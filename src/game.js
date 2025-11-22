@@ -1173,6 +1173,7 @@ class CosmicBackground {
         this.vortexes = [];
         this.planets = [];
         this.dust = [];
+        this.twinkleStars = []; // Small twinkling background stars
         this.starSpeedScale = 1; // scales with player forward push
         this.starThinScale = 1;  // narrows stars as you accelerate
         this.forwardRatio = 0;
@@ -1212,6 +1213,18 @@ class CosmicBackground {
                 color: `hsla(${Math.random() * 360}, 60%, 40%, 0.8)`,
                 vx: (Math.random() - 0.5) * 0.5,
                 vy: (Math.random() - 0.5) * 0.5
+            });
+        }
+        // Twinkling stars - subtle background stars
+        this.twinkleStars = [];
+        for (let i = 0; i < 50; i++) {
+            this.twinkleStars.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                size: 0.5 + Math.random() * 1.5, // Vary size: 0.5 to 2
+                twinkleSpeed: 0.02 + Math.random() * 0.04, // Different twinkle rates
+                twinklePhase: Math.random() * Math.PI * 2, // Random starting phase
+                brightness: 0.3 + Math.random() * 0.4 // Base brightness varies (0.3-0.7)
             });
         }
     }
@@ -1261,6 +1274,11 @@ class CosmicBackground {
             if (p.y < -100) p.y = height + 100;
             if (p.y > height + 100) p.y = -100;
         });
+
+        // Twinkling stars - update phase for animation
+        this.twinkleStars.forEach(s => {
+            s.twinklePhase += s.twinkleSpeed;
+        });
     }
 
     draw(ctx) {
@@ -1270,6 +1288,22 @@ class CosmicBackground {
         grad.addColorStop(1, '#100020');
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, width, height);
+
+        // Twinkling stars - draw first so they're behind everything
+        ctx.globalCompositeOperation = 'lighter';
+        this.twinkleStars.forEach(s => {
+            // Calculate twinkle opacity using sine wave
+            const twinkle = Math.sin(s.twinklePhase) * 0.5 + 0.5; // 0 to 1
+            const opacity = s.brightness * twinkle;
+
+            ctx.globalAlpha = opacity;
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'source-over';
 
         // Vortexes / Nebula
         ctx.globalCompositeOperation = 'screen';
@@ -1981,17 +2015,27 @@ function draw() {
     let sx = 0, sy = 0; if (player.iframes > 0 && player.iframes % 4 === 0) { sx = rand(-5, 5); sy = rand(-5, 5); }
     ctx.save(); ctx.translate(sx, sy);
 
-    // Grid - Optimized
+    // Grid - Optimized with warbling sin wave effect
     ctx.strokeStyle = `hsla(${globalHue}, 80%, 40%, 0.15)`; ctx.lineWidth = 1;
     const gs = 80; // Larger grid size
+    const waveAmp = 8; // Wave amplitude (how far lines move)
+    const waveFreq = 0.015; // Wave frequency (how tight the waves are)
+    const waveSpeed = frameCount * 0.03; // Animation speed
 
     ctx.beginPath();
-    // Simplified grid drawing
+    // Vertical lines with horizontal warble
     for (let x = 0; x <= width; x += gs) {
-        ctx.moveTo(x, 0); ctx.lineTo(x, height);
+        ctx.moveTo(x + Math.sin(waveSpeed + x * waveFreq) * waveAmp, 0);
+        for (let y = gs; y <= height; y += gs) {
+            ctx.lineTo(x + Math.sin(waveSpeed + y * waveFreq + x * waveFreq) * waveAmp, y);
+        }
     }
+    // Horizontal lines with vertical warble
     for (let y = 0; y <= height; y += gs) {
-        ctx.moveTo(0, y); ctx.lineTo(width, y);
+        ctx.moveTo(0, y + Math.sin(waveSpeed + y * waveFreq) * waveAmp);
+        for (let x = gs; x <= width; x += gs) {
+            ctx.lineTo(x, y + Math.sin(waveSpeed + x * waveFreq + y * waveFreq) * waveAmp);
+        }
     }
     ctx.stroke();
 
