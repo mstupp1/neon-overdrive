@@ -50,12 +50,23 @@ local player = {
 local bullets, enemies, particles, powerups, texts = {}, {}, {}, {}, {}
 local spawnBullet, spawnEnemyEntity, spawnParticle, spawnPowerup, spawnText
 
+-- Canvas & shaders for post-processing
+local sceneCanvas, blurCanvas, tempCanvas
+local blurShader
+local overlayShader
+
 -- Helpers --------------------------------------------------------------
 local function clamp(v, mn, mx) return math.max(mn, math.min(mx, v)) end
 local function rand(min, max) return love.math.random() * (max - min) + min end
 local function dist(x1, y1, x2, y2) return ((x2 - x1) ^ 2 + (y2 - y1) ^ 2) ^ 0.5 end
 local function lerp(a, b, t) return a + (b - a) * t end
 local function sign(x) return (x > 0 and 1) or (x < 0 and -1) or 0 end
+
+local function refreshCanvases()
+  sceneCanvas = love.graphics.newCanvas(width, height, { format = "rgba8", msaa = 0 })
+  blurCanvas = love.graphics.newCanvas(width, height, { format = "rgba8", msaa = 0 })
+  tempCanvas = love.graphics.newCanvas(width, height, { format = "rgba8", msaa = 0 })
+end
 
 local function hexToRgb(hex, a)
   hex = hex:gsub("#", "")
@@ -1218,23 +1229,71 @@ local function drawGlitchOverlay()
   end
 end
 
-function love.draw()
-  love.graphics.setBlendMode("alpha")
+local function drawScene()
+  love.graphics.setColor(1, 1, 1, 1)
   cosmicBg:draw()
   drawGrid()
-
-  love.graphics.setColor(1, 1, 1, 1)
   for _, e in ipairs(powerups) do e:draw() end
   for _, e in ipairs(particles) do e:draw() end
   for _, e in ipairs(bullets) do e:draw() end
   for _, e in ipairs(enemies) do e:draw() end
   for _, e in ipairs(texts) do e:draw() end
   drawPlayer()
+end
 
+local function drawOverlayShader()
+  if overlayShader then
+    overlayShader:send("time", love.timer.getTime())
+    love.graphics.setShader(overlayShader)
+    love.graphics.setColor(1, 1, 1, 1)
+    love.graphics.rectangle("fill", 0, 0, width, height)
+    love.graphics.setShader()
+  end
+end
+
+function love.draw()
+  -- Base scene to canvas
+  love.graphics.setCanvas(sceneCanvas)
+  love.graphics.clear(0, 0, 0, 1)
+  drawScene()
+  love.graphics.setCanvas()
+
+  -- Blur horizontal
+  if blurShader then
+    blurShader:send("direction", { 1 / width, 0 })
+    love.graphics.setShader(blurShader)
+    love.graphics.setCanvas(blurCanvas)
+    love.graphics.clear(0, 0, 0, 0)
+    love.graphics.draw(sceneCanvas)
+    -- Blur vertical
+    blurShader:send("direction", { 0, 1 / height })
+    love.graphics.setCanvas(tempCanvas)
+    love.graphics.clear(0, 0, 0, 0)
+    love.graphics.draw(blurCanvas)
+    love.graphics.setShader()
+    love.graphics.setCanvas()
+  end
+
+  -- Draw base
+  love.graphics.setBlendMode("alpha")
+  love.graphics.setColor(1, 1, 1, 1)
+  love.graphics.draw(sceneCanvas, 0, 0)
+
+  -- Add glow
+  if tempCanvas then
+    love.graphics.setBlendMode("add", "premultiplied")
+    love.graphics.setColor(1, 1, 1, 0.65)
+    love.graphics.draw(tempCanvas, 0, 0)
+    love.graphics.setBlendMode("alpha")
+    love.graphics.setColor(1, 1, 1, 1)
+  end
+
+  -- HUD and overlays (kept sharp)
   if gameState ~= "DEMO" then drawHUD() end
   drawGlitchOverlay()
   drawScanlines()
   drawVignette()
+  drawOverlayShader()
 
   if flashAlpha > 0 then
     love.graphics.setColor(1, 1, 1, flashAlpha)
@@ -1279,6 +1338,7 @@ function love.resize(w, h)
   hudTopHeight = 80
   setPlayerStartPosition()
   cosmicBg:init()
+  refreshCanvases()
 end
 
 -- Main loop -----------------------------------------------------------
@@ -1305,4 +1365,38 @@ function love.load()
   setPlayerStartPosition()
   resetWorldState()
   gameState = "DEMO"
+
+  -- Post-process shaders
+  blurShader = love.graphics.newShader([[
+    extern vec2 direction;
+    vec4 effect(vec4 color, Image tex, vec2 uv, vec2 px) {
+      vec2 off1 = direction * 1.3846153846;
+      vec2 off2 = direction * 3.2307692308;
+      vec4 c = Texel(tex, uv) * 0.2270270270;
+      c += Texel(tex, uv + off1) * 0.3162162162;
+      c += Texel(tex, uv - off1) * 0.3162162162;
+      c += Texel(tex, uv + off2) * 0.0702702703;
+      c += Texel(tex, uv - off2) * 0.0702702703;
+      return c * color;
+    }
+  ]])
+
+  overlayShader = love.graphics.newShader([[
+    uniform float time;
+    uniform float scan_alpha = 0.08;
+    uniform float scan_density = 600.0;
+    uniform float vignette_strength = 1.8;
+    uniform float vignette_alpha = 0.6;
+    uniform float vignette_soft = 0.4;
+    vec4 effect(vec4 color, Image tex, vec2 uv, vec2 px) {
+      vec2 screenUV = gl_FragCoord.xy / love_ScreenSize.xy;
+      float d = distance(screenUV, vec2(0.5));
+      float v = pow(smoothstep(vignette_soft, 1.0, d * 1.5), vignette_strength) * vignette_alpha;
+      float lines = step(0.5, fract(screenUV.y * scan_density + time * 0.5)) * scan_alpha;
+      float a = clamp(v + lines, 0.0, 1.0);
+      return vec4(0.0, 0.0, 0.0, a) * color;
+    }
+  ]])
+
+  refreshCanvases()
 end
