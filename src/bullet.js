@@ -1,0 +1,133 @@
+/**
+ * BULLET CLASS
+ */
+
+class Bullet {
+    constructor() { this.active = false; }
+    init(x, y, angle, speed, type, subType = 'normal', opts = {}) {
+        this.x = x; this.y = y;
+        this.vx = Math.cos(angle) * speed; this.vy = Math.sin(angle) * speed;
+        this.angle = angle; this.speed = speed;
+        this.type = type; this.subType = subType;
+        this.active = true;
+        this.destructible = false; // Default
+
+        const baseStats = PLAYER_WEAPON_BASE[subType] || PLAYER_WEAPON_BASE.normal;
+        const defaultDamage = type === 'player' ? (baseStats?.damage || 1) : 1;
+        this.damage = opts.damage ?? defaultDamage;
+        this.pierce = opts.pierce ?? (subType === 'blade' || subType === 'wave');
+        this.tintHue = opts.tintHue ?? 0;
+        this.glow = opts.glow ?? 0;
+
+        // Set radius based on subtype
+        if (type === 'enemy') {
+            if (subType === 'basic') this.radius = 5;
+            else if (subType === 'orb') { this.radius = 12; this.destructible = true; } // Bigger & destructible
+            else if (subType === 'fast') this.radius = 4;
+            else if (subType === 'sniper') this.radius = 8;
+            else if (subType === 'wobble') this.radius = 6;
+            else this.radius = 6;
+        } else {
+            this.radius = 8;
+        }
+
+        this.timer = 0; this.rotation = 0;
+        this.life = 1.0;
+        this.initialAngle = angle; // For wobble
+    }
+
+    update() {
+        this.timer++;
+        this.x += this.vx; this.y += this.vy;
+
+        if (this.subType === 'homing') {
+            let target = null;
+            let minDist = 400;
+            if (frameCount % 4 === 0) {
+                for (let e of enemies) {
+                    if (!e.active) continue;
+                    let d = dist(this.x, this.y, e.x, e.y);
+                    if (d < minDist && e.y > 0) { minDist = d; target = e; }
+                }
+            }
+
+            if (target) {
+                let angleTo = Math.atan2(target.y - this.y, target.x - this.x);
+                let diff = angleTo - this.angle;
+                while (diff < -Math.PI) diff += Math.PI * 2;
+                while (diff > Math.PI) diff -= Math.PI * 2;
+                this.angle += diff * 0.15;
+                this.vx = Math.cos(this.angle) * this.speed;
+                this.vy = Math.sin(this.angle) * this.speed;
+            }
+        } else if (this.subType === 'blade') {
+            this.rotation += 0.3;
+            this.vx *= 0.99; this.vy *= 0.99;
+            this.life -= 0.005;
+            if (this.life <= 0) this.active = false;
+        } else if (this.subType === 'wobble') {
+            // Sine wave motion relative to direction
+            this.x += Math.cos(this.angle + Math.PI / 2) * Math.sin(this.timer * 0.2) * 2;
+            this.y += Math.sin(this.angle + Math.PI / 2) * Math.sin(this.timer * 0.2) * 2;
+        } else if (this.subType === 'sniper') {
+            // Accelerate
+            this.speed += 0.2;
+            this.vx = Math.cos(this.angle) * this.speed;
+            this.vy = Math.sin(this.angle) * this.speed;
+        }
+
+        // Let enemy bullets travel farther offscreen to keep long shots alive a bit longer
+        const bounds = this.type === 'enemy' ? 300 : 50;
+        if (this.x < -bounds || this.x > width + bounds || this.y < -bounds || this.y > height + bounds) this.active = false;
+    }
+
+    draw(ctx) {
+        if (this.type === 'enemy') {
+            ctx.globalAlpha = 1;
+            if (this.subType === 'basic') ctx.drawImage(sprites.enemyBulletBasic, this.x - 12, this.y - 12);
+            else if (this.subType === 'orb') ctx.drawImage(sprites.enemyBulletOrb, this.x - 24, this.y - 24); // Larger
+            else if (this.subType === 'fast') {
+                ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.angle + Math.PI / 2);
+                ctx.drawImage(sprites.enemyBulletFast, -6, -15); // Beam shape
+                ctx.restore();
+            }
+            else if (this.subType === 'sniper') {
+                ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.angle);
+                ctx.drawImage(sprites.enemyBulletSniper, -15, -15);
+                ctx.restore();
+            }
+            else if (this.subType === 'wobble') ctx.drawImage(sprites.enemyBulletWobble, this.x - 12, this.y - 12);
+            else ctx.drawImage(sprites.enemyBulletBasic, this.x - 12, this.y - 12); // Fallback
+        } else {
+            const prevAlpha = ctx.globalAlpha;
+            const prevFilter = ctx.filter;
+            const alphaBoost = this.glow || 0;
+            ctx.globalAlpha = Math.min(1.2, 0.9 + alphaBoost);
+            if (this.tintHue) ctx.filter = `hue-rotate(${this.tintHue}deg) saturate(1.2)`;
+            else ctx.filter = 'none';
+            ctx.globalCompositeOperation = 'lighter';
+            if (this.subType === 'beam') {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle + Math.PI / 2);
+                ctx.drawImage(sprites.playerBeam, -10, -20, 20, 40);
+                ctx.restore();
+            }
+            else if (this.subType === 'homing') ctx.drawImage(sprites.playerHoming, this.x - 12, this.y - 12);
+            else if (this.subType === 'wave') ctx.drawImage(sprites.playerWave, this.x - 18, this.y - 18);
+            else if (this.subType === 'blade') {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                ctx.globalAlpha = Math.max(0, this.life);
+                ctx.drawImage(sprites.playerBlade, -25, -25);
+                ctx.globalAlpha = 1;
+                ctx.restore();
+            }
+            else ctx.drawImage(sprites.playerNormal, this.x - 12, this.y - 12);
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.globalAlpha = prevAlpha;
+            ctx.filter = prevFilter;
+        }
+    }
+}
