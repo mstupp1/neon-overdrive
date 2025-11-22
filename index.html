@@ -127,9 +127,8 @@
             width: 32px;
             height: 32px;
             border: none;
-            border-radius: 8px;
-            background: rgba(0, 0, 0, 0.5);
-            box-shadow: 0 0 12px currentColor;
+            background: none;
+            box-shadow: none;
             position: relative;
             transform: none;
             z-index: 1;
@@ -139,16 +138,17 @@
         .pause-icon::after {
             content: '';
             position: absolute;
-            top: 22%;
-            bottom: 22%;
-            width: 5px;
+            top: 18%;
+            bottom: 18%;
+            width: 6px;
             background: currentColor;
-            box-shadow: 0 0 6px currentColor;
+            box-shadow: 0 0 8px currentColor;
+            border-radius: 2px;
         }
 
-        .pause-icon::before { left: 8px; }
+        .pause-icon::before { left: 7px; }
 
-        .pause-icon::after { right: 8px; }
+        .pause-icon::after { right: 7px; }
 
         .score-block {
             display: flex;
@@ -557,6 +557,7 @@
         const pauseMenu = document.getElementById('pause-menu');
         const gameOverMenu = document.getElementById('game-over-menu');
         const scoreDisplay = document.getElementById('score-display');
+        const hudTop = document.querySelector('.hud-top');
         const livesContainer = document.getElementById('lives-container');
         const powerSegments = document.getElementById('power-segments');
         const finalScoreDisplay = document.getElementById('final-score');
@@ -713,11 +714,15 @@
         const PLAYER_ACCEL_UP_BOOST = 1.25;
         const PLAYER_ACCEL_DOWN_FACTOR = 0.8;
         const PLAYER_FRICTION = 0.9;
-        const PLAYER_TILT_MAX = 0.4;
+        const PLAYER_TILT_MAX = 0.25;
         const PLAYER_TILT_DEADZONE = 0.8;
         const PLAYER_TILT_DIR_SMOOTH = 0.1;
         const PLAYER_TILT_BLEND = 0.08;
         const PLAYER_TILT_DAMP = 0.98;
+        const PLAYFIELD_SIDE_PADDING = 20;
+        const PLAYFIELD_TOP_BUFFER = 20; // Keep player clear of the HUD bar
+        const PLAYFIELD_BOTTOM_PADDING = 36; // Keep player off the very bottom edge
+        let hudTopHeight = hudTop ? hudTop.getBoundingClientRect().height : 80;
         const input = { x: 0, y: 0, active: false, lastX: 0, lastY: 0 };
 
         // Keyboard Input
@@ -753,6 +758,7 @@
             height = rect.height;
             canvas.width = width;
             canvas.height = height;
+            if (hudTop) hudTopHeight = hudTop.getBoundingClientRect().height;
             if (gameState === 'MENU' || gameState === 'DEMO') {
                 player.x = width / 2; player.y = height * 0.8;
             }
@@ -1594,10 +1600,7 @@
             // Apply movement with smoothing
             player.x += moveX;
             player.y += moveY;
-
-            // Clamp to screen
-            player.x = Math.max(30, Math.min(width - 30, player.x));
-            player.y = Math.max(30, Math.min(height - 30, player.y));
+            clampPlayerToPlayfield();
 
             // Auto fire using the full weapon system
             if (frameCount % 7 === 0) {
@@ -1606,6 +1609,18 @@
 
             // Always max power in demo
             player.powerLevel = 6;
+        }
+
+        function clampPlayerToPlayfield({ dampenVelocity = false } = {}) {
+            const leftBound = PLAYFIELD_SIDE_PADDING;
+            const rightBound = width - PLAYFIELD_SIDE_PADDING;
+            const topBound = hudTopHeight + PLAYFIELD_TOP_BUFFER;
+            const bottomBound = height - PLAYFIELD_BOTTOM_PADDING;
+
+            if (player.x < leftBound) { player.x = leftBound; if (dampenVelocity && player.vx < 0) player.vx = 0; }
+            if (player.x > rightBound) { player.x = rightBound; if (dampenVelocity && player.vx > 0) player.vx = 0; }
+            if (player.y < topBound) { player.y = topBound; if (dampenVelocity && player.vy < 0) player.vy = 0; }
+            if (player.y > bottomBound) { player.y = bottomBound; if (dampenVelocity && player.vy > 0) player.vy = 0; }
         }
 
         function update(dt) {
@@ -1680,17 +1695,11 @@
 
                 player.x += player.vx;
                 player.y += player.vy;
-
                 // Clamp player position to screen bounds and damp velocity when hitting edges
-                if (player.x < 20) { player.x = 20; if (player.vx < 0) player.vx = 0; }
-                if (player.x > width - 20) { player.x = width - 20; if (player.vx > 0) player.vx = 0; }
-                if (player.y < 20) { player.y = 20; if (player.vy < 0) player.vy = 0; }
-                if (player.y > height - 20) { player.y = height - 20; if (player.vy > 0) player.vy = 0; }
+                clampPlayerToPlayfield({ dampenVelocity: true });
 
-                // Smooth tilt based on horizontal velocity
-                // Smooth tilt direction changes so reversing doesn't snap; tilt reverses only when backing down
-                const desiredTiltDir = (player.vy > 0) ? -1 : 1;
-                player.tiltDir = player.tiltDir * (1 - PLAYER_TILT_DIR_SMOOTH) + desiredTiltDir * PLAYER_TILT_DIR_SMOOTH;
+                // Smooth tilt based purely on horizontal velocity (always lean into move direction)
+                player.tiltDir = 1; // keep for compatibility, but fix orientation
 
                 const absVx = Math.abs(player.vx);
                 let targetTilt = player.tilt; // preserve current tilt inside deadzone
