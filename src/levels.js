@@ -152,6 +152,13 @@ class LevelManager {
             stageDisplay.style.color = `hsl(${config.hue}, 100%, 70%)`;
             stageDisplay.style.textShadow = `0 0 10px hsl(${config.hue}, 100%, 50%)`;
         }
+
+        // Update Vignette to match theme
+        const vignette = document.querySelector('.vignette');
+        if (vignette) {
+            // Radial gradient from transparent center to dark colored edges
+            vignette.style.background = `radial-gradient(circle, transparent 40%, hsla(${config.hue}, 80%, 10%, 0.9) 120%)`;
+        }
     }
 
     getCurrentStats() {
