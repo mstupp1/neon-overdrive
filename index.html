@@ -88,56 +88,85 @@
             gap: 10px;
         }
 
-        .pause-btn {
-            width: 42px;
-            height: 42px;
+        .hud-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .score-pause {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 8px 16px 8px 18px;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 0, 0, 0.65));
             border: 2px solid #0ff;
-            background: rgba(0, 0, 0, 0.5);
-            color: #0ff;
-            border-radius: 8px;
-            box-shadow: 0 0 12px rgba(0, 255, 255, 0.3);
-            cursor: pointer;
-            position: relative;
-            transition: 0.25s ease;
-            pointer-events: auto;
-        }
-
-        .pause-btn::before,
-        .pause-btn::after {
-            content: '';
-            position: absolute;
-            top: 25%;
-            bottom: 25%;
-            width: 6px;
-            background: currentColor;
-            box-shadow: 0 0 8px currentColor;
-        }
-
-        .pause-btn::before { left: 12px; }
-
-        .pause-btn::after { right: 12px; }
-
-        .pause-btn:hover {
-            background: rgba(0, 255, 255, 0.1);
-            box-shadow: 0 0 18px rgba(0, 255, 255, 0.6), inset 0 0 8px rgba(0, 255, 255, 0.4);
-        }
-
-        .pause-btn.active {
-            color: #f0f;
-            border-color: #f0f;
-            box-shadow: 0 0 20px rgba(240, 0, 255, 0.6);
-        }
-
-        .score-box {
-            background: rgba(0, 0, 0, 0.6);
-            border-left: 3px solid #0ff;
-            padding: 6px 12px;
+            border-left-width: 4px;
             color: #fff;
             text-shadow: 0 0 8px #0ff;
             transform: skewX(-10deg);
-            backdrop-filter: blur(4px);
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 16px rgba(0, 255, 255, 0.3), inset 0 0 8px rgba(0, 255, 255, 0.2);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            pointer-events: auto;
+            backdrop-filter: blur(6px);
         }
+
+        .score-pause::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, rgba(0, 255, 255, 0.15), transparent 45%);
+            pointer-events: none;
+        }
+
+        .score-pause:hover {
+            box-shadow: 0 0 22px rgba(0, 255, 255, 0.55), inset 0 0 10px rgba(0, 255, 255, 0.35);
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.25), rgba(0, 0, 0, 0.75));
+        }
+
+        .score-pause.active {
+            color: #f0f;
+            border-color: #f0f;
+            box-shadow: 0 0 22px rgba(240, 0, 255, 0.55), inset 0 0 10px rgba(240, 0, 255, 0.35);
+        }
+
+        .score-content {
+            display: flex;
+            flex-direction: column;
+            transform: skewX(10deg);
+            position: relative;
+            z-index: 1;
+        }
+
+        .pause-icon {
+            width: 28px;
+            height: 28px;
+            border: 2px solid currentColor;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 12px currentColor;
+            position: relative;
+            transform: skewX(10deg);
+            z-index: 1;
+        }
+
+        .pause-icon::before,
+        .pause-icon::after {
+            content: '';
+            position: absolute;
+            top: 22%;
+            bottom: 22%;
+            width: 5px;
+            background: currentColor;
+            box-shadow: 0 0 6px currentColor;
+        }
+
+        .pause-icon::before { left: 8px; }
+
+        .pause-icon::after { right: 8px; }
 
         .score-label {
             font-size: 10px;
@@ -169,13 +198,9 @@
 
         /* Bottom Power Bar */
         .power-bar-container {
-            position: absolute;
-            bottom: 12px;
-            left: 50%;
-            transform: translateX(-50%) skewX(-15deg);
-            width: 200px;
+            transform: skewX(-10deg);
+            width: 180px;
             background: rgba(0, 0, 0, 0.5);
-            border-bottom: 2px solid #fff;
             padding: 6px;
             display: flex;
             flex-direction: column;
@@ -457,23 +482,25 @@
         <div id="ui-layer" class="hidden">
             <div class="hud-top">
                 <div class="hud-left">
-                    <button class="pause-btn" id="pause-btn" aria-label="Pause"></button>
-                    <div class="score-box">
-                        <div class="score-label">SCORE</div>
-                        <div class="score-val" id="score-display">0</div>
-                    </div>
+                    <button class="score-pause" id="pause-btn" aria-label="Pause or Resume">
+                        <div class="score-content">
+                            <div class="score-label">SCORE</div>
+                            <div class="score-val" id="score-display">0</div>
+                        </div>
+                        <div class="pause-icon" aria-hidden="true"></div>
+                    </button>
                 </div>
-                <div class="lives-box" id="lives-container"></div>
-            </div>
-
-            <div class="power-bar-container">
-                <div class="power-bar-label">WEAPON SYSTEMS</div>
-                <div class="power-segments" id="power-segments">
-                    <div class="segment"></div>
-                    <div class="segment"></div>
-                    <div class="segment"></div>
-                    <div class="segment"></div>
-                    <div class="segment"></div>
+                <div class="hud-right">
+                    <div class="lives-box" id="lives-container"></div>
+                    <div class="power-bar-container">
+                        <div class="power-segments" id="power-segments">
+                            <div class="segment"></div>
+                            <div class="segment"></div>
+                            <div class="segment"></div>
+                            <div class="segment"></div>
+                            <div class="segment"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
