@@ -19,10 +19,20 @@
         <div id="ui-layer" class="hidden">
             <div class="hud-top">
                 <div class="hud-left">
-                    <button class="score-pause" id="pause-btn" aria-label="Pause or Resume">
-                        <div class="pause-icon" aria-hidden="true"></div>
-                    </button>
-                    <div class="score-block">
+                    <div class="stage-block">
+                        <div class="score-label" style="color: #fff; font-size: 8px;">STAGE</div>
+                        <div class="stage-row" style="display: flex; align-items: center; gap: 8px;">
+                            <div id="stage-display"
+                                style="font-size: 18px; font-weight: 900; color: #0ff; text-shadow: 0 0 10px #0ff; font-family: monospace;">
+                                1</div>
+                            <button class="score-pause" id="pause-btn" aria-label="Pause or Resume"
+                                style="transform: scale(0.7);">
+                                <div class="pause-icon" aria-hidden="true"></div>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="score-block" style="margin-left: 15px;">
+                        <div class="score-label">SCORE</div>
                         <div class="score-val" id="score-display">0</div>
                     </div>
                 </div>

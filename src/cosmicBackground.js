@@ -13,7 +13,16 @@ class CosmicBackground {
         this.starThinScale = 1;  // narrows stars as you accelerate
         this.forwardRatio = 0;
         this.vortexSpawnTimer = 0; // Timer for periodic vortex spawning
+        this.themeHue = 240; // Default theme hue
         this.init();
+    }
+
+    setTheme(hue) {
+        this.themeHue = hue;
+        // Update existing vortex colors to match new theme
+        this.vortexes.forEach(v => {
+            v.color = `hsla(${hue + Math.random() * 40 - 20}, 70%, 50%, 0.1)`;
+        });
     }
 
     init() {
@@ -37,7 +46,7 @@ class CosmicBackground {
                 y: Math.random() * height,
                 angle: Math.random() * Math.PI * 2,
                 speed: this.getVortexSpeed(), // Ensure all vortexes spin
-                color: `hsla(${Math.random() * 360}, 70%, 50%, 0.1)`,
+                color: `hsla(${this.themeHue + Math.random() * 40 - 20}, 70%, 50%, 0.1)`,
                 size: 200 + Math.random() * 300,
                 opacity: 1.0, // Initial vortexes are fully visible
                 pulsePhase: Math.random() * Math.PI * 2, // Random starting pulse phase
@@ -134,7 +143,7 @@ class CosmicBackground {
                 y: pos.y,
                 angle: Math.random() * Math.PI * 2,
                 speed: this.getVortexSpeed(), // Ensure it spins
-                color: `hsla(${Math.random() * 360}, 70%, 50%, 0.1)`,
+                color: `hsla(${this.themeHue + Math.random() * 40 - 20}, 70%, 50%, 0.1)`,
                 size: 200 + Math.random() * 300,
                 opacity: 0.0, // Start invisible for fade-in
                 pulsePhase: Math.random() * Math.PI * 2, // Random starting pulse phase
@@ -182,10 +191,10 @@ class CosmicBackground {
     }
 
     draw(ctx) {
-        // Deep space bg
+        // Deep space bg - Tinted by theme
         const grad = ctx.createLinearGradient(0, 0, 0, height);
-        grad.addColorStop(0, '#050010');
-        grad.addColorStop(1, '#100020');
+        grad.addColorStop(0, `hsla(${this.themeHue}, 60%, 5%, 1)`);
+        grad.addColorStop(1, `hsla(${this.themeHue}, 60%, 10%, 1)`);
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, width, height);
 

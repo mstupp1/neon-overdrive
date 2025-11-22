@@ -169,7 +169,7 @@ function updateDemoAI() {
 
 function update(dt) {
     if (gameState !== 'PLAYING' && gameState !== 'DEMO') {
-        if (gameState !== 'LEVEL_UP') globalHue += 1; // Keep animating color unless leveled up? actually keep animating
+        // if (gameState !== 'LEVEL_UP') globalHue += 1; // Removed to keep theme stable
         return;
     }
 

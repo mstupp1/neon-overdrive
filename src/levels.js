@@ -5,25 +5,25 @@
 const LEVEL_CONFIG = {
     1: {
         name: "NEON GENESIS",
-        hue: 240, // Blue
+        hue: 220, // Deep Blue
         enemyTypes: ['chaser'],
         spawnRateMod: 1.0,
         enemyHealthMod: 1.0,
         enemySpeedMod: 1.0,
-        duration: 1800 // 30 seconds
+        duration: 1800
     },
     2: {
         name: "VIOLET VORTEX",
-        hue: 280, // Purple
+        hue: 270, // Purple
         enemyTypes: ['chaser', 'spinner'],
         spawnRateMod: 0.9,
         enemyHealthMod: 1.2,
         enemySpeedMod: 1.05,
-        duration: 2400 // 40 seconds
+        duration: 2400
     },
     3: {
         name: "CRIMSON TIDE",
-        hue: 0, // Red
+        hue: 350, // Red
         enemyTypes: ['chaser', 'spinner', 'dasher'],
         spawnRateMod: 0.8,
         enemyHealthMod: 1.4,
@@ -32,16 +32,16 @@ const LEVEL_CONFIG = {
     },
     4: {
         name: "SOLAR FLARE",
-        hue: 40, // Orange
+        hue: 30, // Orange/Gold
         enemyTypes: ['chaser', 'spinner', 'dasher', 'snake'],
         spawnRateMod: 0.75,
         enemyHealthMod: 1.6,
         enemySpeedMod: 1.15,
-        duration: 3000 // 50 seconds
+        duration: 3000
     },
     5: {
-        name: "EMERALD EXPANSE",
-        hue: 140, // Green
+        name: "TOXIC WASTE",
+        hue: 120, // Toxic Green
         enemyTypes: ['chaser', 'spinner', 'dasher', 'snake', 'sniper'],
         spawnRateMod: 0.7,
         enemyHealthMod: 1.8,
@@ -55,7 +55,7 @@ const LEVEL_CONFIG = {
         spawnRateMod: 0.65,
         enemyHealthMod: 2.0,
         enemySpeedMod: 1.25,
-        duration: 3600 // 60 seconds
+        duration: 3600
     },
     7: {
         name: "MAGENTA MADNESS",
@@ -68,19 +68,19 @@ const LEVEL_CONFIG = {
     },
     8: {
         name: "VOID WALKER",
-        hue: 200, // Dark Blue/Grey
+        hue: 250, // Indigo/Dark
         enemyTypes: ['chaser', 'spinner', 'dasher', 'snake', 'sniper'],
         spawnRateMod: 0.55,
         enemyHealthMod: 3.0,
         enemySpeedMod: 1.4,
-        duration: 4200 // 70 seconds
+        duration: 4200
     },
     9: {
         name: "OMEGA OVERDRIVE",
-        hue: 0, // Cycling/Chaos (handled in logic)
+        hue: 0, // Chaos
         enemyTypes: ['chaser', 'spinner', 'dasher', 'snake', 'sniper'],
         spawnRateMod: 0.5,
-        enemyHealthMod: 4.0, // Scales infinitely
+        enemyHealthMod: 4.0,
         enemySpeedMod: 1.5,
         duration: Infinity
     }
@@ -124,8 +124,8 @@ class LevelManager {
 
         // Visual fanfare
         const config = LEVEL_CONFIG[this.currentLevel];
-        spawnText(width / 2, height / 2, `LEVEL ${this.currentLevel}`, `hsl(${config.hue}, 100%, 50%)`);
-        spawnText(width / 2, height / 2 + 40, config.name, "#fff");
+        spawnText(width / 2, height / 2, `STAGE ${this.currentLevel}`, `hsl(${config.hue}, 100%, 50%)`);
+        spawnText(width / 2, height / 2 + 50, config.name, "#fff");
 
         // Flash screen
         flashOverlay.style.backgroundColor = `hsla(${config.hue}, 100%, 50%, 0.3)`;
@@ -138,11 +138,20 @@ class LevelManager {
 
     applyLevelConfig() {
         const config = LEVEL_CONFIG[this.currentLevel];
-        // Smoothly transition global hue
-        // We'll let the game loop handle the gradual shift, but we set the target
-        // For now, hard set it or let cosmic background handle it.
-        // Let's update cosmic background directly if possible, or just set globalHue
         globalHue = config.hue;
+
+        // Update Background Theme
+        if (window.cosmicBg) {
+            cosmicBg.setTheme(config.hue);
+        }
+
+        // Update UI
+        const stageDisplay = document.getElementById('stage-display');
+        if (stageDisplay) {
+            stageDisplay.innerText = this.currentLevel;
+            stageDisplay.style.color = `hsl(${config.hue}, 100%, 70%)`;
+            stageDisplay.style.textShadow = `0 0 10px hsl(${config.hue}, 100%, 50%)`;
+        }
     }
 
     getCurrentStats() {
