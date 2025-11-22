@@ -70,7 +70,12 @@ function renderGlowSprite(color, radius, glow, type = 'circle') {
 }
 
 function prerenderAssets() {
-    sprites.enemyBullet = renderGlowSprite('#f00', 5, 10);
+    // Varied enemy bullets
+    sprites.enemyBulletBasic = renderGlowSprite('#f00', 4, 8);   // Chaser: Small, sharp
+    sprites.enemyBulletOrb = renderGlowSprite('#d0f', 6, 12);    // Spinner: Medium, purple
+    sprites.enemyBulletFast = renderGlowSprite('#ff0', 3, 10, 'beam'); // Dasher: Fast, yellow beam-like
+    sprites.enemyBulletSniper = renderGlowSprite('#fff', 8, 15); // Sniper: Large, white hot
+
     sprites.playerNormal = renderGlowSprite('#0ff', 4, 8);
     sprites.playerBeam = renderGlowSprite('#0ff', 3, 15, 'beam');
     sprites.playerHoming = renderGlowSprite('#d0f', 4, 8);
@@ -294,7 +299,18 @@ class Bullet {
         this.angle = angle; this.speed = speed;
         this.type = type; this.subType = subType;
         this.active = true;
-        this.radius = 8;
+
+        // Set radius based on subtype
+        if (type === 'enemy') {
+            if (subType === 'basic') this.radius = 5;
+            else if (subType === 'orb') this.radius = 7;
+            else if (subType === 'fast') this.radius = 4;
+            else if (subType === 'sniper') this.radius = 9;
+            else this.radius = 6;
+        } else {
+            this.radius = 8;
+        }
+
         this.timer = 0; this.rotation = 0;
         this.life = 1.0;
     }
@@ -337,7 +353,16 @@ class Bullet {
 
     draw(ctx) {
         if (this.type === 'enemy') {
-            ctx.drawImage(sprites.enemyBullet, this.x - 15, this.y - 15);
+            ctx.globalAlpha = 1;
+            if (this.subType === 'basic') ctx.drawImage(sprites.enemyBulletBasic, this.x - 12, this.y - 12);
+            else if (this.subType === 'orb') ctx.drawImage(sprites.enemyBulletOrb, this.x - 18, this.y - 18);
+            else if (this.subType === 'fast') {
+                ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.angle + Math.PI / 2);
+                ctx.drawImage(sprites.enemyBulletFast, -6, -15); // Beam shape
+                ctx.restore();
+            }
+            else if (this.subType === 'sniper') ctx.drawImage(sprites.enemyBulletSniper, this.x - 23, this.y - 23);
+            else ctx.drawImage(sprites.enemyBulletBasic, this.x - 12, this.y - 12); // Fallback
         } else {
             ctx.globalCompositeOperation = 'lighter';
             if (this.subType === 'beam') {
@@ -368,8 +393,9 @@ class Enemy {
     constructor() { this.active = false; this.segments = []; }
     init(type) {
         this.type = type; this.active = true; this.hp = 1;
-        this.timer = 0; this.state = 'move';
-        this.fireTimer = 0;
+        this.timer = rand(0, 30); // Randomize start to prevent sync
+        this.state = 'move';
+        this.fireTimer = rand(0, 50); // Randomize start
         this.flashTimer = 0; // Flash effect when taking damage
         this.fade = 1; this.inactive = false;
         this.vx = 0; this.vy = 0;
@@ -402,7 +428,7 @@ class Enemy {
 
         // Fade-out zone near the bottom HUD to prevent clumping
         const bottomHudHeight = 80;
-        const fadeBuffer = 140;
+        const fadeBuffer = 50; // Reduced from 140 to keep enemies active longer
         const fadeStart = height - (bottomHudHeight + fadeBuffer);
         const fadeEnd = height - bottomHudHeight + 10;
         const inFadeZone = this.y >= fadeStart;
@@ -415,28 +441,29 @@ class Enemy {
             const a = Math.atan2(player.y - this.y, player.x - this.x);
             this.x += Math.cos(a) * this.speed; this.y += Math.max(1, Math.sin(a) * this.speed);
             this.fireTimer++;
-            if (allowFire && this.fireTimer > 90) {
+            if (allowFire && this.fireTimer > 40) { // Even faster fire (was 60)
                 this.fireTimer = 0;
                 // Light harassment shots from chasers
-                bulletPool.get(this.x, this.y, a + rand(-0.2, 0.2), 7, 'enemy');
+                spawnBullet(this.x, this.y, a + rand(-0.2, 0.2), 6, 'enemy', 'basic');
             }
         }
         else if (this.type === 'spinner') {
             this.y += 0.8; this.x += Math.sin(frameCount * 0.03);
             this.timer++;
-            if (allowFire && this.timer > 45) {
+            if (allowFire && this.timer > 40) { // Adjusted rate
                 this.timer = 0;
                 // Spinners lay down broader, faster rings to pressure space
-                for (let i = 0; i < 6; i++) bulletPool.get(this.x, this.y, i * (Math.PI / 3) + frameCount * 0.1, 9, 'enemy');
+                // Reduced speed from 9 to 6 to prevent "fading" illusion and make them dodgeable but visible
+                for (let i = 0; i < 6; i++) spawnBullet(this.x, this.y, i * (Math.PI / 3) + frameCount * 0.1, 6, 'enemy', 'orb');
             }
         }
         else if (this.type === 'dasher') {
             this.x += this.vx; this.y += this.vy;
             this.fireTimer++;
-            if (allowFire && this.fireTimer > 70) {
+            if (allowFire && this.fireTimer > 50) { // Faster fire (was 70)
                 this.fireTimer = 0;
                 const backAngle = Math.atan2(this.vy, this.vx) + Math.PI; // Fire slightly backwards while dashing
-                bulletPool.get(this.x, this.y, backAngle + rand(-0.15, 0.15), 8, 'enemy');
+                spawnBullet(this.x, this.y, backAngle + rand(-0.15, 0.15), 8, 'enemy', 'fast');
             }
         }
         else if (this.type === 'snake') {
@@ -450,9 +477,9 @@ class Enemy {
                 if (Math.abs(this.x - this.tx) < 5) { this.state = 'aim'; this.timer = 0; }
             } else if (this.state === 'aim') {
                 this.timer++;
-                if (allowFire && this.timer > 50) {
+                if (allowFire && this.timer > 40) { // Faster fire (was 50)
                     const a = Math.atan2(player.y - this.y, player.x - this.x);
-                    bulletPool.get(this.x, this.y, a, 15, 'enemy');
+                    spawnBullet(this.x, this.y, a, 15, 'enemy', 'sniper');
                     this.tx = rand(50, width - 50); this.ty = rand(50, height * 0.4); this.state = 'move';
                 }
             }
@@ -560,7 +587,8 @@ class PowerUp {
         else if (this.type === 'shield') { c = '#00f'; t = 'S'; }
         else if (this.type === 'life') { c = '#f00'; t = '♥'; }
 
-        ctx.shadowBlur = 10; ctx.shadowColor = c; // Reduced blur
+        // Optimization: Removed shadowBlur
+        // ctx.shadowBlur = 10; ctx.shadowColor = c; 
 
         if (this.type === 'bomb') {
             ctx.beginPath(); ctx.arc(0, 0, this.radius + 5, 0, Math.PI * 2);
@@ -569,6 +597,13 @@ class PowerUp {
 
         ctx.strokeStyle = c; ctx.lineWidth = 3;
         ctx.beginPath(); ctx.arc(0, 0, this.radius, 0, Math.PI * 2); ctx.stroke();
+
+        // Add a simple glow using a translucent arc behind
+        ctx.fillStyle = c;
+        ctx.globalAlpha = 0.3;
+        ctx.beginPath(); ctx.arc(0, 0, this.radius + 4, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 1.0;
+
         ctx.fillStyle = c; ctx.font = 'bold 18px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText(t, 0, 2);
         ctx.restore();
@@ -599,7 +634,7 @@ class Particle {
         // Boost glow/alpha when player pushes upward
         const forwardBoost = Math.max(0, -(player?.vy || 0)) / PLAYER_MAX_SPEED_UP;
         const brightScale = 1.25 + forwardBoost * 1.35; // higher base glow
-        const blurScale = 1.1 + forwardBoost * 2.0;
+        // const blurScale = 1.1 + forwardBoost * 2.0; // Unused optimization
         const sizeScale = 1.15 + forwardBoost * 0.85;
         const streakScale = 1 + forwardBoost * 2.2;
         const alphaBoost = 0.2 + forwardBoost * 0.25;
@@ -609,15 +644,19 @@ class Particle {
         ctx.translate(this.x, this.y);
         ctx.rotate(this.rotation);
 
-        // Add glow effect
-        ctx.shadowBlur = 14 * this.life * blurScale;
-        ctx.shadowColor = this.color;
+        // Optimization: Removed shadowBlur
+        // ctx.shadowBlur = 14 * this.life * blurScale;
+        // ctx.shadowColor = this.color;
 
         ctx.fillStyle = this.color;
         // Draw as rotated rectangle for more interesting shape
         const half = (this.size * sizeScale) / 2;
         ctx.scale(1, streakScale);
         ctx.fillRect(-half, -half, half * 2, half * 2);
+
+        // Simple fake glow
+        ctx.globalAlpha = Math.min(1, (this.life * brightScale + alphaBoost) * 0.4);
+        ctx.fillRect(-half * 2, -half * 2, half * 4, half * 4);
 
         ctx.restore();
         ctx.globalAlpha = 1;
@@ -779,7 +818,9 @@ class CosmicBackground {
                 // Very faded - max opacity of 0.25
                 ctx.globalAlpha = (0.1 + depthFactor * 0.15);
 
+                // Optimization: Replaced expensive gradient with simple rect/line
                 // Draw motion-blurred oval with gradient for trail effect
+                /*
                 const gradient = ctx.createLinearGradient(s.x, s.y - height_oval / 2, s.x, s.y + height_oval / 2);
                 gradient.addColorStop(0, 'rgba(255, 255, 255, 0)'); // Fade at top
                 gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.3)');
@@ -789,6 +830,11 @@ class CosmicBackground {
                 ctx.beginPath();
                 ctx.ellipse(s.x, s.y, finalWidth, height_oval, 0, 0, Math.PI * 2);
                 ctx.fill();
+                */
+
+                // Simple trail
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(s.x - finalWidth / 2, s.y - height_oval / 2, finalWidth, height_oval);
             }
         });
         ctx.globalAlpha = 1;
