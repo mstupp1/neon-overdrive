@@ -20,6 +20,10 @@ const resumeBtn = document.getElementById('resume-btn');
 const pauseRestartBtn = document.getElementById('pause-restart-btn');
 const quitBtn = document.getElementById('quit-btn');
 const SCORE_DIGITS = 10;
+const POWERUP_LIFETIME_FRAMES = 900; // ~15 seconds before despawn
+const POWERUP_BLINK_FRAMES = 240; // Blink for last ~4 seconds
+const SCORE_POWERUP_VALUE = 1000;
+const SCORE_POWERUP_XP_RATIO = 0.2;
 
 // --- ASSET PRE-RENDERING ---
 const sprites = {};
@@ -651,6 +655,8 @@ class PowerUp {
         this.x = x; this.y = y; this.active = true; this.radius = 16;
         this.isKnockout = isKnockout;
         this.pickupTimer = 0;
+        this.age = 0;
+        this.lifetime = POWERUP_LIFETIME_FRAMES;
 
         // Always bounce/move dynamically
         const a = Math.random() * 6.28;
@@ -672,6 +678,11 @@ class PowerUp {
     }
     update() {
         if (this.pickupTimer > 0) this.pickupTimer--;
+        this.age++;
+        if (this.age >= this.lifetime) {
+            this.active = false;
+            return;
+        }
         this.x += this.vx; this.y += this.vy;
 
         // Bounce off walls
@@ -692,6 +703,15 @@ class PowerUp {
         ctx.save(); ctx.translate(this.x, this.y);
         const s = 1 + Math.sin(frameCount * 0.2) * 0.3; ctx.scale(s, s);
 
+        const timeLeft = Math.max(0, this.lifetime - this.age);
+        let baseAlpha = 1;
+        if (this.pickupTimer > 0) baseAlpha *= 0.5;
+        if (timeLeft <= POWERUP_BLINK_FRAMES) {
+            const urgency = timeLeft / POWERUP_BLINK_FRAMES;
+            const pulse = 0.4 + Math.abs(Math.sin(frameCount * 0.5)) * 0.6;
+            baseAlpha *= Math.max(0.15, pulse * (0.4 + urgency * 0.6));
+        }
+
         let c = '#fff', t = '?';
         if (this.type === 'weapon') { c = '#0ff'; t = 'W'; }
         else if (this.type === 'bomb') { c = '#ff0'; t = 'B'; }
@@ -702,6 +722,7 @@ class PowerUp {
         // Optimization: Removed shadowBlur
         // ctx.shadowBlur = 10; ctx.shadowColor = c; 
 
+        ctx.globalAlpha = baseAlpha;
         if (this.type === 'bomb') {
             ctx.beginPath(); ctx.arc(0, 0, this.radius + 5, 0, Math.PI * 2);
             ctx.fillStyle = `rgba(255, 255, 0, ${0.3 + Math.sin(frameCount * 0.5) * 0.2})`; ctx.fill();
@@ -712,12 +733,9 @@ class PowerUp {
 
         // Add a simple glow using a translucent arc behind
         ctx.fillStyle = c;
-        ctx.globalAlpha = 0.3;
+        ctx.globalAlpha = baseAlpha * 0.3;
         ctx.beginPath(); ctx.arc(0, 0, this.radius + 4, 0, Math.PI * 2); ctx.fill();
-        ctx.globalAlpha = 1.0;
-
-        // Dim if not pickable yet
-        if (this.pickupTimer > 0) ctx.globalAlpha = 0.5;
+        ctx.globalAlpha = baseAlpha;
 
         ctx.fillStyle = c; ctx.font = 'bold 18px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText(t, 0, 2);
@@ -1024,6 +1042,33 @@ function triggerBombLogic() {
     score += 2000;
     updateUI();
     spawnText(width / 2, height / 2, "OMEGA BLAST", "#ff0");
+}
+
+function awardWeaponXp(xpGain) {
+    if (gameState !== 'PLAYING' || xpGain <= 0) return;
+
+    if (player.powerLevel >= player.maxPower) {
+        player.weaponXp = player.weaponXpMax;
+        return;
+    }
+
+    player.weaponXp += xpGain;
+
+    while (player.powerLevel < player.maxPower && player.weaponXp >= player.weaponXpMax) {
+        player.weaponXp -= player.weaponXpMax;
+
+        if (xpFill) {
+            xpFill.style.transition = 'none';
+            setTimeout(() => xpFill.style.transition = 'width 0.2s ease-out', 50);
+        }
+
+        player.powerLevel++;
+        player.weaponXpMax = getWeaponXpForLevel(player.powerLevel);
+        spawnText(player.x, player.y - 40, "UPGRADE", "#0ff");
+        playSound('powerup');
+    }
+
+    if (player.powerLevel >= player.maxPower) player.weaponXp = player.weaponXpMax;
 }
 
 function getPlayerBulletStats(subType, baseSpeed, levelOverride = null) {
@@ -1485,7 +1530,6 @@ function update(dt) {
                         e.active = false;
                         if (gameState === 'PLAYING') {
                             score += 100;
-                            updateUI();
                         }
                         // Enhanced death explosion with more particles and variety
                         createExplosionLogic(e.x, e.y, `hsl(${globalHue},100%,50%)`, 25);
@@ -1502,30 +1546,7 @@ function update(dt) {
                             else if (e.type === 'snake') xpGain = 40;
                             else if (e.type === 'spinner') xpGain = 50;
 
-                            if (player.powerLevel >= player.maxPower) {
-                                player.weaponXp = player.weaponXpMax;
-                            } else {
-                                player.weaponXp += xpGain;
-                                while (player.powerLevel < player.maxPower && player.weaponXp >= player.weaponXpMax) {
-                                    player.weaponXp -= player.weaponXpMax;
-
-                                    // Instant visual reset
-                                    if (xpFill) {
-                                        xpFill.style.transition = 'none';
-                                        setTimeout(() => xpFill.style.transition = 'width 0.2s ease-out', 50);
-                                    }
-
-                                    player.powerLevel++;
-                                    player.weaponXpMax = getWeaponXpForLevel(player.powerLevel);
-                                    spawnText(player.x, player.y - 40, "UPGRADE", "#0ff");
-                                    playSound('powerup');
-                                }
-
-                                if (player.powerLevel >= player.maxPower) {
-                                    player.weaponXp = player.weaponXpMax;
-                                }
-                            }
-                            // Update UI for bar progress
+                            awardWeaponXp(xpGain);
                             updateUI();
                         }
                     }
@@ -1573,8 +1594,13 @@ function update(dt) {
                 player.lives = Math.min(PLAYER_MAX_LIVES, player.lives + 1);
                 if (player.lives > prevLives) spawnText(player.x, player.y - 40, "EXTEND", "#f00");
             } else if (p.type === 'score') {
-                if (gameState === 'PLAYING') score += 500;
-                spawnText(player.x, player.y - 40, "+500", "#fd0");
+                if (gameState === 'PLAYING') {
+                    score += SCORE_POWERUP_VALUE;
+                    const xpGain = Math.floor(player.weaponXpMax * SCORE_POWERUP_XP_RATIO);
+                    awardWeaponXp(xpGain);
+                }
+                const xpLabel = gameState === 'PLAYING' ? `+${SCORE_POWERUP_VALUE} +XP` : `+${SCORE_POWERUP_VALUE}`;
+                spawnText(player.x, player.y - 40, xpLabel, "#fd0");
             }
             if (gameState === 'PLAYING') updateUI();
         }
