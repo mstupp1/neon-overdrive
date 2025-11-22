@@ -144,14 +144,296 @@ function renderGlowSprite(color, radius, glow, type = 'circle', fillColor = '#ff
             cx.restore();
         }
     } else if (type === 'dasher') {
-        cx.fillStyle = color; cx.shadowBlur = glow; cx.shadowColor = color;
-        cx.beginPath(); cx.moveTo(center, center + 20); cx.lineTo(center + 6, center - 10); cx.lineTo(center, center - 20); cx.lineTo(center - 6, center - 10); cx.fill();
+        cx.shadowBlur = glow; cx.shadowColor = color;
+
+        // Missile body (cylindrical with gradient)
+        const bodyGrad = cx.createLinearGradient(center - 8, center - 15, center + 8, center + 15);
+        bodyGrad.addColorStop(0, '#ffff66');
+        bodyGrad.addColorStop(0.5, '#ffdd00');
+        bodyGrad.addColorStop(1, '#cc9900');
+        cx.fillStyle = bodyGrad;
+        cx.fillRect(center - 6, center - 10, 12, 20);
+
+        // Warning stripes on body
+        cx.fillStyle = '#000';
+        cx.fillRect(center - 6, center - 4, 12, 2);
+        cx.fillRect(center - 6, center + 2, 12, 2);
+
+        // Pointed nose cone
+        const noseGrad = cx.createLinearGradient(center, center - 20, center, center - 10);
+        noseGrad.addColorStop(0, '#ff4444');
+        noseGrad.addColorStop(1, '#ffaa00');
+        cx.fillStyle = noseGrad;
+        cx.beginPath();
+        cx.moveTo(center, center - 20);
+        cx.lineTo(center + 6, center - 10);
+        cx.lineTo(center - 6, center - 10);
+        cx.closePath();
+        cx.fill();
+
+        // Nose cone highlight
+        cx.fillStyle = '#ffcccc';
+        cx.beginPath();
+        cx.moveTo(center, center - 20);
+        cx.lineTo(center + 2, center - 14);
+        cx.lineTo(center - 1, center - 14);
+        cx.closePath();
+        cx.fill();
+
+        // Stabilizer fins (4 fins)
+        cx.fillStyle = '#ffaa00';
+        cx.strokeStyle = '#996600';
+        cx.lineWidth = 1;
+
+        // Left fin
+        cx.beginPath();
+        cx.moveTo(center - 6, center + 5);
+        cx.lineTo(center - 12, center + 2);
+        cx.lineTo(center - 12, center + 8);
+        cx.lineTo(center - 6, center + 10);
+        cx.closePath();
+        cx.fill();
+        cx.stroke();
+
+        // Right fin
+        cx.beginPath();
+        cx.moveTo(center + 6, center + 5);
+        cx.lineTo(center + 12, center + 2);
+        cx.lineTo(center + 12, center + 8);
+        cx.lineTo(center + 6, center + 10);
+        cx.closePath();
+        cx.fill();
+        cx.stroke();
+
+        // Top fin (smaller)
+        cx.beginPath();
+        cx.moveTo(center - 2, center + 5);
+        cx.lineTo(center - 3, center - 2);
+        cx.lineTo(center + 3, center - 2);
+        cx.lineTo(center + 2, center + 5);
+        cx.closePath();
+        cx.fill();
+        cx.stroke();
+
+        // Engine exhaust (glowing)
+        cx.shadowBlur = 15;
+        cx.shadowColor = '#ff6600';
+        const exhaustGrad = cx.createRadialGradient(center, center + 12, 0, center, center + 12, 8);
+        exhaustGrad.addColorStop(0, '#ffff00');
+        exhaustGrad.addColorStop(0.5, '#ff6600');
+        exhaustGrad.addColorStop(1, 'rgba(255, 100, 0, 0)');
+        cx.fillStyle = exhaustGrad;
+        cx.beginPath();
+        cx.arc(center, center + 12, 8, 0, Math.PI * 2);
+        cx.fill();
+
+        // Engine nozzle
+        cx.shadowBlur = 0;
+        cx.fillStyle = '#333';
+        cx.fillRect(center - 4, center + 10, 8, 3);
+
+        // Rivets on body
+        cx.fillStyle = '#996600';
+        cx.beginPath();
+        cx.arc(center - 4, center - 6, 1, 0, Math.PI * 2);
+        cx.arc(center + 4, center - 6, 1, 0, Math.PI * 2);
+        cx.arc(center - 4, center + 6, 1, 0, Math.PI * 2);
+        cx.arc(center + 4, center + 6, 1, 0, Math.PI * 2);
+        cx.fill();
     } else if (type === 'snake') {
-        cx.fillStyle = color; cx.shadowBlur = glow; cx.shadowColor = color;
-        cx.beginPath(); cx.arc(center, center, 12, 0, Math.PI * 2); cx.fill();
+        cx.shadowBlur = glow; cx.shadowColor = color;
+
+        // Main alien head body with organic gradient
+        const headGrad = cx.createRadialGradient(center - 3, center - 3, 2, center, center, 15);
+        headGrad.addColorStop(0, '#ff6b6b');
+        headGrad.addColorStop(0.6, '#ff2020');
+        headGrad.addColorStop(1, '#8b0000');
+        cx.fillStyle = headGrad;
+        cx.beginPath();
+        cx.arc(center, center, 15, 0, Math.PI * 2);
+        cx.fill();
+
+        // Alien tentacle protrusions (3 on each side)
+        cx.fillStyle = '#ff3030';
+        for (let i = 0; i < 3; i++) {
+            const angle = -Math.PI / 2 + (i - 1) * 0.4;
+            const len = 8 - Math.abs(i - 1) * 2;
+            // Left side
+            cx.beginPath();
+            cx.moveTo(center - 12, center);
+            cx.quadraticCurveTo(
+                center - 12 - len, center + Math.sin(angle) * len,
+                center - 12 - len * 1.2, center + Math.sin(angle) * len * 1.5
+            );
+            cx.lineTo(center - 12 - len * 0.8, center + Math.sin(angle) * len * 1.2);
+            cx.closePath();
+            cx.fill();
+            // Right side
+            cx.beginPath();
+            cx.moveTo(center + 12, center);
+            cx.quadraticCurveTo(
+                center + 12 + len, center + Math.sin(angle) * len,
+                center + 12 + len * 1.2, center + Math.sin(angle) * len * 1.5
+            );
+            cx.lineTo(center + 12 + len * 0.8, center + Math.sin(angle) * len * 1.2);
+            cx.closePath();
+            cx.fill();
+        }
+
+        // Menacing eyes (glowing)
+        cx.shadowBlur = 8;
+        cx.shadowColor = '#ffff00';
+        cx.fillStyle = '#ffff00';
+        // Left eye
+        cx.beginPath();
+        cx.ellipse(center - 5, center - 3, 3, 4, 0, 0, Math.PI * 2);
+        cx.fill();
+        // Right eye
+        cx.beginPath();
+        cx.ellipse(center + 5, center - 3, 3, 4, 0, 0, Math.PI * 2);
+        cx.fill();
+
+        // Eye pupils (dark slits)
+        cx.shadowBlur = 0;
+        cx.fillStyle = '#000';
+        cx.fillRect(center - 5.5, center - 5, 1, 4);
+        cx.fillRect(center + 4.5, center - 5, 1, 4);
+
+        // Alien mouth (jagged opening)
+        cx.strokeStyle = '#330000';
+        cx.lineWidth = 2;
+        cx.beginPath();
+        cx.moveTo(center - 6, center + 5);
+        cx.quadraticCurveTo(center - 3, center + 8, center, center + 6);
+        cx.quadraticCurveTo(center + 3, center + 8, center + 6, center + 5);
+        cx.stroke();
+
+        // Inner mouth glow
+        cx.fillStyle = 'rgba(255, 100, 0, 0.6)';
+        cx.beginPath();
+        cx.moveTo(center - 4, center + 5);
+        cx.quadraticCurveTo(center, center + 7, center + 4, center + 5);
+        cx.lineTo(center, center + 6);
+        cx.closePath();
+        cx.fill();
     } else if (type === 'sniper') {
-        cx.fillStyle = color; cx.shadowBlur = glow; cx.shadowColor = color;
-        cx.fillRect(center - 15, center - 15, 30, 30);
+        cx.shadowBlur = glow; cx.shadowColor = color;
+
+        // Main robot body (rectangular core)
+        const bodyGrad = cx.createLinearGradient(center - 12, center - 12, center + 12, center + 12);
+        bodyGrad.addColorStop(0, '#ff8888');
+        bodyGrad.addColorStop(0.5, '#ff4444');
+        bodyGrad.addColorStop(1, '#cc0000');
+        cx.fillStyle = bodyGrad;
+        cx.fillRect(center - 12, center - 12, 24, 24);
+
+        // Body panel lines (mechanical segmentation)
+        cx.strokeStyle = '#880000';
+        cx.lineWidth = 1.5;
+        cx.beginPath();
+        cx.moveTo(center - 12, center - 4);
+        cx.lineTo(center + 12, center - 4);
+        cx.moveTo(center - 12, center + 4);
+        cx.lineTo(center + 12, center + 4);
+        cx.moveTo(center - 4, center - 12);
+        cx.lineTo(center - 4, center + 12);
+        cx.moveTo(center + 4, center - 12);
+        cx.lineTo(center + 4, center + 12);
+        cx.stroke();
+
+        // Robotic claws (left side)
+        cx.fillStyle = '#ff6666';
+        cx.strokeStyle = '#aa0000';
+        cx.lineWidth = 2;
+        // Left claw upper
+        cx.beginPath();
+        cx.moveTo(center - 12, center - 8);
+        cx.lineTo(center - 20, center - 12);
+        cx.lineTo(center - 24, center - 10);
+        cx.lineTo(center - 22, center - 6);
+        cx.closePath();
+        cx.fill();
+        cx.stroke();
+        // Left claw lower
+        cx.beginPath();
+        cx.moveTo(center - 12, center + 8);
+        cx.lineTo(center - 20, center + 12);
+        cx.lineTo(center - 24, center + 10);
+        cx.lineTo(center - 22, center + 6);
+        cx.closePath();
+        cx.fill();
+        cx.stroke();
+
+        // Robotic claws (right side)
+        // Right claw upper
+        cx.beginPath();
+        cx.moveTo(center + 12, center - 8);
+        cx.lineTo(center + 20, center - 12);
+        cx.lineTo(center + 24, center - 10);
+        cx.lineTo(center + 22, center - 6);
+        cx.closePath();
+        cx.fill();
+        cx.stroke();
+        // Right claw lower
+        cx.beginPath();
+        cx.moveTo(center + 12, center + 8);
+        cx.lineTo(center + 20, center + 12);
+        cx.lineTo(center + 24, center + 10);
+        cx.lineTo(center + 22, center + 6);
+        cx.closePath();
+        cx.fill();
+        cx.stroke();
+
+        // Claw joints (rivets)
+        cx.fillStyle = '#330000';
+        cx.beginPath();
+        cx.arc(center - 12, center - 8, 2, 0, Math.PI * 2);
+        cx.arc(center - 12, center + 8, 2, 0, Math.PI * 2);
+        cx.arc(center + 12, center - 8, 2, 0, Math.PI * 2);
+        cx.arc(center + 12, center + 8, 2, 0, Math.PI * 2);
+        cx.fill();
+
+        // Glowing visor eye (central scanner)
+        cx.shadowBlur = 12;
+        cx.shadowColor = '#ff0000';
+        const eyeGrad = cx.createLinearGradient(center - 8, center - 2, center + 8, center + 2);
+        eyeGrad.addColorStop(0, '#ff0000');
+        eyeGrad.addColorStop(0.5, '#ffff00');
+        eyeGrad.addColorStop(1, '#ff0000');
+        cx.fillStyle = eyeGrad;
+        cx.fillRect(center - 8, center - 2, 16, 4);
+
+        // Eye highlight
+        cx.shadowBlur = 0;
+        cx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        cx.fillRect(center - 6, center - 1, 4, 1);
+
+        // Corner armor plating
+        cx.fillStyle = '#aa2222';
+        cx.beginPath();
+        cx.moveTo(center - 12, center - 12);
+        cx.lineTo(center - 8, center - 12);
+        cx.lineTo(center - 12, center - 8);
+        cx.closePath();
+        cx.fill();
+        cx.beginPath();
+        cx.moveTo(center + 12, center - 12);
+        cx.lineTo(center + 8, center - 12);
+        cx.lineTo(center + 12, center - 8);
+        cx.closePath();
+        cx.fill();
+        cx.beginPath();
+        cx.moveTo(center - 12, center + 12);
+        cx.lineTo(center - 8, center + 12);
+        cx.lineTo(center - 12, center + 8);
+        cx.closePath();
+        cx.fill();
+        cx.beginPath();
+        cx.moveTo(center + 12, center + 12);
+        cx.lineTo(center + 8, center + 12);
+        cx.lineTo(center + 12, center + 8);
+        cx.closePath();
+        cx.fill();
     }
     return c;
 }
@@ -700,7 +982,6 @@ class Enemy {
             ctx.drawImage(sprites.enemyChaser, -30, -30); // Size roughly (20+10)*2 = 60
         }
         else if (this.type === 'spinner') {
-            ctx.rotate(frameCount * 0.1);
             ctx.drawImage(sprites.enemySpinner, -40, -40); // Size roughly (30+10)*2 = 80
         }
         else if (this.type === 'dasher') {
@@ -1661,7 +1942,7 @@ function update(dt) {
         if (p.pickupTimer > 0) return; // Cannot pick up yet
         if (dist(p.x, p.y, player.x, player.y) < p.radius + 20) {
             p.active = false; playSound('powerup');
-        if (p.type === 'weapon') {
+            if (p.type === 'weapon') {
                 if (player.powerLevel < player.maxPower) {
                     player.powerLevel++;
                     player.weaponXpMax = getWeaponXpForLevel(player.powerLevel);
