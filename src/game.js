@@ -12,6 +12,7 @@ const hudTop = document.querySelector('.hud-top');
 const livesContainer = document.getElementById('lives-container');
 const powerSegments = document.getElementById('power-segments');
 const xpFill = document.getElementById('xp-fill');
+const xpStatus = document.getElementById('xp-status');
 const finalScoreDisplay = document.getElementById('final-score');
 const flashOverlay = document.getElementById('flash-overlay');
 const pauseBtn = document.getElementById('pause-btn');
@@ -185,6 +186,15 @@ const PLAYER_START_BOTTOM_OFFSET = 40; // Keep initial spawn near the bottom wit
 let hudTopHeight = hudTop ? hudTop.getBoundingClientRect().height : 80;
 const input = { x: 0, y: 0, active: false, lastX: 0, lastY: 0 };
 
+// Power progression
+const MAX_POWER_LEVEL = 10;
+const WEAPON_XP_BASE = 120;
+const WEAPON_XP_GROWTH = 1.75;
+function getWeaponXpForLevel(level) {
+    const clamped = Math.min(Math.max(1, level), MAX_POWER_LEVEL);
+    return Math.floor(WEAPON_XP_BASE * Math.pow(WEAPON_XP_GROWTH, clamped - 1));
+}
+
 // Keyboard Input
 const keys = {
     up: false, down: false, left: false, right: false,
@@ -196,8 +206,8 @@ const PLAYER_MAX_LIVES = 6;
 const player = {
     x: 0, y: 0, radius: 6, // Slightly smaller hitbox
     w: 24, h: 32,
-    lives: PLAYER_MAX_LIVES, iframes: 0, powerLevel: 1, maxPower: 6,
-    weaponXp: 0, weaponXpMax: 100, // XP System
+    lives: PLAYER_MAX_LIVES, iframes: 0, powerLevel: 1, maxPower: MAX_POWER_LEVEL,
+    weaponXp: 0, weaponXpMax: getWeaponXpForLevel(1), // XP System
     hasShield: false,
     tail: [],
     vx: 0, vy: 0, tilt: 0, tiltDir: 1
@@ -209,6 +219,16 @@ const enemies = [];
 const particles = [];
 const powerups = [];
 const texts = [];
+
+function buildPowerSegments() {
+    if (!powerSegments) return;
+    powerSegments.innerHTML = '';
+    for (let i = 0; i < player.maxPower; i++) {
+        const seg = document.createElement('div');
+        seg.className = 'segment';
+        powerSegments.appendChild(seg);
+    }
+}
 
 function setPlayerStartPosition() {
     const topLimit = hudTopHeight + PLAYFIELD_TOP_BUFFER + player.radius;
@@ -231,6 +251,7 @@ function resize() {
 }
 window.addEventListener('resize', resize);
 resize();
+buildPowerSegments();
 
 // Map pointer coords to game space so touch/mouse movement matches keyboard speed
 function toGameCoords(x, y) {
@@ -991,6 +1012,22 @@ function firePlayerWeapons() {
         spawnBullet(player.x - 10, player.y - 20, -Math.PI / 2, 18, 'player', 'beam');
         spawnBullet(player.x + 10, player.y - 20, -Math.PI / 2, 18, 'player', 'beam');
     }
+    if (player.powerLevel >= 7 && frameCount % 10 === 0) {
+        spawnBullet(player.x - 22, player.y - 12, -1.55, 18, 'player', 'beam');
+        spawnBullet(player.x + 22, player.y - 12, -1.59, 18, 'player', 'beam');
+    }
+    if (player.powerLevel >= 8 && frameCount % 18 === 0) {
+        spawnBullet(player.x, player.y + 6, Math.PI, 12, 'player', 'wave');
+    }
+    if (player.powerLevel >= 9 && frameCount % 16 === 0) {
+        spawnBullet(player.x - 28, player.y - 18, -1.35, 17, 'player', 'normal');
+        spawnBullet(player.x + 28, player.y - 18, -1.8, 17, 'player', 'normal');
+    }
+    if (player.powerLevel >= 10 && frameCount % 24 === 0) {
+        spawnBullet(player.x, player.y - 26, -Math.PI / 2, 24, 'player', 'beam');
+        spawnBullet(player.x - 6, player.y - 26, -Math.PI / 2, 24, 'player', 'beam');
+        spawnBullet(player.x + 6, player.y - 26, -Math.PI / 2, 24, 'player', 'beam');
+    }
 }
 
 function updateUI() {
@@ -1012,14 +1049,25 @@ function updateUI() {
     }
 
     const segs = powerSegments.children;
+    const atMaxLevel = player.powerLevel >= player.maxPower;
     for (let i = 0; i < segs.length; i++) {
-        segs[i].className = i < player.powerLevel - 1 ? 'segment active' : 'segment';
-        if (player.powerLevel === player.maxPower && i < player.maxPower - 1) segs[i].className = 'segment max';
+        const filled = i < player.powerLevel;
+        segs[i].className = filled ? 'segment active' : 'segment';
+        if (atMaxLevel && filled) segs[i].className = 'segment max';
     }
 
     // Update XP Bar
-    const xpPercent = Math.min(100, (player.weaponXp / player.weaponXpMax) * 100);
+    const xpPercent = atMaxLevel ? 100 : Math.min(100, (player.weaponXp / player.weaponXpMax) * 100);
     if (xpFill) xpFill.style.width = `${xpPercent}%`;
+    if (xpStatus) {
+        if (atMaxLevel) {
+            xpStatus.textContent = 'MAX';
+            xpStatus.classList.add('max');
+        } else {
+            xpStatus.textContent = '';
+            xpStatus.classList.remove('max');
+        }
+    }
 }
 
 function hitPlayer() {
@@ -1042,6 +1090,8 @@ function hitPlayer() {
 
     if (player.powerLevel > 1) {
         player.powerLevel--;
+        player.weaponXpMax = getWeaponXpForLevel(player.powerLevel);
+        player.weaponXp = Math.min(player.weaponXp, Math.floor(player.weaponXpMax * 0.5));
         spawnPowerup(player.x, player.y, 'weapon', true);
         spawnText(player.x, player.y - 50, "SYSTEM DMG", "#f00");
     }
@@ -1092,22 +1142,24 @@ function returnToMenu() {
     pauseBtn.classList.remove('active');
 
     score = 0; player.lives = PLAYER_MAX_LIVES; player.powerLevel = 1; player.iframes = 0; player.hasShield = false;
-    player.weaponXp = 0; player.weaponXpMax = 100;
+    player.weaponXp = 0; player.weaponXpMax = getWeaponXpForLevel(player.powerLevel);
     if (xpFill) { xpFill.style.transition = 'none'; setTimeout(() => xpFill.style.transition = 'width 0.2s ease-out', 50); }
     setPlayerStartPosition(); player.vx = 0; player.vy = 0; player.tilt = 0;
 
     resetWorldState();
+    buildPowerSegments();
     updateUI();
 }
 
 function initGame() {
     score = 0; player.lives = PLAYER_MAX_LIVES; player.powerLevel = 1; player.iframes = 0; player.hasShield = false;
-    player.weaponXp = 0; player.weaponXpMax = 100;
+    player.weaponXp = 0; player.weaponXpMax = getWeaponXpForLevel(player.powerLevel);
     if (xpFill) { xpFill.style.transition = 'none'; setTimeout(() => xpFill.style.transition = 'width 0.2s ease-out', 50); }
     setPlayerStartPosition(); player.vx = 0; player.vy = 0; player.tilt = 0;
 
     resetWorldState();
 
+    buildPowerSegments();
     updateUI();
     gameState = 'PLAYING';
     uiLayer.classList.remove('hidden');
@@ -1380,26 +1432,28 @@ function update(dt) {
                             else if (e.type === 'snake') xpGain = 40;
                             else if (e.type === 'spinner') xpGain = 50;
 
-                            player.weaponXp += xpGain;
-                            if (player.weaponXp >= player.weaponXpMax) {
-                                player.weaponXp -= player.weaponXpMax;
+                            if (player.powerLevel >= player.maxPower) {
+                                player.weaponXp = player.weaponXpMax;
+                            } else {
+                                player.weaponXp += xpGain;
+                                while (player.powerLevel < player.maxPower && player.weaponXp >= player.weaponXpMax) {
+                                    player.weaponXp -= player.weaponXpMax;
 
-                                // Instant visual reset
-                                if (xpFill) {
-                                    xpFill.style.transition = 'none';
-                                    setTimeout(() => xpFill.style.transition = 'width 0.2s ease-out', 50);
-                                }
+                                    // Instant visual reset
+                                    if (xpFill) {
+                                        xpFill.style.transition = 'none';
+                                        setTimeout(() => xpFill.style.transition = 'width 0.2s ease-out', 50);
+                                    }
 
-                                player.weaponXpMax = Math.floor(player.weaponXpMax * 1.5); // Increased scaling (was 1.2)
-                                if (player.powerLevel < player.maxPower) {
                                     player.powerLevel++;
+                                    player.weaponXpMax = getWeaponXpForLevel(player.powerLevel);
                                     spawnText(player.x, player.y - 40, "UPGRADE", "#0ff");
                                     playSound('powerup');
-                                } else {
-                                    score += 1000;
-                                    spawnText(player.x, player.y - 40, "+1000", "#fff");
                                 }
-                                updateUI();
+
+                                if (player.powerLevel >= player.maxPower) {
+                                    player.weaponXp = player.weaponXpMax;
+                                }
                             }
                             // Update UI for bar progress
                             updateUI();
@@ -1433,8 +1487,14 @@ function update(dt) {
         if (p.pickupTimer > 0) return; // Cannot pick up yet
         if (dist(p.x, p.y, player.x, player.y) < p.radius + 20) {
             p.active = false; playSound('powerup');
-            if (p.type === 'weapon') {
-                if (player.powerLevel < player.maxPower) { player.powerLevel++; spawnText(player.x, player.y - 40, "UPGRADE", "#0ff"); }
+        if (p.type === 'weapon') {
+                if (player.powerLevel < player.maxPower) {
+                    player.powerLevel++;
+                    player.weaponXpMax = getWeaponXpForLevel(player.powerLevel);
+                    player.weaponXp = Math.min(player.weaponXp, player.weaponXpMax);
+                    if (player.powerLevel >= player.maxPower) player.weaponXp = player.weaponXpMax;
+                    spawnText(player.x, player.y - 40, "UPGRADE", "#0ff");
+                }
                 else { if (gameState === 'PLAYING') score += 1000; spawnText(player.x, player.y - 40, "+1000", "#fff"); }
             } else if (p.type === 'bomb') { triggerBombLogic(); }
             else if (p.type === 'shield') { player.hasShield = true; spawnText(player.x, player.y - 40, "SHIELD UP", "#00f"); }

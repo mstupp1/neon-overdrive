@@ -226,9 +226,9 @@ canvas {
 
 .power-segments {
     display: flex;
-    gap: 3px;
+    gap: 2px;
     width: 100%;
-    height: 8px;
+    height: 7px;
 }
 
 .segment {
@@ -264,6 +264,27 @@ canvas {
     background: #ff0;
     box-shadow: 0 0 6px #ff0;
     transition: width 0.2s ease-out;
+}
+
+.xp-status {
+    width: 100%;
+    height: 12px;
+    margin-top: 2px;
+    color: #ff0;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-align: right;
+    padding-right: 2px;
+    text-shadow: 0 0 6px #ff0;
+    opacity: 0;
+    transform: translateY(2px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.xp-status.max {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 /* Menus */
