@@ -663,6 +663,18 @@
         const TIME_STEP = 1000 / 60; // Fixed 60 FPS logic
 
         // Input
+        const PLAYER_MAX_SPEED = 6; // Shared movement cap for keyboard and touch/mouse
+        const PLAYER_MAX_SPEED_UP = 7.5; // Slightly higher cap when boosting upward
+        const PLAYER_MAX_SPEED_DOWN = 5.25; // Slightly slower when retreating/backing down
+        const PLAYER_ACCEL = 0.55;
+        const PLAYER_ACCEL_UP_BOOST = 1.25;
+        const PLAYER_ACCEL_DOWN_FACTOR = 0.8;
+        const PLAYER_FRICTION = 0.9;
+        const PLAYER_TILT_MAX = 0.4;
+        const PLAYER_TILT_DEADZONE = 0.8;
+        const PLAYER_TILT_DIR_SMOOTH = 0.1;
+        const PLAYER_TILT_BLEND = 0.08;
+        const PLAYER_TILT_DAMP = 0.98;
         const input = { x: 0, y: 0, active: false, lastX: 0, lastY: 0 };
 
         // Keyboard Input
@@ -677,7 +689,8 @@
             w: 24, h: 32,
             lives: 5, iframes: 0, powerLevel: 1, maxPower: 6,
             hasShield: false,
-            tail: []
+            tail: [],
+            vx: 0, vy: 0, tilt: 0, tiltDir: 1
         };
 
         // Entities Lists
@@ -703,27 +716,29 @@
         window.addEventListener('resize', resize);
         resize();
 
+        // Map pointer coords to game space so touch/mouse movement matches keyboard speed
+        function toGameCoords(x, y) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = width / rect.width;
+            const scaleY = height / rect.height;
+            return {
+                x: (x - rect.left) * scaleX,
+                y: (y - rect.top) * scaleY
+            };
+        }
+
         // --- Input Handling (Relative) ---
         function handleStart(x, y) {
             input.active = true;
-            input.lastX = x;
-            input.lastY = y;
+            const pos = toGameCoords(x, y);
+            input.lastX = pos.x;
+            input.lastY = pos.y;
         }
         function handleMove(x, y) {
             if (!input.active) return;
-            const dx = x - input.lastX;
-            const dy = y - input.lastY;
-
-            if (gameState === 'PLAYING') {
-                player.x += dx * 1.2; // Sensitivity
-                player.y += dy * 1.2;
-                // Clamp
-                player.x = Math.max(20, Math.min(width - 20, player.x));
-                player.y = Math.max(20, Math.min(height - 20, player.y));
-            }
-
-            input.lastX = x;
-            input.lastY = y;
+            const pos = toGameCoords(x, y);
+            input.lastX = pos.x;
+            input.lastY = pos.y;
         }
         function handleEnd() { input.active = false; }
 
@@ -1385,7 +1400,7 @@
             pauseBtn.classList.remove('active');
 
             score = 0; player.lives = 5; player.powerLevel = 1; player.iframes = 0; player.hasShield = false;
-            player.x = width / 2; player.y = height * 0.8;
+            player.x = width / 2; player.y = height * 0.8; player.vx = 0; player.vy = 0; player.tilt = 0;
 
             resetWorldState();
             updateUI();
@@ -1393,7 +1408,7 @@
 
         function initGame() {
             score = 0; player.lives = 5; player.powerLevel = 1; player.iframes = 0; player.hasShield = false;
-            player.x = width / 2; player.y = height / 2;
+            player.x = width / 2; player.y = height / 2; player.vx = 0; player.vy = 0; player.tilt = 0;
 
             resetWorldState();
 
@@ -1532,26 +1547,74 @@
             player.tail.forEach(t => t.life -= 0.1);
             player.tail = player.tail.filter(t => t.life > 0);
 
-            // --- KEYBOARD MOVEMENT ---
+            // --- PLAYER MOVEMENT (KEYBOARD + TOUCH/MOUSE) ---
             if (gameState === 'PLAYING') {
-                const keyboardSpeed = 6; // Movement speed for keyboard controls
+                let accelX = 0;
+                let accelY = 0;
 
-                if (keys.up || keys.w) {
-                    player.y -= keyboardSpeed;
-                }
-                if (keys.down || keys.s) {
-                    player.y += keyboardSpeed;
-                }
-                if (keys.left || keys.a) {
-                    player.x -= keyboardSpeed;
-                }
-                if (keys.right || keys.d) {
-                    player.x += keyboardSpeed;
+                // Keyboard-driven acceleration
+                if (keys.up || keys.w) accelY -= PLAYER_ACCEL;
+                if (keys.down || keys.s) accelY += PLAYER_ACCEL;
+                if (keys.left || keys.a) accelX -= PLAYER_ACCEL;
+                if (keys.right || keys.d) accelX += PLAYER_ACCEL;
+
+                // Pointer-driven acceleration toward last touch/mouse position
+                if (input.active) {
+                    const dx = input.lastX - player.x;
+                    const dy = input.lastY - player.y;
+                    const distance = Math.hypot(dx, dy);
+                    if (distance > 2) {
+                        const steer = Math.min(PLAYER_ACCEL, distance * 0.02);
+                        accelX += (dx / distance) * steer;
+                        accelY += (dy / distance) * steer;
+                    }
                 }
 
-                // Clamp player position to screen bounds
-                player.x = Math.max(20, Math.min(width - 20, player.x));
-                player.y = Math.max(20, Math.min(height - 20, player.y));
+                // Give upward movement a bit more punch
+                if (accelY < 0) accelY *= PLAYER_ACCEL_UP_BOOST;
+                if (accelY > 0) accelY *= PLAYER_ACCEL_DOWN_FACTOR;
+
+                player.vx += accelX;
+                player.vy += accelY;
+
+                // Apply friction for floaty glide
+                player.vx *= PLAYER_FRICTION;
+                player.vy *= PLAYER_FRICTION;
+
+                // Cap speed
+                const maxSpeed = (player.vy < 0)
+                    ? PLAYER_MAX_SPEED_UP
+                    : (player.vy > 0 ? PLAYER_MAX_SPEED_DOWN : PLAYER_MAX_SPEED);
+                const speed = Math.hypot(player.vx, player.vy);
+                if (speed > maxSpeed) {
+                    const s = maxSpeed / speed;
+                    player.vx *= s; player.vy *= s;
+                }
+
+                player.x += player.vx;
+                player.y += player.vy;
+
+                // Clamp player position to screen bounds and damp velocity when hitting edges
+                if (player.x < 20) { player.x = 20; if (player.vx < 0) player.vx = 0; }
+                if (player.x > width - 20) { player.x = width - 20; if (player.vx > 0) player.vx = 0; }
+                if (player.y < 20) { player.y = 20; if (player.vy < 0) player.vy = 0; }
+                if (player.y > height - 20) { player.y = height - 20; if (player.vy > 0) player.vy = 0; }
+
+                // Smooth tilt based on horizontal velocity
+                // Smooth tilt direction changes so reversing doesn't snap
+                const desiredTiltDir = (player.vy > 0) ? -1 : 1;
+                player.tiltDir = player.tiltDir * (1 - PLAYER_TILT_DIR_SMOOTH) + desiredTiltDir * PLAYER_TILT_DIR_SMOOTH;
+
+                const absVx = Math.abs(player.vx);
+                let targetTilt = player.tilt; // preserve current tilt inside deadzone
+                if (absVx > PLAYER_TILT_DEADZONE) {
+                    const tiltNorm = Math.min(1, (absVx - PLAYER_TILT_DEADZONE) / (PLAYER_MAX_SPEED - PLAYER_TILT_DEADZONE));
+                    targetTilt = tiltNorm * PLAYER_TILT_MAX * Math.sign(player.vx) * player.tiltDir;
+                } else {
+                    targetTilt *= PLAYER_TILT_DAMP; // gently settle toward neutral
+                }
+
+                player.tilt = player.tilt * (1 - PLAYER_TILT_BLEND) + targetTilt * PLAYER_TILT_BLEND;
             }
 
             // --- SHOOTING ---
@@ -1688,6 +1751,8 @@
                 }
 
                 // SHIP SPRITE
+                ctx.save();
+                ctx.rotate(player.tilt);
                 ctx.fillStyle = '#fff';
                 ctx.shadowBlur = 15; ctx.shadowColor = '#0ff';
 
@@ -1709,6 +1774,7 @@
 
                 ctx.shadowBlur = 20; ctx.fillStyle = '#0ff';
                 ctx.fillRect(-5, 20, 3, 5); ctx.fillRect(2, 20, 3, 5);
+                ctx.restore();
 
                 ctx.restore();
             }
