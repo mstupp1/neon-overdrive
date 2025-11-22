@@ -862,9 +862,9 @@
                 this.timer = 0; this.state = 'move';
                 this.flashTimer = 0; // Flash effect when taking damage
 
-                const seed = Math.random();
-                if (seed > 0.3) { this.x = rand(50, width - 50); this.y = -40; }
-                else { this.x = Math.random() > 0.5 ? width + 40 : -40; this.y = rand(20, height * 0.4); }
+                const spawnMargin = 50;
+                // Spawn from the top band only to keep entries predictable
+                this.x = rand(spawnMargin, width - spawnMargin); this.y = -40;
 
                 if (type === 'chaser') { this.hp = 4; this.radius = 18; this.speed = rand(2, 3.5); }
                 else if (type === 'spinner') { this.hp = 15; this.radius = 25; this.speed = 1.5; }
@@ -919,6 +919,14 @@
                         }
                     }
                 }
+
+                // Soft steer away from edges so enemies don't linger at the borders
+                const edgeMargin = 60;
+                if (this.x < edgeMargin) this.x += (edgeMargin - this.x) * 0.05;
+                else if (this.x > width - edgeMargin) this.x -= (this.x - (width - edgeMargin)) * 0.05;
+                if (this.y < edgeMargin) this.y += (edgeMargin - this.y) * 0.05;
+                else if (this.y > height - edgeMargin) this.y -= (this.y - (height - edgeMargin)) * 0.05;
+
                 if (this.y > height + 100 || this.x < -100 || this.x > width + 100) this.active = false;
             }
 
@@ -1601,8 +1609,8 @@
                 if (player.y > height - 20) { player.y = height - 20; if (player.vy > 0) player.vy = 0; }
 
                 // Smooth tilt based on horizontal velocity
-                // Smooth tilt direction changes so reversing doesn't snap
-                const desiredTiltDir = (player.vy > 0) ? -1 : 1;
+                // Smooth tilt direction changes so reversing doesn't snap; forward (up) now reverses tilt
+                const desiredTiltDir = (player.vy < 0) ? -1 : 1;
                 player.tiltDir = player.tiltDir * (1 - PLAYER_TILT_DIR_SMOOTH) + desiredTiltDir * PLAYER_TILT_DIR_SMOOTH;
 
                 const absVx = Math.abs(player.vx);
@@ -1613,6 +1621,9 @@
                 } else {
                     targetTilt *= PLAYER_TILT_DAMP; // gently settle toward neutral
                 }
+
+                // Reverse overall tilt orientation to feel more natural
+                targetTilt *= -1;
 
                 player.tilt = player.tilt * (1 - PLAYER_TILT_BLEND) + targetTilt * PLAYER_TILT_BLEND;
             }
