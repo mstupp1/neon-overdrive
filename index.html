@@ -33,8 +33,16 @@
             justify-content: space-between;
             padding: 20px;
             box-sizing: border-box;
+            box-sizing: border-box;
             z-index: 20;
             transition: opacity 0.5s;
+            opacity: 1;
+            /* Ensure default is visible */
+        }
+
+        #ui-layer.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
 
         .hud-top {
@@ -328,7 +336,7 @@
             opacity: 0.7;
         }
 
-        /* Vignette */
+        /* Vignette - Move behind UI */
         .vignette {
             position: absolute;
             top: 0;
@@ -337,7 +345,8 @@
             height: 100%;
             background: radial-gradient(circle, transparent 40%, #000 120%);
             pointer-events: none;
-            z-index: 24;
+            z-index: 15;
+            /* Lower than UI (20) */
         }
 
         #flash-overlay {
@@ -1202,7 +1211,18 @@
         }
 
         function draw() {
-            ctx.fillStyle = 'rgba(2, 0, 5, 0.25)'; ctx.fillRect(0, 0, width, height);
+            // Background Clear & Fade
+            ctx.fillStyle = 'rgba(2, 0, 5, 0.25)';
+            ctx.fillRect(0, 0, width, height);
+
+            // Trippy Background for DEMO
+            if (gameState === 'DEMO') {
+                const grad = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, width);
+                grad.addColorStop(0, `hsla(${globalHue}, 100%, 20%, 0.1)`);
+                grad.addColorStop(1, `hsla(${globalHue + 180}, 100%, 10%, 0.2)`);
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, width, height);
+            }
 
             let sx = 0, sy = 0; if (player.iframes > 0 && player.iframes % 4 === 0) { sx = rand(-5, 5); sy = rand(-5, 5); }
             ctx.save(); ctx.translate(sx, sy);
@@ -1210,9 +1230,23 @@
             // Grid
             ctx.strokeStyle = `hsla(${globalHue}, 80%, 40%, 0.15)`; ctx.lineWidth = 1;
             const gs = 50; const off = (frameCount * 2) % gs;
+
+            // More distortion in DEMO
+            const distMult = gameState === 'DEMO' ? 2.5 : 1;
+
             ctx.beginPath();
-            for (let x = 0; x <= width; x += gs) { for (let y = 0; y <= height; y += 20) { const xw = x + Math.sin(y * 0.05 + frameCount * 0.05) * 10; if (y === 0) ctx.moveTo(xw, y); else ctx.lineTo(xw, y); } }
-            for (let y = off - gs; y <= height; y += gs) { for (let x = 0; x <= width; x += 20) { const yw = y + Math.cos(x * 0.05 + frameCount * 0.05) * 10; if (x === 0) ctx.moveTo(x, yw); else ctx.lineTo(x, yw); } }
+            for (let x = 0; x <= width; x += gs) {
+                for (let y = 0; y <= height; y += 20) {
+                    const xw = x + Math.sin(y * 0.05 + frameCount * 0.05) * 10 * distMult;
+                    if (y === 0) ctx.moveTo(xw, y); else ctx.lineTo(xw, y);
+                }
+            }
+            for (let y = off - gs; y <= height; y += gs) {
+                for (let x = 0; x <= width; x += 20) {
+                    const yw = y + Math.cos(x * 0.05 + frameCount * 0.05) * 10 * distMult;
+                    if (x === 0) ctx.moveTo(x, yw); else ctx.lineTo(x, yw);
+                }
+            }
             ctx.stroke();
 
             powerups.forEach(e => e.draw(ctx));
@@ -1285,7 +1319,8 @@
 
             // DEMO OVERLAY
             if (gameState === 'DEMO') {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                // Lighter overlay so it's easier to see
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
                 ctx.fillRect(0, 0, width, height);
             }
         }
