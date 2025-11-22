@@ -82,6 +82,52 @@
             align-items: flex-start;
         }
 
+        .hud-left {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .pause-btn {
+            width: 42px;
+            height: 42px;
+            border: 2px solid #0ff;
+            background: rgba(0, 0, 0, 0.5);
+            color: #0ff;
+            border-radius: 8px;
+            box-shadow: 0 0 12px rgba(0, 255, 255, 0.3);
+            cursor: pointer;
+            position: relative;
+            transition: 0.25s ease;
+            pointer-events: auto;
+        }
+
+        .pause-btn::before,
+        .pause-btn::after {
+            content: '';
+            position: absolute;
+            top: 25%;
+            bottom: 25%;
+            width: 6px;
+            background: currentColor;
+            box-shadow: 0 0 8px currentColor;
+        }
+
+        .pause-btn::before { left: 12px; }
+
+        .pause-btn::after { right: 12px; }
+
+        .pause-btn:hover {
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 18px rgba(0, 255, 255, 0.6), inset 0 0 8px rgba(0, 255, 255, 0.4);
+        }
+
+        .pause-btn.active {
+            color: #f0f;
+            border-color: #f0f;
+            box-shadow: 0 0 20px rgba(240, 0, 255, 0.6);
+        }
+
         .score-box {
             background: rgba(0, 0, 0, 0.6);
             border-left: 3px solid #0ff;
@@ -348,6 +394,14 @@
             transform: skewX(-20deg) scale(0.95);
         }
 
+        .menu-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+            align-items: center;
+        }
+
         .scanlines {
             position: absolute;
             top: 0;
@@ -402,9 +456,12 @@
 
         <div id="ui-layer" class="hidden">
             <div class="hud-top">
-                <div class="score-box">
-                    <div class="score-label">SCORE</div>
-                    <div class="score-val" id="score-display">0</div>
+                <div class="hud-left">
+                    <button class="pause-btn" id="pause-btn" aria-label="Pause"></button>
+                    <div class="score-box">
+                        <div class="score-label">SCORE</div>
+                        <div class="score-val" id="score-display">0</div>
+                    </div>
                 </div>
                 <div class="lives-box" id="lives-container"></div>
             </div>
@@ -424,6 +481,15 @@
         <div id="start-menu" class="menu-screen">
             <h1>NEON</h1>
             <button class="btn" id="start-btn">ENGAGE</button>
+        </div>
+
+        <div id="pause-menu" class="menu-screen hidden">
+            <h1 style="color: #0ff;">PAUSED</h1>
+            <div class="menu-actions">
+                <button class="btn" id="resume-btn">RESUME</button>
+                <button class="btn" id="pause-restart-btn">RESTART</button>
+                <button class="btn" id="quit-btn">QUIT TO MENU</button>
+            </div>
         </div>
 
         <div id="game-over-menu" class="menu-screen hidden">
@@ -446,12 +512,17 @@
         const ctx = canvas.getContext('2d', { alpha: false });
         const uiLayer = document.getElementById('ui-layer');
         const startMenu = document.getElementById('start-menu');
+        const pauseMenu = document.getElementById('pause-menu');
         const gameOverMenu = document.getElementById('game-over-menu');
         const scoreDisplay = document.getElementById('score-display');
         const livesContainer = document.getElementById('lives-container');
         const powerSegments = document.getElementById('power-segments');
         const finalScoreDisplay = document.getElementById('final-score');
         const flashOverlay = document.getElementById('flash-overlay');
+        const pauseBtn = document.getElementById('pause-btn');
+        const resumeBtn = document.getElementById('resume-btn');
+        const pauseRestartBtn = document.getElementById('pause-restart-btn');
+        const quitBtn = document.getElementById('quit-btn');
 
         // --- ASSET PRE-RENDERING ---
         const sprites = {};
@@ -1271,27 +1342,68 @@
             if (player.lives <= 0) {
                 gameState = 'GAMEOVER';
                 uiLayer.classList.add('hidden');
+                pauseMenu.classList.add('hidden');
+                pauseBtn.classList.remove('active');
                 gameOverMenu.classList.remove('hidden');
                 finalScoreDisplay.innerText = score;
             }
+        }
+
+        function resetWorldState() {
+            bullets.forEach(b => bulletPool.release(b)); bullets.length = 0;
+            enemies.forEach(e => enemyPool.release(e)); enemies.length = 0;
+            particles.forEach(p => particlePool.release(p)); particles.length = 0;
+            powerups.forEach(p => powerupPool.release(p)); powerups.length = 0;
+            texts.forEach(t => textPool.release(t)); texts.length = 0;
+            player.tail.length = 0;
+        }
+
+        function pauseGame() {
+            if (gameState !== 'PLAYING') return;
+            gameState = 'PAUSED';
+            uiLayer.classList.add('hidden');
+            pauseMenu.classList.remove('hidden');
+            pauseBtn.classList.add('active');
+        }
+
+        function resumeGame() {
+            if (gameState !== 'PAUSED') return;
+            gameState = 'PLAYING';
+            pauseMenu.classList.add('hidden');
+            uiLayer.classList.remove('hidden');
+            pauseBtn.classList.remove('active');
+            lastTime = performance.now();
+            accumulator = 0;
+        }
+
+        function returnToMenu() {
+            gameState = 'MENU';
+            pauseMenu.classList.add('hidden');
+            gameOverMenu.classList.add('hidden');
+            startMenu.classList.remove('hidden');
+            uiLayer.classList.add('hidden');
+            pauseBtn.classList.remove('active');
+
+            score = 0; player.lives = 5; player.powerLevel = 1; player.iframes = 0; player.hasShield = false;
+            player.x = width / 2; player.y = height * 0.8;
+
+            resetWorldState();
+            updateUI();
         }
 
         function initGame() {
             score = 0; player.lives = 5; player.powerLevel = 1; player.iframes = 0; player.hasShield = false;
             player.x = width / 2; player.y = height / 2;
 
-            // Clear lists and return to pools
-            bullets.forEach(b => bulletPool.release(b)); bullets.length = 0;
-            enemies.forEach(e => enemyPool.release(e)); enemies.length = 0;
-            particles.forEach(p => particlePool.release(p)); particles.length = 0;
-            powerups.forEach(p => powerupPool.release(p)); powerups.length = 0;
-            texts.forEach(t => textPool.release(t)); texts.length = 0;
+            resetWorldState();
 
             updateUI();
             gameState = 'PLAYING';
             uiLayer.classList.remove('hidden');
             startMenu.classList.add('hidden');
             gameOverMenu.classList.add('hidden');
+            pauseMenu.classList.add('hidden');
+            pauseBtn.classList.remove('active');
 
             lastTime = performance.now();
             accumulator = 0;
@@ -1551,7 +1663,7 @@
             texts.forEach(e => e.draw(ctx));
 
             // PLAYER DRAW
-            if ((gameState === 'PLAYING' || gameState === 'DEMO') && (player.iframes === 0 || Math.floor(frameCount / 4) % 2 === 0)) {
+            if ((gameState === 'PLAYING' || gameState === 'DEMO' || gameState === 'PAUSED') && (player.iframes === 0 || Math.floor(frameCount / 4) % 2 === 0)) {
                 ctx.save(); ctx.translate(player.x, player.y);
 
                 // Engine Trails
@@ -1635,6 +1747,13 @@
 
         document.getElementById('start-btn').addEventListener('click', initGame);
         document.getElementById('restart-btn').addEventListener('click', initGame);
+        pauseBtn.addEventListener('click', () => {
+            if (gameState === 'PLAYING') pauseGame();
+            else if (gameState === 'PAUSED') resumeGame();
+        });
+        resumeBtn.addEventListener('click', resumeGame);
+        pauseRestartBtn.addEventListener('click', initGame);
+        quitBtn.addEventListener('click', returnToMenu);
 
         // Start loop
         requestAnimationFrame(loop);
