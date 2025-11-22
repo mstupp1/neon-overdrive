@@ -12,19 +12,27 @@ function spawnPowerup(...args) { powerups.push(powerupPool.get(...args)); }
 function spawnText(...args) { texts.push(textPool.get(...args)); }
 
 function spawnEnemyLogic() {
-    const chance = Math.random();
-    let type = 'chaser';
-
     // In DEMO, always allow all types for variety
-    const effectiveScore = gameState === 'DEMO' ? 5000 : score;
+    if (gameState === 'DEMO') {
+        if (enemies.length > 30) return;
+        const types = ['chaser', 'spinner', 'dasher', 'snake', 'sniper'];
+        const type = types[Math.floor(Math.random() * types.length)];
+        spawnEnemyEntity(type);
+        return;
+    }
 
-    // Performance Cap for Demo
-    if (gameState === 'DEMO' && enemies.length > 30) return;
+    const stats = levelManager.getCurrentStats();
+    const allowedTypes = stats.types;
 
-    if (effectiveScore > 500 && chance > 0.6) type = 'spinner';
-    if (effectiveScore > 1000 && chance > 0.8) type = 'dasher';
-    if (effectiveScore > 2000 && chance > 0.85) type = 'snake';
-    if (effectiveScore > 3000 && chance > 0.9) type = 'sniper';
+    // Weighted random selection could be better, but for now uniform is fine
+    // or maybe bias towards 'chaser' as fodder
+    let type = allowedTypes[Math.floor(Math.random() * allowedTypes.length)];
+
+    // Simple bias: 50% chance to just be a chaser if available
+    if (allowedTypes.includes('chaser') && Math.random() < 0.5) {
+        type = 'chaser';
+    }
+
     spawnEnemyEntity(type);
 }
 

@@ -52,4 +52,11 @@ function updateUI() {
             xpStatus.classList.add('show');
         }
     }
+
+    // Update Player Level UI
+    if (playerLevelDisplay) playerLevelDisplay.textContent = player.level;
+    if (playerXpFill) {
+        const pXpPercent = Math.min(100, (player.xp / player.xpMax) * 100);
+        playerXpFill.style.width = `${pXpPercent}%`;
+    }
 }

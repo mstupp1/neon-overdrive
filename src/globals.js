@@ -21,6 +21,8 @@ const pauseBtn = document.getElementById('pause-btn');
 const resumeBtn = document.getElementById('resume-btn');
 const pauseRestartBtn = document.getElementById('pause-restart-btn');
 const quitBtn = document.getElementById('quit-btn');
+const playerLevelDisplay = document.getElementById('player-level-display');
+const playerXpFill = document.getElementById('player-xp-fill');
 
 // Constants
 const SCORE_DIGITS = 10;
@@ -98,11 +100,20 @@ const player = {
     x: 0, y: 0, radius: 6,
     w: 24, h: 32,
     lives: PLAYER_MAX_LIVES, iframes: 0, powerLevel: 0, maxPower: MAX_POWER_LEVEL,
-    weaponXp: 0, weaponXpMax: 0, // Initialized later
+    weaponXp: 0, weaponXpMax: 0, // Weapon Progression
+    level: 1, xp: 0, xpMax: 100, // Character Progression
+    stats: {
+        damageMult: 1.0,
+        hpMax: PLAYER_MAX_LIVES,
+        fireRateMult: 1.0
+    },
     hasShield: false,
     tail: [],
     vx: 0, vy: 0, tilt: 0, tiltDir: 1
 };
+
+const CHAR_XP_BASE = 100;
+const CHAR_XP_GROWTH = 1.5;
 
 // Entity Lists
 const bullets = [];

@@ -23,7 +23,6 @@
                         <div class="pause-icon" aria-hidden="true"></div>
                     </button>
                     <div class="score-block">
-                        <div class="score-label">SCORE</div>
                         <div class="score-val" id="score-display">0</div>
                     </div>
                 </div>
@@ -43,8 +42,15 @@
                         <div class="xp-status" id="xp-status"></div>
                     </div>
                 </div>
+                <div class="level-info-container">
+                    <div class="level-label">LVL <span id="player-level-display">1</span></div>
+                    <div class="player-xp-track">
+                        <div class="player-xp-fill" id="player-xp-fill"></div>
+                    </div>
+                </div>
             </div>
         </div>
+
 
         <div id="start-menu" class="menu-screen">
             <h1>NEON</h1>
@@ -69,10 +75,32 @@
             <button class="btn" id="restart-btn">REBOOT</button>
         </div>
 
+        <div id="level-up-menu" class="menu-screen hidden">
+            <h1 style="color: #fd0;">LEVEL UP!</h1>
+            <div class="upgrade-container">
+                <button class="upgrade-card" onclick="selectUpgrade('hp')">
+                    <div class="icon">❤️</div>
+                    <h3>REINFORCE</h3>
+                    <p>+1 MAX HP</p>
+                </button>
+                <button class="upgrade-card" onclick="selectUpgrade('damage')">
+                    <div class="icon">⚔️</div>
+                    <h3>OVERCHARGE</h3>
+                    <p>+10% DAMAGE</p>
+                </button>
+                <button class="upgrade-card" onclick="selectUpgrade('speed')">
+                    <div class="icon">⚡</div>
+                    <h3>ACCELERATE</h3>
+                    <p>+10% FIRE RATE</p>
+                </button>
+            </div>
+        </div>
+
         <canvas id="gameCanvas"></canvas>
     </div>
 
     <script src="src/globals.js"></script>
+    <script src="src/levels.js"></script>
     <script src="src/utils.js"></script>
     <script src="src/audio.js"></script>
     <script src="src/assets.js"></script>

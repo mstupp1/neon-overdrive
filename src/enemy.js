@@ -17,20 +17,24 @@ class Enemy {
         // Spawn from the top band only to keep entries predictable
         this.x = rand(spawnMargin, width - spawnMargin); this.y = -40;
 
-        if (type === 'chaser') { this.hp = 4; this.radius = 18; this.speed = rand(2, 3.5); }
-        else if (type === 'spinner') { this.hp = 15; this.radius = 25; this.speed = 1.5; }
+        const stats = levelManager.getCurrentStats();
+        const hpMult = stats.hpMod;
+        const speedMult = stats.speedMod;
+
+        if (type === 'chaser') { this.hp = 4 * hpMult; this.radius = 18; this.speed = rand(2, 3.5) * speedMult; }
+        else if (type === 'spinner') { this.hp = 15 * hpMult; this.radius = 25; this.speed = 1.5 * speedMult; }
         else if (type === 'dasher') {
-            this.hp = 3; this.radius = 12; this.speed = 6;
+            this.hp = 3 * hpMult; this.radius = 12; this.speed = 6 * speedMult;
             const a = Math.atan2(player.y - this.y, player.x - this.x);
             this.vx = Math.cos(a) * this.speed; this.vy = Math.sin(a) * this.speed;
         }
         else if (type === 'snake') {
-            this.hp = 20; this.radius = 15;
+            this.hp = 20 * hpMult; this.radius = 15;
             this.segments = [];
             for (let i = 0; i < 8; i++) this.segments.push({ x: this.x, y: this.y - i * 15 });
         }
         else if (type === 'sniper') {
-            this.hp = 6; this.radius = 20;
+            this.hp = 6 * hpMult; this.radius = 20;
             this.tx = rand(50, width - 50); this.ty = rand(50, height * 0.4);
         }
     }

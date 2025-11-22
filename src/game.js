@@ -9,6 +9,7 @@ function resetWorldState() {
     powerups.forEach(p => powerupPool.release(p)); powerups.length = 0;
     texts.forEach(t => textPool.release(t)); texts.length = 0;
     player.tail.length = 0;
+    levelManager.reset();
 }
 
 function pauseGame() {
@@ -50,6 +51,9 @@ function returnToMenu() {
 function initGame() {
     score = 0; player.lives = PLAYER_MAX_LIVES; player.powerLevel = 0; player.iframes = 0; player.hasShield = false;
     player.weaponXp = 0; player.weaponXpMax = getWeaponXpForLevel(player.powerLevel);
+    player.level = 1; player.xp = 0; player.xpMax = CHAR_XP_BASE;
+    player.stats = { damageMult: 1.0, hpMax: PLAYER_MAX_LIVES, fireRateMult: 1.0 };
+
     if (xpFill) { xpFill.style.transition = 'none'; setTimeout(() => xpFill.style.transition = 'width 0.2s ease-out', 50); }
     setPlayerStartPosition(); player.vx = 0; player.vy = 0; player.tilt = 0;
 
@@ -62,6 +66,7 @@ function initGame() {
     startMenu.classList.add('hidden');
     gameOverMenu.classList.add('hidden');
     pauseMenu.classList.add('hidden');
+    document.getElementById('level-up-menu').classList.add('hidden');
     pauseBtn.classList.remove('active');
 
     lastTime = performance.now();
@@ -164,12 +169,14 @@ function updateDemoAI() {
 
 function update(dt) {
     if (gameState !== 'PLAYING' && gameState !== 'DEMO') {
-        globalHue += 1;
+        if (gameState !== 'LEVEL_UP') globalHue += 1; // Keep animating color unless leveled up? actually keep animating
         return;
     }
 
     if (gameState === 'DEMO') {
         updateDemoAI();
+    } else {
+        levelManager.update();
     }
 
     cosmicBg.update();
@@ -178,10 +185,15 @@ function update(dt) {
     frameCount++;
 
     // Spawn logic: More intense in DEMO
+    // Spawn logic: More intense in DEMO
     let spawnRate = Math.max(20, 60 - Math.floor(score / 300));
+    if (gameState === 'PLAYING') {
+        const stats = levelManager.getCurrentStats();
+        spawnRate = Math.max(15, 60 * stats.spawnMod);
+    }
     if (gameState === 'DEMO') spawnRate = 15; // Very fast spawn in demo
 
-    if (frameCount % spawnRate === 0) spawnEnemyLogic();
+    if (frameCount % Math.floor(spawnRate) === 0) spawnEnemyLogic();
 
     // Engine trails
     if (frameCount % 2 === 0) player.tail.push({ x: player.x, y: player.y + 15, life: 1 });
@@ -316,6 +328,7 @@ function update(dt) {
                             else if (e.type === 'spinner') xpGain = 50;
 
                             awardWeaponXp(xpGain);
+                            awardPlayerXp(xpGain); // Award character XP too
                             updateUI();
                         }
                     }
@@ -418,7 +431,7 @@ function draw() {
     texts.forEach(e => e.draw(ctx));
 
     // PLAYER DRAW
-    if ((gameState === 'PLAYING' || gameState === 'DEMO' || gameState === 'PAUSED') && (player.iframes === 0 || Math.floor(frameCount / 4) % 2 === 0)) {
+    if ((gameState === 'PLAYING' || gameState === 'DEMO' || gameState === 'PAUSED' || gameState === 'LEVEL_UP') && (player.iframes === 0 || Math.floor(frameCount / 4) % 2 === 0)) {
         ctx.save(); ctx.translate(player.x, player.y);
 
         // Engine Trails

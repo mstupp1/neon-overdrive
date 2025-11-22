@@ -26,7 +26,7 @@ function getPlayerBulletStats(subType, baseSpeed, levelOverride = null) {
     const scale = getWeaponLevelStats(levelOverride ?? player.powerLevel);
     return {
         speed: baseSpeed * scale.speed,
-        damage: base.damage * scale.damage,
+        damage: base.damage * scale.damage * player.stats.damageMult,
         pierce: base.pierce,
         tintHue: scale.hue,
         glow: scale.glow
@@ -46,39 +46,51 @@ function spawnPlayerBullet(x, y, angle, baseSpeed, subType) {
 function firePlayerWeapons() {
     if (gameState === 'PLAYING') playSound('shoot');
 
+    // Fire rate modifier affects the frame check
+    // Since we use modulo, we can't easily change the modulus dynamically without sync issues
+    // Instead, we can use a probabilistic approach or a separate timer.
+    // For simplicity, let's just use the multiplier to potentially fire EXTRA bullets or increase speed?
+    // No, "Attack Speed" usually means fire rate.
+    // Let's use a global fire timer or modify the modulo check.
+    // A simple way: `frameCount * fireRateMult % interval < fireRateMult`? No.
+    // Better: `Math.floor(frameCount * player.stats.fireRateMult) % interval === 0`
+
+    const fr = player.stats.fireRateMult;
+    const tick = Math.floor(frameCount * fr);
+
     spawnPlayerBullet(player.x, player.y - 20, -Math.PI / 2, 18, 'beam');
 
     if (player.powerLevel >= 2) {
         spawnPlayerBullet(player.x - 15, player.y, -1.7, 15, 'normal');
         spawnPlayerBullet(player.x + 15, player.y, -1.4, 15, 'normal');
     }
-    if (player.powerLevel >= 3 && frameCount % 14 === 0) {
+    if (player.powerLevel >= 3 && tick % 14 === 0) {
         spawnPlayerBullet(player.x, player.y - 20, -1.6, 10, 'blade');
         spawnPlayerBullet(player.x, player.y - 20, -1.5, 10, 'blade');
     }
-    if (player.powerLevel >= 4 && frameCount % 21 === 0) {
+    if (player.powerLevel >= 4 && tick % 21 === 0) {
         spawnPlayerBullet(player.x - 20, player.y, Math.PI, 12, 'homing');
         spawnPlayerBullet(player.x + 20, player.y, 0, 12, 'homing');
     }
-    if (player.powerLevel >= 5 && frameCount % 21 === 0) {
+    if (player.powerLevel >= 5 && tick % 21 === 0) {
         spawnPlayerBullet(player.x, player.y - 10, -Math.PI / 2, 12, 'wave');
     }
     if (player.powerLevel >= 6) {
         spawnPlayerBullet(player.x - 10, player.y - 20, -Math.PI / 2, 18, 'beam');
         spawnPlayerBullet(player.x + 10, player.y - 20, -Math.PI / 2, 18, 'beam');
     }
-    if (player.powerLevel >= 7 && frameCount % 10 === 0) {
+    if (player.powerLevel >= 7 && tick % 10 === 0) {
         spawnPlayerBullet(player.x - 22, player.y - 12, -1.55, 18, 'beam');
         spawnPlayerBullet(player.x + 22, player.y - 12, -1.59, 18, 'beam');
     }
-    if (player.powerLevel >= 8 && frameCount % 18 === 0) {
+    if (player.powerLevel >= 8 && tick % 18 === 0) {
         spawnPlayerBullet(player.x, player.y + 6, Math.PI, 12, 'wave');
     }
-    if (player.powerLevel >= 9 && frameCount % 16 === 0) {
+    if (player.powerLevel >= 9 && tick % 16 === 0) {
         spawnPlayerBullet(player.x - 28, player.y - 18, -1.35, 17, 'normal');
         spawnPlayerBullet(player.x + 28, player.y - 18, -1.8, 17, 'normal');
     }
-    if (player.powerLevel >= 10 && frameCount % 24 === 0) {
+    if (player.powerLevel >= 10 && tick % 24 === 0) {
         spawnPlayerBullet(player.x, player.y - 26, -Math.PI / 2, 24, 'beam');
         spawnPlayerBullet(player.x - 6, player.y - 26, -Math.PI / 2, 24, 'beam');
         spawnPlayerBullet(player.x + 6, player.y - 26, -Math.PI / 2, 24, 'beam');
@@ -111,6 +123,47 @@ function awardWeaponXp(xpGain) {
 
     if (player.powerLevel >= player.maxPower) player.weaponXp = player.weaponXpMax;
 }
+
+function awardPlayerXp(amount) {
+    if (gameState !== 'PLAYING') return;
+
+    player.xp += amount;
+    if (player.xp >= player.xpMax) {
+        player.xp -= player.xpMax;
+        player.level++;
+        player.xpMax = Math.floor(player.xpMax * CHAR_XP_GROWTH);
+        triggerLevelUp();
+    }
+}
+
+function triggerLevelUp() {
+    gameState = 'LEVEL_UP';
+    uiLayer.classList.add('hidden');
+    document.getElementById('level-up-menu').classList.remove('hidden');
+    playSound('powerup'); // Reuse powerup sound or add new one
+}
+
+function applyUpgrade(type) {
+    if (type === 'hp') {
+        player.stats.hpMax += 1;
+        player.lives += 1;
+        spawnText(player.x, player.y, "MAX HP UP", "#f00");
+    } else if (type === 'damage') {
+        player.stats.damageMult += 0.1;
+        spawnText(player.x, player.y, "DAMAGE UP", "#f00");
+    } else if (type === 'speed') {
+        player.stats.fireRateMult += 0.1;
+        spawnText(player.x, player.y, "SPEED UP", "#ff0");
+    }
+
+    document.getElementById('level-up-menu').classList.add('hidden');
+    uiLayer.classList.remove('hidden');
+    gameState = 'PLAYING';
+    updateUI();
+}
+
+// Expose for HTML onclick
+window.selectUpgrade = applyUpgrade;
 
 function hitPlayer() {
     if (gameState === 'DEMO') return; // Invincible in demo
