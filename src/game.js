@@ -443,7 +443,7 @@ function prerenderAssets() {
     sprites.enemySpinnerRing = renderGlowSprite('#f0f', 30, 10, 'spinnerRing');
     sprites.enemySpinner = sprites.enemySpinnerCore; // Backward compatibility
     sprites.enemyDasher = renderGlowSprite('#ff0', 20, 10, 'dasher');
-    sprites.enemySnake = renderGlowSprite('#f00', 15, 10, 'snake');
+    sprites.enemySnake = renderGlowSprite('#0f0', 15, 10, 'snake');
     sprites.enemySniper = renderGlowSprite('#f44', 20, 10, 'sniper');
 }
 prerenderAssets();
