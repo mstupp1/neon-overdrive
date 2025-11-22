@@ -12,12 +12,41 @@
             background-color: #020002;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             touch-action: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #game-container {
+            position: relative;
+            max-width: 430px;
+            max-height: 932px;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Desktop: Allow vertical centering */
+        @media (min-width: 768px) {
+            #game-container {
+                height: auto;
+                aspect-ratio: 430 / 932;
+            }
         }
 
         canvas {
             display: block;
             width: 100%;
             height: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Desktop: Add subtle border to canvas */
+        @media (min-width: 768px) {
+            canvas {
+                border: 1px solid rgba(0, 255, 255, 0.3);
+                box-shadow: 0 0 10px rgba(0, 255, 255, 0.15);
+            }
         }
 
         /* UI LAYER */
@@ -31,8 +60,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 20px;
-            box-sizing: border-box;
+            padding: 12px;
             box-sizing: border-box;
             z-index: 20;
             transition: opacity 0.5s;
@@ -49,15 +77,15 @@
             display: flex;
             justify-content: space-between;
             width: 100%;
-            max-width: 900px;
+            max-width: 430px;
             margin: 0 auto;
             align-items: flex-start;
         }
 
         .score-box {
             background: rgba(0, 0, 0, 0.6);
-            border-left: 4px solid #0ff;
-            padding: 8px 20px;
+            border-left: 3px solid #0ff;
+            padding: 6px 12px;
             color: #fff;
             text-shadow: 0 0 8px #0ff;
             transform: skewX(-10deg);
@@ -66,14 +94,14 @@
         }
 
         .score-label {
-            font-size: 12px;
+            font-size: 10px;
             color: #0ff;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
             font-weight: 800;
         }
 
         .score-val {
-            font-size: 28px;
+            font-size: 20px;
             font-weight: bold;
             font-family: monospace;
         }
@@ -85,8 +113,8 @@
         }
 
         .life-icon {
-            width: 24px;
-            height: 24px;
+            width: 18px;
+            height: 18px;
             background: linear-gradient(135deg, #f00, #900);
             border: 2px solid #fff;
             box-shadow: 0 0 10px #f00;
@@ -96,13 +124,13 @@
         /* Bottom Power Bar */
         .power-bar-container {
             position: absolute;
-            bottom: 20px;
+            bottom: 12px;
             left: 50%;
             transform: translateX(-50%) skewX(-15deg);
-            width: 260px;
+            width: 200px;
             background: rgba(0, 0, 0, 0.5);
-            border-bottom: 3px solid #fff;
-            padding: 8px;
+            border-bottom: 2px solid #fff;
+            padding: 6px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -111,18 +139,18 @@
 
         .power-bar-label {
             color: #0ff;
-            font-size: 12px;
+            font-size: 9px;
             font-weight: 900;
-            letter-spacing: 4px;
-            margin-bottom: 5px;
+            letter-spacing: 2px;
+            margin-bottom: 4px;
             text-shadow: 0 0 8px #0ff;
         }
 
         .power-segments {
             display: flex;
-            gap: 4px;
+            gap: 3px;
             width: 100%;
-            height: 10px;
+            height: 8px;
         }
 
         .segment {
@@ -170,10 +198,10 @@
         }
 
         h1 {
-            font-size: 100px;
+            font-size: 60px;
             margin: 0;
             color: #fff;
-            letter-spacing: 15px;
+            letter-spacing: 8px;
             /* Reduced shadows for performance */
             text-shadow:
                 0 0 10px #fff,
@@ -206,11 +234,11 @@
         h1::after {
             content: 'OVERDRIVE';
             display: block;
-            font-size: 40px;
+            font-size: 24px;
             color: #f0f;
             text-shadow: 0 0 10px #f0f, 0 0 20px #f0f;
-            letter-spacing: 25px;
-            margin-top: 10px;
+            letter-spacing: 12px;
+            margin-top: 6px;
             animation: none;
         }
 
@@ -276,15 +304,15 @@
             background: rgba(0, 0, 0, 0.3);
             border: 2px solid #0ff;
             color: #0ff;
-            padding: 20px 80px;
-            font-size: 28px;
+            padding: 16px 50px;
+            font-size: 22px;
             font-family: monospace;
             cursor: pointer;
             text-transform: uppercase;
-            letter-spacing: 6px;
+            letter-spacing: 4px;
             transition: 0.3s;
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
-            margin-top: 40px;
+            margin-top: 30px;
             font-weight: 900;
             transform: skewX(-20deg);
             position: relative;
@@ -365,48 +393,50 @@
 </head>
 
 <body>
-    <!-- SVG Filters Removed for Performance -->
+    <div id="game-container">
+        <!-- SVG Filters Removed for Performance -->
 
-    <div class="scanlines"></div>
-    <div class="vignette"></div>
-    <div id="flash-overlay"></div>
+        <div class="scanlines"></div>
+        <div class="vignette"></div>
+        <div id="flash-overlay"></div>
 
-    <div id="ui-layer" class="hidden">
-        <div class="hud-top">
-            <div class="score-box">
-                <div class="score-label">SCORE</div>
-                <div class="score-val" id="score-display">0</div>
+        <div id="ui-layer" class="hidden">
+            <div class="hud-top">
+                <div class="score-box">
+                    <div class="score-label">SCORE</div>
+                    <div class="score-val" id="score-display">0</div>
+                </div>
+                <div class="lives-box" id="lives-container"></div>
             </div>
-            <div class="lives-box" id="lives-container"></div>
+
+            <div class="power-bar-container">
+                <div class="power-bar-label">WEAPON SYSTEMS</div>
+                <div class="power-segments" id="power-segments">
+                    <div class="segment"></div>
+                    <div class="segment"></div>
+                    <div class="segment"></div>
+                    <div class="segment"></div>
+                    <div class="segment"></div>
+                </div>
+            </div>
         </div>
 
-        <div class="power-bar-container">
-            <div class="power-bar-label">WEAPON SYSTEMS</div>
-            <div class="power-segments" id="power-segments">
-                <div class="segment"></div>
-                <div class="segment"></div>
-                <div class="segment"></div>
-                <div class="segment"></div>
-                <div class="segment"></div>
-            </div>
+        <div id="start-menu" class="menu-screen">
+            <h1>NEON</h1>
+            <button class="btn" id="start-btn">ENGAGE</button>
         </div>
-    </div>
 
-    <div id="start-menu" class="menu-screen">
-        <h1>NEON</h1>
-        <button class="btn" id="start-btn">ENGAGE</button>
-    </div>
+        <div id="game-over-menu" class="menu-screen hidden">
+            <h1 style="color: #f00;">CRITICAL FAIL</h1>
+            <div style="color: #fff; margin-bottom: 10px; letter-spacing: 2px; font-size: 12px;">FINAL SCORE</div>
+            <div id="final-score"
+                style="font-size: 36px; color: #0ff; font-family: monospace; margin-bottom: 20px; text-shadow: 0 0 10px #0ff;">
+                0</div>
+            <button class="btn" id="restart-btn">REBOOT</button>
+        </div>
 
-    <div id="game-over-menu" class="menu-screen hidden">
-        <h1 style="color: #f00;">CRITICAL FAIL</h1>
-        <div style="color: #fff; margin-bottom: 10px; letter-spacing: 2px;">FINAL SCORE</div>
-        <div id="final-score"
-            style="font-size: 50px; color: #0ff; font-family: monospace; margin-bottom: 30px; text-shadow: 0 0 10px #0ff;">
-            0</div>
-        <button class="btn" id="restart-btn">REBOOT</button>
+        <canvas id="gameCanvas"></canvas>
     </div>
-
-    <canvas id="gameCanvas"></canvas>
 
     <script>
         /**
@@ -588,8 +618,11 @@
 
         // --- Resize ---
         function resize() {
-            width = window.innerWidth;
-            height = window.innerHeight;
+            // Constrain to mobile dimensions
+            const container = document.getElementById('game-container');
+            const rect = container.getBoundingClientRect();
+            width = rect.width;
+            height = rect.height;
             canvas.width = width;
             canvas.height = height;
             if (gameState === 'MENU' || gameState === 'DEMO') {
