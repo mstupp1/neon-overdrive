@@ -722,6 +722,7 @@
         const PLAYFIELD_SIDE_PADDING = 20;
         const PLAYFIELD_TOP_BUFFER = 20; // Keep player clear of the HUD bar
         const PLAYFIELD_BOTTOM_PADDING = 36; // Keep player off the very bottom edge
+        const PLAYER_START_BOTTOM_OFFSET = 40; // Keep initial spawn near the bottom without hugging the edge
         let hudTopHeight = hudTop ? hudTop.getBoundingClientRect().height : 80;
         const input = { x: 0, y: 0, active: false, lastX: 0, lastY: 0 };
 
@@ -749,6 +750,13 @@
         const powerups = [];
         const texts = [];
 
+        function setPlayerStartPosition() {
+            const topLimit = hudTopHeight + PLAYFIELD_TOP_BUFFER + player.radius;
+            const targetBottomY = height - PLAYFIELD_BOTTOM_PADDING - PLAYER_START_BOTTOM_OFFSET;
+            player.x = width / 2;
+            player.y = Math.max(topLimit, targetBottomY);
+        }
+
         // --- Resize ---
         function resize() {
             // Constrain to mobile dimensions
@@ -759,9 +767,7 @@
             canvas.width = width;
             canvas.height = height;
             if (hudTop) hudTopHeight = hudTop.getBoundingClientRect().height;
-            if (gameState === 'MENU' || gameState === 'DEMO') {
-                player.x = width / 2; player.y = height * 0.8;
-            }
+            if (gameState === 'MENU' || gameState === 'DEMO') setPlayerStartPosition();
         }
         window.addEventListener('resize', resize);
         resize();
@@ -1517,7 +1523,7 @@
             pauseBtn.classList.remove('active');
 
             score = 0; player.lives = PLAYER_MAX_LIVES; player.powerLevel = 1; player.iframes = 0; player.hasShield = false;
-            player.x = width / 2; player.y = height * 0.8; player.vx = 0; player.vy = 0; player.tilt = 0;
+            setPlayerStartPosition(); player.vx = 0; player.vy = 0; player.tilt = 0;
 
             resetWorldState();
             updateUI();
@@ -1525,7 +1531,7 @@
 
         function initGame() {
             score = 0; player.lives = PLAYER_MAX_LIVES; player.powerLevel = 1; player.iframes = 0; player.hasShield = false;
-            player.x = width / 2; player.y = height / 2; player.vx = 0; player.vy = 0; player.tilt = 0;
+            setPlayerStartPosition(); player.vx = 0; player.vy = 0; player.tilt = 0;
 
             resetWorldState();
 
