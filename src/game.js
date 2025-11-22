@@ -984,7 +984,7 @@ class Enemy {
                 ctx.shadowColor = '#fff';
             }
             this.segments.forEach((s, i) => {
-                ctx.fillStyle = `rgba(255, 50, 50, ${1 - i / 10})`;
+                ctx.fillStyle = `rgba(50, 255, 50, ${1 - i / 10})`;
                 ctx.beginPath(); ctx.arc(s.x, s.y, 10 - i, 0, Math.PI * 2); ctx.fill();
             });
 
