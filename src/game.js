@@ -1177,6 +1177,7 @@ class CosmicBackground {
         this.starSpeedScale = 1; // scales with player forward push
         this.starThinScale = 1;  // narrows stars as you accelerate
         this.forwardRatio = 0;
+        this.vortexSpawnTimer = 0; // Timer for periodic vortex spawning
         this.init();
     }
 
@@ -1184,6 +1185,7 @@ class CosmicBackground {
         this.stars = [];
         this.vortexes = [];
         this.planets = [];
+        this.vortexSpawnTimer = 0;
         // Stars
         for (let i = 0; i < 100; i++) {
             this.stars.push({
@@ -1193,15 +1195,18 @@ class CosmicBackground {
                 size: Math.random() * 2
             });
         }
-        // Vortexes
-        for (let i = 0; i < 3; i++) {
+        // Vortexes - Start with more
+        for (let i = 0; i < 5; i++) {
             this.vortexes.push({
                 x: Math.random() * width,
                 y: Math.random() * height,
                 angle: Math.random() * Math.PI * 2,
-                speed: (Math.random() - 0.5) * 0.02,
+                speed: this.getVortexSpeed(), // Ensure all vortexes spin
                 color: `hsla(${Math.random() * 360}, 70%, 50%, 0.1)`,
-                size: 200 + Math.random() * 300
+                size: 200 + Math.random() * 300,
+                opacity: 1.0, // Initial vortexes are fully visible
+                pulsePhase: Math.random() * Math.PI * 2, // Random starting pulse phase
+                pulseSpeed: 0.02 + Math.random() * 0.03 // Varied pulse speeds
             });
         }
         // Planets
@@ -1226,6 +1231,32 @@ class CosmicBackground {
                 twinklePhase: Math.random() * Math.PI * 2, // Random starting phase
                 brightness: 0.3 + Math.random() * 0.4 // Base brightness varies (0.3-0.7)
             });
+        }
+    }
+
+    getVortexSpeed() {
+        // Ensure vortexes always spin with a minimum speed
+        // Random direction, but always at least 0.015 radians/frame
+        const minSpeed = 0.015;
+        const maxSpeed = 0.035;
+        const speed = minSpeed + Math.random() * (maxSpeed - minSpeed);
+        return Math.random() < 0.5 ? speed : -speed;
+    }
+
+    getOffscreenVortexPosition() {
+        // Spawn vortexes off-screen so they drift in naturally
+        const margin = 400; // Spawn this far off-screen
+        const side = Math.floor(Math.random() * 4); // 0=top, 1=right, 2=bottom, 3=left
+
+        switch (side) {
+            case 0: // Top
+                return { x: Math.random() * width, y: -margin };
+            case 1: // Right
+                return { x: width + margin, y: Math.random() * height };
+            case 2: // Bottom
+                return { x: Math.random() * width, y: height + margin };
+            case 3: // Left
+                return { x: -margin, y: Math.random() * height };
         }
     }
 
@@ -1257,12 +1288,46 @@ class CosmicBackground {
             }
         });
 
-        // Vortexes
+        // Vortexes - Periodic spawning
+        this.vortexSpawnTimer++;
+        if (this.vortexSpawnTimer >= 180) { // Spawn every ~3 seconds
+            this.vortexSpawnTimer = 0;
+            // Spawn new vortex off-screen
+            const pos = this.getOffscreenVortexPosition();
+            this.vortexes.push({
+                x: pos.x,
+                y: pos.y,
+                angle: Math.random() * Math.PI * 2,
+                speed: this.getVortexSpeed(), // Ensure it spins
+                color: `hsla(${Math.random() * 360}, 70%, 50%, 0.1)`,
+                size: 200 + Math.random() * 300,
+                opacity: 0.0, // Start invisible for fade-in
+                pulsePhase: Math.random() * Math.PI * 2, // Random starting pulse phase
+                pulseSpeed: 0.02 + Math.random() * 0.03 // Varied pulse speeds
+            });
+        }
+
+        // Update existing vortexes
         this.vortexes.forEach(v => {
             v.angle += v.speed;
+            // Animate pulse phase
+            v.pulsePhase = (v.pulsePhase || 0) + (v.pulseSpeed || 0.03);
+            // Fade in gradually
+            if (v.opacity < 1.0) {
+                v.opacity = Math.min(1.0, v.opacity + 0.01); // Fade in over ~100 frames
+            }
             // Parallax
             v.x -= (player.x - width / 2) * 0.002;
             v.y -= (player.y - height / 2) * 0.002;
+        });
+
+        // Remove vortexes that have drifted too far off-screen
+        const maxDistance = Math.max(width, height) * 2;
+        this.vortexes = this.vortexes.filter(v => {
+            const dx = v.x - width / 2;
+            const dy = v.y - height / 2;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            return distance < maxDistance;
         });
 
         // Planets
@@ -1305,30 +1370,76 @@ class CosmicBackground {
         ctx.globalAlpha = 1;
         ctx.globalCompositeOperation = 'source-over';
 
-        // Vortexes / Nebula
+        // Vortexes / Nebula - Push to background with more blur and oscillation
         ctx.globalCompositeOperation = 'screen';
         this.vortexes.forEach(v => {
+            // Calculate pulse effect (0.8 to 1.0)
+            const pulse = 0.8 + Math.sin(v.pulsePhase || 0) * 0.1 + 0.1;
+
+            // Apply fade-in opacity with pulse, but keep them more subtle (max 0.5 for background feel)
+            const maxOpacity = 0.5;
+            const baseOpacity = Math.min(v.opacity || 1.0, maxOpacity);
+            ctx.globalAlpha = baseOpacity * pulse;
+
+            // Radial gradient glow with pulsing blur
+            const blurAmount = 15 + Math.sin(v.pulsePhase || 0) * 5 + 5; // 15-25px range
+            ctx.shadowBlur = blurAmount;
+            ctx.shadowColor = v.color;
+
             const g = ctx.createRadialGradient(v.x, v.y, 0, v.x, v.y, v.size);
             g.addColorStop(0, v.color);
             g.addColorStop(1, 'transparent');
             ctx.fillStyle = g;
             ctx.fillRect(v.x - v.size, v.y - v.size, v.size * 2, v.size * 2);
 
-            // Spiral lines
+            // Oscillating spiral lines with sine wave distortion
             ctx.save();
             ctx.translate(v.x, v.y);
             ctx.rotate(v.angle);
-            ctx.strokeStyle = v.color.replace('0.1)', '0.2)');
-            ctx.lineWidth = 3;
+
+            // Pulsing blur for spiral lines
+            const lineBlur = 10 + Math.sin(v.pulsePhase || 0) * 5 + 5; // 10-20px range
+            ctx.shadowBlur = lineBlur;
+            ctx.shadowColor = v.color;
+            ctx.strokeStyle = v.color.replace('0.1)', '0.15)'); // Slightly more visible lines
+
+            // Pulsing line width
+            const lineWidth = 1.5 + Math.sin(v.pulsePhase || 0) * 0.5 + 0.5; // 1.5-2.5px range
+            ctx.lineWidth = lineWidth;
+
             ctx.beginPath();
             for (let i = 0; i < 6; i++) {
                 ctx.rotate(Math.PI / 3);
-                ctx.moveTo(0, 0);
-                ctx.quadraticCurveTo(v.size / 2, v.size / 2, v.size, 0);
+
+                // Draw oscillating spiral arm using sine wave
+                const segments = 20; // Number of segments for smooth curve
+                for (let j = 0; j <= segments; j++) {
+                    const t = j / segments; // 0 to 1
+                    const baseX = t * v.size;
+                    const baseY = t * v.size * 0.5; // Base curve
+
+                    // Add sine wave oscillation
+                    const frequency = 3; // How many waves along the spiral
+                    const amplitude = 15 + Math.sin(v.angle * 2 + i) * 5; // Oscillating amplitude
+                    const wave = Math.sin(t * Math.PI * frequency + v.angle * 3) * amplitude * t;
+
+                    const x = baseX;
+                    const y = baseY + wave;
+
+                    if (j === 0) {
+                        ctx.moveTo(0, 0);
+                        ctx.lineTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
             }
             ctx.stroke();
+
+            ctx.shadowBlur = 0; // Reset shadow
             ctx.restore();
         });
+        ctx.globalAlpha = 1; // Reset alpha
 
         // Stars - Motion blur ovals
         ctx.globalCompositeOperation = 'lighter';
