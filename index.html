@@ -60,7 +60,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 12px;
+            padding: 0 0 12px;
             box-sizing: border-box;
             z-index: 20;
             transition: opacity 0.5s;
@@ -75,81 +75,63 @@
 
         .hud-top {
             display: flex;
-            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
             width: 100%;
-            max-width: 430px;
-            margin: 0 auto;
-            align-items: flex-start;
+            margin: 0;
+            padding: 10px 14px;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.85), rgba(0, 255, 255, 0.08));
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 255, 255, 0.2);
+            transform: none;
+            backdrop-filter: blur(8px);
+            justify-content: space-between;
+            box-sizing: border-box;
         }
 
         .hud-left {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             gap: 10px;
         }
 
-        .hud-right {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 8px;
-        }
-
         .score-pause {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 14px;
-            padding: 8px 16px 8px 18px;
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 0, 0, 0.65));
-            border: 2px solid #0ff;
-            border-left-width: 4px;
+            justify-content: center;
+            padding: 0;
+            background: none;
+            border: none;
             color: #fff;
             text-shadow: 0 0 8px #0ff;
-            transform: skewX(-10deg);
-            box-shadow: 0 0 16px rgba(0, 255, 255, 0.3), inset 0 0 8px rgba(0, 255, 255, 0.2);
+            transform: none;
+            box-shadow: none;
             cursor: pointer;
             position: relative;
-            overflow: hidden;
+            overflow: visible;
             pointer-events: auto;
-            backdrop-filter: blur(6px);
+            backdrop-filter: none;
+            min-width: unset;
+            appearance: none;
         }
 
-        .score-pause::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(120deg, rgba(0, 255, 255, 0.15), transparent 45%);
-            pointer-events: none;
-        }
+        .score-pause::before { content: none; }
 
-        .score-pause:hover {
-            box-shadow: 0 0 22px rgba(0, 255, 255, 0.55), inset 0 0 10px rgba(0, 255, 255, 0.35);
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.25), rgba(0, 0, 0, 0.75));
-        }
+        .score-pause:hover { box-shadow: none; background: none; }
 
         .score-pause.active {
             color: #f0f;
-            border-color: #f0f;
-            box-shadow: 0 0 22px rgba(240, 0, 255, 0.55), inset 0 0 10px rgba(240, 0, 255, 0.35);
-        }
-
-        .score-content {
-            display: flex;
-            flex-direction: column;
-            transform: skewX(10deg);
-            position: relative;
-            z-index: 1;
         }
 
         .pause-icon {
-            width: 28px;
-            height: 28px;
-            border: 2px solid currentColor;
+            width: 32px;
+            height: 32px;
+            border: none;
             border-radius: 8px;
             background: rgba(0, 0, 0, 0.5);
             box-shadow: 0 0 12px currentColor;
             position: relative;
-            transform: skewX(10deg);
+            transform: none;
             z-index: 1;
         }
 
@@ -168,17 +150,43 @@
 
         .pause-icon::after { right: 8px; }
 
+        .score-block {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+
         .score-label {
             font-size: 10px;
             color: #0ff;
             letter-spacing: 2px;
             font-weight: 800;
+            position: relative;
+            z-index: 1;
         }
 
         .score-val {
+            display: flex;
+            gap: 1px;
             font-size: 20px;
             font-weight: bold;
             font-family: monospace;
+            min-width: calc(0.7ch * 10 + 6px);
+            text-align: left;
+            color: #fff;
+            text-shadow: 0 0 10px #0ff, 0 0 4px #fff;
+            position: relative;
+            z-index: 1;
+        }
+
+        .score-digit {
+            display: inline-block;
+            min-width: 0.7ch;
+        }
+
+        .score-digit.inactive {
+            color: rgba(255, 255, 255, 0.25);
+            text-shadow: none;
         }
 
         .lives-box {
@@ -206,6 +214,13 @@
             flex-direction: column;
             align-items: center;
             backdrop-filter: blur(4px);
+        }
+
+        .hud-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
         }
 
         .power-bar-label {
@@ -483,14 +498,14 @@
             <div class="hud-top">
                 <div class="hud-left">
                     <button class="score-pause" id="pause-btn" aria-label="Pause or Resume">
-                        <div class="score-content">
-                            <div class="score-label">SCORE</div>
-                            <div class="score-val" id="score-display">0</div>
-                        </div>
                         <div class="pause-icon" aria-hidden="true"></div>
                     </button>
+                    <div class="score-block">
+                        <div class="score-label">SCORE</div>
+                        <div class="score-val" id="score-display">0</div>
+                    </div>
                 </div>
-                <div class="hud-right">
+                <div class="hud-stack">
                     <div class="lives-box" id="lives-container"></div>
                     <div class="power-bar-container">
                         <div class="power-segments" id="power-segments">
@@ -550,6 +565,7 @@
         const resumeBtn = document.getElementById('resume-btn');
         const pauseRestartBtn = document.getElementById('pause-restart-btn');
         const quitBtn = document.getElementById('quit-btn');
+        const SCORE_DIGITS = 10;
 
         // --- ASSET PRE-RENDERING ---
         const sprites = {};
@@ -711,10 +727,11 @@
         };
 
         // Player
+        const PLAYER_MAX_LIVES = 6;
         const player = {
             x: 0, y: 0, radius: 6, // Slightly smaller hitbox
             w: 24, h: 32,
-            lives: 5, iframes: 0, powerLevel: 1, maxPower: 6,
+            lives: PLAYER_MAX_LIVES, iframes: 0, powerLevel: 1, maxPower: 6,
             hasShield: false,
             tail: [],
             vx: 0, vy: 0, tilt: 0, tiltDir: 1
@@ -1376,7 +1393,17 @@
         }
 
         function updateUI() {
-            scoreDisplay.innerText = score;
+            const paddedScore = String(score).padStart(SCORE_DIGITS, '0');
+            const firstActive = paddedScore.search(/[1-9]/);
+            const activeFrom = firstActive === -1 ? paddedScore.length - 1 : firstActive;
+
+            scoreDisplay.innerHTML = '';
+            for (let i = 0; i < paddedScore.length; i++) {
+                const span = document.createElement('span');
+                span.className = 'score-digit' + (i < activeFrom ? ' inactive' : '');
+                span.textContent = paddedScore[i];
+                scoreDisplay.appendChild(span);
+            }
             livesContainer.innerHTML = '';
             for (let i = 0; i < player.lives; i++) {
                 const l = document.createElement('div'); l.className = 'life-icon';
@@ -1459,7 +1486,7 @@
             uiLayer.classList.add('hidden');
             pauseBtn.classList.remove('active');
 
-            score = 0; player.lives = 5; player.powerLevel = 1; player.iframes = 0; player.hasShield = false;
+            score = 0; player.lives = PLAYER_MAX_LIVES; player.powerLevel = 1; player.iframes = 0; player.hasShield = false;
             player.x = width / 2; player.y = height * 0.8; player.vx = 0; player.vy = 0; player.tilt = 0;
 
             resetWorldState();
@@ -1467,7 +1494,7 @@
         }
 
         function initGame() {
-            score = 0; player.lives = 5; player.powerLevel = 1; player.iframes = 0; player.hasShield = false;
+            score = 0; player.lives = PLAYER_MAX_LIVES; player.powerLevel = 1; player.iframes = 0; player.hasShield = false;
             player.x = width / 2; player.y = height / 2; player.vx = 0; player.vy = 0; player.tilt = 0;
 
             resetWorldState();
@@ -1752,7 +1779,11 @@
                         else { if (gameState === 'PLAYING') score += 1000; spawnText(player.x, player.y - 40, "+1000", "#fff"); }
                     } else if (p.type === 'bomb') { triggerBombLogic(); }
                     else if (p.type === 'shield') { player.hasShield = true; spawnText(player.x, player.y - 40, "SHIELD UP", "#00f"); }
-                    else if (p.type === 'life') { player.lives++; spawnText(player.x, player.y - 40, "EXTEND", "#f00"); }
+                    else if (p.type === 'life') {
+                        const prevLives = player.lives;
+                        player.lives = Math.min(PLAYER_MAX_LIVES, player.lives + 1);
+                        if (player.lives > prevLives) spawnText(player.x, player.y - 40, "EXTEND", "#f00");
+                    }
                     if (gameState === 'PLAYING') updateUI();
                 }
             });
