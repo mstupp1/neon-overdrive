@@ -243,18 +243,18 @@ function renderGlowSprite(color, radius, glow, type = 'circle', fillColor = '#ff
     } else if (type === 'snake') {
         cx.shadowBlur = glow; cx.shadowColor = color;
 
-        // Main alien head body with organic gradient
+        // Main alien head body with organic gradient (GREEN)
         const headGrad = cx.createRadialGradient(center - 3, center - 3, 2, center, center, 15);
-        headGrad.addColorStop(0, '#ff6b6b');
-        headGrad.addColorStop(0.6, '#ff2020');
-        headGrad.addColorStop(1, '#8b0000');
+        headGrad.addColorStop(0, '#6bff6b');
+        headGrad.addColorStop(0.6, '#20ff20');
+        headGrad.addColorStop(1, '#008b00');
         cx.fillStyle = headGrad;
         cx.beginPath();
         cx.arc(center, center, 15, 0, Math.PI * 2);
         cx.fill();
 
-        // Alien tentacle protrusions (3 on each side)
-        cx.fillStyle = '#ff3030';
+        // Alien tentacle protrusions (3 on each side) (GREEN)
+        cx.fillStyle = '#30ff30';
         for (let i = 0; i < 3; i++) {
             const angle = -Math.PI / 2 + (i - 1) * 0.4;
             const len = 8 - Math.abs(i - 1) * 2;
@@ -280,55 +280,41 @@ function renderGlowSprite(color, radius, glow, type = 'circle', fillColor = '#ff
             cx.fill();
         }
 
-        // Menacing eyes (glowing)
-        cx.shadowBlur = 8;
-        cx.shadowColor = '#ffff00';
-        cx.fillStyle = '#ffff00';
-        // Left eye
+        // Single cyclops eye at the front (bottom) (GREEN GLOW)
+        cx.shadowBlur = 10;
+        cx.shadowColor = '#00ff00';
+
+        // Eye white/outer
+        cx.fillStyle = '#00ff00';
         cx.beginPath();
-        cx.ellipse(center - 5, center - 3, 3, 4, 0, 0, Math.PI * 2);
-        cx.fill();
-        // Right eye
-        cx.beginPath();
-        cx.ellipse(center + 5, center - 3, 3, 4, 0, 0, Math.PI * 2);
+        cx.arc(center, center + 6, 6, 0, Math.PI * 2);
         cx.fill();
 
-        // Eye pupils (dark slits)
+        // Eye pupil (dark slit)
         cx.shadowBlur = 0;
         cx.fillStyle = '#000';
-        cx.fillRect(center - 5.5, center - 5, 1, 4);
-        cx.fillRect(center + 4.5, center - 5, 1, 4);
-
-        // Alien mouth (jagged opening)
-        cx.strokeStyle = '#330000';
-        cx.lineWidth = 2;
         cx.beginPath();
-        cx.moveTo(center - 6, center + 5);
-        cx.quadraticCurveTo(center - 3, center + 8, center, center + 6);
-        cx.quadraticCurveTo(center + 3, center + 8, center + 6, center + 5);
-        cx.stroke();
+        cx.ellipse(center, center + 6, 2, 4, 0, 0, Math.PI * 2);
+        cx.fill();
 
-        // Inner mouth glow
-        cx.fillStyle = 'rgba(255, 100, 0, 0.6)';
+        // Eye highlight
+        cx.fillStyle = 'rgba(255, 255, 255, 0.8)';
         cx.beginPath();
-        cx.moveTo(center - 4, center + 5);
-        cx.quadraticCurveTo(center, center + 7, center + 4, center + 5);
-        cx.lineTo(center, center + 6);
-        cx.closePath();
+        cx.arc(center - 1.5, center + 4.5, 1.5, 0, Math.PI * 2);
         cx.fill();
     } else if (type === 'sniper') {
         cx.shadowBlur = glow; cx.shadowColor = color;
 
-        // Main robot body (rectangular core)
+        // Main robot body (rectangular core) (CHROME/SILVER)
         const bodyGrad = cx.createLinearGradient(center - 12, center - 12, center + 12, center + 12);
-        bodyGrad.addColorStop(0, '#ff8888');
-        bodyGrad.addColorStop(0.5, '#ff4444');
-        bodyGrad.addColorStop(1, '#cc0000');
+        bodyGrad.addColorStop(0, '#e8e8e8');
+        bodyGrad.addColorStop(0.5, '#c0c0c0');
+        bodyGrad.addColorStop(1, '#888888');
         cx.fillStyle = bodyGrad;
         cx.fillRect(center - 12, center - 12, 24, 24);
 
         // Body panel lines (mechanical segmentation)
-        cx.strokeStyle = '#880000';
+        cx.strokeStyle = '#444444';
         cx.lineWidth = 1.5;
         cx.beginPath();
         cx.moveTo(center - 12, center - 4);
@@ -341,9 +327,9 @@ function renderGlowSprite(color, radius, glow, type = 'circle', fillColor = '#ff
         cx.lineTo(center + 4, center + 12);
         cx.stroke();
 
-        // Robotic claws (left side)
-        cx.fillStyle = '#ff6666';
-        cx.strokeStyle = '#aa0000';
+        // Robotic claws (left side) (CHROME)
+        cx.fillStyle = '#d0d0d0';
+        cx.strokeStyle = '#666666';
         cx.lineWidth = 2;
         // Left claw upper
         cx.beginPath();
@@ -385,7 +371,7 @@ function renderGlowSprite(color, radius, glow, type = 'circle', fillColor = '#ff
         cx.stroke();
 
         // Claw joints (rivets)
-        cx.fillStyle = '#330000';
+        cx.fillStyle = '#222222';
         cx.beginPath();
         cx.arc(center - 12, center - 8, 2, 0, Math.PI * 2);
         cx.arc(center - 12, center + 8, 2, 0, Math.PI * 2);
@@ -393,7 +379,7 @@ function renderGlowSprite(color, radius, glow, type = 'circle', fillColor = '#ff
         cx.arc(center + 12, center + 8, 2, 0, Math.PI * 2);
         cx.fill();
 
-        // Glowing visor eye (central scanner)
+        // Glowing visor eye (central scanner) (RED for contrast)
         cx.shadowBlur = 12;
         cx.shadowColor = '#ff0000';
         const eyeGrad = cx.createLinearGradient(center - 8, center - 2, center + 8, center + 2);
@@ -408,8 +394,8 @@ function renderGlowSprite(color, radius, glow, type = 'circle', fillColor = '#ff
         cx.fillStyle = 'rgba(255, 255, 255, 0.8)';
         cx.fillRect(center - 6, center - 1, 4, 1);
 
-        // Corner armor plating
-        cx.fillStyle = '#aa2222';
+        // Corner armor plating (CHROME)
+        cx.fillStyle = '#a0a0a0';
         cx.beginPath();
         cx.moveTo(center - 12, center - 12);
         cx.lineTo(center - 8, center - 12);
