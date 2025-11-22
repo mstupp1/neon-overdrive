@@ -282,6 +282,11 @@ canvas {
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
+.xp-status.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 .xp-status.max {
     opacity: 1;
     transform: translateY(0);

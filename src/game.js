@@ -191,8 +191,36 @@ const MAX_POWER_LEVEL = 10;
 const WEAPON_XP_BASE = 120;
 const WEAPON_XP_GROWTH = 1.75;
 function getWeaponXpForLevel(level) {
-    const clamped = Math.min(Math.max(1, level), MAX_POWER_LEVEL);
-    return Math.floor(WEAPON_XP_BASE * Math.pow(WEAPON_XP_GROWTH, clamped - 1));
+    const clamped = Math.min(Math.max(0, level), MAX_POWER_LEVEL - 1);
+    return Math.floor(WEAPON_XP_BASE * Math.pow(WEAPON_XP_GROWTH, clamped));
+}
+
+// Weapon tuning (base damage/pierce per subtype + level-based scaling)
+const PLAYER_WEAPON_BASE = {
+    beam: { damage: 1.1, pierce: false },
+    normal: { damage: 1, pierce: false },
+    homing: { damage: 0.9, pierce: false },
+    wave: { damage: 0.75, pierce: true },
+    blade: { damage: 0.65, pierce: true }
+};
+
+const WEAPON_LEVEL_CURVE = [
+    { damage: 0.9, speed: 0.95, hue: 0, glow: 0 },      // 0
+    { damage: 1.0, speed: 1.0, hue: 8, glow: 0.02 },    // 1
+    { damage: 1.05, speed: 1.02, hue: 16, glow: 0.03 }, // 2
+    { damage: 1.1, speed: 1.04, hue: 24, glow: 0.05 },  // 3
+    { damage: 1.15, speed: 1.06, hue: 32, glow: 0.07 }, // 4
+    { damage: 1.2, speed: 1.08, hue: 40, glow: 0.1 },   // 5
+    { damage: 1.28, speed: 1.1, hue: 52, glow: 0.12 },  // 6
+    { damage: 1.35, speed: 1.12, hue: 64, glow: 0.14 }, // 7
+    { damage: 1.45, speed: 1.15, hue: 76, glow: 0.16 }, // 8
+    { damage: 1.55, speed: 1.18, hue: 88, glow: 0.18 }, // 9
+    { damage: 1.7, speed: 1.22, hue: 100, glow: 0.2 }   // 10+
+];
+
+function getWeaponLevelStats(level) {
+    const idx = Math.min(Math.max(0, level), WEAPON_LEVEL_CURVE.length - 1);
+    return WEAPON_LEVEL_CURVE[idx];
 }
 
 // Keyboard Input
@@ -206,8 +234,8 @@ const PLAYER_MAX_LIVES = 6;
 const player = {
     x: 0, y: 0, radius: 6, // Slightly smaller hitbox
     w: 24, h: 32,
-    lives: PLAYER_MAX_LIVES, iframes: 0, powerLevel: 1, maxPower: MAX_POWER_LEVEL,
-    weaponXp: 0, weaponXpMax: getWeaponXpForLevel(1), // XP System
+    lives: PLAYER_MAX_LIVES, iframes: 0, powerLevel: 0, maxPower: MAX_POWER_LEVEL,
+    weaponXp: 0, weaponXpMax: getWeaponXpForLevel(0), // XP System
     hasShield: false,
     tail: [],
     vx: 0, vy: 0, tilt: 0, tiltDir: 1
@@ -318,13 +346,20 @@ function j(val, amt = 3) { return val + Math.random() * amt - amt / 2; }
 
 class Bullet {
     constructor() { this.active = false; }
-    init(x, y, angle, speed, type, subType = 'normal') {
+    init(x, y, angle, speed, type, subType = 'normal', opts = {}) {
         this.x = x; this.y = y;
         this.vx = Math.cos(angle) * speed; this.vy = Math.sin(angle) * speed;
         this.angle = angle; this.speed = speed;
         this.type = type; this.subType = subType;
         this.active = true;
         this.destructible = false; // Default
+
+        const baseStats = PLAYER_WEAPON_BASE[subType] || PLAYER_WEAPON_BASE.normal;
+        const defaultDamage = type === 'player' ? (baseStats?.damage || 1) : 1;
+        this.damage = opts.damage ?? defaultDamage;
+        this.pierce = opts.pierce ?? (subType === 'blade' || subType === 'wave');
+        this.tintHue = opts.tintHue ?? 0;
+        this.glow = opts.glow ?? 0;
 
         // Set radius based on subtype
         if (type === 'enemy') {
@@ -406,6 +441,12 @@ class Bullet {
             else if (this.subType === 'wobble') ctx.drawImage(sprites.enemyBulletWobble, this.x - 12, this.y - 12);
             else ctx.drawImage(sprites.enemyBulletBasic, this.x - 12, this.y - 12); // Fallback
         } else {
+            const prevAlpha = ctx.globalAlpha;
+            const prevFilter = ctx.filter;
+            const alphaBoost = this.glow || 0;
+            ctx.globalAlpha = Math.min(1.2, 0.9 + alphaBoost);
+            if (this.tintHue) ctx.filter = `hue-rotate(${this.tintHue}deg) saturate(1.2)`;
+            else ctx.filter = 'none';
             ctx.globalCompositeOperation = 'lighter';
             if (this.subType === 'beam') {
                 ctx.save();
@@ -427,6 +468,8 @@ class Bullet {
             }
             else ctx.drawImage(sprites.playerNormal, this.x - 12, this.y - 12);
             ctx.globalCompositeOperation = 'source-over';
+            ctx.globalAlpha = prevAlpha;
+            ctx.filter = prevFilter;
         }
     }
 }
@@ -483,7 +526,7 @@ class Enemy {
             const a = Math.atan2(player.y - this.y, player.x - this.x);
             this.x += Math.cos(a) * this.speed; this.y += Math.max(1, Math.sin(a) * this.speed);
             this.fireTimer++;
-            if (allowFire && this.fireTimer > 100) { // Slower fire (was 40)
+            if (allowFire && this.fireTimer > 140) { // Fire less often to ease pressure (was 100)
                 this.fireTimer = 0;
                 // Light harassment shots from chasers
                 spawnBullet(this.x, this.y, a + rand(-0.2, 0.2), 6, 'enemy', 'basic');
@@ -492,7 +535,7 @@ class Enemy {
         else if (this.type === 'spinner') {
             this.y += 0.8; this.x += Math.sin(frameCount * 0.03);
             this.timer++;
-            if (allowFire && this.timer > 100) { // Slower rate for big bullets (was 50)
+            if (allowFire && this.timer > 140) { // Fire less often to ease pressure (was 100)
                 this.timer = 0;
                 // Spinners lay down destructible orbs
                 for (let i = 0; i < 8; i++) spawnBullet(this.x, this.y, i * (Math.PI / 4) + frameCount * 0.1, 4, 'enemy', 'orb');
@@ -501,7 +544,7 @@ class Enemy {
         else if (this.type === 'dasher') {
             this.x += this.vx; this.y += this.vy;
             this.fireTimer++;
-            if (allowFire && this.fireTimer > 50) { // Faster fire (was 70)
+            if (allowFire && this.fireTimer > 70) { // Fire less often to ease pressure (was 50)
                 this.fireTimer = 0;
                 const backAngle = Math.atan2(this.vy, this.vx) + Math.PI; // Fire slightly backwards while dashing
                 spawnBullet(this.x, this.y, backAngle + rand(-0.15, 0.15), 8, 'enemy', 'fast');
@@ -512,7 +555,7 @@ class Enemy {
             let p = { x: this.x, y: this.y };
             this.segments.forEach(s => { s.x += (p.x - s.x) * 0.3; s.y += (p.y - s.y) * 0.3; p = { x: s.x, y: s.y }; });
             this.fireTimer++;
-            if (allowFire && this.fireTimer > 60) {
+            if (allowFire && this.fireTimer > 85) { // Fire less often to ease pressure (was 60)
                 this.fireTimer = 0;
                 spawnBullet(this.x, this.y, Math.PI / 2, 5, 'enemy', 'wobble');
             }
@@ -523,7 +566,7 @@ class Enemy {
                 if (Math.abs(this.x - this.tx) < 5) { this.state = 'aim'; this.timer = 0; }
             } else if (this.state === 'aim') {
                 this.timer++;
-                if (allowFire && this.timer > 60) { // Slower aim, faster shot
+                if (allowFire && this.timer > 80) { // Fire less often to ease pressure (was 60)
                     const a = Math.atan2(player.y - this.y, player.x - this.x);
                     spawnBullet(this.x, this.y, a, 12, 'enemy', 'sniper'); // Start slower, accelerates
                     this.tx = rand(50, width - 50); this.ty = rand(50, height * 0.4); this.state = 'move';
@@ -982,7 +1025,31 @@ function triggerBombLogic() {
     spawnText(width / 2, height / 2, "OMEGA BLAST", "#ff0");
 }
 
-function spawnBullet(...args) { bullets.push(bulletPool.get(...args)); }
+function getPlayerBulletStats(subType, baseSpeed, levelOverride = null) {
+    const base = PLAYER_WEAPON_BASE[subType] || PLAYER_WEAPON_BASE.normal;
+    const scale = getWeaponLevelStats(levelOverride ?? player.powerLevel);
+    return {
+        speed: baseSpeed * scale.speed,
+        damage: base.damage * scale.damage,
+        pierce: base.pierce,
+        tintHue: scale.hue,
+        glow: scale.glow
+    };
+}
+
+function spawnBullet(x, y, angle, speed, type, subType, opts) {
+    bullets.push(bulletPool.get(x, y, angle, speed, type, subType, opts));
+}
+
+function spawnPlayerBullet(x, y, angle, baseSpeed, subType) {
+    const stats = getPlayerBulletStats(subType, baseSpeed);
+    spawnBullet(x, y, angle, stats.speed, 'player', subType, {
+        damage: stats.damage,
+        pierce: stats.pierce,
+        tintHue: stats.tintHue,
+        glow: stats.glow
+    });
+}
 function spawnEnemyEntity(type) { enemies.push(enemyPool.get(type)); }
 function spawnParticle(...args) { particles.push(particlePool.get(...args)); }
 function spawnPowerup(...args) { powerups.push(powerupPool.get(...args)); }
@@ -991,42 +1058,42 @@ function spawnText(...args) { texts.push(textPool.get(...args)); }
 function firePlayerWeapons() {
     if (gameState === 'PLAYING') playSound('shoot');
 
-    spawnBullet(player.x, player.y - 20, -Math.PI / 2, 18, 'player', 'beam');
+    spawnPlayerBullet(player.x, player.y - 20, -Math.PI / 2, 18, 'beam');
 
     if (player.powerLevel >= 2) {
-        spawnBullet(player.x - 15, player.y, -1.7, 15, 'player', 'normal');
-        spawnBullet(player.x + 15, player.y, -1.4, 15, 'player', 'normal');
+        spawnPlayerBullet(player.x - 15, player.y, -1.7, 15, 'normal');
+        spawnPlayerBullet(player.x + 15, player.y, -1.4, 15, 'normal');
     }
     if (player.powerLevel >= 3 && frameCount % 14 === 0) {
-        spawnBullet(player.x, player.y - 20, -1.6, 10, 'player', 'blade');
-        spawnBullet(player.x, player.y - 20, -1.5, 10, 'player', 'blade');
+        spawnPlayerBullet(player.x, player.y - 20, -1.6, 10, 'blade');
+        spawnPlayerBullet(player.x, player.y - 20, -1.5, 10, 'blade');
     }
     if (player.powerLevel >= 4 && frameCount % 21 === 0) {
-        spawnBullet(player.x - 20, player.y, Math.PI, 12, 'player', 'homing');
-        spawnBullet(player.x + 20, player.y, 0, 12, 'player', 'homing');
+        spawnPlayerBullet(player.x - 20, player.y, Math.PI, 12, 'homing');
+        spawnPlayerBullet(player.x + 20, player.y, 0, 12, 'homing');
     }
     if (player.powerLevel >= 5 && frameCount % 21 === 0) {
-        spawnBullet(player.x, player.y - 10, -Math.PI / 2, 12, 'player', 'wave');
+        spawnPlayerBullet(player.x, player.y - 10, -Math.PI / 2, 12, 'wave');
     }
     if (player.powerLevel >= 6) {
-        spawnBullet(player.x - 10, player.y - 20, -Math.PI / 2, 18, 'player', 'beam');
-        spawnBullet(player.x + 10, player.y - 20, -Math.PI / 2, 18, 'player', 'beam');
+        spawnPlayerBullet(player.x - 10, player.y - 20, -Math.PI / 2, 18, 'beam');
+        spawnPlayerBullet(player.x + 10, player.y - 20, -Math.PI / 2, 18, 'beam');
     }
     if (player.powerLevel >= 7 && frameCount % 10 === 0) {
-        spawnBullet(player.x - 22, player.y - 12, -1.55, 18, 'player', 'beam');
-        spawnBullet(player.x + 22, player.y - 12, -1.59, 18, 'player', 'beam');
+        spawnPlayerBullet(player.x - 22, player.y - 12, -1.55, 18, 'beam');
+        spawnPlayerBullet(player.x + 22, player.y - 12, -1.59, 18, 'beam');
     }
     if (player.powerLevel >= 8 && frameCount % 18 === 0) {
-        spawnBullet(player.x, player.y + 6, Math.PI, 12, 'player', 'wave');
+        spawnPlayerBullet(player.x, player.y + 6, Math.PI, 12, 'wave');
     }
     if (player.powerLevel >= 9 && frameCount % 16 === 0) {
-        spawnBullet(player.x - 28, player.y - 18, -1.35, 17, 'player', 'normal');
-        spawnBullet(player.x + 28, player.y - 18, -1.8, 17, 'player', 'normal');
+        spawnPlayerBullet(player.x - 28, player.y - 18, -1.35, 17, 'normal');
+        spawnPlayerBullet(player.x + 28, player.y - 18, -1.8, 17, 'normal');
     }
     if (player.powerLevel >= 10 && frameCount % 24 === 0) {
-        spawnBullet(player.x, player.y - 26, -Math.PI / 2, 24, 'player', 'beam');
-        spawnBullet(player.x - 6, player.y - 26, -Math.PI / 2, 24, 'player', 'beam');
-        spawnBullet(player.x + 6, player.y - 26, -Math.PI / 2, 24, 'player', 'beam');
+        spawnPlayerBullet(player.x, player.y - 26, -Math.PI / 2, 24, 'beam');
+        spawnPlayerBullet(player.x - 6, player.y - 26, -Math.PI / 2, 24, 'beam');
+        spawnPlayerBullet(player.x + 6, player.y - 26, -Math.PI / 2, 24, 'beam');
     }
 }
 
@@ -1063,9 +1130,11 @@ function updateUI() {
         if (atMaxLevel) {
             xpStatus.textContent = 'MAX';
             xpStatus.classList.add('max');
+            xpStatus.classList.remove('show');
         } else {
-            xpStatus.textContent = '';
+            xpStatus.textContent = `LVL ${player.powerLevel}`;
             xpStatus.classList.remove('max');
+            xpStatus.classList.add('show');
         }
     }
 }
@@ -1141,7 +1210,7 @@ function returnToMenu() {
     uiLayer.classList.add('hidden');
     pauseBtn.classList.remove('active');
 
-    score = 0; player.lives = PLAYER_MAX_LIVES; player.powerLevel = 1; player.iframes = 0; player.hasShield = false;
+    score = 0; player.lives = PLAYER_MAX_LIVES; player.powerLevel = 0; player.iframes = 0; player.hasShield = false;
     player.weaponXp = 0; player.weaponXpMax = getWeaponXpForLevel(player.powerLevel);
     if (xpFill) { xpFill.style.transition = 'none'; setTimeout(() => xpFill.style.transition = 'width 0.2s ease-out', 50); }
     setPlayerStartPosition(); player.vx = 0; player.vy = 0; player.tilt = 0;
@@ -1152,7 +1221,7 @@ function returnToMenu() {
 }
 
 function initGame() {
-    score = 0; player.lives = PLAYER_MAX_LIVES; player.powerLevel = 1; player.iframes = 0; player.hasShield = false;
+    score = 0; player.lives = PLAYER_MAX_LIVES; player.powerLevel = 0; player.iframes = 0; player.hasShield = false;
     player.weaponXp = 0; player.weaponXpMax = getWeaponXpForLevel(player.powerLevel);
     if (xpFill) { xpFill.style.transition = 'none'; setTimeout(() => xpFill.style.transition = 'width 0.2s ease-out', 50); }
     setPlayerStartPosition(); player.vx = 0; player.vy = 0; player.tilt = 0;
@@ -1403,8 +1472,8 @@ function update(dt) {
                 }
 
                 if (hit) {
-                    if (b.subType !== 'blade' && b.subType !== 'wave') b.active = false;
-                    e.hp -= (b.subType === 'blade' || b.subType === 'wave' ? 0.5 : 1);
+                    if (!b.pierce) b.active = false;
+                    e.hp -= (b.damage ?? 1);
 
                     // Flash effect on damage
                     e.flashTimer = 8;
@@ -1466,7 +1535,7 @@ function update(dt) {
                 if (eb.type === 'enemy' && eb.destructible && eb.active) {
                     if (dist(b.x, b.y, eb.x, eb.y) < b.radius + eb.radius) {
                         eb.active = false;
-                        if (b.subType !== 'blade' && b.subType !== 'wave') b.active = false; // Blade/Wave pierce
+                        if (!b.pierce) b.active = false; // Blade/Wave pierce
                         createExplosionLogic(eb.x, eb.y, '#f80', 5);
                         if (gameState === 'PLAYING') score += 10;
                     }
