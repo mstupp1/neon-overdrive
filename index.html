@@ -34,6 +34,7 @@
             padding: 20px;
             box-sizing: border-box;
             z-index: 20;
+            transition: opacity 0.5s;
         }
 
         .hud-top {
@@ -142,82 +143,173 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.4);
+            /* More transparent for bg demo */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 30;
             pointer-events: auto;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(3px);
+            /* Reduced blur to see game */
+            transition: opacity 0.5s, backdrop-filter 0.5s;
         }
 
         .hidden {
-            display: none !important;
+            opacity: 0;
+            pointer-events: none;
         }
 
         h1 {
-            font-size: 60px;
-            margin: 0 0 20px 0;
+            font-size: 100px;
+            margin: 0;
             color: #fff;
-            letter-spacing: 8px;
-            text-shadow: 4px 4px 0 #f0f, -4px -4px 0 #0ff;
-            animation: glitch-anim 3s infinite;
+            letter-spacing: 15px;
+            /* Reduced shadows for performance */
+            text-shadow:
+                0 0 10px #fff,
+                0 0 20px #0ff,
+                0 0 40px #0ff,
+                0 0 80px #0ff;
+            animation: glitch-skew 3s infinite linear alternate-reverse;
             font-style: italic;
             text-transform: uppercase;
+            line-height: 0.8;
+            text-align: center;
+            position: relative;
         }
 
-        @keyframes glitch-anim {
+        /* CSS-only Glitch Effect (Much lighter than SVG) */
+        h1::before {
+            content: 'NEON';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            text-shadow: -2px 0 #f0f;
+            clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+            animation: glitch-anim-1 2.5s infinite linear alternate-reverse;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        h1::after {
+            content: 'OVERDRIVE';
+            display: block;
+            font-size: 40px;
+            color: #f0f;
+            text-shadow: 0 0 10px #f0f, 0 0 20px #f0f;
+            letter-spacing: 25px;
+            margin-top: 10px;
+            animation: none;
+        }
+
+        @keyframes glitch-skew {
             0% {
                 transform: skew(0deg);
-                text-shadow: 4px 4px 0 #f0f;
             }
 
             20% {
                 transform: skew(-2deg);
-                text-shadow: -4px 4px 0 #0ff;
             }
 
             40% {
                 transform: skew(2deg);
-                text-shadow: 4px -4px 0 #f0f;
             }
 
             60% {
                 transform: skew(0deg);
-                text-shadow: -4px -4px 0 #0ff;
+            }
+
+            80% {
+                transform: skew(1deg);
             }
 
             100% {
                 transform: skew(0deg);
-                text-shadow: 4px 4px 0 #f0f;
+            }
+        }
+
+        @keyframes glitch-anim-1 {
+            0% {
+                clip-path: inset(20% 0 80% 0);
+                transform: translate(-2px, 1px);
+            }
+
+            20% {
+                clip-path: inset(60% 0 10% 0);
+                transform: translate(2px, -1px);
+            }
+
+            40% {
+                clip-path: inset(40% 0 50% 0);
+                transform: translate(-2px, 2px);
+            }
+
+            60% {
+                clip-path: inset(80% 0 5% 0);
+                transform: translate(2px, -2px);
+            }
+
+            80% {
+                clip-path: inset(10% 0 70% 0);
+                transform: translate(-1px, 1px);
+            }
+
+            100% {
+                clip-path: inset(30% 0 50% 0);
+                transform: translate(1px, -1px);
             }
         }
 
         .btn {
-            background: transparent;
+            background: rgba(0, 0, 0, 0.3);
             border: 2px solid #0ff;
-            color: #fff;
-            padding: 15px 60px;
-            font-size: 22px;
+            color: #0ff;
+            padding: 20px 80px;
+            font-size: 28px;
             font-family: monospace;
             cursor: pointer;
             text-transform: uppercase;
-            letter-spacing: 4px;
-            transition: 0.2s;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
-            margin-top: 30px;
-            font-weight: bold;
+            letter-spacing: 6px;
+            transition: 0.3s;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+            margin-top: 40px;
+            font-weight: 900;
+            transform: skewX(-20deg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.5), transparent);
+            transition: 0.5s;
         }
 
         .btn:hover {
-            background: rgba(0, 255, 255, 0.2);
-            box-shadow: 0 0 30px #0ff;
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 40px #0ff, inset 0 0 20px #0ff;
+            color: #fff;
+            text-shadow: 0 0 10px #fff;
+            transform: skewX(-20deg) scale(1.05);
+        }
+
+        .btn:hover::before {
+            left: 100%;
         }
 
         .btn:active {
             background: #0ff;
             color: #000;
+            transform: skewX(-20deg) scale(0.95);
         }
 
         .scanlines {
@@ -227,12 +319,25 @@
             width: 100%;
             height: 100%;
             background: repeating-linear-gradient(0deg,
-                    rgba(0, 0, 0, 0.15),
-                    rgba(0, 0, 0, 0.15) 1px,
+                    rgba(0, 0, 0, 0.1),
+                    rgba(0, 0, 0, 0.1) 1px,
                     transparent 1px,
-                    transparent 3px);
+                    transparent 4px);
             pointer-events: none;
             z-index: 25;
+            opacity: 0.7;
+        }
+
+        /* Vignette */
+        .vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, transparent 40%, #000 120%);
+            pointer-events: none;
+            z-index: 24;
         }
 
         #flash-overlay {
@@ -251,8 +356,10 @@
 </head>
 
 <body>
+    <!-- SVG Filters Removed for Performance -->
 
     <div class="scanlines"></div>
+    <div class="vignette"></div>
     <div id="flash-overlay"></div>
 
     <div id="ui-layer" class="hidden">
@@ -277,7 +384,7 @@
     </div>
 
     <div id="start-menu" class="menu-screen">
-        <h1>NEON<br>OVERDRIVE</h1>
+        <h1>NEON</h1>
         <button class="btn" id="start-btn">ENGAGE</button>
     </div>
 
@@ -345,6 +452,7 @@
         const audioCtx = new AudioContext();
 
         function playSound(type) {
+            if (gameState === 'DEMO') return; // Muted in demo
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
@@ -405,7 +513,7 @@
         // --- State ---
         let width, height;
         let globalHue = 0;
-        let gameState = 'MENU';
+        let gameState = 'DEMO'; // Start in DEMO
         let score = 0;
         let frameCount = 0; // Logical frames
         let lastTime = 0;
@@ -437,7 +545,7 @@
             height = window.innerHeight;
             canvas.width = width;
             canvas.height = height;
-            if (gameState === 'MENU') {
+            if (gameState === 'MENU' || gameState === 'DEMO') {
                 player.x = width / 2; player.y = height * 0.8;
             }
         }
@@ -759,10 +867,17 @@
         function spawnEnemyLogic() {
             const chance = Math.random();
             let type = 'chaser';
-            if (score > 500 && chance > 0.6) type = 'spinner';
-            if (score > 1000 && chance > 0.8) type = 'dasher';
-            if (score > 2000 && chance > 0.85) type = 'snake';
-            if (score > 3000 && chance > 0.9) type = 'sniper';
+
+            // In DEMO, always allow all types for variety
+            const effectiveScore = gameState === 'DEMO' ? 5000 : score;
+
+            // Performance Cap for Demo
+            if (gameState === 'DEMO' && enemies.length > 30) return;
+
+            if (effectiveScore > 500 && chance > 0.6) type = 'spinner';
+            if (effectiveScore > 1000 && chance > 0.8) type = 'dasher';
+            if (effectiveScore > 2000 && chance > 0.85) type = 'snake';
+            if (effectiveScore > 3000 && chance > 0.9) type = 'sniper';
             spawnEnemyEntity(type);
         }
 
@@ -797,6 +912,32 @@
         function spawnPowerup(...args) { powerups.push(powerupPool.get(...args)); }
         function spawnText(...args) { texts.push(textPool.get(...args)); }
 
+        function firePlayerWeapons() {
+            if (gameState === 'PLAYING') playSound('shoot');
+
+            spawnBullet(player.x, player.y - 20, -Math.PI / 2, 18, 'player', 'beam');
+
+            if (player.powerLevel >= 2) {
+                spawnBullet(player.x - 15, player.y, -1.7, 15, 'player', 'normal');
+                spawnBullet(player.x + 15, player.y, -1.4, 15, 'player', 'normal');
+            }
+            if (player.powerLevel >= 3 && frameCount % 14 === 0) {
+                spawnBullet(player.x, player.y - 20, -1.6, 10, 'player', 'blade');
+                spawnBullet(player.x, player.y - 20, -1.5, 10, 'player', 'blade');
+            }
+            if (player.powerLevel >= 4 && frameCount % 21 === 0) {
+                spawnBullet(player.x - 20, player.y, Math.PI, 12, 'player', 'homing');
+                spawnBullet(player.x + 20, player.y, 0, 12, 'player', 'homing');
+            }
+            if (player.powerLevel >= 5 && frameCount % 21 === 0) {
+                spawnBullet(player.x, player.y - 10, -Math.PI / 2, 12, 'player', 'wave');
+            }
+            if (player.powerLevel >= 6) {
+                spawnBullet(player.x - 10, player.y - 20, -Math.PI / 2, 18, 'player', 'beam');
+                spawnBullet(player.x + 10, player.y - 20, -Math.PI / 2, 18, 'player', 'beam');
+            }
+        }
+
         function updateUI() {
             scoreDisplay.innerText = score;
             livesContainer.innerHTML = '';
@@ -813,6 +954,8 @@
         }
 
         function hitPlayer() {
+            if (gameState === 'DEMO') return; // Invincible in demo
+
             if (player.hasShield) {
                 player.hasShield = false;
                 playSound('shieldBreak');
@@ -863,16 +1006,121 @@
             accumulator = 0;
         }
 
+        function updateDemoAI() {
+            // --- AI BEHAVIOR ---
+            // 1. Base Bias: Stay in the bottom 20% of the screen (back row)
+            let targetX = player.x;
+            let targetY = height * 0.85; // Default "safe" Y
+
+            // 2. Avoidance (Bullets & Enemies)
+            let avoidX = 0;
+            let avoidY = 0;
+            let threatCount = 0;
+            const detectionRadius = 150;
+
+            // Check bullets
+            bullets.forEach(b => {
+                if (b.type === 'enemy' && b.active) {
+                    const d = dist(player.x, player.y, b.x, b.y);
+                    if (d < detectionRadius) {
+                        const angle = Math.atan2(player.y - b.y, player.x - b.x);
+                        const force = (detectionRadius - d) / detectionRadius;
+                        avoidX += Math.cos(angle) * force * 20; // Strong avoidance
+                        avoidY += Math.sin(angle) * force * 20;
+                        threatCount++;
+                    }
+                }
+            });
+
+            // Check enemies (don't crash into them)
+            enemies.forEach(e => {
+                if (e.active) {
+                    const d = dist(player.x, player.y, e.x, e.y);
+                    if (d < detectionRadius + 20) {
+                        const angle = Math.atan2(player.y - e.y, player.x - e.x);
+                        const force = (detectionRadius - d) / detectionRadius;
+                        avoidX += Math.cos(angle) * force * 15;
+                        avoidY += Math.sin(angle) * force * 15;
+                        threatCount++;
+                    }
+                }
+            });
+
+            // 3. Attraction (Powerups)
+            let attractX = 0;
+            let attractY = 0;
+            let foundPowerup = false;
+            powerups.forEach(p => {
+                if (p.active && !foundPowerup) { // Target closest/first found
+                    const d = dist(player.x, player.y, p.x, p.y);
+                    if (d < 300) { // Only go for if reasonably close
+                        attractX = p.x - player.x;
+                        attractY = p.y - player.y;
+                        foundPowerup = true;
+                    }
+                }
+            });
+
+            // --- COMBINE FORCES ---
+
+            // If no immediate threats, drift towards center-ish X
+            if (threatCount === 0 && !foundPowerup) {
+                targetX = width / 2 + Math.sin(frameCount * 0.01) * 200;
+            }
+
+            // Apply forces
+            let moveX = 0;
+            let moveY = 0;
+
+            if (threatCount > 0) {
+                // Panic mode: Prioritize avoidance
+                moveX = avoidX;
+                moveY = avoidY;
+            } else if (foundPowerup) {
+                // Greed mode: Go for powerup
+                moveX = attractX * 0.05;
+                moveY = attractY * 0.05;
+            } else {
+                // Idle mode: Drift to base position
+                moveX = (targetX - player.x) * 0.02;
+                moveY = (targetY - player.y) * 0.02;
+            }
+
+            // Apply movement with smoothing
+            player.x += moveX;
+            player.y += moveY;
+
+            // Clamp to screen
+            player.x = Math.max(30, Math.min(width - 30, player.x));
+            player.y = Math.max(30, Math.min(height - 30, player.y));
+
+            // Auto fire using the full weapon system
+            if (frameCount % 7 === 0) {
+                firePlayerWeapons();
+            }
+
+            // Always max power in demo
+            player.powerLevel = 6;
+        }
+
         function update(dt) {
-            if (gameState !== 'PLAYING') {
+            if (gameState !== 'PLAYING' && gameState !== 'DEMO') {
                 globalHue += 1;
                 return;
+            }
+
+            if (gameState === 'DEMO') {
+                updateDemoAI();
             }
 
             globalHue += 2;
             frameCount++;
 
-            if (frameCount % Math.max(20, 60 - Math.floor(score / 300)) === 0) spawnEnemyLogic();
+            // Spawn logic: More intense in DEMO
+            let spawnRate = Math.max(20, 60 - Math.floor(score / 300));
+            if (gameState === 'DEMO') spawnRate = 15; // Very fast spawn in demo
+
+            if (frameCount % spawnRate === 0) spawnEnemyLogic();
 
             // Engine trails
             if (frameCount % 2 === 0) player.tail.push({ x: player.x, y: player.y + 15, life: 1 });
@@ -880,29 +1128,8 @@
             player.tail = player.tail.filter(t => t.life > 0);
 
             // --- SHOOTING ---
-            if (frameCount % 7 === 0) {
-                playSound('shoot');
-                spawnBullet(player.x, player.y - 20, -Math.PI / 2, 18, 'player', 'beam');
-
-                if (player.powerLevel >= 2) {
-                    spawnBullet(player.x - 15, player.y, -1.7, 15, 'player', 'normal');
-                    spawnBullet(player.x + 15, player.y, -1.4, 15, 'player', 'normal');
-                }
-                if (player.powerLevel >= 3 && frameCount % 14 === 0) {
-                    spawnBullet(player.x, player.y - 20, -1.6, 10, 'player', 'blade');
-                    spawnBullet(player.x, player.y - 20, -1.5, 10, 'player', 'blade');
-                }
-                if (player.powerLevel >= 4 && frameCount % 21 === 0) {
-                    spawnBullet(player.x - 20, player.y, Math.PI, 12, 'player', 'homing');
-                    spawnBullet(player.x + 20, player.y, 0, 12, 'player', 'homing');
-                }
-                if (player.powerLevel >= 5 && frameCount % 21 === 0) {
-                    spawnBullet(player.x, player.y - 10, -Math.PI / 2, 12, 'player', 'wave');
-                }
-                if (player.powerLevel >= 6) {
-                    spawnBullet(player.x - 10, player.y - 20, -Math.PI / 2, 18, 'player', 'beam');
-                    spawnBullet(player.x + 10, player.y - 20, -Math.PI / 2, 18, 'player', 'beam');
-                }
+            if (gameState === 'PLAYING' && frameCount % 7 === 0) {
+                firePlayerWeapons();
             }
             if (player.iframes > 0) player.iframes--;
 
@@ -939,7 +1166,11 @@
                             e.hp -= (b.subType === 'blade' || b.subType === 'wave' ? 0.5 : 1);
                             createExplosionLogic(b.x, b.y, '#fff', 1);
                             if (e.hp <= 0 && e.active) {
-                                e.active = false; score += 100; updateUI();
+                                e.active = false;
+                                if (gameState === 'PLAYING') {
+                                    score += 100;
+                                    updateUI();
+                                }
                                 createExplosionLogic(e.x, e.y, `hsl(${globalHue},100%,50%)`, 15);
                                 if (Math.random() < 0.08) spawnPowerup(e.x, e.y);
                             }
@@ -961,11 +1192,11 @@
                     p.active = false; playSound('powerup');
                     if (p.type === 'weapon') {
                         if (player.powerLevel < player.maxPower) { player.powerLevel++; spawnText(player.x, player.y - 40, "UPGRADE", "#0ff"); }
-                        else { score += 1000; spawnText(player.x, player.y - 40, "+1000", "#fff"); }
+                        else { if (gameState === 'PLAYING') score += 1000; spawnText(player.x, player.y - 40, "+1000", "#fff"); }
                     } else if (p.type === 'bomb') { triggerBombLogic(); }
                     else if (p.type === 'shield') { player.hasShield = true; spawnText(player.x, player.y - 40, "SHIELD UP", "#00f"); }
                     else if (p.type === 'life') { player.lives++; spawnText(player.x, player.y - 40, "EXTEND", "#f00"); }
-                    updateUI();
+                    if (gameState === 'PLAYING') updateUI();
                 }
             });
         }
@@ -991,7 +1222,7 @@
             texts.forEach(e => e.draw(ctx));
 
             // PLAYER DRAW
-            if (gameState === 'PLAYING' && (player.iframes === 0 || Math.floor(frameCount / 4) % 2 === 0)) {
+            if ((gameState === 'PLAYING' || gameState === 'DEMO') && (player.iframes === 0 || Math.floor(frameCount / 4) % 2 === 0)) {
                 ctx.save(); ctx.translate(player.x, player.y);
 
                 // Engine Trails
@@ -1050,6 +1281,12 @@
             if (frameCount % 2 === 0) {
                 ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = `hsla(${globalHue + 180},100%,50%,0.05)`;
                 ctx.fillRect(0, 0, width, height); ctx.globalCompositeOperation = 'source-over';
+            }
+
+            // DEMO OVERLAY
+            if (gameState === 'DEMO') {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.fillRect(0, 0, width, height);
             }
         }
 
