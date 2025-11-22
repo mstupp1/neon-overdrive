@@ -992,15 +992,20 @@
             }
 
             update() {
-                const speed = 8; // Flight speed
+                const speed = 8; // Flight speed (downward movement) - increased for faster motion
 
-                // Stars - 3D flythrough
+                // Stars - Move downward to simulate flying upward
                 this.stars.forEach(s => {
-                    s.z -= speed;
-                    if (s.z <= 0) {
-                        s.z = width;
+                    // Move stars downward based on their depth (z)
+                    // Stars closer (smaller z) move faster for parallax effect
+                    const depthSpeed = speed * (1 + (width - s.z) / width * 2);
+                    s.y += depthSpeed;
+
+                    // Reset star to top when it goes off bottom
+                    if (s.y > height + 50) {
+                        s.y = -50;
                         s.x = Math.random() * width;
-                        s.y = Math.random() * height;
+                        s.z = Math.random() * width;
                     }
                 });
 
@@ -1056,22 +1061,37 @@
                     ctx.restore();
                 });
 
-                // Stars
+                // Stars - Motion blur ovals
                 ctx.globalCompositeOperation = 'lighter';
                 ctx.fillStyle = '#fff';
-                const cx = width / 2;
-                const cy = height / 2;
                 this.stars.forEach(s => {
-                    const x = (s.x - cx) * (width / s.z) + cx;
-                    const y = (s.y - cy) * (width / s.z) + cy;
-                    const r = s.size * (width / s.z);
+                    // Size based on depth - closer stars (smaller z) are larger
+                    const depthFactor = (width - s.z) / width;
+                    const baseWidth = s.size * (0.3 + depthFactor * 0.5); // Very thin
 
-                    if (x > 0 && x < width && y > 0 && y < height) {
-                        ctx.globalAlpha = Math.min(1, (width - s.z) / width);
-                        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+                    // Height stretches based on Y position - fatter at bottom, skinnier at top
+                    const screenProgress = s.y / height; // 0 at top, 1 at bottom
+                    const stretchFactor = 0.5 + screenProgress * 3; // More stretch toward bottom
+                    const height_oval = baseWidth * stretchFactor * 4; // Vertical stretch for motion blur
+
+                    if (s.x > 0 && s.x < width && s.y > 0 && s.y < height) {
+                        // Very faded - max opacity of 0.25
+                        ctx.globalAlpha = (0.1 + depthFactor * 0.15);
+
+                        // Draw motion-blurred oval with gradient for trail effect
+                        const gradient = ctx.createLinearGradient(s.x, s.y - height_oval / 2, s.x, s.y + height_oval / 2);
+                        gradient.addColorStop(0, 'rgba(255, 255, 255, 0)'); // Fade at top
+                        gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.3)');
+                        gradient.addColorStop(1, 'rgba(255, 255, 255, 0.8)'); // Brighter at bottom
+
+                        ctx.fillStyle = gradient;
+                        ctx.beginPath();
+                        ctx.ellipse(s.x, s.y, baseWidth, height_oval, 0, 0, Math.PI * 2);
+                        ctx.fill();
                     }
                 });
                 ctx.globalAlpha = 1;
+                ctx.fillStyle = '#fff';
 
                 // Planets
                 ctx.globalCompositeOperation = 'source-over';
