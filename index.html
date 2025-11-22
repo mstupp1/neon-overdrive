@@ -1123,9 +1123,11 @@
             draw(ctx) {
                 // Boost glow/alpha when player pushes upward
                 const forwardBoost = Math.max(0, -(player?.vy || 0)) / PLAYER_MAX_SPEED_UP;
-                const brightScale = 1 + forwardBoost * 1.2;
-                const blurScale = 1 + forwardBoost * 1.8;
-                const alphaBoost = forwardBoost * 0.2;
+                const brightScale = 1.25 + forwardBoost * 1.35; // higher base glow
+                const blurScale = 1.1 + forwardBoost * 2.0;
+                const sizeScale = 1.15 + forwardBoost * 0.85;
+                const streakScale = 1 + forwardBoost * 2.2;
+                const alphaBoost = 0.2 + forwardBoost * 0.25;
 
                 ctx.save();
                 ctx.globalAlpha = Math.min(1, this.life * brightScale + alphaBoost);
@@ -1133,12 +1135,14 @@
                 ctx.rotate(this.rotation);
 
                 // Add glow effect
-                ctx.shadowBlur = 10 * this.life * blurScale;
+                ctx.shadowBlur = 14 * this.life * blurScale;
                 ctx.shadowColor = this.color;
 
                 ctx.fillStyle = this.color;
                 // Draw as rotated rectangle for more interesting shape
-                ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+                const half = (this.size * sizeScale) / 2;
+                ctx.scale(1, streakScale);
+                ctx.fillRect(-half, -half, half * 2, half * 2);
 
                 ctx.restore();
                 ctx.globalAlpha = 1;
