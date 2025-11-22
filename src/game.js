@@ -98,12 +98,49 @@ function renderGlowSprite(color, radius, glow, type = 'circle', fillColor = '#ff
         cx.beginPath();
         cx.ellipse(center, center + 20, 5, 8, 0, 0, Math.PI * 2);
         cx.fill();
-    } else if (type === 'spinner') {
-        cx.strokeStyle = color; cx.lineWidth = 3; cx.shadowBlur = glow; cx.shadowColor = color;
-        cx.beginPath(); cx.arc(center, center, 15, 0, Math.PI * 2); cx.stroke();
+    } else if (type === 'spinnerCore') {
+        cx.shadowBlur = glow; cx.shadowColor = color;
+
+        // Saucer base
+        const baseGrad = cx.createLinearGradient(center, center - 10, center, center + 16);
+        baseGrad.addColorStop(0, '#f66cf6');
+        baseGrad.addColorStop(1, '#a300a3');
+        cx.fillStyle = baseGrad;
+        cx.beginPath();
+        cx.ellipse(center, center + 2, 20, 12, 0, 0, Math.PI * 2);
+        cx.fill();
+
+        // Central ring (static accent)
+        cx.strokeStyle = '#ffb2ff';
+        cx.lineWidth = 3;
+        cx.beginPath(); cx.ellipse(center, center + 2, 14, 8, 0, 0, Math.PI * 2); cx.stroke();
+
+        // Glass dome
+        const domeGrad = cx.createRadialGradient(center - 4, center - 4, 2, center, center - 6, 12);
+        domeGrad.addColorStop(0, '#ffe8ff');
+        domeGrad.addColorStop(1, '#c03bc0');
+        cx.fillStyle = domeGrad;
+        cx.beginPath(); cx.arc(center, center - 6, 10, 0, Math.PI * 2); cx.fill();
+
+        // Soft underglow
+        cx.fillStyle = 'rgba(255, 102, 255, 0.15)';
+        cx.beginPath(); cx.ellipse(center, center + 18, 18, 6, 0, 0, Math.PI * 2); cx.fill();
+    } else if (type === 'spinnerRing') {
+        cx.shadowBlur = glow; cx.shadowColor = color;
+
+        // Outer ring
+        const ringGrad = cx.createLinearGradient(center - 22, center, center + 22, center);
+        ringGrad.addColorStop(0, '#ff7aff');
+        ringGrad.addColorStop(1, '#b300b3');
+        cx.strokeStyle = ringGrad;
+        cx.lineWidth = 4;
+        cx.beginPath(); cx.ellipse(center, center, 24, 16, 0, 0, Math.PI * 2); cx.stroke();
+
+        // Spinner fins on the ring
+        cx.fillStyle = '#ff4dff';
         for (let i = 0; i < 4; i++) {
             cx.save(); cx.translate(center, center); cx.rotate(i * Math.PI / 2);
-            cx.beginPath(); cx.moveTo(15, 0); cx.lineTo(25, 5); cx.lineTo(25, -5); cx.fillStyle = color; cx.fill();
+            cx.beginPath(); cx.moveTo(18, 0); cx.lineTo(28, 6); cx.lineTo(28, -6); cx.closePath(); cx.fill();
             cx.restore();
         }
     } else if (type === 'dasher') {
@@ -134,7 +171,9 @@ function prerenderAssets() {
     sprites.playerWave = renderGlowSprite('#50f', 5, 12);
     sprites.playerBlade = renderGlowSprite('#0ff', 15, 10, 'blade');
     sprites.enemyChaser = renderGlowSprite('#f00', 20, 10, 'chaser');
-    sprites.enemySpinner = renderGlowSprite('#f0f', 30, 10, 'spinner');
+    sprites.enemySpinnerCore = renderGlowSprite('#f0f', 30, 10, 'spinnerCore');
+    sprites.enemySpinnerRing = renderGlowSprite('#f0f', 30, 10, 'spinnerRing');
+    sprites.enemySpinner = sprites.enemySpinnerCore; // Backward compatibility
     sprites.enemyDasher = renderGlowSprite('#ff0', 20, 10, 'dasher');
     sprites.enemySnake = renderGlowSprite('#f00', 15, 10, 'snake');
     sprites.enemySniper = renderGlowSprite('#f44', 20, 10, 'sniper');
