@@ -24,7 +24,7 @@ const SCORE_DIGITS = 10;
 // --- ASSET PRE-RENDERING ---
 const sprites = {};
 
-function renderGlowSprite(color, radius, glow, type = 'circle') {
+function renderGlowSprite(color, radius, glow, type = 'circle', fillColor = '#fff') {
     const size = (radius + glow) * 2;
     const c = document.createElement('canvas');
     c.width = size; c.height = size;
@@ -32,7 +32,7 @@ function renderGlowSprite(color, radius, glow, type = 'circle') {
     const center = size / 2;
 
     cx.shadowBlur = glow; cx.shadowColor = color;
-    cx.fillStyle = '#fff';
+    cx.fillStyle = fillColor;
 
     if (type === 'circle') {
         cx.beginPath(); cx.arc(center, center, radius, 0, Math.PI * 2); cx.fill();
@@ -73,11 +73,12 @@ function renderGlowSprite(color, radius, glow, type = 'circle') {
 
 function prerenderAssets() {
     // Varied enemy bullets
-    sprites.enemyBulletBasic = renderGlowSprite('#f00', 4, 8);   // Chaser: Small, sharp
-    sprites.enemyBulletOrb = renderGlowSprite('#f80', 9, 15);    // Spinner: Large, orange, destructible
-    sprites.enemyBulletFast = renderGlowSprite('#ff0', 3, 10, 'beam'); // Dasher: Fast, yellow beam-like
-    sprites.enemyBulletSniper = renderGlowSprite('#fff', 6, 20, 'blade'); // Sniper: Sharp, high contrast
-    sprites.enemyBulletWobble = renderGlowSprite('#0f0', 5, 10); // Snake: Green, wobbling
+    // Make hazards solid red/orange instead of white cores for better readability
+    sprites.enemyBulletBasic = renderGlowSprite('#ff1f1f', 4, 10, 'circle', '#ff4a4a');   // Chaser: Small, sharp, avoid
+    sprites.enemyBulletOrb = renderGlowSprite('#ff9c2a', 9, 18, 'circle', '#ffb347');    // Spinner: Large, orange, destructible
+    sprites.enemyBulletFast = renderGlowSprite('#ff3b3b', 3, 12, 'beam', '#ff3b3b'); // Dasher: Fast, red beam-like
+    sprites.enemyBulletSniper = renderGlowSprite('#ff6b6b', 6, 22, 'blade', '#ff6b6b'); // Sniper: Sharp, red-tinted contrast
+    sprites.enemyBulletWobble = renderGlowSprite('#ff2f2f', 5, 12, 'circle', '#ff4a4a'); // Snake: Red wobbling hazard
 
     sprites.playerNormal = renderGlowSprite('#0ff', 4, 8);
     sprites.playerBeam = renderGlowSprite('#0ff', 3, 15, 'beam');
@@ -1011,7 +1012,7 @@ function triggerBombLogic() {
         // Enhanced bomb explosion particles
         createExplosionLogic(e.x, e.y, '#ff0', 20);
         createExplosionLogic(e.x, e.y, '#fff', 8);
-        createExplosionLogic(e.x, e.y, '#f80', 12);
+        createExplosionLogic(e.x, e.y, '#ff9c2a', 12);
     });
     bullets.forEach(b => {
         if (b.type === 'enemy') {
@@ -1536,7 +1537,7 @@ function update(dt) {
                     if (dist(b.x, b.y, eb.x, eb.y) < b.radius + eb.radius) {
                         eb.active = false;
                         if (!b.pierce) b.active = false; // Blade/Wave pierce
-                        createExplosionLogic(eb.x, eb.y, '#f80', 5);
+                        createExplosionLogic(eb.x, eb.y, '#ff9c2a', 5);
                         if (gameState === 'PLAYING') score += 10;
                     }
                 }
