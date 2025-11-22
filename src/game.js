@@ -1195,8 +1195,8 @@ class CosmicBackground {
                 size: Math.random() * 2
             });
         }
-        // Vortexes - Start with more
-        for (let i = 0; i < 5; i++) {
+        // Vortexes - Optimized count for performance
+        for (let i = 0; i < 3; i++) {
             this.vortexes.push({
                 x: Math.random() * width,
                 y: Math.random() * height,
@@ -1288,9 +1288,9 @@ class CosmicBackground {
             }
         });
 
-        // Vortexes - Periodic spawning
+        // Vortexes - Periodic spawning (optimized frequency)
         this.vortexSpawnTimer++;
-        if (this.vortexSpawnTimer >= 180) { // Spawn every ~3 seconds
+        if (this.vortexSpawnTimer >= 240 && this.vortexes.length < 6) { // Spawn every ~4 seconds, max 6 vortexes
             this.vortexSpawnTimer = 0;
             // Spawn new vortex off-screen
             const pos = this.getOffscreenVortexPosition();
@@ -1411,26 +1411,34 @@ class CosmicBackground {
             for (let i = 0; i < 6; i++) {
                 ctx.rotate(Math.PI / 3);
 
-                // Draw oscillating spiral arm using sine wave
-                const segments = 20; // Number of segments for smooth curve
-                for (let j = 0; j <= segments; j++) {
+                // Draw oscillating spiral arm using fewer segments for performance
+                const segments = 8; // Reduced from 20 for better performance
+                const wavePhase = v.angle * 3;
+                const baseAmplitude = 15 + Math.sin(v.angle * 2 + i) * 5;
+
+                ctx.moveTo(0, 0);
+
+                for (let j = 1; j <= segments; j++) {
                     const t = j / segments; // 0 to 1
                     const baseX = t * v.size;
-                    const baseY = t * v.size * 0.5; // Base curve
+                    const baseY = t * v.size * 0.5;
 
-                    // Add sine wave oscillation
-                    const frequency = 3; // How many waves along the spiral
-                    const amplitude = 15 + Math.sin(v.angle * 2 + i) * 5; // Oscillating amplitude
-                    const wave = Math.sin(t * Math.PI * frequency + v.angle * 3) * amplitude * t;
+                    // Simplified sine wave oscillation
+                    const wave = Math.sin(t * 9.42 + wavePhase) * baseAmplitude * t; // 9.42 ≈ 3π
 
                     const x = baseX;
                     const y = baseY + wave;
 
-                    if (j === 0) {
-                        ctx.moveTo(0, 0);
+                    // Use quadraticCurveTo for smoother curves with fewer points
+                    if (j === 1) {
                         ctx.lineTo(x, y);
                     } else {
-                        ctx.lineTo(x, y);
+                        const prevT = (j - 1) / segments;
+                        const prevX = prevT * v.size;
+                        const prevY = prevT * v.size * 0.5 + Math.sin(prevT * 9.42 + wavePhase) * baseAmplitude * prevT;
+                        const cpX = (prevX + x) / 2;
+                        const cpY = (prevY + y) / 2;
+                        ctx.quadraticCurveTo(cpX, cpY, x, y);
                     }
                 }
             }
