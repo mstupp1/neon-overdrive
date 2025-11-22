@@ -989,7 +989,7 @@ class Enemy {
             ctx.drawImage(sprites.enemyDasher, -30, -30);
         }
         else if (this.type === 'snake') {
-            ctx.drawImage(sprites.enemySnake, -25, -25); // Head
+            // Draw tail segments first (so head appears on top)
             ctx.restore(); ctx.save();
             ctx.globalAlpha = baseAlpha;
             // Flash effect for segments too
@@ -1001,6 +1001,19 @@ class Enemy {
                 ctx.fillStyle = `rgba(255, 50, 50, ${1 - i / 10})`;
                 ctx.beginPath(); ctx.arc(s.x, s.y, 10 - i, 0, Math.PI * 2); ctx.fill();
             });
+
+            // Draw head on top
+            ctx.restore(); ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.globalAlpha = baseAlpha;
+            if (this.flashTimer > 0) {
+                ctx.globalCompositeOperation = 'lighter';
+                const flashIntensity = this.flashTimer / 8;
+                ctx.shadowBlur = 20 * flashIntensity;
+                ctx.shadowColor = '#fff';
+                ctx.globalAlpha = baseAlpha * (0.5 + (flashIntensity * 0.5));
+            }
+            ctx.drawImage(sprites.enemySnake, -25, -25); // Head drawn last
         }
         else if (this.type === 'sniper') {
             ctx.drawImage(sprites.enemySniper, -30, -30);
