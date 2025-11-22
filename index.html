@@ -861,6 +861,8 @@
                 this.type = type; this.active = true; this.hp = 1;
                 this.timer = 0; this.state = 'move';
                 this.flashTimer = 0; // Flash effect when taking damage
+                this.fade = 1; this.inactive = false;
+                this.vx = 0; this.vy = 0;
 
                 const spawnMargin = 50;
                 // Spawn from the top band only to keep entries predictable
@@ -888,6 +890,17 @@
                 // Decrease flash timer
                 if (this.flashTimer > 0) this.flashTimer--;
 
+                // Fade-out zone near the bottom HUD to prevent clumping
+                const bottomHudHeight = 80;
+                const fadeBuffer = 140;
+                const fadeStart = height - (bottomHudHeight + fadeBuffer);
+                const fadeEnd = height - bottomHudHeight + 10;
+                const inFadeZone = this.y >= fadeStart;
+                const fadeT = inFadeZone ? Math.min(1, (this.y - fadeStart) / (fadeEnd - fadeStart)) : 0;
+                this.fade = 1 - fadeT;
+                this.inactive = inFadeZone;
+                const allowFire = !this.inactive;
+
                 if (this.type === 'chaser') {
                     const a = Math.atan2(player.y - this.y, player.x - this.x);
                     this.x += Math.cos(a) * this.speed; this.y += Math.max(1, Math.sin(a) * this.speed);
@@ -895,7 +908,7 @@
                 else if (this.type === 'spinner') {
                     this.y += 0.8; this.x += Math.sin(frameCount * 0.03);
                     this.timer++;
-                    if (this.timer > 60) {
+                    if (allowFire && this.timer > 60) {
                         this.timer = 0;
                         for (let i = 0; i < 6; i++) bulletPool.get(this.x, this.y, i * (Math.PI / 3) + frameCount * 0.1, 4, 'enemy');
                     }
@@ -912,12 +925,20 @@
                         if (Math.abs(this.x - this.tx) < 5) { this.state = 'aim'; this.timer = 0; }
                     } else if (this.state === 'aim') {
                         this.timer++;
-                        if (this.timer > 50) {
+                        if (allowFire && this.timer > 50) {
                             const a = Math.atan2(player.y - this.y, player.x - this.x);
                             bulletPool.get(this.x, this.y, a, 15, 'enemy');
                             this.tx = rand(50, width - 50); this.ty = rand(50, height * 0.4); this.state = 'move';
                         }
                     }
+                }
+
+                // Drift down and disengage when overlapping the HUD zone
+                if (inFadeZone) {
+                    const exitDrift = 1.5 + fadeT * 2.5;
+                    this.y += exitDrift;
+                    this.vx = (this.vx || 0) * 0.92;
+                    this.vy = (this.vy || 0) * 0.92;
                 }
 
                 // Soft steer away from edges so enemies don't linger at the borders
@@ -933,13 +954,16 @@
             draw(ctx) {
                 ctx.save(); ctx.translate(this.x, this.y);
 
+                const baseAlpha = this.fade ?? 1;
+                ctx.globalAlpha = baseAlpha;
+
                 // Flash effect when taking damage
                 if (this.flashTimer > 0) {
                     ctx.globalCompositeOperation = 'lighter';
                     const flashIntensity = this.flashTimer / 8; // 8 frames flash duration
                     ctx.shadowBlur = 20 * flashIntensity;
                     ctx.shadowColor = '#fff';
-                    ctx.globalAlpha = 0.5 + (flashIntensity * 0.5);
+                    ctx.globalAlpha = baseAlpha * (0.5 + (flashIntensity * 0.5));
                 }
 
                 if (this.type === 'chaser') {
@@ -957,6 +981,7 @@
                 else if (this.type === 'snake') {
                     ctx.drawImage(sprites.enemySnake, -25, -25); // Head
                     ctx.restore(); ctx.save();
+                    ctx.globalAlpha = baseAlpha;
                     // Flash effect for segments too
                     if (this.flashTimer > 0) {
                         ctx.shadowBlur = 15 * (this.flashTimer / 8);
@@ -970,7 +995,7 @@
                 else if (this.type === 'sniper') {
                     ctx.drawImage(sprites.enemySniper, -30, -30);
                     if (this.state === 'aim') {
-                        ctx.restore(); ctx.save(); ctx.strokeStyle = `rgba(255,0,0,${this.timer / 50})`; ctx.lineWidth = 2;
+                        ctx.restore(); ctx.save(); ctx.globalAlpha = baseAlpha; ctx.strokeStyle = `rgba(255,0,0,${this.timer / 50})`; ctx.lineWidth = 2;
                         ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(player.x, player.y); ctx.stroke();
                     }
                 }
@@ -1609,8 +1634,8 @@
                 if (player.y > height - 20) { player.y = height - 20; if (player.vy > 0) player.vy = 0; }
 
                 // Smooth tilt based on horizontal velocity
-                // Smooth tilt direction changes so reversing doesn't snap; forward (up) now reverses tilt
-                const desiredTiltDir = (player.vy < 0) ? -1 : 1;
+                // Smooth tilt direction changes so reversing doesn't snap; tilt reverses only when backing down
+                const desiredTiltDir = (player.vy > 0) ? -1 : 1;
                 player.tiltDir = player.tiltDir * (1 - PLAYER_TILT_DIR_SMOOTH) + desiredTiltDir * PLAYER_TILT_DIR_SMOOTH;
 
                 const absVx = Math.abs(player.vx);
@@ -1621,9 +1646,6 @@
                 } else {
                     targetTilt *= PLAYER_TILT_DAMP; // gently settle toward neutral
                 }
-
-                // Reverse overall tilt orientation to feel more natural
-                targetTilt *= -1;
 
                 player.tilt = player.tilt * (1 - PLAYER_TILT_BLEND) + targetTilt * PLAYER_TILT_BLEND;
             }
