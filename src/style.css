@@ -107,9 +107,14 @@ canvas {
     appearance: none;
 }
 
-.score-pause::before { content: none; }
+.score-pause::before {
+    content: none;
+}
 
-.score-pause:hover { box-shadow: none; background: none; }
+.score-pause:hover {
+    box-shadow: none;
+    background: none;
+}
 
 .score-pause.active {
     color: #f0f;
@@ -138,9 +143,13 @@ canvas {
     border-radius: 2px;
 }
 
-.pause-icon::before { left: 7px; }
+.pause-icon::before {
+    left: 7px;
+}
 
-.pause-icon::after { right: 7px; }
+.pause-icon::after {
+    right: 7px;
+}
 
 .score-block {
     display: flex;
@@ -352,7 +361,7 @@ h1::before {
 }
 
 h1::after {
-    content: 'OVERDRIVE';
+    content: '';
     display: block;
     font-size: 24px;
     color: #f0f;
@@ -360,6 +369,11 @@ h1::after {
     letter-spacing: 12px;
     margin-top: 6px;
     animation: none;
+}
+
+/* Only show OVERDRIVE on start menu */
+#start-menu h1::after {
+    content: 'OVERDRIVE';
 }
 
 @keyframes glitch-skew {
