@@ -52,8 +52,52 @@ function renderGlowSprite(color, radius, glow, type = 'circle', fillColor = '#ff
         cx.moveTo(center, center - radius); cx.lineTo(center, center + radius);
         cx.stroke();
     } else if (type === 'chaser') {
-        cx.fillStyle = color; cx.shadowBlur = glow; cx.shadowColor = color;
-        cx.beginPath(); cx.moveTo(center, center + 15); cx.lineTo(center + 10, center - 15); cx.lineTo(center, center - 10); cx.lineTo(center - 10, center - 15); cx.fill();
+        cx.shadowBlur = glow; cx.shadowColor = color;
+
+        // Core hull
+        const hullGrad = cx.createLinearGradient(center, center - 18, center, center + 18);
+        hullGrad.addColorStop(0, '#ff5a5a');
+        hullGrad.addColorStop(1, '#d00000');
+        cx.fillStyle = hullGrad;
+        cx.beginPath();
+        cx.moveTo(center, center - 18);
+        cx.lineTo(center + 10, center + 6);
+        cx.lineTo(center, center + 18);
+        cx.lineTo(center - 10, center + 6);
+        cx.closePath();
+        cx.fill();
+
+        // Wings
+        cx.fillStyle = '#ff1f1f';
+        cx.beginPath();
+        cx.moveTo(center - 16, center + 2);
+        cx.lineTo(center - 4, center + 8);
+        cx.lineTo(center - 2, center + 2);
+        cx.lineTo(center - 12, center - 10);
+        cx.closePath();
+        cx.fill();
+        cx.beginPath();
+        cx.moveTo(center + 16, center + 2);
+        cx.lineTo(center + 4, center + 8);
+        cx.lineTo(center + 2, center + 2);
+        cx.lineTo(center + 12, center - 10);
+        cx.closePath();
+        cx.fill();
+
+        // Nose highlight
+        cx.fillStyle = '#ffb6b6';
+        cx.beginPath();
+        cx.moveTo(center, center - 18);
+        cx.lineTo(center + 3, center - 10);
+        cx.lineTo(center - 3, center - 10);
+        cx.closePath();
+        cx.fill();
+
+        // Engine glow
+        cx.fillStyle = '#ff4040';
+        cx.beginPath();
+        cx.ellipse(center, center + 20, 5, 8, 0, 0, Math.PI * 2);
+        cx.fill();
     } else if (type === 'spinner') {
         cx.strokeStyle = color; cx.lineWidth = 3; cx.shadowBlur = glow; cx.shadowColor = color;
         cx.beginPath(); cx.arc(center, center, 15, 0, Math.PI * 2); cx.stroke();
