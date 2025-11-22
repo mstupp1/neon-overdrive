@@ -564,6 +564,12 @@
         // Input
         const input = { x: 0, y: 0, active: false, lastX: 0, lastY: 0 };
 
+        // Keyboard Input
+        const keys = {
+            up: false, down: false, left: false, right: false,
+            w: false, a: false, s: false, d: false
+        };
+
         // Player
         const player = {
             x: 0, y: 0, radius: 6, // Slightly smaller hitbox
@@ -629,6 +635,23 @@
             handleMove(e.touches[0].clientX, e.touches[0].clientY);
         }, { passive: false });
         window.addEventListener('touchend', handleEnd);
+
+        // Keyboard Controls
+        window.addEventListener('keydown', e => {
+            const key = e.key.toLowerCase();
+            if (key === 'arrowup' || key === 'w') { keys.up = true; keys.w = true; }
+            if (key === 'arrowdown' || key === 's') { keys.down = true; keys.s = true; }
+            if (key === 'arrowleft' || key === 'a') { keys.left = true; keys.a = true; }
+            if (key === 'arrowright' || key === 'd') { keys.right = true; keys.d = true; }
+        });
+
+        window.addEventListener('keyup', e => {
+            const key = e.key.toLowerCase();
+            if (key === 'arrowup' || key === 'w') { keys.up = false; keys.w = false; }
+            if (key === 'arrowdown' || key === 's') { keys.down = false; keys.s = false; }
+            if (key === 'arrowleft' || key === 'a') { keys.left = false; keys.a = false; }
+            if (key === 'arrowright' || key === 'd') { keys.right = false; keys.d = false; }
+        });
 
         // --- Helpers ---
         const rand = (min, max) => Math.random() * (max - min) + min;
@@ -718,6 +741,7 @@
             init(type) {
                 this.type = type; this.active = true; this.hp = 1;
                 this.timer = 0; this.state = 'move';
+                this.flashTimer = 0; // Flash effect when taking damage
 
                 const seed = Math.random();
                 if (seed > 0.3) { this.x = rand(50, width - 50); this.y = -40; }
@@ -742,6 +766,9 @@
             }
 
             update() {
+                // Decrease flash timer
+                if (this.flashTimer > 0) this.flashTimer--;
+
                 if (this.type === 'chaser') {
                     const a = Math.atan2(player.y - this.y, player.x - this.x);
                     this.x += Math.cos(a) * this.speed; this.y += Math.max(1, Math.sin(a) * this.speed);
@@ -779,6 +806,15 @@
             draw(ctx) {
                 ctx.save(); ctx.translate(this.x, this.y);
 
+                // Flash effect when taking damage
+                if (this.flashTimer > 0) {
+                    ctx.globalCompositeOperation = 'lighter';
+                    const flashIntensity = this.flashTimer / 8; // 8 frames flash duration
+                    ctx.shadowBlur = 20 * flashIntensity;
+                    ctx.shadowColor = '#fff';
+                    ctx.globalAlpha = 0.5 + (flashIntensity * 0.5);
+                }
+
                 if (this.type === 'chaser') {
                     ctx.rotate(Math.atan2(player.y - this.y, player.x - this.x) - Math.PI / 2);
                     ctx.drawImage(sprites.enemyChaser, -30, -30); // Size roughly (20+10)*2 = 60
@@ -794,7 +830,11 @@
                 else if (this.type === 'snake') {
                     ctx.drawImage(sprites.enemySnake, -25, -25); // Head
                     ctx.restore(); ctx.save();
-                    // Segments are simple circles, can keep or optimize. Let's optimize slightly by not using shadowBlur here
+                    // Flash effect for segments too
+                    if (this.flashTimer > 0) {
+                        ctx.shadowBlur = 15 * (this.flashTimer / 8);
+                        ctx.shadowColor = '#fff';
+                    }
                     this.segments.forEach((s, i) => {
                         ctx.fillStyle = `rgba(255, 50, 50, ${1 - i / 10})`;
                         ctx.beginPath(); ctx.arc(s.x, s.y, 10 - i, 0, Math.PI * 2); ctx.fill();
@@ -860,19 +900,40 @@
 
         class Particle {
             constructor() { this.active = false; }
-            init(x, y, color, speed = 5) {
+            init(x, y, color, speed = 5, size = null) {
                 this.x = x; this.y = y; const a = Math.random() * 6.28;
                 this.vx = Math.cos(a) * speed; this.vy = Math.sin(a) * speed;
-                this.life = 1; this.decay = rand(0.03, 0.08); this.color = color;
+                this.life = 1; this.decay = rand(0.015, 0.04); // Slower decay for longer life
+                this.color = color;
+                this.size = size || rand(3, 8); // Variable size
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = rand(-0.2, 0.2);
                 this.active = true;
             }
             update() {
-                this.x += this.vx; this.y += this.vy; this.life -= this.decay;
+                this.x += this.vx; this.y += this.vy;
+                this.vx *= 0.98; // Slight drag
+                this.vy *= 0.98;
+                this.rotation += this.rotationSpeed;
+                this.life -= this.decay;
                 if (this.life <= 0) this.active = false;
             }
             draw(ctx) {
-                ctx.globalAlpha = this.life; ctx.fillStyle = this.color;
-                ctx.fillRect(this.x, this.y, 4, 4); ctx.globalAlpha = 1;
+                ctx.save();
+                ctx.globalAlpha = this.life;
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+
+                // Add glow effect
+                ctx.shadowBlur = 10 * this.life;
+                ctx.shadowColor = this.color;
+
+                ctx.fillStyle = this.color;
+                // Draw as rotated rectangle for more interesting shape
+                ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+
+                ctx.restore();
+                ctx.globalAlpha = 1;
             }
         }
 
@@ -1066,7 +1127,10 @@
 
             enemies.forEach(e => {
                 e.active = false;
-                createExplosionLogic(e.x, e.y, '#ff0', 15);
+                // Enhanced bomb explosion particles
+                createExplosionLogic(e.x, e.y, '#ff0', 20);
+                createExplosionLogic(e.x, e.y, '#fff', 8);
+                createExplosionLogic(e.x, e.y, '#f80', 12);
             });
             bullets.forEach(b => {
                 if (b.type === 'enemy') {
@@ -1303,6 +1367,28 @@
             player.tail.forEach(t => t.life -= 0.1);
             player.tail = player.tail.filter(t => t.life > 0);
 
+            // --- KEYBOARD MOVEMENT ---
+            if (gameState === 'PLAYING') {
+                const keyboardSpeed = 6; // Movement speed for keyboard controls
+
+                if (keys.up || keys.w) {
+                    player.y -= keyboardSpeed;
+                }
+                if (keys.down || keys.s) {
+                    player.y += keyboardSpeed;
+                }
+                if (keys.left || keys.a) {
+                    player.x -= keyboardSpeed;
+                }
+                if (keys.right || keys.d) {
+                    player.x += keyboardSpeed;
+                }
+
+                // Clamp player position to screen bounds
+                player.x = Math.max(20, Math.min(width - 20, player.x));
+                player.y = Math.max(20, Math.min(height - 20, player.y));
+            }
+
             // --- SHOOTING ---
             if (gameState === 'PLAYING' && frameCount % 7 === 0) {
                 firePlayerWeapons();
@@ -1340,6 +1426,10 @@
                         if (hit) {
                             if (b.subType !== 'blade' && b.subType !== 'wave') b.active = false;
                             e.hp -= (b.subType === 'blade' || b.subType === 'wave' ? 0.5 : 1);
+
+                            // Flash effect on damage
+                            e.flashTimer = 8;
+
                             createExplosionLogic(b.x, b.y, '#fff', 1);
                             if (e.hp <= 0 && e.active) {
                                 e.active = false;
@@ -1347,7 +1437,10 @@
                                     score += 100;
                                     updateUI();
                                 }
-                                createExplosionLogic(e.x, e.y, `hsl(${globalHue},100%,50%)`, 15);
+                                // Enhanced death explosion with more particles and variety
+                                createExplosionLogic(e.x, e.y, `hsl(${globalHue},100%,50%)`, 25);
+                                createExplosionLogic(e.x, e.y, '#fff', 10);
+                                createExplosionLogic(e.x, e.y, `hsl(${globalHue + 60},100%,60%)`, 15);
                                 if (Math.random() < 0.08) spawnPowerup(e.x, e.y);
                             }
                         }
