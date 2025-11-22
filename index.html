@@ -1121,13 +1121,19 @@
                 if (this.life <= 0) this.active = false;
             }
             draw(ctx) {
+                // Boost glow/alpha when player pushes upward
+                const forwardBoost = Math.max(0, -(player?.vy || 0)) / PLAYER_MAX_SPEED_UP;
+                const brightScale = 1 + forwardBoost * 1.2;
+                const blurScale = 1 + forwardBoost * 1.8;
+                const alphaBoost = forwardBoost * 0.2;
+
                 ctx.save();
-                ctx.globalAlpha = this.life;
+                ctx.globalAlpha = Math.min(1, this.life * brightScale + alphaBoost);
                 ctx.translate(this.x, this.y);
                 ctx.rotate(this.rotation);
 
                 // Add glow effect
-                ctx.shadowBlur = 10 * this.life;
+                ctx.shadowBlur = 10 * this.life * blurScale;
                 ctx.shadowColor = this.color;
 
                 ctx.fillStyle = this.color;
@@ -1153,6 +1159,9 @@
                 this.vortexes = [];
                 this.planets = [];
                 this.dust = [];
+                this.starSpeedScale = 1; // scales with player forward push
+                this.starThinScale = 1;  // narrows stars as you accelerate
+                this.forwardRatio = 0;
                 this.init();
             }
 
@@ -1194,7 +1203,17 @@
             }
 
             update() {
-                const speed = 8; // Flight speed (downward movement) - increased for faster motion
+                // Tie backdrop speed/shape to velocity so accelerating feels faster
+                const forwardSpeed = Math.max(0, -(player?.vy || 0));
+                const backwardSpeed = Math.max(0, player?.vy || 0);
+                this.forwardRatio = Math.min(1, forwardSpeed / PLAYER_MAX_SPEED_UP);
+                const backwardRatio = Math.min(1, backwardSpeed / PLAYER_MAX_SPEED_DOWN);
+                // Slower idle drift; ramps harder with thrust; braking/downward makes it calmer
+                const baseScale = 0.35 + this.forwardRatio * 1.65;
+                this.starSpeedScale = Math.max(0.12, baseScale * (1 - backwardRatio * 0.65));
+                this.starThinScale = Math.max(0.35, 1 / (1 + this.forwardRatio * 1.1));
+
+                const speed = 8 * this.starSpeedScale; // Base flight speed, boosted by player thrust
 
                 // Stars - Move downward to simulate flying upward
                 this.stars.forEach(s => {
@@ -1269,12 +1288,13 @@
                 this.stars.forEach(s => {
                     // Size based on depth - closer stars (smaller z) are larger
                     const depthFactor = (width - s.z) / width;
-                    const baseWidth = s.size * (0.3 + depthFactor * 0.5); // Very thin
+                    const baseWidth = s.size * (0.3 + depthFactor * 0.5); // Base thickness
+                    const finalWidth = baseWidth * this.starThinScale;
 
                     // Height stretches based on Y position - fatter at bottom, skinnier at top
                     const screenProgress = s.y / height; // 0 at top, 1 at bottom
                     const stretchFactor = 0.5 + screenProgress * 3; // More stretch toward bottom
-                    const height_oval = baseWidth * stretchFactor * 4; // Vertical stretch for motion blur
+                    const height_oval = baseWidth * stretchFactor * 4 * (1 + this.forwardRatio * 0.3);
 
                     if (s.x > 0 && s.x < width && s.y > 0 && s.y < height) {
                         // Very faded - max opacity of 0.25
@@ -1288,7 +1308,7 @@
 
                         ctx.fillStyle = gradient;
                         ctx.beginPath();
-                        ctx.ellipse(s.x, s.y, baseWidth, height_oval, 0, 0, Math.PI * 2);
+                        ctx.ellipse(s.x, s.y, finalWidth, height_oval, 0, 0, Math.PI * 2);
                         ctx.fill();
                     }
                 });
