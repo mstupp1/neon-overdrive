@@ -914,6 +914,8 @@ h1::after {
     font-family: monospace;
     min-height: 190px;
     justify-content: space-between;
+    position: relative;
+    /* Contain the progress bar */
 }
 
 .upgrade-card:hover,
@@ -1063,6 +1065,9 @@ h1::after {
     height: 4px;
     background: rgba(255, 221, 0, 0.2);
     overflow: hidden;
+    opacity: 0;
+    /* Hidden by default */
+    transition: opacity 0.2s;
 }
 
 .hold-progress-fill {
@@ -1078,6 +1083,11 @@ h1::after {
     box-shadow: 0 0 40px #fd0, 0 0 60px rgba(255, 221, 0, 0.5);
     animation: holdingGlow 0.5s ease-in-out infinite;
     pointer-events: none;
+}
+
+/* Show progress bar when holding */
+.upgrade-card.holding .hold-progress-bar {
+    opacity: 1;
 }
 
 @keyframes holdingGlow {
