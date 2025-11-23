@@ -381,8 +381,10 @@ function update(dt) {
             } else if (p.type === 'bomb') { triggerBombLogic(); }
             else if (p.type === 'shield') { player.hasShield = true; spawnText(player.x, player.y - 40, "SHIELD UP", "#00f"); }
             else if (p.type === 'life') {
+                // Can't pick up life powerup if already dead
+                if (player.lives <= 0) return;
                 const prevLives = player.lives;
-                player.lives = Math.min(PLAYER_MAX_LIVES, player.lives + 1);
+                player.lives = Math.min(player.stats.hpMax, player.lives + 1);
                 if (player.lives > prevLives) spawnText(player.x, player.y - 40, "EXTEND", "#f00");
             } else if (p.type === 'score') {
                 if (gameState === 'PLAYING') {
