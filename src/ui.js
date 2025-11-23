@@ -42,12 +42,13 @@ function updateUI() {
     const xpPercent = atMaxLevel ? 100 : Math.min(100, (player.weaponXp / player.weaponXpMax) * 100);
     if (xpFill) xpFill.style.width = `${xpPercent}%`;
     if (xpStatus) {
+        const missileIcon = `<svg class="missile-icon" viewBox="0 0 24 24"><path d="M12 2.5c-2.5 0-4.5 4-4.5 9.5c0 2 1 3.5 1 3.5l-2.5 2.5v1h12v-1l-2.5-2.5s1-1.5 1-3.5c0-5.5-2-9.5-4.5-9.5z"/></svg>`;
         if (atMaxLevel) {
-            xpStatus.textContent = 'MAX';
+            xpStatus.innerHTML = `${missileIcon} MAX`;
             xpStatus.classList.add('max');
             xpStatus.classList.remove('show');
         } else {
-            xpStatus.textContent = `LVL ${player.powerLevel}`;
+            xpStatus.innerHTML = `${missileIcon} LVL ${player.powerLevel}`;
             xpStatus.classList.remove('max');
             xpStatus.classList.add('show');
         }

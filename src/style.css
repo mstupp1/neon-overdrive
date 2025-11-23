@@ -71,7 +71,7 @@ canvas {
     gap: 14px;
     width: 100%;
     margin: 0;
-    padding: 10px 14px;
+    padding: 10px 14px 16px 14px;
     background: linear-gradient(180deg, rgba(0, 0, 0, 0.85), rgba(0, 255, 255, 0.08));
     border: none;
     box-shadow: 0 4px 12px rgba(0, 255, 255, 0.2);
@@ -300,6 +300,22 @@ canvas {
 .xp-status.max {
     opacity: 1;
     transform: translateY(0);
+}
+
+.material-icons {
+    vertical-align: middle;
+    line-height: 1;
+}
+
+.missile-icon {
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 2px;
+    margin-right: 2px;
+    fill: currentColor;
+    transform: rotate(45deg);
 }
 
 /* Menus */

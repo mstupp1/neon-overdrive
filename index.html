@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>NEON GLITCH HELL: OVERDRIVE</title>
     <link rel="stylesheet" href="src/style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 
 <body>
@@ -53,7 +54,9 @@
                     </div>
                 </div>
                 <div class="level-info-container">
-                    <div class="level-label">LVL <span id="player-level-display">1</span></div>
+                    <div class="level-label">
+                        LVL <span id="player-level-display">1</span>
+                    </div>
                     <div class="player-xp-track">
                         <div class="player-xp-fill" id="player-xp-fill"></div>
                     </div>
@@ -89,17 +92,17 @@
             <h1 style="color: #fd0;">LEVEL UP!</h1>
             <div class="upgrade-container">
                 <button class="upgrade-card" onclick="selectUpgrade('hp')">
-                    <div class="icon">❤️</div>
+                    <span class="material-icons icon">favorite</span>
                     <h3>REINFORCE</h3>
                     <p>+1 MAX HP</p>
                 </button>
                 <button class="upgrade-card" onclick="selectUpgrade('damage')">
-                    <div class="icon">⚔️</div>
+                    <span class="material-icons icon">flash_on</span>
                     <h3>OVERCHARGE</h3>
                     <p>+10% DAMAGE</p>
                 </button>
                 <button class="upgrade-card" onclick="selectUpgrade('speed')">
-                    <div class="icon">⚡</div>
+                    <span class="material-icons icon">speed</span>
                     <h3>ACCELERATE</h3>
                     <p>+10% FIRE RATE</p>
                 </button>
