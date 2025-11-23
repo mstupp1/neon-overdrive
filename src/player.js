@@ -174,7 +174,7 @@ function triggerLevelUp() {
 function applyUpgrade(type) {
     if (type === 'hp') {
         player.stats.hpMax += 1;
-        player.lives += 1;
+        player.lives = player.stats.hpMax;
         spawnText(player.x, player.y, "MAX HP UP", "#f00");
     } else if (type === 'damage') {
         player.stats.damageMult += 0.1;

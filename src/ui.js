@@ -14,12 +14,12 @@ const MENUS = {
 };
 
 const ALL_UPGRADES = [
-    { id: 'hp', title: 'REINFORCE', description: '+1 MAX HP', icon: 'favorite', stat: 'HP' },
-    { id: 'damage', title: 'OVERCHARGE', description: '+10% DAMAGE', icon: 'flash_on', stat: 'DMG' },
-    { id: 'speed', title: 'ACCELERATE', description: '+10% FIRE RATE', icon: 'speed', stat: 'RATE' },
-    { id: 'moveSpeed', title: 'AFTERBURNER', description: '+10% MOVE SPEED', icon: 'directions_run', stat: 'MOVE' },
-    { id: 'weaponXp', title: 'WEAPON MASTERY', description: '+10% WEAPON XP', icon: 'military_tech', stat: 'WPN XP' },
-    { id: 'playerXp', title: 'INSIGHT', description: '+10% XP GAIN', icon: 'psychology', stat: 'PLYR XP' }
+    { id: 'hp', title: 'REINFORCE', descriptionLines: ['+1', 'MAX HP', 'FULL HEALTH'], icon: 'favorite', stat: 'HP' },
+    { id: 'damage', title: 'OVERCHARGE', descriptionLines: ['+10%', 'DAMAGE'], icon: 'flash_on', stat: 'DMG' },
+    { id: 'speed', title: 'ACCELERATE', descriptionLines: ['+10%', 'FIRE RATE'], icon: 'speed', stat: 'RATE' },
+    { id: 'moveSpeed', title: 'AFTERBURNER', descriptionLines: ['+10%', 'MOVE SPEED'], icon: 'directions_run', stat: 'MOVE' },
+    { id: 'weaponXp', title: 'WEAPON MASTERY', descriptionLines: ['+10%', 'WEAPON XP'], icon: 'military_tech', stat: 'WPN XP' },
+    { id: 'playerXp', title: 'INSIGHT', descriptionLines: ['+10%', 'XP GAIN'], icon: 'psychology', stat: 'PLYR XP' }
 ];
 
 function showLevelUpOptions() {
@@ -30,12 +30,13 @@ function showLevelUpOptions() {
     const options = [...ALL_UPGRADES].sort(() => 0.5 - Math.random()).slice(0, 3);
 
     options.forEach(upgrade => {
+        const descriptionLines = (upgrade.descriptionLines ?? [upgrade.description ?? '']).filter(Boolean);
         const cardHTML = `
             <div class="upgrade-column">
                 <button class="upgrade-card" data-upgrade-id="${upgrade.id}" onclick="selectUpgrade('${upgrade.id}')" onmouseenter="updateLevelUpStats('${upgrade.id}')" onmouseleave="updateLevelUpStats(null)" onfocus="updateLevelUpStats('${upgrade.id}')" onblur="updateLevelUpStats(null)">
                     <span class="material-icons icon">${upgrade.icon}</span>
                     <h3>${upgrade.title}</h3>
-                    <p>${upgrade.description.replace(' ', '<br>')}</p>
+                    <p>${descriptionLines.join('<br>')}</p>
                 </button>
                 <div class="stat-item">
                     <span class="stat-label">${upgrade.stat}</span>
