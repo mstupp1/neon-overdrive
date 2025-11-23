@@ -193,11 +193,35 @@ canvas {
 
 .lives-box {
     display: flex;
-    gap: 6px;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
     transform: skewX(-10deg);
     flex-wrap: nowrap;
     justify-content: flex-end;
-    min-height: 18px;
+    min-height: 28px;
+}
+
+.life-row {
+    display: flex;
+    gap: 6px;
+}
+
+.life-tier-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: flex-end;
+    height: 6px;
+}
+
+.life-tier-indicator {
+    width: 14px;
+    height: 4px;
+    border-radius: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.25);
+    opacity: 0.9;
 }
 
 .life-icon {
@@ -209,7 +233,8 @@ canvas {
 }
 
 /* Tier 1: Red (1-10 HP) */
-.life-icon.tier-red {
+.life-icon.tier-red,
+.life-tier-indicator.tier-red {
     background: linear-gradient(135deg, #f00, #900);
     box-shadow: 0 0 10px #f00;
 }
@@ -221,7 +246,8 @@ canvas {
 }
 
 /* Tier 2: Cyan (11-20 HP) */
-.life-icon.tier-cyan {
+.life-icon.tier-cyan,
+.life-tier-indicator.tier-cyan {
     background: linear-gradient(135deg, #0ff, #088);
     box-shadow: 0 0 10px #0ff;
 }
@@ -233,7 +259,8 @@ canvas {
 }
 
 /* Tier 3: Yellow (21-30 HP) */
-.life-icon.tier-yellow {
+.life-icon.tier-yellow,
+.life-tier-indicator.tier-yellow {
     background: linear-gradient(135deg, #ff0, #cc0);
     box-shadow: 0 0 10px #ff0;
 }
@@ -245,7 +272,8 @@ canvas {
 }
 
 /* Tier 4: Magenta (31-40 HP) */
-.life-icon.tier-magenta {
+.life-icon.tier-magenta,
+.life-tier-indicator.tier-magenta {
     background: linear-gradient(135deg, #f0f, #909);
     box-shadow: 0 0 10px #f0f;
 }
@@ -257,7 +285,8 @@ canvas {
 }
 
 /* Tier 5: Green (41-50 HP) */
-.life-icon.tier-green {
+.life-icon.tier-green,
+.life-tier-indicator.tier-green {
     background: linear-gradient(135deg, #0f0, #090);
     box-shadow: 0 0 10px #0f0;
 }
@@ -269,7 +298,8 @@ canvas {
 }
 
 /* Tier 6: Orange (51-60 HP) */
-.life-icon.tier-orange {
+.life-icon.tier-orange,
+.life-tier-indicator.tier-orange {
     background: linear-gradient(135deg, #ff8800, #cc6600);
     box-shadow: 0 0 10px #ff8800;
 }
@@ -281,7 +311,8 @@ canvas {
 }
 
 /* Tier 7: Purple (61-70 HP) */
-.life-icon.tier-purple {
+.life-icon.tier-purple,
+.life-tier-indicator.tier-purple {
     background: linear-gradient(135deg, #a0f, #608);
     box-shadow: 0 0 10px #a0f;
 }
@@ -293,7 +324,8 @@ canvas {
 }
 
 /* Tier 8: Pink (71-80 HP) */
-.life-icon.tier-pink {
+.life-icon.tier-pink,
+.life-tier-indicator.tier-pink {
     background: linear-gradient(135deg, #f6c, #c39);
     box-shadow: 0 0 10px #f6c;
 }
@@ -305,7 +337,8 @@ canvas {
 }
 
 /* Tier 9: Lime (81-90 HP) */
-.life-icon.tier-lime {
+.life-icon.tier-lime,
+.life-tier-indicator.tier-lime {
     background: linear-gradient(135deg, #cf0, #9c0);
     box-shadow: 0 0 10px #cf0;
 }
@@ -317,7 +350,8 @@ canvas {
 }
 
 /* Tier 10: Blue (91-100 HP) */
-.life-icon.tier-blue {
+.life-icon.tier-blue,
+.life-tier-indicator.tier-blue {
     background: linear-gradient(135deg, #08f, #05a);
     box-shadow: 0 0 10px #08f;
 }

@@ -126,6 +126,9 @@ function updateUI() {
         { filled: 'tier-blue', empty: 'tier-blue-empty' }      // Tier 10: 91-100 HP (blue)
     ];
 
+    const lifeRow = document.createElement('div');
+    lifeRow.className = 'life-row';
+
     // Render 10 slots from right to left
     for (let i = MAX_VISUAL_SLOTS - 1; i >= 0; i--) {
         const l = document.createElement('div');
@@ -149,7 +152,25 @@ function updateUI() {
             l.className = 'life-icon unavailable';
         }
 
-        livesContainer.appendChild(l);
+        lifeRow.appendChild(l);
+    }
+
+    livesContainer.appendChild(lifeRow);
+
+    // Add tier markers for each completed set of 10 HP to make overflow obvious
+    const completedTiers = Math.min(currentTier, tierColors.length);
+    if (completedTiers > 0) {
+        const tierRow = document.createElement('div');
+        tierRow.className = 'life-tier-row';
+
+        for (let t = 0; t < completedTiers; t++) {
+            const tierColor = tierColors[Math.min(t, tierColors.length - 1)];
+            const indicator = document.createElement('div');
+            indicator.className = `life-tier-indicator ${tierColor.filled}`;
+            tierRow.appendChild(indicator);
+        }
+
+        livesContainer.appendChild(tierRow);
     }
 
 
