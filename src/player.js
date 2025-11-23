@@ -105,7 +105,7 @@ function awardWeaponXp(xpGain) {
         return;
     }
 
-    player.weaponXp += xpGain;
+    player.weaponXp += xpGain * player.stats.weaponXpMult;
 
     while (player.powerLevel < player.maxPower && player.weaponXp >= player.weaponXpMax) {
         player.weaponXp -= player.weaponXpMax;
@@ -127,7 +127,7 @@ function awardWeaponXp(xpGain) {
 function awardPlayerXp(amount) {
     if (gameState !== 'PLAYING') return;
 
-    player.xp += amount;
+    player.xp += amount * player.stats.playerXpMult;
     if (player.xp >= player.xpMax) {
         player.xp -= player.xpMax;
         player.level++;
@@ -158,6 +158,12 @@ function applyUpgrade(type) {
     } else if (type === 'moveSpeed') {
         player.stats.moveSpeedMult += 0.1;
         spawnText(player.x, player.y, "MOVE SPEED UP", "#0ff");
+    } else if (type === 'weaponXp') {
+        player.stats.weaponXpMult += 0.1;
+        spawnText(player.x, player.y, "WEAPON XP UP", "#9e0");
+    } else if (type === 'playerXp') {
+        player.stats.playerXpMult += 0.1;
+        spawnText(player.x, player.y, "PLAYER XP UP", "#9e0");
     }
 
     document.getElementById('level-up-menu').classList.add('hidden');

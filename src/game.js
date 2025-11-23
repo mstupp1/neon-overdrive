@@ -57,7 +57,7 @@ function initGame() {
     score = 0; player.lives = PLAYER_MAX_LIVES; player.powerLevel = 0; player.iframes = 0; player.hasShield = false;
     player.weaponXp = 0; player.weaponXpMax = getWeaponXpForLevel(player.powerLevel);
     player.level = 1; player.xp = 0; player.xpMax = CHAR_XP_BASE;
-    player.stats = { damageMult: 1.0, hpMax: PLAYER_MAX_LIVES, fireRateMult: 1.0, moveSpeedMult: 1.0 };
+    player.stats = { damageMult: 1.0, hpMax: PLAYER_MAX_LIVES, fireRateMult: 1.0, moveSpeedMult: 1.0, weaponXpMult: 1.0, playerXpMult: 1.0 };
 
     if (xpFill) { xpFill.style.transition = 'none'; setTimeout(() => xpFill.style.transition = 'width 0.2s ease-out', 50); }
     setPlayerStartPosition(); player.vx = 0; player.vy = 0; player.tilt = 0;

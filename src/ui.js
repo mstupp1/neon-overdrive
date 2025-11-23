@@ -17,7 +17,9 @@ const ALL_UPGRADES = [
     { id: 'hp', title: 'REINFORCE', description: '+1 MAX HP', icon: 'favorite', stat: 'HP' },
     { id: 'damage', title: 'OVERCHARGE', description: '+10% DAMAGE', icon: 'flash_on', stat: 'DMG' },
     { id: 'speed', title: 'ACCELERATE', description: '+10% FIRE RATE', icon: 'speed', stat: 'RATE' },
-    { id: 'moveSpeed', title: 'AFTERBURNER', description: '+10% MOVE SPEED', icon: 'directions_run', stat: 'MOVE' }
+    { id: 'moveSpeed', title: 'AFTERBURNER', description: '+10% MOVE SPEED', icon: 'directions_run', stat: 'MOVE' },
+    { id: 'weaponXp', title: 'WEAPON MASTERY', description: '+10% WEAPON XP', icon: 'military_tech', stat: 'WPN XP'},
+    { id: 'playerXp', title: 'INSIGHT', description: '+10% XP GAIN', icon: 'psychology', stat: 'PLYR XP' }
 ];
 
 function showLevelUpOptions() {
@@ -306,6 +308,16 @@ function updateLevelUpStats(previewType) {
             case 'moveSpeed':
                 current = player.stats.moveSpeedMult;
                 next = (previewType === 'moveSpeed') ? current + 0.1 : current;
+                formatStat(el, current, next);
+                break;
+            case 'weaponXp':
+                current = player.stats.weaponXpMult;
+                next = (previewType === 'weaponXp') ? current + 0.1 : current;
+                formatStat(el, current, next);
+                break;
+            case 'playerXp':
+                current = player.stats.playerXpMult;
+                next = (previewType === 'playerXp') ? current + 0.1 : current;
                 formatStat(el, current, next);
                 break;
         }

@@ -912,7 +912,7 @@ h1::after {
     gap: 10px;
     box-shadow: 0 0 15px rgba(255, 221, 0, 0.2);
     font-family: monospace;
-    min-height: 150px;
+    min-height: 170px;
     justify-content: space-between;
 }
 
