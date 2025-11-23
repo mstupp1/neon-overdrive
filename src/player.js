@@ -51,34 +51,29 @@ function firePlayerWeapons() {
 
     // Levels 0-2: Single beam
     // Levels 3-5: Double beam
-    // Levels 6-7: Triple shot (front)
-    // Levels 8: Crescent wave (replaces triple)
-    // Levels 9: Crescent wave + rear shot
-    // Level 10: Continuous beam + lightning (replaces crescent)
+    // Levels 6-7: Triple shot (front) - fires every frame
+    // Levels 8-9: Crescent wave (replaces triple) - fires every frame
+    // Level 10: Thick continuous beam (replaces crescent) - fires every frame
 
     // --- BASE FRONT SHOTS ---
-    if (player.powerLevel >= 10 && tick % 3 === 0) {
-        // Level 10: Continuous beam with lightning
+    if (player.powerLevel >= 10) {
+        // Level 10: Thick continuous beam firing every frame
         spawnPlayerBullet(player.x, player.y - 20, -Math.PI / 2, 22, 'beam');
         spawnPlayerBullet(player.x - 4, player.y - 20, -Math.PI / 2, 22, 'beam');
         spawnPlayerBullet(player.x + 4, player.y - 20, -Math.PI / 2, 22, 'beam');
     } else if (player.powerLevel >= 8) {
-        // Level 8-9: Crescent wave shot (replaces triple)
-        if (tick % 8 === 0) {
-            // Frontal crescent wave - 5 bullets in arc
-            const arcSpread = Math.PI / 6; // 30 degree spread
-            for (let i = -2; i <= 2; i++) {
-                const angle = -Math.PI / 2 + (i * arcSpread / 4);
-                spawnPlayerBullet(player.x + i * 3, player.y - 18, angle, 16, 'wave');
-            }
+        // Level 8-9: Crescent wave shot (replaces triple) - fires every frame
+        // Frontal crescent wave - 5 bullets in arc
+        const arcSpread = Math.PI / 6; // 30 degree spread
+        for (let i = -2; i <= 2; i++) {
+            const angle = -Math.PI / 2 + (i * arcSpread / 4);
+            spawnPlayerBullet(player.x + i * 3, player.y - 18, angle, 18, 'wave');
         }
     } else if (player.powerLevel >= 6) {
-        // Level 6-7: Triple shot
-        if (tick % 6 === 0) {
-            spawnPlayerBullet(player.x, player.y - 22, -Math.PI / 2, 20, 'normal');
-            spawnPlayerBullet(player.x - 8, player.y - 18, -Math.PI / 2 - 0.15, 18, 'normal');
-            spawnPlayerBullet(player.x + 8, player.y - 18, -Math.PI / 2 + 0.15, 18, 'normal');
-        }
+        // Level 6-7: Triple shot - fires every frame
+        spawnPlayerBullet(player.x, player.y - 22, -Math.PI / 2, 20, 'normal');
+        spawnPlayerBullet(player.x - 8, player.y - 18, -Math.PI / 2 - 0.15, 18, 'normal');
+        spawnPlayerBullet(player.x + 8, player.y - 18, -Math.PI / 2 + 0.15, 18, 'normal');
     } else if (player.powerLevel >= 3) {
         // Level 3-5: Double beam
         spawnPlayerBullet(player.x - 5, player.y - 20, -Math.PI / 2, 18, 'beam');
@@ -118,7 +113,7 @@ function firePlayerWeapons() {
     // --- LEVEL 9+ REAR SHOT ---
     if (player.powerLevel >= 9 && tick % 12 === 0) {
         // Rear shot similar to single shot from level 1
-        spawnPlayerBullet(player.x, player.y + 10, Math.PI / 2, 16, 'beam');
+        spawnPlayerBullet(player.x, player.y + 10, Math.PI / 2, 22, 'beam');
     }
 
     // --- LEVEL 10+ LIGHTNING BOLTS ---
