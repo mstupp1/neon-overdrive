@@ -143,7 +143,6 @@ function triggerLevelUp() {
     updateMenuSelection();
     updateLevelUpStats(null);
     playSound('powerup'); // Reuse powerup sound or add new one
-    updateDebugPanelVisibility();
 }
 
 function applyUpgrade(type) {
@@ -163,7 +162,6 @@ function applyUpgrade(type) {
     uiLayer.classList.remove('hidden');
     gameState = 'PLAYING';
     updateUI();
-    updateDebugPanelVisibility();
 }
 
 // Expose for HTML onclick
@@ -203,7 +201,6 @@ function hitPlayer() {
         gameOverMenu.classList.remove('hidden');
         finalScoreDisplay.innerText = score;
         updateMenuSelection();
-        updateDebugPanelVisibility();
     }
 }
 

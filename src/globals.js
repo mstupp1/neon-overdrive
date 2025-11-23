@@ -25,13 +25,6 @@ const playerLevelDisplay = document.getElementById('player-level-display');
 const playerXpFill = document.getElementById('player-xp-fill');
 const lowHealthVignette = document.getElementById('low-health-vignette');
 const lowHealthWarning = document.getElementById('low-health-warning');
-const debugPanel = document.getElementById('debug-panel');
-const debugStartBtn = document.getElementById('debug-start-btn');
-const debugLevelBtn = document.getElementById('debug-level-btn');
-const debugWeaponBtn = document.getElementById('debug-weapon-btn');
-const debugUpgradeHpBtn = document.getElementById('debug-upgrade-hp-btn');
-const debugUpgradeDamageBtn = document.getElementById('debug-upgrade-damage-btn');
-const debugUpgradeSpeedBtn = document.getElementById('debug-upgrade-speed-btn');
 
 // Constants
 const SCORE_DIGITS = 10;
@@ -91,7 +84,6 @@ const WEAPON_LEVEL_CURVE = [
 let width, height;
 let globalHue = 0;
 let gameState = 'DEMO';
-let debugMode = false;
 let score = 0;
 let frameCount = 0;
 let lastTime = 0;
