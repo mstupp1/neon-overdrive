@@ -53,16 +53,26 @@ function playSound(type) {
 }
 
 const musicTracks = [
-    'src/audio/music/Space Crossfire 1 - AI Music.mp3',
-    'src/audio/music/Space Crossfire 2 - AI Music.mp3',
-    'src/audio/music/Cosmic Waves 1 - AI Music.mp3',
-    'src/audio/music/Cosmic Waves 2 - AI Music.mp3',
-    'src/audio/music/Galactic Frenzy 1 - AI Music.mp3',
-    'src/audio/music/Galactic Frenzy 2 - AI Music.mp3',
-    'src/audio/music/Galactic Showdown 1 - AI Music.mp3',
-    'src/audio/music/Galactic Showdown 2 - AI Music.mp3',
-    'src/audio/music/Starfire Rumble 1 - AI Music.mp3',
-    'src/audio/music/Starfire Rumble 2 - AI Music.mp3'
+    'src/audio/music/Nebula Ghosts 1.mp3',
+    'src/audio/music/Nebula Ghosts 2.mp3',
+    'src/audio/music/Neon Horizons 1.mp3',
+    'src/audio/music/Neon Horizons 2.mp3',
+    'src/audio/music/Neon Shadows 1.mp3',
+    'src/audio/music/Neon Shadows 2.mp3',
+    'src/audio/music/Photon Drift 1.mp3',
+    'src/audio/music/Photon Drift 2.mp3',
+    'src/audio/music/Star Echoes 1.mp3',
+    'src/audio/music/Star Echoes 2.mp3',
+    'src/audio/music/Space Crossfire 1.mp3',
+    'src/audio/music/Space Crossfire 2.mp3',
+    'src/audio/music/Cosmic Waves 1.mp3',
+    'src/audio/music/Cosmic Waves 2.mp3',
+    'src/audio/music/Galactic Frenzy 1.mp3',
+    'src/audio/music/Galactic Frenzy 2.mp3',
+    'src/audio/music/Galactic Showdown 1.mp3',
+    'src/audio/music/Galactic Showdown 2.mp3',
+    'src/audio/music/Starfire Rumble 1.mp3',
+    'src/audio/music/Starfire Rumble 2.mp3'
 ];
 
 const MusicPlayer = {
