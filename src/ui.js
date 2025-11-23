@@ -194,7 +194,7 @@ function updateUI() {
 
     // Add tier markers to show completed and available 10-HP blocks
     const totalTiers = Math.min(maxTier + 1, tierColors.length);
-    if (totalTiers > 1) {
+    if (totalTiers > 0) {
         const tierRow = document.createElement('div');
         tierRow.className = 'life-tier-row';
 

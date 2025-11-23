@@ -911,7 +911,6 @@ h1::after {
     align-items: center;
     gap: 10px;
     box-shadow: 0 0 15px rgba(255, 221, 0, 0.2);
-    transform: skewX(-10deg);
     font-family: monospace;
     min-height: 190px;
     justify-content: space-between;
@@ -921,7 +920,7 @@ h1::after {
 .upgrade-card.selected {
     background: rgba(255, 221, 0, 0.1);
     box-shadow: 0 0 30px #fd0;
-    transform: skewX(-10deg) scale(1.05);
+    transform: scale(1.05);
 }
 
 .upgrade-card .icon {
