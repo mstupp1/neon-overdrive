@@ -51,3 +51,73 @@ function playSound(type) {
         osc.start(now); osc.stop(now + 0.1);
     }
 }
+
+const musicTracks = [
+    'src/audio/music/Galactic Frenzy 1 - AI Music.mp3',
+    'src/audio/music/Galactic Frenzy 2 - AI Music.mp3'
+];
+
+const MusicPlayer = {
+    playlist: [],
+    currentTrackIndex: -1,
+    audio: new Audio(),
+    isPlaying: false,
+    lastPlayedTrack: null,
+
+    init() {
+        this.audio.addEventListener('ended', () => {
+            this.playNext();
+        });
+    },
+
+    shufflePlaylist() {
+        // Create a copy of tracks
+        let tracks = [...musicTracks];
+
+        // Fisher-Yates shuffle
+        for (let i = tracks.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [tracks[i], tracks[j]] = [tracks[j], tracks[i]];
+        }
+
+        // Ensure the first song of the new playlist isn't the same as the last song played
+        // Only if we have more than 1 track
+        if (this.lastPlayedTrack && tracks.length > 1) {
+            if (tracks[0] === this.lastPlayedTrack) {
+                // Swap first with last to avoid repeat
+                [tracks[0], tracks[tracks.length - 1]] = [tracks[tracks.length - 1], tracks[0]];
+            }
+        }
+
+        this.playlist = tracks;
+        this.currentTrackIndex = -1;
+    },
+
+    playNext() {
+        if (this.playlist.length === 0 || this.currentTrackIndex >= this.playlist.length - 1) {
+            this.shufflePlaylist();
+        }
+
+        this.currentTrackIndex++;
+        const track = this.playlist[this.currentTrackIndex];
+        this.lastPlayedTrack = track;
+
+        this.audio.src = track;
+        this.audio.volume = 0.3; // Background music volume
+        this.audio.play().catch(e => console.warn("Audio play failed:", e));
+    },
+
+    start() {
+        if (this.isPlaying) return;
+        this.isPlaying = true;
+        this.playNext();
+    },
+
+    stop() {
+        this.audio.pause();
+        this.audio.currentTime = 0;
+        this.isPlaying = false;
+    }
+};
+
+MusicPlayer.init();

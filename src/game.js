@@ -46,6 +46,9 @@ function returnToMenu() {
     resetWorldState();
     buildPowerSegments();
     updateUI();
+
+    // Stop background music
+    MusicPlayer.stop();
 }
 
 function initGame() {
@@ -71,6 +74,9 @@ function initGame() {
 
     lastTime = performance.now();
     accumulator = 0;
+
+    // Start background music
+    MusicPlayer.start();
 }
 
 function updateDemoAI() {
