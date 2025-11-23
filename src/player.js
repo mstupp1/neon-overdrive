@@ -110,10 +110,10 @@ function firePlayerWeapons() {
         spawnPlayerBullet(player.x + 12, player.y - 24, arcAngle2, 14, 'homing');
     }
 
-    // --- LEVEL 9+ REAR SHOT ---
-    if (player.powerLevel >= 9 && tick % 12 === 0) {
-        // Rear shot similar to single shot from level 1
-        spawnPlayerBullet(player.x, player.y + 10, Math.PI / 2, 22, 'beam');
+    // --- LEVEL 9+ FORWARD MISSILE ---
+    if (player.powerLevel >= 9 && tick % 45 === 0) {
+        // Forward missile with AOE effect
+        spawnPlayerBullet(player.x, player.y - 15, -Math.PI / 2, 16, 'missile');
     }
 
     // --- LEVEL 10+ LIGHTNING BOLTS ---

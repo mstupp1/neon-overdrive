@@ -308,14 +308,41 @@ function update(dt) {
                 }
 
                 if (hit) {
+                    // Check if this was a missile for AOE
+                    const isMissile = b.subType === 'missile';
+
                     if (!b.pierce) b.active = false;
                     e.hp -= (b.damage ?? 1);
 
                     // Flash effect on damage
                     e.flashTimer = 8;
 
-                    // Reduced impact effect
-                    if (Math.random() < 0.3) createExplosionLogic(b.x, b.y, '#fff', 1);
+                    // Missile AOE explosion
+                    if (isMissile) {
+                        const aoeRadius = 60;
+                        // Visual explosion for missile
+                        createExplosionLogic(b.x, b.y, '#ff9c2a', 30);
+                        createExplosionLogic(b.x, b.y, '#fff', 15);
+                        createExplosionLogic(b.x, b.y, '#f60', 20);
+
+                        // AOE damage to all nearby enemies
+                        enemies.forEach(target => {
+                            if (target.active && target !== e) {
+                                const distance = dist(b.x, b.y, target.x, target.y);
+                                if (distance < aoeRadius) {
+                                    // Reduced damage for AOE
+                                    const aoeDamage = (b.damage ?? 1) * 0.5;
+                                    target.hp -= aoeDamage;
+                                    target.flashTimer = 8;
+                                    createExplosionLogic(target.x, target.y, '#ff9c2a', 3);
+                                }
+                            }
+                        });
+                    } else {
+                        // Reduced impact effect for non-missiles
+                        if (Math.random() < 0.3) createExplosionLogic(b.x, b.y, '#fff', 1);
+                    }
+
                     if (e.hp <= 0 && e.active) {
                         e.active = false;
                         if (gameState === 'PLAYING') {

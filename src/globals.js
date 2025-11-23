@@ -63,7 +63,8 @@ const PLAYER_WEAPON_BASE = {
     normal: { damage: 1, pierce: false },
     homing: { damage: 0.9, pierce: false },
     wave: { damage: 0.75, pierce: true },
-    blade: { damage: 0.65, pierce: true }
+    blade: { damage: 0.65, pierce: true },
+    missile: { damage: 2.5, pierce: false } // High damage + AOE effect
 };
 
 const WEAPON_LEVEL_CURVE = [
