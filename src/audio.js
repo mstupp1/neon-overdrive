@@ -7,6 +7,7 @@ const audioCtx = new AudioContext();
 
 function playSound(type) {
     if (gameState === 'DEMO') return; // Muted in demo
+    if (sfxMuted) return;
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -50,6 +51,12 @@ function playSound(type) {
         gain.gain.linearRampToValueAtTime(0, now + 0.1);
         osc.start(now); osc.stop(now + 0.1);
     }
+}
+
+let sfxMuted = false;
+function toggleSfxMute() {
+    sfxMuted = !sfxMuted;
+    return sfxMuted;
 }
 
 const musicTracks = [
@@ -141,6 +148,16 @@ const MusicPlayer = {
         this.audio.pause();
         this.audio.currentTime = 0;
         this.isPlaying = false;
+    },
+
+    toggleMute() {
+        if (this.audio.muted) {
+            this.audio.muted = false;
+            return false;
+        } else {
+            this.audio.muted = true;
+            return true;
+        }
     }
 };
 

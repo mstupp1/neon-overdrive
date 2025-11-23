@@ -371,3 +371,32 @@ function showStageToast(stageName, hue, stageNum) {
     }, 4000);
 }
 
+// Audio Toggles
+const musicToggleBtn = document.getElementById('music-toggle-btn');
+const sfxToggleBtn = document.getElementById('sfx-toggle-btn');
+
+if (musicToggleBtn) {
+    musicToggleBtn.addEventListener('click', () => {
+        const isMuted = MusicPlayer.toggleMute();
+        updateAudioBtnState(musicToggleBtn, isMuted, 'music_note', 'music_off');
+    });
+}
+
+if (sfxToggleBtn) {
+    sfxToggleBtn.addEventListener('click', () => {
+        const isMuted = toggleSfxMute();
+        updateAudioBtnState(sfxToggleBtn, isMuted, 'volume_up', 'volume_off');
+    });
+}
+
+function updateAudioBtnState(btn, isMuted, onIcon, offIcon) {
+    const iconSpan = btn.querySelector('.material-icons');
+    if (isMuted) {
+        btn.classList.add('muted');
+        iconSpan.textContent = offIcon;
+    } else {
+        btn.classList.remove('muted');
+        iconSpan.textContent = onIcon;
+    }
+}
+

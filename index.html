@@ -69,8 +69,15 @@
                 <div class="stage-name" id="stage-name-display"></div>
             </div>
             <div id="song-toast" class="hidden">
-                <div class="song-label">NOW PLAYING</div>
-                <div class="song-name" id="song-name-display"></div>
+                <div class="song-icon">
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                </div>
+                <div class="song-info">
+                    <div class="song-label">NOW PLAYING</div>
+                    <div class="song-name" id="song-name-display"></div>
+                </div>
             </div>
         </div>
 
@@ -81,6 +88,14 @@
         </div>
 
         <div id="pause-menu" class="menu-screen hidden">
+            <div class="audio-controls">
+                <button id="music-toggle-btn" class="audio-btn" aria-label="Toggle Music">
+                    <span class="material-icons">music_note</span>
+                </button>
+                <button id="sfx-toggle-btn" class="audio-btn" aria-label="Toggle SFX">
+                    <span class="material-icons">volume_up</span>
+                </button>
+            </div>
             <h1 style="color: #0ff;">PAUSED</h1>
             <div class="menu-actions">
                 <button class="btn" id="resume-btn">RESUME</button>
