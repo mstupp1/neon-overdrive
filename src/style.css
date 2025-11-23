@@ -1049,3 +1049,17 @@ h1::after {
     padding: 5px 10px;
 }
 
+/* Hide current health tier indicator */
+.lives-box:has(.life-icon.tier-red) .life-tier-indicator.tier-red,
+.lives-box:has(.life-icon.tier-cyan) .life-tier-indicator.tier-cyan,
+.lives-box:has(.life-icon.tier-yellow) .life-tier-indicator.tier-yellow,
+.lives-box:has(.life-icon.tier-magenta) .life-tier-indicator.tier-magenta,
+.lives-box:has(.life-icon.tier-green) .life-tier-indicator.tier-green,
+.lives-box:has(.life-icon.tier-orange) .life-tier-indicator.tier-orange,
+.lives-box:has(.life-icon.tier-purple) .life-tier-indicator.tier-purple,
+.lives-box:has(.life-icon.tier-pink) .life-tier-indicator.tier-pink,
+.lives-box:has(.life-icon.tier-lime) .life-tier-indicator.tier-lime,
+.lives-box:has(.life-icon.tier-blue) .life-tier-indicator.tier-blue {
+    display: none;
+}
+
