@@ -590,7 +590,11 @@ function playHoldSound() {
 
         holdOscillator.type = 'sine';
         holdOscillator.frequency.value = 300; // Start frequency
-        holdGainNode.gain.value = 0.1; // Start volume
+
+        // Fade in to prevent click at start
+        const currentTime = holdAudioContext.currentTime;
+        holdGainNode.gain.setValueAtTime(0.0001, currentTime); // Start near silent
+        holdGainNode.gain.exponentialRampToValueAtTime(0.1, currentTime + 0.02); // Fade in over 20ms
 
         holdOscillator.start();
     } catch (e) {
