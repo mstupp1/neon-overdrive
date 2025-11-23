@@ -239,6 +239,11 @@ canvas {
     box-shadow: 0 0 10px #f00;
 }
 
+.life-tier-indicator.tier-red-empty {
+    background: rgba(255, 0, 0, 0.2);
+    box-shadow: 0 0 4px rgba(255, 0, 0, 0.25);
+}
+
 .life-icon.tier-red-empty {
     background: rgba(255, 0, 0, 0.15);
     border: 2px solid rgba(255, 255, 255, 0.2);
@@ -250,6 +255,11 @@ canvas {
 .life-tier-indicator.tier-cyan {
     background: linear-gradient(135deg, #0ff, #088);
     box-shadow: 0 0 10px #0ff;
+}
+
+.life-tier-indicator.tier-cyan-empty {
+    background: rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 4px rgba(0, 255, 255, 0.25);
 }
 
 .life-icon.tier-cyan-empty {
@@ -265,6 +275,11 @@ canvas {
     box-shadow: 0 0 10px #ff0;
 }
 
+.life-tier-indicator.tier-yellow-empty {
+    background: rgba(255, 255, 0, 0.2);
+    box-shadow: 0 0 4px rgba(255, 255, 0, 0.25);
+}
+
 .life-icon.tier-yellow-empty {
     background: rgba(255, 255, 0, 0.15);
     border: 2px solid rgba(255, 255, 255, 0.2);
@@ -276,6 +291,11 @@ canvas {
 .life-tier-indicator.tier-magenta {
     background: linear-gradient(135deg, #f0f, #909);
     box-shadow: 0 0 10px #f0f;
+}
+
+.life-tier-indicator.tier-magenta-empty {
+    background: rgba(255, 0, 255, 0.2);
+    box-shadow: 0 0 4px rgba(255, 0, 255, 0.25);
 }
 
 .life-icon.tier-magenta-empty {
@@ -291,6 +311,11 @@ canvas {
     box-shadow: 0 0 10px #0f0;
 }
 
+.life-tier-indicator.tier-green-empty {
+    background: rgba(0, 255, 0, 0.2);
+    box-shadow: 0 0 4px rgba(0, 255, 0, 0.25);
+}
+
 .life-icon.tier-green-empty {
     background: rgba(0, 255, 0, 0.15);
     border: 2px solid rgba(255, 255, 255, 0.2);
@@ -302,6 +327,11 @@ canvas {
 .life-tier-indicator.tier-orange {
     background: linear-gradient(135deg, #ff8800, #cc6600);
     box-shadow: 0 0 10px #ff8800;
+}
+
+.life-tier-indicator.tier-orange-empty {
+    background: rgba(255, 136, 0, 0.2);
+    box-shadow: 0 0 4px rgba(255, 136, 0, 0.25);
 }
 
 .life-icon.tier-orange-empty {
@@ -317,6 +347,11 @@ canvas {
     box-shadow: 0 0 10px #a0f;
 }
 
+.life-tier-indicator.tier-purple-empty {
+    background: rgba(170, 0, 255, 0.2);
+    box-shadow: 0 0 4px rgba(170, 0, 255, 0.25);
+}
+
 .life-icon.tier-purple-empty {
     background: rgba(170, 0, 255, 0.15);
     border: 2px solid rgba(255, 255, 255, 0.2);
@@ -328,6 +363,11 @@ canvas {
 .life-tier-indicator.tier-pink {
     background: linear-gradient(135deg, #f6c, #c39);
     box-shadow: 0 0 10px #f6c;
+}
+
+.life-tier-indicator.tier-pink-empty {
+    background: rgba(255, 102, 204, 0.2);
+    box-shadow: 0 0 4px rgba(255, 102, 204, 0.25);
 }
 
 .life-icon.tier-pink-empty {
@@ -343,6 +383,11 @@ canvas {
     box-shadow: 0 0 10px #cf0;
 }
 
+.life-tier-indicator.tier-lime-empty {
+    background: rgba(204, 255, 0, 0.2);
+    box-shadow: 0 0 4px rgba(204, 255, 0, 0.25);
+}
+
 .life-icon.tier-lime-empty {
     background: rgba(204, 255, 0, 0.15);
     border: 2px solid rgba(255, 255, 255, 0.2);
@@ -354,6 +399,11 @@ canvas {
 .life-tier-indicator.tier-blue {
     background: linear-gradient(135deg, #08f, #05a);
     box-shadow: 0 0 10px #08f;
+}
+
+.life-tier-indicator.tier-blue-empty {
+    background: rgba(0, 136, 255, 0.2);
+    box-shadow: 0 0 4px rgba(0, 136, 255, 0.25);
 }
 
 .life-icon.tier-blue-empty {
