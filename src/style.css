@@ -1025,6 +1025,43 @@ h1::after {
     color: #fff;
 }
 
+/* Level Up HP Display */
+.level-up-hp-display {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 25px;
+    padding: 15px 20px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 221, 0, 0.3);
+    border-radius: 4px;
+}
+
+.hp-increase-label {
+    font-size: 14px;
+    color: #fd0;
+    letter-spacing: 3px;
+    font-weight: 900;
+    text-shadow: 0 0 5px #fd0;
+    font-family: monospace;
+}
+
+.hp-increase-value {
+    font-size: 18px;
+    color: #fff;
+    font-family: monospace;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.hp-increase-value .preview-good {
+    color: #0f0;
+    text-shadow: 0 0 10px #0f0;
+}
+
+
 /* Hold-to-Select Styling */
 .hold-indicator {
     position: absolute;

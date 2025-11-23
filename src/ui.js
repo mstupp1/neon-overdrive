@@ -62,6 +62,15 @@ function showLevelUpOptions() {
         upgradeContainer.innerHTML += cardHTML;
     });
 
+    // Add HP increase display row (shown below all upgrade options)
+    const hpRowHTML = `
+        <div class="level-up-hp-display">
+            <div class="hp-increase-label">HEALTH</div>
+            <div class="hp-increase-value" id="level-up-hp-value"></div>
+        </div>
+    `;
+    upgradeContainer.innerHTML += hpRowHTML;
+
     // Add event listeners for hold-to-select
     setupHoldToSelectListeners();
 
@@ -354,6 +363,14 @@ function updateLevelUpStats(previewType) {
                 break;
         }
     });
+
+    // Update HP increase display (always shows the +1 from leveling up)
+    const hpValueEl = document.getElementById('level-up-hp-value');
+    if (hpValueEl) {
+        const prevHp = player.stats.hpMax - 1;
+        const currentHp = player.stats.hpMax;
+        hpValueEl.innerHTML = `${prevHp} <span class="preview-good">-> ${currentHp}</span>`;
+    }
 }
 
 let songToastTimeout;

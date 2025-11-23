@@ -164,6 +164,10 @@ function awardPlayerXp(amount) {
 }
 
 function triggerLevelUp() {
+    // Always grant +1 max health on level up
+    player.stats.hpMax += 1;
+    player.lives = player.stats.hpMax; // Full heal
+
     gameState = 'LEVEL_UP';
     uiLayer.classList.add('hidden');
     document.getElementById('level-up-menu').classList.remove('hidden');
