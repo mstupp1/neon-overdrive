@@ -91,21 +91,41 @@
         <div id="level-up-menu" class="menu-screen hidden">
             <h1 style="color: #fd0;">LEVEL UP!</h1>
             <div class="upgrade-container">
-                <button class="upgrade-card" onclick="selectUpgrade('hp')">
+                <button class="upgrade-card" onclick="selectUpgrade('hp')" onmouseenter="updateLevelUpStats('hp')"
+                    onmouseleave="updateLevelUpStats(null)" onfocus="updateLevelUpStats('hp')"
+                    onblur="updateLevelUpStats(null)">
                     <span class="material-icons icon">favorite</span>
                     <h3>REINFORCE</h3>
                     <p>+1 MAX HP</p>
                 </button>
-                <button class="upgrade-card" onclick="selectUpgrade('damage')">
+                <button class="upgrade-card" onclick="selectUpgrade('damage')"
+                    onmouseenter="updateLevelUpStats('damage')" onmouseleave="updateLevelUpStats(null)"
+                    onfocus="updateLevelUpStats('damage')" onblur="updateLevelUpStats(null)">
                     <span class="material-icons icon">flash_on</span>
                     <h3>OVERCHARGE</h3>
                     <p>+10% DAMAGE</p>
                 </button>
-                <button class="upgrade-card" onclick="selectUpgrade('speed')">
+                <button class="upgrade-card" onclick="selectUpgrade('speed')" onmouseenter="updateLevelUpStats('speed')"
+                    onmouseleave="updateLevelUpStats(null)" onfocus="updateLevelUpStats('speed')"
+                    onblur="updateLevelUpStats(null)">
                     <span class="material-icons icon">speed</span>
                     <h3>ACCELERATE</h3>
                     <p>+10% FIRE RATE</p>
                 </button>
+            </div>
+            <div id="level-up-stats" class="stats-container">
+                <div class="stat-item">
+                    <span class="stat-label">HP</span>
+                    <span class="stat-value" id="stat-hp">3</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">DMG</span>
+                    <span class="stat-value" id="stat-damage">1.0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">RATE</span>
+                    <span class="stat-value" id="stat-speed">1.0</span>
+                </div>
             </div>
         </div>
 

@@ -44,6 +44,12 @@ function updateMenuSelection() {
             btn.classList.remove('selected');
         }
     });
+
+    // Update stats preview if in level up menu
+    if (menuId === 'level-up-menu') {
+        const upgradeTypes = ['hp', 'damage', 'speed'];
+        updateLevelUpStats(upgradeTypes[selectedButtonIndex]);
+    }
 }
 
 function handleMenuInput(key) {
@@ -128,4 +134,39 @@ function updateUI() {
         const pXpPercent = Math.min(100, (player.xp / player.xpMax) * 100);
         playerXpFill.style.width = `${pXpPercent}%`;
     }
+}
+
+function updateLevelUpStats(previewType) {
+    const hpEl = document.getElementById('stat-hp');
+    const dmgEl = document.getElementById('stat-damage');
+    const spdEl = document.getElementById('stat-speed');
+
+    if (!hpEl || !dmgEl || !spdEl) return;
+
+    // Current Stats
+    const currentHp = player.lives;
+    const currentDmg = player.stats.damageMult.toFixed(1);
+    const currentSpd = player.stats.fireRateMult.toFixed(1);
+
+    // Projected Stats
+    let nextHp = currentHp;
+    let nextDmg = parseFloat(currentDmg);
+    let nextSpd = parseFloat(currentSpd);
+
+    if (previewType === 'hp') nextHp++;
+    if (previewType === 'damage') nextDmg += 0.1;
+    if (previewType === 'speed') nextSpd += 0.1;
+
+    // Helper to format preview
+    const formatStat = (el, current, next, isInt = false) => {
+        if (next > current) {
+            el.innerHTML = `${current} <span class="preview-good">-> ${isInt ? next : next.toFixed(1)}</span>`;
+        } else {
+            el.innerHTML = `<span class="preview-neutral">${current}</span>`;
+        }
+    };
+
+    formatStat(hpEl, currentHp, nextHp, true);
+    formatStat(dmgEl, parseFloat(currentDmg), nextDmg);
+    formatStat(spdEl, parseFloat(currentSpd), nextSpd);
 }

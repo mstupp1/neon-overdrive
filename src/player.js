@@ -141,6 +141,7 @@ function triggerLevelUp() {
     uiLayer.classList.add('hidden');
     document.getElementById('level-up-menu').classList.remove('hidden');
     updateMenuSelection();
+    updateLevelUpStats(null);
     playSound('powerup'); // Reuse powerup sound or add new one
 }
 
