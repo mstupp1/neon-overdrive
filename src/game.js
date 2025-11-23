@@ -171,8 +171,8 @@ function updateDemoAI() {
         firePlayerWeapons();
     }
 
-    // Always max power in demo
-    player.powerLevel = 6;
+    // Always stay at top power in demo so new level 9/10 effects are visible
+    player.powerLevel = player.maxPower;
 }
 
 function update(dt) {
