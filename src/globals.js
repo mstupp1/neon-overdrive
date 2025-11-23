@@ -121,7 +121,7 @@ const player = {
     godMode: false
 };
 
-const CHAR_XP_BASE = 80;
+const CHAR_XP_BASE = 120;
 const CHAR_XP_GROWTH = 1.2;
 
 // Entity Lists
