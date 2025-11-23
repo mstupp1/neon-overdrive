@@ -123,6 +123,12 @@ const MusicPlayer = {
         this.audio.src = track;
         this.audio.volume = 0.3; // Background music volume
         this.audio.play().catch(e => console.warn("Audio play failed:", e));
+
+        // Extract song name from path (e.g., "src/audio/music/Song Name.mp3" -> "Song Name")
+        const songName = track.split('/').pop().replace(/\.[^/.]+$/, "");
+        if (typeof showSongToast === 'function') {
+            showSongToast(songName);
+        }
     },
 
     start() {

@@ -326,3 +326,18 @@ function updateLevelUpStats(previewType) {
         }
     });
 }
+
+let songToastTimeout;
+function showSongToast(songName) {
+    const toast = document.getElementById('song-toast');
+    const nameDisplay = document.getElementById('song-name-display');
+    if (!toast || !nameDisplay) return;
+
+    nameDisplay.textContent = songName;
+    toast.classList.remove('hidden');
+
+    if (songToastTimeout) clearTimeout(songToastTimeout);
+    songToastTimeout = setTimeout(() => {
+        toast.classList.add('hidden');
+    }, 4000);
+}
