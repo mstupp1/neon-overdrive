@@ -511,7 +511,8 @@ function draw() {
         ctx.rotate(player.tilt);
         ctx.fillStyle = '#fff';
         if (!IS_MOBILE) {
-            ctx.shadowBlur = 15; ctx.shadowColor = '#0ff';
+            ctx.shadowBlur = IS_DESKTOP ? 12 : 15; // Desktop optimized (12 vs 15)
+            ctx.shadowColor = '#0ff';
         }
 
         ctx.beginPath();
@@ -531,7 +532,8 @@ function draw() {
         ctx.beginPath(); ctx.moveTo(0, -10); ctx.lineTo(4, 5); ctx.lineTo(0, 8); ctx.lineTo(-4, 5); ctx.fill();
 
         if (!IS_MOBILE) {
-            ctx.shadowBlur = 20; ctx.fillStyle = '#0ff';
+            ctx.shadowBlur = IS_DESKTOP ? 16 : 20; // Desktop optimized (16 vs 20)
+            ctx.fillStyle = '#0ff';
         } else {
             ctx.fillStyle = '#0ff';
         }
@@ -542,8 +544,9 @@ function draw() {
     }
     ctx.restore();
 
-    // Glitch Overlay - Removed for mobile performance
-    if (!IS_MOBILE && frameCount % 4 === 0) { // Reduced frequency
+    // Glitch Overlay - Desktop optimized (every 6 frames vs original 4)
+    const glitchFreq = IS_DESKTOP ? 6 : 4;
+    if (!IS_MOBILE && frameCount % glitchFreq === 0) { // Reduced frequency
         ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = `hsla(${globalHue + 180},100%,50%,0.05)`;
         ctx.fillRect(0, 0, width, height); ctx.globalCompositeOperation = 'source-over';
     }

@@ -51,9 +51,10 @@ class Particle {
             ctx.scale(1, streakScale);
             ctx.fillRect(-half, -half, half * 2, half * 2);
 
-            // Simple fake glow
+            // Simple fake glow - Desktop optimized (3x vs original 4x)
+            const glowSize = IS_DESKTOP ? 3 : 4; // Smaller glow for desktop
             ctx.globalAlpha = Math.min(1, (this.life * brightScale + alphaBoost) * 0.4);
-            ctx.fillRect(-half * 2, -half * 2, half * 4, half * 4);
+            ctx.fillRect(-half * glowSize / 2, -half * glowSize / 2, half * glowSize, half * glowSize);
         } else {
             // Simplified drawing for mobile
             ctx.fillRect(-half, -half, half * 2, half * 2);

@@ -37,7 +37,8 @@ function spawnEnemyLogic() {
 }
 
 function createExplosionLogic(x, y, color, count) {
-    const finalCount = IS_MOBILE ? Math.ceil(count * 0.5) : count;
+    // Desktop optimized to 75% (vs mobile 50%, original 100%)
+    const finalCount = IS_MOBILE ? Math.ceil(count * 0.5) : (IS_DESKTOP ? Math.ceil(count * 0.75) : count);
     for (let i = 0; i < finalCount; i++) spawnParticle(x, y, color);
 }
 

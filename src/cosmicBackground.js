@@ -30,8 +30,8 @@ class CosmicBackground {
         this.vortexes = [];
         this.planets = [];
         this.vortexSpawnTimer = 0;
-        // Stars
-        const starCount = IS_MOBILE ? 40 : 100;
+        // Stars - Desktop optimized to 70 (vs mobile 40, original 100)
+        const starCount = IS_MOBILE ? 40 : 70;
         for (let i = 0; i < starCount; i++) {
             this.stars.push({
                 x: Math.random() * width,
@@ -40,8 +40,8 @@ class CosmicBackground {
                 size: Math.random() * 2
             });
         }
-        // Vortexes - Optimized count for performance
-        const vortexCount = IS_MOBILE ? 1 : 3;
+        // Vortexes - Desktop optimized to 2 (vs mobile 1, original 3)
+        const vortexCount = IS_MOBILE ? 1 : 2;
         for (let i = 0; i < vortexCount; i++) {
             this.vortexes.push({
                 x: Math.random() * width,
@@ -228,7 +228,10 @@ class CosmicBackground {
             ctx.globalAlpha = baseOpacity * pulse;
 
             // Radial gradient glow with pulsing blur
-            const blurAmount = 15 + Math.sin(v.pulsePhase || 0) * 5 + 5; // 15-25px range
+            // Desktop optimized: 12-20px vs original 15-25px
+            const baseBlur = IS_DESKTOP ? 12 : 15;
+            const blurRange = IS_DESKTOP ? 4 : 5;
+            const blurAmount = baseBlur + Math.sin(v.pulsePhase || 0) * blurRange + blurRange;
             if (!IS_MOBILE) {
                 ctx.shadowBlur = blurAmount;
                 ctx.shadowColor = v.color;
@@ -246,7 +249,10 @@ class CosmicBackground {
             ctx.rotate(v.angle);
 
             // Pulsing blur for spiral lines
-            const lineBlur = 10 + Math.sin(v.pulsePhase || 0) * 5 + 5; // 10-20px range
+            // Desktop optimized: 8-16px vs original 10-20px
+            const lineBaseBlur = IS_DESKTOP ? 8 : 10;
+            const lineBlurRange = IS_DESKTOP ? 4 : 5;
+            const lineBlur = lineBaseBlur + Math.sin(v.pulsePhase || 0) * lineBlurRange + lineBlurRange;
             if (!IS_MOBILE) {
                 ctx.shadowBlur = lineBlur;
                 ctx.shadowColor = v.color;
@@ -261,8 +267,8 @@ class CosmicBackground {
             for (let i = 0; i < 6; i++) {
                 ctx.rotate(Math.PI / 3);
 
-                // Draw oscillating spiral arm using fewer segments for performance
-                const segments = IS_MOBILE ? 4 : 8; // Reduced from 20 for better performance
+                // Draw oscillating spiral arm - Desktop optimized to 6 (vs mobile 4, original 8)
+                const segments = IS_MOBILE ? 4 : 6; // Reduced from 20 for better performance
                 const wavePhase = v.angle * 3;
                 const baseAmplitude = 15 + Math.sin(v.angle * 2 + i) * 5;
 
@@ -330,7 +336,8 @@ class CosmicBackground {
         this.planets.forEach(p => {
             ctx.fillStyle = p.color;
             if (!IS_MOBILE) {
-                ctx.shadowBlur = 20; ctx.shadowColor = p.color;
+                ctx.shadowBlur = IS_DESKTOP ? 15 : 20; // Desktop optimized (15 vs 20)
+                ctx.shadowColor = p.color;
             }
             ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
             ctx.shadowBlur = 0;
