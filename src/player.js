@@ -140,6 +140,7 @@ function triggerLevelUp() {
     gameState = 'LEVEL_UP';
     uiLayer.classList.add('hidden');
     document.getElementById('level-up-menu').classList.remove('hidden');
+    updateMenuSelection();
     playSound('powerup'); // Reuse powerup sound or add new one
 }
 
@@ -198,6 +199,7 @@ function hitPlayer() {
         pauseBtn.classList.remove('active');
         gameOverMenu.classList.remove('hidden');
         finalScoreDisplay.innerText = score;
+        updateMenuSelection();
     }
 }
 

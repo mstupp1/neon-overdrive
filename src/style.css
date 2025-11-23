@@ -499,6 +499,18 @@ h1::after {
     transform: skewX(-20deg) scale(0.95);
 }
 
+.btn.selected {
+    background: rgba(0, 255, 255, 0.1);
+    box-shadow: 0 0 40px #0ff, inset 0 0 20px #0ff;
+    color: #fff;
+    text-shadow: 0 0 10px #fff;
+    transform: skewX(-20deg) scale(1.05);
+}
+
+.btn.selected::before {
+    left: 100%;
+}
+
 .menu-actions {
     display: flex;
     flex-direction: column;
@@ -576,7 +588,8 @@ h1::after {
     font-family: monospace;
 }
 
-.upgrade-card:hover {
+.upgrade-card:hover,
+.upgrade-card.selected {
     background: rgba(255, 221, 0, 0.1);
     box-shadow: 0 0 30px #fd0;
     transform: skewX(-10deg) scale(1.05);

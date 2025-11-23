@@ -18,6 +18,7 @@ function pauseGame() {
     uiLayer.classList.add('hidden');
     pauseMenu.classList.remove('hidden');
     pauseBtn.classList.add('active');
+    updateMenuSelection();
 }
 
 function resumeGame() {
@@ -37,6 +38,7 @@ function returnToMenu() {
     startMenu.classList.remove('hidden');
     uiLayer.classList.add('hidden');
     pauseBtn.classList.remove('active');
+    updateMenuSelection();
 
     score = 0; player.lives = PLAYER_MAX_LIVES; player.powerLevel = 0; player.iframes = 0; player.hasShield = false;
     player.weaponXp = 0; player.weaponXpMax = getWeaponXpForLevel(player.powerLevel);
@@ -534,6 +536,23 @@ resumeBtn.addEventListener('click', resumeGame);
 pauseRestartBtn.addEventListener('click', initGame);
 quitBtn.addEventListener('click', returnToMenu);
 
+// Menu Input Handling
+window.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        if (gameState === 'PLAYING') pauseGame();
+        else if (gameState === 'PAUSED') resumeGame();
+        return;
+    }
+
+    if (gameState === 'MENU' || gameState === 'PAUSED' || gameState === 'GAMEOVER' || gameState === 'LEVEL_UP' || gameState === 'DEMO') {
+        handleMenuInput(e.key);
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Enter'].includes(e.key)) {
+            e.preventDefault();
+        }
+    }
+});
+
 // Start loop
 buildPowerSegments();
+updateMenuSelection(); // Initialize selection for start menu
 requestAnimationFrame(loop);

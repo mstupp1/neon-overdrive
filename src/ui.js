@@ -2,6 +2,74 @@
  * UI MANAGEMENT
  */
 
+// Menu Navigation State
+let currentMenuId = null;
+let selectedButtonIndex = 0;
+
+const MENUS = {
+    'start-menu': { selector: '#start-menu .btn', defaultIndex: 0 },
+    'pause-menu': { selector: '#pause-menu .btn', defaultIndex: 0 },
+    'game-over-menu': { selector: '#game-over-menu .btn', defaultIndex: 0 },
+    'level-up-menu': { selector: '#level-up-menu .upgrade-card', defaultIndex: 1 } // Center option default
+};
+
+function getVisibleMenuId() {
+    if (!startMenu.classList.contains('hidden')) return 'start-menu';
+    if (!pauseMenu.classList.contains('hidden')) return 'pause-menu';
+    if (!gameOverMenu.classList.contains('hidden')) return 'game-over-menu';
+    if (!document.getElementById('level-up-menu').classList.contains('hidden')) return 'level-up-menu';
+    return null;
+}
+
+function updateMenuSelection() {
+    const menuId = getVisibleMenuId();
+    if (!menuId) return;
+
+    if (currentMenuId !== menuId) {
+        currentMenuId = menuId;
+        selectedButtonIndex = MENUS[menuId].defaultIndex;
+    }
+
+    const buttons = document.querySelectorAll(MENUS[menuId].selector);
+    if (buttons.length === 0) return;
+
+    // Clamp index
+    if (selectedButtonIndex < 0) selectedButtonIndex = buttons.length - 1;
+    if (selectedButtonIndex >= buttons.length) selectedButtonIndex = 0;
+
+    buttons.forEach((btn, index) => {
+        if (index === selectedButtonIndex) {
+            btn.classList.add('selected');
+        } else {
+            btn.classList.remove('selected');
+        }
+    });
+}
+
+function handleMenuInput(key) {
+    const menuId = getVisibleMenuId();
+    if (!menuId) return;
+
+    const buttons = document.querySelectorAll(MENUS[menuId].selector);
+    if (buttons.length === 0) return;
+
+    // Initialize selection if needed
+    if (currentMenuId !== menuId) {
+        updateMenuSelection();
+        return; // Just highlight first option on first input if not already
+    }
+
+    if (key === 'ArrowUp' || key === 'w' || key === 'ArrowLeft' || key === 'a') {
+        selectedButtonIndex--;
+        updateMenuSelection();
+    } else if (key === 'ArrowDown' || key === 's' || key === 'ArrowRight' || key === 'd') {
+        selectedButtonIndex++;
+        updateMenuSelection();
+    } else if (key === 'Enter' || key === ' ') {
+        buttons[selectedButtonIndex].click();
+    }
+}
+
 function buildPowerSegments() {
     if (!powerSegments) return;
     powerSegments.innerHTML = '';
