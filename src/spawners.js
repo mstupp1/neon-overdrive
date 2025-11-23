@@ -37,7 +37,8 @@ function spawnEnemyLogic() {
 }
 
 function createExplosionLogic(x, y, color, count) {
-    for (let i = 0; i < count; i++) spawnParticle(x, y, color);
+    const finalCount = IS_MOBILE ? Math.ceil(count * 0.5) : count;
+    for (let i = 0; i < finalCount; i++) spawnParticle(x, y, color);
 }
 
 function triggerBombLogic() {

@@ -445,26 +445,35 @@ function draw() {
     // Grid - Optimized with warbling sin wave effect
     ctx.strokeStyle = `hsla(${globalHue}, 80%, 40%, 0.15)`; ctx.lineWidth = 1;
     const gs = 80; // Larger grid size
-    const waveAmp = 8; // Wave amplitude (how far lines move)
-    const waveFreq = 0.015; // Wave frequency (how tight the waves are)
-    const waveSpeed = frameCount * 0.03; // Animation speed
 
-    ctx.beginPath();
-    // Vertical lines with horizontal warble
-    for (let x = 0; x <= width; x += gs) {
-        ctx.moveTo(x + Math.sin(waveSpeed + x * waveFreq) * waveAmp, 0);
-        for (let y = gs; y <= height; y += gs) {
-            ctx.lineTo(x + Math.sin(waveSpeed + y * waveFreq + x * waveFreq) * waveAmp, y);
+    if (IS_MOBILE) {
+        // Simple grid for mobile
+        ctx.beginPath();
+        for (let x = 0; x <= width; x += gs) { ctx.moveTo(x, 0); ctx.lineTo(x, height); }
+        for (let y = 0; y <= height; y += gs) { ctx.moveTo(0, y); ctx.lineTo(width, y); }
+        ctx.stroke();
+    } else {
+        const waveAmp = 8; // Wave amplitude (how far lines move)
+        const waveFreq = 0.015; // Wave frequency (how tight the waves are)
+        const waveSpeed = frameCount * 0.03; // Animation speed
+
+        ctx.beginPath();
+        // Vertical lines with horizontal warble
+        for (let x = 0; x <= width; x += gs) {
+            ctx.moveTo(x + Math.sin(waveSpeed + x * waveFreq) * waveAmp, 0);
+            for (let y = gs; y <= height; y += gs) {
+                ctx.lineTo(x + Math.sin(waveSpeed + y * waveFreq + x * waveFreq) * waveAmp, y);
+            }
         }
-    }
-    // Horizontal lines with vertical warble
-    for (let y = 0; y <= height; y += gs) {
-        ctx.moveTo(0, y + Math.sin(waveSpeed + y * waveFreq) * waveAmp);
-        for (let x = gs; x <= width; x += gs) {
-            ctx.lineTo(x, y + Math.sin(waveSpeed + x * waveFreq + y * waveFreq) * waveAmp);
+        // Horizontal lines with vertical warble
+        for (let y = 0; y <= height; y += gs) {
+            ctx.moveTo(0, y + Math.sin(waveSpeed + y * waveFreq) * waveAmp);
+            for (let x = gs; x <= width; x += gs) {
+                ctx.lineTo(x, y + Math.sin(waveSpeed + x * waveFreq + y * waveFreq) * waveAmp);
+            }
         }
+        ctx.stroke();
     }
-    ctx.stroke();
 
     powerups.forEach(e => e.draw(ctx));
     particles.forEach(e => e.draw(ctx));
@@ -501,7 +510,9 @@ function draw() {
         ctx.save();
         ctx.rotate(player.tilt);
         ctx.fillStyle = '#fff';
-        ctx.shadowBlur = 15; ctx.shadowColor = '#0ff';
+        if (!IS_MOBILE) {
+            ctx.shadowBlur = 15; ctx.shadowColor = '#0ff';
+        }
 
         ctx.beginPath();
         ctx.moveTo(0, -25);
@@ -519,7 +530,11 @@ function draw() {
         ctx.fillStyle = '#022';
         ctx.beginPath(); ctx.moveTo(0, -10); ctx.lineTo(4, 5); ctx.lineTo(0, 8); ctx.lineTo(-4, 5); ctx.fill();
 
-        ctx.shadowBlur = 20; ctx.fillStyle = '#0ff';
+        if (!IS_MOBILE) {
+            ctx.shadowBlur = 20; ctx.fillStyle = '#0ff';
+        } else {
+            ctx.fillStyle = '#0ff';
+        }
         ctx.fillRect(-5, 20, 3, 5); ctx.fillRect(2, 20, 3, 5);
         ctx.restore();
 
@@ -528,8 +543,7 @@ function draw() {
     ctx.restore();
 
     // Glitch Overlay - Removed for mobile performance
-
-    if (frameCount % 4 === 0) { // Reduced frequency
+    if (!IS_MOBILE && frameCount % 4 === 0) { // Reduced frequency
         ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = `hsla(${globalHue + 180},100%,50%,0.05)`;
         ctx.fillRect(0, 0, width, height); ctx.globalCompositeOperation = 'source-over';
     }

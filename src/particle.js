@@ -34,7 +34,10 @@ class Particle {
         ctx.save();
         ctx.globalAlpha = Math.min(1, this.life * brightScale + alphaBoost);
         ctx.translate(this.x, this.y);
-        ctx.rotate(this.rotation);
+
+        if (!IS_MOBILE) {
+            ctx.rotate(this.rotation);
+        }
 
         // Optimization: Removed shadowBlur
         // ctx.shadowBlur = 14 * this.life * blurScale;
@@ -43,12 +46,18 @@ class Particle {
         ctx.fillStyle = this.color;
         // Draw as rotated rectangle for more interesting shape
         const half = (this.size * sizeScale) / 2;
-        ctx.scale(1, streakScale);
-        ctx.fillRect(-half, -half, half * 2, half * 2);
 
-        // Simple fake glow
-        ctx.globalAlpha = Math.min(1, (this.life * brightScale + alphaBoost) * 0.4);
-        ctx.fillRect(-half * 2, -half * 2, half * 4, half * 4);
+        if (!IS_MOBILE) {
+            ctx.scale(1, streakScale);
+            ctx.fillRect(-half, -half, half * 2, half * 2);
+
+            // Simple fake glow
+            ctx.globalAlpha = Math.min(1, (this.life * brightScale + alphaBoost) * 0.4);
+            ctx.fillRect(-half * 2, -half * 2, half * 4, half * 4);
+        } else {
+            // Simplified drawing for mobile
+            ctx.fillRect(-half, -half, half * 2, half * 2);
+        }
 
         ctx.restore();
         ctx.globalAlpha = 1;

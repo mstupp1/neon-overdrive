@@ -28,6 +28,7 @@ const lowHealthVignette = document.getElementById('low-health-vignette');
 const lowHealthWarning = document.getElementById('low-health-warning');
 
 // Constants
+const IS_MOBILE = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 800;
 const SCORE_DIGITS = 10;
 const POWERUP_LIFETIME_FRAMES = 900; // ~15 seconds before despawn
 const POWERUP_BLINK_FRAMES = 240; // Blink for last ~4 seconds

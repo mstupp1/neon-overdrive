@@ -31,7 +31,8 @@ class CosmicBackground {
         this.planets = [];
         this.vortexSpawnTimer = 0;
         // Stars
-        for (let i = 0; i < 100; i++) {
+        const starCount = IS_MOBILE ? 40 : 100;
+        for (let i = 0; i < starCount; i++) {
             this.stars.push({
                 x: Math.random() * width,
                 y: Math.random() * height,
@@ -40,7 +41,8 @@ class CosmicBackground {
             });
         }
         // Vortexes - Optimized count for performance
-        for (let i = 0; i < 3; i++) {
+        const vortexCount = IS_MOBILE ? 1 : 3;
+        for (let i = 0; i < vortexCount; i++) {
             this.vortexes.push({
                 x: Math.random() * width,
                 y: Math.random() * height,
@@ -227,8 +229,10 @@ class CosmicBackground {
 
             // Radial gradient glow with pulsing blur
             const blurAmount = 15 + Math.sin(v.pulsePhase || 0) * 5 + 5; // 15-25px range
-            ctx.shadowBlur = blurAmount;
-            ctx.shadowColor = v.color;
+            if (!IS_MOBILE) {
+                ctx.shadowBlur = blurAmount;
+                ctx.shadowColor = v.color;
+            }
 
             const g = ctx.createRadialGradient(v.x, v.y, 0, v.x, v.y, v.size);
             g.addColorStop(0, v.color);
@@ -243,8 +247,10 @@ class CosmicBackground {
 
             // Pulsing blur for spiral lines
             const lineBlur = 10 + Math.sin(v.pulsePhase || 0) * 5 + 5; // 10-20px range
-            ctx.shadowBlur = lineBlur;
-            ctx.shadowColor = v.color;
+            if (!IS_MOBILE) {
+                ctx.shadowBlur = lineBlur;
+                ctx.shadowColor = v.color;
+            }
             ctx.strokeStyle = v.color.replace('0.1)', '0.15)'); // Slightly more visible lines
 
             // Pulsing line width
@@ -256,7 +262,7 @@ class CosmicBackground {
                 ctx.rotate(Math.PI / 3);
 
                 // Draw oscillating spiral arm using fewer segments for performance
-                const segments = 8; // Reduced from 20 for better performance
+                const segments = IS_MOBILE ? 4 : 8; // Reduced from 20 for better performance
                 const wavePhase = v.angle * 3;
                 const baseAmplitude = 15 + Math.sin(v.angle * 2 + i) * 5;
 
@@ -323,7 +329,9 @@ class CosmicBackground {
         ctx.globalCompositeOperation = 'source-over';
         this.planets.forEach(p => {
             ctx.fillStyle = p.color;
-            ctx.shadowBlur = 20; ctx.shadowColor = p.color;
+            if (!IS_MOBILE) {
+                ctx.shadowBlur = 20; ctx.shadowColor = p.color;
+            }
             ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
             ctx.shadowBlur = 0;
 
