@@ -124,6 +124,13 @@ class Bullet {
                 ctx.globalAlpha = 1;
                 ctx.restore();
             }
+            else if (this.subType === 'missile') {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle + Math.PI / 2);
+                ctx.drawImage(sprites.playerMissile, -16, -16, 32, 32);
+                ctx.restore();
+            }
             else ctx.drawImage(sprites.playerNormal, this.x - 12, this.y - 12);
             ctx.globalCompositeOperation = 'source-over';
             ctx.globalAlpha = prevAlpha;

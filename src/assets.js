@@ -414,6 +414,7 @@ function prerenderAssets() {
     sprites.playerHoming = renderGlowSprite('#d0f', 4, 8);
     sprites.playerWave = renderGlowSprite('#50f', 5, 12);
     sprites.playerBlade = renderGlowSprite('#0ff', 15, 10, 'blade');
+    sprites.playerMissile = renderGlowSprite('#ff9c2a', 6, 20, 'circle', '#ffcc00'); // Missile: Orange/yellow with glow
     sprites.enemyChaser = renderGlowSprite('#f00', 20, 10, 'chaser');
     sprites.enemySpinnerCore = renderGlowSprite('#f0f', 30, 10, 'spinnerCore');
     sprites.enemySpinnerRing = renderGlowSprite('#f0f', 30, 10, 'spinnerRing');
