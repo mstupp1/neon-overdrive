@@ -162,7 +162,7 @@ class LevelManager {
 
         // Show Stage Toast
         if (typeof showStageToast === 'function') {
-            showStageToast(config.name, config.hue);
+            showStageToast(config.name, config.hue, this.currentLevel);
         }
     }
 

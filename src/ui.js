@@ -343,13 +343,16 @@ function showSongToast(songName) {
 }
 
 let stageToastTimeout;
-function showStageToast(stageName, hue) {
+function showStageToast(stageName, hue, stageNum) {
     const toast = document.getElementById('stage-toast');
     const nameDisplay = document.getElementById('stage-name-display');
     const labelDisplay = toast.querySelector('.stage-label');
     if (!toast || !nameDisplay) return;
 
     nameDisplay.textContent = stageName;
+    if (stageNum !== undefined) {
+        labelDisplay.textContent = `ENTERING SECTOR ${stageNum}`;
+    }
 
     // Apply dynamic colors
     const color = `hsl(${hue}, 100%, 50%)`;
