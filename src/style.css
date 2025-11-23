@@ -1053,17 +1053,45 @@ h1::after {
     padding: 5px 10px;
 }
 
-/* Hide current health tier indicator */
-.lives-box:has(.life-icon.tier-red) .life-tier-indicator.tier-red,
-.lives-box:has(.life-icon.tier-cyan) .life-tier-indicator.tier-cyan,
-.lives-box:has(.life-icon.tier-yellow) .life-tier-indicator.tier-yellow,
-.lives-box:has(.life-icon.tier-magenta) .life-tier-indicator.tier-magenta,
-.lives-box:has(.life-icon.tier-green) .life-tier-indicator.tier-green,
-.lives-box:has(.life-icon.tier-orange) .life-tier-indicator.tier-orange,
-.lives-box:has(.life-icon.tier-purple) .life-tier-indicator.tier-purple,
-.lives-box:has(.life-icon.tier-pink) .life-tier-indicator.tier-pink,
-.lives-box:has(.life-icon.tier-lime) .life-tier-indicator.tier-lime,
+/* Show current health tier indicator as empty */
+.lives-box:has(.life-icon.tier-red) .life-tier-indicator.tier-red {
+    background: rgba(255, 0, 0, 0.2);
+    box-shadow: 0 0 4px rgba(255, 0, 0, 0.25);
+}
+.lives-box:has(.life-icon.tier-cyan) .life-tier-indicator.tier-cyan {
+    background: rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 4px rgba(0, 255, 255, 0.25);
+}
+.lives-box:has(.life-icon.tier-yellow) .life-tier-indicator.tier-yellow {
+    background: rgba(255, 255, 0, 0.2);
+    box-shadow: 0 0 4px rgba(255, 255, 0, 0.25);
+}
+.lives-box:has(.life-icon.tier-magenta) .life-tier-indicator.tier-magenta {
+    background: rgba(255, 0, 255, 0.2);
+    box-shadow: 0 0 4px rgba(255, 0, 255, 0.25);
+}
+.lives-box:has(.life-icon.tier-green) .life-tier-indicator.tier-green {
+    background: rgba(0, 255, 0, 0.2);
+    box-shadow: 0 0 4px rgba(0, 255, 0, 0.25);
+}
+.lives-box:has(.life-icon.tier-orange) .life-tier-indicator.tier-orange {
+    background: rgba(255, 136, 0, 0.2);
+    box-shadow: 0 0 4px rgba(255, 136, 0, 0.25);
+}
+.lives-box:has(.life-icon.tier-purple) .life-tier-indicator.tier-purple {
+    background: rgba(170, 0, 255, 0.2);
+    box-shadow: 0 0 4px rgba(170, 0, 255, 0.25);
+}
+.lives-box:has(.life-icon.tier-pink) .life-tier-indicator.tier-pink {
+    background: rgba(255, 102, 204, 0.2);
+    box-shadow: 0 0 4px rgba(255, 102, 204, 0.25);
+}
+.lives-box:has(.life-icon.tier-lime) .life-tier-indicator.tier-lime {
+    background: rgba(204, 255, 0, 0.2);
+    box-shadow: 0 0 4px rgba(204, 255, 0, 0.25);
+}
 .lives-box:has(.life-icon.tier-blue) .life-tier-indicator.tier-blue {
-    display: none;
+    background: rgba(0, 136, 255, 0.2);
+    box-shadow: 0 0 4px rgba(0, 136, 255, 0.25);
 }
 
