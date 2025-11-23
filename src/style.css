@@ -1159,3 +1159,45 @@ h1::after {
     text-shadow: 0 0 5px #fff;
     text-transform: uppercase;
 }
+
+/* Stage Toast Notification */
+#stage-toast {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid #fff;
+    padding: 10px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    pointer-events: none;
+    z-index: 100;
+    transform: skewX(-10deg);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    border-left: 4px solid #fff;
+    transition: opacity 1s ease-in-out, transform 1s ease-out;
+}
+
+#stage-toast.hidden {
+    opacity: 0;
+    transform: skewX(-10deg) translateX(-20px);
+}
+
+.stage-label {
+    color: #fff;
+    font-size: 10px;
+    letter-spacing: 2px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    text-shadow: 0 0 5px #fff;
+}
+
+.stage-name {
+    color: #fff;
+    font-size: 14px;
+    font-family: monospace;
+    font-weight: bold;
+    text-shadow: 0 0 5px #fff;
+    text-transform: uppercase;
+}

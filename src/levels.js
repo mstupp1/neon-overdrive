@@ -159,6 +159,11 @@ class LevelManager {
             // Radial gradient from transparent center to dark colored edges
             vignette.style.background = `radial-gradient(circle, transparent 40%, hsla(${config.hue}, 80%, 10%, 0.9) 120%)`;
         }
+
+        // Show Stage Toast
+        if (typeof showStageToast === 'function') {
+            showStageToast(config.name, config.hue);
+        }
     }
 
     getCurrentStats() {

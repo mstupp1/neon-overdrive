@@ -341,3 +341,30 @@ function showSongToast(songName) {
         toast.classList.add('hidden');
     }, 4000);
 }
+
+let stageToastTimeout;
+function showStageToast(stageName, hue) {
+    const toast = document.getElementById('stage-toast');
+    const nameDisplay = document.getElementById('stage-name-display');
+    const labelDisplay = toast.querySelector('.stage-label');
+    if (!toast || !nameDisplay) return;
+
+    nameDisplay.textContent = stageName;
+
+    // Apply dynamic colors
+    const color = `hsl(${hue}, 100%, 50%)`;
+    toast.style.borderColor = color;
+    toast.style.borderLeftColor = color;
+    toast.style.boxShadow = `0 0 10px hsla(${hue}, 100%, 50%, 0.3)`;
+    labelDisplay.style.color = color;
+    labelDisplay.style.textShadow = `0 0 5px ${color}`;
+    nameDisplay.style.textShadow = `0 0 5px #fff, 0 0 10px ${color}`;
+
+    toast.classList.remove('hidden');
+
+    if (stageToastTimeout) clearTimeout(stageToastTimeout);
+    stageToastTimeout = setTimeout(() => {
+        toast.classList.add('hidden');
+    }, 4000);
+}
+
