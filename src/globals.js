@@ -55,7 +55,7 @@ const PLAYER_START_BOTTOM_OFFSET = 40;
 const MAX_POWER_LEVEL = 10;
 const WEAPON_XP_BASE = 120;
 const WEAPON_XP_GROWTH = 1.75;
-const PLAYER_MAX_LIVES = 6;
+const PLAYER_MAX_LIVES = 10;
 
 // Weapon Tuning
 const PLAYER_WEAPON_BASE = {
