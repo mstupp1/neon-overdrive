@@ -17,7 +17,7 @@ const LEVEL_CONFIG = {
         hue: 270, // Purple
         enemyTypes: ['chaser', 'spinner'],
         spawnRateMod: 0.9,
-        enemyHealthMod: 1.2,
+        enemyHealthMod: 1.4,
         enemySpeedMod: 1.05,
         duration: 2400
     },
@@ -26,7 +26,7 @@ const LEVEL_CONFIG = {
         hue: 350, // Red
         enemyTypes: ['chaser', 'spinner', 'dasher'],
         spawnRateMod: 0.8,
-        enemyHealthMod: 1.4,
+        enemyHealthMod: 2.0,
         enemySpeedMod: 1.1,
         duration: 2400
     },
@@ -35,7 +35,7 @@ const LEVEL_CONFIG = {
         hue: 30, // Orange/Gold
         enemyTypes: ['chaser', 'spinner', 'dasher', 'snake'],
         spawnRateMod: 0.75,
-        enemyHealthMod: 1.6,
+        enemyHealthMod: 2.8,
         enemySpeedMod: 1.15,
         duration: 3000
     },
@@ -44,7 +44,7 @@ const LEVEL_CONFIG = {
         hue: 120, // Toxic Green
         enemyTypes: ['chaser', 'spinner', 'dasher', 'snake', 'sniper'],
         spawnRateMod: 0.7,
-        enemyHealthMod: 1.8,
+        enemyHealthMod: 4.0,
         enemySpeedMod: 1.2,
         duration: 3000
     },
@@ -53,7 +53,7 @@ const LEVEL_CONFIG = {
         hue: 180, // Cyan
         enemyTypes: ['chaser', 'spinner', 'dasher', 'snake', 'sniper'],
         spawnRateMod: 0.65,
-        enemyHealthMod: 2.0,
+        enemyHealthMod: 6.0,
         enemySpeedMod: 1.25,
         duration: 3600
     },
@@ -62,7 +62,7 @@ const LEVEL_CONFIG = {
         hue: 300, // Magenta
         enemyTypes: ['chaser', 'spinner', 'dasher', 'snake', 'sniper'],
         spawnRateMod: 0.6,
-        enemyHealthMod: 2.5,
+        enemyHealthMod: 10.0,
         enemySpeedMod: 1.3,
         duration: 3600
     },
@@ -71,7 +71,7 @@ const LEVEL_CONFIG = {
         hue: 250, // Indigo/Dark
         enemyTypes: ['chaser', 'spinner', 'dasher', 'snake', 'sniper'],
         spawnRateMod: 0.55,
-        enemyHealthMod: 3.0,
+        enemyHealthMod: 15.0,
         enemySpeedMod: 1.4,
         duration: 4200
     },
@@ -80,7 +80,7 @@ const LEVEL_CONFIG = {
         hue: 0, // Chaos
         enemyTypes: ['chaser', 'spinner', 'dasher', 'snake', 'sniper'],
         spawnRateMod: 0.5,
-        enemyHealthMod: 4.0,
+        enemyHealthMod: 25,
         enemySpeedMod: 1.5,
         duration: Infinity
     }
