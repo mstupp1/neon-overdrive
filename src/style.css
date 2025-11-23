@@ -1012,3 +1012,40 @@ h1::after {
 .stat-value .preview-neutral {
     color: #fff;
 }
+
+.debug-container {
+    margin-top: 20px;
+    color: #fff;
+    font-family: monospace;
+}
+
+.debug-container summary {
+    cursor: pointer;
+    outline: none;
+    font-size: 14px;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+
+.debug-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-left: 10px;
+}
+
+.debug-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.debug-option label {
+    font-size: 12px;
+}
+
+#add-health-btn {
+    font-size: 10px;
+    padding: 5px 10px;
+}
+

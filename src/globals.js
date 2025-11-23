@@ -111,7 +111,8 @@ const player = {
     },
     hasShield: false,
     tail: [],
-    vx: 0, vy: 0, tilt: 0, tiltDir: 1
+    vx: 0, vy: 0, tilt: 0, tiltDir: 1,
+    godMode: false
 };
 
 const CHAR_XP_BASE = 100;

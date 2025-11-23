@@ -168,6 +168,7 @@ function applyUpgrade(type) {
 window.selectUpgrade = applyUpgrade;
 
 function hitPlayer() {
+    if (player.godMode) return;
     if (gameState === 'DEMO') return; // Invincible in demo
 
     if (player.hasShield) {

@@ -536,6 +536,23 @@ resumeBtn.addEventListener('click', resumeGame);
 pauseRestartBtn.addEventListener('click', initGame);
 quitBtn.addEventListener('click', returnToMenu);
 
+// Debug controls
+const godModeCheckbox = document.getElementById('god-mode-checkbox');
+if (godModeCheckbox) {
+    godModeCheckbox.addEventListener('change', (e) => {
+        player.godMode = e.target.checked;
+    });
+}
+
+const addHealthBtn = document.getElementById('add-health-btn');
+if (addHealthBtn) {
+    addHealthBtn.addEventListener('click', () => {
+        selectUpgrade('hp');
+        updateUI();
+    });
+}
+
+
 // Menu Input Handling
 window.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
