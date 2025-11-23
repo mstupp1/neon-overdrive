@@ -122,7 +122,7 @@ const player = {
 };
 
 const CHAR_XP_BASE = 80;
-const CHAR_XP_GROWTH = 1;
+const CHAR_XP_GROWTH = 1.2;
 
 // Entity Lists
 const bullets = [];
