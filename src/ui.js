@@ -591,12 +591,12 @@ function playHoldSound() {
         holdOscillator.type = 'sine';
         holdOscillator.frequency.value = 300; // Start frequency
 
-        // Fade in to prevent click at start
+        // Fade in to prevent click at start (linear ramp is more reliable than exponential)
         const currentTime = holdAudioContext.currentTime;
-        holdGainNode.gain.setValueAtTime(0.0001, currentTime); // Start near silent
-        holdGainNode.gain.exponentialRampToValueAtTime(0.1, currentTime + 0.02); // Fade in over 20ms
+        holdGainNode.gain.setValueAtTime(0, currentTime); // Start at true silence
+        holdGainNode.gain.linearRampToValueAtTime(0.1, currentTime + 0.05); // Fade in over 50ms
 
-        holdOscillator.start();
+        holdOscillator.start(currentTime);
     } catch (e) {
         console.warn('Could not play hold sound:', e);
     }
