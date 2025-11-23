@@ -53,8 +53,8 @@ const PLAYFIELD_BOTTOM_PADDING = 36;
 const PLAYER_START_BOTTOM_OFFSET = 40;
 
 const MAX_POWER_LEVEL = 10;
-const WEAPON_XP_BASE = 120;
-const WEAPON_XP_GROWTH = 1.75;
+const WEAPON_XP_BASE = 100;
+const WEAPON_XP_GROWTH = 1.5;
 const PLAYER_MAX_LIVES = 10;
 
 // Weapon Tuning
@@ -116,8 +116,8 @@ const player = {
     godMode: false
 };
 
-const CHAR_XP_BASE = 100;
-const CHAR_XP_GROWTH = 1.5;
+const CHAR_XP_BASE = 80;
+const CHAR_XP_GROWTH = 1.3;
 
 // Entity Lists
 const bullets = [];
