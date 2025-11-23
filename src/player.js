@@ -140,8 +140,7 @@ function triggerLevelUp() {
     gameState = 'LEVEL_UP';
     uiLayer.classList.add('hidden');
     document.getElementById('level-up-menu').classList.remove('hidden');
-    updateMenuSelection();
-    updateLevelUpStats(null);
+    showLevelUpOptions();
     playSound('powerup'); // Reuse powerup sound or add new one
 }
 
@@ -156,6 +155,9 @@ function applyUpgrade(type) {
     } else if (type === 'speed') {
         player.stats.fireRateMult += 0.1;
         spawnText(player.x, player.y, "SPEED UP", "#ff0");
+    } else if (type === 'moveSpeed') {
+        player.stats.moveSpeedMult += 0.1;
+        spawnText(player.x, player.y, "MOVE SPEED UP", "#0ff");
     }
 
     document.getElementById('level-up-menu').classList.add('hidden');

@@ -57,7 +57,7 @@ function initGame() {
     score = 0; player.lives = PLAYER_MAX_LIVES; player.powerLevel = 0; player.iframes = 0; player.hasShield = false;
     player.weaponXp = 0; player.weaponXpMax = getWeaponXpForLevel(player.powerLevel);
     player.level = 1; player.xp = 0; player.xpMax = CHAR_XP_BASE;
-    player.stats = { damageMult: 1.0, hpMax: PLAYER_MAX_LIVES, fireRateMult: 1.0 };
+    player.stats = { damageMult: 1.0, hpMax: PLAYER_MAX_LIVES, fireRateMult: 1.0, moveSpeedMult: 1.0 };
 
     if (xpFill) { xpFill.style.transition = 'none'; setTimeout(() => xpFill.style.transition = 'width 0.2s ease-out', 50); }
     setPlayerStartPosition(); player.vx = 0; player.vy = 0; player.tilt = 0;
@@ -212,12 +212,13 @@ function update(dt) {
     if (gameState === 'PLAYING') {
         let accelX = 0;
         let accelY = 0;
+        const accel = PLAYER_ACCEL * player.stats.moveSpeedMult;
 
         // Keyboard-driven acceleration
-        if (keys.up || keys.w) accelY -= PLAYER_ACCEL;
-        if (keys.down || keys.s) accelY += PLAYER_ACCEL;
-        if (keys.left || keys.a) accelX -= PLAYER_ACCEL;
-        if (keys.right || keys.d) accelX += PLAYER_ACCEL;
+        if (keys.up || keys.w) accelY -= accel;
+        if (keys.down || keys.s) accelY += accel;
+        if (keys.left || keys.a) accelX -= accel;
+        if (keys.right || keys.d) accelX += accel;
 
         // Pointer-driven acceleration toward last touch/mouse position
         if (input.active) {
@@ -225,7 +226,7 @@ function update(dt) {
             const dy = input.lastY - player.y;
             const distance = Math.hypot(dx, dy);
             if (distance > 2) {
-                const steer = Math.min(PLAYER_ACCEL, distance * 0.02);
+                const steer = Math.min(accel, distance * 0.02);
                 accelX += (dx / distance) * steer;
                 accelY += (dy / distance) * steer;
             }
@@ -244,8 +245,8 @@ function update(dt) {
 
         // Cap speed
         const maxSpeed = (player.vy < 0)
-            ? PLAYER_MAX_SPEED_UP
-            : (player.vy > 0 ? PLAYER_MAX_SPEED_DOWN : PLAYER_MAX_SPEED);
+            ? PLAYER_MAX_SPEED_UP * player.stats.moveSpeedMult
+            : (player.vy > 0 ? PLAYER_MAX_SPEED_DOWN * player.stats.moveSpeedMult : PLAYER_MAX_SPEED * player.stats.moveSpeedMult);
         const speed = Math.hypot(player.vx, player.vy);
         if (speed > maxSpeed) {
             const s = maxSpeed / speed;

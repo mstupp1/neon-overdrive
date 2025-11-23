@@ -13,6 +13,41 @@ const MENUS = {
     'level-up-menu': { selector: '#level-up-menu .upgrade-card', defaultIndex: 1 } // Center option default
 };
 
+const ALL_UPGRADES = [
+    { id: 'hp', title: 'REINFORCE', description: '+1 MAX HP', icon: 'favorite', stat: 'HP' },
+    { id: 'damage', title: 'OVERCHARGE', description: '+10% DAMAGE', icon: 'flash_on', stat: 'DMG' },
+    { id: 'speed', title: 'ACCELERATE', description: '+10% FIRE RATE', icon: 'speed', stat: 'RATE' },
+    { id: 'moveSpeed', title: 'AFTERBURNER', description: '+10% MOVE SPEED', icon: 'directions_run', stat: 'MOVE' }
+];
+
+function showLevelUpOptions() {
+    const upgradeContainer = document.querySelector('#level-up-menu .upgrade-container');
+    upgradeContainer.innerHTML = '';
+
+    // Shuffle and pick 3
+    const options = [...ALL_UPGRADES].sort(() => 0.5 - Math.random()).slice(0, 3);
+
+    options.forEach(upgrade => {
+        const cardHTML = `
+            <div class="upgrade-column">
+                <button class="upgrade-card" data-upgrade-id="${upgrade.id}" onclick="selectUpgrade('${upgrade.id}')" onmouseenter="updateLevelUpStats('${upgrade.id}')" onmouseleave="updateLevelUpStats(null)" onfocus="updateLevelUpStats('${upgrade.id}')" onblur="updateLevelUpStats(null)">
+                    <span class="material-icons icon">${upgrade.icon}</span>
+                    <h3>${upgrade.title}</h3>
+                    <p>${upgrade.description}</p>
+                </button>
+                <div class="stat-item">
+                    <span class="stat-label">${upgrade.stat}</span>
+                    <span class="stat-value" id="stat-${upgrade.id}"></span>
+                </div>
+            </div>
+        `;
+        upgradeContainer.innerHTML += cardHTML;
+    });
+
+    updateMenuSelection();
+    updateLevelUpStats(null);
+}
+
 function getVisibleMenuId() {
     if (!startMenu.classList.contains('hidden')) return 'start-menu';
     if (!pauseMenu.classList.contains('hidden')) return 'pause-menu';
@@ -47,7 +82,7 @@ function updateMenuSelection() {
 
     // Update stats preview if in level up menu
     if (menuId === 'level-up-menu') {
-        const upgradeTypes = ['hp', 'damage', 'speed'];
+        const upgradeTypes = Array.from(buttons).map(btn => btn.dataset.upgradeId);
         updateLevelUpStats(upgradeTypes[selectedButtonIndex]);
     }
 }
@@ -235,36 +270,44 @@ function updateUI() {
 }
 
 function updateLevelUpStats(previewType) {
-    const hpEl = document.getElementById('stat-hp');
-    const dmgEl = document.getElementById('stat-damage');
-    const spdEl = document.getElementById('stat-speed');
-
-    if (!hpEl || !dmgEl || !spdEl) return;
-
-    // Current Stats
-    const currentHp = player.stats.hpMax;
-    const currentDmg = player.stats.damageMult.toFixed(1);
-    const currentSpd = player.stats.fireRateMult.toFixed(1);
-
-    // Projected Stats
-    let nextHp = currentHp;
-    let nextDmg = parseFloat(currentDmg);
-    let nextSpd = parseFloat(currentSpd);
-
-    if (previewType === 'hp') nextHp++;
-    if (previewType === 'damage') nextDmg += 0.1;
-    if (previewType === 'speed') nextSpd += 0.1;
+    const upgradeCards = document.querySelectorAll('#level-up-menu .upgrade-card');
+    const displayedUpgrades = Array.from(upgradeCards).map(card => card.dataset.upgradeId);
 
     // Helper to format preview
     const formatStat = (el, current, next, isInt = false) => {
+        if (!el) return;
         if (next > current) {
-            el.innerHTML = `${current} <span class="preview-good">-> ${isInt ? next : next.toFixed(1)}</span>`;
+            el.innerHTML = `${isInt ? current : current.toFixed(1)} <span class="preview-good">-> ${isInt ? next : next.toFixed(1)}</span>`;
         } else {
-            el.innerHTML = `<span class="preview-neutral">${current}</span>`;
+            el.innerHTML = `<span class="preview-neutral">${isInt ? current : current.toFixed(1)}</span>`;
         }
     };
 
-    formatStat(hpEl, currentHp, nextHp, true);
-    formatStat(dmgEl, parseFloat(currentDmg), nextDmg);
-    formatStat(spdEl, parseFloat(currentSpd), nextSpd);
+    displayedUpgrades.forEach(id => {
+        const el = document.getElementById(`stat-${id}`);
+        let current, next;
+
+        switch (id) {
+            case 'hp':
+                current = player.stats.hpMax;
+                next = (previewType === 'hp') ? current + 1 : current;
+                formatStat(el, current, next, true);
+                break;
+            case 'damage':
+                current = player.stats.damageMult;
+                next = (previewType === 'damage') ? current + 0.1 : current;
+                formatStat(el, current, next);
+                break;
+            case 'speed':
+                current = player.stats.fireRateMult;
+                next = (previewType === 'speed') ? current + 0.1 : current;
+                formatStat(el, current, next);
+                break;
+            case 'moveSpeed':
+                current = player.stats.moveSpeedMult;
+                next = (previewType === 'moveSpeed') ? current + 0.1 : current;
+                formatStat(el, current, next);
+                break;
+        }
+    });
 }

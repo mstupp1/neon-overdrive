@@ -107,7 +107,8 @@ const player = {
     stats: {
         damageMult: 1.0,
         hpMax: PLAYER_MAX_LIVES,
-        fireRateMult: 1.0
+        fireRateMult: 1.0,
+        moveSpeedMult: 1.0
     },
     hasShield: false,
     tail: [],
