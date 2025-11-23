@@ -207,6 +207,10 @@ canvas {
     gap: 6px;
 }
 
+.lives-box > .life-row:first-child {
+    flex-direction: row-reverse;
+}
+
 .life-tier-row {
     display: flex;
     gap: 6px;
