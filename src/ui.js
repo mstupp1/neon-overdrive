@@ -6,6 +6,16 @@
 let currentMenuId = null;
 let selectedButtonIndex = 0;
 
+// Hold-to-Select State
+let holdStartTime = null;
+let holdTargetUpgrade = null;
+let isHolding = false;
+let holdAnimationFrame = null;
+const HOLD_DURATION = 800; // milliseconds
+let holdAudioContext = null;
+let holdOscillator = null;
+let holdGainNode = null;
+
 const MENUS = {
     'start-menu': { selector: '#start-menu .btn', defaultIndex: 0 },
     'pause-menu': { selector: '#pause-menu .btn', defaultIndex: 0 },
@@ -33,10 +43,14 @@ function showLevelUpOptions() {
         const descriptionLines = (upgrade.descriptionLines ?? [upgrade.description ?? '']).filter(Boolean);
         const cardHTML = `
             <div class="upgrade-column">
-                <button class="upgrade-card" data-upgrade-id="${upgrade.id}" onclick="selectUpgrade('${upgrade.id}')" onmouseenter="updateLevelUpStats('${upgrade.id}')" onmouseleave="updateLevelUpStats(null)" onfocus="updateLevelUpStats('${upgrade.id}')" onblur="updateLevelUpStats(null)">
+                <div class="hold-indicator hidden">HOLD</div>
+                <button class="upgrade-card" data-upgrade-id="${upgrade.id}" onmouseenter="updateLevelUpStats('${upgrade.id}')" onmouseleave="updateLevelUpStats(null)" onfocus="updateLevelUpStats('${upgrade.id}')" onblur="updateLevelUpStats(null)">
                     <span class="material-icons icon">${upgrade.icon}</span>
                     <h3>${upgrade.title}</h3>
                     <p>${descriptionLines.join('<br>')}</p>
+                    <div class="hold-progress-bar">
+                        <div class="hold-progress-fill"></div>
+                    </div>
                 </button>
                 <div class="stat-item">
                     <span class="stat-label">${upgrade.stat}</span>
@@ -46,6 +60,9 @@ function showLevelUpOptions() {
         `;
         upgradeContainer.innerHTML += cardHTML;
     });
+
+    // Add event listeners for hold-to-select
+    setupHoldToSelectListeners();
 
     updateMenuSelection();
     updateLevelUpStats(null);
@@ -110,7 +127,14 @@ function handleMenuInput(key) {
         selectedButtonIndex++;
         updateMenuSelection();
     } else if (key === 'Enter' || key === ' ') {
-        buttons[selectedButtonIndex].click();
+        // For level-up menu, start hold process
+        if (menuId === 'level-up-menu') {
+            const upgradeId = buttons[selectedButtonIndex].dataset.upgradeId;
+            startHold(upgradeId, buttons[selectedButtonIndex]);
+        } else {
+            // For other menus, immediate click
+            buttons[selectedButtonIndex].click();
+        }
     }
 }
 
@@ -400,3 +424,210 @@ function updateAudioBtnState(btn, isMuted, onIcon, offIcon) {
     }
 }
 
+// ===== HOLD-TO-SELECT SYSTEM =====
+
+function setupHoldToSelectListeners() {
+    const upgradeCards = document.querySelectorAll('#level-up-menu .upgrade-card');
+
+    upgradeCards.forEach(card => {
+        // Mouse events
+        card.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            const upgradeId = card.dataset.upgradeId;
+            startHold(upgradeId, card);
+        });
+
+        // Prevent context menu
+        card.addEventListener('contextmenu', (e) => e.preventDefault());
+    });
+
+    // Global mouseup listener to cancel hold
+    document.addEventListener('mouseup', cancelHold);
+
+    // Keyboard listeners for hold
+    document.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            cancelHold();
+        }
+    });
+}
+
+function startHold(upgradeId, cardElement) {
+    // Cancel any existing hold
+    if (isHolding) {
+        cancelHold();
+    }
+
+    isHolding = true;
+    holdStartTime = Date.now();
+    holdTargetUpgrade = upgradeId;
+
+    // Get the upgrade column (parent of button)
+    const upgradeColumn = cardElement.parentElement;
+    const holdIndicator = upgradeColumn.querySelector('.hold-indicator');
+    const progressFill = cardElement.querySelector('.hold-progress-fill');
+
+    // Show hold indicator and add holding state
+    if (holdIndicator) {
+        holdIndicator.classList.remove('hidden');
+    }
+    cardElement.classList.add('holding');
+
+    // Reset progress bar
+    if (progressFill) {
+        progressFill.style.width = '0%';
+    }
+
+    // Start hold sound
+    playHoldSound();
+
+    // Start animation loop
+    updateHoldProgress(cardElement);
+}
+
+function updateHoldProgress(cardElement) {
+    if (!isHolding) return;
+
+    const elapsed = Date.now() - holdStartTime;
+    const progress = Math.min(elapsed / HOLD_DURATION, 1);
+
+    // Update progress bar
+    const progressFill = cardElement.querySelector('.hold-progress-fill');
+    if (progressFill) {
+        progressFill.style.width = `${progress * 100}%`;
+    }
+
+    // Update hold sound frequency
+    if (holdOscillator && holdGainNode) {
+        // Gradually increase frequency and volume
+        const baseFreq = 300;
+        const maxFreq = 600;
+        holdOscillator.frequency.value = baseFreq + (maxFreq - baseFreq) * progress;
+        holdGainNode.gain.value = 0.1 + (0.2 * progress);
+    }
+
+    if (progress >= 1) {
+        // Hold complete!
+        completeHold();
+    } else {
+        // Continue animation
+        holdAnimationFrame = requestAnimationFrame(() => updateHoldProgress(cardElement));
+    }
+}
+
+function completeHold() {
+    if (!holdTargetUpgrade) return;
+
+    const upgradeId = holdTargetUpgrade;
+
+    // Stop hold
+    cancelHold();
+
+    // Play completion sound (higher pitch burst)
+    playCompletionSound();
+
+    // Select the upgrade
+    window.selectUpgrade(upgradeId);
+}
+
+function cancelHold() {
+    if (!isHolding) return;
+
+    isHolding = false;
+
+    // Stop animation
+    if (holdAnimationFrame) {
+        cancelAnimationFrame(holdAnimationFrame);
+        holdAnimationFrame = null;
+    }
+
+    // Stop sound
+    stopHoldSound();
+
+    // Clean up UI
+    const upgradeCards = document.querySelectorAll('#level-up-menu .upgrade-card');
+    upgradeCards.forEach(card => {
+        card.classList.remove('holding');
+        const progressFill = card.querySelector('.hold-progress-fill');
+        if (progressFill) {
+            progressFill.style.width = '0%';
+        }
+    });
+
+    const holdIndicators = document.querySelectorAll('#level-up-menu .hold-indicator');
+    holdIndicators.forEach(indicator => {
+        indicator.classList.add('hidden');
+    });
+
+    holdTargetUpgrade = null;
+    holdStartTime = null;
+}
+
+// ===== HOLD AUDIO SYSTEM =====
+
+function playHoldSound() {
+    try {
+        // Initialize audio context if needed
+        if (!holdAudioContext) {
+            holdAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        // Stop any existing sound
+        stopHoldSound();
+
+        // Create oscillator for rising tone
+        holdOscillator = holdAudioContext.createOscillator();
+        holdGainNode = holdAudioContext.createGain();
+
+        holdOscillator.connect(holdGainNode);
+        holdGainNode.connect(holdAudioContext.destination);
+
+        holdOscillator.type = 'sine';
+        holdOscillator.frequency.value = 300; // Start frequency
+        holdGainNode.gain.value = 0.1; // Start volume
+
+        holdOscillator.start();
+    } catch (e) {
+        console.warn('Could not play hold sound:', e);
+    }
+}
+
+function stopHoldSound() {
+    if (holdOscillator) {
+        try {
+            holdOscillator.stop();
+        } catch (e) {
+            // Already stopped
+        }
+        holdOscillator = null;
+    }
+    if (holdGainNode) {
+        holdGainNode = null;
+    }
+}
+
+function playCompletionSound() {
+    try {
+        if (!holdAudioContext) {
+            holdAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        const oscillator = holdAudioContext.createOscillator();
+        const gainNode = holdAudioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(holdAudioContext.destination);
+
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 800; // High pitch
+        gainNode.gain.value = 0.3;
+
+        // Quick fade out
+        gainNode.gain.exponentialRampToValueAtTime(0.01, holdAudioContext.currentTime + 0.2);
+
+        oscillator.start();
+        oscillator.stop(holdAudioContext.currentTime + 0.2);
+    } catch (e) {
+        console.warn('Could not play completion sound:', e);
+    }
+}
