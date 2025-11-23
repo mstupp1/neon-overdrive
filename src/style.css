@@ -913,6 +913,8 @@ h1::after {
     box-shadow: 0 0 15px rgba(255, 221, 0, 0.2);
     transform: skewX(-10deg);
     font-family: monospace;
+    min-height: 190px;
+    justify-content: space-between;
 }
 
 .upgrade-card:hover,

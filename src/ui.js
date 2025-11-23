@@ -33,7 +33,7 @@ function showLevelUpOptions() {
                 <button class="upgrade-card" data-upgrade-id="${upgrade.id}" onclick="selectUpgrade('${upgrade.id}')" onmouseenter="updateLevelUpStats('${upgrade.id}')" onmouseleave="updateLevelUpStats(null)" onfocus="updateLevelUpStats('${upgrade.id}')" onblur="updateLevelUpStats(null)">
                     <span class="material-icons icon">${upgrade.icon}</span>
                     <h3>${upgrade.title}</h3>
-                    <p>${upgrade.description}</p>
+                    <p>${upgrade.description.replace(' ', '<br>')}</p>
                 </button>
                 <div class="stat-item">
                     <span class="stat-label">${upgrade.stat}</span>
