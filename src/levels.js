@@ -124,8 +124,6 @@ class LevelManager {
 
         // Visual fanfare
         const config = LEVEL_CONFIG[this.currentLevel];
-        spawnText(width / 2, height / 2, `STAGE ${this.currentLevel}`, `hsl(${config.hue}, 100%, 50%)`);
-        spawnText(width / 2, height / 2 + 50, config.name, "#fff");
 
         // Flash screen
         flashOverlay.style.backgroundColor = `hsla(${config.hue}, 100%, 50%, 0.3)`;
