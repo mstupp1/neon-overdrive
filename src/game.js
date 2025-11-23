@@ -553,6 +553,14 @@ if (addHealthBtn) {
     });
 }
 
+const lvlUpBtn = document.getElementById('lvl-up-btn');
+if (lvlUpBtn) {
+    lvlUpBtn.addEventListener('click', () => {
+        triggerLevelUp();
+        updateUI();
+    });
+}
+
 
 // Menu Input Handling
 window.addEventListener('keydown', e => {
