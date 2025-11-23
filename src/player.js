@@ -202,6 +202,7 @@ function hitPlayer() {
         spawnText(player.x, player.y - 50, "SYSTEM DMG", "#f00");
     }
     updateUI();
+
     // Check if player has run out of lives
     if (player.lives <= 0) {
         gameState = 'GAMEOVER';

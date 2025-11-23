@@ -18,7 +18,7 @@ const ALL_UPGRADES = [
     { id: 'damage', title: 'OVERCHARGE', description: '+10% DAMAGE', icon: 'flash_on', stat: 'DMG' },
     { id: 'speed', title: 'ACCELERATE', description: '+10% FIRE RATE', icon: 'speed', stat: 'RATE' },
     { id: 'moveSpeed', title: 'AFTERBURNER', description: '+10% MOVE SPEED', icon: 'directions_run', stat: 'MOVE' },
-    { id: 'weaponXp', title: 'WEAPON MASTERY', description: '+10% WEAPON XP', icon: 'military_tech', stat: 'WPN XP'},
+    { id: 'weaponXp', title: 'WEAPON MASTERY', description: '+10% WEAPON XP', icon: 'military_tech', stat: 'WPN XP' },
     { id: 'playerXp', title: 'INSIGHT', description: '+10% XP GAIN', icon: 'psychology', stat: 'PLYR XP' }
 ];
 
@@ -142,11 +142,13 @@ function updateUI() {
     const MAX_VISUAL_SLOTS = 10;
 
     // Calculate which tier we're in (0-9 for tiers 1-10)
-    const currentTier = Math.floor((player.lives - 1) / MAX_VISUAL_SLOTS);
+    // Clamp to 0 minimum to handle 0 or negative lives
+    const currentTier = Math.max(0, Math.floor((player.lives - 1) / MAX_VISUAL_SLOTS));
     const maxTier = Math.floor((player.stats.hpMax - 1) / MAX_VISUAL_SLOTS);
 
     // HP within current tier (0-9)
-    const hpInCurrentTier = ((player.lives - 1) % MAX_VISUAL_SLOTS) + 1;
+    // Clamp to 0 minimum to handle 0 or negative lives
+    const hpInCurrentTier = Math.max(0, ((player.lives - 1) % MAX_VISUAL_SLOTS) + 1);
     const maxHpInMaxTier = ((player.stats.hpMax - 1) % MAX_VISUAL_SLOTS) + 1;
 
     // Color tiers - each tier gets a distinct, contrasting color

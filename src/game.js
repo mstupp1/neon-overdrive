@@ -357,13 +357,17 @@ function update(dt) {
         } else {
             if (player.iframes <= 0 && dist(b.x, b.y, player.x, player.y) < player.radius + 5) {
                 b.active = false; hitPlayer();
+                if (gameState === 'GAMEOVER') return; // Stop processing if player died
             }
         }
     });
     enemies.forEach(e => {
         let hit = dist(e.x, e.y, player.x, player.y) < e.radius + player.radius;
         if (e.type === 'snake') e.segments.forEach(s => { if (dist(s.x, s.y, player.x, player.y) < e.radius + player.radius) hit = true; });
-        if (player.iframes <= 0 && hit) hitPlayer();
+        if (player.iframes <= 0 && hit) {
+            hitPlayer();
+            if (gameState === 'GAMEOVER') return; // Stop processing if player died
+        }
     });
     powerups.forEach(p => {
         if (p.pickupTimer > 0) return; // Cannot pick up yet
