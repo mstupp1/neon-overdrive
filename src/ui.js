@@ -442,12 +442,21 @@ function setupHoldToSelectListeners() {
             startHold(upgradeId, card);
         });
 
+        // Touch events for mobile
+        card.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const upgradeId = card.dataset.upgradeId;
+            startHold(upgradeId, card);
+        });
+
         // Prevent context menu
         card.addEventListener('contextmenu', (e) => e.preventDefault());
     });
 
-    // Global mouseup listener to cancel hold
+    // Global mouseup and touchend listeners to cancel hold
     document.addEventListener('mouseup', cancelHold);
+    document.addEventListener('touchend', cancelHold);
+    document.addEventListener('touchcancel', cancelHold);
 
     // Keyboard listeners for hold
     document.addEventListener('keyup', (e) => {

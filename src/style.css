@@ -7,6 +7,11 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    /* Prevent text selection in game */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 #game-container {
