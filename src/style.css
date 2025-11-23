@@ -207,7 +207,7 @@ canvas {
     gap: 6px;
 }
 
-.lives-box > .life-row:first-child {
+.lives-box>.life-row:first-child {
     flex-direction: row-reverse;
 }
 
@@ -1022,6 +1022,7 @@ h1::after {
     margin-top: 20px;
     color: #fff;
     font-family: monospace;
+    max-width: 400px;
 }
 
 .debug-container summary {
@@ -1029,24 +1030,35 @@ h1::after {
     outline: none;
     font-size: 14px;
     letter-spacing: 1px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    text-align: center;
 }
 
 .debug-options {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding-left: 10px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 0 10px;
 }
 
 .debug-option {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: center;
+    gap: 8px;
 }
 
 .debug-option label {
-    font-size: 12px;
+    font-size: 11px;
+}
+
+.debug-btn {
+    font-size: 10px !important;
+    padding: 8px 12px !important;
+    margin-top: 0 !important;
+    letter-spacing: 1px !important;
+    min-width: 120px;
+    white-space: nowrap;
 }
 
 #add-health-btn {
@@ -1054,45 +1066,54 @@ h1::after {
     padding: 5px 10px;
 }
 
+
 /* Show current health tier indicator as empty */
 .lives-box:has(.life-icon.tier-red) .life-tier-indicator.tier-red {
     background: rgba(255, 0, 0, 0.2);
     box-shadow: 0 0 4px rgba(255, 0, 0, 0.25);
 }
+
 .lives-box:has(.life-icon.tier-cyan) .life-tier-indicator.tier-cyan {
     background: rgba(0, 255, 255, 0.2);
     box-shadow: 0 0 4px rgba(0, 255, 255, 0.25);
 }
+
 .lives-box:has(.life-icon.tier-yellow) .life-tier-indicator.tier-yellow {
     background: rgba(255, 255, 0, 0.2);
     box-shadow: 0 0 4px rgba(255, 255, 0, 0.25);
 }
+
 .lives-box:has(.life-icon.tier-magenta) .life-tier-indicator.tier-magenta {
     background: rgba(255, 0, 255, 0.2);
     box-shadow: 0 0 4px rgba(255, 0, 255, 0.25);
 }
+
 .lives-box:has(.life-icon.tier-green) .life-tier-indicator.tier-green {
     background: rgba(0, 255, 0, 0.2);
     box-shadow: 0 0 4px rgba(0, 255, 0, 0.25);
 }
+
 .lives-box:has(.life-icon.tier-orange) .life-tier-indicator.tier-orange {
     background: rgba(255, 136, 0, 0.2);
     box-shadow: 0 0 4px rgba(255, 136, 0, 0.25);
 }
+
 .lives-box:has(.life-icon.tier-purple) .life-tier-indicator.tier-purple {
     background: rgba(170, 0, 255, 0.2);
     box-shadow: 0 0 4px rgba(170, 0, 255, 0.25);
 }
+
 .lives-box:has(.life-icon.tier-pink) .life-tier-indicator.tier-pink {
     background: rgba(255, 102, 204, 0.2);
     box-shadow: 0 0 4px rgba(255, 102, 204, 0.25);
 }
+
 .lives-box:has(.life-icon.tier-lime) .life-tier-indicator.tier-lime {
     background: rgba(204, 255, 0, 0.2);
     box-shadow: 0 0 4px rgba(204, 255, 0, 0.25);
 }
+
 .lives-box:has(.life-icon.tier-blue) .life-tier-indicator.tier-blue {
     background: rgba(0, 136, 255, 0.2);
     box-shadow: 0 0 4px rgba(0, 136, 255, 0.25);
 }
-

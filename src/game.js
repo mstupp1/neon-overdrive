@@ -575,6 +575,21 @@ if (setHealth1Btn) {
     });
 }
 
+const wpnLvlUpBtn = document.getElementById('wpn-lvl-up-btn');
+if (wpnLvlUpBtn) {
+    wpnLvlUpBtn.addEventListener('click', () => {
+        if (player.powerLevel < player.maxPower) {
+            player.powerLevel++;
+            player.weaponXpMax = getWeaponXpForLevel(player.powerLevel);
+            player.weaponXp = Math.min(player.weaponXp, player.weaponXpMax);
+            if (player.powerLevel >= player.maxPower) player.weaponXp = player.weaponXpMax;
+            spawnText(player.x, player.y - 40, "UPGRADE", "#0ff");
+            playSound('powerup');
+        }
+        updateUI();
+    });
+}
+
 
 // Menu Input Handling
 window.addEventListener('keydown', e => {
