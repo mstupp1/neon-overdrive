@@ -46,65 +46,86 @@ function spawnPlayerBullet(x, y, angle, baseSpeed, subType) {
 function firePlayerWeapons() {
     if (gameState === 'PLAYING') playSound('shoot');
 
-    // Fire rate modifier affects the frame check
-    // Since we use modulo, we can't easily change the modulus dynamically without sync issues
-    // Instead, we can use a probabilistic approach or a separate timer.
-    // For simplicity, let's just use the multiplier to potentially fire EXTRA bullets or increase speed?
-    // No, "Attack Speed" usually means fire rate.
-    // Let's use a global fire timer or modify the modulo check.
-    // A simple way: `frameCount * fireRateMult % interval < fireRateMult`? No.
-    // Better: `Math.floor(frameCount * player.stats.fireRateMult) % interval === 0`
-
     const fr = player.stats.fireRateMult;
     const tick = Math.floor(frameCount * fr);
 
-    // Level 0-2: Single beam in middle
-    // Level 3-9: Double beam (slightly offset)
-    // Level 10+: Triple beam
-    if (player.powerLevel >= 10 && tick % 24 === 0) {
-        // Triple beam shot at max level
-        spawnPlayerBullet(player.x, player.y - 26, -Math.PI / 2, 24, 'beam');
-        spawnPlayerBullet(player.x - 6, player.y - 26, -Math.PI / 2, 24, 'beam');
-        spawnPlayerBullet(player.x + 6, player.y - 26, -Math.PI / 2, 24, 'beam');
+    // Levels 0-2: Single beam
+    // Levels 3-5: Double beam
+    // Levels 6-7: Triple shot (front)
+    // Levels 8: Crescent wave (replaces triple)
+    // Levels 9: Crescent wave + rear shot
+    // Level 10: Continuous beam + lightning (replaces crescent)
+
+    // --- BASE FRONT SHOTS ---
+    if (player.powerLevel >= 10 && tick % 3 === 0) {
+        // Level 10: Continuous beam with lightning
+        spawnPlayerBullet(player.x, player.y - 20, -Math.PI / 2, 22, 'beam');
+        spawnPlayerBullet(player.x - 4, player.y - 20, -Math.PI / 2, 22, 'beam');
+        spawnPlayerBullet(player.x + 4, player.y - 20, -Math.PI / 2, 22, 'beam');
+    } else if (player.powerLevel >= 8) {
+        // Level 8-9: Crescent wave shot (replaces triple)
+        if (tick % 8 === 0) {
+            // Frontal crescent wave - 5 bullets in arc
+            const arcSpread = Math.PI / 6; // 30 degree spread
+            for (let i = -2; i <= 2; i++) {
+                const angle = -Math.PI / 2 + (i * arcSpread / 4);
+                spawnPlayerBullet(player.x + i * 3, player.y - 18, angle, 16, 'wave');
+            }
+        }
+    } else if (player.powerLevel >= 6) {
+        // Level 6-7: Triple shot
+        if (tick % 6 === 0) {
+            spawnPlayerBullet(player.x, player.y - 22, -Math.PI / 2, 20, 'normal');
+            spawnPlayerBullet(player.x - 8, player.y - 18, -Math.PI / 2 - 0.15, 18, 'normal');
+            spawnPlayerBullet(player.x + 8, player.y - 18, -Math.PI / 2 + 0.15, 18, 'normal');
+        }
     } else if (player.powerLevel >= 3) {
-        // Double beam starting at level 3
+        // Level 3-5: Double beam
         spawnPlayerBullet(player.x - 5, player.y - 20, -Math.PI / 2, 18, 'beam');
         spawnPlayerBullet(player.x + 5, player.y - 20, -Math.PI / 2, 18, 'beam');
     } else {
-        // Single beam for levels 0-2
+        // Level 0-2: Single beam
         spawnPlayerBullet(player.x, player.y - 20, -Math.PI / 2, 18, 'beam');
     }
 
+    // --- LEVEL 2+ ANGLED SPREAD ---
     if (player.powerLevel >= 2) {
         spawnPlayerBullet(player.x - 15, player.y, -1.7, 15, 'normal');
         spawnPlayerBullet(player.x + 15, player.y, -1.4, 15, 'normal');
     }
-    // Level 3: Just double beam + spread shot (no blade yet)
+
+    // --- LEVEL 4+ BLADE SHOTS ---
     if (player.powerLevel >= 4 && tick % 14 === 0) {
         spawnPlayerBullet(player.x, player.y - 20, -1.6, 10, 'blade');
         spawnPlayerBullet(player.x, player.y - 20, -1.5, 10, 'blade');
     }
+
+    // --- LEVEL 5+ SIDE HOMING ---
     if (player.powerLevel >= 5 && tick % 21 === 0) {
         spawnPlayerBullet(player.x - 20, player.y, Math.PI, 12, 'homing');
         spawnPlayerBullet(player.x + 20, player.y, 0, 12, 'homing');
     }
-    if (player.powerLevel >= 6 && tick % 21 === 0) {
-        spawnPlayerBullet(player.x, player.y - 10, -Math.PI / 2, 12, 'wave');
+
+    // --- LEVEL 7+ ARCING HOMING LASERS ---
+    if (player.powerLevel >= 7 && tick % 35 === 0) {
+        // Occasional arcing homing lasers that shoot from the front
+        const arcAngle1 = -Math.PI / 2 - 0.4;
+        const arcAngle2 = -Math.PI / 2 + 0.4;
+        spawnPlayerBullet(player.x - 12, player.y - 24, arcAngle1, 14, 'homing');
+        spawnPlayerBullet(player.x + 12, player.y - 24, arcAngle2, 14, 'homing');
     }
-    if (player.powerLevel >= 7) {
-        spawnPlayerBullet(player.x - 10, player.y - 20, -Math.PI / 2, 18, 'beam');
-        spawnPlayerBullet(player.x + 10, player.y - 20, -Math.PI / 2, 18, 'beam');
+
+    // --- LEVEL 9+ REAR SHOT ---
+    if (player.powerLevel >= 9 && tick % 12 === 0) {
+        // Rear shot similar to single shot from level 1
+        spawnPlayerBullet(player.x, player.y + 10, Math.PI / 2, 16, 'beam');
     }
-    if (player.powerLevel >= 8 && tick % 10 === 0) {
-        spawnPlayerBullet(player.x - 22, player.y - 12, -1.55, 18, 'beam');
-        spawnPlayerBullet(player.x + 22, player.y - 12, -1.59, 18, 'beam');
-    }
-    if (player.powerLevel >= 9 && tick % 18 === 0) {
-        spawnPlayerBullet(player.x, player.y + 6, Math.PI, 12, 'wave');
-    }
-    if (player.powerLevel >= 10 && tick % 16 === 0) {
-        spawnPlayerBullet(player.x - 28, player.y - 18, -1.35, 17, 'normal');
-        spawnPlayerBullet(player.x + 28, player.y - 18, -1.8, 17, 'normal');
+
+    // --- LEVEL 10+ LIGHTNING BOLTS ---
+    if (player.powerLevel >= 10 && tick % 8 === 0) {
+        // Additional lightning-style rapid fire
+        spawnPlayerBullet(player.x - 18, player.y - 15, -Math.PI / 2 - 0.2, 24, 'beam');
+        spawnPlayerBullet(player.x + 18, player.y - 15, -Math.PI / 2 + 0.2, 24, 'beam');
     }
 }
 
