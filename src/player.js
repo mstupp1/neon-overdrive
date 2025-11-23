@@ -64,7 +64,7 @@ function firePlayerWeapons() {
     } else if (player.powerLevel >= 8) {
         // Level 8-9: Crescent wave shot (replaces triple) - fires every frame
         // Frontal crescent wave - 5 bullets in arc
-        const arcSpread = Math.PI / 6; // 30 degree spread
+        const arcSpread = Math.PI / 8; // Tightened spread
         for (let i = -2; i <= 2; i++) {
             const angle = -Math.PI / 2 + (i * arcSpread / 4);
             spawnPlayerBullet(player.x + i * 3, player.y - 18, angle, 18, 'wave');
@@ -72,8 +72,8 @@ function firePlayerWeapons() {
     } else if (player.powerLevel >= 6) {
         // Level 6-7: Triple shot - fires every frame
         spawnPlayerBullet(player.x, player.y - 22, -Math.PI / 2, 20, 'normal');
-        spawnPlayerBullet(player.x - 8, player.y - 18, -Math.PI / 2 - 0.15, 18, 'normal');
-        spawnPlayerBullet(player.x + 8, player.y - 18, -Math.PI / 2 + 0.15, 18, 'normal');
+        spawnPlayerBullet(player.x - 8, player.y - 18, -Math.PI / 2 - 0.1, 18, 'normal');
+        spawnPlayerBullet(player.x + 8, player.y - 18, -Math.PI / 2 + 0.1, 18, 'normal');
     } else if (player.powerLevel >= 3) {
         // Level 3-5: Double beam
         spawnPlayerBullet(player.x - 5, player.y - 20, -Math.PI / 2, 18, 'beam');
@@ -85,14 +85,14 @@ function firePlayerWeapons() {
 
     // --- LEVEL 2+ ANGLED SPREAD ---
     if (player.powerLevel >= 2) {
-        spawnPlayerBullet(player.x - 15, player.y, -1.7, 15, 'normal');
-        spawnPlayerBullet(player.x + 15, player.y, -1.4, 15, 'normal');
+        spawnPlayerBullet(player.x - 15, player.y, -1.67, 15, 'normal');
+        spawnPlayerBullet(player.x + 15, player.y, -1.47, 15, 'normal');
     }
 
     // --- LEVEL 4+ BLADE SHOTS ---
     if (player.powerLevel >= 4 && tick % 14 === 0) {
-        spawnPlayerBullet(player.x, player.y - 20, -1.6, 10, 'blade');
-        spawnPlayerBullet(player.x, player.y - 20, -1.5, 10, 'blade');
+        spawnPlayerBullet(player.x, player.y - 20, -1.62, 10, 'blade');
+        spawnPlayerBullet(player.x, player.y - 20, -1.52, 10, 'blade');
     }
 
     // --- LEVEL 5+ SIDE HOMING ---
@@ -104,8 +104,8 @@ function firePlayerWeapons() {
     // --- LEVEL 7+ ARCING HOMING LASERS ---
     if (player.powerLevel >= 7 && tick % 35 === 0) {
         // Occasional arcing homing lasers that shoot from the front
-        const arcAngle1 = -Math.PI / 2 - 0.4;
-        const arcAngle2 = -Math.PI / 2 + 0.4;
+        const arcAngle1 = -Math.PI / 2 - 0.25;
+        const arcAngle2 = -Math.PI / 2 + 0.25;
         spawnPlayerBullet(player.x - 12, player.y - 24, arcAngle1, 14, 'homing');
         spawnPlayerBullet(player.x + 12, player.y - 24, arcAngle2, 14, 'homing');
     }
@@ -119,8 +119,8 @@ function firePlayerWeapons() {
     // --- LEVEL 10+ LIGHTNING BOLTS ---
     if (player.powerLevel >= 10 && tick % 8 === 0) {
         // Additional lightning-style rapid fire
-        spawnPlayerBullet(player.x - 18, player.y - 15, -Math.PI / 2 - 0.2, 24, 'beam');
-        spawnPlayerBullet(player.x + 18, player.y - 15, -Math.PI / 2 + 0.2, 24, 'beam');
+        spawnPlayerBullet(player.x - 18, player.y - 15, -Math.PI / 2 - 0.15, 24, 'beam');
+        spawnPlayerBullet(player.x + 18, player.y - 15, -Math.PI / 2 + 0.15, 24, 'beam');
     }
 }
 
