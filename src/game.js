@@ -563,6 +563,14 @@ if (lvlUpBtn) {
     });
 }
 
+const setHealth1Btn = document.getElementById('set-health-1-btn');
+if (setHealth1Btn) {
+    setHealth1Btn.addEventListener('click', () => {
+        player.lives = 1;
+        updateUI();
+    });
+}
+
 
 // Menu Input Handling
 window.addEventListener('keydown', e => {
