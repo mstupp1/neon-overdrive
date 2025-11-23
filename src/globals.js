@@ -67,9 +67,9 @@ const PLAYER_WEAPON_BASE = {
 };
 
 const WEAPON_LEVEL_CURVE = [
-    { damage: 0.9, speed: 0.95, hue: 0, glow: 0 },      // 0
-    { damage: 1.0, speed: 1.0, hue: 8, glow: 0.02 },    // 1
-    { damage: 1.05, speed: 1.02, hue: 16, glow: 0.03 }, // 2
+    { damage: 0.9, speed: 0.5, hue: 0, glow: 0 },      // 0 - Slower
+    { damage: 1.0, speed: 0.90, hue: 8, glow: 0.02 },    // 1 - Slower
+    { damage: 1.05, speed: 0.95, hue: 16, glow: 0.03 }, // 2 - Slower
     { damage: 1.1, speed: 1.04, hue: 24, glow: 0.05 },  // 3
     { damage: 1.15, speed: 1.06, hue: 32, glow: 0.07 }, // 4
     { damage: 1.2, speed: 1.08, hue: 40, glow: 0.1 },   // 5
