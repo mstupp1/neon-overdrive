@@ -15,6 +15,7 @@ const HOLD_DURATION = 800; // milliseconds
 let holdAudioContext = null;
 let holdOscillator = null;
 let holdGainNode = null;
+let isKeyHeld = false; // Track if Enter/Space is currently held down
 
 const MENUS = {
     'start-menu': { selector: '#start-menu .btn', defaultIndex: 0 },
@@ -127,6 +128,10 @@ function handleMenuInput(key) {
         selectedButtonIndex++;
         updateMenuSelection();
     } else if (key === 'Enter' || key === ' ') {
+        // Only start hold if not already holding (prevents keyboard repeat from restarting)
+        if (isKeyHeld) return;
+        isKeyHeld = true;
+
         // For level-up menu, start hold process
         if (menuId === 'level-up-menu') {
             const upgradeId = buttons[selectedButtonIndex].dataset.upgradeId;
@@ -447,6 +452,7 @@ function setupHoldToSelectListeners() {
     // Keyboard listeners for hold
     document.addEventListener('keyup', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
+            isKeyHeld = false; // Reset the key held state
             cancelHold();
         }
     });
