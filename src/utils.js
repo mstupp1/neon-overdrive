@@ -16,11 +16,15 @@ function j(val, amt = 3) {
 
 function toGameCoords(x, y) {
     const rect = canvas.getBoundingClientRect();
-    const scaleX = width / rect.width;
-    const scaleY = height / rect.height;
+    // Map client coordinates to canvas coordinates (0 to rect.width/height)
+    const clientX = x - rect.left;
+    const clientY = y - rect.top;
+
+    // Map canvas coordinates to game coordinates
+    // Game coordinates are (clientX / GAME_SCALE, clientY / GAME_SCALE)
     return {
-        x: (x - rect.left) * scaleX / GAME_SCALE,
-        y: (y - rect.top) * scaleY / GAME_SCALE
+        x: clientX / GAME_SCALE,
+        y: clientY / GAME_SCALE
     };
 }
 

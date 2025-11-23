@@ -11,16 +11,16 @@ body {
 
 #game-container {
     position: relative;
-    max-width: 430px;
-    max-height: 932px;
     width: 100vw;
     height: 100vh;
     overflow: hidden;
 }
 
-/* Desktop: Allow vertical centering */
+/* Desktop: Allow vertical centering and fixed size */
 @media (min-width: 768px) {
     #game-container {
+        max-width: 430px;
+        max-height: 932px;
         height: auto;
         aspect-ratio: 430 / 932;
     }

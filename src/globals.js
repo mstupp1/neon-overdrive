@@ -9,6 +9,7 @@ const uiLayer = document.getElementById('ui-layer');
 const startMenu = document.getElementById('start-menu');
 const pauseMenu = document.getElementById('pause-menu');
 const gameOverMenu = document.getElementById('game-over-menu');
+const levelUpMenu = document.getElementById('level-up-menu');
 const scoreDisplay = document.getElementById('score-display');
 const hudTop = document.querySelector('.hud-top');
 const livesContainer = document.getElementById('lives-container');
@@ -33,7 +34,8 @@ const POWERUP_BLINK_FRAMES = 240; // Blink for last ~4 seconds
 const SCORE_POWERUP_VALUE = 1000;
 const SCORE_POWERUP_XP_RATIO = 0.2;
 const TIME_STEP = 1000 / 60; // Fixed 60 FPS logic
-const GAME_SCALE = 0.75; // Zoom out by 25%
+let GAME_SCALE = 0.75; // Will be dynamic
+const TARGET_LOGICAL_WIDTH = 573; // Based on 430px / 0.75
 
 const PLAYER_MAX_SPEED = 6;
 const PLAYER_MAX_SPEED_UP = 7.5;
@@ -131,11 +133,34 @@ const texts = [];
 function resize() {
     const container = document.getElementById('game-container');
     const rect = container.getBoundingClientRect();
+
+    // Calculate scale to maintain target logical width
+    // If screen is wider than desktop max-width (handled by CSS), this will just use that width
+    // On mobile, rect.width will be screen width
+    GAME_SCALE = rect.width / TARGET_LOGICAL_WIDTH;
+
+    // Clamp scale to reasonable limits if needed, but for now let it float
+    // Ensure we don't get too small or negative
+    GAME_SCALE = Math.max(0.1, GAME_SCALE);
+
     width = rect.width / GAME_SCALE;
     height = rect.height / GAME_SCALE;
     canvas.width = rect.width;
     canvas.height = rect.height;
     if (hudTop) hudTopHeight = hudTop.getBoundingClientRect().height / GAME_SCALE;
+
+    // UI Scaling
+    const uiScale = rect.width / 430; // Base design width
+    const uiElements = [uiLayer, startMenu, pauseMenu, gameOverMenu, levelUpMenu];
+
+    uiElements.forEach(el => {
+        if (el) {
+            el.style.transform = `scale(${uiScale})`;
+            el.style.width = `${100 / uiScale}%`;
+            el.style.height = `${100 / uiScale}%`;
+            el.style.transformOrigin = 'top left';
+        }
+    });
 
     // We need setPlayerStartPosition, but it's not defined yet.
     // We'll handle player positioning in the main game logic or player module.
