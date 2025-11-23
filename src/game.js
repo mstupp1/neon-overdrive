@@ -12,6 +12,13 @@ function resetWorldState() {
     levelManager.reset();
 }
 
+function updateDebugPanelVisibility() {
+    if (!debugPanel) return;
+    const visibleStates = ['PLAYING', 'PAUSED', 'LEVEL_UP'];
+    const shouldShow = debugMode && visibleStates.includes(gameState);
+    debugPanel.classList.toggle('hidden', !shouldShow);
+}
+
 function pauseGame() {
     if (gameState !== 'PLAYING') return;
     gameState = 'PAUSED';
@@ -19,6 +26,7 @@ function pauseGame() {
     pauseMenu.classList.remove('hidden');
     pauseBtn.classList.add('active');
     updateMenuSelection();
+    updateDebugPanelVisibility();
 }
 
 function resumeGame() {
@@ -29,6 +37,7 @@ function resumeGame() {
     pauseBtn.classList.remove('active');
     lastTime = performance.now();
     accumulator = 0;
+    updateDebugPanelVisibility();
 }
 
 function returnToMenu() {
@@ -39,6 +48,9 @@ function returnToMenu() {
     uiLayer.classList.add('hidden');
     pauseBtn.classList.remove('active');
     updateMenuSelection();
+
+    debugMode = false;
+    updateDebugPanelVisibility();
 
     score = 0; player.lives = PLAYER_MAX_LIVES; player.powerLevel = 0; player.iframes = 0; player.hasShield = false;
     player.weaponXp = 0; player.weaponXpMax = getWeaponXpForLevel(player.powerLevel);
@@ -74,11 +86,46 @@ function initGame() {
     document.getElementById('level-up-menu').classList.add('hidden');
     pauseBtn.classList.remove('active');
 
+    updateDebugPanelVisibility();
+
     lastTime = performance.now();
     accumulator = 0;
 
     // Start background music
     MusicPlayer.start();
+}
+
+function startStandardRun() {
+    debugMode = false;
+    initGame();
+}
+
+function startDebugRun() {
+    debugMode = true;
+    initGame();
+}
+
+function debugLevelUpOnce() {
+    if (!debugMode || gameState !== 'PLAYING') return;
+    const xpNeeded = Math.max(1, player.xpMax - player.xp);
+    awardPlayerXp(xpNeeded);
+    updateUI();
+    updateDebugPanelVisibility();
+}
+
+function debugWeaponLevelOnce() {
+    if (!debugMode || gameState !== 'PLAYING') return;
+    if (player.powerLevel >= player.maxPower) return;
+    const xpNeeded = Math.max(1, player.weaponXpMax - player.weaponXp);
+    awardWeaponXp(xpNeeded);
+    updateUI();
+}
+
+function debugApplyUpgrade(type) {
+    if (!debugMode) return;
+    if (gameState !== 'PLAYING' && gameState !== 'LEVEL_UP') return;
+    applyUpgrade(type);
+    updateUI();
 }
 
 function updateDemoAI() {
@@ -526,7 +573,8 @@ function loop(timestamp) {
     draw();
 }
 
-document.getElementById('start-btn').addEventListener('click', initGame);
+document.getElementById('start-btn').addEventListener('click', startStandardRun);
+if (debugStartBtn) debugStartBtn.addEventListener('click', startDebugRun);
 document.getElementById('restart-btn').addEventListener('click', initGame);
 pauseBtn.addEventListener('click', () => {
     if (gameState === 'PLAYING') pauseGame();
@@ -535,6 +583,12 @@ pauseBtn.addEventListener('click', () => {
 resumeBtn.addEventListener('click', resumeGame);
 pauseRestartBtn.addEventListener('click', initGame);
 quitBtn.addEventListener('click', returnToMenu);
+
+if (debugLevelBtn) debugLevelBtn.addEventListener('click', debugLevelUpOnce);
+if (debugWeaponBtn) debugWeaponBtn.addEventListener('click', debugWeaponLevelOnce);
+if (debugUpgradeHpBtn) debugUpgradeHpBtn.addEventListener('click', () => debugApplyUpgrade('hp'));
+if (debugUpgradeDamageBtn) debugUpgradeDamageBtn.addEventListener('click', () => debugApplyUpgrade('damage'));
+if (debugUpgradeSpeedBtn) debugUpgradeSpeedBtn.addEventListener('click', () => debugApplyUpgrade('speed'));
 
 // Menu Input Handling
 window.addEventListener('keydown', e => {
@@ -555,4 +609,5 @@ window.addEventListener('keydown', e => {
 // Start loop
 buildPowerSegments();
 updateMenuSelection(); // Initialize selection for start menu
+updateDebugPanelVisibility();
 requestAnimationFrame(loop);

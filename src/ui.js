@@ -158,8 +158,9 @@ function updateUI() {
     livesContainer.appendChild(lifeRow);
 
     // Add tier markers to show completed and available 10-HP blocks
-    const totalTiers = Math.min(maxTier + 1, tierColors.length);
-    if (totalTiers > 1) {
+    // Show tier markers up to the current tier (ensure the base tier marker is always present)
+    const totalTiers = Math.max(1, Math.min(currentTier + 1, tierColors.length));
+    if (totalTiers > 0) {
         const tierRow = document.createElement('div');
         tierRow.className = 'life-tier-row';
 
@@ -167,9 +168,9 @@ function updateUI() {
             const tierColor = tierColors[Math.min(t, tierColors.length - 1)];
             const indicator = document.createElement('div');
 
-            // A tier is "filled" if the player currently has any HP inside that 10-HP block
-            const tierLives = Math.max(0, Math.min(player.lives - (t * MAX_VISUAL_SLOTS), MAX_VISUAL_SLOTS));
-            const isTierFilled = tierLives > 0;
+            // A tier is "filled" only when that 10-HP block is complete; otherwise it stays inactive
+            const tierLives = player.lives - (t * MAX_VISUAL_SLOTS);
+            const isTierFilled = tierLives >= MAX_VISUAL_SLOTS;
 
             indicator.className = `life-tier-indicator ${isTierFilled ? tierColor.filled : tierColor.empty}`;
             tierRow.appendChild(indicator);
