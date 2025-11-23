@@ -221,13 +221,6 @@ function hitPlayer() {
     flashOverlay.style.opacity = 0.5; setTimeout(() => flashOverlay.style.opacity = 0, 100);
     createExplosionLogic(player.x, player.y, '#f00', 25);
 
-    if (player.powerLevel > 1) {
-        player.powerLevel--;
-        player.weaponXpMax = getWeaponXpForLevel(player.powerLevel);
-        player.weaponXp = Math.min(player.weaponXp, Math.floor(player.weaponXpMax * 0.5));
-        spawnPowerup(player.x, player.y, 'weapon', true);
-        spawnText(player.x, player.y - 50, "SYSTEM DMG", "#f00");
-    }
     updateUI();
 
     // Check if player has run out of lives
