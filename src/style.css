@@ -912,7 +912,7 @@ h1::after {
     gap: 10px;
     box-shadow: 0 0 15px rgba(255, 221, 0, 0.2);
     font-family: monospace;
-    min-height: 190px;
+    min-height: 150px;
     justify-content: space-between;
 }
 
@@ -931,7 +931,7 @@ h1::after {
 
 .upgrade-card h3 {
     margin: 0;
-    font-size: 14px;
+    font-size: 12px;
     letter-spacing: 2px;
     font-weight: 900;
 }
