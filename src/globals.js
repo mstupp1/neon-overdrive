@@ -23,6 +23,8 @@ const pauseRestartBtn = document.getElementById('pause-restart-btn');
 const quitBtn = document.getElementById('quit-btn');
 const playerLevelDisplay = document.getElementById('player-level-display');
 const playerXpFill = document.getElementById('player-xp-fill');
+const lowHealthVignette = document.getElementById('low-health-vignette');
+const lowHealthWarning = document.getElementById('low-health-warning');
 
 // Constants
 const SCORE_DIGITS = 10;
