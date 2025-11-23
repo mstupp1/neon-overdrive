@@ -53,8 +53,16 @@ function playSound(type) {
 }
 
 const musicTracks = [
+    'src/audio/music/Space Crossfire 1 - AI Music.mp3',
+    'src/audio/music/Space Crossfire 2 - AI Music.mp3',
+    'src/audio/music/Cosmic Waves 1 - AI Music.mp3',
+    'src/audio/music/Cosmic Waves 2 - AI Music.mp3',
     'src/audio/music/Galactic Frenzy 1 - AI Music.mp3',
-    'src/audio/music/Galactic Frenzy 2 - AI Music.mp3'
+    'src/audio/music/Galactic Frenzy 2 - AI Music.mp3',
+    'src/audio/music/Galactic Showdown 1 - AI Music.mp3',
+    'src/audio/music/Galactic Showdown 2 - AI Music.mp3',
+    'src/audio/music/Starfire Rumble 1 - AI Music.mp3',
+    'src/audio/music/Starfire Rumble 2 - AI Music.mp3'
 ];
 
 const MusicPlayer = {
