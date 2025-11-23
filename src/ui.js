@@ -603,16 +603,37 @@ function playHoldSound() {
 }
 
 function stopHoldSound() {
-    if (holdOscillator) {
+    if (holdOscillator && holdGainNode && holdAudioContext) {
+        // Keep local references so these nodes can clean themselves up independently
+        const oscToStop = holdOscillator;
+        const gainToStop = holdGainNode;
+
+        // Clear the global references immediately so new sounds can start
+        holdOscillator = null;
+        holdGainNode = null;
+
         try {
-            holdOscillator.stop();
+            // Fade out to prevent click at end
+            const currentTime = holdAudioContext.currentTime;
+            gainToStop.gain.cancelScheduledValues(currentTime);
+            gainToStop.gain.setValueAtTime(gainToStop.gain.value, currentTime);
+            gainToStop.gain.linearRampToValueAtTime(0, currentTime + 0.05); // Fade out over 50ms
+
+            // Stop the oscillator after fade-out completes
+            oscToStop.stop(currentTime + 0.05);
+
+            // Disconnect after stopping to prevent interference with new sounds
+            setTimeout(() => {
+                try {
+                    gainToStop.disconnect();
+                    oscToStop.disconnect();
+                } catch (e) {
+                    // Already disconnected
+                }
+            }, 60); // Slightly longer than fade-out duration
         } catch (e) {
             // Already stopped
         }
-        holdOscillator = null;
-    }
-    if (holdGainNode) {
-        holdGainNode = null;
     }
 }
 
