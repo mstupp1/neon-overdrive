@@ -180,8 +180,14 @@ const intro = {
                  }
                  break;
             
-            case 4: // Transition to Menu
-                if (this.timer > 60) {
+            case 4: // Transition to Menu (Clear Screen)
+                // Fly everyone off screen
+                player.y -= 15; // Player flies up and out
+                enemies.forEach(e => e.y += 20); // Enemies drop down fast
+                bullets.forEach(b => b.active = false);
+                particles.forEach(p => p.active = false);
+
+                if (this.timer > 40) {
                     this.skip();
                 }
                 break;
@@ -235,14 +241,6 @@ const intro = {
             ctx.fillStyle = '#0ff';
             ctx.fillRect(-5, 20, 3, 5);
             ctx.fillRect(2, 20, 3, 5);
-            ctx.restore();
-        }
-
-        // Fade out in phase 4
-        if (this.phase === 4) {
-            ctx.save();
-            ctx.fillStyle = `rgba(0, 0, 0, ${Math.min(this.timer / 60, 0.5)})`;
-            ctx.fillRect(0, 0, width, height);
             ctx.restore();
         }
         
