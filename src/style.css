@@ -747,7 +747,7 @@ h1::after {
 
 .powerup-icons-bar {
     display: flex;
-    gap: 6px;
+    gap: 8px;
     align-items: center;
     margin-left: auto;
 }
@@ -764,13 +764,75 @@ h1::after {
 }
 
 .powerup-icon-small {
-    font-size: 16px;
+    font-size: 18px;
     text-shadow: 0 0 5px currentColor;
-    width: 12px;
-    height: 12px;
+    width: 18px;
+    height: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
+    color: inherit;
+}
+
+.powerup-chip {
+    position: relative;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: 0 0 8px rgba(0, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--powerup-color, #0ff);
+    overflow: hidden;
+}
+
+.powerup-chip::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 6px;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.12), transparent 50%);
+    pointer-events: none;
+}
+
+.powerup-timer {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.powerup-timer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: calc(var(--timer-ratio, 1) * 100%);
+    background: var(--powerup-color, #0ff);
+    box-shadow: 0 0 6px var(--powerup-color, #0ff);
+}
+
+.powerup-chip.expiring {
+    animation: powerup-expire 0.6s linear infinite;
+    box-shadow: 0 0 12px rgba(255, 80, 80, 0.45);
+}
+
+.powerup-chip.expiring .powerup-timer::after {
+    background: #fff;
+}
+
+@keyframes powerup-expire {
+    0% { opacity: 1; }
+    50% { opacity: 0.35; }
+    100% { opacity: 1; }
 }
 
 .btn.selected {
