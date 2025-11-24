@@ -129,9 +129,21 @@ function initGame() {
     lastTime = performance.now();
     accumulator = 0;
 
-    // Start background music in normal mode (not late-game)
-    MusicPlayer.isLateGame = false;
-    MusicPlayer.start();
+    // Start background music
+    if (MusicPlayer.isPlaying) {
+        // If late game music is playing, restart it (fade out -> early game)
+        if (MusicPlayer.isLateGame) {
+            MusicPlayer.restartMusic();
+        } else {
+            // If early game music is playing, keep it going but ensure volume is restored
+            // (in case we restarted during a fade-out)
+            MusicPlayer.fadeIn(500, 0.3);
+        }
+    } else {
+        // First start
+        MusicPlayer.isLateGame = false;
+        MusicPlayer.start();
+    }
 }
 
 function updateDemoAI() {

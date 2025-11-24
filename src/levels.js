@@ -115,7 +115,8 @@ class LevelManager {
             playSound('powerup'); // Or a new victory sound
 
             // Fade out music for passive select (only in late game - stage 7+)
-            if (this.currentLevel >= 7) {
+            // FIXED: Only do this for the transition from 6 -> 7 (Early to Late game music)
+            if (this.currentLevel === 6) {
                 MusicPlayer.fadeOutForPassiveSelect();
             }
         } else if (this.currentLevel === 9) {

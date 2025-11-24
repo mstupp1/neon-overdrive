@@ -99,6 +99,7 @@ const MusicPlayer = {
     isLateGame: false, // Track if we're playing late-game music
     isFading: false, // Track if we're currently fading
     savedVolume: 0.3, // Track saved volume for restoration
+    fadeInterval: null,
 
     init() {
         this.audio.addEventListener('ended', () => {
@@ -174,15 +175,23 @@ const MusicPlayer = {
         }
     },
 
+    cancelFade() {
+        if (this.fadeInterval) {
+            clearInterval(this.fadeInterval);
+            this.fadeInterval = null;
+        }
+        this.isFading = false;
+    },
+
     fadeOut(duration = 2000, pauseAfterFade = true) {
-        if (this.isFading) return Promise.resolve();
+        this.cancelFade();
         this.isFading = true;
 
         return new Promise((resolve) => {
             const startVolume = this.audio.volume;
             const startTime = Date.now();
 
-            const fadeInterval = setInterval(() => {
+            this.fadeInterval = setInterval(() => {
                 const elapsed = Date.now() - startTime;
                 const progress = Math.min(elapsed / duration, 1);
 
@@ -190,7 +199,8 @@ const MusicPlayer = {
                 this.audio.volume = startVolume * (1 - progress);
 
                 if (progress >= 1) {
-                    clearInterval(fadeInterval);
+                    clearInterval(this.fadeInterval);
+                    this.fadeInterval = null;
                     if (pauseAfterFade) {
                         this.audio.pause();
                         this.audio.currentTime = 0;
@@ -213,14 +223,14 @@ const MusicPlayer = {
     },
 
     fadeIn(duration = 2000, targetVolume = null) {
-        if (this.isFading) return Promise.resolve();
+        this.cancelFade();
         this.isFading = true;
 
         return new Promise((resolve) => {
             const finalVolume = targetVolume ?? this.savedVolume;
             const startTime = Date.now();
 
-            const fadeInterval = setInterval(() => {
+            this.fadeInterval = setInterval(() => {
                 const elapsed = Date.now() - startTime;
                 const progress = Math.min(elapsed / duration, 1);
 
@@ -228,7 +238,8 @@ const MusicPlayer = {
                 this.audio.volume = finalVolume * progress;
 
                 if (progress >= 1) {
-                    clearInterval(fadeInterval);
+                    clearInterval(this.fadeInterval);
+                    this.fadeInterval = null;
                     this.isFading = false;
                     resolve();
                 }
@@ -245,6 +256,19 @@ const MusicPlayer = {
     fadeInAfterPassiveSelect(duration = 3000) {
         // Restore to saved volume
         return this.fadeIn(duration, this.savedVolume);
+    },
+
+    restartMusic() {
+        // Fade out, reset to early game music, and fade in
+        this.fadeOut(1000).then(() => {
+            this.stop();
+            this.isLateGame = false;
+            this.shufflePlaylist();
+            this.playNext();
+            // Start at 0 volume for fade in (playNext sets it to 0.3)
+            this.audio.volume = 0;
+            this.fadeIn(2000, 0.3);
+        });
     },
 
     switchToNormalMusic() {
