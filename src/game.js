@@ -75,6 +75,9 @@ function returnToMenu() {
     // Stop background music and reset to normal mode
     MusicPlayer.stop();
     MusicPlayer.isLateGame = false;
+
+    // Stop ambient noise
+    AmbientPlayer.stop();
 }
 
 function initGame() {
@@ -144,6 +147,9 @@ function initGame() {
         MusicPlayer.isLateGame = false;
         MusicPlayer.start();
     }
+
+    // Start ambient noise
+    AmbientPlayer.start();
 }
 
 function updateDemoAI() {

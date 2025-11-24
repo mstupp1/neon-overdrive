@@ -56,6 +56,9 @@ function playSound(type) {
 let sfxMuted = false;
 function toggleSfxMute() {
     sfxMuted = !sfxMuted;
+    if (typeof AmbientPlayer !== 'undefined') {
+        AmbientPlayer.updateMute();
+    }
     return sfxMuted;
 }
 
@@ -282,4 +285,129 @@ const MusicPlayer = {
     }
 };
 
+const AmbientPlayer = {
+    buffer: null,
+    sources: [],
+    gainNode: null,
+    isPlaying: false,
+    url: 'src/audio/sfx/space_vessel_bg.mp3',
+    crossfadeDuration: 3.0, // Seconds
+    volume: 0.2, // Increased volume
+    nextStartTime: 0,
+    isLoaded: false,
+
+    init() {
+        this.gainNode = audioCtx.createGain();
+        this.gainNode.connect(audioCtx.destination);
+        this.gainNode.gain.value = sfxMuted ? 0 : this.volume;
+        this.load();
+    },
+
+    async load() {
+        try {
+            console.log("Loading ambient sound from:", this.url);
+            const response = await fetch(this.url);
+            const arrayBuffer = await response.arrayBuffer();
+            this.buffer = await audioCtx.decodeAudioData(arrayBuffer);
+            this.isLoaded = true;
+            console.log("Ambient sound loaded successfully. Duration:", this.buffer.duration);
+            if (this.isPlaying) {
+                this.startPlayback();
+            }
+        } catch (e) {
+            console.warn("Failed to load ambient sound:", e);
+        }
+    },
+
+    start() {
+        if (this.isPlaying) return;
+        this.isPlaying = true;
+        this.gainNode.gain.value = sfxMuted ? 0 : this.volume;
+
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        if (this.isLoaded) {
+            this.startPlayback();
+        }
+    },
+
+    stop() {
+        this.isPlaying = false;
+        this.sources.forEach(source => {
+            try { source.stop(); } catch (e) { }
+        });
+        this.sources = [];
+        if (this.schedulerTimer) {
+            clearTimeout(this.schedulerTimer);
+            this.schedulerTimer = null;
+        }
+    },
+
+    updateMute() {
+        if (this.gainNode) {
+            // Smoothly transition volume
+            const target = sfxMuted ? 0 : this.volume;
+            this.gainNode.gain.setTargetAtTime(target, audioCtx.currentTime, 0.1);
+        }
+    },
+
+    startPlayback() {
+        if (!this.buffer || !this.isPlaying) return;
+
+        // Start the first source immediately
+        this.playSegment(audioCtx.currentTime);
+    },
+
+    playSegment(time) {
+        if (!this.isPlaying) return;
+
+        const source = audioCtx.createBufferSource();
+        source.buffer = this.buffer;
+
+        // Create a local gain for crossfading this specific segment
+        const segmentGain = audioCtx.createGain();
+        source.connect(segmentGain);
+        segmentGain.connect(this.gainNode);
+
+        // Fade in
+        segmentGain.gain.setValueAtTime(0, time);
+        segmentGain.gain.linearRampToValueAtTime(1, time + this.crossfadeDuration);
+
+        // Play
+        source.start(time);
+
+        // Schedule fade out and stop
+        const duration = this.buffer.duration;
+        // Ensure crossfade isn't too long for the file
+        const actualCrossfade = Math.min(this.crossfadeDuration, duration / 2);
+
+        const endTime = time + duration;
+        const fadeOutStart = endTime - actualCrossfade;
+
+        segmentGain.gain.setValueAtTime(1, fadeOutStart);
+        segmentGain.gain.linearRampToValueAtTime(0, endTime);
+
+        source.stop(endTime);
+
+        // Keep track of source
+        this.sources.push(source);
+        // Cleanup old sources
+        this.sources = this.sources.filter(s => {
+            // Simple cleanup: remove if it would have stopped by now (plus a buffer)
+            // We can't easily check .state on created sources in all browsers, so time-based is safer
+            return true;
+        });
+
+        // Schedule next segment
+        // The next segment should start when the fade out begins (overlap)
+        const nextTime = fadeOutStart;
+        const timeUntilNext = (nextTime - audioCtx.currentTime) * 1000;
+
+        this.schedulerTimer = setTimeout(() => {
+            this.playSegment(nextTime);
+        }, timeUntilNext);
+    }
+};
+
 MusicPlayer.init();
+AmbientPlayer.init();
