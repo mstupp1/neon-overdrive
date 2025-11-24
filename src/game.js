@@ -618,7 +618,7 @@ function update(dt) {
                 dist(b.x, b.y, player.x, player.y) < player.radius + 5
             ) {
                 b.active = false;
-                hitPlayer();
+                hitPlayer(b.damage || 1);
                 if (gameState === 'GAMEOVER') return; // Stop processing if player died
             }
         }
@@ -631,7 +631,7 @@ function update(dt) {
                     hit = true;
             });
         if (player.iframes <= 0 && hit) {
-            hitPlayer();
+            hitPlayer(e.damage || 1);
             if (gameState === 'GAMEOVER') return; // Stop processing if player died
         }
     });

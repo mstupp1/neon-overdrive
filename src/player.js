@@ -334,7 +334,7 @@ function applyPassive(id) {
 window.selectUpgrade = applyUpgrade;
 window.applyPassive = applyPassive;
 
-function hitPlayer() {
+function hitPlayer(damage = 1) {
     if (player.godMode) return;
     if (gameState === 'DEMO') return; // Invincible in demo
 
@@ -360,7 +360,7 @@ function hitPlayer() {
         return;
     }
 
-    player.lives--;
+    player.lives -= damage;
     player.iframes = 120;
 
     // Reset auto shield timer on hit
