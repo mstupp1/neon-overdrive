@@ -24,9 +24,30 @@ function clampPlayerToPlayfield({ dampenVelocity = false } = {}) {
 function getPlayerBulletStats(subType, baseSpeed, levelOverride = null) {
     const base = PLAYER_WEAPON_BASE[subType] || PLAYER_WEAPON_BASE.normal;
     const scale = getWeaponLevelStats(levelOverride ?? player.powerLevel);
+
+    let damageMult = player.stats.damageMult;
+
+    // Passive: Perfectionist (+50% dmg at full health)
+    if (player.passives.has('damageFullHp') && player.lives >= player.stats.hpMax) {
+        damageMult += 0.5;
+    }
+
+    // Passive: Berserker (+100% dmg at low health)
+    if (player.passives.has('damageLowHp')) {
+        const missingHpPercent = 1 - (player.lives / player.stats.hpMax);
+        damageMult += missingHpPercent; // Up to +100%
+    }
+
+    // Passive: Kinetic Boost (more damage with speed)
+    if (player.passives.has('speedDamage')) {
+        const speed = Math.hypot(player.vx, player.vy);
+        const speedRatio = speed / PLAYER_MAX_SPEED;
+        damageMult += speedRatio * 0.5; // Up to +50% at max speed
+    }
+
     return {
         speed: baseSpeed * scale.speed,
-        damage: base.damage * scale.damage * player.stats.damageMult,
+        damage: base.damage * scale.damage * damageMult,
         pierce: base.pierce,
         tintHue: scale.hue,
         glow: scale.glow
@@ -122,6 +143,16 @@ function firePlayerWeapons() {
         spawnPlayerBullet(player.x - 18, player.y - 15, -Math.PI / 2 - 0.15, 24, 'beam');
         spawnPlayerBullet(player.x + 18, player.y - 15, -Math.PI / 2 + 0.15, 24, 'beam');
     }
+
+    // --- PASSIVE: WINGMEN ---
+    if (player.passives.has('sidekicks') && player.sidekicks) {
+        player.sidekicks.forEach(sk => {
+            // Sidekicks fire simple lasers every 20 frames
+            if (tick % 20 === 0) {
+                spawnPlayerBullet(sk.x, sk.y - 10, -Math.PI / 2, 16, 'beam');
+            }
+        });
+    }
 }
 
 function awardWeaponXp(xpGain) {
@@ -203,24 +234,98 @@ function applyUpgrade(type) {
     updateUI();
 }
 
+function applyPassive(id) {
+    player.passives.add(id);
+
+    // Immediate effects
+    if (id === 'doubleHp') {
+        player.stats.hpMax *= 2;
+        player.lives = player.stats.hpMax; // Heal to full? Or just double current? Description says "Doubles your max hp", usually implies heal too or just max increase. Let's do max increase + heal to new max for "Titan Hull" feel.
+        spawnText(player.x, player.y, "MAX HP DOUBLED", "#0f0");
+    } else if (id === 'smallSize') {
+        player.radius *= 0.75;
+        // Visual scale handled in draw? Or just hitbox?
+        // Let's reduce hitbox radius. Visuals might need adjustment if we want it to look smaller.
+        // We can add a scale factor to player for drawing.
+        player.scale = (player.scale || 1) * 0.75;
+        spawnText(player.x, player.y, "SHRUNK", "#0ff");
+    } else if (id === 'sidekicks') {
+        // Initialize sidekicks
+        player.sidekicks = [
+            { x: player.x - 30, y: player.y + 10, offset: -30 },
+            { x: player.x + 30, y: player.y + 10, offset: 30 }
+        ];
+        spawnText(player.x, player.y, "WINGMEN DEPLOYED", "#ff0");
+    } else {
+        spawnText(player.x, player.y, "PASSIVE ACQUIRED", "#fff");
+    }
+
+    document.getElementById('stage-complete-menu').classList.add('hidden');
+    uiLayer.classList.remove('hidden');
+    gameState = 'PLAYING';
+    updateUI();
+
+    // Advance level logic
+    levelManager.advanceLevel();
+}
+
 // Expose for HTML onclick
 window.selectUpgrade = applyUpgrade;
+window.applyPassive = applyPassive;
 
 function hitPlayer() {
     if (player.godMode) return;
     if (gameState === 'DEMO') return; // Invincible in demo
 
     if (player.hasShield) {
+        // Passive: Hardened Shield
+        if (player.passives.has('strongerShield') && !player.shieldDamaged) {
+            player.shieldDamaged = true;
+            playSound('shieldBreak'); // Maybe different sound?
+            spawnText(player.x, player.y - 50, "SHIELD HOLDING", "#0af");
+            player.iframes = 30; // Brief iframe
+            return;
+        }
+
         player.hasShield = false;
+        player.shieldDamaged = false; // Reset state
         playSound('shieldBreak');
         createExplosionLogic(player.x, player.y, '#00f', 20);
         player.iframes = 60;
         spawnText(player.x, player.y - 50, "SHIELD DOWN", "#00f");
+
+        // Reset auto shield timer on hit
+        player.autoShieldTimer = 0;
         return;
     }
 
     player.lives--;
     player.iframes = 120;
+
+    // Reset auto shield timer on hit
+    player.autoShieldTimer = 0;
+
+    // Passive: Shockwave
+    if (player.passives.has('killNearby')) {
+        // Check cooldown? Description said 10s cooldown.
+        const now = Date.now();
+        if (!player.lastShockwaveTime || now - player.lastShockwaveTime > 10000) {
+            player.lastShockwaveTime = now;
+
+            // Kill all nearby enemies
+            enemies.forEach(e => {
+                if (e.active && dist(player.x, player.y, e.x, e.y) < 250) {
+                    e.hp = 0; // Instant kill
+                    createExplosionLogic(e.x, e.y, '#f0f', 10);
+                }
+            });
+
+            // Visual shockwave
+            createExplosionLogic(player.x, player.y, '#f0f', 50);
+            spawnText(player.x, player.y - 60, "SHOCKWAVE", "#f0f");
+        }
+    }
+
     playSound('hit');
     flashOverlay.style.opacity = 0.5; setTimeout(() => flashOverlay.style.opacity = 0, 100);
     createExplosionLogic(player.x, player.y, '#f00', 25);

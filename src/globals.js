@@ -118,10 +118,29 @@ const player = {
     hasShield: false,
     tail: [],
     vx: 0, vy: 0, tilt: 0, tiltDir: 1,
-    godMode: false
+    vx: 0, vy: 0, tilt: 0, tiltDir: 1,
+    godMode: false,
+    passives: new Set(),
+    // Passive specific state
+    autoShieldTimer: 0,
+    sidekicks: []
 };
 
-const CHAR_XP_BASE = 150;
+const PASSIVE_UPGRADES = [
+    { id: 'doubleHp', title: 'TITAN HULL', description: 'Doubles your current Max HP immediately.', icon: 'health_and_safety' },
+    { id: 'autoShield', title: 'REGENERATOR', description: 'Gain a shield after 5 seconds of not taking damage.', icon: 'shield' },
+    { id: 'strongerShield', title: 'HARDENED SHIELD', description: 'Shields can withstand 1 extra hit before breaking.', icon: 'security' },
+    { id: 'killNearby', title: 'SHOCKWAVE', description: 'Emit a deadly shockwave when hit (10s cooldown).', icon: 'wifi_tethering' },
+    { id: 'damageFullHp', title: 'PERFECTIONIST', description: 'Deal +50% damage when at full health.', icon: 'favorite' },
+    { id: 'damageLowHp', title: 'BERSERKER', description: 'Deal up to +100% damage as health gets lower.', icon: 'whatshot' },
+    { id: 'fragments', title: 'SHRAPNEL', description: 'Enemies explode into small damaging fragments on death.', icon: 'grain' },
+    { id: 'speedDamage', title: 'KINETIC BOOST', description: 'Deal more damage the faster you move.', icon: 'speed' },
+    { id: 'spawnRate', title: 'SCAVENGER', description: 'Significantly increases powerup spawn rate.', icon: 'inventory_2' },
+    { id: 'smallSize', title: 'COMPACT FRAME', description: 'Reduces ship size and hitbox by 25%.', icon: 'compress' },
+    { id: 'sidekicks', title: 'WINGMEN', description: 'Two mini-ships fly with you and shoot lasers.', icon: 'flight' }
+];
+
+const CHAR_XP_BASE = 140;
 const CHAR_XP_GROWTH = 1.1;
 
 // Entity Lists

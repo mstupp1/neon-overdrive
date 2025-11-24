@@ -107,7 +107,12 @@ class LevelManager {
         const config = LEVEL_CONFIG[this.currentLevel];
 
         if (this.currentLevel < 9 && this.levelTimer >= config.duration) {
-            this.advanceLevel();
+            // Trigger Stage Complete Screen instead of immediate advance
+            gameState = 'STAGE_COMPLETE';
+            uiLayer.classList.add('hidden');
+            document.getElementById('stage-complete-menu').classList.remove('hidden');
+            showStageCompleteOptions();
+            playSound('powerup'); // Or a new victory sound
         } else if (this.currentLevel === 9) {
             // Infinite scaling logic
             if (this.levelTimer % 600 === 0) { // Every 10 seconds

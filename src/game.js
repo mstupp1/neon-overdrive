@@ -280,6 +280,28 @@ function update(dt) {
     }
     if (player.iframes > 0) player.iframes--;
 
+    // --- PASSIVE: REGENERATOR (Auto Shield) ---
+    if (player.passives.has('autoShield') && !player.hasShield && gameState === 'PLAYING') {
+        player.autoShieldTimer++;
+        if (player.autoShieldTimer >= 300) { // 5 seconds at 60fps
+            player.hasShield = true;
+            player.autoShieldTimer = 0;
+            playSound('powerup');
+            spawnText(player.x, player.y - 40, "SHIELD REGEN", "#00f");
+        }
+    }
+
+    // --- PASSIVE: WINGMEN (Sidekicks) ---
+    if (player.passives.has('sidekicks') && player.sidekicks) {
+        // Update sidekick positions to follow player with lag/smoothing
+        player.sidekicks.forEach(sk => {
+            const targetX = player.x + sk.offset;
+            const targetY = player.y + 10;
+            sk.x += (targetX - sk.x) * 0.1;
+            sk.y += (targetY - sk.y) * 0.1;
+        });
+    }
+
     // Update Entities
     [bullets, enemies, particles, powerups, texts].forEach(arr => arr.forEach(e => e.update()));
 
@@ -353,7 +375,26 @@ function update(dt) {
                         createExplosionLogic(e.x, e.y, `hsl(${globalHue},100%,50%)`, 25);
                         createExplosionLogic(e.x, e.y, '#fff', 10);
                         createExplosionLogic(e.x, e.y, `hsl(${globalHue + 60},100%,60%)`, 15);
-                        if (Math.random() < 0.03) spawnPowerup(e.x, e.y);
+                        createExplosionLogic(e.x, e.y, `hsl(${globalHue + 60},100%,60%)`, 15);
+
+                        // Passive: Scavenger (Increased spawn rate)
+                        let powerupChance = 0.03;
+                        if (player.passives.has('spawnRate')) powerupChance = 0.08; // Significant boost
+                        if (Math.random() < powerupChance) spawnPowerup(e.x, e.y);
+
+                        // Passive: Shrapnel (Fragments)
+                        if (player.passives.has('fragments')) {
+                            const fragCount = 3;
+                            for (let i = 0; i < fragCount; i++) {
+                                const angle = Math.random() * Math.PI * 2;
+                                spawnBullet(e.x, e.y, angle, 10, 'player', 'normal', {
+                                    damage: 0.5 * player.stats.damageMult, // Half normal damage
+                                    pierce: false,
+                                    tintHue: 50, // Gold color
+                                    glow: 0.1
+                                });
+                            }
+                        }
 
                         // XP Logic
                         if (gameState === 'PLAYING') {
@@ -542,7 +583,39 @@ function draw() {
         ctx.restore();
 
         ctx.restore();
+        ctx.restore();
     }
+
+    // --- PASSIVE: WINGMEN DRAW ---
+    if ((gameState === 'PLAYING' || gameState === 'DEMO' || gameState === 'PAUSED' || gameState === 'LEVEL_UP' || gameState === 'STAGE_COMPLETE') && player.passives.has('sidekicks') && player.sidekicks) {
+        player.sidekicks.forEach(sk => {
+            ctx.save();
+            ctx.translate(sk.x, sk.y);
+            ctx.rotate(player.tilt); // Match player tilt
+            ctx.scale(0.6, 0.6); // Smaller size
+
+            // Draw mini ship (simplified player ship)
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.moveTo(0, -25);
+            ctx.lineTo(8, 5);
+            ctx.lineTo(16, 15);
+            ctx.lineTo(8, 15);
+            ctx.lineTo(6, 20);
+            ctx.lineTo(-6, 20);
+            ctx.lineTo(-8, 15);
+            ctx.lineTo(-16, 15);
+            ctx.lineTo(-8, 5);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#0ff';
+            ctx.fillRect(-5, 20, 3, 5); ctx.fillRect(2, 20, 3, 5);
+
+            ctx.restore();
+        });
+    }
+
     ctx.restore();
 
     // Glitch Overlay - Desktop optimized (every 6 frames vs original 4)

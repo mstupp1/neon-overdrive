@@ -21,7 +21,8 @@ const MENUS = {
     'start-menu': { selector: '#start-menu .btn', defaultIndex: 0 },
     'pause-menu': { selector: '#pause-menu .btn', defaultIndex: 0 },
     'game-over-menu': { selector: '#game-over-menu .btn', defaultIndex: 0 },
-    'level-up-menu': { selector: '#level-up-menu .upgrade-card', defaultIndex: 1 } // Center option default
+    'level-up-menu': { selector: '#level-up-menu .upgrade-card', defaultIndex: 1 }, // Center option default
+    'stage-complete-menu': { selector: '#stage-complete-menu .upgrade-card', defaultIndex: 1 }
 };
 
 const ALL_UPGRADES = [
@@ -76,6 +77,41 @@ function showLevelUpOptions() {
 
     updateMenuSelection();
     updateLevelUpStats(null);
+    updateMenuSelection();
+    updateLevelUpStats(null);
+}
+
+function showStageCompleteOptions() {
+    const upgradeContainer = document.querySelector('#stage-complete-menu .upgrade-container');
+    upgradeContainer.innerHTML = '';
+
+    // Filter out already acquired passives
+    const availablePassives = PASSIVE_UPGRADES.filter(p => !player.passives.has(p.id));
+
+    // Shuffle and pick 3
+    const options = [...availablePassives].sort(() => 0.5 - Math.random()).slice(0, 3);
+
+    options.forEach(upgrade => {
+        const cardHTML = `
+            <div class="upgrade-column">
+                <div class="hold-indicator hidden">HOLD</div>
+                <button type="button" class="upgrade-card" data-upgrade-id="${upgrade.id}" data-type="passive">
+                    <span class="material-icons icon">${upgrade.icon}</span>
+                    <h3>${upgrade.title}</h3>
+                    <p>${upgrade.description}</p>
+                    <div class="hold-progress-bar">
+                        <div class="hold-progress-fill"></div>
+                    </div>
+                </button>
+            </div>
+        `;
+        upgradeContainer.innerHTML += cardHTML;
+    });
+
+    // Add event listeners for hold-to-select
+    setupHoldToSelectListeners();
+
+    updateMenuSelection();
 }
 
 function getVisibleMenuId() {
@@ -83,6 +119,7 @@ function getVisibleMenuId() {
     if (!pauseMenu.classList.contains('hidden')) return 'pause-menu';
     if (!gameOverMenu.classList.contains('hidden')) return 'game-over-menu';
     if (!document.getElementById('level-up-menu').classList.contains('hidden')) return 'level-up-menu';
+    if (!document.getElementById('stage-complete-menu').classList.contains('hidden')) return 'stage-complete-menu';
     return null;
 }
 
@@ -141,10 +178,11 @@ function handleMenuInput(key) {
         if (isKeyHeld) return;
         isKeyHeld = true;
 
-        // For level-up menu, start hold process
-        if (menuId === 'level-up-menu') {
+        // For level-up menu or stage-complete menu, start hold process
+        if (menuId === 'level-up-menu' || menuId === 'stage-complete-menu') {
             const upgradeId = buttons[selectedButtonIndex].dataset.upgradeId;
-            startHold(upgradeId, buttons[selectedButtonIndex]);
+            const type = buttons[selectedButtonIndex].dataset.type; // Check if passive
+            startHold(upgradeId, buttons[selectedButtonIndex], type);
         } else {
             // For other menus, immediate click
             buttons[selectedButtonIndex].click();
@@ -449,21 +487,23 @@ function updateAudioBtnState(btn, isMuted, onIcon, offIcon) {
 // ===== HOLD-TO-SELECT SYSTEM =====
 
 function setupHoldToSelectListeners() {
-    const upgradeCards = document.querySelectorAll('#level-up-menu .upgrade-card');
+    const upgradeCards = document.querySelectorAll('.upgrade-card'); // Select all upgrade cards globally
 
     upgradeCards.forEach(card => {
         // Mouse events
         card.addEventListener('mousedown', (e) => {
             e.preventDefault();
             const upgradeId = card.dataset.upgradeId;
-            startHold(upgradeId, card);
+            const type = card.dataset.type;
+            startHold(upgradeId, card, type);
         });
 
         // Touch events for mobile
         card.addEventListener('touchstart', (e) => {
             e.preventDefault();
             const upgradeId = card.dataset.upgradeId;
-            startHold(upgradeId, card);
+            const type = card.dataset.type;
+            startHold(upgradeId, card, type);
         });
 
         // Prevent context menu
@@ -477,20 +517,33 @@ function setupHoldToSelectListeners() {
     });
 
     // Global mouseup and touchend listeners to cancel hold
+    // Remove previous listeners to avoid duplicates if this is called multiple times
+    document.removeEventListener('mousedown', cancelHold); // Changed from mouseup to mousedown to match startHold
+    document.removeEventListener('mouseup', cancelHold);
+    document.removeEventListener('touchend', cancelHold);
+    document.removeEventListener('touchcancel', cancelHold);
+
     document.addEventListener('mouseup', cancelHold);
     document.addEventListener('touchend', cancelHold);
     document.addEventListener('touchcancel', cancelHold);
 
     // Keyboard listeners for hold
+    // We can't easily remove anonymous functions, so we should move this out or use a named function.
+    // For now, let's just leave it but be aware. Ideally this should be in init.
+}
+
+// Add global keyup listener once
+if (!window.holdKeyUpListenerAdded) {
     document.addEventListener('keyup', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
             isKeyHeld = false; // Reset the key held state
             cancelHold();
         }
     });
+    window.holdKeyUpListenerAdded = true;
 }
 
-function startHold(upgradeId, cardElement) {
+function startHold(upgradeId, cardElement, type) {
     // Cancel any existing hold
     if (isHolding) {
         cancelHold();
@@ -498,7 +551,7 @@ function startHold(upgradeId, cardElement) {
 
     isHolding = true;
     holdStartTime = Date.now();
-    holdTargetUpgrade = upgradeId;
+    holdTargetUpgrade = { id: upgradeId, type: type };
 
     // Get the upgrade column (parent of button)
     const upgradeColumn = cardElement.parentElement;
@@ -556,7 +609,8 @@ function updateHoldProgress(cardElement) {
 function completeHold() {
     if (!holdTargetUpgrade) return;
 
-    const upgradeId = holdTargetUpgrade;
+    const upgradeId = holdTargetUpgrade.id;
+    const type = holdTargetUpgrade.type;
 
     // Stop hold
     cancelHold();
@@ -565,7 +619,11 @@ function completeHold() {
     playCompletionSound();
 
     // Select the upgrade
-    window.selectUpgrade(upgradeId);
+    if (type === 'passive') {
+        window.applyPassive(upgradeId);
+    } else {
+        window.selectUpgrade(upgradeId);
+    }
 }
 
 function cancelHold() {
@@ -583,7 +641,7 @@ function cancelHold() {
     stopHoldSound();
 
     // Clean up UI
-    const upgradeCards = document.querySelectorAll('#level-up-menu .upgrade-card');
+    const upgradeCards = document.querySelectorAll('.upgrade-card');
     upgradeCards.forEach(card => {
         card.classList.remove('holding');
         const progressFill = card.querySelector('.hold-progress-fill');
@@ -592,7 +650,7 @@ function cancelHold() {
         }
     });
 
-    const holdIndicators = document.querySelectorAll('#level-up-menu .hold-indicator');
+    const holdIndicators = document.querySelectorAll('.hold-indicator');
     holdIndicators.forEach(indicator => {
         indicator.classList.add('hidden');
     });
