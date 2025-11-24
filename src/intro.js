@@ -184,7 +184,7 @@ const intro = {
                 // Fly everyone off screen
                 player.y -= 15; // Player flies up and out
                 enemies.forEach(e => e.y += 20); // Enemies drop down fast
-                bullets.forEach(b => b.active = false);
+                // Bullets continue to fly naturally
                 particles.forEach(p => p.active = false);
 
                 if (this.timer > 40) {
@@ -212,6 +212,8 @@ const intro = {
         if (this.phase >= 1) {
             ctx.save();
             ctx.translate(player.x, player.y);
+            // Apply slight tilt for dynamic feel in intro
+            ctx.rotate(player.vx * 0.05);
             
             // Engine Trails
             player.tail.forEach(t => {
@@ -223,8 +225,13 @@ const intro = {
             });
             ctx.globalAlpha = 1;
 
-            // Ship
+            // Ship Body
             ctx.fillStyle = '#fff';
+            if (!IS_MOBILE) {
+                ctx.shadowBlur = IS_DESKTOP ? 12 : 15;
+                ctx.shadowColor = '#0ff';
+            }
+
             ctx.beginPath();
             ctx.moveTo(0, -25);
             ctx.lineTo(8, 5);
@@ -238,7 +245,22 @@ const intro = {
             ctx.closePath();
             ctx.fill();
 
-            ctx.fillStyle = '#0ff';
+            // Cockpit
+            ctx.fillStyle = '#022';
+            ctx.beginPath();
+            ctx.moveTo(0, -10);
+            ctx.lineTo(4, 5);
+            ctx.lineTo(0, 8);
+            ctx.lineTo(-4, 5);
+            ctx.fill();
+
+            // Engines
+            if (!IS_MOBILE) {
+                ctx.shadowBlur = IS_DESKTOP ? 16 : 20;
+                ctx.fillStyle = '#0ff';
+            } else {
+                ctx.fillStyle = '#0ff';
+            }
             ctx.fillRect(-5, 20, 3, 5);
             ctx.fillRect(2, 20, 3, 5);
             ctx.restore();
