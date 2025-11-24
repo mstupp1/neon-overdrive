@@ -732,7 +732,7 @@ window.addEventListener('keydown', e => {
         return;
     }
 
-    if (gameState === 'MENU' || gameState === 'PAUSED' || gameState === 'GAMEOVER' || gameState === 'LEVEL_UP' || gameState === 'DEMO') {
+    if (gameState === 'MENU' || gameState === 'PAUSED' || gameState === 'GAMEOVER' || gameState === 'LEVEL_UP' || gameState === 'STAGE_COMPLETE' || gameState === 'DEMO') {
         handleMenuInput(e.key);
         if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Enter'].includes(e.key)) {
             e.preventDefault();
