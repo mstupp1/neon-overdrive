@@ -56,6 +56,12 @@ const PLAYFIELD_TOP_BUFFER = 20;
 const PLAYFIELD_BOTTOM_PADDING = 36;
 const PLAYER_START_BOTTOM_OFFSET = 200;
 
+// Dash constants
+const DASH_SPEED = 20; // Dash velocity magnitude
+const DASH_DURATION = 8; // Frames dash is active
+const DASH_COOLDOWN = 45; // Frames before dash can be used again
+const DOUBLE_TAP_TIME = 300; // Milliseconds for double tap detection
+
 const MAX_POWER_LEVEL = 10;
 const WEAPON_XP_BASE = 170;
 const WEAPON_XP_GROWTH = 1.8;
@@ -100,7 +106,14 @@ let debugNoEnemySpawns = false; // Debug toggle to pause enemy spawns
 const input = { x: 0, y: 0, active: false, lastX: 0, lastY: 0 };
 const keys = {
     up: false, down: false, left: false, right: false,
-    w: false, a: false, s: false, d: false
+    w: false, a: false, s: false, d: false,
+    space: false
+};
+// Mobile double-tap detection
+const touchHistory = {
+    lastTapTime: 0,
+    lastTapX: 0,
+    lastTapY: 0
 };
 
 // Power-up Durations (in frames, 60fps)
@@ -134,7 +147,16 @@ const player = {
     sidekicks: [],
     // Active power-ups (temporary pickups)
     activePowerups: new Map(), // type -> remaining frames
-    fireballAngle: 0 // Rotation angle for fireball ring
+    fireballAngle: 0, // Rotation angle for fireball ring
+    // Dash state
+    dashCooldown: 0,
+    dashActive: false,
+    dashFrames: 0,
+    dashVx: 0,
+    dashVy: 0,
+    lastMoveDirX: 0,
+    lastMoveDirY: 0,
+    barrelRollRotation: 0 // Rotation angle for barrel roll animation
 };
 
 const PASSIVE_UPGRADES = [
