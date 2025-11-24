@@ -208,6 +208,62 @@ canvas {
     z-index: 1;
 }
 
+/* Stage Progress Bar */
+.stage-progress-container {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px;
+    position: relative;
+    opacity: 0.9;
+}
+
+.stage-node {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #333;
+    border: 1px solid #555;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    transition: background-color 0.5s, border-color 0.5s, box-shadow 0.5s;
+}
+
+.stage-progress-track {
+    width: 80px;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    position: relative;
+    overflow: visible;
+}
+
+.stage-progress-fill {
+    width: 0%;
+    height: 100%;
+    background: #fff;
+    border-radius: 2px;
+    position: relative;
+    box-shadow: 0 0 8px currentColor;
+    transition: width 0.1s linear, background-color 0.5s;
+}
+
+.stage-ship-indicator {
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%) rotate(90deg);
+    width: 12px;
+    height: 12px;
+    pointer-events: none;
+    filter: drop-shadow(0 0 4px currentColor);
+}
+
+.stage-ship-indicator svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
 .score-digit {
     display: inline-block;
     min-width: 0.7ch;
@@ -748,7 +804,8 @@ h1::after {
     gap: 8px;
     flex-wrap: nowrap;
     width: 100%;
-    margin-top: -2px; /* snug to XP bar with a bit more breathing room */
+    margin-top: -2px;
+    /* snug to XP bar with a bit more breathing room */
 }
 
 .passive-icons-bar {
@@ -802,9 +859,17 @@ h1::after {
 }
 
 @keyframes powerup-expire {
-    0% { opacity: 1; }
-    50% { opacity: 0.35; }
-    100% { opacity: 1; }
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.35;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
 .btn.selected {

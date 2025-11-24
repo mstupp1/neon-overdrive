@@ -395,6 +395,58 @@ function updateUI() {
         lowHealthVignette.className = '';
         lowHealthWarning.className = '';
     }
+
+    // Update Stage Progress Bar
+    updateStageProgressBar();
+}
+
+function updateStageProgressBar() {
+    const progressFill = document.getElementById('stage-progress-fill');
+    const startNode = document.getElementById('stage-start-node');
+    const endNode = document.getElementById('stage-end-node');
+
+    if (!progressFill || !startNode || !endNode) return;
+
+    const currentLevel = levelManager.currentLevel;
+    const config = LEVEL_CONFIG[currentLevel];
+
+    if (!config) return;
+
+    // Colors
+    const currentHue = config.hue;
+    const nextLevel = Math.min(currentLevel + 1, 9); // Cap at 9
+    const nextHue = LEVEL_CONFIG[nextLevel].hue;
+
+    const currentColor = `hsl(${currentHue}, 100%, 50%)`;
+    const nextColor = `hsl(${nextHue}, 100%, 50%)`;
+
+    // Update Node Colors
+    startNode.style.backgroundColor = currentColor;
+    startNode.style.borderColor = `hsl(${currentHue}, 100%, 70%)`;
+    startNode.style.boxShadow = `0 0 8px ${currentColor}`;
+
+    endNode.style.backgroundColor = nextColor;
+    endNode.style.borderColor = `hsl(${nextHue}, 100%, 70%)`;
+    endNode.style.boxShadow = `0 0 8px ${nextColor}`;
+
+    // Update Fill Color
+    progressFill.style.backgroundColor = currentColor;
+    progressFill.style.boxShadow = `0 0 8px ${currentColor}`;
+    progressFill.style.color = currentColor; // For the ship SVG drop-shadow
+
+    // Calculate Progress
+    let progress = 0;
+    if (currentLevel === 9) {
+        // Infinite level - maybe pulse or just show full?
+        // Let's show full for now to indicate "maxed out"
+        progress = 100;
+    } else {
+        const duration = config.duration;
+        const timer = levelManager.levelTimer;
+        progress = Math.min(100, (timer / duration) * 100);
+    }
+
+    progressFill.style.width = `${progress}%`;
 }
 
 function updateLevelUpStats(previewType) {
