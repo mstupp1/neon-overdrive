@@ -303,6 +303,21 @@ function updateUI() {
         if (atMaxLevel && filled) segs[i].className = 'segment max';
     }
 
+    // Update Passive Icons
+    const passiveIconsContainer = document.getElementById('passive-icons');
+    if (passiveIconsContainer) {
+        passiveIconsContainer.innerHTML = '';
+        player.passives.forEach(passiveId => {
+            const passiveDef = PASSIVE_UPGRADES.find(p => p.id === passiveId);
+            if (passiveDef) {
+                const iconSpan = document.createElement('span');
+                iconSpan.className = 'material-icons passive-icon-small';
+                iconSpan.textContent = passiveDef.icon;
+                passiveIconsContainer.appendChild(iconSpan);
+            }
+        });
+    }
+
     // Update XP Bar
     const xpPercent = atMaxLevel ? 100 : Math.min(100, (player.weaponXp / player.weaponXpMax) * 100);
     if (xpFill) xpFill.style.width = `${xpPercent}%`;
