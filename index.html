@@ -21,39 +21,41 @@
 
         <div id="ui-layer" class="hidden">
             <div class="hud-top">
-                <div class="hud-left-col">
-                    <div class="lives-box" id="lives-container"></div>
-                    <div class="stage-block">
-                        <div class="score-label" style="color: #fff; font-size: 8px;">STAGE</div>
-                        <div class="stage-row" style="display: flex; align-items: center; gap: 8px;">
-                            <div id="stage-display"
-                                style="font-size: 18px; font-weight: 900; color: #0ff; text-shadow: 0 0 10px #0ff; font-family: monospace;">
-                                1</div>
-                            <button class="score-pause" id="pause-btn" aria-label="Pause or Resume"
-                                style="transform: scale(0.7);">
-                                <div class="pause-icon" aria-hidden="true"></div>
-                            </button>
+                <div class="hud-main-row">
+                    <div class="hud-left-col">
+                        <div class="lives-box" id="lives-container"></div>
+                        <div class="stage-block">
+                            <div class="score-label" style="color: #fff; font-size: 8px;">STAGE</div>
+                            <div class="stage-row" style="display: flex; align-items: center; gap: 8px;">
+                                <div id="stage-display"
+                                    style="font-size: 18px; font-weight: 900; color: #0ff; text-shadow: 0 0 10px #0ff; font-family: monospace;">
+                                    1</div>
+                                <button class="score-pause" id="pause-btn" aria-label="Pause or Resume"
+                                    style="transform: scale(0.7);">
+                                    <div class="pause-icon" aria-hidden="true"></div>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="hud-right-col">
-                    <div class="power-bar-container">
-                        <div class="power-segments" id="power-segments">
-                            <div class="segment"></div>
-                            <div class="segment"></div>
-                            <div class="segment"></div>
-                            <div class="segment"></div>
-                            <div class="segment"></div>
+                    <div class="hud-right-col">
+                        <div class="power-bar-container">
+                            <div class="power-segments" id="power-segments">
+                                <div class="segment"></div>
+                                <div class="segment"></div>
+                                <div class="segment"></div>
+                                <div class="segment"></div>
+                                <div class="segment"></div>
+                            </div>
+                            <div class="xp-track">
+                                <div class="xp-fill" id="xp-fill"></div>
+                            </div>
+                            <div class="xp-status" id="xp-status"></div>
                         </div>
-                        <div class="xp-track">
-                            <div class="xp-fill" id="xp-fill"></div>
+                        <div class="score-block">
+                            <div class="score-label">SCORE</div>
+                            <div class="score-val" id="score-display">0</div>
                         </div>
-                        <div class="xp-status" id="xp-status"></div>
-                    </div>
-                    <div class="score-block">
-                        <div class="score-label">SCORE</div>
-                        <div class="score-val" id="score-display">0</div>
                     </div>
                 </div>
 
@@ -65,10 +67,10 @@
                         <div class="player-xp-fill" id="player-xp-fill"></div>
                     </div>
                 </div>
-                <div class="icons-row">
-                    <div id="passive-icons" class="passive-icons-bar"></div>
-                    <div id="powerup-icons" class="powerup-icons-bar"></div>
-                </div>
+            </div>
+            <div class="icons-row">
+                <div id="passive-icons" class="passive-icons-bar"></div>
+                <div id="powerup-icons" class="powerup-icons-bar"></div>
             </div>
             <div id="stage-toast" class="hidden">
                 <div class="stage-label">ENTERING SECTOR</div>

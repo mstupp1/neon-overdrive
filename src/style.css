@@ -56,7 +56,9 @@ canvas {
     pointer-events: none;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 8px;
     padding: 0 0 12px;
     box-sizing: border-box;
     z-index: 20;
@@ -74,8 +76,9 @@ canvas {
 
 .hud-top {
     display: flex;
-    align-items: center;
-    gap: 14px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
     width: 100%;
     margin: 0;
     padding: 10px 14px 16px 14px;
@@ -84,9 +87,17 @@ canvas {
     box-shadow: 0 4px 12px rgba(0, 255, 255, 0.2);
     transform: none;
     backdrop-filter: blur(8px);
-    justify-content: space-between;
+    justify-content: flex-start;
     box-sizing: border-box;
     position: relative;
+}
+
+.hud-main-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    width: 100%;
 }
 
 .hud-left-col {
@@ -736,13 +747,16 @@ h1::after {
     align-items: center;
     gap: 8px;
     width: 100%;
-    margin-top: 8px;
+    padding: 6px 14px 0 14px;
+    margin-top: -4px; /* snug to XP bar */
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .passive-icons-bar {
     display: flex;
-    gap: 6px;
+    gap: 12px;
     align-items: center;
+    left: 12px;
 }
 
 .powerup-icons-bar {
@@ -750,6 +764,7 @@ h1::after {
     gap: 8px;
     align-items: center;
     margin-left: auto;
+    Right: 14px;
 }
 
 .passive-icon-small {
