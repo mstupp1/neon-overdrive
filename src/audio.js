@@ -292,7 +292,7 @@ const AmbientPlayer = {
     isPlaying: false,
     url: 'src/audio/sfx/space_vessel_bg.mp3',
     crossfadeDuration: 3.0, // Seconds
-    volume: 0.2, // Increased volume
+    volume: 0.05, // Increased volume
     nextStartTime: 0,
     isLoaded: false,
 
