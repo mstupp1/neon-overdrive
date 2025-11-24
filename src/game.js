@@ -44,6 +44,8 @@ function returnToMenu() {
     player.weaponXp = 0; player.weaponXpMax = getWeaponXpForLevel(player.powerLevel);
     if (xpFill) { xpFill.style.transition = 'none'; setTimeout(() => xpFill.style.transition = 'width 0.2s ease-out', 50); }
     setPlayerStartPosition(); player.vx = 0; player.vy = 0; player.tilt = 0;
+    player.dashCooldown = 0; player.dashActive = false; player.dashFrames = 0; player.dashVx = 0; player.dashVy = 0;
+    player.lastMoveDirX = 0; player.lastMoveDirY = -1; // Default to up direction
 
     resetWorldState();
     buildPowerSegments();
@@ -63,6 +65,8 @@ function initGame() {
 
     if (xpFill) { xpFill.style.transition = 'none'; setTimeout(() => xpFill.style.transition = 'width 0.2s ease-out', 50); }
     setPlayerStartPosition(); player.vx = 0; player.vy = 0; player.tilt = 0;
+    player.dashCooldown = 0; player.dashActive = false; player.dashFrames = 0; player.dashVx = 0; player.dashVy = 0;
+    player.lastMoveDirX = 0; player.lastMoveDirY = -1; // Default to up direction
 
     resetWorldState();
 
@@ -211,69 +215,110 @@ function update(dt) {
     player.tail.forEach(t => t.life -= 0.1);
     player.tail = player.tail.filter(t => t.life > 0);
 
+    // --- DASH UPDATE ---
+    if (player.dashCooldown > 0) player.dashCooldown--;
+    if (player.dashActive) {
+        player.dashFrames--;
+        if (player.dashFrames <= 0) {
+            player.dashActive = false;
+            // Reset velocity after dash ends
+            player.vx = player.dashVx * 0.3; // Carry some momentum
+            player.vy = player.dashVy * 0.3;
+        }
+    }
+
     // --- PLAYER MOVEMENT (KEYBOARD + TOUCH/MOUSE) ---
     if (gameState === 'PLAYING') {
-        let accelX = 0;
-        let accelY = 0;
-        const accel = PLAYER_ACCEL * player.stats.moveSpeedMult;
-
-        // Keyboard-driven acceleration
-        if (keys.up || keys.w) accelY -= accel;
-        if (keys.down || keys.s) accelY += accel;
-        if (keys.left || keys.a) accelX -= accel;
-        if (keys.right || keys.d) accelX += accel;
-
-        // Pointer-driven acceleration toward last touch/mouse position
-        if (input.active) {
-            const dx = input.lastX - player.x;
-            const dy = input.lastY - player.y;
-            const distance = Math.hypot(dx, dy);
-            if (distance > 2) {
-                const steer = Math.min(accel, distance * 0.02);
-                accelX += (dx / distance) * steer;
-                accelY += (dy / distance) * steer;
+        // Dash movement takes priority
+        if (player.dashActive) {
+            // Move with dash velocity
+            player.x += player.dashVx;
+            player.y += player.dashVy;
+            // Clamp player position to screen bounds
+            clampPlayerToPlayfield({ dampenVelocity: true });
+            
+            // Create dash trail particles with fixed size
+            if (frameCount % 2 === 0) {
+                createDashParticles(player.x, player.y, '#0ff', 2);
             }
-        }
-
-        // Give upward movement a bit more punch
-        if (accelY < 0) accelY *= PLAYER_ACCEL_UP_BOOST;
-        if (accelY > 0) accelY *= PLAYER_ACCEL_DOWN_FACTOR;
-
-        player.vx += accelX;
-        player.vy += accelY;
-
-        // Apply friction for floaty glide
-        player.vx *= PLAYER_FRICTION;
-        player.vy *= PLAYER_FRICTION;
-
-        // Cap speed
-        const maxSpeed = (player.vy < 0)
-            ? PLAYER_MAX_SPEED_UP * player.stats.moveSpeedMult
-            : (player.vy > 0 ? PLAYER_MAX_SPEED_DOWN * player.stats.moveSpeedMult : PLAYER_MAX_SPEED * player.stats.moveSpeedMult);
-        const speed = Math.hypot(player.vx, player.vy);
-        if (speed > maxSpeed) {
-            const s = maxSpeed / speed;
-            player.vx *= s; player.vy *= s;
-        }
-
-        player.x += player.vx;
-        player.y += player.vy;
-        // Clamp player position to screen bounds and damp velocity when hitting edges
-        clampPlayerToPlayfield({ dampenVelocity: true });
-
-        // Smooth tilt based purely on horizontal velocity (always lean into move direction)
-        player.tiltDir = 1; // keep for compatibility, but fix orientation
-
-        const absVx = Math.abs(player.vx);
-        let targetTilt = player.tilt; // preserve current tilt inside deadzone
-        if (absVx > PLAYER_TILT_DEADZONE) {
-            const tiltNorm = Math.min(1, (absVx - PLAYER_TILT_DEADZONE) / (PLAYER_MAX_SPEED - PLAYER_TILT_DEADZONE));
-            targetTilt = tiltNorm * PLAYER_TILT_MAX * Math.sign(player.vx) * player.tiltDir;
         } else {
-            targetTilt *= PLAYER_TILT_DAMP; // gently settle toward neutral
-        }
+            // Normal movement
+            let accelX = 0;
+            let accelY = 0;
+            const accel = PLAYER_ACCEL * player.stats.moveSpeedMult;
 
-        player.tilt = player.tilt * (1 - PLAYER_TILT_BLEND) + targetTilt * PLAYER_TILT_BLEND;
+            // Keyboard-driven acceleration
+            if (keys.up || keys.w) accelY -= accel;
+            if (keys.down || keys.s) accelY += accel;
+            if (keys.left || keys.a) accelX -= accel;
+            if (keys.right || keys.d) accelX += accel;
+
+            // Pointer-driven acceleration toward last touch/mouse position
+            if (input.active) {
+                const dx = input.lastX - player.x;
+                const dy = input.lastY - player.y;
+                const distance = Math.hypot(dx, dy);
+                if (distance > 2) {
+                    const steer = Math.min(accel, distance * 0.02);
+                    accelX += (dx / distance) * steer;
+                    accelY += (dy / distance) * steer;
+                }
+            }
+
+            // Track last movement direction for dash
+            if (accelX !== 0 || accelY !== 0) {
+                const mag = Math.hypot(accelX, accelY);
+                player.lastMoveDirX = accelX / mag;
+                player.lastMoveDirY = accelY / mag;
+            } else {
+                // Track from velocity if no input
+                const speed = Math.hypot(player.vx, player.vy);
+                if (speed > 0.1) {
+                    player.lastMoveDirX = player.vx / speed;
+                    player.lastMoveDirY = player.vy / speed;
+                }
+            }
+
+            // Give upward movement a bit more punch
+            if (accelY < 0) accelY *= PLAYER_ACCEL_UP_BOOST;
+            if (accelY > 0) accelY *= PLAYER_ACCEL_DOWN_FACTOR;
+
+            player.vx += accelX;
+            player.vy += accelY;
+
+            // Apply friction for floaty glide
+            player.vx *= PLAYER_FRICTION;
+            player.vy *= PLAYER_FRICTION;
+
+            // Cap speed
+            const maxSpeed = (player.vy < 0)
+                ? PLAYER_MAX_SPEED_UP * player.stats.moveSpeedMult
+                : (player.vy > 0 ? PLAYER_MAX_SPEED_DOWN * player.stats.moveSpeedMult : PLAYER_MAX_SPEED * player.stats.moveSpeedMult);
+            const speed = Math.hypot(player.vx, player.vy);
+            if (speed > maxSpeed) {
+                const s = maxSpeed / speed;
+                player.vx *= s; player.vy *= s;
+            }
+
+            player.x += player.vx;
+            player.y += player.vy;
+            // Clamp player position to screen bounds and damp velocity when hitting edges
+            clampPlayerToPlayfield({ dampenVelocity: true });
+
+            // Smooth tilt based purely on horizontal velocity (always lean into move direction)
+            player.tiltDir = 1; // keep for compatibility, but fix orientation
+
+            const absVx = Math.abs(player.vx);
+            let targetTilt = player.tilt; // preserve current tilt inside deadzone
+            if (absVx > PLAYER_TILT_DEADZONE) {
+                const tiltNorm = Math.min(1, (absVx - PLAYER_TILT_DEADZONE) / (PLAYER_MAX_SPEED - PLAYER_TILT_DEADZONE));
+                targetTilt = tiltNorm * PLAYER_TILT_MAX * Math.sign(player.vx) * player.tiltDir;
+            } else {
+                targetTilt *= PLAYER_TILT_DAMP; // gently settle toward neutral
+            }
+
+            player.tilt = player.tilt * (1 - PLAYER_TILT_BLEND) + targetTilt * PLAYER_TILT_BLEND;
+        }
     }
 
     // --- SHOOTING ---
