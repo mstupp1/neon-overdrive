@@ -2,6 +2,15 @@
  * MAIN GAME LOOP & STATE MANAGEMENT
  */
 
+let menuIdleTimer = 0;
+
+function startIntro() {
+    gameState = 'INTRO';
+    menuIdleTimer = 0;
+    startMenu.classList.add('hidden');
+    intro.init();
+}
+
 function resetWorldState() {
     bullets.forEach((b) => bulletPool.release(b));
     bullets.length = 0;
@@ -38,6 +47,7 @@ function resumeGame() {
 
 function returnToMenu() {
     gameState = 'MENU';
+    menuIdleTimer = 0; // Reset idle timer on return
     pauseMenu.classList.add('hidden');
     gameOverMenu.classList.add('hidden');
     startMenu.classList.remove('hidden');
@@ -85,6 +95,7 @@ function returnToMenu() {
 
 function initGame() {
     if (document.activeElement) document.activeElement.blur();
+    menuIdleTimer = 0;
     score = 0;
     player.lives = PLAYER_MAX_LIVES;
     player.powerLevel = 0;
@@ -255,6 +266,23 @@ function updateDemoAI() {
 }
 
 function update(dt) {
+    if (gameState === 'INTRO') {
+        intro.update();
+        return;
+    }
+
+    if (gameState === 'MENU') {
+        menuIdleTimer++;
+        if (menuIdleTimer > 60 * 20) { // 20 seconds at 60fps
+            startIntro();
+        }
+        // Update cosmetic background in menu
+        cosmicBg.update();
+        globalHue += 0.5;
+        frameCount++;
+        return;
+    }
+
     if (gameState !== 'PLAYING' && gameState !== 'DEMO') {
         // if (gameState !== 'LEVEL_UP') globalHue += 1; // Removed to keep theme stable
         return;
@@ -735,12 +763,22 @@ function update(dt) {
 }
 
 function draw() {
+    if (gameState === 'INTRO') {
+        intro.draw(ctx);
+        return;
+    }
+
     // Background
     // Apply scale for game world
     ctx.save();
     ctx.scale(GAME_SCALE, GAME_SCALE);
 
     cosmicBg.draw(ctx);
+
+    if (gameState === 'MENU') {
+        ctx.restore();
+        return;
+    }
 
     let sx = 0,
         sy = 0;
@@ -1012,6 +1050,15 @@ function loop(timestamp) {
     }
 }
 
+document.addEventListener('click', () => {
+    menuIdleTimer = 0; // Reset on any input
+    if (gameState === 'INTRO') intro.skip();
+});
+document.addEventListener('touchstart', () => {
+    menuIdleTimer = 0; // Reset on any input
+    if (gameState === 'INTRO') intro.skip();
+}, { passive: true });
+
 document.getElementById('start-btn').addEventListener('click', initGame);
 document.getElementById('restart-btn').addEventListener('click', initGame);
 pauseBtn.addEventListener('click', () => {
@@ -1106,6 +1153,14 @@ if (stageLvlUpBtn) {
 
 // Menu Input Handling
 window.addEventListener('keydown', (e) => {
+    menuIdleTimer = 0; // Reset on any input
+    if (gameState === 'INTRO') {
+        if (['Enter', ' ', 'Escape', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+            intro.skip();
+        }
+        return;
+    }
+
     if (e.key === 'Escape') {
         if (gameState === 'PLAYING') pauseGame();
         else if (gameState === 'PAUSED') resumeGame();
@@ -1139,6 +1194,11 @@ window.addEventListener('keydown', (e) => {
 // Start loop
 buildPowerSegments();
 updateMenuSelection(); // Initialize selection for start menu
+
+// Start in INTRO mode
+gameState = 'INTRO';
+intro.init();
+
 requestAnimationFrame(loop);
 
 // Debug helper: spawn all powerups in a static grid for quick testing
