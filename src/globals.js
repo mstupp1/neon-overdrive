@@ -62,7 +62,7 @@ const DASH_DURATION = 8; // Frames dash is active
 const DASH_COOLDOWN = 45; // Frames before dash can be used again (Legacy, kept for safety but largely replaced by charges)
 const DOUBLE_TAP_TIME = 300; // Milliseconds for double tap detection
 const DODGE_CHARGES_MAX = 3;
-const DODGE_RECHARGE_FRAMES = 60; // 1 second per charge
+const DODGE_RECHARGE_FRAMES = 120; // 2 seconds per charge
 const DODGE_GAP_FRAMES = 10; // Minimum frames between dashes
 
 const MAX_POWER_LEVEL = 10;
