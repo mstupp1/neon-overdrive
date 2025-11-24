@@ -519,6 +519,18 @@ function triggerDash(dirX, dirY) {
   player.dashVx = dashDirX * DASH_SPEED * player.stats.moveSpeedMult;
   player.dashVy = dashDirY * DASH_SPEED * player.stats.moveSpeedMult;
 
+  // Check if dash is to the side (barrel roll)
+  const absDirX = Math.abs(dashDirX);
+  const absDirY = Math.abs(dashDirY);
+  // Barrel roll if horizontal component is significant (more than 0.3) and greater than vertical
+  if (absDirX > 0.3 && absDirX > absDirY) {
+    // Start barrel roll - will complete full rotation (2π) over dash duration
+    player.barrelRollRotation = 0;
+  } else {
+    // Reset barrel roll if not dashing sideways
+    player.barrelRollRotation = 0;
+  }
+
   // Create dash visual effect with fixed-size particles
   createDashParticles(player.x, player.y, '#0ff', 3);
 }
