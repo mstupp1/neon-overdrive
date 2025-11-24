@@ -786,6 +786,20 @@ if (lvlUpBtn) {
     });
 }
 
+const spawnPowerGridBtn = document.getElementById('spawn-power-grid-btn');
+if (spawnPowerGridBtn) {
+    spawnPowerGridBtn.addEventListener('click', () => {
+        spawnAllPowerupsGrid();
+    });
+}
+
+const noEnemiesCheckbox = document.getElementById('no-enemies-checkbox');
+if (noEnemiesCheckbox) {
+    noEnemiesCheckbox.addEventListener('change', (e) => {
+        debugNoEnemySpawns = e.target.checked;
+    });
+}
+
 const setHealth1Btn = document.getElementById('set-health-1-btn');
 if (setHealth1Btn) {
     setHealth1Btn.addEventListener('click', () => {
@@ -850,3 +864,28 @@ window.addEventListener('keydown', e => {
 buildPowerSegments();
 updateMenuSelection(); // Initialize selection for start menu
 requestAnimationFrame(loop);
+
+// Debug helper: spawn all powerups in a static grid for quick testing
+function spawnAllPowerupsGrid() {
+    const types = ['weapon', 'bomb', 'shield', 'life', 'score', 'rapidFire', 'slowDown', 'fireballs', 'piercing'];
+    const cols = 3;
+    const spacing = 80;
+    const rows = Math.ceil(types.length / cols);
+
+    const startX = width / 2 - ((cols - 1) * spacing) / 2;
+    const startY = height / 2 - ((rows - 1) * spacing) / 2;
+
+    types.forEach((type, index) => {
+        const col = index % cols;
+        const row = Math.floor(index / cols);
+        const x = startX + col * spacing;
+        const y = startY + row * spacing;
+        const p = spawnPowerup(x, y, type, false);
+        if (p) {
+            p.vx = 0;
+            p.vy = 0;
+            p.age = 0;
+            p.lifetime = POWERUP_LIFETIME_FRAMES * 5;
+        }
+    });
+}

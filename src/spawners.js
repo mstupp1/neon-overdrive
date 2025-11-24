@@ -8,10 +8,16 @@ function spawnBullet(x, y, angle, speed, type, subType, opts) {
 
 function spawnEnemyEntity(type) { enemies.push(enemyPool.get(type)); }
 function spawnParticle(...args) { particles.push(particlePool.get(...args)); }
-function spawnPowerup(...args) { powerups.push(powerupPool.get(...args)); }
+function spawnPowerup(...args) {
+    const p = powerupPool.get(...args);
+    powerups.push(p);
+    return p;
+}
 function spawnText(...args) { texts.push(textPool.get(...args)); }
 
 function spawnEnemyLogic() {
+    if (debugNoEnemySpawns) return;
+
     // In DEMO, always allow all types for variety
     if (gameState === 'DEMO') {
         if (enemies.length > 30) return;

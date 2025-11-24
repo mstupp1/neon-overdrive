@@ -94,6 +94,7 @@ let frameCount = 0;
 let lastTime = 0;
 let accumulator = 0;
 let hudTopHeight = hudTop ? hudTop.getBoundingClientRect().height : 80;
+let debugNoEnemySpawns = false; // Debug toggle to pause enemy spawns
 
 // Input State
 const input = { x: 0, y: 0, active: false, lastX: 0, lastY: 0 };
