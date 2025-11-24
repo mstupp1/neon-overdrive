@@ -113,6 +113,11 @@ class LevelManager {
             document.getElementById('stage-complete-menu').classList.remove('hidden');
             showStageCompleteOptions();
             playSound('powerup'); // Or a new victory sound
+
+            // Fade out music for passive select (only in late game - stage 7+)
+            if (this.currentLevel >= 7) {
+                MusicPlayer.fadeOutForPassiveSelect();
+            }
         } else if (this.currentLevel === 9) {
             // Infinite scaling logic
             if (this.levelTimer % 600 === 0) { // Every 10 seconds
@@ -161,6 +166,11 @@ class LevelManager {
         if (vignette) {
             // Radial gradient from transparent center to dark colored edges
             vignette.style.background = `radial-gradient(circle, transparent 40%, hsla(${config.hue}, 80%, 10%, 0.9) 120%)`;
+        }
+
+        // Switch to late-game music when reaching stage 7
+        if (this.currentLevel >= 7 && typeof MusicPlayer !== 'undefined') {
+            MusicPlayer.switchToLateGameMusic();
         }
 
         // Show Stage Toast

@@ -49,8 +49,9 @@ function returnToMenu() {
     buildPowerSegments();
     updateUI();
 
-    // Stop background music
+    // Stop background music and reset to normal mode
     MusicPlayer.stop();
+    MusicPlayer.isLateGame = false;
 }
 
 function initGame() {
@@ -78,7 +79,8 @@ function initGame() {
     lastTime = performance.now();
     accumulator = 0;
 
-    // Start background music
+    // Start background music in normal mode (not late-game)
+    MusicPlayer.isLateGame = false;
     MusicPlayer.start();
 }
 
@@ -719,6 +721,11 @@ if (stageLvlUpBtn) {
             document.getElementById('stage-complete-menu').classList.remove('hidden');
             showStageCompleteOptions();
             playSound('powerup');
+
+            // Fade out music for passive select (only in late game - stage 7+)
+            if (levelManager.currentLevel >= 7) {
+                MusicPlayer.fadeOutForPassiveSelect();
+            }
         }
     });
 }

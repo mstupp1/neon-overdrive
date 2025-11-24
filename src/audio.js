@@ -84,12 +84,21 @@ const musicTracks = [
     'src/audio/music/Starfire Rumble 2.mp3'
 ];
 
+// Late-game music for stage 7+
+const lateGameMusicTracks = [
+    'src/audio/music/The Tyrant\'s March.mp3',
+    'src/audio/music/The Final Shadow.mp3'
+];
+
 const MusicPlayer = {
     playlist: [],
     currentTrackIndex: -1,
     audio: new Audio(),
     isPlaying: false,
     lastPlayedTrack: null,
+    isLateGame: false, // Track if we're playing late-game music
+    isFading: false, // Track if we're currently fading
+    savedVolume: 0.3, // Track saved volume for restoration
 
     init() {
         this.audio.addEventListener('ended', () => {
@@ -98,8 +107,11 @@ const MusicPlayer = {
     },
 
     shufflePlaylist() {
+        // Use late-game tracks if we're in late-game mode, otherwise use normal tracks
+        const sourceList = this.isLateGame ? lateGameMusicTracks : musicTracks;
+
         // Create a copy of tracks
-        let tracks = [...musicTracks];
+        let tracks = [...sourceList];
 
         // Fisher-Yates shuffle
         for (let i = tracks.length - 1; i > 0; i--) {
@@ -160,6 +172,89 @@ const MusicPlayer = {
             this.audio.muted = true;
             return true;
         }
+    },
+
+    fadeOut(duration = 2000, pauseAfterFade = true) {
+        if (this.isFading) return Promise.resolve();
+        this.isFading = true;
+
+        return new Promise((resolve) => {
+            const startVolume = this.audio.volume;
+            const startTime = Date.now();
+
+            const fadeInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // Linear fade out
+                this.audio.volume = startVolume * (1 - progress);
+
+                if (progress >= 1) {
+                    clearInterval(fadeInterval);
+                    if (pauseAfterFade) {
+                        this.audio.pause();
+                        this.audio.currentTime = 0;
+                    }
+                    this.isFading = false;
+                    resolve();
+                }
+            }, 50);
+        });
+    },
+
+    switchToLateGameMusic() {
+        if (this.isLateGame) return; // Already in late-game mode
+
+        this.fadeOut(2000).then(() => {
+            this.isLateGame = true;
+            this.shufflePlaylist();
+            this.playNext();
+        });
+    },
+
+    fadeIn(duration = 2000, targetVolume = null) {
+        if (this.isFading) return Promise.resolve();
+        this.isFading = true;
+
+        return new Promise((resolve) => {
+            const finalVolume = targetVolume ?? this.savedVolume;
+            const startTime = Date.now();
+
+            const fadeInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // Linear fade in
+                this.audio.volume = finalVolume * progress;
+
+                if (progress >= 1) {
+                    clearInterval(fadeInterval);
+                    this.isFading = false;
+                    resolve();
+                }
+            }, 50);
+        });
+    },
+
+    fadeOutForPassiveSelect(duration = 3000) {
+        // Fade to very quiet (not completely silent) without pausing
+        this.savedVolume = this.audio.volume;
+        return this.fadeOut(duration, false);
+    },
+
+    fadeInAfterPassiveSelect(duration = 3000) {
+        // Restore to saved volume
+        return this.fadeIn(duration, this.savedVolume);
+    },
+
+    switchToNormalMusic() {
+        if (!this.isLateGame) return; // Already in normal mode
+
+        this.fadeOut(2000).then(() => {
+            this.isLateGame = false;
+            this.shufflePlaylist();
+            this.playNext();
+        });
     }
 };
 
