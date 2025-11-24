@@ -67,7 +67,6 @@ function returnToMenu() {
   player.dashVy = 0;
   player.lastMoveDirX = 0;
   player.lastMoveDirY = -1; // Default to up direction
-  player.barrelRollRotation = 0;
 
   resetWorldState();
   buildPowerSegments();
@@ -114,7 +113,6 @@ function initGame() {
   player.dashVy = 0;
   player.lastMoveDirX = 0;
   player.lastMoveDirY = -1; // Default to up direction
-  player.barrelRollRotation = 0;
 
   resetWorldState();
 
@@ -271,33 +269,12 @@ function update(dt) {
   if (player.dashActive) {
     player.dashFrames--;
 
-    // Update barrel roll rotation if dashing sideways
-    const absDashVx = Math.abs(player.dashVx);
-    const absDashVy = Math.abs(player.dashVy);
-    // Barrel roll if horizontal movement is dominant (more horizontal than vertical)
-    if (absDashVx > absDashVy) {
-      // Complete full rotation (2π) over dash duration
-      const progress = 1 - player.dashFrames / DASH_DURATION;
-      player.barrelRollRotation = progress * Math.PI * 2;
-      // Determine roll direction based on dash direction (left = counter-clockwise, right = clockwise)
-      if (player.dashVx < 0) {
-        player.barrelRollRotation = -player.barrelRollRotation; // Roll left (counter-clockwise)
-      }
-    } else {
-      // Not dashing sideways, reset barrel roll
-      player.barrelRollRotation = 0;
-    }
-
     if (player.dashFrames <= 0) {
       player.dashActive = false;
-      player.barrelRollRotation = 0; // Reset barrel roll
       // Reset velocity after dash ends
       player.vx = player.dashVx * 0.3; // Carry some momentum
       player.vy = player.dashVy * 0.3;
     }
-  } else {
-    // Reset barrel roll when not dashing
-    player.barrelRollRotation = 0;
   }
 
   // --- PLAYER MOVEMENT (KEYBOARD + TOUCH/MOUSE) ---
@@ -858,19 +835,16 @@ function draw() {
 
     // SHIP SPRITE
     ctx.save();
-    // Apply tilt first (banking)
+    // Apply tilt (banking)
     ctx.rotate(player.tilt);
 
-    // Apply barrel roll around the forward axis (roll axis)
-    // Simulate 3D roll by scaling vertically based on roll angle
-    if (player.barrelRollRotation !== 0) {
-      // Scale Y based on roll angle: full scale at 0°/180°, compressed at 90°/270°
-      const rollScaleY = Math.abs(Math.cos(player.barrelRollRotation));
-      // Scale X slightly to maintain proportions (optional - makes it look more 3D)
-      const rollScaleX = 1.0 + (1.0 - rollScaleY) * 0.1;
-      ctx.scale(rollScaleX, rollScaleY);
-      // Also rotate around Z for visual effect
-      ctx.rotate(player.barrelRollRotation);
+    // Apply subtle blink effect during dash
+    if (player.dashActive) {
+      // Blink effect: fade between 0.6 and 1.0 opacity
+      const blinkSpeed = 0.3; // How fast the blink cycles
+      const blinkAlpha =
+        0.2 + Math.abs(Math.sin(frameCount * blinkSpeed)) * 0.2;
+      ctx.globalAlpha = blinkAlpha;
     }
     ctx.fillStyle = '#fff';
     if (!IS_MOBILE) {
@@ -908,6 +882,11 @@ function draw() {
     ctx.fillRect(-5, 20, 3, 5);
     ctx.fillRect(2, 20, 3, 5);
     ctx.restore();
+
+    // Reset alpha if dash blink was applied
+    if (player.dashActive) {
+      ctx.globalAlpha = 1;
+    }
 
     ctx.restore();
     ctx.restore();

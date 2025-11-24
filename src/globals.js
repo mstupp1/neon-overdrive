@@ -155,8 +155,7 @@ const player = {
     dashVx: 0,
     dashVy: 0,
     lastMoveDirX: 0,
-    lastMoveDirY: 0,
-    barrelRollRotation: 0 // Rotation angle for barrel roll animation
+    lastMoveDirY: 0
 };
 
 const PASSIVE_UPGRADES = [
