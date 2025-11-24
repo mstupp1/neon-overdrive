@@ -708,6 +708,21 @@ if (wpnLvlUpBtn) {
     });
 }
 
+const stageLvlUpBtn = document.getElementById('stage-lvl-up-btn');
+if (stageLvlUpBtn) {
+    stageLvlUpBtn.addEventListener('click', () => {
+        // Trigger the stage complete screen
+        if (gameState === 'PLAYING' || gameState === 'PAUSED') {
+            gameState = 'STAGE_COMPLETE';
+            uiLayer.classList.add('hidden');
+            pauseMenu.classList.add('hidden');
+            document.getElementById('stage-complete-menu').classList.remove('hidden');
+            showStageCompleteOptions();
+            playSound('powerup');
+        }
+    });
+}
+
 
 // Menu Input Handling
 window.addEventListener('keydown', e => {
