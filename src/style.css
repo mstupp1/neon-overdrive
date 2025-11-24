@@ -1588,11 +1588,10 @@ h1::after {
 }
 
 .dodge-charge {
-    width: 8px;
-    height: 4px;
-    /* Flatter look */
+    width: 6px;
+    height: 6px;
     border: 1px solid rgba(255, 255, 255, 0.5);
-    transform: skewX(-10deg);
+    transform: rotate(45deg);
     background: transparent;
     box-shadow: 0 0 2px rgba(255, 255, 255, 0.3);
     transition: background-color 0.2s, box-shadow 0.2s;
