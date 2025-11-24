@@ -341,7 +341,7 @@ function update(dt) {
                         createExplosionLogic(e.x, e.y, '#fff', 10);
 
                         // Powerup spawn chance
-                        let powerupChance = 0.95;
+                        let powerupChance = 0.05;
                         if (player.passives.has('spawnRate')) powerupChance = 0.12;
                         if (Math.random() < powerupChance) spawnPowerup(e.x, e.y);
 
@@ -437,7 +437,7 @@ function update(dt) {
                         createExplosionLogic(e.x, e.y, `hsl(${globalHue + 60},100%,60%)`, 15);
 
                         // Passive: Scavenger (Increased spawn rate)
-                        let powerupChance = 0.95;
+                        let powerupChance = 0.05;
                         if (player.passives.has('spawnRate')) powerupChance = 0.12; // Significant boost
                         if (Math.random() < powerupChance) spawnPowerup(e.x, e.y);
 

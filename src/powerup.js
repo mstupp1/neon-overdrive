@@ -22,15 +22,15 @@ class PowerUp {
         if (type) this.type = type;
         else {
             const r = Math.random();
-            if (r > 0.95) this.type = 'bomb';
-            else if (r > 0.90) this.type = 'shield';
-            else if (r > 0.86) this.type = 'rapidFire';
-            else if (r > 0.82) this.type = 'slowDown';
-            else if (r > 0.78) this.type = 'fireballs';
-            else if (r > 0.74) this.type = 'piercing';
-            else if (r > 0.60) this.type = 'life';
-            else if (r > 0.20) this.type = 'weapon';
-            else this.type = 'score';
+            if (r > 0.90) this.type = 'bomb';
+            else if (r > 0.88) this.type = 'shield';
+            else if (r > 0.72) this.type = 'rapidFire';
+            else if (r > 0.60) this.type = 'slowDown';
+            else if (r > 0.58) this.type = 'fireballs';
+            else if (r > 0.46) this.type = 'piercing';
+            else if (r > 0.24) this.type = 'life';
+            else if (r > 0.12) this.type = 'score';
+            else this.type = 'weapon';
         }
     }
     update() {
