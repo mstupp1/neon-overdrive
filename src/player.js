@@ -321,8 +321,8 @@ function applyPassive(id) {
     gameState = 'PLAYING';
     updateUI();
 
-    // Fade music back in after passive select (only in late game - stage 7+)
-    if (levelManager.currentLevel >= 7) {
+    // Fade music back in after passive select (only if we faded out at level 6)
+    if (levelManager.currentLevel === 6) {
         MusicPlayer.fadeInAfterPassiveSelect();
     }
 

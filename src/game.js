@@ -1065,8 +1065,8 @@ if (stageLvlUpBtn) {
             showStageCompleteOptions();
             playSound('powerup');
 
-            // Fade out music for passive select (only in late game - stage 7+)
-            if (levelManager.currentLevel >= 7) {
+            // Fade out music for passive select (only if transitioning from level 6)
+            if (levelManager.currentLevel === 6) {
                 MusicPlayer.fadeOutForPassiveSelect();
             }
         }
