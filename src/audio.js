@@ -65,6 +65,8 @@ function toggleSfxMute() {
 const musicTracks = [
     'src/audio/music/Nebula Ghosts 1.mp3',
     'src/audio/music/Nebula Ghosts 2.mp3',
+    'src/audio/music/Rocket Jungle 1.mp3',
+    'src/audio/music/Rocket Jungle 2.mp3',
     'src/audio/music/Galactic Shadows 1.mp3',
     'src/audio/music/Galactic Shadows 2.mp3',
     'src/audio/music/Neon Horizons 1.mp3',
