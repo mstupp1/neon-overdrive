@@ -744,9 +744,9 @@ h1::after {
 .icons-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     gap: 8px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     width: 100%;
     margin-top: -2px; /* snug to XP bar with a bit more breathing room */
 }
@@ -754,14 +754,18 @@ h1::after {
 .passive-icons-bar {
     display: flex;
     gap: 12px;
-    align-items: center;
+    align-items: flex-start;
+    flex: 1 1 auto;
+    min-width: 0;
     margin-left: 6px;
 }
 
 .powerup-icons-bar {
     display: flex;
     gap: 8px;
-    align-items: center;
+    align-items: flex-start;
+    flex: 1 1 auto;
+    min-width: 0;
     margin-left: auto;
     margin-right: 8px;
     flex-wrap: wrap;
