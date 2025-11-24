@@ -45,7 +45,7 @@ function showLevelUpOptions() {
         const cardHTML = `
             <div class="upgrade-column">
                 <div class="hold-indicator hidden">HOLD</div>
-                <button class="upgrade-card" data-upgrade-id="${upgrade.id}" onmouseenter="updateLevelUpStats('${upgrade.id}')" onmouseleave="updateLevelUpStats(null)" onfocus="updateLevelUpStats('${upgrade.id}')" onblur="updateLevelUpStats(null)">
+                <button type="button" class="upgrade-card" data-upgrade-id="${upgrade.id}" onmouseenter="updateLevelUpStats('${upgrade.id}')" onmouseleave="updateLevelUpStats(null)" onfocus="updateLevelUpStats('${upgrade.id}')" onblur="updateLevelUpStats(null)">
                     <span class="material-icons icon">${upgrade.icon}</span>
                     <h3>${upgrade.title}</h3>
                     <p>${descriptionLines.join('<br>')}</p>
@@ -468,6 +468,12 @@ function setupHoldToSelectListeners() {
 
         // Prevent context menu
         card.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // Prevent click events (only hold should work)
+        card.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
     });
 
     // Global mouseup and touchend listeners to cancel hold

@@ -54,6 +54,7 @@ function returnToMenu() {
 }
 
 function initGame() {
+    if (document.activeElement) document.activeElement.blur();
     score = 0; player.lives = PLAYER_MAX_LIVES; player.powerLevel = 0; player.iframes = 0; player.hasShield = false;
     player.weaponXp = 0; player.weaponXpMax = getWeaponXpForLevel(player.powerLevel);
     player.level = 1; player.xp = 0; player.xpMax = CHAR_XP_BASE;

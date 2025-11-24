@@ -68,6 +68,8 @@ canvas {
 #ui-layer.hidden {
     opacity: 0;
     pointer-events: none;
+    visibility: hidden;
+    transition: opacity 0.5s, visibility 0s 0.5s;
 }
 
 .hud-top {
@@ -565,6 +567,8 @@ canvas {
 .hidden {
     opacity: 0;
     pointer-events: none;
+    visibility: hidden;
+    transition: opacity 0.5s, backdrop-filter 0.5s, visibility 0s 0.5s;
 }
 
 h1 {
