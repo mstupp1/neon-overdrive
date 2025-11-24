@@ -335,28 +335,18 @@ function updateUI() {
             const powerupData = iconMap[type];
             if (!powerupData) return;
 
-            const chip = document.createElement('div');
-            chip.className = 'powerup-chip';
-            chip.style.setProperty('--powerup-color', powerupData.color);
-
             const iconSpan = document.createElement('span');
             iconSpan.className = 'material-icons powerup-icon-small';
             iconSpan.textContent = powerupData.icon;
-            chip.appendChild(iconSpan);
+            iconSpan.style.color = powerupData.color;
 
             const totalDuration = powerupData.duration || timer;
-            const ratio = totalDuration > 0 ? Math.max(0, Math.min(1, timer / totalDuration)) : 1;
-            const timerBar = document.createElement('div');
-            timerBar.className = 'powerup-timer';
-            timerBar.style.setProperty('--timer-ratio', ratio);
-            chip.appendChild(timerBar);
-
             const expireThreshold = totalDuration ? Math.min(120, totalDuration * 0.25) : 90;
             if (timer <= expireThreshold) {
-                chip.classList.add('expiring');
+                iconSpan.classList.add('expiring');
             }
 
-            powerupIconsContainer.appendChild(chip);
+            powerupIconsContainer.appendChild(iconSpan);
         });
     }
 
