@@ -21,20 +21,20 @@ class Enemy {
         const hpMult = stats.hpMod;
         const speedMult = stats.speedMod;
 
-        if (type === 'chaser') { this.hp = 4 * hpMult; this.radius = 18; this.speed = rand(2, 3.5) * speedMult; }
-        else if (type === 'spinner') { this.hp = 15 * hpMult; this.radius = 25; this.speed = 1.5 * speedMult; }
+        if (type === 'chaser') { this.hp = 4 * hpMult; this.radius = 18; this.speed = rand(2, 3.5) * speedMult; this.damage = 1; }
+        else if (type === 'spinner') { this.hp = 15 * hpMult; this.radius = 25; this.speed = 1.5 * speedMult; this.damage = 2; }
         else if (type === 'dasher') {
-            this.hp = 3 * hpMult; this.radius = 12; this.speed = 6 * speedMult;
+            this.hp = 3 * hpMult; this.radius = 12; this.speed = 6 * speedMult; this.damage = 3;
             const a = Math.atan2(player.y - this.y, player.x - this.x);
             this.vx = Math.cos(a) * this.speed; this.vy = Math.sin(a) * this.speed;
         }
         else if (type === 'snake') {
-            this.hp = 20 * hpMult; this.radius = 15;
+            this.hp = 20 * hpMult; this.radius = 15; this.damage = 4;
             this.segments = [];
             for (let i = 0; i < 8; i++) this.segments.push({ x: this.x, y: this.y - i * 15 });
         }
         else if (type === 'sniper') {
-            this.hp = 6 * hpMult; this.radius = 20;
+            this.hp = 6 * hpMult; this.radius = 20; this.damage = 5;
             this.tx = rand(50, width - 50); this.ty = rand(50, height * 0.4);
         }
     }
@@ -67,7 +67,7 @@ class Enemy {
             if (allowFire && this.fireTimer > 140) { // Fire less often to ease pressure (was 100)
                 this.fireTimer = 0;
                 // Light harassment shots from chasers
-                spawnBullet(this.x, this.y, a + rand(-0.2, 0.2), 6, 'enemy', 'basic');
+                spawnBullet(this.x, this.y, a + rand(-0.2, 0.2), 6, 'enemy', 'basic', { damage: this.damage });
             }
         }
         else if (this.type === 'spinner') {
@@ -76,7 +76,7 @@ class Enemy {
             if (allowFire && this.timer > 140) { // Fire less often to ease pressure (was 100)
                 this.timer = 0;
                 // Spinners lay down destructible orbs
-                for (let i = 0; i < 8; i++) spawnBullet(this.x, this.y, i * (Math.PI / 4) + frameCount * 0.1, 4, 'enemy', 'orb');
+                for (let i = 0; i < 8; i++) spawnBullet(this.x, this.y, i * (Math.PI / 4) + frameCount * 0.1, 4, 'enemy', 'orb', { damage: this.damage });
             }
         }
         else if (this.type === 'dasher') {
@@ -85,7 +85,7 @@ class Enemy {
             if (allowFire && this.fireTimer > 70) { // Fire less often to ease pressure (was 50)
                 this.fireTimer = 0;
                 const backAngle = Math.atan2(this.vy, this.vx) + Math.PI; // Fire slightly backwards while dashing
-                spawnBullet(this.x, this.y, backAngle + rand(-0.15, 0.15), 8, 'enemy', 'fast');
+                spawnBullet(this.x, this.y, backAngle + rand(-0.15, 0.15), 8, 'enemy', 'fast', { damage: this.damage });
             }
         }
         else if (this.type === 'snake') {
@@ -95,7 +95,7 @@ class Enemy {
             this.fireTimer++;
             if (allowFire && this.fireTimer > 85) { // Fire less often to ease pressure (was 60)
                 this.fireTimer = 0;
-                spawnBullet(this.x, this.y, Math.PI / 2, 5, 'enemy', 'wobble');
+                spawnBullet(this.x, this.y, Math.PI / 2, 5, 'enemy', 'wobble', { damage: this.damage });
             }
         }
         else if (this.type === 'sniper') {
@@ -106,7 +106,7 @@ class Enemy {
                 this.timer++;
                 if (allowFire && this.timer > 80) { // Fire less often to ease pressure (was 60)
                     const a = Math.atan2(player.y - this.y, player.x - this.x);
-                    spawnBullet(this.x, this.y, a, 12, 'enemy', 'sniper'); // Start slower, accelerates
+                    spawnBullet(this.x, this.y, a, 12, 'enemy', 'sniper', { damage: this.damage }); // Start slower, accelerates
                     this.tx = rand(50, width - 50); this.ty = rand(50, height * 0.4); this.state = 'move';
                 }
             }
