@@ -87,7 +87,7 @@ function spawnPlayerBullet(x, y, angle, baseSpeed, subType) {
 }
 
 function firePlayerWeapons() {
-    if (gameState === 'PLAYING') playSound('shoot');
+    if (gameState === 'PLAYING' || gameState === 'INTRO') playSound('shoot');
 
     let fr = player.stats.fireRateMult;
 

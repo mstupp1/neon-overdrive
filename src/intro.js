@@ -134,22 +134,9 @@ const intro = {
             
             case 3: // ACTION! (MAX POWER)
                  // Player fires MAX WEAPONS
-                 if (this.timer % 5 === 0) {
-                     // Main Beams
-                     spawnBullet(player.x, player.y, -Math.PI/2, 15, 'player', 'beam');
-                     spawnBullet(player.x - 15, player.y, -Math.PI/2 - 0.1, 15, 'player', 'beam');
-                     spawnBullet(player.x + 15, player.y, -Math.PI/2 + 0.1, 15, 'player', 'beam');
-                     
-                     // Waves
-                     spawnBullet(player.x, player.y, -Math.PI/2, 12, 'player', 'wave');
-                     spawnBullet(player.x, player.y, -Math.PI/2 - 0.2, 12, 'player', 'wave');
-                     spawnBullet(player.x, player.y, -Math.PI/2 + 0.2, 12, 'player', 'wave');
-                     
-                     // Blades
-                     if (this.timer % 10 === 0) {
-                         spawnBullet(player.x - 30, player.y, -Math.PI/2 - 0.4, 10, 'player', 'blade');
-                         spawnBullet(player.x + 30, player.y, -Math.PI/2 + 0.4, 10, 'player', 'blade');
-                     }
+                 player.powerLevel = MAX_POWER_LEVEL;
+                 if (this.timer % 4 === 0) { // Rapid fire
+                     firePlayerWeapons();
                  }
 
                  // Enemies move
