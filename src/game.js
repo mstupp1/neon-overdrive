@@ -304,6 +304,63 @@ function update(dt) {
         });
     }
 
+    // --- ACTIVE POWER-UPS TIMER ---
+    if (gameState === 'PLAYING') {
+        for (const [type, timer] of player.activePowerups.entries()) {
+            const newTimer = timer - 1;
+            if (newTimer <= 0) {
+                player.activePowerups.delete(type);
+                spawnText(player.x, player.y - 60, `${type.toUpperCase()} ENDED`, "#888");
+            } else {
+                player.activePowerups.set(type, newTimer);
+            }
+        }
+    }
+
+    // --- POWER-UP: FIREBALLS ---
+    if (player.activePowerups.has('fireballs') && gameState === 'PLAYING') {
+        player.fireballAngle += 0.08; // Rotation speed
+        const fireballRadius = 60; // Distance from player
+        const fireballCount = 8;
+        const fireballDamage = 2.5;
+
+        // Check collision with enemies
+        for (let i = 0; i < fireballCount; i++) {
+            const angle = player.fireballAngle + (i * Math.PI * 2 / fireballCount);
+            const fbX = player.x + Math.cos(angle) * fireballRadius;
+            const fbY = player.y + Math.sin(angle) * fireballRadius;
+
+            enemies.forEach(e => {
+                if (e.active && dist(fbX, fbY, e.x, e.y) < e.radius + 8) {
+                    e.hp -= fireballDamage;
+                    e.flashTimer = 8;
+                    if (e.hp <= 0 && e.active) {
+                        e.active = false;
+                        if (gameState === 'PLAYING') score += 100;
+                        createExplosionLogic(e.x, e.y, `hsl(${globalHue},100%,50%)`, 25);
+                        createExplosionLogic(e.x, e.y, '#fff', 10);
+
+                        // Powerup spawn chance
+                        let powerupChance = 0.03;
+                        if (player.passives.has('spawnRate')) powerupChance = 0.08;
+                        if (Math.random() < powerupChance) spawnPowerup(e.x, e.y);
+
+                        // XP Logic
+                        let xpGain = 10;
+                        if (e.type === 'chaser') xpGain = 10;
+                        else if (e.type === 'dasher') xpGain = 20;
+                        else if (e.type === 'sniper') xpGain = 30;
+                        else if (e.type === 'snake') xpGain = 40;
+                        else if (e.type === 'spinner') xpGain = 50;
+                        awardWeaponXp(xpGain);
+                        awardPlayerXp(xpGain);
+                        updateUI();
+                    }
+                }
+            });
+        }
+    }
+
     // Update Entities
     [bullets, enemies, particles, powerups, texts].forEach(arr => arr.forEach(e => e.update()));
 
@@ -469,6 +526,19 @@ function update(dt) {
                 }
                 const xpLabel = gameState === 'PLAYING' ? `+${SCORE_POWERUP_VALUE} +XP` : `+${SCORE_POWERUP_VALUE}`;
                 spawnText(player.x, player.y - 40, xpLabel, "#fd0");
+            } else if (p.type === 'rapidFire') {
+                player.activePowerups.set('rapidFire', POWERUP_DURATION_RAPID_FIRE);
+                spawnText(player.x, player.y - 40, "RAPID FIRE", "#f80");
+            } else if (p.type === 'slowDown') {
+                player.activePowerups.set('slowDown', POWERUP_DURATION_SLOW_DOWN);
+                spawnText(player.x, player.y - 40, "SLOW DOWN", "#0cf");
+            } else if (p.type === 'fireballs') {
+                player.activePowerups.set('fireballs', POWERUP_DURATION_FIREBALLS);
+                player.fireballAngle = 0; // Reset rotation
+                spawnText(player.x, player.y - 40, "FIREBALLS", "#f30");
+            } else if (p.type === 'piercing') {
+                player.activePowerups.set('piercing', POWERUP_DURATION_PIERCING);
+                spawnText(player.x, player.y - 40, "PIERCING", "#a0f");
             }
             if (gameState === 'PLAYING') updateUI();
         }
@@ -548,6 +618,35 @@ function draw() {
             ctx.setLineDash([]);
             ctx.fillStyle = 'rgba(0, 200, 255, 0.15)'; ctx.fill();
             ctx.rotate(-frameCount * 0.1);
+        }
+
+        // FIREBALL RING VISUAL
+        if (player.activePowerups.has('fireballs')) {
+            const fireballRadius = 60;
+            const fireballCount = 8;
+            for (let i = 0; i < fireballCount; i++) {
+                const angle = player.fireballAngle + (i * Math.PI * 2 / fireballCount);
+                const fbX = Math.cos(angle) * fireballRadius;
+                const fbY = Math.sin(angle) * fireballRadius;
+
+                // Draw fireball
+                ctx.save();
+                ctx.translate(fbX, fbY);
+                ctx.fillStyle = '#f30';
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = '#f30';
+                ctx.beginPath();
+                ctx.arc(0, 0, 8, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Inner glow
+                ctx.fillStyle = '#ff6';
+                ctx.beginPath();
+                ctx.arc(0, 0, 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+            ctx.shadowBlur = 0;
         }
 
         // SHIP SPRITE

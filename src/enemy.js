@@ -40,6 +40,12 @@ class Enemy {
     }
 
     update() {
+        // Apply slow-down effect if active
+        let slowMult = 1.0;
+        if (player.activePowerups && player.activePowerups.has('slowDown')) {
+            slowMult = 0.4; // 60% slower
+        }
+
         // Decrease flash timer
         if (this.flashTimer > 0) this.flashTimer--;
 
@@ -56,7 +62,7 @@ class Enemy {
 
         if (this.type === 'chaser') {
             const a = Math.atan2(player.y - this.y, player.x - this.x);
-            this.x += Math.cos(a) * this.speed; this.y += Math.max(1, Math.sin(a) * this.speed);
+            this.x += Math.cos(a) * this.speed * slowMult; this.y += Math.max(1, Math.sin(a) * this.speed * slowMult);
             this.fireTimer++;
             if (allowFire && this.fireTimer > 140) { // Fire less often to ease pressure (was 100)
                 this.fireTimer = 0;
@@ -65,7 +71,7 @@ class Enemy {
             }
         }
         else if (this.type === 'spinner') {
-            this.y += 0.8; this.x += Math.sin(frameCount * 0.03);
+            this.y += 0.8 * slowMult; this.x += Math.sin(frameCount * 0.03) * slowMult;
             this.timer++;
             if (allowFire && this.timer > 140) { // Fire less often to ease pressure (was 100)
                 this.timer = 0;
@@ -74,7 +80,7 @@ class Enemy {
             }
         }
         else if (this.type === 'dasher') {
-            this.x += this.vx; this.y += this.vy;
+            this.x += this.vx * slowMult; this.y += this.vy * slowMult;
             this.fireTimer++;
             if (allowFire && this.fireTimer > 70) { // Fire less often to ease pressure (was 50)
                 this.fireTimer = 0;
@@ -83,7 +89,7 @@ class Enemy {
             }
         }
         else if (this.type === 'snake') {
-            this.x += Math.sin(frameCount * 0.05) * 3; this.y += 2;
+            this.x += Math.sin(frameCount * 0.05) * 3 * slowMult; this.y += 2 * slowMult;
             let p = { x: this.x, y: this.y };
             this.segments.forEach(s => { s.x += (p.x - s.x) * 0.3; s.y += (p.y - s.y) * 0.3; p = { x: s.x, y: s.y }; });
             this.fireTimer++;

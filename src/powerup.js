@@ -22,11 +22,15 @@ class PowerUp {
         if (type) this.type = type;
         else {
             const r = Math.random();
-            if (r > 0.95) this.type = 'bomb';    // 5%
-            else if (r > 0.85) this.type = 'shield'; // 10%
-            else if (r > 0.80) this.type = 'life';   // 5%
-            else if (r > 0.70) this.type = 'weapon'; // 10%
-            else this.type = 'score';                // 70%
+            if (r > 0.95) this.type = 'bomb';        // 5%
+            else if (r > 0.88) this.type = 'shield'; // 7%
+            else if (r > 0.84) this.type = 'rapidFire'; // 4%
+            else if (r > 0.80) this.type = 'slowDown';  // 4%
+            else if (r > 0.76) this.type = 'fireballs'; // 4%
+            else if (r > 0.72) this.type = 'piercing';  // 4%
+            else if (r > 0.68) this.type = 'life';      // 4%
+            else if (r > 0.58) this.type = 'weapon';    // 10%
+            else this.type = 'score';                   // 58%
         }
     }
     update() {
@@ -71,6 +75,10 @@ class PowerUp {
         else if (this.type === 'shield') { c = '#00f'; t = 'S'; }
         else if (this.type === 'life') { c = '#f00'; t = '♥'; }
         else if (this.type === 'score') { c = '#fd0'; t = '$'; }
+        else if (this.type === 'rapidFire') { c = '#f80'; t = '⚡'; }
+        else if (this.type === 'slowDown') { c = '#0cf'; t = '⌛'; }
+        else if (this.type === 'fireballs') { c = '#f30'; t = '🔥'; }
+        else if (this.type === 'piercing') { c = '#a0f'; t = '→'; }
 
         // Optimization: Removed shadowBlur
         // ctx.shadowBlur = 10; ctx.shadowColor = c; 

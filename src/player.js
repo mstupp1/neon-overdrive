@@ -45,10 +45,16 @@ function getPlayerBulletStats(subType, baseSpeed, levelOverride = null) {
         damageMult += speedRatio * 0.5; // Up to +50% at max speed
     }
 
+    // Power-up: Piercing Bullets
+    let pierceBullets = base.pierce;
+    if (player.activePowerups.has('piercing')) {
+        pierceBullets = true;
+    }
+
     return {
         speed: baseSpeed * scale.speed,
         damage: base.damage * scale.damage * damageMult,
-        pierce: base.pierce,
+        pierce: pierceBullets,
         tintHue: scale.hue,
         glow: scale.glow
     };
@@ -67,7 +73,13 @@ function spawnPlayerBullet(x, y, angle, baseSpeed, subType) {
 function firePlayerWeapons() {
     if (gameState === 'PLAYING') playSound('shoot');
 
-    const fr = player.stats.fireRateMult;
+    let fr = player.stats.fireRateMult;
+
+    // Power-up: Rapid Fire
+    if (player.activePowerups.has('rapidFire')) {
+        fr *= 2.0; // Double the fire rate
+    }
+
     const tick = Math.floor(frameCount * fr);
 
     // Levels 0-2: Single beam

@@ -730,21 +730,42 @@ h1::after {
 }
 
 /* Passive Icons Bar (Under HUD) */
-.passive-icons-bar {
-    position: absolute;
-    bottom: -16px;
-    left: 12px;
+.icons-row {
     display: flex;
-    gap: 14px;
+    justify-content: space-between;
     align-items: center;
-    height: 12px;
-    pointer-events: none;
+    gap: 8px;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.passive-icons-bar {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.powerup-icons-bar {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-left: auto;
 }
 
 .passive-icon-small {
-    font-size: 12px;
+    font-size: 16px;
     color: #0ff;
-    text-shadow: 0 0 4px #0ff;
+    text-shadow: 0 0 5px currentColor;
+    width: 12px;
+    height: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.powerup-icon-small {
+    font-size: 16px;
+    text-shadow: 0 0 5px currentColor;
     width: 12px;
     height: 12px;
     display: flex;

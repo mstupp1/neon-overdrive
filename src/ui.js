@@ -318,6 +318,29 @@ function updateUI() {
         });
     }
 
+    // Update Active Power-up Icons
+    const powerupIconsContainer = document.getElementById('powerup-icons');
+    if (powerupIconsContainer) {
+        powerupIconsContainer.innerHTML = '';
+        const iconMap = {
+            'rapidFire': { icon: 'bolt', color: '#f80' },
+            'slowDown': { icon: 'hourglass_bottom', color: '#0cf' },
+            'fireballs': { icon: 'local_fire_department', color: '#f30' },
+            'piercing': { icon: 'arrow_forward', color: '#a0f' }
+        };
+
+        player.activePowerups.forEach((timer, type) => {
+            const powerupData = iconMap[type];
+            if (powerupData) {
+                const iconSpan = document.createElement('span');
+                iconSpan.className = 'material-icons powerup-icon-small';
+                iconSpan.textContent = powerupData.icon;
+                iconSpan.style.color = powerupData.color;
+                powerupIconsContainer.appendChild(iconSpan);
+            }
+        });
+    }
+
     // Update XP Bar
     const xpPercent = atMaxLevel ? 100 : Math.min(100, (player.weaponXp / player.weaponXpMax) * 100);
     if (xpFill) xpFill.style.width = `${xpPercent}%`;

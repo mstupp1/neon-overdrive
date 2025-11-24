@@ -38,7 +38,15 @@ class Bullet {
 
     update() {
         this.timer++;
-        this.x += this.vx; this.y += this.vy;
+
+        // Apply slow-down effect to enemy bullets
+        let speedMult = 1.0;
+        if (this.type === 'enemy' && player.activePowerups && player.activePowerups.has('slowDown')) {
+            speedMult = 0.4; // 60% slower
+        }
+
+        this.x += this.vx * speedMult;
+        this.y += this.vy * speedMult;
 
         if (this.subType === 'homing') {
             let target = null;

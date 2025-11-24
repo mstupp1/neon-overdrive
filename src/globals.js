@@ -102,6 +102,12 @@ const keys = {
     w: false, a: false, s: false, d: false
 };
 
+// Power-up Durations (in frames, 60fps)
+const POWERUP_DURATION_RAPID_FIRE = 300; // 5 seconds
+const POWERUP_DURATION_SLOW_DOWN = 420; // 7 seconds
+const POWERUP_DURATION_FIREBALLS = 480; // 8 seconds
+const POWERUP_DURATION_PIERCING = 360; // 6 seconds
+
 // Player State
 const player = {
     x: 0, y: 0, radius: 6,
@@ -113,17 +119,21 @@ const player = {
         damageMult: 1.0,
         hpMax: PLAYER_MAX_LIVES,
         fireRateMult: 1.0,
-        moveSpeedMult: 1.0
+        moveSpeedMult: 1.0,
+        weaponXpMult: 1.0,
+        playerXpMult: 1.0
     },
     hasShield: false,
     tail: [],
-    vx: 0, vy: 0, tilt: 0, tiltDir: 1,
     vx: 0, vy: 0, tilt: 0, tiltDir: 1,
     godMode: false,
     passives: new Set(),
     // Passive specific state
     autoShieldTimer: 0,
-    sidekicks: []
+    sidekicks: [],
+    // Active power-ups (temporary pickups)
+    activePowerups: new Map(), // type -> remaining frames
+    fireballAngle: 0 // Rotation angle for fireball ring
 };
 
 const PASSIVE_UPGRADES = [
