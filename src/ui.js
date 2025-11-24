@@ -407,20 +407,11 @@ function updateUI() {
             const charge = document.createElement('div');
             charge.className = 'dodge-charge';
 
-            // Determine state
-            // Charges are consumed from right to left (or left to right?)
-            // Let's say we have 3 charges. 
-            // If player has 3, all filled.
-            // If player has 2, first 2 filled, 3rd empty/recharging.
-            // If player has 2 and is recharging, the 3rd one is the one recharging.
-
             if (i < player.dodgeCharges) {
+                // Filled charges
                 charge.classList.add('filled');
-            } else if (i === player.dodgeCharges && player.dodgeCooldowns.length > 0) {
-                // This is the one currently recharging (or one of them)
-                // Actually dodgeCooldowns is a list. The one with the smallest time is the next to arrive?
-                // We just know if we have < MAX, we are recharging.
-                // Visualizing specific recharge progress might be overkill for now, just pulsing "recharging" style.
+            } else if (player.dodgeCooldowns.length > 0) {
+                // All empty charges flash when any are recharging
                 charge.classList.add('recharging');
             }
 
