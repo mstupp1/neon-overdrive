@@ -753,7 +753,7 @@ h1::after {
 
 .passive-icons-bar {
     display: flex;
-    gap: 12px;
+    gap: 14px;
     align-items: flex-start;
     flex: 1 1 auto;
     min-width: 0;
@@ -768,6 +768,7 @@ h1::after {
     min-width: 0;
     margin-left: auto;
     margin-right: 8px;
+    margin-top: -2px;
     flex-wrap: wrap;
     justify-content: flex-end;
     row-gap: 6px;
