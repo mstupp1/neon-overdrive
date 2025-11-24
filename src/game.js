@@ -65,6 +65,9 @@ function returnToMenu() {
     player.dashFrames = 0;
     player.dashVx = 0;
     player.dashVy = 0;
+    player.dodgeCharges = DODGE_CHARGES_MAX;
+    player.dodgeCooldowns = [];
+    player.dashGapTimer = 0;
     player.lastMoveDirX = 0;
     player.lastMoveDirY = -1; // Default to up direction
 
@@ -114,6 +117,9 @@ function initGame() {
     player.dashFrames = 0;
     player.dashVx = 0;
     player.dashVy = 0;
+    player.dodgeCharges = DODGE_CHARGES_MAX;
+    player.dodgeCooldowns = [];
+    player.dashGapTimer = 0;
     player.lastMoveDirX = 0;
     player.lastMoveDirY = -1; // Default to up direction
 
@@ -283,6 +289,20 @@ function update(dt) {
     player.tail = player.tail.filter((t) => t.life > 0);
 
     // --- DASH UPDATE ---
+    if (player.dashGapTimer > 0) player.dashGapTimer--;
+
+    // Recharge Logic
+    for (let i = player.dodgeCooldowns.length - 1; i >= 0; i--) {
+        player.dodgeCooldowns[i]--;
+        if (player.dodgeCooldowns[i] <= 0) {
+            player.dodgeCooldowns.splice(i, 1);
+            if (player.dodgeCharges < DODGE_CHARGES_MAX) {
+                player.dodgeCharges++;
+                updateUI();
+            }
+        }
+    }
+
     if (player.dashCooldown > 0) player.dashCooldown--;
     if (player.dashActive) {
         player.dashFrames--;

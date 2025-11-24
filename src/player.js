@@ -484,7 +484,8 @@ window.addEventListener('touchend', handleEnd);
 
 // Dash function
 function triggerDash(dirX, dirY) {
-    if (player.dashCooldown > 0 || player.dashActive || gameState !== 'PLAYING')
+    // Check for charges and gap timer instead of old cooldown
+    if (player.dodgeCharges <= 0 || player.dashGapTimer > 0 || player.dashActive || gameState !== 'PLAYING')
         return;
 
     // Normalize direction if provided, otherwise use last movement direction
@@ -512,15 +513,22 @@ function triggerDash(dirX, dirY) {
         dashDirY /= dashMag;
     }
 
+    // Consume Charge
+    player.dodgeCharges--;
+    player.dodgeCooldowns.push(DODGE_RECHARGE_FRAMES);
+    player.dashGapTimer = DODGE_GAP_FRAMES;
+
     // Activate dash
     player.dashActive = true;
     player.dashFrames = DASH_DURATION;
-    player.dashCooldown = DASH_COOLDOWN;
+    // player.dashCooldown = DASH_COOLDOWN; // Legacy cooldown no longer used for blocking
     player.dashVx = dashDirX * DASH_SPEED * player.stats.moveSpeedMult;
     player.dashVy = dashDirY * DASH_SPEED * player.stats.moveSpeedMult;
 
     // Create dash visual effect with fixed-size particles
     createDashParticles(player.x, player.y, '#0ff', 3);
+
+    updateUI();
 }
 
 // Keyboard Controls

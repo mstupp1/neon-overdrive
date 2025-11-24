@@ -572,7 +572,8 @@ canvas {
 }
 
 .xp-status {
-    width: 100%;
+    width: auto;
+    flex: 1;
     height: 12px;
     margin-top: 2px;
     color: #ff0;
@@ -1570,4 +1571,50 @@ h1::after {
     font-weight: bold;
     text-shadow: 0 0 5px #fff;
     text-transform: uppercase;
+}
+
+/* Dodge Charges */
+.power-info-row {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.dodge-charges {
+    display: flex;
+    gap: 3px;
+}
+
+.dodge-charge {
+    width: 8px;
+    height: 4px;
+    /* Flatter look */
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    transform: skewX(-10deg);
+    background: transparent;
+    box-shadow: 0 0 2px rgba(255, 255, 255, 0.3);
+    transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.dodge-charge.filled {
+    background: #fff;
+    box-shadow: 0 0 6px #fff;
+    border-color: #fff;
+}
+
+.dodge-charge.recharging {
+    background: rgba(255, 255, 255, 0.2);
+    animation: pulse-charge 0.5s infinite alternate;
+}
+
+@keyframes pulse-charge {
+    from {
+        opacity: 0.3;
+    }
+
+    to {
+        opacity: 0.7;
+    }
 }
