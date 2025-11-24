@@ -21,7 +21,7 @@
 
         <div id="ui-layer" class="hidden">
             <div class="hud-top">
-                <div class="hud-left">
+                <div class="hud-left-col">
                     <div class="stage-block">
                         <div class="score-label" style="color: #fff; font-size: 8px;">STAGE</div>
                         <div class="stage-row" style="display: flex; align-items: center; gap: 8px;">
@@ -34,13 +34,14 @@
                             </button>
                         </div>
                     </div>
-                    <div class="score-block" style="margin-left: 15px;">
+                    <div class="lives-box" id="lives-container"></div>
+                </div>
+
+                <div class="hud-right-col">
+                    <div class="score-block">
                         <div class="score-label">SCORE</div>
                         <div class="score-val" id="score-display">0</div>
                     </div>
-                </div>
-                <div class="hud-stack">
-                    <div class="lives-box" id="lives-container"></div>
                     <div class="power-bar-container">
                         <div class="power-segments" id="power-segments">
                             <div class="segment"></div>
@@ -55,6 +56,7 @@
                         <div class="xp-status" id="xp-status"></div>
                     </div>
                 </div>
+
                 <div class="level-info-container">
                     <div class="level-label">
                         LVL <span id="player-level-display">1</span>
