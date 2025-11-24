@@ -985,6 +985,11 @@ function loop(timestamp) {
     }
 
     draw();
+
+    // Update stage progress bar every frame for smooth animation
+    if (typeof updateStageProgressBar === 'function' && gameState === 'PLAYING') {
+        updateStageProgressBar();
+    }
 }
 
 document.getElementById('start-btn').addEventListener('click', initGame);
