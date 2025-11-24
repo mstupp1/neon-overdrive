@@ -135,9 +135,7 @@ const intro = {
             case 3: // ACTION! (MAX POWER)
                  // Player fires MAX WEAPONS
                  player.powerLevel = MAX_POWER_LEVEL;
-                 if (this.timer % 4 === 0) { // Rapid fire
-                     firePlayerWeapons();
-                 }
+                 firePlayerWeapons();
 
                  // Enemies move
                  enemies.forEach(e => {
