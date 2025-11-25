@@ -57,6 +57,34 @@ class Enemy {
             // Initialize segments array (even though boss doesn't use it)
             this.segments = [];
         }
+        else if (type === 'boss_stage5') {
+            this.hp = 800 * hpMult; // Tankier than stage 3
+            this.radius = 80;
+            this.damage = 15;
+            this.x = width / 2;
+            this.y = -200; // Start further up
+            this.state = 'enter';
+            this.vx = 0; this.vy = 0;
+
+            // Attack timers
+            this.fireTimer = 60;
+            this.orbTimer = 180;
+            this.fuzzyTimer = 300;
+
+            // Visuals
+            this.lightsOffset = rand(0, 100);
+
+            // Tentacles (8 segments)
+            this.segments = [];
+            for (let i = 0; i < 8; i++) {
+                // Each tentacle has multiple joints for smooth movement
+                let tentacle = [];
+                for (let j = 0; j < 25; j++) { // Increased from 10 to 25 for much longer tentacles
+                    tentacle.push({ x: this.x, y: this.y - j * 12 }); // Increased spacing slightly
+                }
+                this.segments.push(tentacle);
+            }
+        }
     }
 
     update() {
@@ -171,8 +199,73 @@ class Enemy {
                     if (this.torpedoTimer <= 0) {
                         this.torpedoTimer = 240; // Every 4 seconds
                         // Shoot 2 torpedos from sides
-                        spawnBullet(this.x - 60, this.y, Math.PI / 2, 4, 'enemy', 'torpedo', { damage: 3, hp: 5 });
                         spawnBullet(this.x + 60, this.y, Math.PI / 2, 4, 'enemy', 'torpedo', { damage: 3, hp: 5 });
+                    }
+                }
+            }
+        }
+        else if (this.type === 'boss_stage5') {
+            if (this.state === 'enter') {
+                this.y += 1.5;
+                if (this.y >= 150) {
+                    this.state = 'fight';
+                    this.baseY = 150;
+                    this.timer = 0;
+                }
+            } else if (this.state === 'fight') {
+                this.timer++;
+                // Slow movement - REDUCED AMPLITUDE to keep in middle
+                this.x = width / 2 + Math.sin(this.timer * 0.01) * (width * 0.15); // Reduced from 0.25 to 0.15
+                this.y = this.baseY + Math.sin(this.timer * 0.03) * 20;
+
+                // Update Tentacles (Slithering effect)
+                this.segments.forEach((tentacle, tIndex) => {
+                    // Base position (attached to body)
+                    // Distribute around the body
+                    const angle = (tIndex / 8) * Math.PI * 2 + this.timer * 0.02;
+                    const attachX = this.x + Math.cos(angle) * 40;
+                    const attachY = this.y + Math.sin(angle) * 40;
+
+                    let p = { x: attachX, y: attachY };
+                    tentacle.forEach((segment, sIndex) => {
+                        // Drag effect
+                        segment.x += (p.x - segment.x) * 0.2;
+                        segment.y += (p.y - segment.y) * 0.2;
+
+                        // Add sine wave motion
+                        segment.x += Math.sin(this.timer * 0.05 + tIndex + sIndex * 0.5) * 2;
+                        segment.y += Math.cos(this.timer * 0.05 + tIndex + sIndex * 0.5) * 2;
+
+                        p = { x: segment.x, y: segment.y };
+                    });
+                });
+
+                if (allowFire) {
+                    // Attack 1: Snake Shots (Wobble)
+                    this.fireTimer--;
+                    if (this.fireTimer <= 0) {
+                        this.fireTimer = 100;
+                        const baseAngle = Math.atan2(player.y - this.y, player.x - this.x);
+                        for (let i = -3; i <= 3; i++) {
+                            spawnBullet(this.x, this.y, baseAngle + i * 0.2, 6, 'enemy', 'wobble', { damage: 2 });
+                        }
+                    }
+
+                    // Attack 2: Destructible Orbs (Orange)
+                    this.orbTimer--;
+                    if (this.orbTimer <= 0) {
+                        this.orbTimer = 200;
+                        for (let i = 0; i < 8; i++) {
+                            const angle = (i / 8) * Math.PI * 2 + this.timer * 0.05;
+                            spawnBullet(this.x, this.y, angle, 4, 'enemy', 'orb', { damage: 3 });
+                        }
+                    }
+
+                    // Attack 3: Fuzzy Homing (Yellow)
+                    this.fuzzyTimer--;
+                    if (this.fuzzyTimer <= 0) {
+                        this.fuzzyTimer = 350; // Rare attack
+                        spawnBullet(this.x, this.y, -Math.PI / 2, 3, 'enemy', 'fuzzy', { damage: 5, hp: 15 }); // Very tanky
                     }
                 }
             }
@@ -330,6 +423,77 @@ class Enemy {
             ctx.shadowBlur = 0;
             ctx.shadowColor = 'transparent';
             ctx.globalCompositeOperation = 'source-over';
+        }
+        else if (this.type === 'boss_stage5') {
+            // Reset any previous state changes first
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'transparent';
+
+            // Draw Tentacles first (behind body)
+            this.segments.forEach((tentacle, tIndex) => {
+                ctx.beginPath();
+                tentacle.forEach((s, sIndex) => {
+                    if (sIndex === 0) ctx.moveTo(s.x, s.y);
+                    else ctx.lineTo(s.x, s.y);
+                });
+
+                // Tentacle style
+                ctx.strokeStyle = `hsl(${100 + tIndex * 10}, 80%, 30%)`; // Green to Dark Green
+                ctx.lineWidth = 12;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+
+                // Inner highlight
+                ctx.strokeStyle = `hsl(${100 + tIndex * 10}, 80%, 50%)`;
+                ctx.lineWidth = 4;
+                ctx.stroke();
+            });
+
+            // Draw Main Body
+            ctx.save();
+            ctx.translate(this.x, this.y);
+
+            // Body Glow
+            const pulse = 0.5 + 0.5 * Math.sin(frameCount * 0.05);
+            ctx.shadowBlur = 30 * pulse;
+            ctx.shadowColor = '#00ff00';
+
+            // Main Hull
+            ctx.fillStyle = '#004400'; // Dark Green
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 60, 80, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Purple/Yellow Accents
+            ctx.fillStyle = '#440044'; // Purple
+            ctx.beginPath();
+            ctx.ellipse(0, -20, 40, 50, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Horns
+            ctx.fillStyle = '#aaaa00'; // Yellowish Horns
+            ctx.beginPath();
+            ctx.moveTo(-40, -40); ctx.lineTo(-70, -90); ctx.lineTo(-20, -60); ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(40, -40); ctx.lineTo(70, -90); ctx.lineTo(20, -60); ctx.fill();
+
+            // Eyes
+            const blink = Math.sin((frameCount + this.lightsOffset) * 0.1) > 0;
+            ctx.fillStyle = blink ? '#ffff00' : '#888800';
+            ctx.shadowBlur = blink ? 20 : 0;
+            ctx.shadowColor = '#ffff00';
+
+            ctx.beginPath(); ctx.arc(-25, 0, 10, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(25, 0, 10, 0, Math.PI * 2); ctx.fill();
+
+            // Mouth / Core
+            ctx.fillStyle = '#220022';
+            ctx.beginPath();
+            ctx.arc(0, 40, 20, 0, Math.PI, false);
+            ctx.fill();
+
+            ctx.restore();
         }
         ctx.restore();
     }

@@ -29,6 +29,7 @@ class Bullet {
             else if (subType === 'sniper') this.radius = 8;
             else if (subType === 'wobble') this.radius = 6;
             else if (subType === 'torpedo') { this.radius = 10; this.destructible = true; }
+            else if (subType === 'fuzzy') { this.radius = 15; this.destructible = true; } // Large, destructible
             else this.radius = 6;
         } else {
             this.radius = 8;
@@ -103,6 +104,17 @@ class Bullet {
                 this.vx = Math.cos(this.angle) * this.speed;
                 this.vy = Math.sin(this.angle) * this.speed;
             }
+        } else if (this.subType === 'fuzzy') {
+            // Slow homing, very persistent
+            if (frameCount % 2 === 0) {
+                let angleTo = Math.atan2(player.y - this.y, player.x - this.x);
+                let diff = angleTo - this.angle;
+                while (diff < -Math.PI) diff += Math.PI * 2;
+                while (diff > Math.PI) diff -= Math.PI * 2;
+                this.angle += diff * 0.05; // Very slow turn
+                this.vx = Math.cos(this.angle) * this.speed;
+                this.vy = Math.sin(this.angle) * this.speed;
+            }
         }
 
         // Let enemy bullets travel farther offscreen to keep long shots alive a bit longer
@@ -129,6 +141,30 @@ class Bullet {
             else if (this.subType === 'torpedo') {
                 ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.angle + Math.PI / 2);
                 ctx.drawImage(sprites.enemyBulletTorpedo, -10, -20); // Torpedo sprite
+                ctx.restore();
+            }
+            else if (this.subType === 'fuzzy') {
+                // Procedural drawing for fuzzy bullet
+                ctx.save(); ctx.translate(this.x, this.y);
+
+                // Fuzzy glow
+                const pulse = 0.8 + 0.2 * Math.sin(frameCount * 0.2);
+                ctx.shadowBlur = 20 * pulse;
+                ctx.shadowColor = '#ffff00';
+
+                // Core
+                ctx.fillStyle = '#ffffaa';
+                ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI * 2); ctx.fill();
+
+                // Outer fuzz
+                ctx.strokeStyle = `rgba(255, 255, 0, ${0.5 * pulse})`;
+                ctx.lineWidth = 2;
+                for (let i = 0; i < 8; i++) {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 12 + Math.random() * 4, i * Math.PI / 4, (i + 1) * Math.PI / 4);
+                    ctx.stroke();
+                }
+
                 ctx.restore();
             }
             else ctx.drawImage(sprites.enemyBulletBasic, this.x - 12, this.y - 12); // Fallback

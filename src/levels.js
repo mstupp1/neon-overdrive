@@ -125,7 +125,7 @@ class LevelManager {
 
             // Play boss music
             if (typeof MusicPlayer !== 'undefined') {
-                MusicPlayer.playBossMusic('src/audio/music/starlover.mp3');
+              MusicPlayer.playBossMusic('src/audio/music/starlover.mp3');
             }
 
             // Show warning
@@ -140,13 +140,55 @@ class LevelManager {
             if (!boss) {
               this.bossActive = false;
               this.bossDefeated = true;
-              
+
               // Resume normal music
               if (typeof MusicPlayer !== 'undefined') {
-                  MusicPlayer.resumeNormalMusic();
+                MusicPlayer.resumeNormalMusic();
               }
-              
+
               // Proceed to stage complete logic below
+            } else {
+              // Boss is fighting, do not advance
+              return;
+            }
+          }
+        }
+      }
+
+      // Stage 5 Boss Logic
+      if (this.currentLevel === 5) {
+        if (!this.bossDefeated) {
+          if (!this.bossActive) {
+            // Spawn Boss
+            spawnEnemyEntity('boss_stage5');
+            this.bossActive = true;
+            // Clear existing enemies
+            enemies.forEach((e) => {
+              if (e.type !== 'boss_stage5') e.active = false;
+            });
+
+            // Play boss music
+            if (typeof MusicPlayer !== 'undefined') {
+              MusicPlayer.playBossMusic('src/audio/music/starlover.mp3'); // Re-using boss music for now
+            }
+
+            // Show warning
+            spawnText(width / 2, height / 2, 'WARNING: MASSIVE SIGNAL', '#0f0');
+            playSound('bomb');
+            return;
+          } else {
+            // Check if boss is still alive
+            const boss = enemies.find(
+              (e) => e.type === 'boss_stage5' && e.active
+            );
+            if (!boss) {
+              this.bossActive = false;
+              this.bossDefeated = true;
+
+              // Resume normal music
+              if (typeof MusicPlayer !== 'undefined') {
+                MusicPlayer.resumeNormalMusic();
+              }
             } else {
               // Boss is fighting, do not advance
               return;
