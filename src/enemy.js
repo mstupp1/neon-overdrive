@@ -268,8 +268,8 @@ class Enemy {
                     this.fuzzyTimer--;
                     if (this.fuzzyTimer <= 0) {
                         this.fuzzyTimer = 350; // Rare attack
-                        // Increased HP from 15 to 40 (Very Tanky)
-                        spawnBullet(this.x, this.y, -Math.PI / 2, 3, 'enemy', 'fuzzy', { damage: 5, hp: 40 });
+                        // Increased HP to 250 (Extremely Tanky)
+                        spawnBullet(this.x, this.y, -Math.PI / 2, 3, 'enemy', 'fuzzy', { damage: 5, hp: 250 });
                     }
                 }
             }

@@ -29,7 +29,7 @@ class Bullet {
             else if (subType === 'sniper') this.radius = 8;
             else if (subType === 'wobble') this.radius = 6;
             else if (subType === 'torpedo') { this.radius = 10; this.destructible = true; }
-            else if (subType === 'fuzzy') { this.radius = 20; this.destructible = true; } // Increased radius
+            else if (subType === 'fuzzy') { this.radius = 40; this.destructible = true; } // Massive
             else this.radius = 6;
         } else {
             this.radius = 8;
@@ -151,19 +151,19 @@ class Bullet {
                 const flash = Math.floor(frameCount / 4) % 2 === 0; // Flash every 4 frames
                 const pulse = 0.8 + 0.2 * Math.sin(frameCount * 0.2);
 
-                ctx.shadowBlur = (flash ? 40 : 20) * pulse;
+                ctx.shadowBlur = (flash ? 60 : 30) * pulse; // More glow
                 ctx.shadowColor = flash ? '#ff0000' : '#ffff00'; // Flash red
 
                 // Core
                 ctx.fillStyle = flash ? '#ffcccc' : '#ffffaa';
-                ctx.beginPath(); ctx.arc(0, 0, 15, 0, Math.PI * 2); ctx.fill(); // Increased size from 10 to 15
+                ctx.beginPath(); ctx.arc(0, 0, 35, 0, Math.PI * 2); ctx.fill(); // Increased size to 35
 
                 // Outer fuzz
                 ctx.strokeStyle = `rgba(${flash ? '255, 0, 0' : '255, 255, 0'}, ${0.5 * pulse})`;
-                ctx.lineWidth = 3;
-                for (let i = 0; i < 8; i++) {
+                ctx.lineWidth = 4;
+                for (let i = 0; i < 12; i++) { // More fuzz strands
                     ctx.beginPath();
-                    ctx.arc(0, 0, 18 + Math.random() * 6, i * Math.PI / 4, (i + 1) * Math.PI / 4); // Increased size
+                    ctx.arc(0, 0, 40 + Math.random() * 10, i * Math.PI / 6, (i + 1) * Math.PI / 6); // Increased size
                     ctx.stroke();
                 }
 
