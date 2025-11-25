@@ -332,11 +332,16 @@ const MusicPlayer = {
             this.isBossMusic = true;
             this.audio.loop = true; // Loop boss music
             this.audio.src = trackUrl;
-            this.audio.play().catch(e => console.warn("Boss music play failed:", e));
 
-            // Start at 0 volume for fade in
+            // Start at 0 volume BEFORE playing
             this.audio.volume = 0;
-            this.fadeIn(2000, 0.3);
+
+            // Play and then fade in
+            this.audio.play()
+                .then(() => {
+                    this.fadeIn(2000, 0.3);
+                })
+                .catch(e => console.warn("Boss music play failed:", e));
 
             // Extract song name from path
             const songName = trackUrl.split('/').pop().replace(/\.[^/.]+$/, "");
