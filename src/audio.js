@@ -439,7 +439,7 @@ const InvincibilityPlayer = {
         this.stop();
         this.audio.currentTime = 0;
         this.audio.loop = true;
-        this.audio.volume = 0.75;
+        this.audio.volume = 0.25;
         this.audio.muted = MusicPlayer.audio?.muted ?? false;
         this.audio.play().catch((e) => console.warn('Invincibility track failed to play:', e));
         this.isPlaying = true;
