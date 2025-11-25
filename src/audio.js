@@ -217,6 +217,44 @@ const MusicPlayer = {
         });
     },
 
+    playBossMusic(trackUrl) {
+        if (this.isBossMusic) return; // Already playing boss music
+
+        this.fadeOut(2000).then(() => {
+            this.isBossMusic = true;
+            this.audio.loop = true; // Loop boss music
+            this.audio.src = trackUrl;
+            this.audio.play().catch(e => console.warn("Boss music play failed:", e));
+            
+            // Start at 0 volume for fade in
+            this.audio.volume = 0;
+            this.fadeIn(2000, 0.3);
+
+            // Extract song name from path
+            const songName = trackUrl.split('/').pop().replace(/\.[^/.]+$/, "");
+            if (typeof showSongToast === 'function') {
+                showSongToast(songName);
+            }
+        });
+    },
+
+    resumeNormalMusic() {
+        if (!this.isBossMusic) return;
+
+        this.fadeOut(2000).then(() => {
+            this.isBossMusic = false;
+            this.audio.loop = false; // Turn off loop
+            
+            // Shuffle if playlist ended, or just play next/resume
+            // playNext() increments index, so we might want to be careful if we want to "resume" 
+            // exactly where we were, but shuffling/playing next is usually fine for games.
+            this.playNext(); 
+            
+            this.audio.volume = 0;
+            this.fadeIn(2000, 0.3);
+        });
+    },
+
     switchToLateGameMusic() {
         if (this.isLateGame) return; // Already in late-game mode
 

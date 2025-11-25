@@ -123,6 +123,11 @@ class LevelManager {
               if (e.type !== 'boss_stage3') e.active = false;
             });
 
+            // Play boss music
+            if (typeof MusicPlayer !== 'undefined') {
+                MusicPlayer.playBossMusic('src/audio/music/starlover.mp3');
+            }
+
             // Show warning
             spawnText(width / 2, height / 2, 'WARNING: BOSS DETECTED', '#f00');
             playSound('bomb'); // Use bomb sound for alarm effect
@@ -134,6 +139,12 @@ class LevelManager {
             if (!boss) {
               this.bossActive = false;
               this.bossDefeated = true;
+              
+              // Resume normal music
+              if (typeof MusicPlayer !== 'undefined') {
+                  MusicPlayer.resumeNormalMusic();
+              }
+              
               // Proceed to stage complete logic below
             } else {
               // Boss is fighting, do not advance
