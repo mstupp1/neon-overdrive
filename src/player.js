@@ -91,6 +91,24 @@ function spawnPlayerBullet(x, y, angle, baseSpeed, subType, opts = {}) {
     });
 }
 
+function findNearestEnemy(x, y) {
+    let nearest = null;
+    let nearestDistSq = Infinity;
+
+    enemies.forEach((enemy) => {
+        if (!enemy.active) return;
+        const dx = enemy.x - x;
+        const dy = enemy.y - y;
+        const distSq = dx * dx + dy * dy;
+        if (distSq < nearestDistSq) {
+            nearestDistSq = distSq;
+            nearest = enemy;
+        }
+    });
+
+    return nearest;
+}
+
 function firePlayerWeapons() {
     if (gameState === 'PLAYING' || gameState === 'INTRO') playSound('shoot');
 
@@ -208,12 +226,24 @@ function firePlayerWeapons() {
     }
 
     // --- PASSIVE: WINGMEN ---
-    if (player.passives.has('sidekicks') && player.sidekicks) {
+    if (player.passives.has('sidekicks') && player.sidekicks?.length) {
         player.sidekicks.forEach((sk) => {
-            // Sidekicks fire simple lasers every 20 frames
-            if (tick % 20 === 0) {
-                spawnPlayerBullet(sk.x, sk.y - 10, -Math.PI / 2, 16, 'beam');
-            }
+            const fireDelay = sk.fireDelay || 12;
+            const fireOffset = sk.fireOffset ?? 0;
+            if (((tick + fireOffset) % fireDelay) !== 0) return;
+
+            const target = findNearestEnemy(sk.x, sk.y);
+            if (!target) return;
+
+            const facing = sk.facing ?? -Math.PI / 2;
+            const angleToTarget = Math.atan2(target.y - sk.y, target.x - sk.x);
+            const diff = Math.abs(normalizeAngle(angleToTarget - facing));
+            const fireCone = sk.fireCone ?? Math.PI / 5; // ~36 degrees
+            if (diff > fireCone) return; // target not in front arc
+
+            const originX = sk.x + Math.cos(facing) * 10;
+            const originY = sk.y + Math.sin(facing) * 10;
+            spawnPlayerBullet(originX, originY, facing, 20, 'beam');
         });
     }
 }
@@ -319,8 +349,8 @@ function applyPassive(id) {
     } else if (id === 'sidekicks') {
         // Initialize sidekicks
         player.sidekicks = [
-            { x: player.x - 30, y: player.y + 10, offset: -30 },
-            { x: player.x + 30, y: player.y + 10, offset: 30 },
+            createSidekick({ pathAngle: Math.PI * 0.8, fireOffset: 0 }),
+            createSidekick({ pathAngle: Math.PI * 0.2, fireOffset: 6 }),
         ];
         spawnText(player.x, player.y, 'WINGMEN DEPLOYED', '#ff0');
     } else if (id === 'dashWeapon') {
@@ -353,6 +383,38 @@ function createBoomerangStates() {
         createBoomerangState({ curveDir: 1, angleOffset: 0.2 }),
         createBoomerangState({ curveDir: -1, angleOffset: -0.2 })
     ];
+}
+
+function createSidekick({
+    pathAngle = 0,
+    orbitRadius = 70,
+    orbitSpeed = 0.01,
+    verticalScale = 0.6,
+    fireDelay =1,
+    fireOffset = 0,
+    speed = 3,
+    turnSpeed = 0.05,
+    fireCone = Math.PI / 5
+} = {}) {
+    const baseX = player.x + Math.cos(pathAngle) * orbitRadius;
+    const baseY = player.y + Math.sin(pathAngle) * orbitRadius * verticalScale;
+    return {
+        x: baseX,
+        y: baseY,
+        pathAngle,
+        orbitRadius,
+        orbitSpeed,
+        verticalScale,
+        fireDelay,
+        fireOffset,
+        speed,
+        turnSpeed,
+        fireCone,
+        facing: -Math.PI / 2,
+        bobPhase: Math.random() * Math.PI * 2,
+        bobSpeed: 0.01 + Math.random() * 0.01,
+        bobAmplitude: 8
+    };
 }
 
 function createBoomerangState({ curveDir = 1, angleOffset = 0 } = {}) {

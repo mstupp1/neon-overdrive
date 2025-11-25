@@ -533,13 +533,33 @@ function update(dt) {
   }
 
   // --- PASSIVE: WINGMEN (Sidekicks) ---
-  if (player.passives.has('sidekicks') && player.sidekicks) {
-    // Update sidekick positions to follow player with lag/smoothing
+  if (player.passives.has('sidekicks') && player.sidekicks?.length) {
     player.sidekicks.forEach((sk) => {
-      const targetX = player.x + sk.offset;
-      const targetY = player.y + 10;
-      sk.x += (targetX - sk.x) * 0.1;
-      sk.y += (targetY - sk.y) * 0.1;
+      const orbitSpeed = sk.orbitSpeed ?? 0.01;
+      sk.pathAngle = (sk.pathAngle ?? 0) + orbitSpeed;
+
+      sk.bobPhase = (sk.bobPhase ?? 0) + (sk.bobSpeed ?? 0.015);
+      const bob = Math.sin(sk.bobPhase) * (sk.bobAmplitude ?? 6);
+
+      const radius = sk.orbitRadius ?? 70;
+      const verticalScale = sk.verticalScale ?? 0.6;
+      const targetX = player.x + Math.cos(sk.pathAngle) * radius;
+      const targetY =
+        player.y + Math.sin(sk.pathAngle) * radius * verticalScale + bob;
+
+      const desiredHeading = Math.atan2(targetY - sk.y, targetX - sk.x);
+      const currentFacing = sk.facing ?? -Math.PI / 2;
+      const turnSpeed = sk.turnSpeed ?? 0.05;
+      const headingDiff = normalizeAngle(desiredHeading - currentFacing);
+      const appliedTurn = clampValue(headingDiff, -turnSpeed, turnSpeed);
+      const newFacing = normalizeAngle(currentFacing + appliedTurn);
+      sk.facing = newFacing;
+
+      const moveSpeed = sk.speed ?? 3;
+      const distance = Math.hypot(targetX - sk.x, targetY - sk.y);
+      const step = Math.min(moveSpeed, distance);
+      sk.x += Math.cos(newFacing) * step;
+      sk.y += Math.sin(newFacing) * step;
     });
   }
 
@@ -1332,7 +1352,8 @@ function draw() {
     player.sidekicks.forEach((sk) => {
       ctx.save();
       ctx.translate(sk.x, sk.y);
-      ctx.rotate(player.tilt); // Match player tilt
+      const facing = sk.facing ?? -Math.PI / 2;
+      ctx.rotate(facing + Math.PI / 2);
       ctx.scale(0.6, 0.6); // Smaller size
 
       // Draw mini ship (simplified player ship)

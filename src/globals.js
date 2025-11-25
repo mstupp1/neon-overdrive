@@ -185,11 +185,26 @@ const PASSIVE_UPGRADES = [
     // { id: 'speedDamage', title: 'KINETIC BOOST', description: 'Deal more damage the faster you move.', icon: 'speed' },
     { id: 'spawnRate', title: 'SCAVENGER', description: 'Significantly increases powerup spawn rate.', icon: 'inventory_2' },
     // { id: 'smallSize', title: 'COMPACT FRAME', description: 'Reduces ship size and hitbox by 25%.', icon: 'compress' },
-    { id: 'boomerang', title: 'NEON BOOMERANG', description: 'Launches an arc-boomerang that loops out and back forever.', icon: 'sync' },
+    { id: 'boomerang', title: 'BANGERANG', description: 'Launches an arc-boomerang that loops out and back forever.', icon: 'sync' },
     { id: 'sidekicks', title: 'WINGMEN', description: 'Two mini-ships fly with you and shoot lasers.', icon: 'flight' },
     { id: 'dashWeapon', title: 'LANCE SHIFT', description: 'During a dash, your ship morphs into a piercing weapon.', icon: 'bolt' },
     { id: 'dashExplosion', title: 'SHOCK NOVA', description: 'Each dash begins with an explosive nova that fires blades.', icon: 'flare' }
 ];
+
+function clampValue(value, min, max) {
+    if (!Number.isFinite(value)) return min;
+    if (value < min) return min;
+    if (value > max) return max;
+    return value;
+}
+
+function normalizeAngle(angle) {
+    if (!Number.isFinite(angle)) return 0;
+    const twoPi = Math.PI * 2;
+    angle = ((angle % twoPi) + twoPi) % twoPi;
+    if (angle > Math.PI) angle -= twoPi;
+    return angle;
+}
 
 // Boomerang Passive Tuning
 const BOOMERANG_BASE_DAMAGE = 3;
