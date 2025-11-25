@@ -465,8 +465,8 @@ function update(dt) {
         player.vy < 0
           ? PLAYER_MAX_SPEED_UP * player.stats.moveSpeedMult
           : player.vy > 0
-          ? PLAYER_MAX_SPEED_DOWN * player.stats.moveSpeedMult
-          : PLAYER_MAX_SPEED * player.stats.moveSpeedMult;
+            ? PLAYER_MAX_SPEED_DOWN * player.stats.moveSpeedMult
+            : PLAYER_MAX_SPEED * player.stats.moveSpeedMult;
       const speed = Math.hypot(player.vx, player.vy);
       if (speed > maxSpeed) {
         const s = maxSpeed / speed;
@@ -488,7 +488,7 @@ function update(dt) {
         const tiltNorm = Math.min(
           1,
           (absVx - PLAYER_TILT_DEADZONE) /
-            (PLAYER_MAX_SPEED - PLAYER_TILT_DEADZONE)
+          (PLAYER_MAX_SPEED - PLAYER_TILT_DEADZONE)
         );
         targetTilt =
           tiltNorm * PLAYER_TILT_MAX * Math.sign(player.vx) * player.tiltDir;
@@ -1528,6 +1528,94 @@ if (stageLvlUpBtn) {
     }
   });
 }
+
+// Debug Passive Selector
+const debugPassiveSelector = document.getElementById('debug-passive-selector');
+if (debugPassiveSelector) {
+  // Populate with all passives
+  PASSIVE_UPGRADES.forEach(passive => {
+    const passiveBtn = document.createElement('button');
+    passiveBtn.className = 'debug-passive-btn';
+    passiveBtn.style.cssText = `
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: rgba(0, 255, 255, 0.1);
+      border: 1px solid #0ff;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      padding: 0;
+
+    `;
+
+    // Create material icon
+    const icon = document.createElement('span');
+    icon.className = 'material-icons';
+    icon.textContent = passive.icon;
+    icon.style.cssText = `
+      font-size: 20px;
+      color: #0ff;
+    `;
+
+    passiveBtn.appendChild(icon);
+    passiveBtn.title = passive.title; // Tooltip
+
+    // Hover effect
+    passiveBtn.addEventListener('mouseenter', () => {
+      passiveBtn.style.background = 'rgba(0, 255, 255, 0.3)';
+      passiveBtn.style.borderColor = '#fff';
+      icon.style.color = '#fff';
+    });
+
+    passiveBtn.addEventListener('mouseleave', () => {
+      passiveBtn.style.background = 'rgba(0, 255, 255, 0.1)';
+      passiveBtn.style.borderColor = '#0ff';
+      icon.style.color = '#0ff';
+    });
+
+    // Click to grant passive
+    passiveBtn.addEventListener('click', () => {
+      if (!player.passives.has(passive.id)) {
+        // Grant the passive immediately
+        player.passives.add(passive.id);
+
+        // Handle immediate effects (similar to applyPassive but without menu transitions)
+        if (passive.id === 'sidekicks' && !player.sidekicks) {
+          player.sidekicks = [
+            { x: player.x - 30, y: player.y + 10, offset: -30 },
+            { x: player.x + 30, y: player.y + 10, offset: 30 },
+          ];
+        } else if (passive.id === 'boomerang' && !player.boomerangs) {
+          player.boomerangs = createBoomerangStates();
+        } else if (passive.id === 'doubleHp') {
+          player.stats.hpMax *= 2;
+          player.lives = player.stats.hpMax;
+        } else if (passive.id === 'smallSize') {
+          player.radius *= 0.75;
+          player.scale = (player.scale || 1) * 0.75;
+        }
+
+        spawnText(player.x, player.y, `${passive.title} `, '#0f0');
+        playSound('powerup');
+        updateUI();
+
+        // Visual feedback
+        passiveBtn.style.background = 'rgba(0, 255, 0, 0.3)';
+        passiveBtn.style.borderColor = '#0f0';
+        icon.style.color = '#0f0';
+      } else {
+        // Already have this passive
+        spawnText(player.x, player.y, 'ALREADY OWNED', '#f00');
+      }
+    });
+
+    debugPassiveSelector.appendChild(passiveBtn);
+  });
+}
+
 
 // Menu Input Handling
 window.addEventListener('keydown', (e) => {
