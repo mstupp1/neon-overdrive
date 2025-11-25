@@ -246,6 +246,22 @@ function firePlayerWeapons() {
             spawnPlayerBullet(originX, originY, facing, 20, 'beam');
         });
     }
+
+    // --- PASSIVE: SPIRAL NOVA BLASTER ---
+    if (player.passives.has('spiralNova')) {
+        // Fire every few frames
+        if (tick % 1 === 0) {
+            player.spiralAngle += 0.2; // Rotate
+            spawnPlayerBullet(player.x, player.y, player.spiralAngle, 12, 'normal', {
+                damage: 0.8 * player.stats.damageMult,
+                tintHue: (player.spiralAngle * 50) % 360 // Rainbow effect
+            });
+             spawnPlayerBullet(player.x, player.y, player.spiralAngle + Math.PI, 12, 'normal', {
+                damage: 0.8 * player.stats.damageMult,
+                tintHue: (player.spiralAngle * 50 + 180) % 360
+            });
+        }
+    }
 }
 
 function awardWeaponXp(xpGain) {

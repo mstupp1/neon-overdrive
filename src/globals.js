@@ -171,7 +171,8 @@ const player = {
     dodgeCharges: DODGE_CHARGES_MAX,
     dodgeCooldowns: [], // Array of timers for each recharging charge
     dashGapTimer: 0,
-    dashWeaponHits: new Set()
+    dashWeaponHits: new Set(),
+    spiralAngle: 0
 };
 
 const SHIP_MUTATIONS = [
@@ -188,7 +189,8 @@ const SHIP_MUTATIONS = [
     { id: 'boomerang', title: 'BANGERANG', description: 'Launches an arc-boomerang that loops out and back forever.', icon: 'sync' },
     { id: 'sidekicks', title: 'WINGMEN', description: 'Two mini-ships fly with you and shoot lasers.', icon: 'flight' },
     { id: 'dashWeapon', title: 'LANCE SHIFT', description: 'During a dash, your ship morphs into a piercing weapon.', icon: 'bolt' },
-    { id: 'dashExplosion', title: 'SHOCK NOVA', description: 'Each dash begins with an explosive nova that fires blades.', icon: 'flare' }
+    { id: 'dashExplosion', title: 'SHOCK NOVA', description: 'Each dash begins with an explosive nova that fires blades.', icon: 'flare' },
+    { id: 'spiralNova', title: 'SPIRAL NOVA', description: 'Shoots projectiles outward in a rotating spiral pattern.', icon: 'cyclone' }
 ];
 
 function clampValue(value, min, max) {
