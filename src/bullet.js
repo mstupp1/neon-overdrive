@@ -18,6 +18,7 @@ class Bullet {
         this.pierce = opts.pierce ?? (subType === 'blade' || subType === 'wave');
         this.tintHue = opts.tintHue ?? 0;
         this.glow = opts.glow ?? 0;
+        this.helixPhase = opts.helixPhase ?? 0;
 
         // Set radius based on subtype
         if (type === 'enemy') {
@@ -73,6 +74,13 @@ class Bullet {
             this.vx *= 0.99; this.vy *= 0.99;
             this.life -= 0.005;
             if (this.life <= 0) this.active = false;
+        } else if (this.subType === 'helix') {
+            const helixRadius = 16;
+            const helixFrequency = 0.25;
+            const perpendicularAngle = this.angle + Math.PI / 2;
+            const offsetMagnitude = Math.sin(this.timer * helixFrequency + this.helixPhase) * helixRadius;
+            this.x += Math.cos(perpendicularAngle) * offsetMagnitude;
+            this.y += Math.sin(perpendicularAngle) * offsetMagnitude;
         } else if (this.subType === 'wobble') {
             // Sine wave motion relative to direction
             this.x += Math.cos(this.angle + Math.PI / 2) * Math.sin(this.timer * 0.2) * 2;
@@ -123,6 +131,7 @@ class Bullet {
             }
             else if (this.subType === 'homing') ctx.drawImage(sprites.playerHoming, this.x - 12, this.y - 12);
             else if (this.subType === 'wave') ctx.drawImage(sprites.playerWave, this.x - 18, this.y - 18);
+            else if (this.subType === 'helix') ctx.drawImage(sprites.playerWave, this.x - 18, this.y - 18);
             else if (this.subType === 'blade') {
                 ctx.save();
                 ctx.translate(this.x, this.y);

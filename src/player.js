@@ -76,13 +76,14 @@ function getPlayerBulletStats(subType, baseSpeed, levelOverride = null) {
     };
 }
 
-function spawnPlayerBullet(x, y, angle, baseSpeed, subType) {
+function spawnPlayerBullet(x, y, angle, baseSpeed, subType, opts = {}) {
     const stats = getPlayerBulletStats(subType, baseSpeed);
     spawnBullet(x, y, angle, stats.speed, 'player', subType, {
         damage: stats.damage,
         pierce: stats.pierce,
         tintHue: stats.tintHue,
         glow: stats.glow,
+        ...opts,
     });
 }
 
@@ -110,6 +111,12 @@ function firePlayerWeapons() {
         spawnPlayerBullet(player.x, player.y - 20, -Math.PI / 2, 22, 'beam');
         spawnPlayerBullet(player.x - 4, player.y - 20, -Math.PI / 2, 22, 'beam');
         spawnPlayerBullet(player.x + 4, player.y - 20, -Math.PI / 2, 22, 'beam');
+
+        // Helix bullets
+        if (tick % 2 === 0) {
+            spawnPlayerBullet(player.x, player.y - 20, -Math.PI / 2, 22, 'helix', { helixPhase: 0 });
+            spawnPlayerBullet(player.x, player.y - 20, -Math.PI / 2, 22, 'helix', { helixPhase: Math.PI });
+        }
     } else if (player.powerLevel >= 8) {
         // Level 8-9: Crescent wave shot (replaces triple) - fires every frame
         // Frontal crescent wave - 5 bullets in arc
