@@ -1490,32 +1490,150 @@ h1::after {
 .song-icon .bar {
     width: 2px;
     background: #0ff;
-    animation: equalizer 0.5s ease-in-out infinite alternate;
     box-shadow: 0 0 5px #0ff;
 }
 
 .song-icon .bar:nth-child(1) {
-    height: 60%;
-    animation-delay: 0s;
+    animation: equalizer1 0.42s ease-in-out infinite;
 }
 
 .song-icon .bar:nth-child(2) {
-    height: 100%;
-    animation-delay: 0.2s;
+    animation: equalizer2 0.61s ease-in-out infinite;
 }
 
 .song-icon .bar:nth-child(3) {
-    height: 80%;
-    animation-delay: 0.4s;
+    animation: equalizer3 0.53s ease-in-out infinite;
 }
 
-@keyframes equalizer {
-    0% {
+@keyframes equalizer1 {
+
+    0%,
+    100% {
         height: 30%;
     }
 
+    10% {
+        height: 85%;
+    }
+
+    20% {
+        height: 45%;
+    }
+
+    30% {
+        height: 95%;
+    }
+
+    40% {
+        height: 55%;
+    }
+
+    50% {
+        height: 70%;
+    }
+
+    60% {
+        height: 40%;
+    }
+
+    70% {
+        height: 90%;
+    }
+
+    80% {
+        height: 60%;
+    }
+
+    90% {
+        height: 50%;
+    }
+}
+
+@keyframes equalizer2 {
+
+    0%,
     100% {
+        height: 50%;
+    }
+
+    15% {
+        height: 75%;
+    }
+
+    25% {
+        height: 95%;
+    }
+
+    35% {
+        height: 60%;
+    }
+
+    45% {
+        height: 85%;
+    }
+
+    55% {
+        height: 40%;
+    }
+
+    65% {
         height: 100%;
+    }
+
+    75% {
+        height: 55%;
+    }
+
+    85% {
+        height: 70%;
+    }
+
+    95% {
+        height: 45%;
+    }
+}
+
+@keyframes equalizer3 {
+
+    0%,
+    100% {
+        height: 45%;
+    }
+
+    12% {
+        height: 80%;
+    }
+
+    22% {
+        height: 55%;
+    }
+
+    32% {
+        height: 90%;
+    }
+
+    42% {
+        height: 65%;
+    }
+
+    52% {
+        height: 50%;
+    }
+
+    62% {
+        height: 95%;
+    }
+
+    72% {
+        height: 40%;
+    }
+
+    82% {
+        height: 75%;
+    }
+
+    92% {
+        height: 60%;
     }
 }
 
@@ -1685,32 +1803,277 @@ h1::after {
 
 .transport-btn-equalizer {
     display: flex;
-    gap: 2px;
+    gap: 1.5px;
     align-items: flex-end;
-    height: 14px;
-    width: 14px;
+    height: 16px;
+    width: 18px;
 }
 
 .transport-btn-equalizer .bar {
-    width: 2px;
+    width: 2.5px;
     background: #0ff;
-    animation: equalizer 0.5s ease-in-out infinite alternate;
     box-shadow: 0 0 5px #0ff;
 }
 
 .transport-btn-equalizer .bar:nth-child(1) {
+    animation: eqBar1 0.42s ease-in-out infinite;
+}
+
+.transport-btn-equalizer .bar:nth-child(2) {
+    animation: eqBar2 0.53s ease-in-out infinite;
+}
+
+.transport-btn-equalizer .bar:nth-child(3) {
+    animation: eqBar3 0.61s ease-in-out infinite;
+}
+
+.transport-btn-equalizer .bar:nth-child(4) {
+    animation: eqBar4 0.48s ease-in-out infinite;
+}
+
+.transport-btn-equalizer .bar:nth-child(5) {
+    animation: eqBar5 0.57s ease-in-out infinite;
+}
+
+/* Song Toast Equalizer (reverted to simple animation) */
+.song-icon .bar {
+    width: 2px;
+    background: #0ff;
+    animation: equalizer-simple 0.5s ease-in-out infinite alternate;
+    box-shadow: 0 0 5px #0ff;
+}
+
+.song-icon .bar:nth-child(1) {
     height: 60%;
     animation-delay: 0s;
 }
 
-.transport-btn-equalizer .bar:nth-child(2) {
+.song-icon .bar:nth-child(2) {
     height: 100%;
     animation-delay: 0.2s;
 }
 
-.transport-btn-equalizer .bar:nth-child(3) {
+.song-icon .bar:nth-child(3) {
     height: 80%;
     animation-delay: 0.4s;
+}
+
+@keyframes equalizer-simple {
+    0% {
+        height: 30%;
+    }
+
+    100% {
+        height: 100%;
+    }
+}
+
+@keyframes eqBar1 {
+
+    0%,
+    100% {
+        height: 30%;
+    }
+
+    10% {
+        height: 85%;
+    }
+
+    20% {
+        height: 45%;
+    }
+
+    30% {
+        height: 95%;
+    }
+
+    40% {
+        height: 55%;
+    }
+
+    50% {
+        height: 70%;
+    }
+
+    60% {
+        height: 40%;
+    }
+
+    70% {
+        height: 90%;
+    }
+
+    80% {
+        height: 60%;
+    }
+
+    90% {
+        height: 50%;
+    }
+}
+
+@keyframes eqBar2 {
+
+    0%,
+    100% {
+        height: 50%;
+    }
+
+    15% {
+        height: 75%;
+    }
+
+    25% {
+        height: 95%;
+    }
+
+    35% {
+        height: 60%;
+    }
+
+    45% {
+        height: 85%;
+    }
+
+    55% {
+        height: 40%;
+    }
+
+    65% {
+        height: 100%;
+    }
+
+    75% {
+        height: 55%;
+    }
+
+    85% {
+        height: 70%;
+    }
+
+    95% {
+        height: 45%;
+    }
+}
+
+@keyframes eqBar3 {
+
+    0%,
+    100% {
+        height: 45%;
+    }
+
+    12% {
+        height: 80%;
+    }
+
+    22% {
+        height: 55%;
+    }
+
+    32% {
+        height: 90%;
+    }
+
+    42% {
+        height: 65%;
+    }
+
+    52% {
+        height: 50%;
+    }
+
+    62% {
+        height: 95%;
+    }
+
+    72% {
+        height: 40%;
+    }
+
+    82% {
+        height: 75%;
+    }
+
+    92% {
+        height: 60%;
+    }
+}
+
+@keyframes eqBar4 {
+
+    0%,
+    100% {
+        height: 55%;
+    }
+
+    11% {
+        height: 75%;
+    }
+
+    23% {
+        height: 45%;
+    }
+
+    34% {
+        height: 85%;
+    }
+
+    46% {
+        height: 60%;
+    }
+
+    57% {
+        height: 95%;
+    }
+
+    68% {
+        height: 50%;
+    }
+
+    79% {
+        height: 70%;
+    }
+
+    89% {
+        height: 40%;
+    }
+}
+
+@keyframes eqBar5 {
+
+    0%,
+    100% {
+        height: 40%;
+    }
+
+    13% {
+        height: 90%;
+    }
+
+    26% {
+        height: 55%;
+    }
+
+    39% {
+        height: 75%;
+    }
+
+    52% {
+        height: 45%;
+    }
+
+    65% {
+        height: 85%;
+    }
+
+    78% {
+        height: 60%;
+    }
+
+    91% {
+        height: 95%;
+    }
 }
 
 .transport-btn .material-icons {
