@@ -1839,23 +1839,22 @@ h1::after {
 .song-icon .bar {
     width: 2px;
     background: #0ff;
-    animation: equalizer-simple 1.2s ease-in-out infinite alternate;
     box-shadow: 0 0 5px #0ff;
 }
 
 .song-icon .bar:nth-child(1) {
-    height: 60%;
+    animation: equalizer-simple 0.5s ease-in-out infinite alternate;
     animation-delay: 0s;
 }
 
 .song-icon .bar:nth-child(2) {
-    height: 100%;
-    animation-delay: 0.4s;
+    animation: equalizer-simple 0.5s ease-in-out infinite alternate;
+    animation-delay: 0.27s;
 }
 
 .song-icon .bar:nth-child(3) {
-    height: 80%;
-    animation-delay: 0.8s;
+    animation: equalizer-simple 0.5s ease-in-out infinite alternate;
+    animation-delay: 0.54s;
 }
 
 @keyframes equalizer-simple {
