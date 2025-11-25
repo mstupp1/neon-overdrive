@@ -63,6 +63,10 @@ function toggleSfxMute() {
 }
 
 const musicTracks = [
+    'src/audio/music/Laser Beam 1.mp3',
+    'src/audio/music/Laser Beam 2.mp3',
+    'src/audio/music/Heavy Gravity 1.mp3',
+    'src/audio/music/Heavy Gravity 2.mp3',
     'src/audio/music/Nebula Ghosts 1.mp3',
     'src/audio/music/Nebula Ghosts 2.mp3',
     'src/audio/music/Rocket Jungle 1.mp3',
