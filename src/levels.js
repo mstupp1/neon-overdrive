@@ -131,6 +131,7 @@ class LevelManager {
             // Show warning
             spawnText(width / 2, height / 2, 'WARNING: BOSS DETECTED', '#f00');
             playSound('bomb'); // Use bomb sound for alarm effect
+            return;
           } else {
             // Check if boss is still alive
             const boss = enemies.find(
