@@ -116,7 +116,7 @@ const input = { x: 0, y: 0, active: false, lastX: 0, lastY: 0 };
 const keys = {
     up: false, down: false, left: false, right: false,
     w: false, a: false, s: false, d: false,
-    space: false
+    shift: false
 };
 // Mobile double-tap detection
 const touchHistory = {

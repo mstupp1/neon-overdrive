@@ -716,9 +716,9 @@ window.addEventListener('keydown', (e) => {
         keys.right = true;
         keys.d = true;
     }
-    if (key === ' ') {
-        keys.space = true;
-        // Trigger dash on space bar press
+    if (key === 'shift') {
+        keys.shift = true;
+        // Trigger dash on shift key press
         if (gameState === 'PLAYING') {
             // Determine dash direction from current input
             let dirX = 0;
@@ -743,7 +743,6 @@ window.addEventListener('keydown', (e) => {
 
             triggerDash(dirX, dirY);
         }
-        e.preventDefault(); // Prevent page scroll
     }
 });
 
@@ -765,7 +764,7 @@ window.addEventListener('keyup', (e) => {
         keys.right = false;
         keys.d = false;
     }
-    if (key === ' ') {
-        keys.space = false;
+    if (key === 'shift') {
+        keys.shift = false;
     }
 });
