@@ -214,17 +214,19 @@ class Enemy {
                 }
             } else if (this.state === 'fight') {
                 this.timer++;
-                // Slow movement - REDUCED AMPLITUDE to keep in middle
-                this.x = width / 2 + Math.sin(this.timer * 0.01) * (width * 0.15); // Reduced from 0.25 to 0.15
+                // Slow movement - Ensure it stays centered
+                // Using a smaller amplitude and ensuring it oscillates around width/2
+                this.x = width / 2 + Math.sin(this.timer * 0.015) * (width * 0.1); // Reduced amplitude further
                 this.y = this.baseY + Math.sin(this.timer * 0.03) * 20;
 
                 // Update Tentacles (Slithering effect)
                 this.segments.forEach((tentacle, tIndex) => {
                     // Base position (attached to body)
-                    // Distribute around the body
+                    // Distribute around the body - Match the ellipse shape (60, 80)
                     const angle = (tIndex / 8) * Math.PI * 2 + this.timer * 0.02;
-                    const attachX = this.x + Math.cos(angle) * 40;
-                    const attachY = this.y + Math.sin(angle) * 40;
+                    // Attach at the edge of the ellipse (slightly inside to look connected)
+                    const attachX = this.x + Math.cos(angle) * 55; // Close to 60
+                    const attachY = this.y + Math.sin(angle) * 75; // Close to 80
 
                     let p = { x: attachX, y: attachY };
                     tentacle.forEach((segment, sIndex) => {
