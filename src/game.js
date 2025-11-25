@@ -1554,7 +1554,7 @@ if (stageLvlUpBtn) {
 const debugPassiveSelector = document.getElementById('debug-passive-selector');
 if (debugPassiveSelector) {
   // Populate with all passives
-  PASSIVE_UPGRADES.forEach(passive => {
+  SHIP_MUTATIONS.forEach(passive => {
     const passiveBtn = document.createElement('button');
     passiveBtn.className = 'debug-passive-btn';
     passiveBtn.style.cssText = `

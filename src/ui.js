@@ -86,7 +86,7 @@ function showStageCompleteOptions() {
     upgradeContainer.innerHTML = '';
 
     // Filter out already acquired passives
-    const availablePassives = PASSIVE_UPGRADES.filter(p => !player.passives.has(p.id));
+    const availablePassives = SHIP_MUTATIONS.filter(p => !player.passives.has(p.id));
 
     // Shuffle and pick 3
     const options = [...availablePassives].sort(() => 0.5 - Math.random()).slice(0, 3);
@@ -308,7 +308,7 @@ function updateUI() {
     if (passiveIconsContainer) {
         passiveIconsContainer.innerHTML = '';
         player.passives.forEach(passiveId => {
-            const passiveDef = PASSIVE_UPGRADES.find(p => p.id === passiveId);
+            const passiveDef = SHIP_MUTATIONS.find(p => p.id === passiveId);
             if (passiveDef) {
                 const iconSpan = document.createElement('span');
                 iconSpan.className = 'material-icons passive-icon-small';

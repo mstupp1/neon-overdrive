@@ -174,7 +174,7 @@ const player = {
     dashWeaponHits: new Set()
 };
 
-const PASSIVE_UPGRADES = [
+const SHIP_MUTATIONS = [
     // { id: 'doubleHp', title: 'TITAN HULL', description: 'Doubles your current Max HP immediately.', icon: 'health_and_safety' },
     { id: 'autoShield', title: 'REGENERATOR', description: 'Gain a shield after 5 seconds of not taking damage.', icon: 'shield' },
     // { id: 'strongerShield', title: 'HARDENED SHIELD', description: 'Shields can withstand 1 extra hit before breaking.', icon: 'security' },
