@@ -37,6 +37,26 @@ class Enemy {
             this.hp = 6 * hpMult; this.radius = 20; this.damage = 5;
             this.tx = rand(50, width - 50); this.ty = rand(50, height * 0.4);
         }
+        else if (type === 'boss_stage3') {
+            this.hp = 500 * hpMult;
+            this.radius = 70;
+            this.damage = 10;
+            this.x = width / 2;
+            this.y = -150; // Start further up
+            this.state = 'enter';
+            this.vx = 0; this.vy = 0;
+
+            // Attack timers
+            this.fireTimer = 60;
+            this.orbTimer = 120;
+            this.torpedoTimer = 200;
+
+            // Visuals
+            this.lightsOffset = rand(0, 100);
+
+            // Initialize segments array (even though boss doesn't use it)
+            this.segments = [];
+        }
     }
 
     update() {
@@ -111,21 +131,69 @@ class Enemy {
                 }
             }
         }
+        else if (this.type === 'boss_stage3') {
+            if (this.state === 'enter') {
+                this.y += 2;
+                if (this.y >= 150) {
+                    this.state = 'fight';
+                    this.baseY = 150;
+                    this.timer = 0;
+                }
+            } else if (this.state === 'fight') {
+                // Movement: Figure 8 or simple horizontal sway
+                this.timer++;
+                this.x = width / 2 + Math.sin(this.timer * 0.02) * (width * 0.35);
+                this.y = this.baseY + Math.sin(this.timer * 0.05) * 30;
 
-        // Drift down and disengage when overlapping the HUD zone
-        if (inFadeZone) {
+                if (allowFire) {
+                    // Attack 1: Basic Spread
+                    this.fireTimer--;
+                    if (this.fireTimer <= 0) {
+                        this.fireTimer = 90;
+                        const baseAngle = Math.atan2(player.y - this.y, player.x - this.x);
+                        for (let i = -2; i <= 2; i++) {
+                            spawnBullet(this.x, this.y, baseAngle + i * 0.15, 7, 'enemy', 'basic', { damage: 1 });
+                        }
+                    }
+
+                    // Attack 2: Destructible Orbs (Orange)
+                    this.orbTimer--;
+                    if (this.orbTimer <= 0) {
+                        this.orbTimer = 150;
+                        for (let i = 0; i < 6; i++) {
+                            const angle = (i / 6) * Math.PI * 2 + this.timer * 0.05;
+                            spawnBullet(this.x, this.y, angle, 5, 'enemy', 'orb', { damage: 2 });
+                        }
+                    }
+
+                    // Attack 3: Homing Torpedos (Tanky)
+                    this.torpedoTimer--;
+                    if (this.torpedoTimer <= 0) {
+                        this.torpedoTimer = 240; // Every 4 seconds
+                        // Shoot 2 torpedos from sides
+                        spawnBullet(this.x - 60, this.y, Math.PI / 2, 4, 'enemy', 'torpedo', { damage: 3, hp: 5 });
+                        spawnBullet(this.x + 60, this.y, Math.PI / 2, 4, 'enemy', 'torpedo', { damage: 3, hp: 5 });
+                    }
+                }
+            }
+        }
+
+        // Drift down and disengage when overlapping the HUD zone (not for bosses)
+        if (inFadeZone && this.type !== 'boss_stage3') {
             const exitDrift = 1.5 + fadeT * 2.5;
             this.y += exitDrift;
             this.vx = (this.vx || 0) * 0.92;
             this.vy = (this.vy || 0) * 0.92;
         }
 
-        // Soft steer away from edges so enemies don't linger at the borders
-        const edgeMargin = 60;
-        if (this.x < edgeMargin) this.x += (edgeMargin - this.x) * 0.05;
-        else if (this.x > width - edgeMargin) this.x -= (this.x - (width - edgeMargin)) * 0.05;
-        if (this.y < edgeMargin) this.y += (edgeMargin - this.y) * 0.05;
-        else if (this.y > height - edgeMargin) this.y -= (this.y - (height - edgeMargin)) * 0.05;
+        // Soft steer away from edges so enemies don't linger at the borders (not for bosses)
+        if (this.type !== 'boss_stage3') {
+            const edgeMargin = 60;
+            if (this.x < edgeMargin) this.x += (edgeMargin - this.x) * 0.05;
+            else if (this.x > width - edgeMargin) this.x -= (this.x - (width - edgeMargin)) * 0.05;
+            if (this.y < edgeMargin) this.y += (edgeMargin - this.y) * 0.05;
+            else if (this.y > height - edgeMargin) this.y -= (this.y - (height - edgeMargin)) * 0.05;
+        }
 
         if (this.y > height + 100 || this.x < -100 || this.x > width + 100) this.active = false;
     }
@@ -189,6 +257,79 @@ class Enemy {
                 ctx.restore(); ctx.save(); ctx.globalAlpha = baseAlpha; ctx.strokeStyle = `rgba(255,0,0,${this.timer / 50})`; ctx.lineWidth = 2;
                 ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(player.x, player.y); ctx.stroke();
             }
+        }
+        else if (this.type === 'boss_stage3') {
+            // Reset any previous state changes first
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'transparent';
+
+            // Draw Boss
+            // Main Body
+            ctx.fillStyle = '#222';
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 4;
+
+            // Central Hull
+            ctx.beginPath();
+            ctx.rect(-60, -40, 120, 80);
+            ctx.fill();
+            ctx.stroke();
+
+            // Side Pods (Engines/Weapon Mounts)
+            ctx.fillStyle = '#333';
+            ctx.beginPath();
+            ctx.rect(-90, -30, 30, 60); // Left
+            ctx.rect(60, -30, 30, 60);  // Right
+            ctx.fill();
+            ctx.stroke();
+
+            // Mandibles (Front)
+            ctx.fillStyle = '#444';
+            ctx.beginPath();
+            ctx.moveTo(-40, 40); ctx.lineTo(-50, 80); ctx.lineTo(-30, 70); ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(40, 40); ctx.lineTo(50, 80); ctx.lineTo(30, 70); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+            // Blinking Lights (Red/Orange)
+            const blink = Math.sin((frameCount + this.lightsOffset) * 0.1) > 0;
+            ctx.fillStyle = blink ? '#ff0000' : '#550000';
+            ctx.shadowBlur = blink ? 15 : 0;
+            ctx.shadowColor = '#ff0000';
+
+            // Eyes/Sensors
+            ctx.beginPath(); ctx.arc(-20, 20, 5, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(20, 20, 5, 0, Math.PI * 2); ctx.fill();
+
+            // Central Core (Pulsing)
+            const pulse = 0.5 + 0.5 * Math.sin(frameCount * 0.05);
+            ctx.fillStyle = `rgba(255, 100, 0, ${pulse})`;
+            ctx.shadowBlur = 20 * pulse;
+            ctx.shadowColor = '#ff6600';
+            ctx.beginPath(); ctx.arc(0, 0, 20, 0, Math.PI * 2); ctx.fill();
+
+            // Turrets (Visual only)
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#666';
+            ctx.beginPath(); ctx.arc(-50, -10, 8, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(50, -10, 8, 0, Math.PI * 2); ctx.fill();
+
+            // Barrels pointing at player
+            const aimAngle = Math.atan2(player.y - this.y, player.x - this.x) - Math.PI / 2;
+            ctx.save();
+            ctx.translate(-50, -10); ctx.rotate(aimAngle);
+            ctx.fillStyle = '#888'; ctx.fillRect(-2, 0, 4, 15);
+            ctx.restore();
+
+            ctx.save();
+            ctx.translate(50, -10); ctx.rotate(aimAngle);
+            ctx.fillStyle = '#888'; ctx.fillRect(-2, 0, 4, 15);
+            ctx.restore();
+
+            // Clean up state before final restore
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'transparent';
+            ctx.globalCompositeOperation = 'source-over';
         }
         ctx.restore();
     }

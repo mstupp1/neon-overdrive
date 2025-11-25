@@ -408,6 +408,7 @@ function prerenderAssets() {
     sprites.enemyBulletFast = renderGlowSprite('#ff3b3b', 3, 12, 'beam', '#ff3b3b'); // Dasher: Fast, red beam-like
     sprites.enemyBulletSniper = renderGlowSprite('#ff6b6b', 6, 22, 'blade', '#ff6b6b'); // Sniper: Sharp, red-tinted contrast
     sprites.enemyBulletWobble = renderGlowSprite('#ff2f2f', 5, 12, 'circle', '#ff4a4a'); // Snake: Red wobbling hazard
+    sprites.enemyBulletTorpedo = renderGlowSprite('#ff4400', 4, 15, 'dasher', '#ff6600'); // Re-using dasher shape but smaller/orange for torpedo
 
     sprites.playerNormal = renderGlowSprite('#0ff', 4, 8);
     sprites.playerBeam = renderGlowSprite('#0ff', 3, 15, 'beam');

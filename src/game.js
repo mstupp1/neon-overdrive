@@ -671,10 +671,17 @@ function update(dt) {
             bullets.forEach((eb) => {
                 if (eb.type === 'enemy' && eb.destructible && eb.active) {
                     if (dist(b.x, b.y, eb.x, eb.y) < b.radius + eb.radius) {
-                        eb.active = false;
-                        if (!b.pierce) b.active = false; // Blade/Wave pierce
-                        createExplosionLogic(eb.x, eb.y, '#ff9c2a', 5);
-                        if (gameState === 'PLAYING') score += 10;
+                        if (!b.pierce) b.active = false; // Player bullet dies unless piercing
+
+                        eb.hp -= b.damage ?? 1;
+                        if (eb.hp <= 0) {
+                            eb.active = false;
+                            createExplosionLogic(eb.x, eb.y, '#ff9c2a', 5);
+                            if (gameState === 'PLAYING') score += 10;
+                        } else {
+                            // Flash or effect to show hit but not dead?
+                            createExplosionLogic(eb.x, eb.y, '#ff9c2a', 2);
+                        }
                     }
                 }
             });

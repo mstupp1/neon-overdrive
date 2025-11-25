@@ -91,12 +91,16 @@ class LevelManager {
         this.currentLevel = 1;
         this.levelTimer = 0;
         this.infiniteScalingFactor = 1.0;
+        this.bossActive = false;
+        this.bossDefeated = false;
     }
 
     reset() {
         this.currentLevel = 1;
         this.levelTimer = 0;
         this.infiniteScalingFactor = 1.0;
+        this.bossActive = false;
+        this.bossDefeated = false;
         this.applyLevelConfig();
     }
 
@@ -107,6 +111,34 @@ class LevelManager {
         const config = LEVEL_CONFIG[this.currentLevel];
 
         if (this.currentLevel < 9 && this.levelTimer >= config.duration) {
+            // Stage 3 Boss Logic
+            if (this.currentLevel === 3) {
+                if (!this.bossDefeated) {
+                    if (!this.bossActive) {
+                        // Spawn Boss
+                        spawnEnemyEntity('boss_stage3');
+                        this.bossActive = true;
+                        // Clear existing enemies to focus on boss
+                        enemies.forEach(e => { if (e.type !== 'boss_stage3') e.active = false; });
+
+                        // Show warning
+                        spawnText(width / 2, height / 2, "WARNING: BOSS DETECTED", "#f00");
+                        playSound('bomb'); // Use bomb sound for alarm effect
+                    } else {
+                        // Check if boss is still alive
+                        const boss = enemies.find(e => e.type === 'boss_stage3' && e.active);
+                        if (!boss) {
+                            this.bossActive = false;
+                            this.bossDefeated = true;
+                            // Proceed to stage complete logic below
+                        } else {
+                            // Boss is fighting, do not advance
+                            return;
+                        }
+                    }
+                }
+            }
+
             // Trigger Stage Complete Screen instead of immediate advance
             gameState = 'STAGE_COMPLETE';
             uiLayer.classList.add('hidden');
@@ -131,6 +163,8 @@ class LevelManager {
     advanceLevel() {
         this.currentLevel++;
         this.levelTimer = 0;
+        this.bossActive = false;
+        this.bossDefeated = false;
         this.applyLevelConfig();
 
         // Visual fanfare
