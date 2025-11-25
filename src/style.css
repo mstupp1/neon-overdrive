@@ -1683,6 +1683,36 @@ h1::after {
     border-radius: 2px;
 }
 
+.transport-btn-equalizer {
+    display: flex;
+    gap: 2px;
+    align-items: flex-end;
+    height: 14px;
+    width: 14px;
+}
+
+.transport-btn-equalizer .bar {
+    width: 2px;
+    background: #0ff;
+    animation: equalizer 0.5s ease-in-out infinite alternate;
+    box-shadow: 0 0 5px #0ff;
+}
+
+.transport-btn-equalizer .bar:nth-child(1) {
+    height: 60%;
+    animation-delay: 0s;
+}
+
+.transport-btn-equalizer .bar:nth-child(2) {
+    height: 100%;
+    animation-delay: 0.2s;
+}
+
+.transport-btn-equalizer .bar:nth-child(3) {
+    height: 80%;
+    animation-delay: 0.4s;
+}
+
 .transport-btn .material-icons {
     font-size: 18px;
     line-height: 1;

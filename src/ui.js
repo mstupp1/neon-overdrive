@@ -904,9 +904,15 @@ function updateTransportControls() {
     if (!playPauseBtn) return;
 
     const iconSpan = playPauseBtn.querySelector('.material-icons');
+    const equalizer = playPauseBtn.querySelector('.transport-btn-equalizer');
+
     if (MusicPlayer.isPaused || MusicPlayer.audio.paused) {
-        iconSpan.textContent = 'play_arrow';
+        // Show play icon, hide equalizer
+        if (iconSpan) iconSpan.style.display = '';
+        if (equalizer) equalizer.style.display = 'none';
     } else {
-        iconSpan.textContent = 'pause';
+        // Show equalizer, hide play icon
+        if (iconSpan) iconSpan.style.display = 'none';
+        if (equalizer) equalizer.style.display = 'flex';
     }
 }
