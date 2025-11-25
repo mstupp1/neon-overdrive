@@ -1647,3 +1647,59 @@ h1::after {
         opacity: 0.7;
     }
 }
+
+/* Audio Transport Controls */
+.audio-transport-controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    margin-bottom: 4px;
+    pointer-events: auto;
+}
+
+.transport-btn {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 255, 255, 0.4);
+    color: #0ff;
+    padding: 4px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(4px);
+    border-radius: 2px;
+}
+
+.transport-btn .material-icons {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.transport-btn:hover {
+    background: rgba(0, 255, 255, 0.2);
+    border-color: #0ff;
+    box-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
+    transform: scale(1.05);
+}
+
+.transport-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 4px rgba(0, 255, 255, 0.6);
+}
+
+.transport-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.transport-btn:disabled:hover {
+    background: rgba(0, 0, 0, 0.5);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: none;
+    transform: scale(1);
+}

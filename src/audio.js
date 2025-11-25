@@ -100,6 +100,7 @@ const MusicPlayer = {
     currentTrackIndex: -1,
     audio: new Audio(),
     isPlaying: false,
+    isPaused: false,
     lastPlayedTrack: null,
     isLateGame: false, // Track if we're playing late-game music
     isFading: false, // Track if we're currently fading
@@ -206,6 +207,7 @@ const MusicPlayer = {
 
         this.audio.src = track;
         this.audio.volume = 0.3; // Background music volume
+        this.isPaused = false;
         this.audio.play().catch(e => console.warn("Audio play failed:", e));
 
         // Extract song name from path (e.g., "src/audio/music/Song Name.mp3" -> "Song Name")
@@ -215,9 +217,50 @@ const MusicPlayer = {
         }
     },
 
+    playPrevious() {
+        // Can't go before the start of the playlist
+        if (this.currentTrackIndex <= 0) {
+            // Restart current track if at the beginning
+            this.audio.currentTime = 0;
+            return;
+        }
+
+        this.currentTrackIndex--;
+        const track = this.playlist[this.currentTrackIndex];
+        this.lastPlayedTrack = track;
+
+        this.audio.src = track;
+        this.audio.volume = 0.3;
+        this.isPaused = false;
+        this.audio.play().catch(e => console.warn("Audio play failed:", e));
+
+        // Extract song name from path
+        const songName = track.split('/').pop().replace(/\.[^/.]+$/, "");
+        if (typeof showSongToast === 'function') {
+            showSongToast(songName);
+        }
+    },
+
+    togglePlayPause() {
+        if (!this.audio.src) return false;
+
+        if (this.isPaused || this.audio.paused) {
+            // Resume playback
+            this.audio.play().catch(e => console.warn("Audio play failed:", e));
+            this.isPaused = false;
+            return false; // Not paused
+        } else {
+            // Pause playback
+            this.audio.pause();
+            this.isPaused = true;
+            return true; // Is paused
+        }
+    },
+
     start() {
         if (this.isPlaying) return;
         this.isPlaying = true;
+        this.isPaused = false;
         this.playNext();
     },
 
@@ -284,7 +327,7 @@ const MusicPlayer = {
             this.audio.loop = true; // Loop boss music
             this.audio.src = trackUrl;
             this.audio.play().catch(e => console.warn("Boss music play failed:", e));
-            
+
             // Start at 0 volume for fade in
             this.audio.volume = 0;
             this.fadeIn(2000, 0.3);
@@ -303,12 +346,12 @@ const MusicPlayer = {
         this.fadeOut(2000).then(() => {
             this.isBossMusic = false;
             this.audio.loop = false; // Turn off loop
-            
+
             // Shuffle if playlist ended, or just play next/resume
             // playNext() increments index, so we might want to be careful if we want to "resume" 
             // exactly where we were, but shuffling/playing next is usually fine for games.
-            this.playNext(); 
-            
+            this.playNext();
+
             this.audio.volume = 0;
             this.fadeIn(2000, 0.3);
         });

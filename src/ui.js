@@ -872,3 +872,41 @@ function playCompletionSound() {
         console.warn('Could not play completion sound:', e);
     }
 }
+
+// ===== AUDIO TRANSPORT CONTROLS =====
+
+const prevTrackBtn = document.getElementById('prev-track-btn');
+const playPauseBtn = document.getElementById('play-pause-btn');
+const nextTrackBtn = document.getElementById('next-track-btn');
+
+if (prevTrackBtn) {
+    prevTrackBtn.addEventListener('click', () => {
+        MusicPlayer.playPrevious();
+        updateTransportControls();
+    });
+}
+
+if (playPauseBtn) {
+    playPauseBtn.addEventListener('click', () => {
+        const isPaused = MusicPlayer.togglePlayPause();
+        updateTransportControls();
+    });
+}
+
+if (nextTrackBtn) {
+    nextTrackBtn.addEventListener('click', () => {
+        MusicPlayer.playNext();
+        updateTransportControls();
+    });
+}
+
+function updateTransportControls() {
+    if (!playPauseBtn) return;
+
+    const iconSpan = playPauseBtn.querySelector('.material-icons');
+    if (MusicPlayer.isPaused || MusicPlayer.audio.paused) {
+        iconSpan.textContent = 'play_arrow';
+    } else {
+        iconSpan.textContent = 'pause';
+    }
+}
