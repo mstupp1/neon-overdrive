@@ -203,6 +203,9 @@ class LevelManager {
     if (typeof cosmicBg !== 'undefined' && cosmicBg) {
       cosmicBg.setTheme(config.hue, config.name);
     }
+    if (typeof backgroundObstacleManager !== 'undefined') {
+      backgroundObstacleManager.setStage(config.name);
+    }
 
     // Update UI
     const stageDisplay = document.getElementById('stage-display');
