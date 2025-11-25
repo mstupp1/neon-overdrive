@@ -29,7 +29,7 @@ class Bullet {
             else if (subType === 'sniper') this.radius = 8;
             else if (subType === 'wobble') this.radius = 6;
             else if (subType === 'torpedo') { this.radius = 10; this.destructible = true; }
-            else if (subType === 'fuzzy') { this.radius = 15; this.destructible = true; } // Large, destructible
+            else if (subType === 'fuzzy') { this.radius = 20; this.destructible = true; } // Increased radius
             else this.radius = 6;
         } else {
             this.radius = 8;
@@ -147,21 +147,23 @@ class Bullet {
                 // Procedural drawing for fuzzy bullet
                 ctx.save(); ctx.translate(this.x, this.y);
 
-                // Fuzzy glow
+                // Fuzzy glow with Flash
+                const flash = Math.floor(frameCount / 4) % 2 === 0; // Flash every 4 frames
                 const pulse = 0.8 + 0.2 * Math.sin(frameCount * 0.2);
-                ctx.shadowBlur = 20 * pulse;
-                ctx.shadowColor = '#ffff00';
+
+                ctx.shadowBlur = (flash ? 40 : 20) * pulse;
+                ctx.shadowColor = flash ? '#ff0000' : '#ffff00'; // Flash red
 
                 // Core
-                ctx.fillStyle = '#ffffaa';
-                ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = flash ? '#ffcccc' : '#ffffaa';
+                ctx.beginPath(); ctx.arc(0, 0, 15, 0, Math.PI * 2); ctx.fill(); // Increased size from 10 to 15
 
                 // Outer fuzz
-                ctx.strokeStyle = `rgba(255, 255, 0, ${0.5 * pulse})`;
-                ctx.lineWidth = 2;
+                ctx.strokeStyle = `rgba(${flash ? '255, 0, 0' : '255, 255, 0'}, ${0.5 * pulse})`;
+                ctx.lineWidth = 3;
                 for (let i = 0; i < 8; i++) {
                     ctx.beginPath();
-                    ctx.arc(0, 0, 12 + Math.random() * 4, i * Math.PI / 4, (i + 1) * Math.PI / 4);
+                    ctx.arc(0, 0, 18 + Math.random() * 6, i * Math.PI / 4, (i + 1) * Math.PI / 4); // Increased size
                     ctx.stroke();
                 }
 

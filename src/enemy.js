@@ -216,7 +216,8 @@ class Enemy {
                 this.timer++;
                 // Slow movement - Ensure it stays centered
                 // Using a smaller amplitude and ensuring it oscillates around width/2
-                this.x = width / 2 + Math.sin(this.timer * 0.015) * (width * 0.1); // Reduced amplitude further
+                // OFFSET TO LEFT as requested (-100 pixels)
+                this.x = (width / 2 - 100) + Math.sin(this.timer * 0.015) * (width * 0.1);
                 this.y = this.baseY + Math.sin(this.timer * 0.03) * 20;
 
                 // Update Tentacles (Slithering effect)
@@ -267,7 +268,8 @@ class Enemy {
                     this.fuzzyTimer--;
                     if (this.fuzzyTimer <= 0) {
                         this.fuzzyTimer = 350; // Rare attack
-                        spawnBullet(this.x, this.y, -Math.PI / 2, 3, 'enemy', 'fuzzy', { damage: 5, hp: 15 }); // Very tanky
+                        // Increased HP from 15 to 40 (Very Tanky)
+                        spawnBullet(this.x, this.y, -Math.PI / 2, 3, 'enemy', 'fuzzy', { damage: 5, hp: 40 });
                     }
                 }
             }
