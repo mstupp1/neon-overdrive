@@ -11,6 +11,25 @@ function startIntro() {
     intro.init();
 }
 
+function startDemo() {
+    gameState = 'DEMO';
+    menuIdleTimer = 0;
+    startMenu.classList.add('hidden');
+    
+    resetWorldState();
+    
+    // Setup player for demo
+    player.x = width / 2;
+    player.y = height * 0.8;
+    player.powerLevel = player.maxPower;
+    player.activePowerups.clear();
+    
+    // Ensure UI is hidden
+    uiLayer.classList.add('hidden');
+    pauseMenu.classList.add('hidden');
+    gameOverMenu.classList.add('hidden');
+}
+
 function resetWorldState() {
     bullets.forEach((b) => bulletPool.release(b));
     bullets.length = 0;
@@ -273,8 +292,8 @@ function update(dt) {
 
     if (gameState === 'MENU') {
         menuIdleTimer++;
-        if (menuIdleTimer > 60 * 20) { // 20 seconds at 60fps
-            startIntro();
+        if (menuIdleTimer > 60 * 10) { // 10 seconds at 60fps
+            startDemo();
         }
         // Update cosmetic background in menu
         cosmicBg.update();
@@ -289,6 +308,11 @@ function update(dt) {
     }
 
     if (gameState === 'DEMO') {
+        menuIdleTimer++;
+        if (menuIdleTimer > 60 * 20) { // 20 seconds
+            startIntro();
+            return;
+        }
         updateDemoAI();
     } else {
         levelManager.update();
@@ -1031,6 +1055,16 @@ function draw() {
         // Lighter overlay so it's easier to see
         ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
         ctx.fillRect(0, 0, width, height);
+
+        ctx.save();
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 24px monospace';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'top';
+        ctx.shadowColor = '#0ff';
+        ctx.shadowBlur = 10;
+        ctx.fillText('DEMO MODE', width - 20, 20);
+        ctx.restore();
     }
 
     ctx.restore(); // Restore scale
@@ -1060,10 +1094,12 @@ function loop(timestamp) {
 document.addEventListener('click', () => {
     menuIdleTimer = 0; // Reset on any input
     if (gameState === 'INTRO') intro.skip();
+    if (gameState === 'DEMO') returnToMenu();
 });
 document.addEventListener('touchstart', () => {
     menuIdleTimer = 0; // Reset on any input
     if (gameState === 'INTRO') intro.skip();
+    if (gameState === 'DEMO') returnToMenu();
 }, { passive: true });
 
 document.getElementById('start-btn').addEventListener('click', initGame);
@@ -1165,6 +1201,11 @@ window.addEventListener('keydown', (e) => {
         if (['Enter', ' ', 'Escape', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
             intro.skip();
         }
+        return;
+    }
+
+    if (gameState === 'DEMO') {
+        returnToMenu();
         return;
     }
 
