@@ -327,6 +327,9 @@ function applyPassive(id) {
         spawnText(player.x, player.y, 'LANCE MODE', '#0ff');
     } else if (id === 'dashExplosion') {
         spawnText(player.x, player.y, 'SHOCK NOVA READY', '#f80');
+    } else if (id === 'boomerang') {
+        player.boomerangs = createBoomerangStates();
+        spawnText(player.x, player.y, 'BOOMERANG ONLINE', '#fd0');
     } else {
         spawnText(player.x, player.y, 'PASSIVE ACQUIRED', '#fff');
     }
@@ -343,6 +346,41 @@ function applyPassive(id) {
 
     // Advance level logic
     levelManager.advanceLevel();
+}
+
+function createBoomerangStates() {
+    return [
+        createBoomerangState({ curveDir: 1, angleOffset: 0.2 }),
+        createBoomerangState({ curveDir: -1, angleOffset: -0.2 })
+    ];
+}
+
+function createBoomerangState({ curveDir = 1, angleOffset = 0 } = {}) {
+    return {
+        x: player.x,
+        y: player.y,
+        vx: 0,
+        vy: 0,
+        angle: -Math.PI / 2 + angleOffset,
+        state: 'outbound',
+        timer: 0,
+        curveDir,
+        radius: BOOMERANG_RADIUS,
+        hitSet: new Set(),
+        initialAngleOffset: angleOffset
+    };
+}
+
+function resetBoomerangToPlayer(boomerang) {
+    if (!boomerang) return;
+    boomerang.x = player.x;
+    boomerang.y = player.y;
+    boomerang.vx = 0;
+    boomerang.vy = 0;
+    boomerang.angle = -Math.PI / 2 + (boomerang.initialAngleOffset || 0);
+    boomerang.state = 'outbound';
+    boomerang.timer = 0;
+    boomerang.hitSet?.clear();
 }
 
 // Expose for HTML onclick

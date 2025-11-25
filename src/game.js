@@ -48,6 +48,7 @@ function resetWorldState() {
   texts.forEach((t) => textPool.release(t));
   texts.length = 0;
   player.tail.length = 0;
+  player.boomerangs = [];
   player.activePowerups.clear();
   player.fireballAngle = 0;
   levelManager.reset();
@@ -610,6 +611,8 @@ function update(dt) {
   cleanList(powerups, powerupPool);
   cleanList(texts, textPool);
 
+  updateBoomerangPassive();
+
   // Collisions
   const stageObstacles =
     typeof backgroundObstacleManager !== 'undefined'
@@ -629,7 +632,7 @@ function update(dt) {
         }
 
         if (hit) {
-          // Check if this was a missile for AOE
+          // Check if  this was a missile for AOE
           const isMissile = b.subType === 'missile';
 
           if (!b.pierce) b.active = false;
@@ -857,6 +860,157 @@ function handleEnemyDefeat(enemy) {
   }
 }
 
+function shortestAngleDiff(current, target) {
+  let diff = target - current;
+  while (diff > Math.PI) diff -= Math.PI * 2;
+  while (diff < -Math.PI) diff += Math.PI * 2;
+  return diff;
+}
+
+function updateBoomerangPassive() {
+  if (!player.passives.has('boomerang')) return;
+
+  if (!player.boomerangs) player.boomerangs = [];
+  if (player.boomerang && player.boomerangs.length === 0) {
+    // Legacy single boomerang support
+    player.boomerang.initialAngleOffset = 0.2;
+    player.boomerangs = [
+      player.boomerang,
+      createBoomerangState({ curveDir: -1, angleOffset: -0.2 }),
+    ];
+    player.boomerang = null;
+  }
+  if (player.boomerangs.length < 2) {
+    player.boomerangs = createBoomerangStates();
+  }
+
+  const activeStates = player.boomerangs;
+
+  if (gameState !== 'PLAYING' && gameState !== 'DEMO') {
+    activeStates.forEach((boomerang) => resetBoomerangToPlayer(boomerang));
+    return;
+  }
+
+  const damage = BOOMERANG_BASE_DAMAGE * player.stats.damageMult;
+
+  const stageObstacles =
+    typeof backgroundObstacleManager !== 'undefined'
+      ? backgroundObstacleManager.getObstacles()
+      : null;
+
+  activeStates.forEach((boomerang) => {
+    if (!boomerang.hitSet) boomerang.hitSet = new Set();
+
+    if (boomerang.state === 'outbound') {
+      boomerang.timer++;
+      boomerang.angle += boomerang.curveDir * BOOMERANG_CURVE_RATE;
+      boomerang.vx = Math.cos(boomerang.angle) * BOOMERANG_SPEED;
+      boomerang.vy = Math.sin(boomerang.angle) * BOOMERANG_SPEED;
+      boomerang.x += boomerang.vx;
+      boomerang.y += boomerang.vy;
+
+      if (boomerang.timer >= BOOMERANG_OUTBOUND_FRAMES) {
+        boomerang.state = 'returning';
+        boomerang.timer = 0;
+        boomerang.hitSet.clear();
+      }
+    } else {
+      boomerang.timer++;
+      const dx = player.x - boomerang.x;
+      const dy = player.y - boomerang.y;
+      const desiredAngle = Math.atan2(dy, dx);
+      const diff = shortestAngleDiff(boomerang.angle, desiredAngle);
+      const turn = Math.max(
+        -BOOMERANG_RETURN_TURN_RATE,
+        Math.min(BOOMERANG_RETURN_TURN_RATE, diff)
+      );
+      boomerang.angle += turn;
+
+      boomerang.vx = Math.cos(boomerang.angle) * BOOMERANG_RETURN_SPEED;
+      boomerang.vy = Math.sin(boomerang.angle) * BOOMERANG_RETURN_SPEED;
+      boomerang.x += boomerang.vx;
+      boomerang.y += boomerang.vy;
+
+      const snappingDistance = BOOMERANG_RADIUS + 6;
+      if (
+        boomerang.timer > 240 ||
+        dist(boomerang.x, boomerang.y, player.x, player.y) < snappingDistance
+      ) {
+        boomerang.curveDir *= -1;
+        resetBoomerangToPlayer(boomerang);
+        return;
+      }
+    }
+
+    enemies.forEach((enemy) => {
+      if (!enemy.active || boomerang.hitSet.has(enemy)) return;
+      const hitRadius = enemy.radius + BOOMERANG_RADIUS;
+      if (dist(boomerang.x, boomerang.y, enemy.x, enemy.y) <= hitRadius) {
+        enemy.hp -= damage;
+        enemy.flashTimer = 8;
+        boomerang.hitSet.add(enemy);
+
+        if (enemy.hp <= 0 && enemy.active) {
+          handleEnemyDefeat(enemy);
+        }
+      }
+    });
+
+    if (stageObstacles && stageObstacles.length) {
+      stageObstacles.forEach((obstacle) => {
+        if (!obstacle.active || boomerang.hitSet.has(obstacle)) return;
+        const obstacleRadius = (obstacle.radius || 30) + BOOMERANG_RADIUS;
+        if (
+          dist(boomerang.x, boomerang.y, obstacle.x, obstacle.y) <=
+          obstacleRadius
+        ) {
+          boomerang.hitSet.add(obstacle);
+          backgroundObstacleManager.damageObstacle(obstacle, damage);
+        }
+      });
+    }
+  });
+}
+
+function drawBoomerangs(ctx) {
+  if (
+    !player.passives.has('boomerang') ||
+    !player.boomerangs ||
+    player.boomerangs.length === 0 ||
+    (gameState !== 'PLAYING' &&
+      gameState !== 'DEMO' &&
+      gameState !== 'PAUSED' &&
+      gameState !== 'LEVEL_UP' &&
+      gameState !== 'STAGE_COMPLETE')
+  ) {
+    return;
+  }
+
+  player.boomerangs.forEach((boomerang) => {
+    ctx.save();
+    ctx.translate(boomerang.x, boomerang.y);
+    ctx.rotate(boomerang.angle + Math.PI / 2);
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = '#ffd54f';
+
+    ctx.fillStyle = boomerang.state === 'returning' ? '#fff59d' : '#ffd54f';
+    ctx.beginPath();
+    ctx.moveTo(0, -BOOMERANG_RADIUS);
+    ctx.lineTo(BOOMERANG_RADIUS * 0.9, -BOOMERANG_RADIUS * 0.1);
+    ctx.lineTo(BOOMERANG_RADIUS * 0.35, BOOMERANG_RADIUS);
+    ctx.lineTo(-BOOMERANG_RADIUS * 0.35, BOOMERANG_RADIUS);
+    ctx.lineTo(-BOOMERANG_RADIUS * 0.9, -BOOMERANG_RADIUS * 0.1);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.restore();
+  });
+}
+
 function applyDashWeaponDamage() {
   if (!player.dashActive) return;
   const dashSpeed = Math.hypot(player.dashVx, player.dashVy);
@@ -978,6 +1132,8 @@ function draw() {
   bullets.forEach((e) => e.draw(ctx));
   enemies.forEach((e) => e.draw(ctx));
   texts.forEach((e) => e.draw(ctx));
+
+  drawBoomerangs(ctx);
 
   // PLAYER DRAW
   if (

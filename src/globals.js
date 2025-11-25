@@ -155,6 +155,7 @@ const player = {
     // Passive specific state
     autoShieldTimer: 0,
     sidekicks: [],
+    boomerangs: [],
     // Active power-ups (temporary pickups)
     activePowerups: new Map(), // type -> remaining frames
     fireballAngle: 0, // Rotation angle for fireball ring
@@ -178,16 +179,26 @@ const PASSIVE_UPGRADES = [
     { id: 'autoShield', title: 'REGENERATOR', description: 'Gain a shield after 5 seconds of not taking damage.', icon: 'shield' },
     // { id: 'strongerShield', title: 'HARDENED SHIELD', description: 'Shields can withstand 1 extra hit before breaking.', icon: 'security' },
     { id: 'killNearby', title: 'SHOCKWAVE', description: 'Emit a deadly shockwave when hit (10s cooldown).', icon: 'wifi_tethering' },
-    { id: 'damageFullHp', title: 'PERFECTIONIST', description: 'Deal +50% damage when at full health.', icon: 'favorite' },
-    { id: 'damageLowHp', title: 'BERSERKER', description: 'Deal up to +100% damage as health gets lower.', icon: 'whatshot' },
+    // { id: 'damageFullHp', title: 'PERFECTIONIST', description: 'Deal +50% damage when at full health.', icon: 'favorite' },
+    // { id: 'damageLowHp', title: 'BERSERKER', description: 'Deal up to +100% damage as health gets lower.', icon: 'whatshot' },
     { id: 'fragments', title: 'SHRAPNEL', description: 'Enemies explode into small damaging fragments on death.', icon: 'grain' },
-    { id: 'speedDamage', title: 'KINETIC BOOST', description: 'Deal more damage the faster you move.', icon: 'speed' },
+    // { id: 'speedDamage', title: 'KINETIC BOOST', description: 'Deal more damage the faster you move.', icon: 'speed' },
     { id: 'spawnRate', title: 'SCAVENGER', description: 'Significantly increases powerup spawn rate.', icon: 'inventory_2' },
-    { id: 'smallSize', title: 'COMPACT FRAME', description: 'Reduces ship size and hitbox by 25%.', icon: 'compress' },
+    // { id: 'smallSize', title: 'COMPACT FRAME', description: 'Reduces ship size and hitbox by 25%.', icon: 'compress' },
+    { id: 'boomerang', title: 'NEON BOOMERANG', description: 'Launches an arc-boomerang that loops out and back forever.', icon: 'sync' },
     { id: 'sidekicks', title: 'WINGMEN', description: 'Two mini-ships fly with you and shoot lasers.', icon: 'flight' },
     { id: 'dashWeapon', title: 'LANCE SHIFT', description: 'During a dash, your ship morphs into a piercing weapon.', icon: 'bolt' },
     { id: 'dashExplosion', title: 'SHOCK NOVA', description: 'Each dash begins with an explosive nova that fires blades.', icon: 'flare' }
 ];
+
+// Boomerang Passive Tuning
+const BOOMERANG_BASE_DAMAGE = 3;
+const BOOMERANG_RADIUS = 14;
+const BOOMERANG_OUTBOUND_FRAMES = 32;
+const BOOMERANG_SPEED = 11;
+const BOOMERANG_RETURN_SPEED = 13;
+const BOOMERANG_CURVE_RATE = 0.03;
+const BOOMERANG_RETURN_TURN_RATE = 0.12;
 
 const CHAR_XP_BASE = 140;
 const CHAR_XP_GROWTH = 1.1;
