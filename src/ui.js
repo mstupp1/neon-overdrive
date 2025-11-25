@@ -326,7 +326,8 @@ function updateUI() {
             rapidFire: { icon: 'bolt', color: '#f80', duration: POWERUP_DURATION_RAPID_FIRE },
             slowDown: { icon: 'hourglass_bottom', color: '#0cf', duration: POWERUP_DURATION_SLOW_DOWN },
             fireballs: { icon: 'local_fire_department', color: '#f30', duration: POWERUP_DURATION_FIREBALLS },
-            piercing: { icon: 'arrow_forward', color: '#a0f', duration: POWERUP_DURATION_PIERCING }
+            piercing: { icon: 'arrow_forward', color: '#a0f', duration: POWERUP_DURATION_PIERCING },
+            invincibility: { icon: 'grade', color: '#ffd54f', duration: POWERUP_DURATION_INVINCIBILITY }
         };
 
         const activePowerups = Array.from(player.activePowerups.entries()).reverse(); // newest on the left

@@ -22,7 +22,8 @@ class PowerUp {
         if (type) this.type = type;
         else {
             const r = Math.random();
-            if (r > 0.90) this.type = 'bomb';
+            if (r > 0.965) this.type = 'invincibility';
+            else if (r > 0.92) this.type = 'bomb';
             else if (r > 0.88) this.type = 'shield';
             else if (r > 0.72) this.type = 'rapidFire';
             else if (r > 0.60) this.type = 'slowDown';
@@ -70,6 +71,7 @@ class PowerUp {
         }
 
         let c = '#fff', t = '?';
+        const isInvincibility = this.type === 'invincibility';
         if (this.type === 'weapon') { c = '#0ff'; t = 'W'; }
         else if (this.type === 'bomb') { c = '#ff0'; t = 'B'; }
         else if (this.type === 'shield') { c = '#00f'; t = 'S'; }
@@ -79,6 +81,7 @@ class PowerUp {
         else if (this.type === 'slowDown') { c = '#0cf'; t = '⌛'; }
         else if (this.type === 'fireballs') { c = '#f30'; t = '🔥'; }
         else if (this.type === 'piercing') { c = '#a0f'; t = '→'; }
+        else if (isInvincibility) { c = '#ffd54f'; t = 'star'; }
 
         // Optimization: Removed shadowBlur
         // ctx.shadowBlur = 10; ctx.shadowColor = c; 
@@ -98,8 +101,14 @@ class PowerUp {
         ctx.beginPath(); ctx.arc(0, 0, this.radius + 4, 0, Math.PI * 2); ctx.fill();
         ctx.globalAlpha = baseAlpha;
 
-        ctx.fillStyle = c; ctx.font = 'bold 18px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(t, 0, 2);
+        ctx.fillStyle = c; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        if (isInvincibility) {
+            ctx.font = '24px "Material Icons"';
+            ctx.fillText(t, 0, 1);
+        } else {
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText(t, 0, 2);
+        }
         ctx.restore();
     }
 }

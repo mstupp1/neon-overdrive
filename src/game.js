@@ -4,6 +4,12 @@
 
 let menuIdleTimer = 0;
 
+function playerCanBeHit() {
+  if (player.godMode || gameState === 'DEMO') return false;
+  if (hasActiveInvincibility()) return false;
+  return player.iframes <= 0;
+}
+
 function startIntro() {
   gameState = 'INTRO';
   menuIdleTimer = 0;
@@ -42,10 +48,15 @@ function resetWorldState() {
   texts.forEach((t) => textPool.release(t));
   texts.length = 0;
   player.tail.length = 0;
+  player.activePowerups.clear();
+  player.fireballAngle = 0;
   levelManager.reset();
   if (typeof backgroundObstacleManager !== 'undefined') {
     backgroundObstacleManager.reset();
   }
+
+  InvincibilityPlayer.stop();
+  MusicPlayer.clearInvincibilityPause();
 }
 
 function pauseGame() {
@@ -110,6 +121,12 @@ function returnToMenu() {
   // Stop background music and reset to normal mode
   MusicPlayer.stop();
   MusicPlayer.isLateGame = false;
+
+  // Reset any invincibility pause state
+  MusicPlayer.clearInvincibilityPause();
+
+  // Stop invincibility theme if it was playing
+  InvincibilityPlayer.stop();
 
   // Stop ambient noise
   AmbientPlayer.stop();
@@ -189,6 +206,10 @@ function initGame() {
 
   // Start ambient noise
   AmbientPlayer.start();
+
+  // Ensure invincibility theme is reset on new runs
+  InvincibilityPlayer.stop();
+  MusicPlayer.clearInvincibilityPause();
 }
 
 function updateDemoAI() {
@@ -518,12 +539,17 @@ function update(dt) {
       const newTimer = timer - 1;
       if (newTimer <= 0) {
         player.activePowerups.delete(type);
+        if (type === 'invincibility') {
+          InvincibilityPlayer.stop();
+          MusicPlayer.resumeFromInvincibility();
+        }
         spawnText(
           player.x,
           player.y - 60,
           `${type.toUpperCase()} ENDED`,
           '#888'
         );
+        updateUI();
       } else {
         player.activePowerups.set(type, newTimer);
       }
@@ -734,7 +760,7 @@ function update(dt) {
       });
     } else {
       if (
-        player.iframes <= 0 &&
+        playerCanBeHit() &&
         dist(b.x, b.y, player.x, player.y) < player.radius + 5
       ) {
         b.active = false;
@@ -750,7 +776,7 @@ function update(dt) {
         if (dist(s.x, s.y, player.x, player.y) < e.radius + player.radius)
           hit = true;
       });
-    if (player.iframes <= 0 && hit) {
+    if (playerCanBeHit() && hit) {
       hitPlayer(e.damage || 1);
       if (gameState === 'GAMEOVER') return; // Stop processing if player died
     }
@@ -760,7 +786,7 @@ function update(dt) {
       if (!ob.active || !ob.collides) continue;
       const combinedRadius = (ob.radius || 30) + player.radius;
       if (
-        player.iframes <= 0 &&
+        playerCanBeHit() &&
         dist(ob.x, ob.y, player.x, player.y) < combinedRadius
       ) {
         hitPlayer(1);
@@ -824,6 +850,14 @@ function update(dt) {
       } else if (p.type === 'piercing') {
         player.activePowerups.set('piercing', POWERUP_DURATION_PIERCING);
         spawnText(player.x, player.y - 40, 'PIERCING', '#a0f');
+      } else if (p.type === 'invincibility') {
+        player.activePowerups.set(
+          'invincibility',
+          POWERUP_DURATION_INVINCIBILITY
+        );
+        MusicPlayer.pauseForInvincibility();
+        InvincibilityPlayer.play();
+        spawnText(player.x, player.y - 40, 'INVINCIBLE', '#ffd54f');
       }
       if (gameState === 'PLAYING') updateUI();
     }
@@ -857,6 +891,15 @@ function draw() {
     sx = rand(-5, 5);
     sy = rand(-5, 5);
   }
+
+  const invincibleActive = hasActiveInvincibility();
+  const shouldBlink = player.iframes > 0 || invincibleActive;
+  const blinkRate = invincibleActive ? 3 : 4;
+  const showPlayerSprite =
+    gameState === 'PLAYING' ||
+    gameState === 'DEMO' ||
+    gameState === 'PAUSED' ||
+    gameState === 'LEVEL_UP';
   ctx.save();
   ctx.translate(sx, sy);
 
@@ -914,11 +957,8 @@ function draw() {
 
   // PLAYER DRAW
   if (
-    (gameState === 'PLAYING' ||
-      gameState === 'DEMO' ||
-      gameState === 'PAUSED' ||
-      gameState === 'LEVEL_UP') &&
-    (player.iframes === 0 || Math.floor(frameCount / 4) % 2 === 0)
+    showPlayerSprite &&
+    (!shouldBlink || Math.floor(frameCount / blinkRate) % 2 === 0)
   ) {
     ctx.save();
     ctx.translate(player.x, player.y);
@@ -949,6 +989,25 @@ function draw() {
       ctx.fillStyle = 'rgba(0, 200, 255, 0.15)';
       ctx.fill();
       ctx.rotate(-frameCount * 0.1);
+    }
+
+    // INVINCIBILITY VISUAL
+    if (invincibleActive) {
+      ctx.save();
+      const pulse = 1 + Math.sin(frameCount * 0.25) * 0.05;
+      ctx.scale(pulse, pulse);
+      ctx.strokeStyle = 'rgba(255, 213, 79, 0.9)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(0, 0, 38, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(255, 255, 224, 0.4)';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.arc(0, 0, 32, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
     }
 
     // FIREBALL RING VISUAL
@@ -1218,6 +1277,17 @@ if (wpnLvlUpBtn) {
   });
 }
 
+const invincibilityBtn = document.getElementById('invincibility-btn');
+if (invincibilityBtn) {
+  invincibilityBtn.addEventListener('click', () => {
+    player.activePowerups.set('invincibility', POWERUP_DURATION_INVINCIBILITY);
+    MusicPlayer.pauseForInvincibility();
+    InvincibilityPlayer.play();
+    spawnText(player.x, player.y - 40, 'INVINCIBLE', '#ffd54f');
+    updateUI();
+  });
+}
+
 const stageLvlUpBtn = document.getElementById('stage-lvl-up-btn');
 if (stageLvlUpBtn) {
   stageLvlUpBtn.addEventListener('click', () => {
@@ -1315,6 +1385,7 @@ function spawnAllPowerupsGrid() {
     'slowDown',
     'fireballs',
     'piercing',
+    'invincibility',
   ];
   const cols = 3;
   const spacing = 80;

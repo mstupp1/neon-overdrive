@@ -105,11 +105,68 @@ const MusicPlayer = {
     isFading: false, // Track if we're currently fading
     savedVolume: 0.3, // Track saved volume for restoration
     fadeInterval: null,
+    invincibilityPaused: false,
+    invincibilitySavedTime: 0,
+    invincibilitySavedVolume: 0.3,
 
     init() {
         this.audio.addEventListener('ended', () => {
             this.playNext();
         });
+    },
+
+    fadeVolumeTo(targetVolume, duration = 500) {
+        if (this.fadeInterval) {
+            clearInterval(this.fadeInterval);
+            this.fadeInterval = null;
+        }
+
+        const startVolume = this.audio.volume;
+        const startTime = Date.now();
+        const diff = targetVolume - startVolume;
+
+        return new Promise((resolve) => {
+            this.fadeInterval = setInterval(() => {
+                const progress = Math.min((Date.now() - startTime) / duration, 1);
+                this.audio.volume = Math.max(0, startVolume + diff * progress);
+                if (progress >= 1) {
+                    clearInterval(this.fadeInterval);
+                    this.fadeInterval = null;
+                    resolve();
+                }
+            }, 50);
+        });
+    },
+
+    pauseForInvincibility() {
+        if (this.invincibilityPaused) return;
+        if (!this.audio || !this.audio.src) return;
+        this.invincibilityPaused = true;
+        this.invincibilitySavedTime = this.audio.currentTime;
+        this.invincibilitySavedVolume = this.audio.volume || 0.3;
+        this.fadeVolumeTo(0, 400).then(() => {
+            if (!this.invincibilityPaused) return;
+            this.audio.pause();
+        });
+    },
+
+    resumeFromInvincibility() {
+        if (!this.invincibilityPaused) return;
+        this.invincibilityPaused = false;
+        try {
+            this.audio.currentTime = this.invincibilitySavedTime || 0;
+        } catch (e) {
+            /* Some browsers may block setting currentTime; ignore */
+        }
+        const playPromise = this.audio.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+            playPromise.catch((e) => console.warn('Music resume failed:', e));
+        }
+        this.fadeVolumeTo(this.invincibilitySavedVolume || 0.3, 400);
+    },
+
+    clearInvincibilityPause() {
+        this.invincibilityPaused = false;
     },
 
     shufflePlaylist() {
@@ -173,9 +230,11 @@ const MusicPlayer = {
     toggleMute() {
         if (this.audio.muted) {
             this.audio.muted = false;
+            InvincibilityPlayer.setMuted(false);
             return false;
         } else {
             this.audio.muted = true;
+            InvincibilityPlayer.setMuted(true);
             return true;
         }
     },
@@ -323,6 +382,31 @@ const MusicPlayer = {
             this.playNext();
         });
     }
+};
+
+const InvincibilityPlayer = {
+    audio: new Audio('src/audio/music/Invincibility.mp3'),
+    isPlaying: false,
+
+    play() {
+        this.stop();
+        this.audio.currentTime = 0;
+        this.audio.loop = true;
+        this.audio.volume = 0.75;
+        this.audio.muted = MusicPlayer.audio?.muted ?? false;
+        this.audio.play().catch((e) => console.warn('Invincibility track failed to play:', e));
+        this.isPlaying = true;
+    },
+
+    stop() {
+        this.audio.pause();
+        this.audio.currentTime = 0;
+        this.isPlaying = false;
+    },
+
+    setMuted(isMuted) {
+        this.audio.muted = isMuted;
+    },
 };
 
 const AmbientPlayer = {

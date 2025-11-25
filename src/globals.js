@@ -124,6 +124,7 @@ const POWERUP_DURATION_RAPID_FIRE = 300; // 5 seconds
 const POWERUP_DURATION_SLOW_DOWN = 420; // 7 seconds
 const POWERUP_DURATION_FIREBALLS = 480; // 8 seconds
 const POWERUP_DURATION_PIERCING = 360; // 6 seconds
+const POWERUP_DURATION_INVINCIBILITY = 900; // 15 seconds
 
 // Player State
 const player = {

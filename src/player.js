@@ -34,6 +34,10 @@ function clampPlayerToPlayfield({ dampenVelocity = false } = {}) {
     }
 }
 
+function hasActiveInvincibility() {
+    return player.activePowerups.has('invincibility');
+}
+
 function getPlayerBulletStats(subType, baseSpeed, levelOverride = null) {
     const base = PLAYER_WEAPON_BASE[subType] || PLAYER_WEAPON_BASE.normal;
     const scale = getWeaponLevelStats(levelOverride ?? player.powerLevel);
@@ -344,6 +348,7 @@ window.applyPassive = applyPassive;
 function hitPlayer(damage = 1) {
     if (player.godMode) return;
     if (gameState === 'DEMO') return; // Invincible in demo
+    if (hasActiveInvincibility()) return;
 
     if (player.hasShield) {
         // Passive: Hardened Shield
@@ -403,6 +408,7 @@ function hitPlayer(damage = 1) {
 
     // Check if player has run out of lives
     if (player.lives <= 0) {
+        InvincibilityPlayer.stop();
         gameState = 'GAMEOVER';
         uiLayer.classList.add('hidden');
         pauseMenu.classList.add('hidden');
