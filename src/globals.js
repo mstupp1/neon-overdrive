@@ -64,6 +64,12 @@ const DOUBLE_TAP_TIME = 300; // Milliseconds for double tap detection
 const DODGE_CHARGES_MAX = 3;
 const DODGE_RECHARGE_FRAMES = 120; // 2 seconds per charge
 const DODGE_GAP_FRAMES = 10; // Minimum frames between dashes
+const DASH_WEAPON_DAMAGE = 18; // Base damage dealt per enemy during weapon dash
+const DASH_WEAPON_TIP_RANGE = 45; // Distance from player center to tip hitbox
+const DASH_WEAPON_BODY_RANGE = 28; // Radius around player body while in weapon form
+const DASH_EXPLOSION_PROJECTILE_COUNT = 12;
+const DASH_EXPLOSION_PROJECTILE_SPEED = 14;
+const DASH_EXPLOSION_PROJECTILE_DAMAGE = 1.1;
 
 const MAX_POWER_LEVEL = 10;
 const WEAPON_XP_BASE = 170;
@@ -163,13 +169,14 @@ const player = {
     // New Dodge Charge System
     dodgeCharges: DODGE_CHARGES_MAX,
     dodgeCooldowns: [], // Array of timers for each recharging charge
-    dashGapTimer: 0
+    dashGapTimer: 0,
+    dashWeaponHits: new Set()
 };
 
 const PASSIVE_UPGRADES = [
-    { id: 'doubleHp', title: 'TITAN HULL', description: 'Doubles your current Max HP immediately.', icon: 'health_and_safety' },
+    // { id: 'doubleHp', title: 'TITAN HULL', description: 'Doubles your current Max HP immediately.', icon: 'health_and_safety' },
     { id: 'autoShield', title: 'REGENERATOR', description: 'Gain a shield after 5 seconds of not taking damage.', icon: 'shield' },
-    { id: 'strongerShield', title: 'HARDENED SHIELD', description: 'Shields can withstand 1 extra hit before breaking.', icon: 'security' },
+    // { id: 'strongerShield', title: 'HARDENED SHIELD', description: 'Shields can withstand 1 extra hit before breaking.', icon: 'security' },
     { id: 'killNearby', title: 'SHOCKWAVE', description: 'Emit a deadly shockwave when hit (10s cooldown).', icon: 'wifi_tethering' },
     { id: 'damageFullHp', title: 'PERFECTIONIST', description: 'Deal +50% damage when at full health.', icon: 'favorite' },
     { id: 'damageLowHp', title: 'BERSERKER', description: 'Deal up to +100% damage as health gets lower.', icon: 'whatshot' },
@@ -177,7 +184,9 @@ const PASSIVE_UPGRADES = [
     { id: 'speedDamage', title: 'KINETIC BOOST', description: 'Deal more damage the faster you move.', icon: 'speed' },
     { id: 'spawnRate', title: 'SCAVENGER', description: 'Significantly increases powerup spawn rate.', icon: 'inventory_2' },
     { id: 'smallSize', title: 'COMPACT FRAME', description: 'Reduces ship size and hitbox by 25%.', icon: 'compress' },
-    { id: 'sidekicks', title: 'WINGMEN', description: 'Two mini-ships fly with you and shoot lasers.', icon: 'flight' }
+    { id: 'sidekicks', title: 'WINGMEN', description: 'Two mini-ships fly with you and shoot lasers.', icon: 'flight' },
+    { id: 'dashWeapon', title: 'LANCE SHIFT', description: 'During a dash, your ship morphs into a piercing weapon.', icon: 'bolt' },
+    { id: 'dashExplosion', title: 'SHOCK NOVA', description: 'Each dash begins with an explosive nova that fires blades.', icon: 'flare' }
 ];
 
 const CHAR_XP_BASE = 140;

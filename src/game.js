@@ -522,6 +522,15 @@ function update(dt) {
     }
   }
 
+  // --- PASSIVE: WEAPON DASH ---
+  if (player.passives.has('dashWeapon')) {
+    if (player.dashActive) {
+      applyDashWeaponDamage();
+    } else if (player.dashWeaponHits && player.dashWeaponHits.size) {
+      player.dashWeaponHits.clear();
+    }
+  }
+
   // --- PASSIVE: WINGMEN (Sidekicks) ---
   if (player.passives.has('sidekicks') && player.sidekicks) {
     // Update sidekick positions to follow player with lag/smoothing
@@ -574,26 +583,7 @@ function update(dt) {
           e.hp -= fireballDamage;
           e.flashTimer = 8;
           if (e.hp <= 0 && e.active) {
-            e.active = false;
-            if (gameState === 'PLAYING') score += 100;
-            createExplosionLogic(e.x, e.y, `hsl(${globalHue},100%,50%)`, 25);
-            createExplosionLogic(e.x, e.y, '#fff', 10);
-
-            // Powerup spawn chance
-            let powerupChance = 0.05;
-            if (player.passives.has('spawnRate')) powerupChance = 0.12;
-            if (Math.random() < powerupChance) spawnPowerup(e.x, e.y);
-
-            // XP Logic
-            let xpGain = 10;
-            if (e.type === 'chaser') xpGain = 10;
-            else if (e.type === 'dasher') xpGain = 20;
-            else if (e.type === 'sniper') xpGain = 30;
-            else if (e.type === 'snake') xpGain = 40;
-            else if (e.type === 'spinner') xpGain = 50;
-            awardWeaponXp(xpGain);
-            awardPlayerXp(xpGain);
-            updateUI();
+            handleEnemyDefeat(e);
           }
         }
       });
@@ -675,58 +665,7 @@ function update(dt) {
           }
 
           if (e.hp <= 0 && e.active) {
-            e.active = false;
-            if (gameState === 'PLAYING') {
-              score += 100;
-            }
-            // Enhanced death explosion with more particles and variety
-            createExplosionLogic(e.x, e.y, `hsl(${globalHue},100%,50%)`, 25);
-            createExplosionLogic(e.x, e.y, '#fff', 10);
-            createExplosionLogic(
-              e.x,
-              e.y,
-              `hsl(${globalHue + 60},100%,60%)`,
-              15
-            );
-            createExplosionLogic(
-              e.x,
-              e.y,
-              `hsl(${globalHue + 60},100%,60%)`,
-              15
-            );
-
-            // Passive: Scavenger (Increased spawn rate)
-            let powerupChance = 0.05;
-            if (player.passives.has('spawnRate')) powerupChance = 0.12; // Significant boost
-            if (Math.random() < powerupChance) spawnPowerup(e.x, e.y);
-
-            // Passive: Shrapnel (Fragments)
-            if (player.passives.has('fragments')) {
-              const fragCount = 3;
-              for (let i = 0; i < fragCount; i++) {
-                const angle = Math.random() * Math.PI * 2;
-                spawnBullet(e.x, e.y, angle, 10, 'player', 'normal', {
-                  damage: 0.5 * player.stats.damageMult, // Half normal damage
-                  pierce: false,
-                  tintHue: 50, // Gold color
-                  glow: 0.1,
-                });
-              }
-            }
-
-            // XP Logic
-            if (gameState === 'PLAYING') {
-              let xpGain = 10;
-              if (e.type === 'chaser') xpGain = 10;
-              else if (e.type === 'dasher') xpGain = 20;
-              else if (e.type === 'sniper') xpGain = 30;
-              else if (e.type === 'snake') xpGain = 40;
-              else if (e.type === 'spinner') xpGain = 50;
-
-              awardWeaponXp(xpGain);
-              awardPlayerXp(xpGain); // Award character XP too
-              updateUI();
-            }
+            handleEnemyDefeat(e);
           }
         }
       });
@@ -860,6 +799,91 @@ function update(dt) {
         spawnText(player.x, player.y - 40, 'INVINCIBLE', '#ffd54f');
       }
       if (gameState === 'PLAYING') updateUI();
+    }
+  });
+}
+
+function handleEnemyDefeat(enemy) {
+  if (!enemy || !enemy.active) return;
+
+  enemy.active = false;
+  if (gameState === 'PLAYING') {
+    score += 100;
+  }
+
+  createExplosionLogic(enemy.x, enemy.y, `hsl(${globalHue},100%,50%)`, 25);
+  createExplosionLogic(enemy.x, enemy.y, '#fff', 10);
+  createExplosionLogic(
+    enemy.x,
+    enemy.y,
+    `hsl(${globalHue + 60},100%,60%)`,
+    15
+  );
+  createExplosionLogic(
+    enemy.x,
+    enemy.y,
+    `hsl(${globalHue + 60},100%,60%)`,
+    15
+  );
+
+  let powerupChance = 0.05;
+  if (player.passives.has('spawnRate')) powerupChance = 0.12;
+  if (Math.random() < powerupChance) spawnPowerup(enemy.x, enemy.y);
+
+  if (player.passives.has('fragments')) {
+    const fragCount = 3;
+    for (let i = 0; i < fragCount; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      spawnBullet(enemy.x, enemy.y, angle, 10, 'player', 'normal', {
+        damage: 0.5 * player.stats.damageMult,
+        pierce: false,
+        tintHue: 50,
+        glow: 0.1,
+      });
+    }
+  }
+
+  if (gameState === 'PLAYING') {
+    let xpGain = 10;
+    if (enemy.type === 'chaser') xpGain = 10;
+    else if (enemy.type === 'dasher') xpGain = 20;
+    else if (enemy.type === 'sniper') xpGain = 30;
+    else if (enemy.type === 'snake') xpGain = 40;
+    else if (enemy.type === 'spinner') xpGain = 50;
+
+    awardWeaponXp(xpGain);
+    awardPlayerXp(xpGain);
+    updateUI();
+  }
+}
+
+function applyDashWeaponDamage() {
+  if (!player.dashActive) return;
+  const dashSpeed = Math.hypot(player.dashVx, player.dashVy);
+  if (dashSpeed < 0.01) return;
+
+  const dirX = player.dashVx / dashSpeed;
+  const dirY = player.dashVy / dashSpeed;
+  const tipX = player.x + dirX * DASH_WEAPON_TIP_RANGE;
+  const tipY = player.y + dirY * DASH_WEAPON_TIP_RANGE;
+
+  enemies.forEach((enemy) => {
+    if (!enemy.active || player.dashWeaponHits.has(enemy)) return;
+
+    const tipDist = dist(tipX, tipY, enemy.x, enemy.y);
+    const bodyDist = dist(player.x, player.y, enemy.x, enemy.y);
+    if (
+      tipDist < enemy.radius + 25 ||
+      bodyDist < enemy.radius + DASH_WEAPON_BODY_RANGE
+    ) {
+      player.dashWeaponHits.add(enemy);
+      const damage = DASH_WEAPON_DAMAGE * player.stats.damageMult;
+      enemy.hp -= damage;
+      enemy.flashTimer = 8;
+      createExplosionLogic(enemy.x, enemy.y, '#0ff', 4);
+      if (enemy.hp <= 0 && enemy.active) {
+        handleEnemyDefeat(enemy);
+      }
     }
   });
 }
@@ -1041,8 +1065,16 @@ function draw() {
 
     // SHIP SPRITE
     ctx.save();
-    // Apply tilt (banking)
-    ctx.rotate(player.tilt);
+    const dashWeaponActive =
+      player.dashActive && player.passives.has('dashWeapon');
+    let shipRotation = player.tilt;
+    if (dashWeaponActive) {
+      const dashAngle = Math.atan2(player.dashVy, player.dashVx);
+      if (!Number.isNaN(dashAngle)) {
+        shipRotation = dashAngle + Math.PI / 2;
+      }
+    }
+    ctx.rotate(shipRotation);
 
     // Apply subtle blink effect during dash
     if (player.dashActive) {
@@ -1052,41 +1084,74 @@ function draw() {
         0.2 + Math.abs(Math.sin(frameCount * blinkSpeed)) * 0.2;
       ctx.globalAlpha = blinkAlpha;
     }
-    ctx.fillStyle = '#fff';
-    if (!IS_MOBILE) {
-      ctx.shadowBlur = IS_DESKTOP ? 12 : 15; // Desktop optimized (12 vs 15)
+    if (dashWeaponActive) {
+      ctx.fillStyle = '#e0ffff';
+      ctx.shadowBlur = IS_DESKTOP ? 20 : 24;
       ctx.shadowColor = '#0ff';
-    }
 
-    ctx.beginPath();
-    ctx.moveTo(0, -25);
-    ctx.lineTo(8, 5);
-    ctx.lineTo(16, 15);
-    ctx.lineTo(8, 15);
-    ctx.lineTo(6, 20);
-    ctx.lineTo(-6, 20);
-    ctx.lineTo(-8, 15);
-    ctx.lineTo(-16, 15);
-    ctx.lineTo(-8, 5);
-    ctx.closePath();
-    ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(0, -50);
+      ctx.lineTo(10, 18);
+      ctx.lineTo(-10, 18);
+      ctx.closePath();
+      ctx.fill();
 
-    ctx.fillStyle = '#022';
-    ctx.beginPath();
-    ctx.moveTo(0, -10);
-    ctx.lineTo(4, 5);
-    ctx.lineTo(0, 8);
-    ctx.lineTo(-4, 5);
-    ctx.fill();
-
-    if (!IS_MOBILE) {
-      ctx.shadowBlur = IS_DESKTOP ? 16 : 20; // Desktop optimized (16 vs 20)
       ctx.fillStyle = '#0ff';
+      ctx.fillRect(-3, -35, 6, 60);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(-1.5, -45, 3, 65);
+
+      ctx.fillStyle = '#0ff';
+      ctx.beginPath();
+      ctx.moveTo(-14, 10);
+      ctx.lineTo(-24, 25);
+      ctx.lineTo(-8, 25);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(14, 10);
+      ctx.lineTo(24, 25);
+      ctx.lineTo(8, 25);
+      ctx.closePath();
+      ctx.fill();
     } else {
-      ctx.fillStyle = '#0ff';
+      ctx.fillStyle = '#fff';
+      if (!IS_MOBILE) {
+        ctx.shadowBlur = IS_DESKTOP ? 12 : 15; // Desktop optimized (12 vs 15)
+        ctx.shadowColor = '#0ff';
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(0, -25);
+      ctx.lineTo(8, 5);
+      ctx.lineTo(16, 15);
+      ctx.lineTo(8, 15);
+      ctx.lineTo(6, 20);
+      ctx.lineTo(-6, 20);
+      ctx.lineTo(-8, 15);
+      ctx.lineTo(-16, 15);
+      ctx.lineTo(-8, 5);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#022';
+      ctx.beginPath();
+      ctx.moveTo(0, -10);
+      ctx.lineTo(4, 5);
+      ctx.lineTo(0, 8);
+      ctx.lineTo(-4, 5);
+      ctx.fill();
+
+      if (!IS_MOBILE) {
+        ctx.shadowBlur = IS_DESKTOP ? 16 : 20; // Desktop optimized (16 vs 20)
+        ctx.fillStyle = '#0ff';
+      } else {
+        ctx.fillStyle = '#0ff';
+      }
+      ctx.fillRect(-5, 20, 3, 5);
+      ctx.fillRect(2, 20, 3, 5);
     }
-    ctx.fillRect(-5, 20, 3, 5);
-    ctx.fillRect(2, 20, 3, 5);
     ctx.restore();
 
     // Reset alpha if dash blink was applied

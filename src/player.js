@@ -323,6 +323,10 @@ function applyPassive(id) {
             { x: player.x + 30, y: player.y + 10, offset: 30 },
         ];
         spawnText(player.x, player.y, 'WINGMEN DEPLOYED', '#ff0');
+    } else if (id === 'dashWeapon') {
+        spawnText(player.x, player.y, 'LANCE MODE', '#0ff');
+    } else if (id === 'dashExplosion') {
+        spawnText(player.x, player.y, 'SHOCK NOVA READY', '#f80');
     } else {
         spawnText(player.x, player.y, 'PASSIVE ACQUIRED', '#fff');
     }
@@ -538,10 +542,59 @@ function triggerDash(dirX, dirY) {
     player.dashVx = dashDirX * DASH_SPEED * player.stats.moveSpeedMult;
     player.dashVy = dashDirY * DASH_SPEED * player.stats.moveSpeedMult;
 
+    if (player.dashWeaponHits) player.dashWeaponHits.clear();
+
     // Create dash visual effect with fixed-size particles
     createDashParticles(player.x, player.y, '#0ff', 3);
 
+    if (player.passives.has('dashExplosion')) {
+        triggerDashNova(dashDirX, dashDirY);
+    }
+
     updateUI();
+}
+
+function triggerDashNova(dirX, dirY) {
+    createExplosionLogic(player.x, player.y, '#ffae00', 35);
+    createExplosionLogic(player.x, player.y, '#fff', 12);
+    playSound('bomb');
+
+    const shardCount = DASH_EXPLOSION_PROJECTILE_COUNT;
+    const dashAngle = Math.atan2(dirY, dirX || 0);
+
+    for (let i = 0; i < shardCount; i++) {
+        const angle = (Math.PI * 2 * i) / shardCount;
+        const speed =
+            DASH_EXPLOSION_PROJECTILE_SPEED * (0.9 + Math.random() * 0.2);
+        spawnPlayerBullet(player.x, player.y, angle, speed, 'normal', {
+            damage: DASH_EXPLOSION_PROJECTILE_DAMAGE * player.stats.damageMult,
+            pierce: true,
+            tintHue: globalHue + 40,
+            glow: 0.2,
+        });
+    }
+
+    if (!Number.isNaN(dashAngle)) {
+        const forwardAngles = [dashAngle, dashAngle + 0.2, dashAngle - 0.2];
+        forwardAngles.forEach((angle) => {
+            spawnPlayerBullet(
+                player.x,
+                player.y,
+                angle,
+                DASH_EXPLOSION_PROJECTILE_SPEED + 4,
+                'beam',
+                {
+                    damage:
+                        DASH_EXPLOSION_PROJECTILE_DAMAGE *
+                        1.5 *
+                        player.stats.damageMult,
+                    pierce: true,
+                    tintHue: globalHue,
+                    glow: 0.25,
+                }
+            );
+        });
+    }
 }
 
 // Keyboard Controls
