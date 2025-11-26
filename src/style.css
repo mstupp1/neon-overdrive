@@ -612,6 +612,23 @@ canvas {
     transition: width 0.2s ease-out;
 }
 
+.excess-xp-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 100%;
+    background: #0cf;
+    box-shadow: 0 0 8px #0cf;
+    transition: width 0.3s ease-out;
+    opacity: 0;
+}
+
+.excess-xp-fill.active {
+    opacity: 1;
+}
+
+
 .xp-status {
     width: auto;
     flex: 1;

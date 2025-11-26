@@ -95,6 +95,7 @@ function returnToMenu() {
   player.iframes = 0;
   player.hasShield = false;
   player.weaponXp = 0;
+  player.excessWeaponXp = 0;
   player.weaponXpMax = getWeaponXpForLevel(player.powerLevel);
   if (xpFill) {
     xpFill.style.transition = 'none';
@@ -142,6 +143,7 @@ function initGame() {
   player.iframes = 0;
   player.hasShield = false;
   player.weaponXp = 0;
+  player.excessWeaponXp = 0;
   player.weaponXpMax = getWeaponXpForLevel(player.powerLevel);
   player.level = 1;
   player.xp = 0;

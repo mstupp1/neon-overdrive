@@ -65,6 +65,12 @@ function getPlayerBulletStats(subType, baseSpeed, levelOverride = null) {
         damageMult += speedRatio * 0.5; // Up to +50% at max speed
     }
 
+    // Late-game: Excess weapon XP converts to damage (2000 XP = +0.01 damage)
+    if (player.excessWeaponXp > 0) {
+        const excessDamageBonus = (player.excessWeaponXp / 2000) * 0.01;
+        damageMult += excessDamageBonus;
+    }
+
     // Power-up: Piercing Bullets
     let pierceBullets = base.pierce;
     if (player.activePowerups.has('piercing')) {
@@ -269,6 +275,8 @@ function awardWeaponXp(xpGain) {
 
     if (player.powerLevel >= player.maxPower) {
         player.weaponXp = player.weaponXpMax;
+        // Accumulate excess XP for damage conversion (late-game progression)
+        player.excessWeaponXp += xpGain * player.stats.weaponXpMult;
         return;
     }
 

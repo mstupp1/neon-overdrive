@@ -354,6 +354,28 @@ function updateUI() {
     // Update XP Bar
     const xpPercent = atMaxLevel ? 100 : Math.min(100, (player.weaponXp / player.weaponXpMax) * 100);
     if (xpFill) xpFill.style.width = `${xpPercent}%`;
+
+    // Update Excess XP Bar (shown when at max weapon level)
+    const excessXpFill = document.getElementById('excess-xp-fill');
+    if (excessXpFill) {
+        if (atMaxLevel && player.excessWeaponXp > 0) {
+            // Show the blue bar overlay
+            excessXpFill.classList.add('active');
+
+            // Calculate progress toward next damage milestone (2000 XP = +0.01 damage)
+            const xpPerMilestone = 2000;
+            const currentMilestone = Math.floor(player.excessWeaponXp / xpPerMilestone);
+            const xpInCurrentMilestone = player.excessWeaponXp % xpPerMilestone;
+            const excessPercent = Math.min(100, (xpInCurrentMilestone / xpPerMilestone) * 100);
+
+            excessXpFill.style.width = `${excessPercent}%`;
+        } else {
+            // Hide the blue bar when not at max level or no excess XP
+            excessXpFill.classList.remove('active');
+            excessXpFill.style.width = '0%';
+        }
+    }
+
     if (xpStatus) {
         const missileIcon = `<svg class="missile-icon" viewBox="0 0 24 24"><path d="M12 2.5c-2.5 0-4.5 4-4.5 9.5c0 2 1 3.5 1 3.5l-2.5 2.5v1h12v-1l-2.5-2.5s1-1.5 1-3.5c0-5.5-2-9.5-4.5-9.5z"/></svg>`;
         if (atMaxLevel) {
@@ -428,7 +450,15 @@ function updateUI() {
         // Calculate effective damage for a beam bullet at current weapon level
         const weaponLevelStats = getWeaponLevelStats(player.powerLevel);
         const baseDamage = PLAYER_WEAPON_BASE.beam.damage; // 1.1
-        const effectiveDamage = baseDamage * weaponLevelStats.damage * player.stats.damageMult;
+
+        // Include excess weapon XP bonus in damage calculation
+        let damageMult = player.stats.damageMult;
+        if (player.excessWeaponXp > 0) {
+            const excessDamageBonus = (player.excessWeaponXp / 2000) * 0.01;
+            damageMult += excessDamageBonus;
+        }
+
+        const effectiveDamage = baseDamage * weaponLevelStats.damage * damageMult;
         hudDamageVal.textContent = effectiveDamage.toFixed(1);
     }
 

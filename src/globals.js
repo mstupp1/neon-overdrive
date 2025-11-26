@@ -138,6 +138,7 @@ const player = {
     w: 24, h: 32,
     lives: PLAYER_MAX_LIVES, iframes: 0, powerLevel: 0, maxPower: MAX_POWER_LEVEL,
     weaponXp: 0, weaponXpMax: 0, // Weapon Progression
+    excessWeaponXp: 0, // XP accumulated after max level for damage conversion
     level: 1, xp: 0, xpMax: 100, // Character Progression
     stats: {
         damageMult: 1.0,
