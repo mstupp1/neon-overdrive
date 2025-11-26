@@ -501,8 +501,21 @@ function update(dt) {
     }
   }
 
+
   // --- SHOOTING ---
-  if (gameState === 'PLAYING' && frameCount % 7 === 0) {
+  // Calculate fire interval based on fire rate multiplier
+  let baseFireInterval = 7; // Default fire every 7 frames
+  let fireRateMult = player.stats.fireRateMult;
+
+  // Power-up: Rapid Fire - get the multiplier from player stats calculation
+  if (player.activePowerups.has('rapidFire')) {
+    fireRateMult *= 2.0; // Apply rapid fire multiplier (matches player.js)
+  }
+
+  // Calculate actual fire interval (lower interval = faster firing)
+  const fireInterval = Math.max(1, Math.floor(baseFireInterval / fireRateMult));
+
+  if (gameState === 'PLAYING' && frameCount % fireInterval === 0) {
     firePlayerWeapons();
   }
   if (player.iframes > 0) player.iframes--;

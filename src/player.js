@@ -256,7 +256,7 @@ function firePlayerWeapons() {
                 damage: 0.8 * player.stats.damageMult,
                 tintHue: (player.spiralAngle * 50) % 360 // Rainbow effect
             });
-             spawnPlayerBullet(player.x, player.y, player.spiralAngle + Math.PI, 12, 'normal', {
+            spawnPlayerBullet(player.x, player.y, player.spiralAngle + Math.PI, 12, 'normal', {
                 damage: 0.8 * player.stats.damageMult,
                 tintHue: (player.spiralAngle * 50 + 180) % 360
             });
@@ -406,7 +406,7 @@ function createSidekick({
     orbitRadius = 70,
     orbitSpeed = 0.01,
     verticalScale = 0.6,
-    fireDelay =1,
+    fireDelay = 1,
     fireOffset = 0,
     speed = 3,
     turnSpeed = 0.05,
