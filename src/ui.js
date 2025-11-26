@@ -420,11 +420,29 @@ function updateUI() {
         }
     }
 
-    // Update HUD Stats (Damage & Speed)
+    // Update HUD Stats (Damage & Speed) - Show effective values instead of multipliers
     const hudDamageVal = document.getElementById('hud-damage-val');
     const hudSpeedVal = document.getElementById('hud-speed-val');
-    if (hudDamageVal) hudDamageVal.textContent = player.stats.damageMult.toFixed(1);
-    if (hudSpeedVal) hudSpeedVal.textContent = player.stats.fireRateMult.toFixed(1);
+
+    if (hudDamageVal) {
+        // Calculate effective damage for a beam bullet at current weapon level
+        const weaponLevelStats = getWeaponLevelStats(player.powerLevel);
+        const baseDamage = PLAYER_WEAPON_BASE.beam.damage; // 1.1
+        const effectiveDamage = baseDamage * weaponLevelStats.damage * player.stats.damageMult;
+        hudDamageVal.textContent = effectiveDamage.toFixed(1);
+    }
+
+    if (hudSpeedVal) {
+        // Calculate effective fire rate including power-ups
+        let effectiveFireRate = player.stats.fireRateMult;
+
+        // Power-up: Rapid Fire doubles the fire rate
+        if (player.activePowerups.has('rapidFire')) {
+            effectiveFireRate *= 2.0;
+        }
+
+        hudSpeedVal.textContent = effectiveFireRate.toFixed(1);
+    }
 }
 
 function updateStageProgressBar() {
