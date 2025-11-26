@@ -561,18 +561,36 @@ function update(dt) {
         player.y + Math.sin(sk.pathAngle) * radius * verticalScale + bob;
 
       const desiredHeading = Math.atan2(targetY - sk.y, targetX - sk.x);
-      const currentFacing = sk.facing ?? -Math.PI / 2;
+      const currentMoveAngle = sk.moveAngle ?? -Math.PI / 2;
       const turnSpeed = sk.turnSpeed ?? 0.05;
-      const headingDiff = normalizeAngle(desiredHeading - currentFacing);
+      const headingDiff = normalizeAngle(desiredHeading - currentMoveAngle);
       const appliedTurn = clampValue(headingDiff, -turnSpeed, turnSpeed);
-      const newFacing = normalizeAngle(currentFacing + appliedTurn);
-      sk.facing = newFacing;
+      const newMoveAngle = normalizeAngle(currentMoveAngle + appliedTurn);
+      sk.moveAngle = newMoveAngle;
 
       const moveSpeed = sk.speed ?? 3;
       const distance = Math.hypot(targetX - sk.x, targetY - sk.y);
       const step = Math.min(moveSpeed, distance);
-      sk.x += Math.cos(newFacing) * step;
-      sk.y += Math.sin(newFacing) * step;
+      const vx = Math.cos(newMoveAngle) * step;
+      sk.x += vx;
+      sk.y += Math.sin(newMoveAngle) * step;
+
+      // Tilt logic
+      const absVx = Math.abs(vx);
+      let targetTilt = sk.tilt || 0;
+      if (absVx > 0.1) {
+        const tiltNorm = Math.min(1, absVx / moveSpeed);
+        // Tilt max ~20 degrees
+        targetTilt = tiltNorm * 0.35 * (Math.sign(vx) || 0);
+      } else {
+        targetTilt *= 0.8;
+      }
+      sk.tilt = (sk.tilt || 0) * 0.8 + targetTilt * 0.2;
+
+      // Safety checks
+      if (!Number.isFinite(sk.tilt)) sk.tilt = 0;
+      if (!Number.isFinite(sk.x)) sk.x = player.x;
+      if (!Number.isFinite(sk.y)) sk.y = player.y;
     });
   }
 
@@ -1365,8 +1383,8 @@ function draw() {
     player.sidekicks.forEach((sk) => {
       ctx.save();
       ctx.translate(sk.x, sk.y);
-      const facing = sk.facing ?? -Math.PI / 2;
-      ctx.rotate(facing + Math.PI / 2);
+      // Face forward (up) + tilt
+      ctx.rotate(sk.tilt || 0);
       ctx.scale(0.6, 0.6); // Smaller size
 
       // Draw mini ship (simplified player ship)
@@ -1619,8 +1637,8 @@ if (debugPassiveSelector) {
         // Handle immediate effects (similar to applyPassive but without menu transitions)
         if (passive.id === 'sidekicks' && !player.sidekicks) {
           player.sidekicks = [
-            { x: player.x - 30, y: player.y + 10, offset: -30 },
-            { x: player.x + 30, y: player.y + 10, offset: 30 },
+            createSidekick({ pathAngle: Math.PI * 0.8, fireOffset: 0 }),
+            createSidekick({ pathAngle: Math.PI * 0.2, fireOffset: 6 }),
           ];
         } else if (passive.id === 'boomerang' && !player.boomerangs) {
           player.boomerangs = createBoomerangStates();

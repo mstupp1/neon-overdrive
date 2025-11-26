@@ -235,15 +235,15 @@ function firePlayerWeapons() {
             const target = findNearestEnemy(sk.x, sk.y);
             if (!target) return;
 
-            const facing = sk.facing ?? -Math.PI / 2;
+            const moveAngle = sk.moveAngle ?? -Math.PI / 2;
             const angleToTarget = Math.atan2(target.y - sk.y, target.x - sk.x);
-            const diff = Math.abs(normalizeAngle(angleToTarget - facing));
+            const diff = Math.abs(normalizeAngle(angleToTarget - moveAngle));
             const fireCone = sk.fireCone ?? Math.PI / 5; // ~36 degrees
             if (diff > fireCone) return; // target not in front arc
 
-            const originX = sk.x + Math.cos(facing) * 10;
-            const originY = sk.y + Math.sin(facing) * 10;
-            spawnPlayerBullet(originX, originY, facing, 20, 'beam');
+            const originX = sk.x + Math.cos(moveAngle) * 10;
+            const originY = sk.y + Math.sin(moveAngle) * 10;
+            spawnPlayerBullet(originX, originY, moveAngle, 20, 'beam');
         });
     }
 
@@ -426,7 +426,8 @@ function createSidekick({
         speed,
         turnSpeed,
         fireCone,
-        facing: -Math.PI / 2,
+        moveAngle: -Math.PI / 2,
+        tilt: 0,
         bobPhase: Math.random() * Math.PI * 2,
         bobSpeed: 0.01 + Math.random() * 0.01,
         bobAmplitude: 8
