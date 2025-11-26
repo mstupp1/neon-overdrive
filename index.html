@@ -34,19 +34,33 @@
                                     style="transform: scale(0.7);">
                                     <div class="pause-icon" aria-hidden="true"></div>
                                 </button>
-                                <!-- Stage Progress Bar -->
-                                <div class="stage-progress-container">
-                                    <div class="stage-node start-node" id="stage-start-node"></div>
-                                    <div class="stage-progress-track">
-                                        <div class="stage-progress-fill" id="stage-progress-fill">
-                                            <div class="stage-ship-indicator">
-                                                <svg viewBox="0 0 32 32" width="12" height="12">
-                                                    <path d="M16 2 L24 22 L16 18 L8 22 Z" fill="#fff" />
-                                                </svg>
-                                            </div>
+                                <!-- Stage Info Column -->
+                                <div class="stage-info-col">
+                                    <!-- Stats Row -->
+                                    <div class="stage-stats-row">
+                                        <div class="stat-item" title="Attack Power">
+                                            <span class="material-icons stat-icon">flash_on</span>
+                                            <span class="stat-value" id="hud-damage-val">1.0</span>
+                                        </div>
+                                        <div class="stat-item" title="Attack Speed">
+                                            <span class="material-icons stat-icon">speed</span>
+                                            <span class="stat-value" id="hud-speed-val">1.0</span>
                                         </div>
                                     </div>
-                                    <div class="stage-node end-node" id="stage-end-node"></div>
+                                    <!-- Stage Progress Bar -->
+                                    <div class="stage-progress-container">
+                                        <div class="stage-node start-node" id="stage-start-node"></div>
+                                        <div class="stage-progress-track">
+                                            <div class="stage-progress-fill" id="stage-progress-fill">
+                                                <div class="stage-ship-indicator">
+                                                    <svg viewBox="0 0 32 32" width="12" height="12">
+                                                        <path d="M16 2 L24 22 L16 18 L8 22 Z" fill="#fff" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="stage-node end-node" id="stage-end-node"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -419,6 +419,12 @@ function updateUI() {
             dodgeContainer.appendChild(charge);
         }
     }
+
+    // Update HUD Stats (Damage & Speed)
+    const hudDamageVal = document.getElementById('hud-damage-val');
+    const hudSpeedVal = document.getElementById('hud-speed-val');
+    if (hudDamageVal) hudDamageVal.textContent = player.stats.damageMult.toFixed(1);
+    if (hudSpeedVal) hudSpeedVal.textContent = player.stats.fireRateMult.toFixed(1);
 }
 
 function updateStageProgressBar() {

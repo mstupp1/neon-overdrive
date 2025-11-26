@@ -209,12 +209,52 @@ canvas {
     z-index: 1;
 }
 
+/* Stage Info Column */
+.stage-info-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    margin-left: 8px;
+    width: 104px;
+    /* Match progress bar width */
+}
+
+.stage-stats-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 4px;
+    box-sizing: border-box;
+}
+
+.stage-stats-row .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.8;
+}
+
+.stage-stats-row .stat-icon {
+    font-size: 10px;
+    color: #0ff;
+}
+
+.stage-stats-row .stat-value {
+    font-size: 10px;
+    color: #fff;
+    font-family: monospace;
+    font-weight: bold;
+}
+
 /* Stage Progress Bar */
 .stage-progress-container {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 4px;
-    margin-left: 8px;
+    width: 100%;
     position: relative;
     opacity: 0.9;
 }
