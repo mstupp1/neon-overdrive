@@ -3,249 +3,157 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEON GLITCH HELL: OVERDRIVE</title>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#05030d">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="NEON OVERDRIVE — a roguelike neon arcade shooter. Draft upgrades, chain combos, graze bullets and unleash Overdrive.">
+    <title>NEON OVERDRIVE</title>
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2305030d'/%3E%3Cpath d='M16 4l5 12 6 8h-6l-5 4-5-4H5l6-8z' fill='none' stroke='%233ff6ff' stroke-width='2'/%3E%3C/svg%3E">
+    <link rel="preload" href="src/fonts/orbitron.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="src/fonts/fonts.css">
     <link rel="stylesheet" href="src/style.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 
 <body>
-    <div id="game-container">
-        <!-- SVG Filters Removed for Performance -->
+    <div id="app">
+        <canvas id="game" aria-label="Game"></canvas>
+        <div class="fx-vignette"></div>
+        <div class="fx-danger" id="danger"></div>
+        <div class="fx-scan"></div>
+        <div id="safe-probe"></div>
 
-        <div class="scanlines"></div>
-        <div class="vignette"></div>
-        <div id="flash-overlay"></div>
-        <div id="low-health-vignette"></div>
-        <div id="low-health-warning"></div>
+        <button id="pause-btn" class="pause-btn" aria-label="Pause" tabindex="-1" hidden><i></i><i></i></button>
 
-        <div id="ui-layer" class="hidden">
-            <div class="hud-top">
-                <div class="hud-main-row">
-                    <div class="hud-left-col">
-                        <div class="lives-box" id="lives-container"></div>
-                        <div class="stage-block">
-                            <div class="score-label" style="color: #fff; font-size: 8px;">STAGE</div>
-                            <div class="stage-row" style="display: flex; align-items: center; gap: 8px;">
-                                <div id="stage-display"
-                                    style="font-size: 18px; font-weight: 900; color: #0ff; text-shadow: 0 0 10px #0ff; font-family: monospace;">
-                                    1</div>
-                                <button class="score-pause" id="pause-btn" aria-label="Pause or Resume"
-                                    style="transform: scale(0.7);">
-                                    <div class="pause-icon" aria-hidden="true"></div>
-                                </button>
-                                <!-- Stage Info Column -->
-                                <div class="stage-info-col">
-                                    <!-- Stats Row -->
-                                    <div class="stage-stats-row">
-                                        <div class="stat-item" title="Attack Power">
-                                            <span class="material-icons stat-icon">flash_on</span>
-                                            <span class="stat-value" id="hud-damage-val">1.0</span>
-                                        </div>
-                                        <div class="stat-item" title="Attack Speed">
-                                            <span class="material-icons stat-icon">speed</span>
-                                            <span class="stat-value" id="hud-speed-val">1.0</span>
-                                        </div>
-                                    </div>
-                                    <!-- Stage Progress Bar -->
-                                    <div class="stage-progress-container">
-                                        <div class="stage-node start-node" id="stage-start-node"></div>
-                                        <div class="stage-progress-track">
-                                            <div class="stage-progress-fill" id="stage-progress-fill">
-                                                <div class="stage-ship-indicator">
-                                                    <svg viewBox="0 0 32 32" width="12" height="12">
-                                                        <path d="M16 2 L24 22 L16 18 L8 22 Z" fill="#fff" />
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="stage-node end-node" id="stage-end-node"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <div id="touch-ui" hidden>
+            <button id="touch-od" class="touch-btn od" aria-label="Overdrive" tabindex="-1"></button>
+            <button id="touch-dash" class="touch-btn dash" aria-label="Dash" tabindex="-1"></button>
+        </div>
 
-                    <div class="hud-right-col">
-                        <div class="power-bar-container">
-                            <div class="power-segments" id="power-segments">
-                                <div class="segment"></div>
-                                <div class="segment"></div>
-                                <div class="segment"></div>
-                                <div class="segment"></div>
-                                <div class="segment"></div>
-                            </div>
-                            <div class="xp-track">
-                                <div class="xp-fill" id="xp-fill"></div>
-                                <div class="excess-xp-fill" id="excess-xp-fill"></div>
-                            </div>
-                            <div class="power-info-row">
-                                <div class="dodge-charges" id="dodge-charges"></div>
-                                <div class="xp-status" id="xp-status"></div>
-                            </div>
-                        </div>
-                        <div class="score-and-controls-row">
-                            <div class="audio-transport-controls">
-                                <button class="transport-btn" id="prev-track-btn" aria-label="Previous Track">
-                                    <span class="material-icons">skip_previous</span>
-                                </button>
-                                <button class="transport-btn" id="play-pause-btn" aria-label="Play/Pause">
-                                    <div class="transport-btn-equalizer">
-                                        <div class="bar"></div>
-                                        <div class="bar"></div>
-                                        <div class="bar"></div>
-                                        <div class="bar"></div>
-                                        <div class="bar"></div>
-                                    </div>
-                                    <span class="material-icons" style="display: none;">play_arrow</span>
-                                </button>
-                                <button class="transport-btn" id="next-track-btn" aria-label="Next Track">
-                                    <span class="material-icons">skip_next</span>
-                                </button>
-                            </div>
-                            <div class="score-block">
-                                <div class="score-label">SCORE</div>
-                                <div class="score-val" id="score-display">0</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div id="toast" class="toast"><span class="eq"><i></i><i></i><i></i></span><span id="toast-text"></span></div>
 
-                <div class="level-info-container">
-                    <div class="level-label">
-                        LVL <span id="player-level-display">1</span>
-                    </div>
-                    <div class="player-xp-track">
-                        <div class="player-xp-fill" id="player-xp-fill"></div>
-                    </div>
-                </div>
+        <!-- TITLE -->
+        <section class="screen" id="scr-title" data-back="">
+            <div class="logo" aria-label="Neon Overdrive">
+                <span class="logo-top" data-text="NEON">NEON</span>
+                <span class="logo-bottom" data-text="OVERDRIVE">OVERDRIVE</span>
             </div>
-            <div class="icons-row">
-                <div id="passive-icons" class="passive-icons-bar"></div>
-                <div id="powerup-icons" class="powerup-icons-bar"></div>
+            <p class="tagline">ROGUELIKE ARCADE SHOOTER</p>
+            <nav class="menu">
+                <button class="btn primary" data-act="play">PLAY</button>
+                <button class="btn" data-act="help">HOW TO PLAY</button>
+                <button class="btn" data-act="settings">SETTINGS</button>
+            </nav>
+            <div class="records" id="title-records"></div>
+            <div class="foot-hint" id="title-hint"></div>
+        </section>
+
+        <!-- SHIP SELECT -->
+        <section class="screen" id="scr-ships" data-back="back">
+            <h2 class="screen-title">SELECT SHIP</h2>
+            <div class="ships" id="ship-list"></div>
+            <nav class="menu row">
+                <button class="btn ghost" data-act="back">BACK</button>
+            </nav>
+        </section>
+
+        <!-- UPGRADE DRAFT -->
+        <section class="screen draft" id="scr-draft" data-back="">
+            <div class="draft-head">
+                <h2 class="screen-title" id="draft-title">LEVEL UP</h2>
+                <p class="screen-sub" id="draft-sub">Choose an upgrade</p>
             </div>
-            <div id="stage-toast" class="hidden">
-                <div class="stage-label">ENTERING SECTOR</div>
-                <div class="stage-name" id="stage-name-display"></div>
+            <div class="cards" id="draft-cards"></div>
+            <nav class="menu row">
+                <button class="btn ghost small" data-act="reroll" id="reroll-btn">REROLL</button>
+            </nav>
+            <div class="build" id="draft-build"></div>
+        </section>
+
+        <!-- PAUSE -->
+        <section class="screen" id="scr-pause" data-back="resume">
+            <h2 class="screen-title">PAUSED</h2>
+            <div class="run-stats" id="pause-stats"></div>
+            <div class="build big" id="pause-build"></div>
+            <nav class="menu">
+                <button class="btn primary" data-act="resume">RESUME</button>
+                <button class="btn" data-act="settings">SETTINGS</button>
+                <button class="btn" data-act="restart">RESTART</button>
+                <button class="btn ghost" data-act="quit">QUIT TO TITLE</button>
+            </nav>
+        </section>
+
+        <!-- SETTINGS -->
+        <section class="screen" id="scr-settings" data-back="back">
+            <h2 class="screen-title">SETTINGS</h2>
+            <div class="settings">
+                <label class="set-row"><span>Music</span><input type="range" min="0" max="100" step="5" id="set-music"><b id="set-music-v"></b></label>
+                <label class="set-row"><span>Sound FX</span><input type="range" min="0" max="100" step="5" id="set-sfx"><b id="set-sfx-v"></b></label>
+                <button class="set-row toggle" data-set="shake"><span>Screen shake</span><b></b></button>
+                <button class="set-row toggle" data-set="flashes"><span>Screen flashes</span><b></b></button>
+                <button class="set-row toggle" data-set="damageNumbers"><span>Damage numbers</span><b></b></button>
+                <button class="set-row" data-act="fullscreen"><span>Fullscreen</span><b>⤢</b></button>
+                <button class="set-row danger" data-act="reset"><span id="reset-label">Reset progress</span><b>⟲</b></button>
             </div>
-            <div id="song-toast" class="hidden">
-                <div class="song-icon">
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
+            <nav class="menu row">
+                <button class="btn ghost" data-act="back">BACK</button>
+            </nav>
+        </section>
+
+        <!-- HELP -->
+        <section class="screen" id="scr-help" data-back="back">
+            <h2 class="screen-title">HOW TO PLAY</h2>
+            <div class="help">
+                <div class="help-block">
+                    <h3>Controls</h3>
+                    <table class="keys">
+                        <tr><td>Move</td><td><kbd>WASD</kbd> <kbd>←↑↓→</kbd> · mouse · drag · stick</td></tr>
+                        <tr><td>Dash</td><td><kbd>Space</kbd> · left click · 2nd finger / button · <kbd>A</kbd></td></tr>
+                        <tr><td>Overdrive</td><td><kbd>E</kbd> · right click · button · <kbd>B</kbd></td></tr>
+                        <tr><td>Focus</td><td>Hold <kbd>Shift</kbd> / <kbd>LB</kbd> for precise movement</td></tr>
+                        <tr><td>Pause</td><td><kbd>Esc</kbd> <kbd>P</kbd> · Start</td></tr>
+                    </table>
                 </div>
-                <div class="song-info">
-                    <div class="song-label">NOW PLAYING</div>
-                    <div class="song-name" id="song-name-display"></div>
+                <div class="help-block">
+                    <h3>Survive</h3>
+                    <ul>
+                        <li>Your ship fires automatically. Only the <b>white core</b> can be hit.</li>
+                        <li><b>Dash</b> through danger — you're untouchable mid-dash.</li>
+                        <li><b>Graze</b> bullets and chain kills to charge <b class="pink">Overdrive</b>: erase every bullet and double your fire, damage and score.</li>
+                        <li>Collect <b class="cyan">data shards</b> to level up and draft upgrades. Build around up to 4 weapon modules.</li>
+                        <li>Clear sectors for bonus picks. Every third sector hides a boss.</li>
+                    </ul>
                 </div>
             </div>
-        </div>
+            <nav class="menu row">
+                <button class="btn primary" data-act="back" id="help-back">GOT IT</button>
+            </nav>
+        </section>
 
+        <!-- GAME OVER -->
+        <section class="screen" id="scr-over" data-back="">
+            <h2 class="screen-title glitch" data-text="SIGNAL LOST">SIGNAL LOST</h2>
+            <div class="final-score" id="over-score">0</div>
+            <div class="best-badge" id="over-best" hidden>NEW BEST</div>
+            <div class="run-stats" id="over-stats"></div>
+            <div class="unlock" id="over-unlock" hidden></div>
+            <div class="build big" id="over-build"></div>
+            <nav class="menu">
+                <button class="btn primary" data-act="retry">RETRY</button>
+                <button class="btn" data-act="ships">CHANGE SHIP</button>
+                <button class="btn ghost" data-act="title">TITLE</button>
+            </nav>
+        </section>
 
-        <div id="start-menu" class="menu-screen hidden">
-            <h1>NEON</h1>
-            <button class="btn" id="start-btn">ENGAGE</button>
-        </div>
-
-        <div id="pause-menu" class="menu-screen hidden">
-            <div class="audio-controls">
-                <button id="music-toggle-btn" class="audio-btn" aria-label="Toggle Music">
-                    <span class="material-icons">music_note</span>
-                </button>
-                <button id="sfx-toggle-btn" class="audio-btn" aria-label="Toggle SFX">
-                    <span class="material-icons">volume_up</span>
-                </button>
-            </div>
-            <h1 style="color: #0ff;">PAUSED</h1>
-            <div class="menu-actions">
-                <button class="btn" id="resume-btn">RESUME</button>
-                <button class="btn" id="pause-restart-btn">RESTART</button>
-                <button class="btn" id="quit-btn">QUIT TO MENU</button>
-            </div>
-            <div class="debug-container">
-                <details>
-                    <summary>Debug</summary>
-                    <div class="debug-options">
-                        <div class="debug-option">
-                            <label for="god-mode-checkbox">God Mode</label>
-                            <input type="checkbox" id="god-mode-checkbox">
-                        </div>
-                        <div class="debug-option">
-                            <label for="no-enemies-checkbox">No Enemy Spawns</label>
-                            <input type="checkbox" id="no-enemies-checkbox">
-                        </div>
-                        <div class="debug-option">
-                            <button class="btn debug-btn" id="add-health-btn">+1 Max HP</button>
-                        </div>
-                        <div class="debug-option">
-                            <button class="btn debug-btn" id="lvl-up-btn">Plyr Lvl Up</button>
-                        </div>
-                        <div class="debug-option">
-                            <button class="btn debug-btn" id="wpn-lvl-up-btn">Wpn Lvl Up</button>
-                        </div>
-                        <div class="debug-option">
-                            <button class="btn debug-btn" id="set-health-1-btn">HP to 1</button>
-                        </div>
-                        <div class="debug-option">
-                            <button class="btn debug-btn" id="stage-lvl-up-btn">Stage Lvl Up</button>
-                        </div>
-                        <div class="debug-option">
-                            <button class="btn debug-btn" id="spawn-power-grid-btn">Spawn All Powerups</button>
-                        </div>
-                        <div class="debug-option" style="grid-column: 1 / -1;">
-                            <label style="margin-bottom: 8px; display: block; font-size: 10px; opacity: 0.7;">Grant
-                                Passive:</label>
-                            <div id="debug-passive-selector" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
-                        </div>
-                    </div>
-                </details>
-            </div>
-        </div>
-
-        <div id="game-over-menu" class="menu-screen hidden">
-            <h1 style="color: #f00;">CRITICAL FAIL</h1>
-            <div style="color: #fff; margin-bottom: 10px; letter-spacing: 2px; font-size: 12px;">FINAL SCORE</div>
-            <div id="final-score"
-                style="font-size: 36px; color: #0ff; font-family: monospace; margin-bottom: 20px; text-shadow: 0 0 10px #0ff;">
-                0</div>
-            <button class="btn" id="restart-btn">REBOOT</button>
-        </div>
-
-        <div id="level-up-menu" class="menu-screen hidden">
-            <h1 style="color: #fd0;">LEVEL UP!</h1>
-            <div class="upgrade-container">
-            </div>
-        </div>
-
-        <div id="stage-complete-menu" class="menu-screen hidden">
-            <h1 style="color: #0f0;">STAGE COMPLETE</h1>
-            <div style="color: #fff; margin-bottom: 20px; letter-spacing: 2px;">CHOOSE A PASSIVE BUFF</div>
-            <div class="upgrade-container">
-            </div>
-        </div>
-
-        <canvas id="gameCanvas"></canvas>
+        <noscript>
+            <div class="noscript">NEON OVERDRIVE needs JavaScript enabled.</div>
+        </noscript>
     </div>
 
-    <script src="src/globals.js"></script>
-    <script src="src/levels.js"></script>
-    <script src="src/utils.js"></script>
-    <script src="src/audio.js"></script>
-    <script src="src/assets.js"></script>
-    <script src="src/pool.js"></script>
-    <script src="src/bullet.js"></script>
-    <script src="src/enemy.js"></script>
-    <script src="src/particle.js"></script>
-    <script src="src/powerup.js"></script>
-    <script src="src/floatingText.js"></script>
-    <script src="src/backgroundObstacles.js"></script>
-    <script src="src/cosmicBackground.js"></script>
-    <script src="src/pools.js"></script>
-    <script src="src/ui.js"></script>
-    <script src="src/spawners.js"></script>
-    <script src="src/player.js"></script>
-    <script src="src/intro.js"></script>
-    <script src="src/game.js"></script>
+    <script type="module" src="src/main.js"></script>
 </body>
 
 </html>
