@@ -152,35 +152,42 @@ export const ENEMY_COLORS = {
   mine: '#ff8a3d',
 };
 
+function bulletSprite(sh, c) {
+  return makeSprite(24, (g) => {
+    if (sh.weapon === 'lance') {
+      g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 8;
+      g.fillRect(-1.6, -11, 3.2, 22);
+      g.fillStyle = '#fff'; g.shadowBlur = 0; g.fillRect(-0.7, -10, 1.4, 20);
+    } else if (sh.weapon === 'scatter') {
+      g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 8;
+      g.beginPath(); poly([[0, -6], [3.5, 0], [0, 6], [-3.5, 0]])(g); g.fill();
+      g.fillStyle = '#fff'; g.shadowBlur = 0;
+      g.beginPath(); poly([[0, -3], [1.5, 0], [0, 3], [-1.5, 0]])(g); g.fill();
+    } else if (sh.weapon === 'phase') {
+      g.strokeStyle = c; g.shadowColor = c; g.shadowBlur = 8; g.lineWidth = 3;
+      g.beginPath(); g.arc(0, 4, 7, Math.PI * 1.15, Math.PI * 1.85); g.stroke();
+      g.strokeStyle = '#fff'; g.lineWidth = 1.2; g.shadowBlur = 0;
+      g.beginPath(); g.arc(0, 4, 7, Math.PI * 1.2, Math.PI * 1.8); g.stroke();
+    } else {
+      g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 8;
+      g.beginPath(); g.roundRect(-2.4, -8, 4.8, 16, 2.4); g.fill();
+      g.fillStyle = '#fff'; g.shadowBlur = 0;
+      g.beginPath(); g.roundRect(-1, -6.5, 2, 13, 1); g.fill();
+    }
+  });
+}
+
+// Re-bakes one ship's sprite and its primary bullet in a paint colour (cosmetic; ship defs stay immutable).
+export function rebuildShipSprite(ship, color, bullet = color) {
+  S['ship_' + ship.id] = shipSprite(SHIP_SHAPES[ship.id], color);
+  S['pb_' + ship.id] = bulletSprite(ship, bullet);
+}
+
 export function buildSprites(ships) {
   for (const sh of ships) S['ship_' + sh.id] = shipSprite(SHIP_SHAPES[sh.id], sh.color);
 
   // Player bullets ---------------------------------------------------------
-  for (const sh of ships) {
-    const c = sh.bullet;
-    S['pb_' + sh.id] = makeSprite(24, (g) => {
-      if (sh.weapon === 'lance') {
-        g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 8;
-        g.fillRect(-1.6, -11, 3.2, 22);
-        g.fillStyle = '#fff'; g.shadowBlur = 0; g.fillRect(-0.7, -10, 1.4, 20);
-      } else if (sh.weapon === 'scatter') {
-        g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 8;
-        g.beginPath(); poly([[0, -6], [3.5, 0], [0, 6], [-3.5, 0]])(g); g.fill();
-        g.fillStyle = '#fff'; g.shadowBlur = 0;
-        g.beginPath(); poly([[0, -3], [1.5, 0], [0, 3], [-1.5, 0]])(g); g.fill();
-      } else if (sh.weapon === 'phase') {
-        g.strokeStyle = c; g.shadowColor = c; g.shadowBlur = 8; g.lineWidth = 3;
-        g.beginPath(); g.arc(0, 4, 7, Math.PI * 1.15, Math.PI * 1.85); g.stroke();
-        g.strokeStyle = '#fff'; g.lineWidth = 1.2; g.shadowBlur = 0;
-        g.beginPath(); g.arc(0, 4, 7, Math.PI * 1.2, Math.PI * 1.8); g.stroke();
-      } else {
-        g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 8;
-        g.beginPath(); g.roundRect(-2.4, -8, 4.8, 16, 2.4); g.fill();
-        g.fillStyle = '#fff'; g.shadowBlur = 0;
-        g.beginPath(); g.roundRect(-1, -6.5, 2, 13, 1); g.fill();
-      }
-    });
-  }
+  for (const sh of ships) S['pb_' + sh.id] = bulletSprite(sh, sh.bullet);
   S.pb_od = makeSprite(26, (g) => {
     g.fillStyle = '#fff'; g.shadowColor = '#ff3df2'; g.shadowBlur = 10;
     g.beginPath(); g.roundRect(-3, -10, 6, 20, 3); g.fill();

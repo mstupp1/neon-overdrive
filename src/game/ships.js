@@ -1,4 +1,5 @@
 // Playable ships. Each has a distinct primary weapon and a starting kit.
+// `price` (credits) buys a ship in the Hangar; `unlock` is the legacy free grant. No price + no unlock = owned from the start.
 
 export const SHIPS = [
   {
@@ -27,6 +28,7 @@ export const SHIPS = [
     speed: 1.14,
     dashes: 2,
     start: { pierce: 1 },
+    price: 600,
     unlock: { kind: 'bossKills', n: 1, text: 'Defeat any boss' },
   },
   {
@@ -41,6 +43,7 @@ export const SHIPS = [
     speed: 0.9,
     dashes: 1,
     start: { aegis: 1 },
+    price: 900,
     unlock: { kind: 'bestSector', n: 5, text: 'Reach Sector 5' },
   },
   {
@@ -55,6 +58,7 @@ export const SHIPS = [
     speed: 1.05,
     dashes: 3,
     start: { dashNova: 1, capacitor: 1 },
+    price: 1400,
     unlock: { kind: 'bestSector', n: 8, text: 'Reach Sector 8' },
   },
 ];
@@ -63,6 +67,36 @@ export function isUnlocked(ship, profile) {
   if (!ship.unlock) return true;
   const u = ship.unlock;
   return (profile[u.kind] || 0) >= u.n;
+}
+
+// Owned = bought, legacy-unlocked (both land in profile.ownedShips), or the free starter.
+export function ownsShip(profile, ship) {
+  return profile.ownedShips.includes(ship.id) || (!ship.price && !ship.unlock);
+}
+
+// Paint palettes: index 0 is the stock colour (free); the rest are bought in the Hangar.
+const PAINT_SETS = {
+  vector: [['CRIMSON', '#ff3b5c'], ['GOLD', '#ffc933'], ['ULTRAVIOLET', '#9a6bff']],
+  needle: [['CRIMSON', '#ff3b5c'], ['GHOST', '#e4f2ff'], ['ULTRAVIOLET', '#9a6bff']],
+  bulwark: [['CRIMSON', '#ff3b5c'], ['GHOST', '#e4f2ff'], ['TOXIC', '#b6ff00']],
+  phantom: [['CRIMSON', '#ff3b5c'], ['GOLD', '#ffc933'], ['TOXIC', '#b6ff00']],
+};
+const FALLBACK_PAINTS = [['CRIMSON', '#ff3b5c'], ['GOLD', '#ffc933'], ['GHOST', '#e4f2ff']];
+export const PAINT_PRICE = 120;
+
+export function paintsFor(ship) {
+  return [
+    { name: 'STOCK', color: ship.color, bullet: ship.bullet, price: 0 },
+    ...(PAINT_SETS[ship.id] || FALLBACK_PAINTS).map(([name, c]) => ({ name, color: c, bullet: c, price: PAINT_PRICE })),
+  ];
+}
+
+// The equipped paint (owned only) for a ship.
+export function activePaint(profile, ship) {
+  const list = paintsFor(ship);
+  const i = (profile.paint && profile.paint[ship.id]) || 0;
+  const owned = i === 0 || ((profile.paintsOwned && profile.paintsOwned[ship.id]) || []).includes(i);
+  return list[owned && list[i] ? i : 0];
 }
 
 export const shipById = (id) => SHIPS.find((s) => s.id === id) || SHIPS[0];

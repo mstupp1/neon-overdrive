@@ -3,7 +3,9 @@
 import { G, view } from './state.js';
 import { S, glow } from '../render/sprites.js';
 import { clamp, damp, rand, TAU } from '../core/math.js';
-import { WEAPONS, weaponStreams, weaponDamageScale } from './ships.js';
+import { WEAPONS, weaponStreams, weaponDamageScale, activePaint } from './ships.js';
+import { equippedParts } from './parts.js';
+import { profile } from '../core/storage.js';
 import { recomputeStats } from './upgrades.js';
 import { playerBullet, clearBullets } from './bullets.js';
 import { gainCredits } from './economy.js';
@@ -17,9 +19,12 @@ import { dashNova, resetModules } from './modules.js';
 
 export const xpFor = (l) => Math.floor(5 + 4.5 * l + 0.9 * l * l);
 
-export function createPlayer(ship) {
+// gear=false (attract mode): no hangar parts. The paint is cosmetic and always applies.
+export function createPlayer(ship, gear = true) {
   const p = {
     ship,
+    color: activePaint(profile, ship).color,
+    parts: gear ? equippedParts(profile, ship.id) : [],
     x: view.W / 2,
     y: view.H * 0.78,
     vx: 0,
@@ -55,6 +60,7 @@ export function createPlayer(ship) {
     hurtT: 0,
   };
   for (const [id, lv] of Object.entries(ship.start)) p.up[id] = lv;
+  for (const part of p.parts) for (const [id, lv] of Object.entries(part.start || {})) p.up[id] = Math.max(p.up[id] || 0, lv); // free levels (max-capped by the upgrade pool)
   recomputeStats(p);
   p.hp = p.maxHp;
   p.charges = p.maxCharges;
@@ -134,11 +140,11 @@ export function updatePlayer(p, dt) {
     } else { dx /= m; dy /= m; }
     p.dashDx = dx;
     p.dashDy = dy;
-    p.dashT = 0.13;
+    p.dashT = 0.13 * st.dashDur;
     p.charges--;
-    p.iframes = Math.max(p.iframes, 0.24);
+    p.iframes = Math.max(p.iframes, 0.24 * st.dashDur);
     sfx.dash();
-    ring(p.x, p.y, 34, p.ship.color, 0.3);
+    ring(p.x, p.y, 34, p.color, 0.3);
     if (p.up.dashNova) dashNova(p);
   }
   if (p.dashT > 0) {
@@ -206,7 +212,7 @@ export function updatePlayer(p, dt) {
   p.trailT -= dt;
   if (p.trailT <= 0) {
     p.trailT = 0.025;
-    const col = p.odT > 0 ? '#ff3df2' : p.ship.color;
+    const col = p.odT > 0 ? '#ff3df2' : p.color;
     particle('dot', p.x + rand(-3, 3), p.y + 15, rand(-15, 15) - p.vx * 0.1, rand(160, 240), 0.22, rand(5, 8), col, 1);
   }
 
@@ -336,7 +342,7 @@ export function hurtPlayer(p) {
 
 function killPlayer(p) {
   p.dead = true;
-  explosion(p.x, p.y, p.ship.color, 3);
+  explosion(p.x, p.y, p.color, 3);
   explosion(p.x, p.y, '#ffffff', 1.5);
   slowmo(1.6);
   addShake(1);
@@ -377,7 +383,7 @@ export function collectPickup(pk) {
 }
 
 export function gainXp(p, v) {
-  p.xp += v;
+  p.xp += v * p.st.xpMul;
   while (p.xp >= p.xpNeed) {
     p.xp -= p.xpNeed;
     p.level++;
@@ -399,7 +405,7 @@ export function drawPlayer(ctx, k) {
     ctx.drawImage(spr.img, g.x - spr.half, g.y - spr.half, spr.size, spr.size);
   }
   // Engine / aura glow
-  const gl = glow(od ? '#ff3df2' : p.ship.color, 64);
+  const gl = glow(od ? '#ff3df2' : p.color, 64);
   ctx.globalAlpha = od ? 0.55 + Math.sin(G.time * 20) * 0.15 : 0.28;
   const gs = od ? 70 : 42;
   ctx.drawImage(gl.img, p.x - gs / 2, p.y - gs / 2 + 4, gs, gs);
@@ -435,7 +441,7 @@ export function drawPlayer(ctx, k) {
   ctx.beginPath();
   ctx.arc(p.x, p.y + 1, p.r, 0, TAU);
   ctx.fill();
-  ctx.strokeStyle = p.hurtT > 0 ? '#ff4d6d' : od ? '#ff3df2' : p.ship.color;
+  ctx.strokeStyle = p.hurtT > 0 ? '#ff4d6d' : od ? '#ff3df2' : p.color;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.arc(p.x, p.y + 1, p.r + 2, 0, TAU);

@@ -36,12 +36,18 @@ In menus: arrows/d-pad to move, Enter/Space/A to select, Esc/B to go back, `1`�
 
 ### Ships
 
-| Ship | Style | Unlock |
-|---|---|---|
-| VECTOR | Twin pulse cannon, balanced | — |
-| NEEDLE | Piercing lances, fast, 2 hull | Defeat any boss |
-| BULWARK | Wide scatter, 4 hull, starts with shield | Reach sector 5 |
-| PHANTOM | Seeking crescents, 3 dashes, Shock Dash | Reach sector 8 |
+| Ship | Style | Price | Free unlock |
+|---|---|---|---|
+| VECTOR | Twin pulse cannon, balanced | owned | — |
+| NEEDLE | Piercing lances, fast, 2 hull | 600 | Defeat any boss |
+| BULWARK | Wide scatter, 4 hull, starts with shield | 900 | Reach sector 5 |
+| PHANTOM | Seeking crescents, 3 dashes, Shock Dash | 1400 | Reach sector 8 |
+
+Ships are bought with credits in the **Hangar** (campaign map → HANGAR), or granted for free when you hit the legacy unlock goal.
+
+### Hangar: parts and paint
+
+Each ship has three gear slots: **Core**, **Plating**, **Thrusters**. Parts are bought once and usable on any ship; every part has a tradeoff (e.g. Glass Reactor: +30% damage, -1 hull; Afterburner Kit: +1 dash, slower recharge; Aegis Emitter: start with Aegis Shield). Four paint jobs per ship (120 credits each) are cosmetic. Gear can only be changed from the campaign map, never mid-run. Endless Grid flies your selected ship with its parts.
 
 Best score, best sector, unlocks and settings persist in `localStorage`.
 
@@ -53,13 +59,15 @@ Music / SFX volume, screen shake, screen flashes, damage numbers, fullscreen, an
 
 ```
 index.html          markup for canvas + DOM menus
-src/main.js         boot, layout, main loop, game flow (title → ships → run → draft/pause → results)
+src/main.js         boot, layout, main loop, game flow (title → campaign → hangar / route → run → draft/pause → results)
 src/style.css       menu/HUD-overlay styles
 src/core/           math, input (kb/mouse/touch/gamepad), audio (synth SFX + music), storage
 src/render/         pre-rendered glow sprites, synthwave background, canvas HUD
 src/game/           state, player, weapons modules, enemies, bosses, bullets, pickups,
                     wave director, upgrades, ships, FX, autopilot bot, world step/collisions
 src/ui/screens.js   menu screens, navigation, draft cards
+src/ui/meta.js      campaign / route / market / extraction screens
+src/ui/hangar.js    hangar (ships, parts, paint)
 src/audio/music/    soundtrack
 src/fonts/          Orbitron + Rajdhani (SIL OFL)
 ```

@@ -3,6 +3,7 @@
 
 import { weightedPick } from '../core/math.js';
 import { WEAPONS } from './ships.js';
+import { applyParts } from './parts.js';
 
 export const MAX_MODULES = 4;
 
@@ -96,6 +97,15 @@ export function recomputeStats(p) {
   st.maxHp = Math.max(1, p.ship.hp + lv('hull') + (p.hullMod || 0)); // hullMod: dock reinforcement (+) / contraband (-)
   st.shieldInterval = lv('aegis') ? 16 - 3 * lv('aegis') : 0;
   st.maxCharges = p.ship.dashes + lv('dashes');
+  // Neutral defaults for fields only parts / pilots touch (attract mode and later steps rely on these).
+  st.xpMul = 1;
+  st.creditMul = 1;
+  st.grazeR = 1;
+  st.grazeOd = 1;
+  st.dashDur = 1;
+  st.critMul = 2.5;
+  applyParts(st, p);
+  st.maxHp = Math.max(1, st.maxHp);
   p.maxHp = st.maxHp;
   p.maxCharges = st.maxCharges;
 }

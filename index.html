@@ -52,11 +52,36 @@
         </section>
 
         <!-- SHIP SELECT -->
-        <section class="screen" id="scr-ships" data-back="back">
-            <h2 class="screen-title">SELECT SHIP</h2>
-            <div class="ships" id="ship-list"></div>
+        <!-- HANGAR (reachable from the campaign map only) -->
+        <section class="screen" id="scr-hangar" data-back="leaveHangar">
+            <h2 class="screen-title">HANGAR</h2>
+            <div class="pilot-line" id="hangar-credits"></div>
+            <div class="hs-ship">
+                <button class="hs-nav" data-act="hprev" aria-label="Previous ship">&#8249;</button>
+                <div class="hs-card" id="hs-card"></div>
+                <button class="hs-nav" data-act="hnext" aria-label="Next ship">&#8250;</button>
+            </div>
+            <div class="hs-dots" id="hs-dots"></div>
+            <button class="btn primary hs-act" data-act="hact" id="hs-act">SELECT</button>
+            <div class="hs-label">GEAR</div>
+            <div class="slots" id="hs-slots"></div>
+            <div class="hs-label">PAINT</div>
+            <div class="paints" id="hs-paints"></div>
+            <div class="hs-label">LOADOUT</div>
+            <div class="hs-stats" id="hs-stats"></div>
             <nav class="menu row">
-                <button class="btn ghost" data-act="back">BACK</button>
+                <button class="btn ghost small" data-act="leaveHangar" id="hs-back">BACK</button>
+            </nav>
+        </section>
+
+        <!-- HANGAR PART LIST -->
+        <section class="screen" id="scr-parts" data-back="partsBack">
+            <h2 class="screen-title" id="parts-title">CORE</h2>
+            <p class="screen-sub" id="parts-sub"></p>
+            <div class="pilot-line" id="parts-credits"></div>
+            <div class="cards still" id="parts-list"></div>
+            <nav class="menu row">
+                <button class="btn ghost small" data-act="partsBack" id="parts-back">BACK</button>
             </nav>
         </section>
 
@@ -70,7 +95,7 @@
             <nav class="menu">
                 <button class="btn primary" data-act="launch" id="launch-btn">LAUNCH</button>
                 <div class="pair">
-                    <button class="btn small" data-act="pickship" id="ship-btn">SHIP</button>
+                    <button class="btn small" data-act="hangar" id="ship-btn">HANGAR</button>
                     <button class="btn small" data-act="endless">ENDLESS GRID</button>
                 </div>
                 <button class="btn ghost small" data-act="back">BACK</button>
@@ -81,6 +106,7 @@
         <section class="screen" id="scr-route" data-back="">
             <h2 class="screen-title" id="route-title">ROUTE</h2>
             <div class="run-stats" id="route-stats"></div>
+            <div class="build" id="route-gear"></div>
             <div class="routemap" id="route-map"></div>
             <p class="route-hint" id="route-hint"></p>
             <nav class="menu row">
@@ -219,8 +245,7 @@
             <div class="build big" id="over-build"></div>
             <nav class="menu">
                 <button class="btn primary" data-act="retry">RETRY</button>
-                <button class="btn" data-act="campaign" id="over-campaign" hidden>CAMPAIGN</button>
-                <button class="btn" data-act="ships" id="over-ships">CHANGE SHIP</button>
+                <button class="btn" data-act="campaign" id="over-campaign">CAMPAIGN</button>
                 <button class="btn ghost" data-act="title">TITLE</button>
             </nav>
         </section>

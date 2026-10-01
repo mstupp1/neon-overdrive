@@ -7,13 +7,15 @@ import { unlockAudio, music, setSfxVolume, setSfxMuted, sfx } from './core/audio
 import { buildSprites } from './render/sprites.js';
 import { bg } from './render/background.js';
 import { drawHud, updateBanner } from './render/hud.js';
-import { SHIPS, shipById, isUnlocked } from './game/ships.js';
+import { SHIPS, shipById, ownsShip, isUnlocked } from './game/ships.js';
 import { createPlayer } from './game/player.js';
 import { createDirector, startSector, nextSector, endlessSpec } from './game/director.js';
 import { rollDraft, applyUpgrade } from './game/upgrades.js';
 import { step, renderWorld } from './game/world.js';
 import { ui } from './ui/screens.js';
 import { meta } from './ui/meta.js';
+import { hangarActs, openHangar } from './ui/hangar.js';
+import { buyShip, buyPart, equipPart, unequipSlot, setPaint, selectShip, applyAllPaints } from './game/hangar.js';
 import { SYSTEMS, systemById, generateRoute, nodeSpec, reachableNodes, routeNode, systemUnlocked } from './game/campaign.js';
 import { rand, pick } from './core/math.js';
 import { rollMarket, buyOffer, dockRepair, dockReinforce, settleRun, rankFor } from './game/economy.js';
@@ -27,11 +29,14 @@ const dangerEl = document.getElementById('danger');
 const probe = document.getElementById('safe-probe');
 
 let dprCap = 2;
-let ship = shipById(profile.lastShip);
+// The ship flown by Endless / campaign launches: the hangar's selection (profile.lastShip), if still owned.
+const curShip = () => {
+  const s = shipById(profile.lastShip);
+  return ownsShip(profile, s) ? s : SHIPS[0];
+};
 let settingsReturn = 'title';
 let draftKind = null;
 let draftChoices = null;
-let shipsMode = 'run'; // ship select: 'run' (pick → endless run) | 'campaign' (just sets the ship)
 let selSystem = 0;
 let marketOffers = null; // current Black Market stock
 let afterDraft = null; // 'route' | 'extract': where to go once the sector reward / level drafts are done
@@ -97,7 +102,7 @@ function newWorld(mode, shipDef, run = null) {
   G.vacuum = false;
   G.director = createDirector();
   G.director.onClear = onSectorClear;
-  G.player = createPlayer(shipDef);
+  G.player = createPlayer(shipDef, mode !== 'attract'); // hangar parts only in real runs
   startSector(endlessSpec(1));
   if (run && run.mode === 'campaign') {
     G.banner = null;
@@ -107,14 +112,13 @@ function newWorld(mode, shipDef, run = null) {
 }
 
 function startAttract() {
-  newWorld('attract', pick(SHIPS.filter((s) => isUnlocked(s, profile))));
+  newWorld('attract', pick(SHIPS.filter((s) => ownsShip(profile, s))));
   // Give the demo ship some toys so the menus look alive.
   const p = G.player;
   for (const id of ['main', 'main', 'main', pick(['missiles', 'orbitals', 'drones', 'arc'])]) applyUpgrade(p, id, G);
 }
 
 function startRun(s) {
-  ship = s;
   profile.lastShip = s.id;
   saveProfile();
   newWorld('run', s, { mode: 'endless' });
@@ -124,6 +128,7 @@ function startRun(s) {
 // --- Campaign flow ---------------------------------------------------------------------
 
 function launchSystem(sys) {
+  const ship = curShip();
   profile.lastShip = ship.id;
   saveProfile();
   const route = generateRoute(sys, Math.floor(Math.random() * 2147483647));
@@ -139,7 +144,7 @@ function showCampaign() {
   music.setSet('normal');
   music.setDuck(1);
   if (!systemUnlocked(SYSTEMS[selSystem], profile)) selSystem = 0;
-  const focus = meta.renderCampaign(selSystem, ship.name);
+  const focus = meta.renderCampaign(selSystem, curShip().name);
   ui.show('campaign', { focus });
 }
 
@@ -234,7 +239,6 @@ function extract() {
 // Folds the finished run into the profile records and banks credits / rank XP.
 // Returns { unlocked: newly unlocked ships, reward: economy.settleRun summary }.
 function bankRun() {
-  const before = SHIPS.filter((s) => isUnlocked(s, profile));
   profile.runs++;
   profile.kills += G.kills;
   profile.best = Math.max(profile.best, Math.floor(G.score));
@@ -243,7 +247,11 @@ function bankRun() {
   profile.bossKills += G.bossKills;
   const reward = settleRun(!!(G.run && G.run.victory));
   saveProfile();
-  return { unlocked: SHIPS.filter((s) => isUnlocked(s, profile) && !before.includes(s)), reward };
+  // Legacy unlock conditions still grant ships for free (they join ownedShips).
+  const unlocked = SHIPS.filter((s) => s.unlock && isUnlocked(s, profile) && !ownsShip(profile, s));
+  for (const s of unlocked) profile.ownedShips.push(s.id);
+  saveProfile();
+  return { unlocked, reward };
 }
 
 function enterPlay() {
@@ -317,8 +325,6 @@ function gameOver() {
   const newBest = G.score > profile.best;
   const { unlocked, reward } = bankRun();
   const campaign = G.run.mode === 'campaign';
-  document.getElementById('over-campaign').hidden = !campaign;
-  document.getElementById('over-ships').hidden = campaign;
   ui.renderGameOver({
     score: Math.floor(G.score), newBest: newBest && profile.runs > 1, sector: G.sector, time: G.runTime,
     level: p.level, kills: G.kills, maxCombo: G.maxCombo, grazes: G.grazes, unlocked, reward, player: p,
@@ -340,20 +346,6 @@ function toTitle() {
   ui.show('title');
   music.setSet('normal');
   music.setDuck(1);
-}
-
-function showShips(mode = 'run') {
-  shipsMode = mode;
-  G.screen = 'ships';
-  const focus = ui.renderShips(mode === 'campaign' ? setShip : startRun);
-  ui.show('ships', { focus, lock: 150 });
-}
-
-function setShip(s) {
-  ship = s;
-  profile.lastShip = s.id;
-  saveProfile();
-  showCampaign();
 }
 
 // --- UI handlers ---------------------------------------------------------------------
@@ -395,8 +387,6 @@ ui.init({
         ui.renderTitle();
         ui.show('title', { focus: ui.current === 'help' ? 1 : 2 });
       }
-    } else if (ui.current === 'ships' && shipsMode === 'campaign') {
-      showCampaign();
     } else {
       G.screen = 'title';
       ui.renderTitle();
@@ -408,8 +398,10 @@ ui.init({
     meta.selectSystem(selSystem);
   },
   launch: () => launchSystem(SYSTEMS[selSystem]),
-  endless: () => startRun(ship),
-  pickship: () => showShips('campaign'),
+  endless: () => startRun(curShip()),
+  hangar: () => openHangar(),
+  leaveHangar: () => showCampaign(),
+  ...hangarActs,
   campaign: () => showCampaign(),
   node(btn) {
     pickRouteNode(routeNode(G.run.route, btn.dataset.id));
@@ -421,10 +413,9 @@ ui.init({
   resume: () => {
     enterPlay();
   },
-  restart: () => (G.run.mode === 'campaign' ? launchSystem(G.run.system) : startRun(ship)),
+  restart: () => (G.run.mode === 'campaign' ? launchSystem(G.run.system) : startRun(curShip())),
   quit: () => (G.run.mode === 'campaign' ? showCampaign() : toTitle()),
-  retry: () => (G.run.mode === 'campaign' ? launchSystem(G.run.system) : startRun(ship)),
-  ships: () => showShips('run'),
+  retry: () => (G.run.mode === 'campaign' ? launchSystem(G.run.system) : startRun(curShip())),
   title: () => toTitle(),
   reroll() {
     if (G.rerolls <= 0) return;
@@ -506,7 +497,7 @@ let slowFrames = 0;
 
 function simulating() {
   const s = G.screen;
-  return s === 'play' || s === 'gameover' || s === 'title' || s === 'campaign' || s === 'ships' || s === 'settings' || s === 'help';
+  return s === 'play' || s === 'gameover' || s === 'title' || s === 'campaign' || s === 'hangar' || s === 'parts' || s === 'settings' || s === 'help';
 }
 
 function frame(now) {
@@ -606,6 +597,7 @@ function render() {
 function boot() {
   layout();
   buildSprites(SHIPS);
+  applyAllPaints();
   bg.init();
   setSfxVolume(profile.settings.sfx);
   toTitle();
@@ -653,6 +645,11 @@ window.NEON = {
     return { credits: profile.credits, rankXp: profile.rankXp, rank: rankFor(profile.rankXp), wallet: G.run && G.run.wallet };
   },
   market: () => marketOffers,
+  // Hangar (return '' on success, else a reason). Costs credits; use grant() first in tests.
+  buyShip, buyPart, selectShip,
+  equip: (shipId, partId) => (partId ? equipPart(shipId, partId) : 'NO PART'),
+  unequip: unequipSlot,
+  paint: setPaint,
   campaign: { SYSTEMS, generateRoute, nodeSpec, reachableNodes },
   // opts.nodePick(nodes) → index overrides the default (random fighting node).
   simulate(seconds, pickFn = (choices) => pick(choices), opts = {}) {

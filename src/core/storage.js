@@ -29,6 +29,7 @@ const DEFAULTS = {
   ownedParts: [],
   equip: {}, // shipId → { core, plating, thrusters }
   paint: {}, // shipId → palette index
+  paintsOwned: {}, // shipId → [owned palette indices] (0 = stock, always owned)
   pilot: { cls: 'striker', passives: {} }, // passives: cls → [ids]
   endlessBest: 0,
 };
@@ -62,14 +63,15 @@ function migrate(old) {
 }
 
 const grantShips = (p) => {
-  p.ownedShips = SHIPS.filter((s) => isUnlocked(s, p)).map((s) => s.id);
+  // Union: legacy unlock conditions top up ownership but never remove bought ships.
+  p.ownedShips = [...new Set([...p.ownedShips, ...SHIPS.filter((s) => (s.unlock ? isUnlocked(s, p) : !s.price)).map((s) => s.id)])];
   return p;
 };
 
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) return merge(DEFAULTS, JSON.parse(raw));
+    if (raw) return grantShips(merge(DEFAULTS, JSON.parse(raw)));
     const old = localStorage.getItem(OLD_KEY);
     if (old) {
       const p = migrate(JSON.parse(old));

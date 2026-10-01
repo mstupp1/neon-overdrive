@@ -91,7 +91,7 @@ function collide(p) {
       if (!hitTest(e, b.x, b.y, b.r)) continue;
       if (b.hits.includes(e)) continue;
       const isCrit = crit > 0 && Math.random() < crit;
-      const dmg = b.dmg * (isCrit ? 2.5 : 1);
+      const dmg = b.dmg * (isCrit ? p.st.critMul : 1);
       if (!e.invuln) {
         damageEnemy(e, dmg, b.x, b.y, isCrit);
         sfx.hit();
@@ -145,7 +145,7 @@ function collide(p) {
   if (p.dead) return;
 
   // Enemy bullets → player (+ graze)
-  const grazeR = 24;
+  const grazeR = 24 * p.st.grazeR;
   for (const b of G.eBullets) {
     if (b.dead || b.delay > 0) continue;
     const dx = b.x - p.x;
@@ -162,7 +162,7 @@ function collide(p) {
     } else if (!b.grazed && d2 < lim * lim) {
       b.grazed = true;
       G.grazes++;
-      gainOverdrive(2.4);
+      gainOverdrive(2.4 * p.st.grazeOd);
       addScore(25);
       sparks(p.x + dx * 0.5, p.y + dy * 0.5, '#ffffff', 2, 140);
       sfx.graze();

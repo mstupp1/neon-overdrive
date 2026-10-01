@@ -3,8 +3,6 @@
 import { input } from '../core/input.js';
 import { profile, saveProfile } from '../core/storage.js';
 import { sfx } from '../core/audio.js';
-import { SHIPS, isUnlocked } from '../game/ships.js';
-import { S } from '../render/sprites.js';
 import { cardInfo, CAT_COLORS, UPGRADES, ICONS } from '../game/upgrades.js';
 import { formatScore, formatTime } from '../core/math.js';
 
@@ -110,41 +108,6 @@ export const ui = {
       ? `<div>BEST<b>${formatScore(profile.best)}</b></div><div>SECTOR<b>${profile.bestSector}</b></div><div>RUNS<b>${profile.runs}</b></div>`
       : '';
     $('#title-hint').textContent = input.isTouchDevice ? 'Tap PLAY to begin' : 'Enter / Space to select';
-  },
-
-  // --- Ships --------------------------------------------------------------------
-  renderShips(onPick) {
-    const list = $('#ship-list');
-    list.innerHTML = '';
-    let focus = 0;
-    SHIPS.forEach((ship, i) => {
-      const unlocked = isUnlocked(ship, profile);
-      const b = document.createElement('button');
-      b.className = 'ship' + (unlocked ? '' : ' locked');
-      b.style.setProperty('--c', ship.color);
-      const cv = document.createElement('canvas');
-      cv.width = 112;
-      cv.height = 112;
-      const g = cv.getContext('2d');
-      const spr = S['ship_' + ship.id];
-      g.drawImage(spr.img, 0, 0, 112, 112);
-      const specs = `HULL ${'♥'.repeat(ship.hp)} · DASH ${ship.dashes}`;
-      b.innerHTML = `<div class="ship-art"></div><div><div class="role">${ship.role}</div><h4>${ship.name}</h4><p>${unlocked ? ship.desc : '🔒 ' + ship.unlock.text}</p>${unlocked ? `<div class="specs">${specs}</div>` : ''}</div>`;
-      b.querySelector('.ship-art').appendChild(cv);
-      b.addEventListener('click', () => {
-        if (performance.now() < lockUntil) return;
-        if (!unlocked) {
-          sfx.ui();
-          b.animate([{ transform: 'translateX(-4px)' }, { transform: 'translateX(4px)' }, { transform: 'none' }], { duration: 180 });
-          return;
-        }
-        sfx.select();
-        onPick(ship);
-      });
-      if (ship.id === profile.lastShip && unlocked) focus = i;
-      list.appendChild(b);
-    });
-    return focus;
   },
 
   // --- Draft --------------------------------------------------------------------

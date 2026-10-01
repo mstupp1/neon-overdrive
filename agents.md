@@ -11,7 +11,7 @@ The game is a set of ES modules (see README "Project layout"). All mutable world
 | `G` | Live game state (see below) |
 | `view` | Logical size, scale, safe-area insets, quality |
 | `profile` | Persisted records/settings |
-| `startRun(shipId)` | Start a run (`vector`, `needle`, `bulwark`, `phantom`) |
+| `startRun(shipId)` | Start a run (`vector`, `needle`, `bulwark`, `phantom`); uses that ship's equipped hangar parts and paint |
 | `startEndless(shipId)` | Alias of `startRun` (endless mode) |
 | `startSpec(spec, shipId?)` | Start a run, then `startSector` with a sector spec `{index, level, loop, boss, elite, modifiers[], hue, name, duration}` (missing fields default to `endlessSpec(1)`) |
 | `launch(system)` | Start a campaign run (1-based index or id: `genesis crimson cyclone void`); lands on the route screen |
@@ -19,6 +19,7 @@ The game is a set of ES modules (see README "Project layout"). All mutable world
 | `market()` | Current Black Market offers (array, see Economy) |
 | `pickNode(i)` | On the route screen, pick the i-th reachable node |
 | `campaign` | `{ SYSTEMS, generateRoute(system, seed), nodeSpec, reachableNodes }` from `src/game/campaign.js` |
+| `buyShip(id)` `buyPart(id)` `selectShip(id)` `equip(shipId, partId)` `unequip(shipId, slot)` `paint(shipId, idx)` | Hangar actions; return `''` or a reason (`NEED n`, `OWNED`, ...). They spend profile credits, so `grant({credits})` first |
 | `toTitle()` | Back to title/attract mode |
 | `applyUpgrade(id)` | Grant an upgrade (ids in `src/game/upgrades.js`) |
 | `simulate(seconds, pickFn?, opts?)` | Fast-forward synchronously at 60 Hz, auto-picking drafts (`pickFn(choices) → id`) and route nodes (`opts.nodePick(nodes) → index`, default random fighting node). Market: buys the cheapest affordable upgrade offer (override `opts.marketPick(offers, wallet) → index | -1`), then leaves; dock: repairs if damaged else reinforces; anomaly auto-continues. Stops on `gameover` or `extract`. Returns `{screen, sector, hp, level, score, time, run:{system,row}, victory}`. |
@@ -34,7 +35,7 @@ NEON.simulate(600); // → { screen, sector, hp, level, score, time }
 
 ## Useful state
 
-- `G.screen`: `title | campaign | ships | help | settings | route | node | play | pause | pause-settings | draft | gameover | extract`
+- `G.screen`: `title | campaign | hangar | parts | help | settings | route | node | play | pause | pause-settings | draft | gameover | extract`
 - `G.mode`: `attract` (bot demo behind menus, SFX muted) or `run`
 - `G.player`: `x, y, hp, maxHp, shield, charges, od (0–100), odT, level, xp, up {id: level}, st {derived stats}`
 - `G.enemies` (`type, x, y, r, hp, elite, parts?`; bosses have `boss: true, phase, state`), `G.boss`
@@ -48,7 +49,7 @@ NEON.simulate(600); // → { screen, sector, hp, level, score, time }
 
 ## Campaign flow
 
-Title PLAY → `scr-campaign` (select system, LAUNCH / SHIP / ENDLESS GRID) → `launchSystem` → `scr-route` (branching nodes) → fighting node = `startSector(nodeSpec(...))` → sector reward draft → back to route. Boss node cleared → `extract()` → `scr-extract` → campaign. `G.run = { mode: 'campaign'|'endless', system, route, row, nodeId, sectors, victory, visited[] }` (null in attract).
+Title PLAY → `scr-campaign` (select system, LAUNCH / HANGAR + ENDLESS GRID pair / BACK) → `launchSystem` → `scr-route` (branching nodes) → fighting node = `startSector(nodeSpec(...))` → sector reward draft → back to route. Boss node cleared → `extract()` → `scr-extract` → campaign. `G.run = { mode: 'campaign'|'endless', system, route, row, nodeId, sectors, victory, visited[] }` (null in attract).
 
 - `src/game/campaign.js`: `SYSTEMS`, `generateRoute`, `reachableNodes`, `nodeSpec`, `systemUnlocked`. Progress: `profile.campaign.cleared` (system ids).
 - `src/ui/meta.js`: render functions for campaign / route / route stop / extraction.
@@ -64,3 +65,11 @@ Title PLAY → `scr-campaign` (select system, LAUNCH / SHIP / ENDLESS GRID) → 
 - Black Market: `rollMarket(p, system, rng) → offers`; offer = `{id, kind: 'upgrade'|'repair'|'reroll'|'contraband', name, desc, icon, cat, tag, price, sold, blocked?, up?, amount?, hullDrawback?}`; `buyOffer(offer)` returns `''` or a reason. Prices ×(1+0.5*(act-1)).
 - Max-hull tweaks go through `p.hullMod` (dock reinforcement +, contraband −), read by `recomputeStats` (min 1).
 - Upgrade helper: `rollUpgradeIds(p, kind, n, rng)` in `upgrades.js` (also behind `rollDraft`).
+
+## Hangar (`src/game/parts.js`, `src/game/hangar.js`, `src/ui/hangar.js`)
+
+- Reachable only from the campaign map (`#ship-btn` → `openHangar()`); `scr-hangar` (ship carousel, 3 slot rows, paint swatches, live stat summary) and `scr-parts` (part list for one slot). Never reachable from pause/route, so gear is locked during a run. Ship selection lives here: `profile.lastShip` is the ship used by LAUNCH and ENDLESS GRID.
+- Add a ship: push a def to `SHIPS` with `price` (and optional legacy `unlock`), a `SHIP_SHAPES[id]` in `sprites.js`; the hangar carousel, ownership, paint (`paintsFor`, per-ship set in `PAINT_SETS` or the fallback) and buying all follow. No price and no unlock = owned from the start. Legacy `unlock` ships still auto-grant at game over (`bankRun`) into `profile.ownedShips`; `ownsShip(profile, ship)` is the menu check (`isUnlocked` is only the legacy condition).
+- Parts: `PARTS` in `parts.js`, `{id, slot, name, desc, price, icon, apply(st, p), start?}`. `createPlayer(ship, gear)` sets `p.parts` (empty in attract) and `p.color` (painted colour; use it instead of `p.ship.color` for visuals). `recomputeStats` runs `applyParts(st, p)` after upgrades and before `maxHp` is clamped to >= 1. `start: {upgradeId: lv}` grants free upgrade levels at run start (Aegis Emitter).
+- New `p.st` fields (neutral defaults set in `recomputeStats`): `xpMul` (gainXp), `creditMul` (gainCredits), `grazeR` / `grazeOd` (graze radius / Overdrive per graze, world.js), `dashDur` (dash length and i-frames), `critMul` (2.5 default; world.js crit).
+- Profile: `ownedParts[]`, `equip{shipId:{core,plating,thrusters}}`, `paint{shipId: idx}`, `paintsOwned{shipId:[idx]}` (0 is stock, always owned). `rebuildShipSprite(ship, color, bullet)` re-bakes one ship sprite and its primary bullet; run for painted ships on boot (`applyAllPaints`) and on paint change.
