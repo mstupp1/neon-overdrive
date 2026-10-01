@@ -4,6 +4,7 @@
 import { weightedPick } from '../core/math.js';
 import { WEAPONS } from './ships.js';
 import { applyParts } from './parts.js';
+import { applyPassives } from './pilot.js';
 
 export const MAX_MODULES = 4;
 
@@ -105,6 +106,7 @@ export function recomputeStats(p) {
   st.dashDur = 1;
   st.critMul = 2.5;
   applyParts(st, p);
+  applyPassives(st, p);
   st.maxHp = Math.max(1, st.maxHp);
   p.maxHp = st.maxHp;
   p.maxCharges = st.maxCharges;
@@ -133,7 +135,7 @@ export function rollUpgradeIds(p, kind, n = 3, rng = Math.random) {
   const pool = UPGRADES.filter((u) => {
     const l = p.up[u.id] || 0;
     if (l >= u.max) return false;
-    if (u.cat === 'module' && l === 0 && mods >= MAX_MODULES) return false;
+    if (u.cat === 'module' && l === 0 && mods >= p.st.maxModules) return false;
     return true;
   });
   const choices = [];

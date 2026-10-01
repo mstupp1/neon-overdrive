@@ -6,6 +6,7 @@ import { TAU, segDist2, dist2 } from '../core/math.js';
 import { bg } from '../render/background.js';
 import { updateDirector } from './director.js';
 import { updatePlayer, drawPlayer, hurtPlayer, gainOverdrive, addScore } from './player.js';
+import { pilotTimeScale, domeErase, onGraze, phasing } from './pilot.js';
 import { updateModules, updateBeams, drawModules, drawBeams } from './modules.js';
 import { updateEnemies, damageEnemy } from './enemies.js';
 import { drawBoss } from './bosses.js';
@@ -21,9 +22,10 @@ export function step(dt) {
   updateDirector(dt);
   updatePlayer(p, dt);
   updateModules(p, dt);
-  updateEnemies(dt);
+  const et = dt * pilotTimeScale(p, dt); // enemy time (Phase Shift slows it)
+  updateEnemies(et);
   updatePlayerBullets(dt);
-  updateEnemyBullets(dt);
+  updateEnemyBullets(et);
   updateBeams(dt);
   collide(p);
   updatePickups(dt);
@@ -35,7 +37,7 @@ export function step(dt) {
   }
   if (G.pulse > 0) {
     G.pulse += dt * 1100;
-    if (G.pulse > 1100) G.pulse = 0;
+    if (G.pulse > G.pulseMax) G.pulse = 0;
   }
 }
 
@@ -143,9 +145,11 @@ function collide(p) {
   }
 
   if (p.dead) return;
+  domeErase(p);
 
   // Enemy bullets → player (+ graze)
   const grazeR = 24 * p.st.grazeR;
+  const ghost = phasing(p);
   for (const b of G.eBullets) {
     if (b.dead || b.delay > 0) continue;
     const dx = b.x - p.x;
@@ -154,7 +158,7 @@ function collide(p) {
     if (dx > lim || dx < -lim || dy > lim || dy < -lim) continue;
     const d2 = dx * dx + dy * dy;
     const hr = b.r + p.r;
-    if (d2 < hr * hr) {
+    if (d2 < hr * hr && !ghost) {
       if (p.iframes <= 0 && p.dashT <= 0) {
         b.dead = true;
         hurtPlayer(p);
@@ -166,6 +170,7 @@ function collide(p) {
       addScore(25);
       sparks(p.x + dx * 0.5, p.y + dy * 0.5, '#ffffff', 2, 140);
       sfx.graze();
+      onGraze(p);
     }
   }
 
@@ -297,10 +302,10 @@ export function renderWorld(ctx, k) {
   // Overdrive shockwave
   if (G.pulse > 0 && G.player) {
     const p = G.player;
-    const t = G.pulse / 1100;
+    const t = G.pulse / G.pulseMax;
     ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = 1 - t;
-    ctx.strokeStyle = '#ff3df2';
+    ctx.strokeStyle = G.pulseColor;
     ctx.lineWidth = 16 * (1 - t) + 2;
     ctx.beginPath();
     ctx.arc(p.x, p.y, G.pulse, 0, TAU);
@@ -309,9 +314,9 @@ export function renderWorld(ctx, k) {
     ctx.globalCompositeOperation = 'source-over';
   }
 
-  // Overdrive tint
+  // Ult tint (class colour)
   if (G.player && G.player.odT > 0) {
-    const g = glow('#ff3df2', 64);
+    const g = glow(G.player.ucol, 64);
     ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = 0.08 + Math.sin(G.time * 6) * 0.03;
     ctx.drawImage(g.img, -view.W * 0.5, -view.H * 0.2, view.W * 2, view.H * 1.4);

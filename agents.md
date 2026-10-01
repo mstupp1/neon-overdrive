@@ -19,6 +19,7 @@ The game is a set of ES modules (see README "Project layout"). All mutable world
 | `market()` | Current Black Market offers (array, see Economy) |
 | `pickNode(i)` | On the route screen, pick the i-th reachable node |
 | `campaign` | `{ SYSTEMS, generateRoute(system, seed), nodeSpec, reachableNodes }` from `src/game/campaign.js` |
+| `setClass(id)` `setPassives(cls, [ids])` | Pilot class / up to 2 passives; return `''` or a reason (`RANK n`, `SLOTS FULL`). Rank-gated: `grant({rankXp: 9000})` first (rank 3 = 700 XP, 6 = 2500, 10 = 6300) |
 | `buyShip(id)` `buyPart(id)` `selectShip(id)` `equip(shipId, partId)` `unequip(shipId, slot)` `paint(shipId, idx)` | Hangar actions; return `''` or a reason (`NEED n`, `OWNED`, ...). They spend profile credits, so `grant({credits})` first |
 | `toTitle()` | Back to title/attract mode |
 | `applyUpgrade(id)` | Grant an upgrade (ids in `src/game/upgrades.js`) |
@@ -49,7 +50,7 @@ NEON.simulate(600); // → { screen, sector, hp, level, score, time }
 
 ## Campaign flow
 
-Title PLAY → `scr-campaign` (select system, LAUNCH / HANGAR + ENDLESS GRID pair / BACK) → `launchSystem` → `scr-route` (branching nodes) → fighting node = `startSector(nodeSpec(...))` → sector reward draft → back to route. Boss node cleared → `extract()` → `scr-extract` → campaign. `G.run = { mode: 'campaign'|'endless', system, route, row, nodeId, sectors, victory, visited[] }` (null in attract).
+Title PLAY → `scr-campaign` (select system, LAUNCH / HANGAR + PILOT pair / ENDLESS GRID + BACK pair) → `launchSystem` → `scr-route` (branching nodes) → fighting node = `startSector(nodeSpec(...))` → sector reward draft → back to route. Boss node cleared → `extract()` → `scr-extract` → campaign. `G.run = { mode: 'campaign'|'endless', system, route, row, nodeId, sectors, victory, visited[] }` (null in attract).
 
 - `src/game/campaign.js`: `SYSTEMS`, `generateRoute`, `reachableNodes`, `nodeSpec`, `systemUnlocked`. Progress: `profile.campaign.cleared` (system ids).
 - `src/ui/meta.js`: render functions for campaign / route / route stop / extraction.
@@ -65,6 +66,15 @@ Title PLAY → `scr-campaign` (select system, LAUNCH / HANGAR + ENDLESS GRID pai
 - Black Market: `rollMarket(p, system, rng) → offers`; offer = `{id, kind: 'upgrade'|'repair'|'reroll'|'contraband', name, desc, icon, cat, tag, price, sold, blocked?, up?, amount?, hullDrawback?}`; `buyOffer(offer)` returns `''` or a reason. Prices ×(1+0.5*(act-1)).
 - Max-hull tweaks go through `p.hullMod` (dock reinforcement +, contraband −), read by `recomputeStats` (min 1).
 - Upgrade helper: `rollUpgradeIds(p, kind, n, rng)` in `upgrades.js` (also behind `rollDraft`).
+
+## Pilot classes (`src/game/pilot.js`, `src/ui/pilot.js`)
+
+- `CLASSES` = striker / engineer / ghost: `{id, name, role, color, rgb, unlockRank, desc, icon, ult:{id,name,short,desc}, passives:[{id,name,rank,desc,icon,apply?(st,p)}]}`. Profile: `pilot.cls`, `pilot.passives[cls] = [ids]` (max 2, only those with `rank <= rankFor(profile.rankXp).rank`; `activeClass()` / `equippedPassives(cls)` apply the gating, `setClass` / `togglePassive` / `setPassives` return `''` or a reason). `scr-pilot` (campaign map only, PILOT button) renders them.
+- `createPlayer` calls `initPilot(p, cls, passiveIds)`: sets `p.cls` (`'striker'` for attract / no gear), `p.ucol` (class colour), `p.passives`, `p.pdm` (Killstreak damage multiplier), `p.echoes`, timers. `recomputeStats` runs `applyPassives(st, p)` right after `applyParts`: numeric passives edit `st` (`creditMul`, `grazeR`, `critMul`, `modDmg`, `maxModules`), behavioural ones set flags `st.killstreak/exec/bloodrush/nanorepair/riposte/afterimage/slipstream` checked at the hook points (`updatePilot`, `damageEnemy`, `onEnemyKilled`, director `sectorClear`, world.js graze, dash code).
+- The ult replaces Overdrive but still uses `p.od` (meter), `p.odT` (time left; `st.odDur`) and the O key. `player.js activateOverdrive(p)` does the shared part (meter, i-frames, sfx, flash, floatText with `ult.short`) then `pilot.js castUlt(p)` → `ULTS[p.cls](p)` (opening effect). Per-frame effects key off `p.odT > 0` plus helpers `boosted(p)` (Striker's fire/damage boost; modules and `firePrimary` use it), `fortressOn(p)` (dome, in `domeErase(p)` called from `collide`, and 2 temporary drones in `modules.js`), `phasing(p)` (intangible: `hurtPlayer` and the bullet hit test skip, grazes still count and call `onGraze`).
+- Phase Shift: `G.enemyTimeScale` (smoothed 1 → 0.4, set by `pilotTimeScale(p, dt)` in `world.js step`) multiplies the dt given to `updateEnemies` (bosses included), `updateEnemyBullets` and enemy beams. Player, player bullets, pickups, director timers and FX stay at 1. Any system that moves enemy things should use that dt. `G.slowmo` is the global (hit-stop style) slow-mo and is separate.
+- `G.pulse` / `G.pulseMax` / `G.pulseColor`: the ult shockwave ring. `S.dome` (Fortress dome) and `S.portrait_echo` (96 px helmet bust, for the pilot screen and later comms) are baked in `sprites.js`.
+- Add a class: push a def into `CLASSES`, a `ULTS[id]` opening effect and per-frame behaviour keyed on `p.cls`; the HUD gauge (label `ult.short`, colour), pilot screen, route chips and bot already read from `CLASSES`.
 
 ## Hangar (`src/game/parts.js`, `src/game/hangar.js`, `src/ui/hangar.js`)
 

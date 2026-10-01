@@ -15,6 +15,8 @@ import { step, renderWorld } from './game/world.js';
 import { ui } from './ui/screens.js';
 import { meta } from './ui/meta.js';
 import { hangarActs, openHangar } from './ui/hangar.js';
+import { pilotActs, openPilot } from './ui/pilot.js';
+import { setClass, setPassives } from './game/pilot.js';
 import { buyShip, buyPart, equipPart, unequipSlot, setPaint, selectShip, applyAllPaints } from './game/hangar.js';
 import { SYSTEMS, systemById, generateRoute, nodeSpec, reachableNodes, routeNode, systemUnlocked } from './game/campaign.js';
 import { rand, pick } from './core/math.js';
@@ -99,6 +101,7 @@ function newWorld(mode, shipDef, run = null) {
   G.hitstop = 0;
   G.banner = null;
   G.pulse = 0;
+  G.enemyTimeScale = 1;
   G.vacuum = false;
   G.director = createDirector();
   G.director.onClear = onSectorClear;
@@ -402,6 +405,9 @@ ui.init({
   hangar: () => openHangar(),
   leaveHangar: () => showCampaign(),
   ...hangarActs,
+  pilot: () => openPilot(),
+  leavePilot: () => showCampaign(),
+  ...pilotActs,
   campaign: () => showCampaign(),
   node(btn) {
     pickRouteNode(routeNode(G.run.route, btn.dataset.id));
@@ -497,7 +503,7 @@ let slowFrames = 0;
 
 function simulating() {
   const s = G.screen;
-  return s === 'play' || s === 'gameover' || s === 'title' || s === 'campaign' || s === 'hangar' || s === 'parts' || s === 'settings' || s === 'help';
+  return s === 'play' || s === 'gameover' || s === 'title' || s === 'campaign' || s === 'hangar' || s === 'parts' || s === 'pilot' || s === 'settings' || s === 'help';
 }
 
 function frame(now) {
@@ -650,6 +656,9 @@ window.NEON = {
   equip: (shipId, partId) => (partId ? equipPart(shipId, partId) : 'NO PART'),
   unequip: unequipSlot,
   paint: setPaint,
+  // Pilot (return '' on success, else a reason). Classes / passives are rank-gated: grant({rankXp}) first.
+  setClass,
+  setPassives,
   campaign: { SYSTEMS, generateRoute, nodeSpec, reachableNodes },
   // opts.nodePick(nodes) → index overrides the default (random fighting node).
   simulate(seconds, pickFn = (choices) => pick(choices), opts = {}) {

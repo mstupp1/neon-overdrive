@@ -349,6 +349,8 @@ export function updateEnemies(dt) {
 
 export function damageEnemy(e, dmg, x, y, crit = false) {
   if (e.dead || e.invuln) return false;
+  const pl = G.player;
+  if (pl && pl.st.exec) dmg *= e.boss ? 1.1 : e.hp < e.maxHp * 0.3 ? 1.4 : 1; // Executioner
   e.hp -= dmg;
   e.flash = 0.06;
   damageNumber(x ?? e.x, y ?? e.y, dmg, crit);

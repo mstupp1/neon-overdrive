@@ -51,7 +51,10 @@ export const G = {
   flash: 0,
   flashColor: '255,255,255',
   banner: null, // { title, sub, t, dur, color }
-  pulse: 0, // overdrive shockwave visual radius
+  pulse: 0, // ult shockwave visual radius
+  pulseMax: 1100,
+  pulseColor: '#ff3df2',
+  enemyTimeScale: 1, // Phase Shift: scales enemies, bosses, enemy bullets and enemy beams (not the player)
 
   stats: null, // end-of-run summary
 };

@@ -10,6 +10,7 @@ import { bossById } from '../game/bosses.js';
 import { rankFor, ECON_ICONS } from '../game/economy.js';
 import { CAT_COLORS } from '../game/upgrades.js';
 import { SLOT_INFO } from '../game/parts.js';
+import { CLASSES, activeClass } from '../game/pilot.js';
 
 const svg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 
@@ -51,7 +52,7 @@ export const meta = {
     });
     map.innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none">${lines}</svg>${btns}`;
     const rk = rankFor(profile.rankXp);
-    $('#camp-pilot').innerHTML = `<span class="gold">${coin}${fmt(profile.credits)}</span><span class="rank">RANK <b>${rk.rank}</b></span><span class="rankbar"><i style="width:${rk.need ? Math.round((100 * rk.into) / rk.need) : 100}%"></i></span><span class="rank">${shipName}</span>`;
+    $('#camp-pilot').innerHTML = `<span class="gold">${coin}${fmt(profile.credits)}</span><span class="rank">RANK <b>${rk.rank}</b></span><span class="rankbar"><i style="width:${rk.need ? Math.round((100 * rk.into) / rk.need) : 100}%"></i></span><span class="rank">${shipName}</span><span class="rank cls" style="--c:${activeClass().color}">${activeClass().name}</span>`;
     return this.selectSystem(sel);
   },
 
@@ -78,7 +79,11 @@ export const meta = {
     $('#route-title').textContent = sys.name;
     $('#route-title').style.textShadow = `0 0 0.35em ${hsl(sys.hue)}, 0 0 1.2em ${hsl(sys.hue, 55)}`;
     $('#route-stats').innerHTML = stat('HULL', `${p.hp}/${p.maxHp}`) + stat('LEVEL', p.level) + stat('CREDITS', `<span class="gold">${fmt(run.wallet || 0)}</span>`) + stat('ROUTE', `${visited.size}/${total}`);
-    $('#route-gear').innerHTML = (p.parts || []).map((pt) => `<div class="chip" style="--c:${SLOT_INFO[pt.slot].color}" title="${pt.name}">${pt.icon}</div>`).join('');
+    const cls = CLASSES.find((c) => c.id === p.cls) || CLASSES[0];
+    $('#route-gear').innerHTML =
+      `<div class="chip cls" style="--c:${cls.color}" title="${cls.name}">${cls.icon}</div>` +
+      (p.passives || []).map((id) => cls.passives.find((x) => x.id === id)).filter(Boolean).map((ps) => `<div class="chip" style="--c:${cls.color}" title="${ps.name}">${ps.icon}</div>`).join('') +
+      (p.parts || []).map((pt) => `<div class="chip" style="--c:${SLOT_INFO[pt.slot].color}" title="${pt.name}">${pt.icon}</div>`).join('');
     const px = (n) => 12 + n.x * 76;
     const py = (n) => 90 - (n.row / (total - 1)) * 84;
     let lines = '';

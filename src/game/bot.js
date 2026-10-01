@@ -80,7 +80,7 @@ export function botControl() {
     tx: 0,
     ty: 0,
     dash,
-    od: p.od >= 100 && busy,
+    od: p.od >= 100 && (busy || danger > 3),
     focus: danger > 2.5,
   };
 }

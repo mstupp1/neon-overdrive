@@ -29,7 +29,7 @@
         <button id="pause-btn" class="pause-btn" aria-label="Pause" tabindex="-1" hidden><i></i><i></i></button>
 
         <div id="touch-ui" hidden>
-            <button id="touch-od" class="touch-btn od" aria-label="Overdrive" tabindex="-1"></button>
+            <button id="touch-od" class="touch-btn od" aria-label="Ultimate" tabindex="-1"></button>
             <button id="touch-dash" class="touch-btn dash" aria-label="Dash" tabindex="-1"></button>
         </div>
 
@@ -74,6 +74,20 @@
             </nav>
         </section>
 
+        <!-- PILOT (reachable from the campaign map only) -->
+        <section class="screen" id="scr-pilot" data-back="leavePilot">
+            <h2 class="screen-title">PILOT</h2>
+            <div class="pilot-card" id="pl-card"></div>
+            <div class="hs-label">CLASS</div>
+            <div class="cls-tabs" id="pl-tabs"></div>
+            <div class="cls-info" id="pl-info"></div>
+            <div class="hs-label" id="pl-pass-label">PASSIVES</div>
+            <div class="cards still pass-list" id="pl-passives"></div>
+            <nav class="menu row">
+                <button class="btn ghost small" data-act="leavePilot" id="pl-back">BACK</button>
+            </nav>
+        </section>
+
         <!-- HANGAR PART LIST -->
         <section class="screen" id="scr-parts" data-back="partsBack">
             <h2 class="screen-title" id="parts-title">CORE</h2>
@@ -96,9 +110,12 @@
                 <button class="btn primary" data-act="launch" id="launch-btn">LAUNCH</button>
                 <div class="pair">
                     <button class="btn small" data-act="hangar" id="ship-btn">HANGAR</button>
-                    <button class="btn small" data-act="endless">ENDLESS GRID</button>
+                    <button class="btn small" data-act="pilot" id="pilot-btn">PILOT</button>
                 </div>
-                <button class="btn ghost small" data-act="back">BACK</button>
+                <div class="pair">
+                    <button class="btn small" data-act="endless">ENDLESS GRID</button>
+                    <button class="btn ghost small" data-act="back">BACK</button>
+                </div>
             </nav>
         </section>
 
@@ -213,7 +230,7 @@
                     <table class="keys">
                         <tr><td>Move</td><td><kbd>WASD</kbd> <kbd>←↑↓→</kbd> · mouse · drag · stick</td></tr>
                         <tr><td>Dash</td><td><kbd>Space</kbd> · left click · 2nd finger / button · <kbd>A</kbd></td></tr>
-                        <tr><td>Overdrive</td><td><kbd>E</kbd> · right click · button · <kbd>B</kbd></td></tr>
+                        <tr><td>Ultimate</td><td><kbd>E</kbd> · right click · button · <kbd>B</kbd></td></tr>
                         <tr><td>Focus</td><td>Hold <kbd>Shift</kbd> / <kbd>LB</kbd> for precise movement</td></tr>
                         <tr><td>Pause</td><td><kbd>Esc</kbd> <kbd>P</kbd> · Start</td></tr>
                     </table>
@@ -223,7 +240,8 @@
                     <ul>
                         <li>Your ship fires automatically. Only the <b>white core</b> can be hit.</li>
                         <li><b>Dash</b> through danger — you're untouchable mid-dash.</li>
-                        <li><b>Graze</b> bullets and chain kills to charge <b class="pink">Overdrive</b>: erase every bullet and double your fire, damage and score.</li>
+                        <li><b>Graze</b> bullets and chain kills to charge your <b class="pink">Ultimate</b>. Your pilot class replaces Overdrive: <b>Striker</b> erases every bullet and doubles fire and damage, <b>Engineer</b> raises a bullet-eating dome with extra wingmen, <b>Ghost</b> slows time around you and turns grazes into strikes. All of them double your score.</li>
+                        <li>Pick your class and two passives on the <b>Pilot</b> screen of the campaign map. Pilot Rank unlocks more.</li>
                         <li>Collect <b class="cyan">data shards</b> to level up and draft upgrades. Build around up to 4 weapon modules.</li>
                         <li>Clear sectors for bonus picks. Every third sector hides a boss.</li>
                     </ul>

@@ -19,7 +19,7 @@ It deploys as-is to any static host (itch.io, GitHub Pages, Netlify…). Fonts a
 |---|---|---|---|---|
 | Move | WASD / arrows | ship follows cursor | drag anywhere (relative) | left stick / d-pad |
 | Dash (i-frames) | Space | left click | DASH button or 2nd finger | A / RT |
-| Overdrive | E | right click | OVERDRIVE button | B / X |
+| Ultimate (class) | E | right click | ULT button | B / X |
 | Focus (slow, precise) | hold Shift | — | — | LB / RB / LT |
 | Pause | Esc / P | pause button | pause button | Start |
 
@@ -31,7 +31,7 @@ In menus: arrows/d-pad to move, Enter/Space/A to select, Esc/B to go back, `1`�
 - **Data shards → level ups.** Enemies drop XP shards (magnetised when close). Each level offers a draft of 3 upgrades; clearing a sector grants a bonus draft and repairs 1 hull. Rerolls: 1 per run + 1 per boss kill.
 - **Build.** Upgrade your main cannon, stats (damage, fire rate, crit, pierce, speed, magnet, overdrive capacitor) and defenses (hull, regenerating Aegis shield, extra dashes), and slot up to **4 weapon modules**: Swarm Missiles, Razor Orbit, Wingmen, Arc Coil, Pulse Nova, Rail Lance, Shrapnel, Shock Dash.
 - **Combo.** Kills chain into a score multiplier (up to x8). Getting hit breaks the chain.
-- **Graze & Overdrive.** Skimming bullets and killing fills the Overdrive meter. Trigger it to erase every bullet on screen, hit everything, vacuum shards, and gain boosted fire rate/damage and double score for several seconds.
+- **Graze & Ultimate.** Skimming bullets and killing fills the ultimate meter. Your **pilot class** decides what it does (see below). Every ultimate doubles your score while it lasts.
 - **Only the white core of your ship is the hitbox.** Dashing makes you invulnerable.
 
 ### Ships
@@ -44,6 +44,16 @@ In menus: arrows/d-pad to move, Enter/Space/A to select, Esc/B to go back, `1`�
 | PHANTOM | Seeking crescents, 3 dashes, Shock Dash | 1400 | Reach sector 8 |
 
 Ships are bought with credits in the **Hangar** (campaign map → HANGAR), or granted for free when you hit the legacy unlock goal.
+
+### Pilot classes
+
+Open **PILOT** on the campaign map to pick your class and equip **2 passives**. Pilot ECHO's rank (XP from runs) unlocks classes and passives (the screen shows each requirement).
+
+| Class | Unlock | Ultimate | Passives (rank) |
+|---|---|---|---|
+| STRIKER | rank 1 | **OVERDRIVE**: erase every bullet, blast all enemies, vacuum shards, +60% fire / +50% damage | Killstreak (1), Hair Trigger (2), Executioner (4), Bloodrush (5) |
+| ENGINEER | rank 3 | **FORTRESS PROTOCOL**: opening blast, then a bullet-eating dome and 2 extra wingmen | Salvager (3), Overflow (4), Drone Link (5), Nanorepair (7) |
+| GHOST | rank 6 | **PHASE SHIFT**: enemies and bullets at 40% speed, you are intangible, grazes damage the nearest enemy | Wide Graze (6), Slipstream (7), Riposte (8), Afterimage (10) |
 
 ### Hangar: parts and paint
 
@@ -68,6 +78,7 @@ src/game/           state, player, weapons modules, enemies, bosses, bullets, pi
 src/ui/screens.js   menu screens, navigation, draft cards
 src/ui/meta.js      campaign / route / market / extraction screens
 src/ui/hangar.js    hangar (ships, parts, paint)
+src/ui/pilot.js     pilot screen (class, passives)
 src/audio/music/    soundtrack
 src/fonts/          Orbitron + Rajdhani (SIL OFL)
 ```

@@ -7,8 +7,10 @@ import { playerBullet, nearestEnemy, clearBullets } from './bullets.js';
 import { damageEnemy } from './enemies.js';
 import { ring, sparks } from './fx.js';
 import { sfx } from '../core/audio.js';
+import { boosted, fortressOn } from './pilot.js';
 
 const lvl = (arr, lv) => arr[Math.min(arr.length, lv) - 1];
+const TEMP_SLOTS = [[-62, 30], [62, 30]];
 
 export function resetModules(p) {
   p.mod = { missT: 1, arcT: 1.2, novaT: 2, railT: 2, orbA: 0, droneT: 0.2 };
@@ -16,11 +18,11 @@ export function resetModules(p) {
 }
 
 function dmgMul(p) {
-  return p.st.dmg * (p.odT > 0 ? 1.5 : 1);
+  return p.st.dmg * p.pdm * p.st.modDmg * (boosted(p) ? 1.5 : 1);
 }
 
 function rateMul(p) {
-  return p.st.rate * (p.odT > 0 ? 1.4 : 1);
+  return p.st.rate * (boosted(p) ? 1.4 : 1);
 }
 
 export function updateModules(p, dt) {
@@ -79,15 +81,19 @@ export function updateModules(p, dt) {
     }
   }
 
-  // Wingmen
-  if (up.drones) {
-    const lv = up.drones;
-    const n = lv >= 5 ? 3 : 2;
+  // Wingmen. Fortress Protocol adds 2 temporary drones (aimed like level-3 wingmen when you own no module).
+  const fort = fortressOn(p);
+  if (up.drones || fort) {
+    const lv = up.drones || 3;
+    const nPerm = up.drones ? (lv >= 5 ? 3 : 2) : 0;
+    const n = nPerm + (fort ? 2 : 0);
     while (p.drones.length < n) p.drones.push({ x: p.x, y: p.y + 20, ang: -Math.PI / 2 });
-    const slots = n === 3 ? [[-36, 14], [36, 14], [0, 34]] : [[-34, 12], [34, 12]];
+    p.drones.length = n;
+    const slots = nPerm === 3 ? [[-36, 14], [36, 14], [0, 34]] : [[-34, 12], [34, 12]];
     p.drones.forEach((d, i) => {
-      d.x = damp(d.x, p.x + slots[i][0], 9, dt);
-      d.y = damp(d.y, p.y + slots[i][1], 9, dt);
+      const sl = i < nPerm ? slots[i] : TEMP_SLOTS[i - nPerm];
+      d.x = damp(d.x, p.x + sl[0], 9, dt);
+      d.y = damp(d.y, p.y + sl[1], 9, dt);
     });
     m.droneT -= dt * rate;
     if (m.droneT <= 0) {
@@ -103,7 +109,7 @@ export function updateModules(p, dt) {
         playerBullet(d.x, d.y - 6, a, 900, dmg, S.pb_drone, { r: 3.5, life: 1, alpha: 0.9 });
       }
     }
-  }
+  } else if (p.drones.length) p.drones.length = 0;
 
   // Arc coil
   if (up.arc) {
@@ -197,10 +203,11 @@ export function dashNova(p) {
   ring(p.x, p.y, 55 + 15 * lv, '#ff3df2', 0.35);
 }
 
-export function updateBeams(dt) {
+export function updateBeams(rawDt) {
   const p = G.player;
   let w = 0;
   for (const b of G.beams) {
+    const dt = b.owner === 'enemy' ? rawDt * G.enemyTimeScale : rawDt; // Phase Shift slows enemy beams too
     if (b.owner === 'enemy') {
       if (b.src) {
         if (b.src.dead) continue;
@@ -223,7 +230,7 @@ export function updateBeams(dt) {
   G.beams.length = w;
   let bw = 0;
   for (const bolt of G.bolts) {
-    bolt.life -= dt;
+    bolt.life -= rawDt;
     if (bolt.life > 0) G.bolts[bw++] = bolt;
   }
   G.bolts.length = bw;

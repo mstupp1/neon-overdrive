@@ -1,9 +1,10 @@
 // In-canvas HUD: hull, score & combo, XP, sector progress, boss bar, gauges, banners.
 
 import { G, view, sectorInfo } from '../game/state.js';
-import { S } from './sprites.js';
+import { S, withAlpha } from './sprites.js';
 import { TAU, clamp, easeOutCubic } from '../core/math.js';
 import { comboMult } from '../game/player.js';
+import { CLASSES } from '../game/pilot.js';
 import { input } from '../core/input.js';
 
 const FONT = 'Orbitron, "Segoe UI", sans-serif';
@@ -146,21 +147,23 @@ function drawGauge(ctx, x, y, p, kind) {
   ctx.fill();
   if (kind === 'od') {
     const active = p.odT > 0;
-    const t = active ? p.odT / p.st.odDur : p.od / 100;
+    const t = clamp(active ? p.odT / p.st.odDur : p.od / 100, 0, 1);
     const ready = p.od >= 100 && !active;
-    ctx.strokeStyle = 'rgba(255,61,242,0.2)';
+    const cls = CLASSES.find((c) => c.id === p.cls) || CLASSES[0];
+    const col = cls.color;
+    ctx.strokeStyle = withAlpha(col, 0.2);
     ctx.lineWidth = 4;
     ctx.beginPath();
     ctx.arc(x, y, r, 0, TAU);
     ctx.stroke();
-    ctx.strokeStyle = active || ready ? '#ff3df2' : '#b84dff';
+    ctx.strokeStyle = active || ready ? col : withAlpha(col, 0.7);
     ctx.lineWidth = ready ? 5 + Math.sin(G.realTime * 8) * 1.5 : 4;
     ctx.beginPath();
     ctx.arc(x, y, r, -Math.PI / 2, -Math.PI / 2 + TAU * t);
     ctx.stroke();
     const label = active ? 'ON' : ready ? keyHint('od') || 'TAP' : `${Math.floor(p.od)}%`;
-    text(ctx, label, x, y - 1, ready || active ? 10 : 9, ready || active ? '#ffffff' : '#e7b8ff', 'center', 700);
-    text(ctx, 'OVERDRIVE', x, y + r + 12, 7, '#ff9ad5', 'center', 700);
+    text(ctx, label, x, y - 1, ready || active ? 10 : 9, ready || active ? '#ffffff' : withAlpha(col, 0.85), 'center', 700);
+    text(ctx, cls.ult.short, x, y + r + 12, 7, col, 'center', 700);
   } else {
     const n = p.maxCharges;
     for (let i = 0; i < n; i++) {

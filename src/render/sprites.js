@@ -374,4 +374,44 @@ export function buildSprites(ships) {
     const p = poly([[0, -8], [7, -5], [6, 3], [0, 8], [-6, 3], [-7, -5]]);
     glowFill(g, '#3ff6ff', 0, p, 0.5); glowStroke(g, '#3ff6ff', 1.4, 6, p, 1);
   });
+
+  // Fortress Protocol dome (ring radius 85 at scale 1), baked so the per-frame cost is one drawImage.
+  S.dome = makeSprite(220, (g) => {
+    const R = 85;
+    const grd = g.createRadialGradient(0, 0, R * 0.55, 0, 0, R);
+    grd.addColorStop(0, 'rgba(255,176,46,0)');
+    grd.addColorStop(1, 'rgba(255,176,46,0.3)');
+    g.fillStyle = grd;
+    g.beginPath(); g.arc(0, 0, R, 0, TAU); g.fill();
+    glowStroke(g, '#ffb02e', 2.6, 12, (c) => c.arc(0, 0, R, 0, TAU));
+    g.save();
+    g.globalAlpha = 0.35;
+    g.strokeStyle = '#ffd98a'; g.lineWidth = 1; g.setLineDash([6, 8]);
+    g.beginPath(); g.arc(0, 0, R - 7, 0, TAU); g.stroke();
+    g.restore();
+  });
+
+  // ECHO's helmet bust (pilot screen now, comms later). 96x96 box.
+  S.portrait_echo = makeSprite(96, (g) => {
+    const shell = (c) => {
+      c.moveTo(-23, 20); c.lineTo(-25, -6); c.quadraticCurveTo(-25, -34, 0, -37); c.quadraticCurveTo(25, -34, 25, -6);
+      c.lineTo(23, 20); c.lineTo(11, 28); c.lineTo(-11, 28); c.closePath();
+    };
+    const shoulders = (c) => {
+      c.moveTo(-44, 48); c.lineTo(-36, 36); c.lineTo(-14, 30); c.moveTo(14, 30); c.lineTo(36, 36); c.lineTo(44, 48);
+    };
+    glowStroke(g, '#3ff6ff', 2, 6, shoulders, 1);
+    glowFill(g, '#3ff6ff', 0, shell, 0.16);
+    glowStroke(g, '#3ff6ff', 2.4, 10, shell);
+    // crest + cheek lines
+    glowStroke(g, '#3ff6ff', 1.4, 5, (c) => { c.moveTo(0, -37); c.lineTo(0, -22); c.moveTo(-23, 12); c.lineTo(-13, 14); c.moveTo(23, 12); c.lineTo(13, 14); }, 1);
+    // visor
+    const visor = (c) => { c.moveTo(-19, -10); c.lineTo(19, -10); c.lineTo(15, 3); c.lineTo(-15, 3); c.closePath(); };
+    glowFill(g, '#ff3df2', 0, visor, 0.55);
+    glowStroke(g, '#ff3df2', 2, 9, visor);
+    g.save();
+    g.fillStyle = '#fff'; g.shadowColor = '#ff3df2'; g.shadowBlur = 8;
+    g.fillRect(-11, -5, 22, 2.4);
+    g.restore();
+  });
 }
