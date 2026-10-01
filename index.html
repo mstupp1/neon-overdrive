@@ -242,8 +242,13 @@
         <!-- HELP -->
         <section class="screen" id="scr-help" data-back="back">
             <h2 class="screen-title">HOW TO PLAY</h2>
+            <div class="help-tabs">
+                <button class="btn small on" data-act="helpTab" data-tab="controls">CONTROLS</button>
+                <button class="btn small" data-act="helpTab" data-tab="survive">SURVIVE</button>
+                <button class="btn small" data-act="helpTab" data-tab="campaign">CAMPAIGN</button>
+            </div>
             <div class="help">
-                <div class="help-block">
+                <div class="help-block on" data-tab="controls">
                     <h3>Controls</h3>
                     <table class="keys">
                         <tr><td>Move</td><td><kbd>WASD</kbd> <kbd>←↑↓→</kbd> · mouse · drag · stick</td></tr>
@@ -253,7 +258,7 @@
                         <tr><td>Pause</td><td><kbd>Esc</kbd> <kbd>P</kbd> · Start</td></tr>
                     </table>
                 </div>
-                <div class="help-block">
+                <div class="help-block" data-tab="survive">
                     <h3>Survive</h3>
                     <ul>
                         <li>Your ship fires automatically. Only the <b>white core</b> can be hit.</li>
@@ -264,7 +269,7 @@
                         <li>Clear sectors for bonus picks. Every third sector hides a boss.</li>
                     </ul>
                 </div>
-                <div class="help-block">
+                <div class="help-block" data-tab="campaign">
                     <h3>Campaign</h3>
                     <ul>
                         <li>Pick a star system, then jump along a <b>route</b>: combat, elite, <b class="gold">market</b>, <b class="green">dock</b>, <b class="violet">anomaly</b>, then the boss.</li>

@@ -60,6 +60,7 @@ export const ui = {
     input.clear();
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     if (focus instanceof Element) focusIdx = Math.max(0, focusables().indexOf(focus)); // focus a given element
+    if (name) fit(screens[name]);
     applyFocus();
   },
 
@@ -70,6 +71,13 @@ export const ui = {
   // Called every frame while a menu is open.
   update() {
     if (!current) return;
+    // Content can change after show() (purchases, event results, fonts, resizes): keep it fitted.
+    const now = performance.now();
+    if (now >= fitCheckAt) {
+      fitCheckAt = now + 250;
+      const el = screens[current];
+      if (el.scrollHeight > el.clientHeight + 1 || el.clientHeight !== el._fitH || el.clientWidth !== el._fitW) fit(el);
+    }
     if (guarded) {
       if (input.anyHeld() || performance.now() < guardUntil) {
         input.clear();
@@ -252,6 +260,22 @@ export function renderBuild(el, p) {
     html += `<div class="${u.cat === 'evolution' ? 'chip evo' : 'chip'}" style="--c:${CAT_COLORS[u.cat]}" title="${u.name}">${ICONS[u.id]}${u.cat === 'evolution' ? '' : `<b>${lv}</b>`}</div>`;
   }
   el.innerHTML = html;
+}
+
+// Menus never scroll: when a screen's content is taller than the window, shrink the whole screen's
+// type (everything is sized in em) until it fits. Below MIN_FIT it stays clipped-but-scrollable (no bar).
+const MIN_FIT = 0.72;
+let fitCheckAt = 0;
+
+function fit(el) {
+  el.style.fontSize = '';
+  let k = 1;
+  for (let i = 0; i < 6 && k > MIN_FIT && el.scrollHeight > el.clientHeight + 1; i++) {
+    k = Math.max(MIN_FIT, k * Math.min(0.97, el.clientHeight / el.scrollHeight));
+    el.style.fontSize = `${k}em`;
+  }
+  el._fitH = el.clientHeight;
+  el._fitW = el.clientWidth;
 }
 
 function focusables() {

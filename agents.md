@@ -106,6 +106,13 @@ Title PLAY → `scr-campaign` (select system, LAUNCH / HANGAR + PILOT pair / END
 - `playerBullet` opts: `bounce` (reflect `vx` at the side walls that many times, `updatePlayerBullets`) and `crit` (always crits; also on missile AoE). WEAPONS `ricochet` (CORSAIR) and `charge` (MONOLITH, whose orb radius/scale grows with weapon level in `firePrimary`; a muzzle charge glow is drawn in `drawPlayer`).
 - Sprites for all of this live in `buildGearSpritesV2()` at the end of `sprites.js` (`S.gwell`, `S.reflect`, `S.flak`, `S.pb_refl`, `S.afterglow`).
 
+## Menu styling (`src/style.css`, `src/ui/screens.js`)
+
+- Everything is sized in `em` off `#app`'s font-size (16px x playfield scale); `button { font: inherit }` keeps buttons on that scale too. Keep menu text at 0.72em or larger.
+- Menus never scroll: `ui.show` calls `fit(screen)`, which shrinks the screen's font-size (down to `MIN_FIT` 0.72) until its content fits, and `ui.update` re-checks every 250 ms (content changes, resizes). Scrollbars are hidden as a last resort.
+- Look: square corners, thin neon borders and corner brackets drawn by a shared `::before` (colour `--fc`, defaults to the element's `--c`); focus / hover pops the brackets outward. New panels or buttons join the selector lists in the "HUD frames" section. No `clip-path` cut corners.
+- How to Play is tabbed (`data-act="helpTab"`, blocks with matching `data-tab`).
+
 ## Story, events and system themes (step 7a)
 
 - `src/game/story.js`: `SPEAKERS` (MAG cyan, ECHO class colour, SIGNAL red), `STORY` = `{prologue, systems:{id:{intro, preBoss, postBoss}}, ending}` (lines are `{who, text}`), and `EVENTS` (10 anomalies: `{id, title, color, text, choices: [] | (ctx) => []}`, choice = `{label, desc, tag?, cost?, ok?(ctx), effect(ctx) → result string}`, `ctx = {p, run, rng, scale, lvl}`). `eventFor(route, node, used)` is seeded by route seed + node id and avoids repeats via `G.run.events`; `startEvent / choiceBlocked / resolveChoice` drive the session. Effects use `p.hullMod`, `p.dmgMod` (damage multiplier read by `recomputeStats`), `G.rerolls`, `run.wallet`, `run.curse` (modifier id for the next fight), `run.ambush` (next fight is elite) and `run.bonusXp` (added to rank XP in `settleRun`).

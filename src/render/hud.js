@@ -71,8 +71,8 @@ export function drawHud(ctx) {
   }
 
   // Level + XP
-  text(ctx, `LV ${p.level}`, 12, y0 + 33, 10, '#9ffcff', 'left', 700);
-  bar(ctx, 50, y0 + 30, 118, 5, p.xp / p.xpNeed, '#3ff6ff');
+  text(ctx, `LV ${p.level}`, 12, y0 + 33, 12, '#9ffcff', 'left', 700);
+  bar(ctx, 58, y0 + 30, 104, 5, p.xp / p.xpNeed, '#3ff6ff');
 
   // Score (rolling)
   G.displayScore += (G.score - G.displayScore) * Math.min(1, 0.2);
@@ -85,7 +85,7 @@ export function drawHud(ctx) {
   const mult = comboMult();
   if (G.combo > 0) {
     const col = mult >= 5 ? '#ff3df2' : mult >= 3 ? '#ffe14d' : '#9ffcff';
-    text(ctx, `x${mult}  ·  ${G.combo} CHAIN`, W / 2, y0 + 31, 10, col, 'center', 700);
+    text(ctx, `x${mult}  ·  ${G.combo} CHAIN`, W / 2, y0 + 31, 11, col, 'center', 700);
     bar(ctx, W / 2 - 40, y0 + 39, 80, 2, G.comboTimer / 2.6, col, 'rgba(255,255,255,0.08)');
   }
 
@@ -95,7 +95,7 @@ export function drawHud(ctx) {
   const run = G.run;
   const hue = `hsl(${d.spec ? d.spec.hue : sectorInfo(G.sector).hue},100%,72%)`;
   const label = run && run.mode === 'campaign' ? `${run.system.short} · ${run.row + 1}/${run.route.rows.length}` : `SECTOR ${G.sector}`;
-  text(ctx, label, rx, y0 + 9, 11, hue, 'right', 700);
+  text(ctx, label, rx, y0 + 9, 12, hue, 'right', 700);
   const bossSector = !!(d.spec && d.spec.boss);
   bar(ctx, rx - 84, y0 + 23, 84, 4, d.progress, hue);
   if (bossSector) {
@@ -108,9 +108,9 @@ export function drawHud(ctx) {
   if (run) {
     const flash = G.realTime - (run.flash || -9) < 0.25;
     ctx.drawImage(S.credit.img, rx - 85, y0 + 31, 14, 14);
-    text(ctx, Math.floor(run.wallet || 0).toLocaleString(), rx - 69, y0 + 38.5, 10, flash ? '#fff' : '#ffd24a', 'left', 700);
+    text(ctx, Math.floor(run.wallet || 0).toLocaleString(), rx - 69, y0 + 38.5, 11, flash ? '#fff' : '#ffd24a', 'left', 700);
   }
-  text(ctx, `${Math.floor(G.runTime / 60)}:${Math.floor(G.runTime % 60).toString().padStart(2, '0')}`, rx, y0 + 38, 9, 'rgba(255,255,255,0.5)', 'right', 600);
+  text(ctx, `${Math.floor(G.runTime / 60)}:${Math.floor(G.runTime % 60).toString().padStart(2, '0')}`, rx, y0 + 38, 11, 'rgba(255,255,255,0.65)', 'right', 600, FONT2);
 
   // Boss bar
   const boss = G.boss;
@@ -118,8 +118,8 @@ export function drawHud(ctx) {
     const by = y0 + 58;
     const bw = W - 32;
     const fill = boss.state === 'enter' ? easeOutCubic(boss.barFill) : boss.hp / boss.maxHp;
-    text(ctx, boss.name, 16, by - 7, 10, boss.color, 'left', 900);
-    text(ctx, boss.phase === 3 ? 'FINAL PHASE' : `PHASE ${boss.phase}`, W - 16, by - 7, 9, 'rgba(255,255,255,0.7)', 'right', 700);
+    text(ctx, boss.name, 16, by - 8, 12, boss.color, 'left', 900);
+    text(ctx, boss.phase === 3 ? 'FINAL PHASE' : `PHASE ${boss.phase}`, W - 16, by - 8, 10, 'rgba(255,255,255,0.8)', 'right', 700);
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
     ctx.fillRect(16, by, bw, 6);
     ctx.fillStyle = boss.flash > 0 ? '#ffffff' : boss.color;
@@ -136,7 +136,7 @@ export function drawHud(ctx) {
     const hw = Math.min(190, W - 120);
     const hx = (W - hw) / 2;
     const fill = clamp(hu.hp / hu.maxHp, 0, 1);
-    text(ctx, 'HUNTER', hx, hy - 6, 9, '#ff3b3b', 'left', 900);
+    text(ctx, 'HUNTER', hx, hy - 7, 11, '#ff3b3b', 'left', 900);
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
     ctx.fillRect(hx, hy, hw, 4);
     ctx.fillStyle = hu.flash > 0 ? '#ffffff' : '#ff3b3b';
@@ -178,8 +178,8 @@ function drawGauge(ctx, x, y, p, kind) {
     ctx.arc(x, y, r, -Math.PI / 2, -Math.PI / 2 + TAU * t);
     ctx.stroke();
     const label = active ? 'ON' : ready ? keyHint('od') || 'TAP' : `${Math.floor(p.od)}%`;
-    text(ctx, label, x, y - 1, ready || active ? 10 : 9, ready || active ? '#ffffff' : withAlpha(col, 0.85), 'center', 700);
-    text(ctx, cls.ult.short, x, y + r + 12, 7, col, 'center', 700);
+    text(ctx, label, x, y - 1, ready || active ? 11 : 10, ready || active ? '#ffffff' : withAlpha(col, 0.85), 'center', 700);
+    text(ctx, cls.ult.short, x, y + r + 13, 9, col, 'center', 700);
   } else {
     const n = p.maxCharges;
     for (let i = 0; i < n; i++) {
@@ -201,8 +201,8 @@ function drawGauge(ctx, x, y, p, kind) {
       }
     }
     const hint = keyHint('dash');
-    text(ctx, hint || 'DASH', x, y - 1, hint.length > 3 ? 8 : 10, p.charges ? '#ffffff' : 'rgba(255,255,255,0.4)', 'center', 700);
-    text(ctx, 'DASH', x, y + r + 12, 7, '#9ffcff', 'center', 700);
+    text(ctx, hint || 'DASH', x, y - 1, hint.length > 3 ? 9 : 11, p.charges ? '#ffffff' : 'rgba(255,255,255,0.4)', 'center', 700);
+    text(ctx, 'DASH', x, y + r + 13, 9, '#9ffcff', 'center', 700);
   }
   ctx.globalAlpha = 1;
 }
@@ -246,7 +246,7 @@ function drawBanner(ctx) {
   ctx.fillStyle = b.color;
   ctx.fillText(b.title, view.W / 2 - slide, cy - 6);
   if (b.sub) {
-    ctx.font = `700 13px ${FONT2}`;
+    ctx.font = `700 15px ${FONT2}`;
     ctx.fillStyle = '#ffffff';
     ctx.fillText(b.sub.split('').join(String.fromCharCode(8202)), view.W / 2 + slide, cy + 22);
   }
