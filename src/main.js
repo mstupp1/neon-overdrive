@@ -511,7 +511,7 @@ ui.init({
       saveProfile();
       settingsReturn = 'campaign';
       G.screen = 'help';
-      ui.show('help');
+      ui.show('help', { focus: document.getElementById('help-back') });
       return;
     }
     showCampaign();
@@ -519,7 +519,7 @@ ui.init({
   help() {
     settingsReturn = 'title';
     G.screen = 'help';
-    ui.show('help');
+    ui.show('help', { focus: document.getElementById('help-back') });
   },
   settings() {
     settingsReturn = G.screen === 'pause' ? 'pause' : 'title';
@@ -546,6 +546,9 @@ ui.init({
       ui.renderTitle();
       ui.show('title');
     }
+  },
+  helpTab(btn) {
+    document.querySelectorAll('#scr-help [data-tab]').forEach((el) => el.classList.toggle('on', el.dataset.tab === btn.dataset.tab));
   },
   sys(btn) {
     selSystem = +btn.dataset.i;
