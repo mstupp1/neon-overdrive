@@ -6,6 +6,7 @@ import { input, bindPointer, pollGamepads } from './core/input.js';
 import { unlockAudio, music, setSfxVolume, setSfxMuted, sfx } from './core/audio.js';
 import { buildSprites, buildEnemySpritesV2 } from './render/sprites.js';
 import { bg } from './render/background.js';
+import { bloom } from './render/post.js';
 import { drawHud, updateBanner } from './render/hud.js';
 import { SHIPS, shipById, ownsShip, isUnlocked } from './game/ships.js';
 import { createPlayer } from './game/player.js';
@@ -702,6 +703,7 @@ function render() {
   view.oy = sh > 0.001 ? rand(-1, 1) * sh * 12 * k : 0;
   ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
   renderWorld(ctx, k);
+  bloom(ctx);
   ctx.setTransform(k, 0, 0, k, 0, 0);
   if (G.mode === 'run' && (G.screen === 'play' || G.screen === 'pause' || G.screen === 'draft' || G.screen === 'pause-settings')) drawHud(ctx);
   if (G.flash > 0.01) {
