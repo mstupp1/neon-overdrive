@@ -92,7 +92,7 @@ function collide(p) {
       if (e.dead || (!e.entered && !e.boss) || e.state === 'dying') continue;
       if (!hitTest(e, b.x, b.y, b.r)) continue;
       if (b.hits.includes(e)) continue;
-      const isCrit = crit > 0 && Math.random() < crit;
+      const isCrit = b.crit || (crit > 0 && Math.random() < crit);
       const dmg = b.dmg * (isCrit ? p.st.critMul : 1);
       if (!e.invuln) {
         damageEnemy(e, dmg, b.x, b.y, isCrit);
@@ -106,7 +106,7 @@ function collide(p) {
         const r2 = b.aoe * b.aoe;
         for (const o of enemies) {
           if (o === e || o.dead || !o.entered || o.boss) continue;
-          if (dist2(b.x, b.y, o.x, o.y) < r2) damageEnemy(o, b.dmg * 0.6, o.x, o.y);
+          if (dist2(b.x, b.y, o.x, o.y) < r2) damageEnemy(o, b.dmg * 0.6 * (b.crit ? p.st.critMul : 1), o.x, o.y);
         }
       }
       if (b.pierce > 0 && !e.boss) {

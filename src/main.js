@@ -636,6 +636,7 @@ window.NEON = {
     e.entered = true;
     return e;
   },
+  rollDraft: (kind = 'level') => rollDraft(G.player, kind),
   // Start a campaign run (1-based index or system id); lands on the route screen.
   launch(sys = 1) {
     launchSystem(typeof sys === 'number' ? SYSTEMS[sys - 1] : systemById(sys));

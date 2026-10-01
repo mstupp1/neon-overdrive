@@ -239,14 +239,23 @@ function firePrimary(p, w) {
   const od = boosted(p);
   const dmg = w.dmg * p.st.dmg * p.pdm * weaponDamageScale(lv) * (od ? 1.5 : 1);
   const spr = od ? S.pb_od : S['pb_' + p.ship.id];
+  const charge = p.ship.weapon === 'charge';
+  const grow = charge ? 1 + (lv - 1) * 0.1 : 1; // charge orbs swell with weapon level
   for (const [ox, a] of streams) {
     playerBullet(p.x + ox, p.y - 12, -Math.PI / 2 + a, w.speed, dmg, spr, {
       pierce: p.st.pierce,
       homing: w.homing || 0,
       life: w.life || 1.2,
-      r: w.r,
+      r: w.r * grow,
+      scale: charge ? grow * 1.5 : 1,
+      bounce: w.bounce || 0,
+      kind: charge ? 'orb' : 'bullet',
       alpha: G.mode === 'attract' ? 0.6 : 0.85,
     });
+  }
+  if (charge) {
+    ring(p.x, p.y - 14, 26, p.ship.bullet, 0.18);
+    sparks(p.x, p.y - 16, p.ship.bullet, 6, 220, -Math.PI / 2, 1.2);
   }
   p.muzzle = 0.05;
   sfx.shoot();
@@ -431,6 +440,15 @@ export function drawPlayer(ctx, k) {
     ctx.globalAlpha = 0.7;
     const mg = glow('#ffffff', 32);
     ctx.drawImage(mg.img, p.x - 10, p.y - 26, 20, 20);
+  }
+  if (p.ship.weapon === 'charge' && G.mode !== 'attract') {
+    // Charge-up orb at the muzzle: grows as the next shot comes online.
+    const w = WEAPONS.charge;
+    const t = Math.max(0, Math.min(1, 1 - p.fireT / w.interval));
+    const cg = glow(p.ship.bullet, 64);
+    const cs = 8 + t * 26;
+    ctx.globalAlpha = 0.25 + t * 0.55;
+    ctx.drawImage(cg.img, p.x - cs / 2, p.y - 20 - cs / 2, cs, cs);
   }
   ctx.globalCompositeOperation = 'source-over';
 

@@ -30,7 +30,8 @@ In menus: arrows/d-pad to move, Enter/Space/A to select, Esc/B to go back, `1`�
 - **Sectors.** Each run is a sequence of ~40–60 s sectors of enemy formations. Every **3rd sector ends in a boss** (WARDEN → HYDRA → OMEGA, each with three phases; the campaign's final system ends with **ECLIPSE**, a dark mirror of your ship whose last phase copies your class ultimate). After sector 9 the cycle loops with much harder enemies — it's endless, chase the high score.
 - **Enemies.** Darts, swarms, spinners, dashers, snakes, snipers, tanks, splitters and mines, plus from later systems: **Carriers** (launch swarm pods), **Shielders** (shield their neighbours until killed: kill them first), **Weavers** (a pair that stretches a lethal laser tripwire between them), **Blinkers** (teleport next to you and fire a ring) and, on Elite nodes, the **Hunter** mini-boss.
 - **Data shards → level ups.** Enemies drop XP shards (magnetised when close). Each level offers a draft of 3 upgrades; clearing a sector grants a bonus draft and repairs 1 hull. Rerolls: 1 per run + 1 per boss kill.
-- **Build.** Upgrade your main cannon, stats (damage, fire rate, crit, pierce, speed, magnet, overdrive capacitor) and defenses (hull, regenerating Aegis shield, extra dashes), and slot up to **4 weapon modules**: Swarm Missiles, Razor Orbit, Wingmen, Arc Coil, Pulse Nova, Rail Lance, Shrapnel, Shock Dash.
+- **Build.** Upgrade your main cannon, stats (damage, fire rate, crit, pierce, speed, magnet, overdrive capacitor) and defenses (hull, regenerating Aegis shield, extra dashes), and slot up to **4 weapon modules**: Swarm Missiles, Razor Orbit, Wingmen, Arc Coil, Pulse Nova, Rail Lance, Shrapnel, Shock Dash, **Gravity Well** (a singularity that drags in enemies and bullets), **Reflector** (a brief bubble that returns enemy bullets) and **Flak Burst** (proximity airbursts).
+- **Evolutions.** Max a module (level 5) while owning its partner stat and a gold **EVOLVE** card can appear in drafts: Swarm Missiles + Targeting AI → **Hellfire Swarm**, Razor Orbit + Thrusters → **Storm Halo**, Arc Coil + Capacitor → **Tesla Storm**, Rail Lance + Phase Rounds → **Annihilator**. Evolutions take no module slot and are never sold in the Black Market.
 - **Combo.** Kills chain into a score multiplier (up to x8). Getting hit breaks the chain.
 - **Graze & Ultimate.** Skimming bullets and killing fills the ultimate meter. Your **pilot class** decides what it does (see below). Every ultimate doubles your score while it lasts.
 - **Only the white core of your ship is the hitbox.** Dashing makes you invulnerable.
@@ -43,6 +44,8 @@ In menus: arrows/d-pad to move, Enter/Space/A to select, Esc/B to go back, `1`�
 | NEEDLE | Piercing lances, fast, 2 hull | 600 | Defeat any boss |
 | BULWARK | Wide scatter, 4 hull, starts with shield | 900 | Reach sector 5 |
 | PHANTOM | Seeking crescents, 3 dashes, Shock Dash | 1400 | Reach sector 8 |
+| CORSAIR | Skirmisher: ricochet bolts that bounce off the side walls | 1100 | — |
+| MONOLITH | Siege: slow, huge piercing charge orbs, 5 hull | 1600 | — |
 
 Ships are bought with credits in the **Hangar** (campaign map → HANGAR), or granted for free when you hit the legacy unlock goal.
 
