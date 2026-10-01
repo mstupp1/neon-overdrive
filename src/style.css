@@ -523,6 +523,13 @@ body {
     transform: scale(1.02);
 }
 
+/* Keys aren't live yet (still held from flying): the keyboard focus lights up once they're released. */
+.screen.guarded .card.focus:not(:hover) {
+    border-color: color-mix(in srgb, var(--c) 35%, transparent);
+    box-shadow: none;
+    transform: none;
+}
+
 .card-icon {
     width: 3.2em;
     height: 3.2em;

@@ -21,7 +21,8 @@ import { pilotActs, openPilot } from './ui/pilot.js';
 import { setClass, setPassives } from './game/pilot.js';
 import { buyShip, buyPart, equipPart, unequipSlot, setPaint, selectShip, applyAllPaints } from './game/hangar.js';
 import { SYSTEMS, systemById, generateRoute, nodeSpec, reachableNodes, routeNode, systemUnlocked } from './game/campaign.js';
-import { rand, pick } from './core/math.js';
+import { rand, pick, lerp, easeInOut } from './core/math.js';
+import { ring } from './game/fx.js';
 import { STORY, eventFor, eventById, startEvent, resolveChoice, choiceBlocked } from './game/story.js';
 import { rollMarket, buyOffer, dockRepair, dockReinforce, settleRun, rankFor } from './game/economy.js';
 
@@ -49,6 +50,11 @@ let marketOffers = null; // current Black Market stock
 let curEvent = null; // open anomaly event session (story.startEvent)
 let bossCardT = 0;
 let afterDraft = null; // 'route' | 'extract': where to go once the sector reward / level drafts are done
+// Level-up pacing: the world slows into the draft and eases back out of it instead of hard cuts.
+const LEVEL_INTRO = 0.5; // real seconds of slow-down before the level-up draft opens
+const RESUME_EASE = 0.45; // real seconds to ramp back to full speed after a draft
+let levelIntro = -1; // seconds left in the slow-down (-1 = not running)
+let resumeEase = 0;
 
 // --- Layout -------------------------------------------------------------------------
 
@@ -112,6 +118,8 @@ function newWorld(mode, shipDef, run = null) {
   G.pendingLevels = 0;
   G.supplyLeft = 0;
   afterDraft = null;
+  levelIntro = -1;
+  resumeEase = 0;
   G.deathT = 0;
   G.slowmo = 0;
   G.hitstop = 0;
@@ -382,15 +390,34 @@ function pause() {
   music.setDuck(0.45);
 }
 
-function openDraft(kind) {
+function openDraft(kind, quiet = false) {
+  levelIntro = -1;
   draftKind = kind;
   draftChoices = rollDraft(G.player, kind === 'supply' ? 'sector' : kind);
   G.screen = 'draft';
   ui.renderDraft(G.player, draftChoices, kind, G.rerolls, pickUpgrade, G.supplyLeft);
-  ui.show('draft', { lock: 420 });
+  // guard: keys already held for flying (or a stray dash) don't drive the menu until released.
+  ui.show('draft', { lock: 420, guard: true });
   pauseBtn.hidden = true;
   music.setDuck(0.6);
-  if (kind === 'level') sfx.levelUp();
+  if (kind === 'level' && !quiet) sfx.levelUp();
+}
+
+// Level-up during play: a short slow-motion beat (ring + chime) before the draft opens.
+function startLevelIntro() {
+  const p = G.player;
+  levelIntro = LEVEL_INTRO;
+  p.iframes = Math.max(p.iframes, LEVEL_INTRO + 0.1);
+  ring(p.x, p.y, 70, '#3ff6ff', LEVEL_INTRO);
+  sfx.levelUp();
+  music.setDuck(0.8);
+}
+
+// World time scale from the level-up slow-down / post-draft ease (1 = normal).
+function draftTimeScale() {
+  if (levelIntro >= 0) return lerp(0.12, 1, easeInOut(levelIntro / LEVEL_INTRO));
+  if (resumeEase > 0) return lerp(0.25, 1, easeInOut(1 - resumeEase / RESUME_EASE));
+  return 1;
 }
 
 function pickUpgrade(id) {
@@ -408,6 +435,8 @@ function pickUpgrade(id) {
   if (next === 'route') return showRoute();
   if (next === 'extract') return extract();
   enterPlay();
+  resumeEase = RESUME_EASE;
+  input.holdTarget(); // the cursor was on the menu: don't yank the ship toward it
 }
 
 function onSectorClear() {
@@ -654,6 +683,7 @@ function frame(now) {
       G.slowmo -= raw;
       dt *= 0.3;
     }
+    if (G.screen === 'play') dt *= draftTimeScale();
     while (dt > 0) {
       const s = Math.min(dt, 1 / 60);
       step(s);
@@ -686,7 +716,14 @@ function afterStep(raw) {
     return;
   }
   if (G.screen === 'play') {
-    if (G.pendingLevels > 0 && !p.dead && G.director.state !== 'clear') openDraft('level');
+    if (resumeEase > 0) resumeEase = Math.max(0, resumeEase - raw);
+    if (G.pendingLevels > 0 && !p.dead && G.director.state !== 'clear') {
+      if (levelIntro < 0) startLevelIntro();
+      else if ((levelIntro -= raw) <= 0) openDraft('level', true);
+    } else if (levelIntro >= 0) {
+      levelIntro = -1;
+      music.setDuck(1);
+    }
     if (p.dead) {
       G.deathT -= raw;
       if (G.deathT <= 0) gameOver();
@@ -708,8 +745,10 @@ function render() {
     ctx.fillStyle = `rgba(${G.flashColor},${Math.min(0.8, G.flash)})`;
     ctx.fillRect(0, 0, view.W, view.H);
   }
-  if (G.screen === 'pause' || G.screen === 'draft' || G.screen === 'pause-settings') {
-    ctx.fillStyle = 'rgba(5,3,13,0.35)';
+  // Menu dim; fades in over the level-up slow-down so the draft doesn't hard-cut.
+  const dim = G.screen === 'pause' || G.screen === 'draft' || G.screen === 'pause-settings' ? 0.35 : levelIntro >= 0 && G.screen === 'play' ? 0.35 * (1 - levelIntro / LEVEL_INTRO) : 0;
+  if (dim > 0) {
+    ctx.fillStyle = `rgba(5,3,13,${dim})`;
     ctx.fillRect(0, 0, view.W, view.H);
   }
 }

@@ -42,6 +42,13 @@ export const input = {
   ty: 0,
   hasTarget: false,
   touch: null, // { id, sx, sy, ax, ay }
+  // Mouse: the target is the cursor plus this offset. A dash shifts it so the ship
+  // doesn't snap back to the cursor; it bleeds off as the mouse moves.
+  ox: 0,
+  oy: 0,
+  holding: false,
+  padX: 0,
+  padY: 0,
   getAnchor: () => ({ x: view.W / 2, y: view.H * 0.8 }),
   onAnyGesture: null,
   onDeviceChange: null,
@@ -61,6 +68,31 @@ export const input = {
   },
   down(action) {
     return held.has(action) || padHeld.has(action);
+  },
+  // Any key / pad button held or stick deflected (menus wait for this to clear).
+  anyHeld() {
+    return held.size > 0 || padHeld.size > 0 || Math.hypot(this.padX || 0, this.padY || 0) > 0.3;
+  },
+  // Move the steering target with the ship (dash), so pointer steering keeps the new position.
+  shiftTarget(dx, dy) {
+    this.tx += dx;
+    this.ty += dy;
+    if (this.touch) {
+      this.touch.ax += dx;
+      this.touch.ay += dy;
+    } else if (this.device === 'mouse') {
+      this.ox += dx;
+      this.oy += dy;
+    }
+  },
+  // Steer toward the ship's current position until the pointer moves again.
+  holdTarget() {
+    const a = this.getAnchor();
+    this.tx = a.x;
+    this.ty = a.y;
+    this.ox = 0;
+    this.oy = 0;
+    this.holding = this.device === 'mouse';
   },
   setDevice(d) {
     if (this.device !== d) {
@@ -109,6 +141,25 @@ function toLogical(clientX, clientY) {
   return { x: (clientX - r.left) / view.scale, y: (clientY - r.top) / view.scale };
 }
 
+function mouseTarget(e, moved) {
+  const p = toLogical(e.clientX, e.clientY);
+  if (input.holding) {
+    // First move after holdTarget: re-anchor so the ship follows from where it is.
+    input.holding = false;
+    input.ox = input.tx - p.x;
+    input.oy = input.ty - p.y;
+  }
+  const k = Math.exp(-moved / 140);
+  input.ox *= k;
+  input.oy *= k;
+  input.mode = 'target';
+  input.tx = Math.max(0, Math.min(view.W, p.x + input.ox));
+  input.ty = Math.max(0, Math.min(view.H, p.y + input.oy));
+  input.ox = input.tx - p.x;
+  input.oy = input.ty - p.y;
+  input.hasTarget = true;
+}
+
 export function bindPointer(surface) {
   surface.addEventListener('contextmenu', (e) => e.preventDefault());
 
@@ -133,11 +184,7 @@ export function bindPointer(surface) {
       input.setDevice('mouse');
       if (e.button === 0) input.press('dash');
       else if (e.button === 2) input.press('od');
-      const p = toLogical(e.clientX, e.clientY);
-      input.mode = 'target';
-      input.tx = p.x;
-      input.ty = p.y;
-      input.hasTarget = true;
+      mouseTarget(e, 0);
     }
   }, { passive: false });
 
@@ -166,11 +213,7 @@ export function bindPointer(surface) {
       if (e.movementX === 0 && e.movementY === 0) return;
       if (input.device !== 'mouse' && Math.abs(e.movementX) + Math.abs(e.movementY) < 3) return;
       input.setDevice('mouse');
-      const p = toLogical(e.clientX, e.clientY);
-      input.mode = 'target';
-      input.tx = p.x;
-      input.ty = p.y;
-      input.hasTarget = true;
+      mouseTarget(e, Math.hypot(e.movementX, e.movementY) / view.scale);
     }
   }, { passive: false });
 
@@ -214,7 +257,11 @@ export function pollGamepads() {
   let pad = null;
   for (const p of pads) if (p && p.connected) { pad = p; break; }
   padHeld.clear();
-  if (!pad) return;
+  if (!pad) {
+    input.padX = 0;
+    input.padY = 0;
+    return;
+  }
 
   let active = false;
   for (const [idx, actions] of Object.entries(PAD_BUTTONS)) {

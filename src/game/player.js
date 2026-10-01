@@ -83,6 +83,7 @@ function control() {
     dash: input.consume('dash'),
     od: input.consume('od'),
     focus: input.down('focus'),
+    shift: (dx, dy) => input.shiftTarget(dx, dy),
   };
 }
 
@@ -111,7 +112,8 @@ export function updatePlayer(p, dt) {
     const b = playfieldBounds();
     const dx = clamp(c.tx, b.left, b.right) - p.x;
     const dy = clamp(c.ty, b.top, b.bottom) - p.y;
-    const cap = maxSpeed * 2.4;
+    // Ease in near the target, but never outrun the keyboard top speed.
+    const cap = maxSpeed;
     tvx = dx * 16;
     tvy = dy * 16;
     const m = Math.hypot(tvx, tvy);
@@ -150,7 +152,8 @@ export function updatePlayer(p, dt) {
     if (p.up.dashNova) dashNova(p);
     if (st.afterimage) spawnEchoes(p, dx, dy);
   }
-  if (p.dashT > 0) {
+  const dashing = p.dashT > 0;
+  if (dashing) {
     p.dashT -= dt;
     p.vx = p.dashDx * 1150;
     p.vy = p.dashDy * 1150;
@@ -171,11 +174,15 @@ export function updatePlayer(p, dt) {
     }
   } else p.rechargeT = 0;
 
+  const px = p.x;
+  const py = p.y;
   p.x += p.vx * dt;
   p.y += p.vy * dt;
   const b = playfieldBounds();
   p.x = clamp(p.x, b.left, b.right);
   p.y = clamp(p.y, b.top, b.bottom);
+  // Pointer steering: carry the target along with a dash so the ship stays where it dashed to.
+  if (dashing && c.mode === 'target' && c.shift) c.shift(p.x - px, p.y - py);
   p.bank = damp(p.bank, clamp(p.vx / 420, -1, 1), 10, dt);
 
   for (const g of p.ghosts) g.life -= dt;
