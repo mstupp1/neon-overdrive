@@ -370,9 +370,9 @@ export const bg = {
   init() {
     this.stars.length = 0;
     const layers = [
-      { n: 60, speed: 18, size: 1, a: 0.35 },
-      { n: 34, speed: 45, size: 1.4, a: 0.55 },
-      { n: 14, speed: 110, size: 2, a: 0.9 },
+      { n: 60, speed: 18, size: 1, a: 0.3 },
+      { n: 34, speed: 45, size: 1.2, a: 0.32 },
+      { n: 14, speed: 110, size: 1.5, a: 0.45 },
     ];
     for (const L of layers) {
       for (let i = 0; i < L.n; i++) {
@@ -593,8 +593,8 @@ export const bg = {
     ctx.globalAlpha = 0.25;
     ctx.drawImage(hg.img, -W * 0.2, horizon - 30, W * 1.4, 60);
 
-    // Stars (streak when boosting)
-    ctx.fillStyle = '#ffffff';
+    // Stars (streak when boosting). Tinted toward the sky and kept dim so they read as backdrop, not as pickups.
+    ctx.fillStyle = `hsl(${(h + 20) % 360},60%,82%)`;
     const streak = Math.max(0, this.boost - 1.2) * 14;
     for (const s of this.stars) {
       ctx.globalAlpha = s.a;
