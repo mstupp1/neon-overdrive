@@ -1,6 +1,6 @@
 // Scrolling synthwave backdrop: gradient sky, nebula glows, perspective grid, stars.
 
-import { view } from '../game/state.js';
+import { view, G } from '../game/state.js';
 import { glow } from './sprites.js';
 import { rand, damp, wrapAngle, mulberry32, TAU } from '../core/math.js';
 
@@ -220,6 +220,141 @@ const THEMES = {
 const DEFAULT_GRID = { rows: 16, cols: 14, lw: 1, a: 1 };
 const baked = {};
 
+
+// --- Reactive grid ------------------------------------------------------------------
+// A screen-space lattice of spring nodes under the floor grid. Explosions kick nodes outward, gravity wells pull them
+// in, the ult shockwave rides across them; springs pull every node home and neighbours drag on each other so dents
+// ripple outward. Grid lines are drawn through the displaced lattice only while it is moving (at rest: the old path).
+
+const CELL = 30;
+const PAD = 30; // lattice reaches past the screen edges so line ends move too
+const STIFF = 34; // spring back to rest
+const COUPLE = 26; // pull toward the neighbours' average (spreads the ripple)
+const DAMP = 4.2;
+const MAX_D = 36; // displacement clamp (logical px)
+
+const field = {
+  cols: 0,
+  rows: 0,
+  x0: 0,
+  y0: 0,
+  dx: null, // displacement
+  dy: null,
+  vx: null, // velocity
+  vy: null,
+  energy: 0, // rough motion level, 0 = at rest (fast path)
+  lights: [], // light pools on the floor: {x, y, color, size, life, max}
+
+  fit(W, H, top) {
+    const cols = Math.ceil((W + PAD * 2) / CELL) + 1;
+    const rows = Math.ceil((H - top + PAD * 2) / CELL) + 1;
+    if (cols === this.cols && rows === this.rows && this.y0 === top - PAD) return;
+    this.cols = cols;
+    this.rows = rows;
+    this.x0 = -PAD;
+    this.y0 = top - PAD;
+    const n = cols * rows;
+    this.dx = new Float32Array(n);
+    this.dy = new Float32Array(n);
+    this.vx = new Float32Array(n);
+    this.vy = new Float32Array(n);
+    this.energy = 0;
+  },
+
+  // Radial kick: force > 0 pushes away from (x, y), < 0 pulls in. Strongest at the centre, zero at radius.
+  kick(x, y, radius, force) {
+    if (!this.dx) return;
+    const c0 = Math.max(0, Math.floor((x - radius - this.x0) / CELL));
+    const c1 = Math.min(this.cols - 1, Math.ceil((x + radius - this.x0) / CELL));
+    const r0 = Math.max(0, Math.floor((y - radius - this.y0) / CELL));
+    const r1 = Math.min(this.rows - 1, Math.ceil((y + radius - this.y0) / CELL));
+    for (let r = r0; r <= r1; r++) {
+      for (let c = c0; c <= c1; c++) {
+        const ox = this.x0 + c * CELL - x;
+        const oy = this.y0 + r * CELL - y;
+        const d = Math.hypot(ox, oy);
+        if (d >= radius) continue;
+        const k = (1 - d / radius) * force / (d + 8);
+        const i = r * this.cols + c;
+        this.vx[i] += ox * k;
+        this.vy[i] += oy * k;
+      }
+    }
+    this.energy = Math.max(this.energy, 1);
+  },
+
+  // Outward push on the band of nodes just inside a ring of radius r (an expanding shockwave front).
+  ring(x, y, r, band, force) {
+    if (!this.dx) return;
+    for (let row = 0; row < this.rows; row++) {
+      const oy = this.y0 + row * CELL - y;
+      for (let c = 0; c < this.cols; c++) {
+        const ox = this.x0 + c * CELL - x;
+        const d = Math.hypot(ox, oy);
+        const t = r - d;
+        if (t < 0 || t > band || d < 1) continue;
+        const k = (force * (1 - t / band)) / d;
+        const i = row * this.cols + c;
+        this.vx[i] += ox * k;
+        this.vy[i] += oy * k;
+      }
+    }
+    this.energy = Math.max(this.energy, 1);
+  },
+
+  step(dt) {
+    if (this.energy <= 0 || !this.dx) return;
+    const { cols, rows, dx, dy, vx, vy } = this;
+    let e = 0;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const i = r * cols + c;
+        // neighbour average (missing neighbours count as rest)
+        const nx = (c > 0 ? dx[i - 1] : 0) + (c < cols - 1 ? dx[i + 1] : 0) + (r > 0 ? dx[i - cols] : 0) + (r < rows - 1 ? dx[i + cols] : 0);
+        const ny = (c > 0 ? dy[i - 1] : 0) + (c < cols - 1 ? dy[i + 1] : 0) + (r > 0 ? dy[i - cols] : 0) + (r < rows - 1 ? dy[i + cols] : 0);
+        const ax = -STIFF * dx[i] + COUPLE * (nx * 0.25 - dx[i]) - DAMP * vx[i];
+        const ay = -STIFF * dy[i] + COUPLE * (ny * 0.25 - dy[i]) - DAMP * vy[i];
+        vx[i] += ax * dt;
+        vy[i] += ay * dt;
+      }
+    }
+    for (let i = 0; i < dx.length; i++) {
+      let x = dx[i] + vx[i] * dt;
+      let y = dy[i] + vy[i] * dt;
+      if (x > MAX_D) x = MAX_D; else if (x < -MAX_D) x = -MAX_D;
+      if (y > MAX_D) y = MAX_D; else if (y < -MAX_D) y = -MAX_D;
+      dx[i] = x;
+      dy[i] = y;
+      const m = Math.abs(x) + Math.abs(y) + (Math.abs(vx[i]) + Math.abs(vy[i])) * 0.05;
+      if (m > e) e = m;
+    }
+    if (e < 0.05) {
+      dx.fill(0); dy.fill(0); vx.fill(0); vy.fill(0);
+      this.energy = 0;
+    } else this.energy = e;
+  },
+
+  // Bilinear displacement at (x, y) into out[0], out[1].
+  sample(x, y, out) {
+    let fc = (x - this.x0) / CELL;
+    let fr = (y - this.y0) / CELL;
+    fc = fc < 0 ? 0 : fc > this.cols - 1.001 ? this.cols - 1.001 : fc;
+    fr = fr < 0 ? 0 : fr > this.rows - 1.001 ? this.rows - 1.001 : fr;
+    const c = fc | 0;
+    const r = fr | 0;
+    const tx = fc - c;
+    const ty = fr - r;
+    const i = r * this.cols + c;
+    const j = i + this.cols;
+    const { dx, dy } = this;
+    out[0] = (dx[i] * (1 - tx) + dx[i + 1] * tx) * (1 - ty) + (dx[j] * (1 - tx) + dx[j + 1] * tx) * ty;
+    out[1] = (dy[i] * (1 - tx) + dy[i + 1] * tx) * (1 - ty) + (dy[j] * (1 - tx) + dy[j + 1] * tx) * ty;
+  },
+};
+const tmp = [0, 0];
+const HSEG = 18; // samples per horizontal line while the grid is moving
+const VSEG = 14; // samples per vertical line
+
 export const bg = {
   hue: 215,
   target: 215,
@@ -251,6 +386,19 @@ export const bg = {
     ];
   },
 
+  // Grid reactions (world coordinates = screen logical coordinates). size ~ explosion size.
+  blast(x, y, size = 1, color = null) {
+    field.kick(x, y, 70 + 45 * size, 300 * Math.min(3, size));
+    if (color) this.light(x, y, color, 70 + 50 * Math.min(3, size), 0.35 + 0.12 * size);
+  },
+
+  // A coloured light pool on the floor (drawn under the grid lines, so the fight lights the arena).
+  light(x, y, color, size, life) {
+    const L = field.lights;
+    if (L.length >= 24) L.shift();
+    L.push({ x, y, color, size, life, max: life });
+  },
+
   setHue(h) {
     this.target = h;
   },
@@ -275,6 +423,7 @@ export const bg = {
     this.dark = damp(this.dark, this.darkTarget, 2.5, dt);
     this.t += dt;
     this.scroll += dt * 0.55 * this.boost;
+    this.updateField(dt);
     for (const s of this.stars) {
       s.y += (s.speed * this.boost * dt) / view.H;
       if (s.y > 1) {
@@ -282,6 +431,30 @@ export const bg = {
         s.x = Math.random();
       }
     }
+  },
+
+  updateField(dt) {
+    field.fit(view.W, view.H, view.H * 0.12);
+    // Continuous sources: gravity wells drag the floor in, the ult shockwave rides outward across it.
+    const p = G.player;
+    if (p && dt > 0) {
+      if (p.mod && p.mod.wells) for (const w of p.mod.wells) if (w.life > 0) field.kick(w.x, w.y, w.r * 1.3, -1800 * dt);
+      if (G.pulse > 0) field.ring(p.x, p.y, G.pulse, 60, 22000 * dt * (1 - G.pulse / G.pulseMax));
+    }
+    // Sub-step so stiff springs stay stable through long frames.
+    let left = Math.min(dt, 0.1);
+    while (left > 1e-4) {
+      const s = Math.min(left, 1 / 60);
+      field.step(s);
+      left -= s;
+    }
+    const L = field.lights;
+    let w = 0;
+    for (const l of L) {
+      l.life -= dt;
+      if (l.life > 0) L[w++] = l;
+    }
+    L.length = w;
   },
 
   draw(ctx) {
@@ -328,7 +501,16 @@ export const bg = {
       ctx.globalCompositeOperation = 'lighter';
     }
 
-    // Perspective grid
+    // Light pools on the floor (under the lines)
+    for (const l of field.lights) {
+      const t = l.life / l.max;
+      ctx.globalAlpha = 0.32 * t * t;
+      const gs = glow(l.color, 64);
+      const sz = l.size * (1.25 - 0.25 * t);
+      ctx.drawImage(gs.img, l.x - sz, l.y - sz * 0.8, sz * 2, sz * 1.6);
+    }
+
+    // Perspective grid (bent through the reactive lattice while it is moving)
     const depth = H - horizon;
     const lineCol = `hsl(${h},100%,62%)`;
     ctx.strokeStyle = lineCol;
@@ -337,18 +519,47 @@ export const bg = {
     const phase = this.scroll % 1;
     const bend = GR.bend || 0;
     const wave = GR.wave || 0;
+    const live = field.energy > 0;
+    // Displacement fades out toward the horizon so the far grid stays calm.
+    const fade = (y) => Math.min(1, Math.max(0, (y - horizon) / (depth * 0.35)));
     for (let i = 0; i < rows; i++) {
       const f = (i + phase) / rows;
       const y = horizon + depth * f * f;
-      ctx.globalAlpha = (0.04 + f * 0.14) * GR.a;
+      const baseA = (0.04 + f * 0.14) * GR.a;
+      const wa = wave ? wave * (0.3 + f) * Math.sin(this.t * 0.8 + i * 0.7) : 0;
       ctx.beginPath();
-      ctx.moveTo(0, y);
-      if (bend) ctx.quadraticCurveTo(W / 2, y + bend * (1 - f), W, y);
-      else if (wave) {
-        const a = wave * (0.3 + f) * Math.sin(this.t * 0.8 + i * 0.7);
-        ctx.quadraticCurveTo(W * 0.25, y + a, W * 0.5, y);
-        ctx.quadraticCurveTo(W * 0.75, y - a, W, y);
-      } else ctx.lineTo(W, y);
+      if (live) {
+        // y of the undisturbed line at x (same curves as the fast path below)
+        let disturb = 0;
+        const k = fade(y);
+        for (let s = 0; s <= HSEG; s++) {
+          const x = (s / HSEG) * W;
+          let yy = y;
+          if (bend) {
+            const u = x / W;
+            yy = y + bend * (1 - f) * 2 * u * (1 - u);
+          } else if (wave) {
+            const u = x / W;
+            yy = y + (u < 0.5 ? wa * 2 * (2 * u) * (1 - 2 * u) : -wa * 2 * (2 * u - 1) * (2 - 2 * u));
+          }
+          field.sample(x, yy, tmp);
+          const ox = tmp[0] * k;
+          const oy = tmp[1] * k;
+          disturb += Math.abs(ox) + Math.abs(oy);
+          if (s === 0) ctx.moveTo(x + ox, yy + oy);
+          else ctx.lineTo(x + ox, yy + oy);
+        }
+        // disturbed lines glow brighter
+        ctx.globalAlpha = Math.min(0.6, baseA + (disturb / (HSEG + 1)) * 0.03);
+      } else {
+        ctx.globalAlpha = baseA;
+        ctx.moveTo(0, y);
+        if (bend) ctx.quadraticCurveTo(W / 2, y + bend * (1 - f), W, y);
+        else if (wave) {
+          ctx.quadraticCurveTo(W * 0.25, y + wa, W * 0.5, y);
+          ctx.quadraticCurveTo(W * 0.75, y - wa, W, y);
+        } else ctx.lineTo(W, y);
+      }
       ctx.stroke();
     }
     ctx.globalAlpha = 0.09 * GR.a;
@@ -357,8 +568,23 @@ export const bg = {
     const colW = W / (cols / 2);
     for (let i = -cols; i <= cols; i++) {
       const bx = W / 2 + i * colW;
-      ctx.moveTo(W / 2 + (bx - W / 2) * 0.06, horizon);
-      ctx.lineTo(bx, H);
+      const tx = W / 2 + (bx - W / 2) * 0.06;
+      if (live) {
+        // Only the stretch that is on screen matters; lines far off the sides are skipped.
+        if (bx < -W * 1.5 || bx > W * 2.5) continue;
+        for (let s = 0; s <= VSEG; s++) {
+          const u = s / VSEG;
+          const x = tx + (bx - tx) * u;
+          const y = horizon + depth * u;
+          field.sample(x, y, tmp);
+          const k = fade(y);
+          if (s === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x + tmp[0] * k, y + tmp[1] * k);
+        }
+      } else {
+        ctx.moveTo(tx, horizon);
+        ctx.lineTo(bx, H);
+      }
     }
     ctx.stroke();
 
