@@ -8,7 +8,7 @@ import { S } from '../render/sprites.js';
 import { cardInfo, CAT_COLORS, UPGRADES, ICONS } from '../game/upgrades.js';
 import { formatScore, formatTime } from '../core/math.js';
 
-const $ = (sel) => document.querySelector(sel);
+export const $ = (sel) => document.querySelector(sel);
 
 const screens = {};
 let current = null;
@@ -48,10 +48,11 @@ export const ui = {
   show(name, { lock = 0, focus = 0 } = {}) {
     for (const [k, el] of Object.entries(screens)) el.classList.toggle('active', k === name);
     current = name || null;
-    focusIdx = focus;
+    focusIdx = typeof focus === 'number' ? focus : 0;
     lockUntil = performance.now() + lock;
     input.clear();
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    if (focus instanceof Element) focusIdx = Math.max(0, focusables().indexOf(focus)); // focus a given element
     applyFocus();
   },
 
@@ -184,6 +185,7 @@ export const ui = {
     const p = G.player;
     $('#pause-stats').innerHTML = stat('SECTOR', G.sector) + stat('LEVEL', p.level) + stat('TIME', formatTime(G.runTime));
     renderBuild($('#pause-build'), p);
+    $('#pause-quit').textContent = G.run && G.run.mode === 'campaign' ? 'ABANDON RUN' : 'QUIT TO TITLE';
   },
 
   // --- Game over ----------------------------------------------------------------
@@ -247,11 +249,11 @@ export const ui = {
   },
 };
 
-function stat(label, value) {
+export function stat(label, value) {
   return `<div>${label}<b>${value}</b></div>`;
 }
 
-function renderBuild(el, p) {
+export function renderBuild(el, p) {
   if (!p) {
     el.innerHTML = '';
     return;

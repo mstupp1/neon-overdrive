@@ -90,11 +90,12 @@ export function drawHud(ctx) {
 
   // Sector + progress (left of pause button)
   const rx = W - 60;
-  const info = sectorInfo(G.sector);
-  const hue = `hsl(${info.hue},100%,72%)`;
-  text(ctx, `SECTOR ${G.sector}`, rx, y0 + 9, 11, hue, 'right', 700);
   const d = G.director;
-  const bossSector = G.sector % 3 === 0;
+  const run = G.run;
+  const hue = `hsl(${d.spec ? d.spec.hue : sectorInfo(G.sector).hue},100%,72%)`;
+  const label = run && run.mode === 'campaign' ? `${run.system.short} · ${run.row + 1}/${run.route.rows.length}` : `SECTOR ${G.sector}`;
+  text(ctx, label, rx, y0 + 9, 11, hue, 'right', 700);
+  const bossSector = !!(d.spec && d.spec.boss);
   bar(ctx, rx - 84, y0 + 23, 84, 4, d.progress, hue);
   if (bossSector) {
     ctx.fillStyle = '#ff2e55';

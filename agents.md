@@ -14,9 +14,12 @@ The game is a set of ES modules (see README "Project layout"). All mutable world
 | `startRun(shipId)` | Start a run (`vector`, `needle`, `bulwark`, `phantom`) |
 | `startEndless(shipId)` | Alias of `startRun` (endless mode) |
 | `startSpec(spec, shipId?)` | Start a run, then `startSector` with a sector spec `{index, level, loop, boss, elite, modifiers[], hue, name, duration}` (missing fields default to `endlessSpec(1)`) |
+| `launch(system)` | Start a campaign run (1-based index or id: `genesis crimson cyclone void`); lands on the route screen |
+| `pickNode(i)` | On the route screen, pick the i-th reachable node |
+| `campaign` | `{ SYSTEMS, generateRoute(system, seed), nodeSpec, reachableNodes }` from `src/game/campaign.js` |
 | `toTitle()` | Back to title/attract mode |
 | `applyUpgrade(id)` | Grant an upgrade (ids in `src/game/upgrades.js`) |
-| `simulate(seconds, pickFn?)` | Fast-forward synchronously at 60 Hz, auto-picking drafts (`pickFn(choices) → id`). Returns a summary. |
+| `simulate(seconds, pickFn?, opts?)` | Fast-forward synchronously at 60 Hz, auto-picking drafts (`pickFn(choices) → id`) and route nodes (`opts.nodePick(nodes) → index`, default random fighting node; stop screens auto-continue). Stops on `gameover` or `extract`. Returns `{screen, sector, hp, level, score, time, run:{system,row}, victory}`. |
 
 Set `G.autopilot = true` to let the built-in bot (`src/game/bot.js`) fly a real run; `G.player.god = true` for invulnerability.
 
@@ -29,7 +32,7 @@ NEON.simulate(600); // → { screen, sector, hp, level, score, time }
 
 ## Useful state
 
-- `G.screen`: `title | ships | help | settings | play | pause | pause-settings | draft | gameover`
+- `G.screen`: `title | campaign | ships | help | settings | route | node | play | pause | pause-settings | draft | gameover | extract`
 - `G.mode`: `attract` (bot demo behind menus, SFX muted) or `run`
 - `G.player`: `x, y, hp, maxHp, shield, charges, od (0–100), odT, level, xp, up {id: level}, st {derived stats}`
 - `G.enemies` (`type, x, y, r, hp, elite, parts?`; bosses have `boss: true, phase, state`), `G.boss`
@@ -40,3 +43,12 @@ NEON.simulate(600); // → { screen, sector, hp, level, score, time }
 ## Driving input programmatically
 
 `input` (`src/core/input.js`, also `NEON.input`): call `input.press('dash' | 'od' | 'pause' | 'confirm' | …)` for buffered presses; set `input.mode = 'target'` with `input.tx/ty` (logical coords) to steer toward a point.
+
+## Campaign flow
+
+Title PLAY → `scr-campaign` (select system, LAUNCH / SHIP / ENDLESS GRID) → `launchSystem` → `scr-route` (branching nodes) → fighting node = `startSector(nodeSpec(...))` → sector reward draft → back to route. Boss node cleared → `extract()` → `scr-extract` → campaign. `G.run = { mode: 'campaign'|'endless', system, route, row, nodeId, sectors, victory, visited[] }` (null in attract).
+
+- `src/game/campaign.js`: `SYSTEMS`, `generateRoute`, `reachableNodes`, `nodeSpec`, `systemUnlocked`. Progress: `profile.campaign.cleared` (system ids).
+- `src/ui/meta.js`: render functions for campaign / route / route stop / extraction.
+- Placeholder stops (market / dock / anomaly): `visitNode(node)` in `src/main.js` (`scr-node`, body `#node-body`); must finish via `nodeContinue()`.
+- Extraction rewards go in `#extract-rewards` (filled in `meta.renderExtract`); banking happens in `extract()` / `bankRun()` in `main.js`.

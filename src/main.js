@@ -13,6 +13,8 @@ import { createDirector, startSector, nextSector, endlessSpec } from './game/dir
 import { rollDraft, applyUpgrade } from './game/upgrades.js';
 import { step, renderWorld } from './game/world.js';
 import { ui } from './ui/screens.js';
+import { meta } from './ui/meta.js';
+import { SYSTEMS, systemById, generateRoute, nodeSpec, reachableNodes, routeNode, systemUnlocked } from './game/campaign.js';
 import { rand, pick } from './core/math.js';
 
 const app = document.getElementById('app');
@@ -28,6 +30,9 @@ let ship = shipById(profile.lastShip);
 let settingsReturn = 'title';
 let draftKind = null;
 let draftChoices = null;
+let shipsMode = 'run'; // ship select: 'run' (pick → endless run) | 'campaign' (just sets the ship)
+let selSystem = 0;
+let afterDraft = null; // 'route' | 'extract': where to go once the sector reward / level drafts are done
 
 // --- Layout -------------------------------------------------------------------------
 
@@ -57,8 +62,9 @@ window.addEventListener('orientationchange', () => setTimeout(layout, 200));
 
 // --- World lifecycle -----------------------------------------------------------------
 
-function newWorld(mode, shipDef) {
+function newWorld(mode, shipDef, run = null) {
   G.mode = mode;
+  G.run = run;
   G.time = 0;
   G.runTime = 0;
   G.enemies.length = 0;
@@ -90,6 +96,10 @@ function newWorld(mode, shipDef) {
   G.director.onClear = onSectorClear;
   G.player = createPlayer(shipDef);
   startSector(endlessSpec(1));
+  if (run && run.mode === 'campaign') {
+    G.banner = null;
+    G.director.state = 'await'; // idle until a route node is picked
+  }
   setSfxMuted(mode === 'attract');
 }
 
@@ -104,8 +114,99 @@ function startRun(s) {
   ship = s;
   profile.lastShip = s.id;
   saveProfile();
-  newWorld('run', s);
+  newWorld('run', s, { mode: 'endless' });
   enterPlay();
+}
+
+// --- Campaign flow ---------------------------------------------------------------------
+
+function launchSystem(sys) {
+  profile.lastShip = ship.id;
+  saveProfile();
+  const route = generateRoute(sys, Math.floor(Math.random() * 2147483647));
+  newWorld('run', ship, { mode: 'campaign', system: sys, route, row: -1, nodeId: null, sectors: 0, victory: false, visited: [] });
+  showRoute();
+}
+
+function showCampaign() {
+  if (G.mode !== 'attract') startAttract();
+  G.screen = 'campaign';
+  pauseBtn.hidden = true;
+  touchUi.hidden = true;
+  music.setSet('normal');
+  music.setDuck(1);
+  if (!systemUnlocked(SYSTEMS[selSystem], profile)) selSystem = 0;
+  const focus = meta.renderCampaign(selSystem, ship.name);
+  ui.show('campaign', { focus });
+}
+
+function showRoute() {
+  G.screen = 'route';
+  pauseBtn.hidden = true;
+  touchUi.hidden = true;
+  music.setDuck(0.6);
+  const focus = meta.renderRoute(G);
+  ui.show('route', { focus, lock: 250 });
+}
+
+// Picks a route node: fighting nodes start a sector, the rest go through visitNode.
+function pickRouteNode(node) {
+  const r = G.run;
+  r.nodeId = node.id;
+  r.row = node.row;
+  r.visited.push(node.id);
+  if (node.type === 'combat' || node.type === 'elite' || node.type === 'boss') {
+    startSector(nodeSpec(r.system, node, r.sectors + 1));
+    r.sectors++;
+    enterPlay();
+  } else visitNode(node);
+}
+
+// Market / dock / anomaly stops. PLACEHOLDER (step 3 economy / step 7 events replace the
+// body of this switch); every stop must end by calling nodeContinue().
+function visitNode(node) {
+  switch (node.type) {
+    default:
+      meta.renderNode(node);
+      G.screen = 'node';
+      ui.show('node', { lock: 250 });
+  }
+}
+
+function nodeContinue() {
+  showRoute();
+}
+
+function extract() {
+  const p = G.player;
+  const r = G.run;
+  r.victory = true;
+  if (!profile.campaign.cleared.includes(r.system.id)) profile.campaign.cleared.push(r.system.id);
+  const unlocked = bankRun();
+  meta.renderExtract({
+    system: r.system, score: Math.floor(G.score), time: G.runTime, level: p.level, kills: G.kills, sectors: r.sectors,
+    maxCombo: G.maxCombo, grazes: G.grazes, unlocked, player: p,
+  });
+  const idx = SYSTEMS.indexOf(r.system);
+  if (idx < SYSTEMS.length - 1) selSystem = idx + 1;
+  G.screen = 'extract';
+  ui.show('extract', { lock: 700 });
+  pauseBtn.hidden = true;
+  touchUi.hidden = true;
+  music.setDuck(0.5);
+}
+
+// Folds the finished run into the profile records; returns newly unlocked ships.
+function bankRun() {
+  const before = SHIPS.filter((s) => isUnlocked(s, profile));
+  profile.runs++;
+  profile.kills += G.kills;
+  profile.best = Math.max(profile.best, Math.floor(G.score));
+  if (!G.run || G.run.mode === 'endless') profile.bestSector = Math.max(profile.bestSector, G.sector);
+  profile.bestCombo = Math.max(profile.bestCombo, G.maxCombo);
+  profile.bossKills += G.bossKills;
+  saveProfile();
+  return SHIPS.filter((s) => isUnlocked(s, profile) && !before.includes(s));
 }
 
 function enterPlay() {
@@ -142,11 +243,14 @@ function pickUpgrade(id) {
   if (draftKind === 'level') G.pendingLevels = Math.max(0, G.pendingLevels - 1);
   G.player.iframes = Math.max(G.player.iframes, 0.5);
   if (draftKind === 'sector') {
-    nextSector();
-    if (G.pendingLevels > 0) return openDraft('level');
-  } else if (G.pendingLevels > 0) {
-    return openDraft('level');
+    if (G.run.mode === 'campaign') afterDraft = 'route';
+    else nextSector();
   }
+  if (G.pendingLevels > 0) return openDraft('level');
+  const next = afterDraft;
+  afterDraft = null;
+  if (next === 'route') return showRoute();
+  if (next === 'extract') return extract();
   enterPlay();
 }
 
@@ -157,21 +261,27 @@ function onSectorClear() {
     return;
   }
   if (G.player.dead) return;
-  if (G.screen === 'play') openDraft('sector');
+  if (G.screen !== 'play') return;
+  if (G.run.mode === 'campaign' && G.director.spec.boss) {
+    // Final boss: skip the reward draft, finish any pending level-ups, then extract.
+    afterDraft = 'extract';
+    if (G.pendingLevels > 0) openDraft('level');
+    else {
+      afterDraft = null;
+      extract();
+    }
+    return;
+  }
+  openDraft('sector');
 }
 
 function gameOver() {
   const p = G.player;
-  const before = SHIPS.filter((s) => isUnlocked(s, profile));
   const newBest = G.score > profile.best;
-  profile.runs++;
-  profile.kills += G.kills;
-  profile.best = Math.max(profile.best, Math.floor(G.score));
-  profile.bestSector = Math.max(profile.bestSector, G.sector);
-  profile.bestCombo = Math.max(profile.bestCombo, G.maxCombo);
-  profile.bossKills += G.bossKills;
-  saveProfile();
-  const unlocked = SHIPS.filter((s) => isUnlocked(s, profile) && !before.includes(s));
+  const unlocked = bankRun();
+  const campaign = G.run.mode === 'campaign';
+  document.getElementById('over-campaign').hidden = !campaign;
+  document.getElementById('over-ships').hidden = campaign;
   ui.renderGameOver({
     score: Math.floor(G.score), newBest: newBest && profile.runs > 1, sector: G.sector, time: G.runTime,
     level: p.level, kills: G.kills, maxCombo: G.maxCombo, grazes: G.grazes, unlocked, player: p,
@@ -194,10 +304,18 @@ function toTitle() {
   music.setDuck(1);
 }
 
-function showShips() {
+function showShips(mode = 'run') {
+  shipsMode = mode;
   G.screen = 'ships';
-  const focus = ui.renderShips(startRun);
+  const focus = ui.renderShips(mode === 'campaign' ? setShip : startRun);
   ui.show('ships', { focus, lock: 150 });
+}
+
+function setShip(s) {
+  ship = s;
+  profile.lastShip = s.id;
+  saveProfile();
+  showCampaign();
 }
 
 // --- UI handlers ---------------------------------------------------------------------
@@ -207,12 +325,12 @@ ui.init({
     if (!profile.seenHelp) {
       profile.seenHelp = true;
       saveProfile();
-      settingsReturn = 'ships';
+      settingsReturn = 'campaign';
       G.screen = 'help';
       ui.show('help');
       return;
     }
-    showShips();
+    showCampaign();
   },
   help() {
     settingsReturn = 'title';
@@ -231,26 +349,42 @@ ui.init({
         G.screen = 'pause';
         ui.renderPause(G);
         ui.show('pause', { focus: 1 });
-      } else if (settingsReturn === 'ships') {
-        showShips();
+      } else if (settingsReturn === 'campaign') {
+        settingsReturn = 'title';
+        showCampaign();
       } else {
         G.screen = 'title';
         ui.renderTitle();
         ui.show('title', { focus: ui.current === 'help' ? 1 : 2 });
       }
+    } else if (ui.current === 'ships' && shipsMode === 'campaign') {
+      showCampaign();
     } else {
       G.screen = 'title';
       ui.renderTitle();
       ui.show('title');
     }
   },
+  sys(btn) {
+    selSystem = +btn.dataset.i;
+    meta.selectSystem(selSystem);
+  },
+  launch: () => launchSystem(SYSTEMS[selSystem]),
+  endless: () => startRun(ship),
+  pickship: () => showShips('campaign'),
+  campaign: () => showCampaign(),
+  node(btn) {
+    pickRouteNode(routeNode(G.run.route, btn.dataset.id));
+  },
+  nodeDone: () => nodeContinue(),
+  abandon: () => showCampaign(),
   resume: () => {
     enterPlay();
   },
-  restart: () => startRun(ship),
-  quit: () => toTitle(),
-  retry: () => startRun(ship),
-  ships: () => showShips(),
+  restart: () => (G.run.mode === 'campaign' ? launchSystem(G.run.system) : startRun(ship)),
+  quit: () => (G.run.mode === 'campaign' ? showCampaign() : toTitle()),
+  retry: () => (G.run.mode === 'campaign' ? launchSystem(G.run.system) : startRun(ship)),
+  ships: () => showShips('run'),
   title: () => toTitle(),
   reroll() {
     if (G.rerolls <= 0) return;
@@ -332,7 +466,7 @@ let slowFrames = 0;
 
 function simulating() {
   const s = G.screen;
-  return s === 'play' || s === 'gameover' || s === 'title' || s === 'ships' || s === 'settings' || s === 'help';
+  return s === 'play' || s === 'gameover' || s === 'title' || s === 'campaign' || s === 'ships' || s === 'settings' || s === 'help';
 }
 
 function frame(now) {
@@ -416,7 +550,7 @@ function render() {
   ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
   renderWorld(ctx, k);
   ctx.setTransform(k, 0, 0, k, 0, 0);
-  if (G.mode === 'run' && G.screen !== 'gameover') drawHud(ctx);
+  if (G.mode === 'run' && (G.screen === 'play' || G.screen === 'pause' || G.screen === 'draft' || G.screen === 'pause-settings')) drawHud(ctx);
   if (G.flash > 0.01) {
     ctx.fillStyle = `rgba(${G.flashColor},${Math.min(0.8, G.flash)})`;
     ctx.fillRect(0, 0, view.W, view.H);
@@ -455,16 +589,44 @@ window.NEON = {
     startSector({ ...endlessSpec(1), ...spec });
   },
   applyUpgrade: (id) => applyUpgrade(G.player, id, G),
-  simulate(seconds, pickFn = (choices) => pick(choices)) {
+  // Start a campaign run (1-based index or system id); lands on the route screen.
+  launch(sys = 1) {
+    launchSystem(typeof sys === 'number' ? SYSTEMS[sys - 1] : systemById(sys));
+  },
+  // Pick the i-th currently reachable route node.
+  pickNode(i = 0) {
+    if (G.screen !== 'route') return false;
+    const node = reachableNodes(G.run.route, G.run.nodeId)[i];
+    if (!node) return false;
+    pickRouteNode(node);
+    return true;
+  },
+  campaign: { SYSTEMS, generateRoute, nodeSpec, reachableNodes },
+  // opts.nodePick(nodes) → index overrides the default (random fighting node).
+  simulate(seconds, pickFn = (choices) => pick(choices), opts = {}) {
     const dt = 1 / 60;
+    const nodePick = opts.nodePick || ((nodes) => {
+      const fights = nodes.map((n, i) => i).filter((i) => ['combat', 'elite', 'boss'].includes(nodes[i].type));
+      return pick(fights.length ? fights : nodes.map((n, i) => i));
+    });
     for (let t = 0; t < seconds; t += dt) {
       if (G.screen === 'draft') pickUpgrade(pickFn(draftChoices));
-      if (G.screen === 'gameover') break;
+      for (let guard = 0; guard < 4 && (G.screen === 'route' || G.screen === 'node'); guard++) {
+        if (G.screen === 'node') nodeContinue();
+        else {
+          const nodes = reachableNodes(G.run.route, G.run.nodeId);
+          pickRouteNode(nodes[nodePick(nodes)]);
+        }
+      }
+      if (G.screen === 'gameover' || G.screen === 'extract') break;
       if (G.hitstop > 0) G.hitstop = 0;
       step(dt);
       afterStep(dt);
     }
-    return { screen: G.screen, sector: G.sector, hp: G.player.hp, level: G.player.level, score: Math.floor(G.score), time: Math.round(G.runTime) };
+    return {
+      screen: G.screen, sector: G.sector, hp: G.player.hp, level: G.player.level, score: Math.floor(G.score), time: Math.round(G.runTime),
+      run: G.run && { system: G.run.system && G.run.system.id, row: G.run.row }, victory: !!(G.run && G.run.victory),
+    };
   },
 };
 

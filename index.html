@@ -60,6 +60,58 @@
             </nav>
         </section>
 
+        <!-- CAMPAIGN MAP -->
+        <section class="screen" id="scr-campaign" data-back="back">
+            <h2 class="screen-title">CAMPAIGN</h2>
+            <p class="screen-sub">Choose a star system</p>
+            <div class="sysmap" id="sys-map"></div>
+            <div class="sys-detail" id="sys-detail"></div>
+            <nav class="menu">
+                <button class="btn primary" data-act="launch" id="launch-btn">LAUNCH</button>
+                <div class="pair">
+                    <button class="btn small" data-act="pickship" id="ship-btn">SHIP</button>
+                    <button class="btn small" data-act="endless">ENDLESS GRID</button>
+                </div>
+                <button class="btn ghost small" data-act="back">BACK</button>
+            </nav>
+        </section>
+
+        <!-- ROUTE -->
+        <section class="screen" id="scr-route" data-back="">
+            <h2 class="screen-title" id="route-title">ROUTE</h2>
+            <div class="run-stats" id="route-stats"></div>
+            <div class="routemap" id="route-map"></div>
+            <p class="route-hint" id="route-hint"></p>
+            <nav class="menu row">
+                <button class="btn ghost small" data-act="abandon">ABANDON RUN</button>
+            </nav>
+        </section>
+
+        <!-- ROUTE STOP (market / dock / anomaly placeholder; later steps fill #node-body) -->
+        <section class="screen" id="scr-node" data-back="nodeDone">
+            <div class="node-icon" id="node-icon"></div>
+            <h2 class="screen-title" id="node-title">STOP</h2>
+            <p class="screen-sub" id="node-sub"></p>
+            <div class="node-body" id="node-body"></div>
+            <nav class="menu">
+                <button class="btn primary" data-act="nodeDone">CONTINUE</button>
+            </nav>
+        </section>
+
+        <!-- EXTRACTION -->
+        <section class="screen" id="scr-extract" data-back="">
+            <h2 class="screen-title" id="extract-title">SYSTEM SECURED</h2>
+            <p class="screen-sub" id="extract-sub">EXTRACTION COMPLETE</p>
+            <div class="final-score" id="extract-score">0</div>
+            <div class="run-stats" id="extract-stats"></div>
+            <div class="unlock" id="extract-unlock" hidden></div>
+            <div class="extract-rewards" id="extract-rewards"></div>
+            <div class="build big" id="extract-build"></div>
+            <nav class="menu">
+                <button class="btn primary" data-act="campaign">CONTINUE</button>
+            </nav>
+        </section>
+
         <!-- UPGRADE DRAFT -->
         <section class="screen draft" id="scr-draft" data-back="">
             <div class="draft-head">
@@ -82,7 +134,7 @@
                 <button class="btn primary" data-act="resume">RESUME</button>
                 <button class="btn" data-act="settings">SETTINGS</button>
                 <button class="btn" data-act="restart">RESTART</button>
-                <button class="btn ghost" data-act="quit">QUIT TO TITLE</button>
+                <button class="btn ghost" id="pause-quit" data-act="quit">QUIT TO TITLE</button>
             </nav>
         </section>
 
@@ -143,7 +195,8 @@
             <div class="build big" id="over-build"></div>
             <nav class="menu">
                 <button class="btn primary" data-act="retry">RETRY</button>
-                <button class="btn" data-act="ships">CHANGE SHIP</button>
+                <button class="btn" data-act="campaign" id="over-campaign" hidden>CAMPAIGN</button>
+                <button class="btn" data-act="ships" id="over-ships">CHANGE SHIP</button>
                 <button class="btn ghost" data-act="title">TITLE</button>
             </nav>
         </section>
