@@ -16,6 +16,7 @@
     <link rel="preload" href="src/fonts/orbitron.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="src/fonts/fonts.css">
     <link rel="stylesheet" href="src/style.css">
+    <link rel="stylesheet" href="src/gallery.css">
 </head>
 
 <body>
@@ -34,6 +35,8 @@
         </div>
 
         <div id="toast" class="toast"><span class="eq"><i></i><i></i><i></i></span><span id="toast-text"></span></div>
+
+        <div id="notes" class="notes" aria-live="polite"></div>
 
         <div id="boss-card" class="boss-card" aria-hidden="true"></div>
 
@@ -59,9 +62,38 @@
                 <button class="btn primary" data-act="play">PLAY</button>
                 <button class="btn" data-act="help">HOW TO PLAY</button>
                 <button class="btn" data-act="settings">SETTINGS</button>
+                <div class="pair">
+                    <button class="btn small" data-act="gallery">GALLERY</button>
+                    <button class="btn small" data-act="achievements">ACHIEVEMENTS</button>
+                </div>
             </nav>
             <div class="records" id="title-records"></div>
             <div class="foot-hint" id="title-hint"></div>
+        </section>
+
+        <!-- GALLERY (relic sets) -->
+        <section class="screen" id="scr-gallery" data-back="leaveGallery">
+            <h2 class="screen-title">GALLERY</h2>
+            <div class="pilot-line" id="gl-head"></div>
+            <div class="gl-tabs" id="gl-tabs"></div>
+            <div class="gl-set" id="gl-set"></div>
+            <div class="gl-grid" id="gl-grid"></div>
+            <div class="gl-detail" id="gl-detail"></div>
+            <nav class="menu row">
+                <button class="btn small" data-act="capsule" id="gl-capsule">CAPSULE</button>
+                <button class="btn ghost small" data-act="leaveGallery">BACK</button>
+            </nav>
+        </section>
+
+        <!-- ACHIEVEMENTS -->
+        <section class="screen" id="scr-achievements" data-back="leaveAch">
+            <h2 class="screen-title">ACHIEVEMENTS</h2>
+            <div class="pilot-line ach-head" id="ach-head"></div>
+            <div class="gl-tabs ach-tabs" id="ach-tabs"></div>
+            <div class="ach-list" id="ach-list"></div>
+            <nav class="menu row">
+                <button class="btn ghost small" data-act="leaveAch" id="ach-back">BACK</button>
+            </nav>
         </section>
 
         <!-- SHIP SELECT -->

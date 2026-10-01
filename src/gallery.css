@@ -1,0 +1,687 @@
+/* Gallery, Achievements and notification toasts. Same em scale as style.css. */
+
+/* ---------------------------------------------------------------- Toasts */
+.notes {
+    position: absolute;
+    top: calc(var(--safe-top) + 3.6em);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4em;
+    pointer-events: none;
+    z-index: 30;
+}
+
+.note {
+    --c: var(--cyan);
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    padding: 0.35em 1.1em 0.35em 0.45em;
+    border-radius: 2px;
+    background: rgba(6, 4, 18, 0.88);
+    border: 1px solid color-mix(in srgb, var(--c) 55%, transparent);
+    box-shadow: 0 0 1.2em color-mix(in srgb, var(--c) 25%, transparent);
+    white-space: nowrap;
+    overflow: hidden;
+    animation: note-in 0.5s cubic-bezier(.2, 1.4, .4, 1) both;
+}
+
+.note.out {
+    animation: note-out 0.4s ease-in forwards;
+}
+
+.note-ico {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 2em;
+    height: 2em;
+    padding: 0.35em;
+    border-radius: 50%;
+    color: var(--c);
+    background: color-mix(in srgb, var(--c) 16%, transparent);
+    animation: note-pop 0.6s 0.15s cubic-bezier(.3, 1.8, .5, 1) both;
+}
+
+.note-ico svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 0.25em var(--c));
+}
+
+/* one expanding ring when the icon lands */
+.note-ico::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px solid var(--c);
+    animation: note-ring 0.7s 0.2s ease-out both;
+}
+
+.note-txt {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+.note-txt em {
+    font-style: normal;
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    color: var(--c);
+}
+
+.note-txt b {
+    font-size: 0.95em;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #fff;
+}
+
+/* gold sheen sweep for big ones */
+.note.shine::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.28) 50%, transparent 65%);
+    transform: translateX(-100%);
+    animation: note-sheen 1.1s 0.35s ease-in-out both;
+}
+
+@keyframes note-in {
+    from { opacity: 0; transform: translateY(-1.2em) scale(0.85); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes note-out {
+    to { opacity: 0; transform: translateY(-0.6em) scale(0.95); }
+}
+
+@keyframes note-pop {
+    0% { transform: scale(0) rotate(-40deg); }
+    100% { transform: none; }
+}
+
+@keyframes note-ring {
+    from { transform: scale(0.8); opacity: 0.9; }
+    to { transform: scale(2.1); opacity: 0; }
+}
+
+@keyframes note-sheen {
+    to { transform: translateX(100%); }
+}
+
+/* ---------------------------------------------------------------- Gallery */
+#scr-gallery,
+#scr-achievements {
+    justify-content: safe center;
+    gap: 0.55em;
+    padding-top: calc(var(--safe-top) + 0.9em);
+    padding-bottom: calc(var(--safe-bottom) + 0.9em);
+}
+
+#scr-gallery .screen-title,
+#scr-achievements .screen-title {
+    font-size: 1.55em;
+}
+
+#gl-head span + span b,
+.ach-head b {
+    color: #fff;
+}
+
+.gl-tabs {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.3em;
+    width: 100%;
+    max-width: 24em;
+}
+
+.gl-tab {
+    --c: var(--cyan);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15em;
+    padding: 0.45em 0.1em;
+    font-family: inherit;
+    color: var(--dim);
+    background: var(--panel);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 2px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s, color 0.15s;
+}
+
+.gl-tab b {
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    line-height: 1.25;
+    text-align: center;
+}
+
+.gl-tab i {
+    font-style: normal;
+    font-weight: 700;
+    font-size: 0.85em;
+}
+
+.gl-tab.cur {
+    color: #fff;
+    border-color: var(--c);
+    background: color-mix(in srgb, var(--c) 14%, var(--panel));
+}
+
+.gl-tab.done i {
+    color: var(--c);
+}
+
+.gl-tab.done i::after {
+    content: ' ✓';
+}
+
+.gl-tab.focus,
+.gl-tab:hover {
+    border-color: var(--c);
+    box-shadow: 0 0 0.9em color-mix(in srgb, var(--c) 45%, transparent);
+}
+
+/* NEW dot */
+.gl-tab s,
+.gl-tile s {
+    position: absolute;
+    top: 0.35em;
+    right: 0.35em;
+    width: 0.45em;
+    height: 0.45em;
+    border-radius: 50%;
+    background: var(--pink);
+    box-shadow: 0 0 0.5em var(--pink);
+}
+
+.gl-set {
+    --c: var(--cyan);
+    width: 100%;
+    max-width: 24em;
+}
+
+.gl-set-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5em;
+}
+
+.gl-set h4 {
+    margin: 0;
+    font-family: Orbitron, sans-serif;
+    font-size: 1em;
+    letter-spacing: 0.14em;
+    color: var(--c);
+    text-shadow: 0 0 0.6em color-mix(in srgb, var(--c) 60%, transparent);
+}
+
+.gl-set-top span {
+    font-size: 0.78em;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--dim);
+    white-space: nowrap;
+}
+
+.gl-set-top span.ok {
+    color: var(--c);
+}
+
+.gl-set-top .coin,
+.gl-info .coin,
+.ach-rw .coin {
+    width: 1.1em;
+    height: 1.1em;
+    vertical-align: -0.2em;
+    margin: 0 0.15em 0 0.3em;
+    color: #ffd24a;
+}
+
+.gl-set p {
+    margin: 0.2em 0 0.45em;
+    font-size: 0.85em;
+    color: var(--dim);
+}
+
+.gl-bar {
+    height: 0.3em;
+    border-radius: 1em;
+    background: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+.gl-bar i {
+    display: block;
+    height: 100%;
+    background: var(--c, var(--cyan));
+    box-shadow: 0 0 0.6em var(--c, var(--cyan));
+    transition: width 0.5s ease;
+}
+
+.gl-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5em;
+    width: 100%;
+    max-width: 24em;
+}
+
+.gl-tile {
+    --c: var(--cyan);
+    --r: #fff;
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1.35;
+    padding: 0.9em;
+    color: var(--c);
+    background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--c) 10%, transparent), transparent 70%), var(--panel);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 2px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+.gl-tile svg {
+    width: 2.6em;
+    height: 2.6em;
+    opacity: 0.22;
+    filter: grayscale(1);
+}
+
+.gl-tile > i {
+    font-style: normal;
+    font-family: Orbitron, sans-serif;
+    font-size: 1.6em;
+    font-weight: 900;
+    color: rgba(255, 210, 74, 0.35);
+}
+
+.gl-tile.own {
+    border-color: color-mix(in srgb, var(--c) 40%, transparent);
+}
+
+.gl-tile.own svg {
+    opacity: 1;
+    filter: drop-shadow(0 0 0.35em var(--c));
+}
+
+.gl-tile.legend {
+    border-style: dashed;
+    border-color: rgba(255, 210, 74, 0.35);
+}
+
+.gl-tile.legend.own {
+    border-style: solid;
+    border-color: #ffd24a;
+    color: #ffd24a;
+    box-shadow: inset 0 0 1.2em rgba(255, 210, 74, 0.18);
+}
+
+.gl-tile.legend.own svg {
+    filter: drop-shadow(0 0 0.45em #ffd24a);
+    animation: legend-bob 2.4s ease-in-out infinite;
+}
+
+.gl-tile.sel {
+    border-color: var(--c);
+    box-shadow: 0 0 0 1px var(--c), 0 0 1em color-mix(in srgb, var(--c) 40%, transparent);
+}
+
+.gl-tile.focus,
+.gl-tile:hover {
+    border-color: var(--c);
+    box-shadow: 0 0 1em color-mix(in srgb, var(--c) 45%, transparent);
+    transform: translateY(-0.1em);
+}
+
+.gl-tile.pop svg {
+    animation: relic-pop 0.7s cubic-bezier(.3, 1.8, .5, 1) both;
+}
+
+.gl-tile.pop::after {
+    content: '';
+    position: absolute;
+    inset: 15%;
+    border-radius: 50%;
+    border: 2px solid var(--c);
+    animation: note-ring 0.8s ease-out both;
+}
+
+@keyframes relic-pop {
+    0% { transform: scale(0) rotate(-90deg); }
+    100% { transform: none; }
+}
+
+@keyframes legend-bob {
+    50% { transform: translateY(-0.12em) scale(1.05); }
+}
+
+.gl-detail {
+    --c: var(--cyan);
+    position: relative;
+    --r: #fff;
+    display: grid;
+    grid-template-columns: 4em 1fr;
+    gap: 0.8em;
+    align-items: center;
+    width: 100%;
+    max-width: 24em;
+    min-height: 6.4em;
+    padding: 0.7em 0.9em;
+    background: linear-gradient(100deg, color-mix(in srgb, var(--c) 12%, var(--panel)) 0%, var(--panel) 65%);
+    border: 1px solid color-mix(in srgb, var(--c) 30%, transparent);
+    border-radius: 2px;
+}
+
+.gl-cap {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 2.6em 1fr;
+    gap: 0.8em;
+    align-items: center;
+}
+
+.gl-cap-ico {
+    color: var(--dim);
+}
+
+.gl-cap p,
+.gl-info p {
+    margin: 0;
+    font-size: 0.85em;
+    line-height: 1.3;
+    color: rgba(233, 244, 255, 0.75);
+}
+
+.gl-cap b {
+    color: var(--c);
+}
+
+.gl-big {
+    display: grid;
+    place-items: center;
+    width: 4em;
+    height: 4em;
+    padding: 0.7em;
+    color: var(--c);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+.gl-big svg {
+    width: 100%;
+    height: 100%;
+    opacity: 0.25;
+}
+
+.gl-big > i {
+    font-style: normal;
+    font-family: Orbitron, sans-serif;
+    font-size: 1.4em;
+    font-weight: 900;
+    color: rgba(255, 210, 74, 0.5);
+}
+
+.gl-big.own {
+    border: 1px solid color-mix(in srgb, var(--r) 60%, transparent);
+    background: color-mix(in srgb, var(--c) 12%, transparent);
+}
+
+.gl-big.own svg {
+    opacity: 1;
+    filter: drop-shadow(0 0 0.4em var(--c));
+}
+
+.gl-info em {
+    font-style: normal;
+    font-size: 0.78em;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--r);
+}
+
+.gl-info h4 {
+    margin: 0.05em 0 0.2em;
+    font-size: 1.15em;
+    letter-spacing: 0.04em;
+    color: #fff;
+}
+
+.gl-info .btn {
+    margin-top: 0.5em;
+}
+
+.gl-info .btn small {
+    display: block;
+    margin-top: 0.2em;
+    font-size: 0.75em;
+    letter-spacing: 0.1em;
+    opacity: 0.8;
+}
+
+.gl-own {
+    display: inline-block;
+    margin-top: 0.4em;
+    font-size: 0.78em;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: var(--c);
+}
+
+#gl-capsule .coin {
+    width: 1.2em;
+    height: 1.2em;
+    vertical-align: -0.25em;
+    margin: 0 0.1em 0 0.4em;
+}
+
+/* ---------------------------------------------------------------- Achievements */
+.ach-head {
+    width: 100%;
+    max-width: 18em;
+    flex-direction: column;
+    gap: 0.4em;
+}
+
+.ach-head .gl-bar {
+    width: 100%;
+    --c: #ffd24a;
+}
+
+.ach-tabs {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.ach-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35em;
+    width: 100%;
+    max-width: 24em;
+}
+
+.ach {
+    --c: var(--cyan);
+    position: relative;
+    display: grid;
+    grid-template-columns: 2em 1fr auto;
+    gap: 0.7em;
+    align-items: center;
+    padding: 0.35em 0.8em 0.35em 0.5em;
+    text-align: left;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--panel);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    outline: none;
+    cursor: default;
+    transition: border-color 0.15s;
+}
+
+.ach-ico {
+    display: grid;
+    place-items: center;
+    width: 2em;
+    height: 2em;
+    padding: 0.4em;
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.ach-ico svg {
+    width: 100%;
+    height: 100%;
+}
+
+.ach-txt b {
+    display: block;
+    font-size: 0.95em;
+    letter-spacing: 0.03em;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.ach-txt > span {
+    display: block;
+    font-size: 0.8em;
+    line-height: 1.25;
+    color: var(--dim);
+}
+
+.ach-rw {
+    font-size: 0.78em;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--dim);
+    white-space: nowrap;
+}
+
+.ach.on {
+    border-color: color-mix(in srgb, var(--c) 35%, transparent);
+    background: linear-gradient(100deg, color-mix(in srgb, var(--c) 10%, var(--panel)) 0%, var(--panel) 60%);
+}
+
+.ach.on .ach-ico {
+    color: var(--c);
+    background: color-mix(in srgb, var(--c) 16%, transparent);
+    filter: drop-shadow(0 0 0.3em color-mix(in srgb, var(--c) 70%, transparent));
+}
+
+.ach.on .ach-txt b {
+    color: #fff;
+}
+
+.ach.on .ach-rw {
+    color: var(--c);
+}
+
+.ach.secret .ach-txt b {
+    letter-spacing: 0.3em;
+}
+
+.ach.focus,
+.ach:hover {
+    border-color: color-mix(in srgb, var(--c) 60%, transparent);
+}
+
+.ach-prog {
+    position: relative;
+    display: block;
+    margin-top: 0.2em;
+    height: 0.2em;
+    border-radius: 1em;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.ach-prog i {
+    display: block;
+    height: 100%;
+    border-radius: 1em;
+    background: var(--c);
+    opacity: 0.7;
+}
+
+/* HUD-frame corner brackets, same look as the menu restyle; focus pops them out like a lock-on. */
+.gl-tab,
+.gl-tile,
+.gl-detail,
+.ach,
+.note {
+    --fc: color-mix(in srgb, var(--c, var(--cyan)) 85%, transparent);
+}
+
+.gl-tab::before,
+.gl-tile::before,
+.gl-detail::before,
+.ach::before,
+.note::before {
+    --k: 0.55em;
+    --t: 2px;
+    content: '';
+    position: absolute;
+    inset: -1px;
+    pointer-events: none;
+    background:
+        linear-gradient(var(--fc), var(--fc)) left top / var(--k) var(--t) no-repeat,
+        linear-gradient(var(--fc), var(--fc)) left top / var(--t) var(--k) no-repeat,
+        linear-gradient(var(--fc), var(--fc)) right top / var(--k) var(--t) no-repeat,
+        linear-gradient(var(--fc), var(--fc)) right top / var(--t) var(--k) no-repeat,
+        linear-gradient(var(--fc), var(--fc)) left bottom / var(--k) var(--t) no-repeat,
+        linear-gradient(var(--fc), var(--fc)) left bottom / var(--t) var(--k) no-repeat,
+        linear-gradient(var(--fc), var(--fc)) right bottom / var(--k) var(--t) no-repeat,
+        linear-gradient(var(--fc), var(--fc)) right bottom / var(--t) var(--k) no-repeat;
+    transition: inset 0.15s ease-out;
+}
+
+.ach:not(.on),
+.gl-tile:not(.own) {
+    --fc: rgba(233, 244, 255, 0.25);
+}
+
+.gl-tab.focus::before,
+.gl-tab:hover::before,
+.gl-tile.focus::before,
+.gl-tile:hover::before,
+.ach.focus::before {
+    inset: -5px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .note,
+    .note-ico,
+    .note-ico::after,
+    .note.shine::after,
+    .gl-tile.legend.own svg,
+    .gl-tile.pop svg,
+    .gl-tile.pop::after {
+        animation: none !important;
+    }
+}
+
+/* the title's GALLERY / ACHIEVEMENTS pair: tighter tracking so the long label fits */
+#scr-title .pair .btn {
+    letter-spacing: 0.06em;
+    padding-left: 0.3em;
+    padding-right: 0.3em;
+    white-space: nowrap;
+}

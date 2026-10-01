@@ -15,6 +15,8 @@ import { input, readDirection } from '../core/input.js';
 import { botControl } from './bot.js';
 import { vacuumAll } from './pickups.js';
 import { dashNova, resetModules } from './modules.js';
+import { collectRelic } from './collectables.js';
+import { achEvent } from './achievements.js';
 import { CLASSES, activeClass, equippedPassives, initPilot, castUlt, boosted, phasing, fortressOn, bloodrush, onEliteKilled, updatePilot, spawnEchoes } from './pilot.js';
 
 export const xpFor = (l) => Math.floor(5 + 4.5 * l + 0.9 * l * l);
@@ -313,6 +315,7 @@ export function onEnemyKilled(e) {
     floatText(p.x, p.y - 36, `x${after} COMBO`, '#ffe14d', 12, 0.9);
   }
   addScore(e.score);
+  achEvent('kill', e);
   bloodrush(p);
   if (e.elite) onEliteKilled(p);
   gainOverdrive(e.elite ? 10 : e.type === 'swarm' ? 0.8 : 1.6);
@@ -388,6 +391,7 @@ export function collectPickup(pk) {
     } else {
       addScore(2500);
       floatText(p.x, p.y - 30, '+2500', '#ff3b6b', 12, 1);
+      achEvent('heartFull');
     }
     sfx.heal();
     ring(p.x, p.y, 40, '#ff3b6b', 0.4);
@@ -399,6 +403,8 @@ export function collectPickup(pk) {
     gainOverdrive(30);
     sfx.select();
     floatText(p.x, p.y - 30, `+${ultOf(p).short}`, p.ucol, 11, 1);
+  } else if (pk.type === 'relic') {
+    collectRelic(pk);
   }
 }
 

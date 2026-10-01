@@ -1,7 +1,7 @@
 // XP gems and power-up pickups with magnet behaviour.
 
 import { G, view } from './state.js';
-import { S } from '../render/sprites.js';
+import { S, glow } from '../render/sprites.js';
 import { rand, TAU, dist2 } from '../core/math.js';
 import { collectPickup } from './player.js';
 
@@ -113,6 +113,13 @@ export function drawPickups(ctx) {
     ctx.globalAlpha = a;
     let sz = s.size;
     if (p.type !== 'xp' && p.type !== 'credit') sz *= 1 + Math.sin(time * 6) * 0.08;
+    if (p.type === 'relic') {
+      // Relic cache: a slow golden beacon so it reads as loot, not a gem.
+      const g = glow('#ffd24a', 64);
+      ctx.globalAlpha = a * (0.55 + 0.25 * Math.sin(time * 3));
+      ctx.drawImage(g.img, p.x - 32, p.y - 32, 64, 64);
+      ctx.globalAlpha = a;
+    }
     ctx.drawImage(s.img, p.x - sz / 2, p.y - sz / 2, sz, sz);
   }
   ctx.globalAlpha = 1;

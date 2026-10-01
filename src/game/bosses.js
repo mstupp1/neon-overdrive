@@ -9,6 +9,7 @@ import { explosion, addShake, flash, floatText, slowmo, hitstop, sparks } from '
 import { spawnEnemy, killEnemy } from './enemies.js';
 import { dropXp, dropPickup } from './pickups.js';
 import { bossPayout } from './economy.js';
+import { rollRelicDrop } from './collectables.js';
 import { sfx } from '../core/audio.js';
 import { addScore } from './player.js';
 
@@ -654,6 +655,7 @@ function finishBoss(e) {
   dropXp(e.x, e.y, Math.round(e.xp * G.director.diff.xp));
   dropPickup(e.x - 20, e.y, 'heart');
   dropPickup(e.x + 20, e.y, 'heart');
+  rollRelicDrop(e);
   floatText(e.x, e.y, `${e.name} DESTROYED`, '#ffe14d', 18, 2);
   const bp = bossPayout();
   if (bp) floatText(e.x, e.y + 24, `+${bp} CREDITS`, '#ffd24a', 12, 2);
