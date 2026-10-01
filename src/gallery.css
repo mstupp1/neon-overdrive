@@ -621,51 +621,6 @@
     opacity: 0.7;
 }
 
-/* HUD-frame corner brackets, same look as the menu restyle; focus pops them out like a lock-on. */
-.gl-tab,
-.gl-tile,
-.gl-detail,
-.ach,
-.note {
-    --fc: color-mix(in srgb, var(--c, var(--cyan)) 85%, transparent);
-}
-
-.gl-tab::before,
-.gl-tile::before,
-.gl-detail::before,
-.ach::before,
-.note::before {
-    --k: 0.55em;
-    --t: 2px;
-    content: '';
-    position: absolute;
-    inset: -1px;
-    pointer-events: none;
-    background:
-        linear-gradient(var(--fc), var(--fc)) left top / var(--k) var(--t) no-repeat,
-        linear-gradient(var(--fc), var(--fc)) left top / var(--t) var(--k) no-repeat,
-        linear-gradient(var(--fc), var(--fc)) right top / var(--k) var(--t) no-repeat,
-        linear-gradient(var(--fc), var(--fc)) right top / var(--t) var(--k) no-repeat,
-        linear-gradient(var(--fc), var(--fc)) left bottom / var(--k) var(--t) no-repeat,
-        linear-gradient(var(--fc), var(--fc)) left bottom / var(--t) var(--k) no-repeat,
-        linear-gradient(var(--fc), var(--fc)) right bottom / var(--k) var(--t) no-repeat,
-        linear-gradient(var(--fc), var(--fc)) right bottom / var(--t) var(--k) no-repeat;
-    transition: inset 0.15s ease-out;
-}
-
-.ach:not(.on),
-.gl-tile:not(.own) {
-    --fc: rgba(233, 244, 255, 0.25);
-}
-
-.gl-tab.focus::before,
-.gl-tab:hover::before,
-.gl-tile.focus::before,
-.gl-tile:hover::before,
-.ach.focus::before {
-    inset: -5px;
-}
-
 @media (prefers-reduced-motion: reduce) {
     .note,
     .note-ico,
