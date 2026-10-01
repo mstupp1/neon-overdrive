@@ -12,6 +12,7 @@ const DEFAULTS = {
     sfx: 0.8,
     shake: true,
     flashes: true,
+    bloom: true,
     damageNumbers: true,
     story: true,
   },

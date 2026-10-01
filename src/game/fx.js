@@ -4,6 +4,7 @@ import { G, view } from './state.js';
 import { rand, TAU } from '../core/math.js';
 import { glow } from '../render/sprites.js';
 import { profile } from '../core/storage.js';
+import { bg } from '../render/background.js';
 
 const free = [];
 const MAX_PARTICLES = 900;
@@ -33,6 +34,7 @@ export function particle(kind, x, y, vx, vy, life, size, color, drag = 3) {
 
 export function explosion(x, y, color, size = 1) {
   const q = view.quality;
+  bg.blast(x, y, size, color);
   particle('flash', x, y, 0, 0, 0.18 + size * 0.05, 50 * size, color, 0);
   particle('flash', x, y, 0, 0, 0.12, 26 * size, '#ffffff', 0);
   particle('ring', x, y, 0, 0, 0.35 + size * 0.1, 14 + 26 * size, color, 0);
