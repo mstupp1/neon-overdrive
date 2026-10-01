@@ -101,32 +101,40 @@ export function openGallery(onBack) {
 
 // --- Achievements ---------------------------------------------------------------------
 
+let group = 0; // achievements tab
+
 function renderAchievements() {
   const got = ACHIEVEMENTS.filter((a) => hasAch(a.id)).length;
   $('#ach-head').innerHTML = `<span>UNLOCKED <b>${got}/${ACHIEVEMENTS.length}</b></span><div class="gl-bar"><i style="width:${(got / ACHIEVEMENTS.length) * 100}%"></i></div>`;
-  let html = '';
-  for (const g of GROUPS) {
+  // One group per tab so the screen never needs to scroll.
+  $('#ach-tabs').innerHTML = GROUPS.map((g, i) => {
     const list = ACHIEVEMENTS.filter((a) => a.group === g);
     const n = list.filter((a) => hasAch(a.id)).length;
-    html += `<div class="ach-group">${g}<i>${n}/${list.length}</i></div>`;
-    for (const a of list) {
-      const on = hasAch(a.id);
-      const t = TIERS[a.tier];
-      const secret = a.hidden && !on;
-      const pr = !on && achProgress(a.id);
-      const bar = pr ? `<span class="ach-prog"><i style="width:${Math.min(100, (pr[0] / pr[1]) * 100)}%"></i><em>${fmt(Math.min(pr[0], pr[1]))}/${fmt(pr[1])}</em></span>` : '';
-      html += `<button class="ach${on ? ' on' : ''}${secret ? ' secret' : ''}" tabindex="-1" style="--c:${t.color}"><span class="ach-ico">${on ? STAR : LOCK}</span><span class="ach-txt"><b>${secret ? '???' : a.name}</b><span>${secret ? 'Hidden. Keep flying.' : a.desc}</span>${bar}</span><span class="ach-rw">${on ? t.name : `${coin}${t.reward}`}</span></button>`;
-    }
+    return `<button class="gl-tab${i === group ? ' cur' : ''}${n === list.length ? ' done' : ''}" data-act="achtab" data-i="${i}" style="--c:#ffd24a"><b>${g}</b><i>${n}/${list.length}</i></button>`;
+  }).join('');
+  let html = '';
+  for (const a of ACHIEVEMENTS.filter((x) => x.group === GROUPS[group])) {
+    const on = hasAch(a.id);
+    const t = TIERS[a.tier];
+    const secret = a.hidden && !on;
+    const pr = !on && achProgress(a.id);
+    const right = on ? t.name : pr ? `${fmt(Math.min(pr[0], pr[1]))}/${fmt(pr[1])}` : `${coin}${t.reward}`;
+    const bar = pr ? `<span class="ach-prog"><i style="width:${Math.min(100, (pr[0] / pr[1]) * 100)}%"></i></span>` : '';
+    html += `<button class="ach${on ? ' on' : ''}${secret ? ' secret' : ''}" tabindex="-1" style="--c:${t.color}"><span class="ach-ico">${on ? STAR : LOCK}</span><span class="ach-txt"><b>${secret ? '???' : a.name}</b><span>${secret ? a.hint || 'Hidden. Keep flying.' : a.desc}</span>${bar}</span><span class="ach-rw">${right}</span></button>`;
   }
   $('#ach-list').innerHTML = html;
 }
 
-export function openAchievements(onBack) {
-  back = onBack;
+function showAch(focus) {
   G.screen = 'achievements';
   renderAchievements();
-  $('#ach-list').scrollTop = 0;
-  ui.show('achievements', { focus: $('#ach-list .ach') });
+  ui.show('achievements', { focus: focus || $('#ach-tabs .cur') });
+}
+
+export function openAchievements(onBack) {
+  back = onBack;
+  group = 0;
+  showAch();
 }
 
 // data-act handlers merged into main's ui.init.
@@ -159,6 +167,10 @@ export const galleryActs = {
   leaveGallery() {
     seenRelics();
     back?.();
+  },
+  achtab(btn) {
+    group = +btn.dataset.i;
+    showAch($(`#ach-tabs [data-i="${group}"]`));
   },
   leaveAch() {
     back?.();

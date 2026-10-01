@@ -15,9 +15,9 @@ export const TIERS = {
   g: { name: 'GOLD', color: '#ffd24a', reward: 150 },
 };
 
-export const GROUPS = ['COMBAT', 'SKILL', 'COLLECTION', 'ODDITIES'];
+export const GROUPS = ['COMBAT', 'SKILL', 'CAREER', 'ODDITIES'];
 
-// hidden: name and description stay ??? until unlocked.
+// hidden: name and description stay ??? until unlocked; `hint` is shown instead.
 export const ACHIEVEMENTS = [
   // COMBAT
   { id: 'first_blood', group: 'COMBAT', tier: 'b', name: 'First Blood', desc: 'Destroy your first enemy.' },
@@ -27,12 +27,12 @@ export const ACHIEVEMENTS = [
   { id: 'boss_1', group: 'COMBAT', tier: 'b', name: 'Giant Slayer', desc: 'Defeat a boss.' },
   { id: 'boss_10', group: 'COMBAT', tier: 's', name: 'Boss Rush', desc: 'Defeat 10 bosses.' },
   { id: 'clear_1', group: 'COMBAT', tier: 's', name: 'System Secured', desc: 'Extract from a star system.' },
-  { id: 'clear_all', group: 'COMBAT', tier: 'g', name: 'Overdrive', desc: 'Clear all four star systems.' },
+  { id: 'clear_all', group: 'CAREER', tier: 'g', name: 'Overdrive', desc: 'Clear all four star systems.' },
   { id: 'endless_10', group: 'COMBAT', tier: 's', name: 'Deep Grid', desc: 'Reach sector 10 in the Endless Grid.' },
   { id: 'ult_1', group: 'COMBAT', tier: 'b', name: 'Unleashed', desc: 'Fire your ultimate.' },
   { id: 'evolve', group: 'COMBAT', tier: 's', name: 'Metamorphosis', desc: 'Evolve a weapon module.' },
-  { id: 'rank_5', group: 'COMBAT', tier: 'b', name: 'Promoted', desc: 'Reach Pilot Rank 5.' },
-  { id: 'rank_max', group: 'COMBAT', tier: 'g', name: 'Living Legend', desc: 'Reach the top Pilot Rank.' },
+  { id: 'rank_5', group: 'CAREER', tier: 'b', name: 'Promoted', desc: 'Reach Pilot Rank 5.' },
+  { id: 'rank_max', group: 'CAREER', tier: 'g', name: 'Living Legend', desc: 'Reach the top Pilot Rank.' },
   // SKILL
   { id: 'combo_50', group: 'SKILL', tier: 'b', name: 'Chain Reaction', desc: 'Reach a 50 kill chain.' },
   { id: 'combo_200', group: 'SKILL', tier: 'g', name: 'Unbroken', desc: 'Reach a 200 kill chain.' },
@@ -44,29 +44,29 @@ export const ACHIEVEMENTS = [
   { id: 'level_15', group: 'SKILL', tier: 's', name: 'Overclocked', desc: 'Reach level 15 in one run.' },
   { id: 'dash_100', group: 'SKILL', tier: 'b', name: 'Dash Addict', desc: 'Dash 100 times in one run.' },
   { id: 'ult_10', group: 'SKILL', tier: 's', name: 'Unlimited Power', desc: 'Fire your ultimate 10 times in one run.' },
-  { id: 'hoard', group: 'SKILL', tier: 's', name: 'Dragon Hoard', desc: 'Hold 1,000 credits in a run wallet.' },
+  { id: 'hoard', group: 'CAREER', tier: 's', name: 'Dragon Hoard', desc: 'Hold 1,000 credits in a run wallet.' },
   { id: 'tourist', group: 'SKILL', tier: 'b', name: 'Space Tourist', desc: 'Visit a Market, a Dock and an Anomaly in one run.' },
-  // COLLECTION
-  { id: 'relic_1', group: 'COLLECTION', tier: 'b', name: 'Finders Keepers', desc: 'Find a relic in the field.' },
-  { id: 'relic_legend', group: 'COLLECTION', tier: 's', name: 'Lucky Star', desc: 'Find a legendary relic.' },
-  { id: 'set_1', group: 'COLLECTION', tier: 's', name: 'Completionist', desc: 'Complete a relic set.' },
-  { id: 'set_all', group: 'COLLECTION', tier: 'g', name: 'Curator', desc: 'Complete every relic set.' },
-  { id: 'capsule', group: 'COLLECTION', tier: 'b', name: 'Gacha Brain', desc: 'Open a Data Capsule.' },
-  { id: 'bigspend', group: 'COLLECTION', tier: 's', name: 'Big Spender', desc: 'Spend 400 credits at a single Black Market.' },
-  { id: 'drip', group: 'COLLECTION', tier: 'b', name: 'Fresh Paint', desc: 'Buy a paint job.' },
-  { id: 'fleet', group: 'COLLECTION', tier: 'g', name: 'Fleet Admiral', desc: 'Own every ship.' },
+  // CAREER
+  { id: 'relic_1', group: 'CAREER', tier: 'b', name: 'Finders Keepers', desc: 'Find a relic in the field.' },
+  { id: 'relic_legend', group: 'CAREER', tier: 's', name: 'Lucky Star', desc: 'Find a legendary relic.' },
+  { id: 'set_1', group: 'CAREER', tier: 's', name: 'Completionist', desc: 'Complete a relic set.' },
+  { id: 'set_all', group: 'CAREER', tier: 'g', name: 'Curator', desc: 'Complete every relic set.' },
+  { id: 'capsule', group: 'CAREER', tier: 'b', name: 'Gacha Brain', desc: 'Open a Data Capsule.' },
+  { id: 'bigspend', group: 'CAREER', tier: 's', name: 'Big Spender', desc: 'Spend 400 credits at a single Black Market.' },
+  { id: 'drip', group: 'CAREER', tier: 'b', name: 'Fresh Paint', desc: 'Buy a paint job.' },
+  { id: 'fleet', group: 'CAREER', tier: 'g', name: 'Fleet Admiral', desc: 'Own every ship.' },
   // ODDITIES
   { id: 'rtfm', group: 'ODDITIES', tier: 'b', name: 'Read the Manual', desc: 'Open How to Play from the title screen.' },
   { id: 'indecisive', group: 'ODDITIES', tier: 'b', name: 'Indecisive', desc: 'Reroll an upgrade draft.' },
   { id: 'window', group: 'ODDITIES', tier: 'b', name: 'Window Shopper', desc: 'Leave a Black Market without buying anything.' },
-  { id: 'fast_death', group: 'ODDITIES', tier: 'b', hidden: true, name: 'That Was Quick', desc: 'Lose a run in under 20 seconds.' },
-  { id: 'broke', group: 'ODDITIES', tier: 'b', hidden: true, name: 'Nothing to Show', desc: 'Bank zero credits from a run.' },
-  { id: 'ragequit', group: 'ODDITIES', tier: 'b', hidden: true, name: 'Strategic Retreat', desc: 'Abandon a campaign run.' },
-  { id: 'overheal', group: 'ODDITIES', tier: 'b', hidden: true, name: 'Waste Not', desc: 'Grab a repair kit at full hull.' },
-  { id: 'potty', group: 'ODDITIES', tier: 'b', hidden: true, name: 'Bathroom Break', desc: 'Pause 10 times in one run.' },
-  { id: 'nightowl', group: 'ODDITIES', tier: 'b', hidden: true, name: 'Night Shift', desc: 'Start a run between 2 and 5 AM.' },
-  { id: 'tldr', group: 'ODDITIES', tier: 'b', hidden: true, name: 'TL;DR', desc: 'Turn off story dialogue.' },
-  { id: 'silent', group: 'ODDITIES', tier: 'b', hidden: true, name: 'Silent Running', desc: 'Turn the music all the way down.' },
+  { id: 'fast_death', group: 'ODDITIES', tier: 'b', hidden: true, hint: 'Speed is not always a virtue.', name: 'That Was Quick', desc: 'Lose a run in under 20 seconds.' },
+  { id: 'broke', group: 'ODDITIES', tier: 'b', hidden: true, hint: 'Empty pockets.', name: 'Nothing to Show', desc: 'Bank zero credits from a run.' },
+  { id: 'ragequit', group: 'ODDITIES', tier: 'b', hidden: true, hint: 'Sometimes you just walk away.', name: 'Strategic Retreat', desc: 'Abandon a campaign run.' },
+  { id: 'overheal', group: 'ODDITIES', tier: 'b', hidden: true, hint: 'Already fine, thanks.', name: 'Waste Not', desc: 'Grab a repair kit at full hull.' },
+  { id: 'potty', group: 'ODDITIES', tier: 'b', hidden: true, hint: 'Nature calls.', name: 'Bathroom Break', desc: 'Pause 10 times in one run.' },
+  { id: 'nightowl', group: 'ODDITIES', tier: 'b', hidden: true, hint: "Shouldn't you be asleep?", name: 'Night Shift', desc: 'Start a run between 2 and 5 AM.' },
+  { id: 'tldr', group: 'ODDITIES', tier: 'b', hidden: true, hint: 'Too long.', name: 'TL;DR', desc: 'Turn off story dialogue.' },
+  { id: 'silent', group: 'ODDITIES', tier: 'b', hidden: true, hint: 'Shhh.', name: 'Silent Running', desc: 'Turn the music all the way down.' },
 ];
 
 const byId = new Map(ACHIEVEMENTS.map((a) => [a.id, a]));

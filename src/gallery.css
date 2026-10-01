@@ -20,8 +20,8 @@
     display: flex;
     align-items: center;
     gap: 0.6em;
-    padding: 0.35em 1.1em 0.35em 0.4em;
-    border-radius: 2em;
+    padding: 0.35em 1.1em 0.35em 0.45em;
+    border-radius: 2px;
     background: rgba(6, 4, 18, 0.88);
     border: 1px solid color-mix(in srgb, var(--c) 55%, transparent);
     box-shadow: 0 0 1.2em color-mix(in srgb, var(--c) 25%, transparent);
@@ -71,9 +71,9 @@
 
 .note-txt em {
     font-style: normal;
-    font-family: Orbitron, sans-serif;
-    font-size: 0.5em;
-    letter-spacing: 0.22em;
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.16em;
     color: var(--c);
 }
 
@@ -85,7 +85,7 @@
 }
 
 /* gold sheen sweep for big ones */
-.note.shine::before {
+.note.shine::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -156,16 +156,16 @@
     color: var(--dim);
     background: var(--panel);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 0.45em;
+    border-radius: 2px;
     cursor: pointer;
     outline: none;
     transition: border-color 0.15s, box-shadow 0.15s, color 0.15s;
 }
 
 .gl-tab b {
-    font-family: Orbitron, sans-serif;
-    font-size: 0.45em;
-    letter-spacing: 0.08em;
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.06em;
     line-height: 1.25;
     text-align: center;
 }
@@ -232,8 +232,8 @@
 }
 
 .gl-set-top span {
-    font-family: Orbitron, sans-serif;
-    font-size: 0.55em;
+    font-size: 0.78em;
+    font-weight: 700;
     letter-spacing: 0.12em;
     color: var(--dim);
     white-space: nowrap;
@@ -293,7 +293,7 @@
     color: var(--c);
     background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--c) 10%, transparent), transparent 70%), var(--panel);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 0.55em;
+    border-radius: 2px;
     cursor: pointer;
     outline: none;
     transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
@@ -376,6 +376,7 @@
 
 .gl-detail {
     --c: var(--cyan);
+    position: relative;
     --r: #fff;
     display: grid;
     grid-template-columns: 4em 1fr;
@@ -387,7 +388,7 @@
     padding: 0.7em 0.9em;
     background: linear-gradient(100deg, color-mix(in srgb, var(--c) 12%, var(--panel)) 0%, var(--panel) 65%);
     border: 1px solid color-mix(in srgb, var(--c) 30%, transparent);
-    border-radius: 0.55em;
+    border-radius: 2px;
 }
 
 .gl-cap {
@@ -407,7 +408,7 @@
     margin: 0;
     font-size: 0.85em;
     line-height: 1.3;
-    color: var(--dim);
+    color: rgba(233, 244, 255, 0.75);
 }
 
 .gl-cap b {
@@ -452,9 +453,9 @@
 
 .gl-info em {
     font-style: normal;
-    font-family: Orbitron, sans-serif;
-    font-size: 0.55em;
-    letter-spacing: 0.25em;
+    font-size: 0.78em;
+    font-weight: 700;
+    letter-spacing: 0.18em;
     color: var(--r);
 }
 
@@ -479,10 +480,10 @@
 
 .gl-own {
     display: inline-block;
-    margin-top: 0.45em;
-    font-family: Orbitron, sans-serif;
-    font-size: 0.55em;
-    letter-spacing: 0.18em;
+    margin-top: 0.4em;
+    font-size: 0.78em;
+    font-weight: 700;
+    letter-spacing: 0.14em;
     color: var(--c);
 }
 
@@ -506,57 +507,32 @@
     --c: #ffd24a;
 }
 
+.ach-tabs {
+    grid-template-columns: repeat(4, 1fr);
+}
+
 .ach-list {
     display: flex;
     flex-direction: column;
     gap: 0.35em;
     width: 100%;
     max-width: 24em;
-    flex: 0 1 auto;
-    min-height: 0;
-    overflow-y: auto;
-    scrollbar-width: none;
-    padding: 0.2em 0.1em 1em;
-    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 0.6em, #000 calc(100% - 1.6em), transparent 100%);
-    mask-image: linear-gradient(180deg, transparent 0, #000 0.6em, #000 calc(100% - 1.6em), transparent 100%);
-}
-
-.ach-list::-webkit-scrollbar {
-    display: none;
-}
-
-.ach-group {
-    display: flex;
-    justify-content: space-between;
-    margin: 0.6em 0.2em 0.1em;
-    font-family: Orbitron, sans-serif;
-    font-size: 0.6em;
-    letter-spacing: 0.3em;
-    color: var(--dim);
-}
-
-.ach-group:first-child {
-    margin-top: 0.2em;
-}
-
-.ach-group i {
-    font-style: normal;
-    letter-spacing: 0.1em;
 }
 
 .ach {
     --c: var(--cyan);
+    position: relative;
     display: grid;
-    grid-template-columns: 2.1em 1fr auto;
+    grid-template-columns: 2em 1fr auto;
     gap: 0.7em;
     align-items: center;
-    padding: 0.45em 0.8em 0.45em 0.5em;
+    padding: 0.35em 0.8em 0.35em 0.5em;
     text-align: left;
     font-family: inherit;
     color: var(--text);
     background: var(--panel);
     border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 0.45em;
+    border-radius: 2px;
     outline: none;
     cursor: default;
     transition: border-color 0.15s;
@@ -565,8 +541,8 @@
 .ach-ico {
     display: grid;
     place-items: center;
-    width: 2.1em;
-    height: 2.1em;
+    width: 2em;
+    height: 2em;
     padding: 0.4em;
     border-radius: 50%;
     color: rgba(255, 255, 255, 0.3);
@@ -593,9 +569,9 @@
 }
 
 .ach-rw {
-    font-family: Orbitron, sans-serif;
-    font-size: 0.55em;
-    letter-spacing: 0.15em;
+    font-size: 0.78em;
+    font-weight: 700;
+    letter-spacing: 0.1em;
     color: var(--dim);
     white-space: nowrap;
 }
@@ -631,8 +607,8 @@
 .ach-prog {
     position: relative;
     display: block;
-    margin-top: 0.3em;
-    height: 0.25em;
+    margin-top: 0.2em;
+    height: 0.2em;
     border-radius: 1em;
     background: rgba(255, 255, 255, 0.08);
 }
@@ -645,24 +621,56 @@
     opacity: 0.7;
 }
 
-.ach-prog em {
-    position: absolute;
-    right: 0;
-    top: 0.4em;
-    font-style: normal;
-    font-size: 0.7em;
-    color: var(--dim);
+/* HUD-frame corner brackets, same look as the menu restyle; focus pops them out like a lock-on. */
+.gl-tab,
+.gl-tile,
+.gl-detail,
+.ach,
+.note {
+    --fc: color-mix(in srgb, var(--c, var(--cyan)) 85%, transparent);
 }
 
-.ach-prog:has(em) {
-    margin-bottom: 0.9em;
+.gl-tab::before,
+.gl-tile::before,
+.gl-detail::before,
+.ach::before,
+.note::before {
+    --k: 0.55em;
+    --t: 2px;
+    content: '';
+    position: absolute;
+    inset: -1px;
+    pointer-events: none;
+    background:
+        linear-gradient(var(--fc), var(--fc)) left top / var(--k) var(--t) no-repeat,
+        linear-gradient(var(--fc), var(--fc)) left top / var(--t) var(--k) no-repeat,
+        linear-gradient(var(--fc), var(--fc)) right top / var(--k) var(--t) no-repeat,
+        linear-gradient(var(--fc), var(--fc)) right top / var(--t) var(--k) no-repeat,
+        linear-gradient(var(--fc), var(--fc)) left bottom / var(--k) var(--t) no-repeat,
+        linear-gradient(var(--fc), var(--fc)) left bottom / var(--t) var(--k) no-repeat,
+        linear-gradient(var(--fc), var(--fc)) right bottom / var(--k) var(--t) no-repeat,
+        linear-gradient(var(--fc), var(--fc)) right bottom / var(--t) var(--k) no-repeat;
+    transition: inset 0.15s ease-out;
+}
+
+.ach:not(.on),
+.gl-tile:not(.own) {
+    --fc: rgba(233, 244, 255, 0.25);
+}
+
+.gl-tab.focus::before,
+.gl-tab:hover::before,
+.gl-tile.focus::before,
+.gl-tile:hover::before,
+.ach.focus::before {
+    inset: -5px;
 }
 
 @media (prefers-reduced-motion: reduce) {
     .note,
     .note-ico,
     .note-ico::after,
-    .note.shine::before,
+    .note.shine::after,
     .gl-tile.legend.own svg,
     .gl-tile.pop svg,
     .gl-tile.pop::after {

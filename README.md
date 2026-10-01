@@ -141,7 +141,7 @@ Best score, unlocks, credits, rank, gear and settings persist in `localStorage` 
 - **Find** them in the field: any kill has a tiny chance to drop a golden relic cache (elites 4%, Hunters 20%, bosses 35%). It drops a relic from the set of the system you're flying, preferring ones you don't own. **Legendaries are field finds only.** Finds are kept even if you die.
 - Completing a set pays a 250 credit bonus.
 
-**ACHIEVEMENTS** (title menu): 44 achievements in four groups (Combat, Skill, Collection, Oddities), some hidden until unlocked. Each pays credits (bronze 20, silver 60, gold 150). Unlocks, relic finds and set completions pop a small toast at the top of the screen. Older saves get what they already earned on first load.
+**ACHIEVEMENTS** (title menu): 44 achievements in four tabs (Combat, Skill, Career, Oddities), some hidden behind a one-line hint until unlocked. Each pays credits (bronze 20, silver 60, gold 150). Unlocks, relic finds and set completions pop a small toast at the top of the screen. Older saves get what they already earned on first load.
 
 ## Settings
 
