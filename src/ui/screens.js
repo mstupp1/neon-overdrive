@@ -12,6 +12,10 @@ const screens = {};
 let current = null;
 let focusIdx = 0;
 let lockUntil = 0;
+// Guarded screens ignore keys / pad until everything held when they opened is let go
+// (and a short beat has passed), so flying input doesn't spill into the menu.
+let guarded = false;
+let guardUntil = 0;
 let handlers = {};
 
 export const ui = {
@@ -45,11 +49,14 @@ export const ui = {
     this.initSettings();
   },
 
-  show(name, { lock = 0, focus = 0 } = {}) {
+  show(name, { lock = 0, focus = 0, guard = false } = {}) {
     for (const [k, el] of Object.entries(screens)) el.classList.toggle('active', k === name);
     current = name || null;
     focusIdx = typeof focus === 'number' ? focus : 0;
     lockUntil = performance.now() + lock;
+    guarded = guard;
+    guardUntil = performance.now() + 180;
+    if (name) screens[name].classList.toggle('guarded', guard);
     input.clear();
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     if (focus instanceof Element) focusIdx = Math.max(0, focusables().indexOf(focus)); // focus a given element
@@ -63,6 +70,14 @@ export const ui = {
   // Called every frame while a menu is open.
   update() {
     if (!current) return;
+    if (guarded) {
+      if (input.anyHeld() || performance.now() < guardUntil) {
+        input.clear();
+        return;
+      }
+      guarded = false;
+      screens[current].classList.remove('guarded');
+    }
     const items = focusables();
     if (!items.length) {
       // Nothing focusable: back must still escape the screen.
