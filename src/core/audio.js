@@ -210,6 +210,17 @@ export const sfx = {
     if (!ready()) return;
     tone({ type: 'triangle', f0: 700, f1: 1400, dur: 0.12, vol: 0.09 });
   },
+  // Notification chimes: play on menus too (attract mode mutes the rest).
+  achieve(gold = false) {
+    if (!ac || ac.state !== 'running' || profile.settings.sfx <= 0.001) return;
+    [988, 1319].forEach((f, i) => tone({ type: 'triangle', f0: f, dur: 0.22, vol: 0.07, delay: i * 0.07 }));
+    if (gold) tone({ type: 'sine', f0: 2637, dur: 0.6, vol: 0.035, delay: 0.16 });
+  },
+  relic(legendary = false) {
+    if (!ac || ac.state !== 'running' || profile.settings.sfx <= 0.001) return;
+    const notes = legendary ? [784, 988, 1175, 1568, 1976] : [1175, 1568, 1976];
+    notes.forEach((f, i) => tone({ type: 'sine', f0: f, f1: f * 1.01, dur: 0.28, vol: 0.06, delay: i * 0.055 }));
+  },
   sector() {
     if (!ready()) return;
     [392, 523, 659, 784, 1047].forEach((f, i) => tone({ type: 'triangle', f0: f, dur: 0.3, vol: 0.09, delay: i * 0.09 }));

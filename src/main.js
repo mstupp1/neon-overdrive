@@ -19,6 +19,10 @@ import { comms } from './ui/comms.js';
 import { meta } from './ui/meta.js';
 import { hangarActs, openHangar } from './ui/hangar.js';
 import { pilotActs, openPilot } from './ui/pilot.js';
+import { galleryActs, openGallery, openAchievements } from './ui/gallery.js';
+import { initToasts, notifyBacklog } from './ui/toasts.js';
+import { achInit, achTick } from './game/achievements.js';
+import { rollRelicDrop } from './game/collectables.js';
 import { setClass, setPassives } from './game/pilot.js';
 import { buyShip, buyPart, equipPart, unequipSlot, setPaint, selectShip, applyAllPaints } from './game/hangar.js';
 import { SYSTEMS, systemById, generateRoute, nodeSpec, reachableNodes, routeNode, systemUnlocked } from './game/campaign.js';
@@ -480,6 +484,13 @@ function gameOver() {
   music.setDuck(0.5);
 }
 
+// Back to the title menu without restarting the attract demo.
+function titleMenu(focus) {
+  G.screen = 'title';
+  ui.renderTitle();
+  ui.show('title', { focus: document.querySelector('#scr-title ' + focus) });
+}
+
 function toTitle() {
   G.screen = 'title';
   pauseBtn.hidden = true;
@@ -548,6 +559,9 @@ ui.init({
   pilot: () => openPilot(),
   leavePilot: () => showCampaign(),
   ...pilotActs,
+  gallery: () => openGallery(() => titleMenu('[data-act=gallery]')),
+  achievements: () => openAchievements(() => titleMenu('[data-act=achievements]')),
+  ...galleryActs,
   campaign: () => showCampaign(),
   node(btn) {
     pickRouteNode(routeNode(G.run.route, btn.dataset.id));
@@ -645,7 +659,7 @@ let slowFrames = 0;
 
 function simulating() {
   const s = G.screen;
-  return s === 'play' || s === 'gameover' || s === 'title' || s === 'campaign' || s === 'hangar' || s === 'parts' || s === 'pilot' || s === 'settings' || s === 'help';
+  return s === 'play' || s === 'gameover' || s === 'title' || s === 'campaign' || s === 'hangar' || s === 'parts' || s === 'pilot' || s === 'settings' || s === 'help' || s === 'gallery' || s === 'achievements';
 }
 
 function frame(now) {
@@ -666,6 +680,7 @@ function frame(now) {
     }
   } else slowFrames = 0;
 
+  achTick(raw);
   comms.update(raw, G.screen === 'play');
   if (G.screen === 'play') {
     if (input.consume('pause')) pause();
@@ -764,6 +779,9 @@ function boot() {
   applyAllPaints();
   bg.init();
   setSfxVolume(profile.settings.sfx);
+  initToasts();
+  const past = achInit(); // achievements older saves already earned
+  if (past) setTimeout(() => notifyBacklog(past), 1200);
   toTitle();
   requestAnimationFrame((t) => {
     last = t;
@@ -834,6 +852,8 @@ window.NEON = {
     return { credits: profile.credits, rankXp: profile.rankXp, rank: rankFor(profile.rankXp), wallet: G.run && G.run.wallet };
   },
   market: () => marketOffers,
+  // Debug: drop a relic cache (run only) at x, y (default: above the ship).
+  dropRelic: (x = G.player.x, y = G.player.y - 120) => rollRelicDrop({ x, y }, true),
   // Hangar (return '' on success, else a reason). Costs credits; use grant() first in tests.
   buyShip, buyPart, selectShip,
   equip: (shipId, partId) => (partId ? equipPart(shipId, partId) : 'NO PART'),

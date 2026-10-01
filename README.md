@@ -133,6 +133,16 @@ Open **PILOT** on the campaign map to pick a class and equip **2 passives**. Ran
 
 Best score, unlocks, credits, rank, gear and settings persist in `localStorage` (profile v3; v2 saves migrate and corrupt saves are sanitised).
 
+## Gallery and achievements
+
+**GALLERY** (title menu) holds 30 **relics** in five themed sets of six: GRID ORIGINS, BIO BLOOM, DATA STORM and EVENTIDE (one per campaign system) and GRID JUNK (Endless Grid). Each set has 3 commons, 2 rares and a legendary.
+
+- **Buy** commons (150) and rares (350) in the Gallery, or open a **Data Capsule** (180) for a random common or rare you don't own yet.
+- **Find** them in the field: any kill has a tiny chance to drop a golden relic cache (elites 4%, Hunters 20%, bosses 35%). It drops a relic from the set of the system you're flying, preferring ones you don't own. **Legendaries are field finds only.** Finds are kept even if you die.
+- Completing a set pays a 250 credit bonus.
+
+**ACHIEVEMENTS** (title menu): 44 achievements in four groups (Combat, Skill, Collection, Oddities), some hidden until unlocked. Each pays credits (bronze 20, silver 60, gold 150). Unlocks, relic finds and set completions pop a small toast at the top of the screen. Older saves get what they already earned on first load.
+
 ## Settings
 
 Music / SFX volume, screen shake, screen flashes, damage numbers, story dialogue, fullscreen, reset progress.
@@ -166,6 +176,11 @@ src/ui/meta.js        campaign / route / market / dock / event / extraction scre
 src/ui/hangar.js      Hangar (ships, parts, paint)
 src/ui/pilot.js       Pilot screen (class, passives)
 src/ui/comms.js       dialogue overlay
+src/game/collectables.js   relic sets, buying, capsules, field drops
+src/game/achievements.js   achievement defs + tracker (polls G / profile each frame)
+src/ui/gallery.js     Gallery and Achievements screens
+src/ui/toasts.js      achievement / relic notification toasts
+src/gallery.css       styles for the above
 src/audio/music/      soundtrack
 src/fonts/            Orbitron + Rajdhani (SIL OFL)
 ```
