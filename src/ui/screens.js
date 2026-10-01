@@ -3,12 +3,10 @@
 import { input } from '../core/input.js';
 import { profile, saveProfile } from '../core/storage.js';
 import { sfx } from '../core/audio.js';
-import { SHIPS, isUnlocked } from '../game/ships.js';
-import { S } from '../render/sprites.js';
 import { cardInfo, CAT_COLORS, UPGRADES, ICONS } from '../game/upgrades.js';
 import { formatScore, formatTime } from '../core/math.js';
 
-const $ = (sel) => document.querySelector(sel);
+export const $ = (sel) => document.querySelector(sel);
 
 const screens = {};
 let current = null;
@@ -29,6 +27,8 @@ export const ui = {
         const btn = e.target.closest('[data-act]');
         if (!btn || btn.disabled) return;
         if (performance.now() < lockUntil) return;
+        // Unaffordable items stay focusable (aria-disabled) so their price and text can be read with keys / a pad.
+        if (btn.getAttribute('aria-disabled') === 'true') return sfx.ui();
         sfx.select();
         handlers[btn.dataset.act]?.(btn);
       });
@@ -48,10 +48,11 @@ export const ui = {
   show(name, { lock = 0, focus = 0 } = {}) {
     for (const [k, el] of Object.entries(screens)) el.classList.toggle('active', k === name);
     current = name || null;
-    focusIdx = focus;
+    focusIdx = typeof focus === 'number' ? focus : 0;
     lockUntil = performance.now() + lock;
     input.clear();
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    if (focus instanceof Element) focusIdx = Math.max(0, focusables().indexOf(focus)); // focus a given element
     applyFocus();
   },
 
@@ -63,7 +64,14 @@ export const ui = {
   update() {
     if (!current) return;
     const items = focusables();
-    if (!items.length) return;
+    if (!items.length) {
+      // Nothing focusable: back must still escape the screen.
+      if (input.consume('back')) {
+        const act = screens[current].dataset.back;
+        if (act && handlers[act]) handlers[act]();
+      }
+      return;
+    }
     const el = items[focusIdx];
     const isRange = el && el.tagName === 'INPUT' && el.type === 'range';
     const isRow = el && el.classList.contains('set-row') && el.querySelector('input[type=range]');
@@ -111,46 +119,11 @@ export const ui = {
     $('#title-hint').textContent = input.isTouchDevice ? 'Tap PLAY to begin' : 'Enter / Space to select';
   },
 
-  // --- Ships --------------------------------------------------------------------
-  renderShips(onPick) {
-    const list = $('#ship-list');
-    list.innerHTML = '';
-    let focus = 0;
-    SHIPS.forEach((ship, i) => {
-      const unlocked = isUnlocked(ship, profile);
-      const b = document.createElement('button');
-      b.className = 'ship' + (unlocked ? '' : ' locked');
-      b.style.setProperty('--c', ship.color);
-      const cv = document.createElement('canvas');
-      cv.width = 112;
-      cv.height = 112;
-      const g = cv.getContext('2d');
-      const spr = S['ship_' + ship.id];
-      g.drawImage(spr.img, 0, 0, 112, 112);
-      const specs = `HULL ${'♥'.repeat(ship.hp)} · DASH ${ship.dashes}`;
-      b.innerHTML = `<div class="ship-art"></div><div><div class="role">${ship.role}</div><h4>${ship.name}</h4><p>${unlocked ? ship.desc : '🔒 ' + ship.unlock.text}</p>${unlocked ? `<div class="specs">${specs}</div>` : ''}</div>`;
-      b.querySelector('.ship-art').appendChild(cv);
-      b.addEventListener('click', () => {
-        if (performance.now() < lockUntil) return;
-        if (!unlocked) {
-          sfx.ui();
-          b.animate([{ transform: 'translateX(-4px)' }, { transform: 'translateX(4px)' }, { transform: 'none' }], { duration: 180 });
-          return;
-        }
-        sfx.select();
-        onPick(ship);
-      });
-      if (ship.id === profile.lastShip && unlocked) focus = i;
-      list.appendChild(b);
-    });
-    return focus;
-  },
-
   // --- Draft --------------------------------------------------------------------
-  renderDraft(player, choices, kind, rerolls, onPick) {
-    $('#draft-title').textContent = kind === 'sector' ? 'SECTOR CLEAR' : 'LEVEL UP';
-    $('#draft-title').style.color = kind === 'sector' ? '#7dff6b' : '#fff';
-    $('#draft-sub').textContent = kind === 'sector' ? 'Claim a reward for the next sector' : `Level ${player.level} — choose an upgrade`;
+  renderDraft(player, choices, kind, rerolls, onPick, left = 0) {
+    $('#draft-title').textContent = kind === 'sector' ? 'SECTOR CLEAR' : kind === 'supply' ? 'SUPPLY DROP' : 'LEVEL UP';
+    $('#draft-title').style.color = kind === 'sector' ? '#7dff6b' : kind === 'supply' ? '#ffd24a' : '#fff';
+    $('#draft-sub').textContent = kind === 'sector' ? 'Claim a reward for the next sector' : kind === 'supply' ? `Salvaged tech for this system — ${left} to claim` : `Level ${player.level} — choose an upgrade`;
     const wrap = $('#draft-cards');
     wrap.innerHTML = '';
     wrap.classList.toggle('no-keys', input.device === 'touch');
@@ -158,13 +131,13 @@ export const ui = {
       const info = cardInfo(player, id);
       const c = CAT_COLORS[info.cat];
       const b = document.createElement('button');
-      b.className = 'card';
+      b.className = info.evo ? 'card evo' : 'card';
       b.style.setProperty('--c', c);
       let pips = '';
-      if (info.max) {
+      if (info.max && !info.evo) {
         for (let k = 0; k < info.max; k++) pips += `<i class="${k < info.lv ? 'on' : k === info.lv ? 'next' : ''}"></i>`;
       }
-      const tag = info.max ? (info.lv === 0 ? 'NEW' : `LV ${info.lv + 1}`) : 'BONUS';
+      const tag = info.evo ? 'EVOLVE' : info.max ? (info.lv === 0 ? 'NEW' : `LV ${info.lv + 1}`) : 'BONUS';
       b.innerHTML = `<div class="card-icon">${info.icon}</div><div><div class="card-top"><span class="card-name">${info.name}</span><span class="card-tag">${tag}</span></div><div class="card-desc">${info.desc}</div>${pips ? `<div class="pips">${pips}</div>` : ''}</div>${input.device === 'touch' ? '' : `<kbd>${i + 1}</kbd>`}`;
       b.addEventListener('click', () => {
         if (performance.now() < lockUntil) return;
@@ -184,6 +157,7 @@ export const ui = {
     const p = G.player;
     $('#pause-stats').innerHTML = stat('SECTOR', G.sector) + stat('LEVEL', p.level) + stat('TIME', formatTime(G.runTime));
     renderBuild($('#pause-build'), p);
+    $('#pause-quit').textContent = G.run && G.run.mode === 'campaign' ? 'ABANDON RUN' : 'QUIT TO TITLE';
   },
 
   // --- Game over ----------------------------------------------------------------
@@ -247,11 +221,11 @@ export const ui = {
   },
 };
 
-function stat(label, value) {
+export function stat(label, value) {
   return `<div>${label}<b>${value}</b></div>`;
 }
 
-function renderBuild(el, p) {
+export function renderBuild(el, p) {
   if (!p) {
     el.innerHTML = '';
     return;
@@ -260,7 +234,7 @@ function renderBuild(el, p) {
   for (const u of UPGRADES) {
     const lv = p.up[u.id] || 0;
     if (!lv) continue;
-    html += `<div class="chip" style="--c:${CAT_COLORS[u.cat]}" title="${u.name}">${ICONS[u.id]}<b>${lv}</b></div>`;
+    html += `<div class="${u.cat === 'evolution' ? 'chip evo' : 'chip'}" style="--c:${CAT_COLORS[u.cat]}" title="${u.name}">${ICONS[u.id]}${u.cat === 'evolution' ? '' : `<b>${lv}</b>`}</div>`;
   }
   el.innerHTML = html;
 }

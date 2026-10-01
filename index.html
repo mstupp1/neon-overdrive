@@ -29,11 +29,24 @@
         <button id="pause-btn" class="pause-btn" aria-label="Pause" tabindex="-1" hidden><i></i><i></i></button>
 
         <div id="touch-ui" hidden>
-            <button id="touch-od" class="touch-btn od" aria-label="Overdrive" tabindex="-1"></button>
+            <button id="touch-od" class="touch-btn od" aria-label="Ultimate" tabindex="-1"></button>
             <button id="touch-dash" class="touch-btn dash" aria-label="Dash" tabindex="-1"></button>
         </div>
 
         <div id="toast" class="toast"><span class="eq"><i></i><i></i><i></i></span><span id="toast-text"></span></div>
+
+        <div id="boss-card" class="boss-card" aria-hidden="true"></div>
+
+        <div id="comms" class="comms" hidden>
+            <div class="comms-box">
+                <canvas class="comms-face" width="96" height="96"></canvas>
+                <div class="comms-txt">
+                    <div class="comms-name"></div>
+                    <div class="comms-line"></div>
+                    <div class="comms-hint" hidden></div>
+                </div>
+            </div>
+        </div>
 
         <!-- TITLE -->
         <section class="screen" id="scr-title" data-back="">
@@ -52,11 +65,132 @@
         </section>
 
         <!-- SHIP SELECT -->
-        <section class="screen" id="scr-ships" data-back="back">
-            <h2 class="screen-title">SELECT SHIP</h2>
-            <div class="ships" id="ship-list"></div>
+        <!-- HANGAR (reachable from the campaign map only) -->
+        <section class="screen" id="scr-hangar" data-back="leaveHangar">
+            <h2 class="screen-title">HANGAR</h2>
+            <div class="pilot-line" id="hangar-credits"></div>
+            <div class="hs-ship">
+                <button class="hs-nav" data-act="hprev" aria-label="Previous ship">&#8249;</button>
+                <div class="hs-card" id="hs-card"></div>
+                <button class="hs-nav" data-act="hnext" aria-label="Next ship">&#8250;</button>
+            </div>
+            <div class="hs-dots" id="hs-dots"></div>
+            <button class="btn primary hs-act" data-act="hact" id="hs-act">SELECT</button>
+            <div class="hs-label">GEAR</div>
+            <div class="slots" id="hs-slots"></div>
+            <div class="hs-label">PAINT</div>
+            <div class="paints" id="hs-paints"></div>
+            <div class="hs-label">LOADOUT</div>
+            <div class="hs-stats" id="hs-stats"></div>
             <nav class="menu row">
-                <button class="btn ghost" data-act="back">BACK</button>
+                <button class="btn ghost small" data-act="leaveHangar" id="hs-back">BACK</button>
+            </nav>
+        </section>
+
+        <!-- PILOT (reachable from the campaign map only) -->
+        <section class="screen" id="scr-pilot" data-back="leavePilot">
+            <h2 class="screen-title">PILOT</h2>
+            <div class="pilot-card" id="pl-card"></div>
+            <div class="hs-label">CLASS</div>
+            <div class="cls-tabs" id="pl-tabs"></div>
+            <div class="cls-info" id="pl-info"></div>
+            <div class="hs-label" id="pl-pass-label">PASSIVES</div>
+            <div class="cards still pass-list" id="pl-passives"></div>
+            <nav class="menu row">
+                <button class="btn ghost small" data-act="leavePilot" id="pl-back">BACK</button>
+            </nav>
+        </section>
+
+        <!-- HANGAR PART LIST -->
+        <section class="screen" id="scr-parts" data-back="partsBack">
+            <h2 class="screen-title" id="parts-title">CORE</h2>
+            <p class="screen-sub" id="parts-sub"></p>
+            <div class="pilot-line" id="parts-credits"></div>
+            <div class="cards still" id="parts-list"></div>
+            <nav class="menu row">
+                <button class="btn ghost small" data-act="partsBack" id="parts-back">BACK</button>
+            </nav>
+        </section>
+
+        <!-- CAMPAIGN MAP -->
+        <section class="screen" id="scr-campaign" data-back="back">
+            <h2 class="screen-title">CAMPAIGN</h2>
+            <p class="screen-sub">Choose a star system</p>
+            <div class="pilot-line" id="camp-pilot"></div>
+            <div class="sysmap" id="sys-map"></div>
+            <div class="sys-detail" id="sys-detail"></div>
+            <nav class="menu">
+                <button class="btn primary" data-act="launch" id="launch-btn">LAUNCH</button>
+                <div class="pair">
+                    <button class="btn small" data-act="hangar" id="ship-btn">HANGAR</button>
+                    <button class="btn small" data-act="pilot" id="pilot-btn">PILOT</button>
+                </div>
+                <div class="pair">
+                    <button class="btn small" data-act="endless">ENDLESS GRID</button>
+                    <button class="btn ghost small" data-act="back">BACK</button>
+                </div>
+            </nav>
+        </section>
+
+        <!-- ROUTE -->
+        <section class="screen" id="scr-route" data-back="">
+            <h2 class="screen-title" id="route-title">ROUTE</h2>
+            <div class="run-stats" id="route-stats"></div>
+            <div class="build" id="route-gear"></div>
+            <div class="routemap" id="route-map"></div>
+            <p class="route-hint" id="route-hint"></p>
+            <nav class="menu row">
+                <button class="btn ghost small" data-act="abandon">ABANDON RUN</button>
+            </nav>
+        </section>
+
+        <!-- ANOMALY EVENT -->
+        <section class="screen" id="scr-event" data-back="">
+            <div class="node-icon" id="event-icon"></div>
+            <h2 class="screen-title" id="event-title">ANOMALY</h2>
+            <p class="screen-sub">ANOMALY DETECTED</p>
+            <p class="event-text" id="event-text"></p>
+            <div class="cards still" id="event-choices"></div>
+            <div class="event-result" id="event-result" hidden></div>
+            <div class="run-stats" id="event-stats"></div>
+            <nav class="menu">
+                <button class="btn primary" data-act="eventDone" id="event-continue" hidden>CONTINUE</button>
+            </nav>
+        </section>
+
+        <!-- BLACK MARKET -->
+        <section class="screen" id="scr-market" data-back="nodeDone">
+            <h2 class="screen-title" id="market-title">BLACK MARKET</h2>
+            <div class="wallet" id="market-wallet"></div>
+            <p class="route-hint" id="market-hint"></p>
+            <div class="cards" id="market-cards"></div>
+            <div class="build" id="market-build"></div>
+            <nav class="menu row">
+                <button class="btn primary" data-act="nodeDone" id="market-leave">LEAVE</button>
+            </nav>
+        </section>
+
+        <!-- REPAIR DOCK -->
+        <section class="screen" id="scr-dock" data-back="">
+            <h2 class="screen-title" id="dock-title">REPAIR DOCK</h2>
+            <p class="screen-sub" id="dock-hull"></p>
+            <div class="cards">
+                <button class="card dock-card" data-act="dock" data-opt="repair" id="dock-repair" style="--c:#7dff6b"></button>
+                <button class="card dock-card" data-act="dock" data-opt="reinforce" id="dock-reinforce" style="--c:#3ff6ff"></button>
+            </div>
+        </section>
+
+        <!-- EXTRACTION -->
+        <section class="screen" id="scr-extract" data-back="">
+            <h2 class="screen-title" id="extract-title">SYSTEM SECURED</h2>
+            <p class="screen-sub" id="extract-sub">EXTRACTION COMPLETE</p>
+            <div class="final-score" id="extract-score">0</div>
+            <div class="run-stats" id="extract-stats"></div>
+            <div class="unlock" id="extract-unlock" hidden></div>
+            <div class="extract-rewards" id="extract-rewards"></div>
+            <div class="build big" id="extract-build"></div>
+            <nav class="menu">
+                <button class="btn primary" data-act="campaign">CONTINUE</button>
             </nav>
         </section>
 
@@ -82,7 +216,7 @@
                 <button class="btn primary" data-act="resume">RESUME</button>
                 <button class="btn" data-act="settings">SETTINGS</button>
                 <button class="btn" data-act="restart">RESTART</button>
-                <button class="btn ghost" data-act="quit">QUIT TO TITLE</button>
+                <button class="btn ghost" id="pause-quit" data-act="quit">QUIT TO TITLE</button>
             </nav>
         </section>
 
@@ -95,6 +229,7 @@
                 <button class="set-row toggle" data-set="shake"><span>Screen shake</span><b></b></button>
                 <button class="set-row toggle" data-set="flashes"><span>Screen flashes</span><b></b></button>
                 <button class="set-row toggle" data-set="damageNumbers"><span>Damage numbers</span><b></b></button>
+                <button class="set-row toggle" data-set="story"><span>Story dialogue</span><b></b></button>
                 <button class="set-row" data-act="fullscreen"><span>Fullscreen</span><b>⤢</b></button>
                 <button class="set-row danger" data-act="reset"><span id="reset-label">Reset progress</span><b>⟲</b></button>
             </div>
@@ -112,7 +247,7 @@
                     <table class="keys">
                         <tr><td>Move</td><td><kbd>WASD</kbd> <kbd>←↑↓→</kbd> · mouse · drag · stick</td></tr>
                         <tr><td>Dash</td><td><kbd>Space</kbd> · left click · 2nd finger / button · <kbd>A</kbd></td></tr>
-                        <tr><td>Overdrive</td><td><kbd>E</kbd> · right click · button · <kbd>B</kbd></td></tr>
+                        <tr><td>Ultimate</td><td><kbd>E</kbd> · right click · button · <kbd>B</kbd></td></tr>
                         <tr><td>Focus</td><td>Hold <kbd>Shift</kbd> / <kbd>LB</kbd> for precise movement</td></tr>
                         <tr><td>Pause</td><td><kbd>Esc</kbd> <kbd>P</kbd> · Start</td></tr>
                     </table>
@@ -122,9 +257,19 @@
                     <ul>
                         <li>Your ship fires automatically. Only the <b>white core</b> can be hit.</li>
                         <li><b>Dash</b> through danger — you're untouchable mid-dash.</li>
-                        <li><b>Graze</b> bullets and chain kills to charge <b class="pink">Overdrive</b>: erase every bullet and double your fire, damage and score.</li>
+                        <li><b>Graze</b> bullets and chain kills to charge your <b class="pink">Ultimate</b>. Your pilot class replaces Overdrive: <b>Striker</b> erases every bullet and doubles fire and damage, <b>Engineer</b> raises a bullet-eating dome with extra wingmen, <b>Ghost</b> slows time around you and turns grazes into strikes. All of them double your score.</li>
+                        <li>Pick your class and two passives on the <b>Pilot</b> screen of the campaign map. Pilot Rank unlocks more.</li>
                         <li>Collect <b class="cyan">data shards</b> to level up and draft upgrades. Build around up to 4 weapon modules.</li>
                         <li>Clear sectors for bonus picks. Every third sector hides a boss.</li>
+                    </ul>
+                </div>
+                <div class="help-block">
+                    <h3>Campaign</h3>
+                    <ul>
+                        <li>Pick a star system, then jump along a <b>route</b>: combat, elite, <b class="gold">market</b>, <b class="green">dock</b>, <b class="violet">anomaly</b>, then the boss.</li>
+                        <li>You earn <b class="gold">credits</b> in a run. Extract after the boss to bank them all; die and keep half. Spend them in the <b>Hangar</b> on ships, gear and paint.</li>
+                        <li>Systems 2-4 open with a <b class="gold">Supply Drop</b>: free upgrade picks before the first jump.</li>
+                        <li>Anomalies are risk-for-reward choices. Black Market and Docks heal and upgrade mid-run.</li>
                     </ul>
                 </div>
             </div>
@@ -140,10 +285,11 @@
             <div class="best-badge" id="over-best" hidden>NEW BEST</div>
             <div class="run-stats" id="over-stats"></div>
             <div class="unlock" id="over-unlock" hidden></div>
+            <div class="extract-rewards" id="over-rewards"></div>
             <div class="build big" id="over-build"></div>
             <nav class="menu">
                 <button class="btn primary" data-act="retry">RETRY</button>
-                <button class="btn" data-act="ships">CHANGE SHIP</button>
+                <button class="btn" data-act="campaign" id="over-campaign">CAMPAIGN</button>
                 <button class="btn ghost" data-act="title">TITLE</button>
             </nav>
         </section>

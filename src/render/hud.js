@@ -1,9 +1,10 @@
 // In-canvas HUD: hull, score & combo, XP, sector progress, boss bar, gauges, banners.
 
 import { G, view, sectorInfo } from '../game/state.js';
-import { S } from './sprites.js';
+import { S, withAlpha } from './sprites.js';
 import { TAU, clamp, easeOutCubic } from '../core/math.js';
 import { comboMult } from '../game/player.js';
+import { CLASSES } from '../game/pilot.js';
 import { input } from '../core/input.js';
 
 const FONT = 'Orbitron, "Segoe UI", sans-serif';
@@ -90,17 +91,24 @@ export function drawHud(ctx) {
 
   // Sector + progress (left of pause button)
   const rx = W - 60;
-  const info = sectorInfo(G.sector);
-  const hue = `hsl(${info.hue},100%,72%)`;
-  text(ctx, `SECTOR ${G.sector}`, rx, y0 + 9, 11, hue, 'right', 700);
   const d = G.director;
-  const bossSector = G.sector % 3 === 0;
+  const run = G.run;
+  const hue = `hsl(${d.spec ? d.spec.hue : sectorInfo(G.sector).hue},100%,72%)`;
+  const label = run && run.mode === 'campaign' ? `${run.system.short} · ${run.row + 1}/${run.route.rows.length}` : `SECTOR ${G.sector}`;
+  text(ctx, label, rx, y0 + 9, 11, hue, 'right', 700);
+  const bossSector = !!(d.spec && d.spec.boss);
   bar(ctx, rx - 84, y0 + 23, 84, 4, d.progress, hue);
   if (bossSector) {
     ctx.fillStyle = '#ff2e55';
     ctx.beginPath();
     ctx.arc(rx + 1, y0 + 25, 4, 0, TAU);
     ctx.fill();
+  }
+  // Credits wallet (under the sector bar, left of the clock)
+  if (run) {
+    const flash = G.realTime - (run.flash || -9) < 0.25;
+    ctx.drawImage(S.credit.img, rx - 85, y0 + 31, 14, 14);
+    text(ctx, Math.floor(run.wallet || 0).toLocaleString(), rx - 69, y0 + 38.5, 10, flash ? '#fff' : '#ffd24a', 'left', 700);
   }
   text(ctx, `${Math.floor(G.runTime / 60)}:${Math.floor(G.runTime % 60).toString().padStart(2, '0')}`, rx, y0 + 38, 9, 'rgba(255,255,255,0.5)', 'right', 600);
 
@@ -121,6 +129,22 @@ export function drawHud(ctx) {
     ctx.fillRect(16 + bw * 0.33, by, 2, 6);
   }
 
+  // Hunter (elite-node mini-boss): compact bar under the sector info
+  const hu = d.hunter;
+  if (hu && !hu.dead && !boss) {
+    const hy = y0 + 58;
+    const hw = Math.min(190, W - 120);
+    const hx = (W - hw) / 2;
+    const fill = clamp(hu.hp / hu.maxHp, 0, 1);
+    text(ctx, 'HUNTER', hx, hy - 6, 9, '#ff3b3b', 'left', 900);
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(hx, hy, hw, 4);
+    ctx.fillStyle = hu.flash > 0 ? '#ffffff' : '#ff3b3b';
+    ctx.fillRect(hx, hy, hw * fill, 4);
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillRect(hx + hw * 0.5, hy, 2, 4);
+  }
+
   // Gauges (fade when the ship flies near them)
   const gy = view.H - view.safeBottom - 46;
   drawGauge(ctx, 44, gy, p, 'od');
@@ -139,21 +163,23 @@ function drawGauge(ctx, x, y, p, kind) {
   ctx.fill();
   if (kind === 'od') {
     const active = p.odT > 0;
-    const t = active ? p.odT / p.st.odDur : p.od / 100;
+    const t = clamp(active ? p.odT / p.st.odDur : p.od / 100, 0, 1);
     const ready = p.od >= 100 && !active;
-    ctx.strokeStyle = 'rgba(255,61,242,0.2)';
+    const cls = CLASSES.find((c) => c.id === p.cls) || CLASSES[0];
+    const col = cls.color;
+    ctx.strokeStyle = withAlpha(col, 0.2);
     ctx.lineWidth = 4;
     ctx.beginPath();
     ctx.arc(x, y, r, 0, TAU);
     ctx.stroke();
-    ctx.strokeStyle = active || ready ? '#ff3df2' : '#b84dff';
+    ctx.strokeStyle = active || ready ? col : withAlpha(col, 0.7);
     ctx.lineWidth = ready ? 5 + Math.sin(G.realTime * 8) * 1.5 : 4;
     ctx.beginPath();
     ctx.arc(x, y, r, -Math.PI / 2, -Math.PI / 2 + TAU * t);
     ctx.stroke();
     const label = active ? 'ON' : ready ? keyHint('od') || 'TAP' : `${Math.floor(p.od)}%`;
-    text(ctx, label, x, y - 1, ready || active ? 10 : 9, ready || active ? '#ffffff' : '#e7b8ff', 'center', 700);
-    text(ctx, 'OVERDRIVE', x, y + r + 12, 7, '#ff9ad5', 'center', 700);
+    text(ctx, label, x, y - 1, ready || active ? 10 : 9, ready || active ? '#ffffff' : withAlpha(col, 0.85), 'center', 700);
+    text(ctx, cls.ult.short, x, y + r + 12, 7, col, 'center', 700);
   } else {
     const n = p.maxCharges;
     for (let i = 0; i < n; i++) {

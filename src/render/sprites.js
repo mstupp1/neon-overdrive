@@ -134,6 +134,8 @@ const SHIP_SHAPES = {
   needle: [[0, -24], [5, -6], [9, 12], [3, 9], [0, 15], [-3, 9], [-9, 12], [-5, -6]],
   bulwark: [[0, -16], [10, -10], [19, 4], [19, 12], [8, 14], [0, 10], [-8, 14], [-19, 12], [-19, 4], [-10, -10]],
   phantom: [[0, -20], [4, -8], [18, -2], [8, 4], [12, 16], [0, 8], [-12, 16], [-8, 4], [-18, -2], [-4, -8]],
+  corsair: [[0, -21], [4, -7], [19, -12], [15, 4], [7, 6], [6, 14], [0, 9], [-6, 14], [-7, 6], [-15, 4], [-19, -12], [-4, -7]],
+  monolith: [[0, -22], [7, -15], [12, -15], [13, 10], [8, 17], [-8, 17], [-13, 10], [-12, -15], [-7, -15]],
 };
 
 // --- Build all sprites --------------------------------------------------------
@@ -150,37 +152,64 @@ export const ENEMY_COLORS = {
   tank: '#ffe14d',
   splitter: '#ff5ce1',
   mine: '#ff8a3d',
+  carrier: '#ffc27a',
+  shielder: '#7aa7ff',
+  weaver: '#d6ff3a',
+  blinker: '#e0d4ff',
+  hunter: '#ff2d2d',
+  eclipsedrone: '#c23bff',
 };
+
+function bulletSprite(sh, c) {
+  return makeSprite(24, (g) => {
+    if (sh.weapon === 'lance') {
+      g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 8;
+      g.fillRect(-1.6, -11, 3.2, 22);
+      g.fillStyle = '#fff'; g.shadowBlur = 0; g.fillRect(-0.7, -10, 1.4, 20);
+    } else if (sh.weapon === 'scatter') {
+      g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 8;
+      g.beginPath(); poly([[0, -6], [3.5, 0], [0, 6], [-3.5, 0]])(g); g.fill();
+      g.fillStyle = '#fff'; g.shadowBlur = 0;
+      g.beginPath(); poly([[0, -3], [1.5, 0], [0, 3], [-1.5, 0]])(g); g.fill();
+    } else if (sh.weapon === 'ricochet') {
+      g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 8;
+      g.beginPath(); poly([[0, -9], [3, 0], [0, 7], [-3, 0]])(g); g.fill();
+      g.fillStyle = '#fff'; g.shadowBlur = 0;
+      g.beginPath(); poly([[0, -6], [1.2, 0], [0, 4], [-1.2, 0]])(g); g.fill();
+    } else if (sh.weapon === 'charge') {
+      // Soft orb (drawn ~8 units radius; scaled up by weapon level in firePrimary).
+      const grd = g.createRadialGradient(0, 0, 0, 0, 0, 9);
+      grd.addColorStop(0, '#ffffff'); grd.addColorStop(0.35, c); grd.addColorStop(1, withAlpha(c, 0));
+      g.fillStyle = grd;
+      g.beginPath(); g.arc(0, 0, 9, 0, TAU); g.fill();
+      g.strokeStyle = c; g.lineWidth = 1.2; g.shadowColor = c; g.shadowBlur = 6;
+      g.beginPath(); g.arc(0, 0, 6.5, 0, TAU); g.stroke();
+    } else if (sh.weapon === 'phase') {
+      g.strokeStyle = c; g.shadowColor = c; g.shadowBlur = 8; g.lineWidth = 3;
+      g.beginPath(); g.arc(0, 4, 7, Math.PI * 1.15, Math.PI * 1.85); g.stroke();
+      g.strokeStyle = '#fff'; g.lineWidth = 1.2; g.shadowBlur = 0;
+      g.beginPath(); g.arc(0, 4, 7, Math.PI * 1.2, Math.PI * 1.8); g.stroke();
+    } else {
+      g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 8;
+      g.beginPath(); g.roundRect(-2.4, -8, 4.8, 16, 2.4); g.fill();
+      g.fillStyle = '#fff'; g.shadowBlur = 0;
+      g.beginPath(); g.roundRect(-1, -6.5, 2, 13, 1); g.fill();
+    }
+  });
+}
+
+// Re-bakes one ship's sprite and its primary bullet in a paint colour (cosmetic; ship defs stay immutable).
+export function rebuildShipSprite(ship, color, bullet = color) {
+  S['ship_' + ship.id] = shipSprite(SHIP_SHAPES[ship.id], color);
+  S['pb_' + ship.id] = bulletSprite(ship, bullet);
+}
 
 export function buildSprites(ships) {
   for (const sh of ships) S['ship_' + sh.id] = shipSprite(SHIP_SHAPES[sh.id], sh.color);
 
   // Player bullets ---------------------------------------------------------
-  for (const sh of ships) {
-    const c = sh.bullet;
-    S['pb_' + sh.id] = makeSprite(24, (g) => {
-      if (sh.weapon === 'lance') {
-        g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 8;
-        g.fillRect(-1.6, -11, 3.2, 22);
-        g.fillStyle = '#fff'; g.shadowBlur = 0; g.fillRect(-0.7, -10, 1.4, 20);
-      } else if (sh.weapon === 'scatter') {
-        g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 8;
-        g.beginPath(); poly([[0, -6], [3.5, 0], [0, 6], [-3.5, 0]])(g); g.fill();
-        g.fillStyle = '#fff'; g.shadowBlur = 0;
-        g.beginPath(); poly([[0, -3], [1.5, 0], [0, 3], [-1.5, 0]])(g); g.fill();
-      } else if (sh.weapon === 'phase') {
-        g.strokeStyle = c; g.shadowColor = c; g.shadowBlur = 8; g.lineWidth = 3;
-        g.beginPath(); g.arc(0, 4, 7, Math.PI * 1.15, Math.PI * 1.85); g.stroke();
-        g.strokeStyle = '#fff'; g.lineWidth = 1.2; g.shadowBlur = 0;
-        g.beginPath(); g.arc(0, 4, 7, Math.PI * 1.2, Math.PI * 1.8); g.stroke();
-      } else {
-        g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 8;
-        g.beginPath(); g.roundRect(-2.4, -8, 4.8, 16, 2.4); g.fill();
-        g.fillStyle = '#fff'; g.shadowBlur = 0;
-        g.beginPath(); g.roundRect(-1, -6.5, 2, 13, 1); g.fill();
-      }
-    });
-  }
+  for (const sh of ships) S['pb_' + sh.id] = bulletSprite(sh, sh.bullet);
+  buildGearSpritesV2();
   S.pb_od = makeSprite(26, (g) => {
     g.fillStyle = '#fff'; g.shadowColor = '#ff3df2'; g.shadowBlur = 10;
     g.beginPath(); g.roundRect(-3, -10, 6, 20, 3); g.fill();
@@ -320,6 +349,12 @@ export function buildSprites(ships) {
   S.gem2 = gem(22, 6, '#7dff6b');
   S.gem3 = gem(28, 8, '#ff3df2');
   S.gem4 = gem(34, 10, '#ffe14d');
+  S.credit = makeSprite(26, (g) => {
+    const p = (c) => c.arc(0, 0, 6.5, 0, TAU);
+    glowFill(g, '#ffd24a', 0, p, 0.55); glowStroke(g, '#ffd24a', 1.8, 8, p, 1);
+    g.strokeStyle = '#fff6c9'; g.lineWidth = 1.4;
+    g.beginPath(); g.moveTo(-2.6, 0); g.lineTo(0, -3.2); g.lineTo(2.6, 0); g.lineTo(0, 3.2); g.closePath(); g.stroke();
+  });
   S.heart = makeSprite(36, (g) => {
     const p = (c) => {
       c.moveTo(0, 9);
@@ -360,5 +395,239 @@ export function buildSprites(ships) {
   S.hudShield = makeSprite(24, (g) => {
     const p = poly([[0, -8], [7, -5], [6, 3], [0, 8], [-6, 3], [-7, -5]]);
     glowFill(g, '#3ff6ff', 0, p, 0.5); glowStroke(g, '#3ff6ff', 1.4, 6, p, 1);
+  });
+
+  // Fortress Protocol dome (ring radius 85 at scale 1), baked so the per-frame cost is one drawImage.
+  S.dome = makeSprite(220, (g) => {
+    const R = 85;
+    const grd = g.createRadialGradient(0, 0, R * 0.55, 0, 0, R);
+    grd.addColorStop(0, 'rgba(255,176,46,0)');
+    grd.addColorStop(1, 'rgba(255,176,46,0.3)');
+    g.fillStyle = grd;
+    g.beginPath(); g.arc(0, 0, R, 0, TAU); g.fill();
+    glowStroke(g, '#ffb02e', 2.6, 12, (c) => c.arc(0, 0, R, 0, TAU));
+    g.save();
+    g.globalAlpha = 0.35;
+    g.strokeStyle = '#ffd98a'; g.lineWidth = 1; g.setLineDash([6, 8]);
+    g.beginPath(); g.arc(0, 0, R - 7, 0, TAU); g.stroke();
+    g.restore();
+  });
+
+  // ECHO's helmet bust (pilot screen now, comms later). 96x96 box.
+  S.portrait_echo = makeSprite(96, (g) => {
+    const shell = (c) => {
+      c.moveTo(-23, 20); c.lineTo(-25, -6); c.quadraticCurveTo(-25, -34, 0, -37); c.quadraticCurveTo(25, -34, 25, -6);
+      c.lineTo(23, 20); c.lineTo(11, 28); c.lineTo(-11, 28); c.closePath();
+    };
+    const shoulders = (c) => {
+      c.moveTo(-44, 48); c.lineTo(-36, 36); c.lineTo(-14, 30); c.moveTo(14, 30); c.lineTo(36, 36); c.lineTo(44, 48);
+    };
+    glowStroke(g, '#3ff6ff', 2, 6, shoulders, 1);
+    glowFill(g, '#3ff6ff', 0, shell, 0.16);
+    glowStroke(g, '#3ff6ff', 2.4, 10, shell);
+    // crest + cheek lines
+    glowStroke(g, '#3ff6ff', 1.4, 5, (c) => { c.moveTo(0, -37); c.lineTo(0, -22); c.moveTo(-23, 12); c.lineTo(-13, 14); c.moveTo(23, 12); c.lineTo(13, 14); }, 1);
+    // visor
+    const visor = (c) => { c.moveTo(-19, -10); c.lineTo(19, -10); c.lineTo(15, 3); c.lineTo(-15, 3); c.closePath(); };
+    glowFill(g, '#ff3df2', 0, visor, 0.55);
+    glowStroke(g, '#ff3df2', 2, 9, visor);
+    g.save();
+    g.fillStyle = '#fff'; g.shadowColor = '#ff3df2'; g.shadowBlur = 8;
+    g.fillRect(-11, -5, 22, 2.4);
+    g.restore();
+  });
+
+  // MAG, the mission AI: a hex frame around a watching eye. 96x96 box.
+  S.portrait_mag = makeSprite(96, (g) => {
+    const C = '#3ff6ff';
+    const hex = poly(regular(6, 37, Math.PI / 2));
+    glowFill(g, C, 0, hex, 0.12);
+    glowStroke(g, C, 2.4, 10, hex);
+    glowStroke(g, C, 1.2, 5, poly(regular(6, 28, Math.PI / 2)), 1);
+    glowStroke(g, C, 1.4, 5, (c) => {
+      for (let i = 0; i < 6; i++) {
+        const a = Math.PI / 2 + (i / 6) * TAU;
+        c.moveTo(Math.cos(a) * 37, Math.sin(a) * 37);
+        c.lineTo(Math.cos(a) * 45, Math.sin(a) * 45);
+      }
+    }, 1);
+    const eye = (c) => { c.moveTo(-23, 0); c.quadraticCurveTo(0, -21, 23, 0); c.quadraticCurveTo(0, 21, -23, 0); c.closePath(); };
+    glowFill(g, C, 0, eye, 0.28);
+    glowStroke(g, C, 2, 8, eye);
+    glowStroke(g, '#ff3df2', 1.6, 6, (c) => c.arc(0, 0, 8.5, 0, TAU), 1);
+    g.save();
+    g.fillStyle = '#fff'; g.shadowColor = C; g.shadowBlur = 8;
+    g.fillRect(-1.6, -7, 3.2, 14);
+    g.restore();
+  });
+
+  // SIGNAL, the hostile intelligence: a cracked, glitch-sliced mask. 96x96 box.
+  S.portrait_signal = makeSprite(96, (g) => {
+    const R = '#ff3d6e';
+    const M = '#ff3df2';
+    const mask = (c) => {
+      c.moveTo(-26, -34); c.lineTo(26, -34); c.lineTo(30, -4); c.lineTo(20, 24); c.lineTo(8, 36); c.lineTo(-8, 36); c.lineTo(-20, 24); c.lineTo(-30, -4); c.closePath();
+    };
+    glowFill(g, R, 0, mask, 0.16);
+    glowStroke(g, R, 2.4, 10, mask);
+    // eyes: jagged slits, one displaced
+    const eyeL = (c) => { c.moveTo(-21, -10); c.lineTo(-5, -14); c.lineTo(-8, -3); c.lineTo(-19, -4); c.closePath(); };
+    const eyeR = (c) => { c.moveTo(21, -10); c.lineTo(5, -14); c.lineTo(8, -3); c.lineTo(19, -4); c.closePath(); };
+    glowFill(g, R, 0, eyeL, 0.7); glowStroke(g, R, 1.8, 8, eyeL);
+    glowFill(g, R, 0, eyeR, 0.7); glowStroke(g, R, 1.8, 8, eyeR);
+    // crack down the face + mouth grille
+    glowStroke(g, M, 1.4, 6, (c) => { c.moveTo(2, -34); c.lineTo(-4, -20); c.lineTo(3, -8); c.lineTo(-2, 6); c.lineTo(4, 18); }, 1);
+    glowStroke(g, R, 1.2, 4, (c) => { for (const x of [-9, -3, 3, 9]) { c.moveTo(x, 20); c.lineTo(x, 29); } }, 1);
+    // glitch slices: shifted copies of the outline
+    g.save();
+    g.globalCompositeOperation = 'lighter';
+    g.strokeStyle = '#3ff6ff'; g.lineWidth = 1.4; g.globalAlpha = 0.7;
+    g.beginPath(); g.moveTo(-34, -22); g.lineTo(-18, -22); g.moveTo(22, -22); g.lineTo(38, -22); g.stroke();
+    g.strokeStyle = M;
+    g.beginPath(); g.moveTo(-36, 10); g.lineTo(-12, 10); g.moveTo(14, 10); g.lineTo(36, 10); g.moveTo(-30, 30); g.lineTo(-16, 30); g.stroke();
+    g.restore();
+  });
+}
+
+// --- Step 6a enemies: Carrier, Shielder, Weaver, Blinker, Hunter, ECLIPSE (+ its drones) --------------
+// Kept in one function (called from boot after buildSprites) so it stays separate from the roster above.
+
+export function buildEnemySpritesV2() {
+  const E = ENEMY_COLORS;
+  S.carrier = makeSprite(84, (g) => {
+    const hull = poly([[0, 24], [14, 18], [30, 2], [24, -14], [10, -22], [-10, -22], [-24, -14], [-30, 2], [-14, 18]]);
+    glowFill(g, E.carrier, 0, hull, 0.2); glowStroke(g, E.carrier, 2.6, 12, hull);
+    // launch bays
+    for (const s of [-1, 1]) {
+      const bay = poly([[s * 8, 12], [s * 18, 8], [s * 18, -6], [s * 8, -6]]);
+      glowStroke(g, E.carrier, 1.6, 6, bay, 1);
+    }
+    glowStroke(g, E.carrier, 1.4, 5, (c) => { c.moveTo(-12, -14); c.lineTo(12, -14); }, 1);
+    g.fillStyle = '#fff'; g.beginPath(); g.arc(0, 2, 4, 0, TAU); g.fill();
+  }, true);
+  S.shielder = makeSprite(52, (g) => {
+    const p = poly(regular(6, 15, Math.PI / 2));
+    glowFill(g, E.shielder, 0, p, 0.25); glowStroke(g, E.shielder, 2.2, 10, p);
+    glowStroke(g, E.shielder, 1.5, 6, (c) => c.arc(0, 0, 8, 0, TAU), 1);
+    for (let i = 0; i < 3; i++) {
+      const a = -Math.PI / 2 + (i / 3) * TAU;
+      glowStroke(g, E.shielder, 1.6, 6, (c) => { c.moveTo(Math.cos(a) * 15, Math.sin(a) * 15); c.lineTo(Math.cos(a) * 22, Math.sin(a) * 22); }, 1);
+    }
+    g.fillStyle = '#fff'; g.beginPath(); g.arc(0, 0, 3, 0, TAU); g.fill();
+  }, true);
+  S.shieldRing = makeSprite(64, (g) => {
+    g.save();
+    g.globalAlpha = 0.16; g.fillStyle = E.shielder; g.beginPath(); g.arc(0, 0, 28, 0, TAU); g.fill();
+    g.restore();
+    glowStroke(g, E.shielder, 1.8, 8, (c) => c.arc(0, 0, 28, 0, TAU), 1);
+  });
+  S.weaver = makeSprite(40, (g) => {
+    const p = poly([[0, 13], [12, 0], [0, -13], [-12, 0]]);
+    glowFill(g, E.weaver, 0, p, 0.3); glowStroke(g, E.weaver, 2.2, 10, p);
+    glowStroke(g, E.weaver, 1.6, 6, poly([[0, 6], [5, 0], [0, -6], [-5, 0]]), 1);
+    g.fillStyle = '#fff'; g.beginPath(); g.arc(0, 0, 2.4, 0, TAU); g.fill();
+  }, true);
+  S.blinker = makeSprite(44, (g) => {
+    const p = poly([[0, -14], [12, 0], [0, 14], [-12, 0]]);
+    glowFill(g, E.blinker, 0, p, 0.25); glowStroke(g, E.blinker, 2, 10, p);
+    glowStroke(g, E.blinker, 1.5, 6, (c) => { c.moveTo(-17, 0); c.lineTo(-9, 0); c.moveTo(17, 0); c.lineTo(9, 0); c.moveTo(0, -17); c.lineTo(0, -9); c.moveTo(0, 17); c.lineTo(0, 9); }, 1);
+    g.fillStyle = '#fff'; g.shadowColor = E.blinker; g.shadowBlur = 8;
+    g.beginPath(); g.arc(0, 0, 3.2, 0, TAU); g.fill();
+  }, true);
+  S.hunter = makeSprite(84, (g) => {
+    // Gunship: swept wings, nose pointing down at the player, targeting reticle in the middle.
+    const hull = poly([[0, 28], [9, 12], [30, -6], [34, -22], [14, -14], [8, -24], [-8, -24], [-14, -14], [-34, -22], [-30, -6], [-9, 12]]);
+    glowFill(g, E.hunter, 0, hull, 0.22); glowStroke(g, E.hunter, 2.6, 12, hull);
+    glowStroke(g, E.hunter, 1.6, 6, (c) => c.arc(0, 2, 9, 0, TAU), 1);
+    glowStroke(g, E.hunter, 1.4, 5, (c) => { c.moveTo(0, -8); c.lineTo(0, 12); c.moveTo(-10, 2); c.lineTo(10, 2); }, 1);
+    for (const s of [-1, 1]) glowStroke(g, '#ffd0d0', 1.4, 5, (c) => { c.moveTo(s * 22, -8); c.lineTo(s * 28, -18); }, 1);
+    g.fillStyle = '#fff'; g.beginPath(); g.arc(0, 2, 3, 0, TAU); g.fill();
+  }, true);
+  S.eclipseDrone = makeSprite(36, (g) => {
+    const p = poly([[0, 11], [9, -8], [0, -3], [-9, -8]]);
+    g.fillStyle = '#08000f'; g.beginPath(); p(g); g.fill();
+    glowStroke(g, E.eclipsedrone, 2, 9, p);
+    g.fillStyle = '#ff3df2'; g.beginPath(); g.arc(0, 0, 2.4, 0, TAU); g.fill();
+  }, true);
+
+  // ECLIPSE: an inverted, black-hulled dark mirror of the player's ship with a magenta-white rim.
+  S.eclipse = makeSprite(210, (g) => {
+    const K = 4.2;
+    const shape = [[0, -20], [7, -4], [17, 10], [8, 8], [5, 14], [-5, 14], [-8, 8], [-17, 10], [-7, -4]]
+      .map(([x, y]) => [x * K, -y * K - 12]); // flipped: nose points down
+    const path = poly(shape);
+    g.save();
+    g.shadowColor = '#c23bff'; g.shadowBlur = 26;
+    g.fillStyle = '#06000d'; g.beginPath(); path(g); g.fill();
+    g.restore();
+    g.fillStyle = '#06000d'; g.beginPath(); path(g); g.fill();
+    glowStroke(g, '#ff3df2', 3, 16, path);
+    // inner echo of the hull
+    const inner = poly(shape.map(([x, y]) => [x * 0.55, (y + 12) * 0.55 - 14]));
+    glowStroke(g, '#8a2bd6', 1.8, 8, inner, 1);
+    // panel lines
+    glowStroke(g, '#c23bff', 1.2, 5, (c) => {
+      c.moveTo(-34, -40); c.lineTo(-14, -14); c.moveTo(34, -40); c.lineTo(14, -14);
+      c.moveTo(-16, -52); c.lineTo(16, -52);
+    }, 1);
+    // dark core eye
+    g.save();
+    g.fillStyle = '#000'; g.beginPath(); g.ellipse(0, -2, 11, 17, 0, 0, TAU); g.fill();
+    g.restore();
+    glowStroke(g, '#ffffff', 1.8, 8, (c) => c.ellipse(0, -2, 11, 17, 0, 0, TAU), 1);
+  }, true);
+}
+
+// --- Step 6b: Gravity Well, Reflector, Flak Burst and reflected-bullet sprites ----------------------------
+function buildGearSpritesV2() {
+  // Singularity core, radius ~50 at scale 1 (drawn rotated and scaled per frame).
+  S.gwell = makeSprite(120, (g) => {
+    const R = 52;
+    const grd = g.createRadialGradient(0, 0, 0, 0, 0, R);
+    grd.addColorStop(0, 'rgba(0,0,0,0.95)');
+    grd.addColorStop(0.3, 'rgba(20,4,40,0.8)');
+    grd.addColorStop(0.75, 'rgba(160,60,255,0.25)');
+    grd.addColorStop(1, 'rgba(160,60,255,0)');
+    g.fillStyle = grd;
+    g.beginPath(); g.arc(0, 0, R, 0, TAU); g.fill();
+    for (let i = 0; i < 3; i++) {
+      const a0 = (i / 3) * TAU;
+      glowStroke(g, '#b86bff', 2.2, 8, (c) => {
+        c.moveTo(Math.cos(a0) * 14, Math.sin(a0) * 14);
+        for (let t = 0.1; t <= 1; t += 0.1) c.lineTo(Math.cos(a0 + t * 2.2) * (14 + t * 34), Math.sin(a0 + t * 2.2) * (14 + t * 34));
+      }, 1);
+    }
+    glowStroke(g, '#e0b3ff', 1.8, 8, (c) => c.arc(0, 0, 9, 0, TAU), 1);
+  });
+  // Reflector bubble, ring radius 50 at scale 1.
+  S.reflect = makeSprite(120, (g) => {
+    const R = 50;
+    const grd = g.createRadialGradient(0, 0, R * 0.5, 0, 0, R);
+    grd.addColorStop(0, 'rgba(127,255,230,0)');
+    grd.addColorStop(1, 'rgba(127,255,230,0.3)');
+    g.fillStyle = grd;
+    g.beginPath(); g.arc(0, 0, R, 0, TAU); g.fill();
+    glowStroke(g, '#7fffe6', 2.6, 12, (c) => c.arc(0, 0, R, 0, TAU));
+  });
+  S.flak = makeSprite(20, (g) => {
+    g.fillStyle = '#ffcf6b'; g.shadowColor = '#ff8a3d'; g.shadowBlur = 8;
+    g.beginPath(); g.arc(0, 0, 4.2, 0, TAU); g.fill();
+    g.shadowBlur = 0; g.fillStyle = '#fff';
+    g.beginPath(); g.arc(0, 0, 2, 0, TAU); g.fill();
+  });
+  S.pb_refl = makeSprite(22, (g) => {
+    g.fillStyle = '#7fffe6'; g.shadowColor = '#7fffe6'; g.shadowBlur = 8;
+    g.beginPath(); g.arc(0, 0, 4.4, 0, TAU); g.fill();
+    g.shadowBlur = 0; g.fillStyle = '#fff';
+    g.beginPath(); g.arc(0, 0, 2.2, 0, TAU); g.fill();
+  });
+  // Annihilator afterglow strip (stretched vertically per frame).
+  S.afterglow = makeSprite(24, (g) => {
+    const grd = g.createLinearGradient(-12, 0, 12, 0);
+    grd.addColorStop(0, 'rgba(255,61,242,0)');
+    grd.addColorStop(0.5, 'rgba(255,200,250,0.9)');
+    grd.addColorStop(1, 'rgba(255,61,242,0)');
+    g.fillStyle = grd;
+    g.fillRect(-12, -12, 24, 24);
   });
 }

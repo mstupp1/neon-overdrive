@@ -2,7 +2,7 @@
 // automated smoke tests). Steers away from threats and lines up shots.
 
 import { G, view } from './state.js';
-import { clamp } from '../core/math.js';
+import { clamp, segDist2 } from '../core/math.js';
 
 export function botControl() {
   const p = G.player;
@@ -25,6 +25,32 @@ export function botControl() {
     danger += w;
     if (d2 < 16 * 16 && approaching > 1) dash = true;
   }
+  // Enemy beams (lasers, lanes, weaver tripwires): push away from the segment once lethal or about to be.
+  for (const bm of G.beams) {
+    if (bm.owner !== 'enemy' || bm.tele > 0.25 || bm.dead) continue;
+    const L = bm.len || 1400;
+    const ex = bm.x + Math.cos(bm.ang) * L;
+    const ey = bm.y + Math.sin(bm.ang) * L;
+    const d2 = segDist2(p.x, p.y, bm.x, bm.y, ex, ey);
+    const lim = bm.w * 0.8 + 62;
+    if (d2 > lim * lim) continue;
+    // Closest point on the segment, to know which way is "away".
+    const vx = ex - bm.x;
+    const vy = ey - bm.y;
+    const t = clamp(((p.x - bm.x) * vx + (p.y - bm.y) * vy) / (vx * vx + vy * vy || 1), 0, 1);
+    const cx = bm.x + vx * t;
+    const cy = bm.y + vy * t;
+    let dx = p.x - cx;
+    let dy = p.y - cy;
+    const d = Math.hypot(dx, dy) || 1;
+    dx /= d;
+    dy /= d;
+    const w = 1 + (lim - d) / lim * 2.5;
+    fx += dx * w;
+    fy += dy * w;
+    danger += w;
+    if (bm.tele <= 0 && d < bm.w * 0.8 + p.r + 6) dash = true;
+  }
   let target = null;
   let best = Infinity;
   for (const e of G.enemies) {
@@ -40,14 +66,14 @@ export function botControl() {
       danger += w;
     }
     if (e.y < p.y - 60) {
-      const score = Math.abs(dx) + (e.boss ? -200 : 0);
+      const score = Math.abs(dx) + (e.boss ? -200 : 0) + (e.invuln ? 600 : 0); // shoot the Dark Fortress drones, not the dome
       if (score < best) {
         best = score;
         target = e;
       }
     }
   }
-  const homeY = view.H * 0.8;
+  const homeY = view.H * (p.ship && p.ship.weapon === 'scatter' ? 0.6 : 0.8); // the shotgun has to get close, like a human would
   if (target) fx += clamp((target.x - p.x) * 0.012, -1, 1);
   else fx += clamp((view.W / 2 - p.x) * 0.004, -0.5, 0.5);
   fy += clamp((homeY - p.y) * 0.01, -1, 1);
@@ -80,7 +106,7 @@ export function botControl() {
     tx: 0,
     ty: 0,
     dash,
-    od: p.od >= 100 && busy,
+    od: p.od >= 100 && (busy || danger > 3),
     focus: danger > 2.5,
   };
 }

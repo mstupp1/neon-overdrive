@@ -34,11 +34,11 @@ export function turnToward(a, b, step) {
   return a + Math.sign(d) * step;
 }
 
-export function weightedPick(items, weightFn) {
+export function weightedPick(items, weightFn, rng = Math.random) {
   let total = 0;
   for (const it of items) total += Math.max(0, weightFn(it));
   if (total <= 0) return null;
-  let r = Math.random() * total;
+  let r = rng() * total;
   for (const it of items) {
     r -= Math.max(0, weightFn(it));
     if (r <= 0) return it;
@@ -74,4 +74,15 @@ export function formatTime(sec) {
   const m = Math.floor(sec / 60);
   const s = Math.floor(sec % 60);
   return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+// Small seeded PRNG (mulberry32): returns () → [0, 1).
+export function mulberry32(seed) {
+  let a = seed | 0;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }

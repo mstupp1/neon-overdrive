@@ -6,9 +6,11 @@ import { rand, damp, TAU, clamp, chance, dist2 } from '../core/math.js';
 import { shoot, ring, fan, aimAt } from './bullets.js';
 import { explosion, sparks, damageNumber, addShake, floatText, hitstop } from './fx.js';
 import { dropXp, dropPickup } from './pickups.js';
+import { dropKillCredits } from './economy.js';
 import { sfx } from '../core/audio.js';
 import { onEnemyKilled } from './player.js';
-import { bossDamaged, updateBoss } from './bosses.js';
+import { onEliteKilled } from './pilot.js';
+import { bossDamaged, updateBoss, every } from './bosses.js';
 
 export const TYPES = {
   dart: { hp: 3, r: 12, xp: 1, score: 100, spr: 'dart' },
@@ -20,6 +22,13 @@ export const TYPES = {
   tank: { hp: 80, r: 27, xp: 14, score: 1400, spr: 'tank' },
   splitter: { hp: 15, r: 16, xp: 3, score: 300, spr: 'splitter' },
   mine: { hp: 5, r: 11, xp: 1, score: 120, spr: 'mine' },
+  // Step 6a roster. `keep` = never despawned for lingering / leaving the screen; `plain` = no elite roll.
+  carrier: { hp: 60, r: 26, xp: 12, score: 1200, spr: 'carrier' },
+  shielder: { hp: 18, r: 15, xp: 5, score: 500, spr: 'shielder' },
+  weaver: { hp: 12, r: 13, xp: 4, score: 400, spr: 'weaver', plain: true },
+  blinker: { hp: 10, r: 13, xp: 4, score: 450, spr: 'blinker' },
+  hunter: { hp: 110, r: 24, xp: 40, score: 6000, spr: 'hunter', keep: true, plain: true }, // elite-node mini-boss; hp scales with the sector level, not diff.hp (see spawnEnemy)
+  eclipsedrone: { hp: 30, r: 11, xp: 3, score: 500, spr: 'eclipseDrone', keep: true, plain: true }, // ECLIPSE's Dark Fortress turrets
 };
 
 export function spawnEnemy(type, x, y, opts = {}) {
@@ -57,8 +66,9 @@ export function spawnEnemy(type, x, y, opts = {}) {
   e.curve = opts.curve || 0;
   e.state = 'enter';
   e.parts = null;
-  let hp = def.hp * d.hp;
-  if (opts.elite || (type !== 'swarm' && type !== 'mine' && G.sector + G.loop * 9 >= 2 && chance(0.04 + 0.008 * G.sector))) {
+  // The Hunter is a mini-boss: ~15-25s to kill with a typical build, so it scales very gently with level (+3% per level) instead of diff.hp.
+  let hp = type === 'hunter' ? def.hp * (1 + 0.03 * (G.director.spec ? G.director.spec.level : 1)) : def.hp * d.hp;
+  if (opts.elite || (type !== 'swarm' && type !== 'mine' && !def.plain && G.sector + G.loop * 9 >= 2 && chance(0.04 + 0.008 * G.sector + (d.eliteBonus || 0)))) {
     e.elite = true;
     hp *= 3.2;
     e.r *= 1.2;
@@ -67,6 +77,20 @@ export function spawnEnemy(type, x, y, opts = {}) {
   }
   e.hp = hp;
   e.maxHp = hp;
+  if (def.keep) e.keep = true;
+  if (type === 'hunter') {
+    e.hunter = true;
+    e.name = 'HUNTER';
+    e.gap = 1;
+    e.cycle = 0;
+  } else if (type === 'blinker') {
+    e.alpha = 0; // fades in
+    e.state = 'in';
+    e.invuln = true;
+    e.sp = false;
+  } else if (type === 'carrier') {
+    e.launches = 0;
+  }
   if (type === 'snake') {
     e.trail = [];
     e.parts = [];
@@ -325,6 +349,245 @@ const BEHAVIOR = {
   },
 };
 
+// --- Step 6a behaviours -------------------------------------------------------------
+
+// Carrier: creeps down to a hover, then opens its bays (telegraphed by flashing) and launches 3 swarm pods that dive.
+BEHAVIOR.carrier = function carrier(e, dt) {
+  const fr = Math.sqrt(G.director.diff.fireRate);
+  if (e.state === 'enter') {
+    e.y += 42 * dt;
+    e.x += Math.sin(e.t * 0.6 + e.ph) * 10 * dt;
+    if (e.y >= e.ty) {
+      e.state = 'hold';
+      e.fireT = 1.4;
+    }
+  } else if (e.state === 'hold') {
+    e.x = clamp(e.x + Math.sin(e.t * 0.6 + e.ph) * 16 * dt, 40, view.W - 40);
+    e.fireT -= dt * fr;
+    if (e.fireT < 0.5) e.flash = Math.sin(e.t * 45) > 0 ? 0.05 : 0; // bay-open warning
+    if (e.fireT <= 0) {
+      e.fireT = 3.8;
+      e.launches++;
+      for (let i = -1; i <= 1; i++) {
+        const tx = clamp(e.x + i * 40, 20, view.W - 20);
+        const pod = spawnEnemy('swarm', e.x + i * 10, e.y + 18, { mv: 'dive', tx, ty: e.y + 62 + Math.abs(i) * 10 });
+        pod.entered = true;
+      }
+      sparks(e.x, e.y + 20, e.color, 10, 190, Math.PI / 2, 1.6);
+      sfx.zap();
+      if (e.launches >= (e.elite ? 4 : 3)) e.state = 'leave';
+    }
+  } else {
+    e.vy += 120 * dt;
+    e.y += e.vy * dt;
+  }
+};
+
+const LINK_R = 210;
+
+function relink(e) {
+  const L = e.links || (e.links = []);
+  for (let i = L.length - 1; i >= 0; i--) {
+    const o = L[i];
+    if (o.dead || dist2(e.x, e.y, o.x, o.y) > (LINK_R + 40) * (LINK_R + 40)) {
+      if (o.shieldedBy === e) o.shieldedBy = null;
+      L.splice(i, 1);
+    }
+  }
+  if (L.length >= 3) return;
+  let cand = null;
+  for (const o of G.enemies) {
+    if (o === e || o.dead || o.boss || o.hunter || o.type === 'shielder' || o.shieldedBy || !o.entered) continue;
+    const d2 = dist2(e.x, e.y, o.x, o.y);
+    if (d2 > LINK_R * LINK_R) continue;
+    (cand || (cand = [])).push({ o, d2 });
+  }
+  if (!cand) return;
+  cand.sort((a, b) => a.d2 - b.d2);
+  for (let i = 0; i < cand.length && L.length < 3; i++) {
+    cand[i].o.shieldedBy = e;
+    L.push(cand[i].o);
+  }
+}
+
+// Shielder: hovers and tethers a shield to up to 3 nearby enemies (-80% damage) for as long as it lives.
+BEHAVIOR.shielder = function shielder(e, dt) {
+  moveCommon(e, dt);
+  e.rot += dt * 1.1;
+  e.linkT = (e.linkT || 0) - dt;
+  if (e.linkT <= 0) {
+    e.linkT = 0.35;
+    relink(e);
+  }
+  if (e.state === 'hold') {
+    e.fireT -= dt * G.director.diff.fireRate;
+    if (e.fireT <= 0) {
+      e.fireT = 3;
+      fan(e.x, e.y, aimAt(e.x, e.y), 3, 0.5, 125, 'small');
+    }
+  }
+};
+
+// Weaver: a pair of nodes (partner links them) drift down in parallel; the lead node owns the tripwire beam.
+export function spawnWeavers(cx, y, gap = 200) {
+  const o = { mv: 'down', speed: 66, wa: 34, wf: 1.1, ph: 0 };
+  const a = spawnEnemy('weaver', cx - gap / 2, y, o);
+  const b = spawnEnemy('weaver', cx + gap / 2, y, o);
+  a.partner = b;
+  b.partner = a;
+  a.lead = true;
+  return [a, b];
+}
+
+BEHAVIOR.weaver = function weaver(e, dt) {
+  moveCommon(e, dt);
+  e.rot += dt * 2.4;
+  if (!e.lead) return;
+  const o = e.partner;
+  const bm = e.beam;
+  if (!bm) {
+    if (o && !o.dead && e.y > 14 && o.y > 14 && !e.cut) {
+      // Thin flickering telegraph for 0.6s (updateBeams counts `tele` down), then it is lethal.
+      e.beam = { owner: 'enemy', src: e, x: e.x, y: e.y, ox: 0, oy: 0, ang: 0, len: 1, w: 5, tele: 0.6, life: 9999, spin: 0, aimSpin: 0 };
+      G.beams.push(e.beam);
+      sfx.warn();
+    }
+  } else if (!o || o.dead) {
+    bm.tele = 0;
+    bm.life = 0; // updateBeams drops it
+    e.beam = null;
+    e.cut = true;
+  } else {
+    bm.ang = Math.atan2(o.y - e.y, o.x - e.x);
+    bm.len = Math.hypot(o.x - e.x, o.y - e.y);
+  }
+};
+
+// Blinker spot: near-but-not-on the player (>= 140px away), inside the upper play area.
+function blinkSpot(e) {
+  const p = G.player;
+  for (let i = 0; i < 12; i++) {
+    const a = rand(0, TAU);
+    const d = rand(150, 250);
+    const x = clamp(p.x + Math.cos(a) * d, 40, view.W - 40);
+    const y = clamp(p.y + Math.sin(a) * d, view.safeTop + 70, view.H * 0.62);
+    if (dist2(x, y, p.x, p.y) >= 140 * 140) {
+      e.x = x;
+      e.y = y;
+      return;
+    }
+  }
+  e.x = clamp(p.x + (p.x < view.W / 2 ? 170 : -170), 40, view.W - 40);
+  e.y = view.safeTop + 110;
+}
+export { blinkSpot };
+
+// Blinker: fade in → telegraph 0.5s → ring of 10-14 → fade out and teleport near the player; repeats `shots` times then leaves.
+BEHAVIOR.blinker = function blinker(e, dt) {
+  e.rot += dt * 1.6;
+  if (e.state === 'in') {
+    if (!e.sp) {
+      e.sp = true;
+      sparks(e.x, e.y, e.color, 12, 200);
+    }
+    e.alpha = Math.min(1, e.alpha + dt * 4);
+    e.invuln = e.alpha < 0.7;
+    if (e.alpha >= 1) {
+      e.state = 'tele';
+      e.timer = 0.5;
+    }
+  } else if (e.state === 'tele') {
+    e.timer -= dt;
+    if (e.timer <= 0) {
+      const n = 10 + Math.min(4, Math.floor(G.director.spec.level / 3)) + (e.elite ? 2 : 0);
+      ring(e.x, e.y, Math.min(n, 14), 120, 'orb', rand(0, TAU));
+      sparks(e.x, e.y, e.color, 8, 180);
+      sfx.zap();
+      e.shots--;
+      e.state = 'rest';
+      e.timer = 0.55;
+    }
+  } else if (e.state === 'rest') {
+    e.timer -= dt;
+    if (e.timer <= 0) {
+      e.state = 'out';
+      sparks(e.x, e.y, e.color, 12, 200);
+    }
+  } else {
+    e.alpha = Math.max(0, e.alpha - dt * 5);
+    e.invuln = e.alpha < 0.7;
+    if (e.alpha <= 0) {
+      if (e.shots > 0) {
+        blinkSpot(e);
+        e.state = 'in';
+        e.sp = false;
+      } else {
+        e.dead = true; // leaves without a reward
+      }
+    }
+  }
+};
+
+// Hunter attack patterns (boss-style: return true when finished).
+const HUNTER_ATK = {
+  needles(e, a, dt, fr) {
+    every(a, dt, 0.42 / fr, () => fan(e.x, e.y + 16, aimAt(e.x, e.y + 16), 3, 0.26, 235, 'needle', { acc: 150, maxSpeed: 380 }));
+    return a.n >= 6;
+  },
+  spiral(e, a, dt, fr) {
+    a.t2 = (a.t2 || 0) + dt;
+    every(a, dt, 0.075 / fr, () => {
+      shoot(e.x, e.y, a.t2 * 3.2, 125, 'small');
+      shoot(e.x, e.y, a.t2 * 3.2 + Math.PI, 125, 'small');
+    });
+    return a.t2 > 2.4;
+  },
+};
+const HUNTER_CYCLE = ['needles', 'spiral'];
+
+// Hunter: strafes across the top and alternates aimed needle bursts with a spiral.
+BEHAVIOR.hunter = function hunter(e, dt) {
+  const px = e.x;
+  const fr = Math.min(1.6, G.director.diff.fireRate) * (e.hp < e.maxHp * 0.5 ? 1.25 : 1);
+  if (e.state === 'enter') {
+    e.y = damp(e.y, e.ty, 1.8, dt);
+    e.x = damp(e.x, view.W / 2, 1.8, dt);
+    if (Math.abs(e.y - e.ty) < 8) e.state = 'fight';
+  } else {
+    e.x = damp(e.x, view.W / 2 + Math.sin(e.t * 0.75) * view.W * 0.34, 3, dt);
+    e.y = damp(e.y, e.ty + Math.sin(e.t * 1.4) * 12, 3, dt);
+    if (e.atk) {
+      if (HUNTER_ATK[e.atk.name](e, e.atk, dt, fr)) {
+        e.atk = null;
+        e.gap = 0.9 / fr;
+      }
+    } else {
+      e.gap -= dt;
+      if (e.gap <= 0) e.atk = { name: HUNTER_CYCLE[e.cycle++ % HUNTER_CYCLE.length], n: 0 };
+    }
+  }
+  e.rot = clamp((px - e.x) * 0.12, -0.4, 0.4);
+};
+
+// ECLIPSE's Dark Fortress turret drone: orbits its owner and takes potshots; dies with it.
+BEHAVIOR.eclipsedrone = function eclipsedrone(e, dt) {
+  const o = e.owner;
+  if (!o || o.dead || o.state === 'dying') {
+    killEnemy(e, true);
+    return;
+  }
+  e.oa += dt * 1.5 * e.dir;
+  const R = 96 + Math.sin(e.t * 2 + e.ph) * 6;
+  e.x = o.x + Math.cos(e.oa) * R;
+  e.y = o.y + Math.sin(e.oa) * R * 0.78;
+  e.rot = aimAt(e.x, e.y) - Math.PI / 2;
+  e.fireT -= dt * G.director.diff.fireRate;
+  if (e.fireT <= 0) {
+    e.fireT = 1.6;
+    fan(e.x, e.y, aimAt(e.x, e.y), 2, 0.16, 190, 'needle', { acc: 90, maxSpeed: 300 });
+  }
+};
+
 export function updateEnemies(dt) {
   const arr = G.enemies;
   for (const e of arr) {
@@ -335,7 +598,7 @@ export function updateEnemies(dt) {
     else BEHAVIOR[e.type](e, dt);
     if (!e.entered && inBounds(e, -e.r * 0.5)) e.entered = true;
     // Despawn once they leave the play area (after having entered), or if stuck off-screen.
-    if (!e.boss && ((e.entered && !inBounds(e, 70)) || e.t > 30 || (!e.entered && e.t > 9))) e.dead = true;
+    if (!e.boss && !e.keep && ((e.entered && !inBounds(e, 70)) || e.t > 30 || (!e.entered && e.t > 9))) e.dead = true;
   }
   let w = 0;
   for (const e of arr) {
@@ -348,6 +611,16 @@ export function updateEnemies(dt) {
 
 export function damageEnemy(e, dmg, x, y, crit = false) {
   if (e.dead || e.invuln) return false;
+  if (e.shieldedBy) {
+    // Shielder link: -80% damage while the shielder lives.
+    if (e.shieldedBy.dead) e.shieldedBy = null;
+    else {
+      dmg *= 0.2;
+      sparks(x ?? e.x, y ?? e.y, '#7aa7ff', 2, 110);
+    }
+  }
+  const pl = G.player;
+  if (pl && pl.st.exec) dmg *= e.boss ? 1.1 : e.hp < e.maxHp * 0.3 ? 1.4 : 1; // Executioner
   e.hp -= dmg;
   e.flash = 0.06;
   damageNumber(x ?? e.x, y ?? e.y, dmg, crit);
@@ -377,7 +650,14 @@ export function killEnemy(e, silent = false) {
   }
   const d = G.director.diff;
   dropXp(e.x, e.y, Math.max(1, Math.round(e.xp * d.xp)));
-  if (e.elite) {
+  dropKillCredits(e);
+  if (e.hunter) {
+    dropPickup(e.x - 10, e.y, 'heart');
+    dropPickup(e.x + 10, e.y, chance(0.5) ? 'magnet' : 'cell');
+    floatText(e.x, e.y - 24, 'HUNTER DOWN', '#ff3b3b', 16, 1.6);
+    addShake(0.4);
+    if (G.player) onEliteKilled(G.player);
+  } else if (e.elite) {
     dropPickup(e.x, e.y, chance(0.3) ? 'heart' : chance(0.5) ? 'magnet' : 'cell');
     floatText(e.x, e.y - 20, 'ELITE DOWN', '#ffd84d', 12, 1);
   } else if (chance(0.006)) dropPickup(e.x, e.y, 'heart');

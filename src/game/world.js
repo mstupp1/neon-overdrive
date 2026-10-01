@@ -6,6 +6,7 @@ import { TAU, segDist2, dist2 } from '../core/math.js';
 import { bg } from '../render/background.js';
 import { updateDirector } from './director.js';
 import { updatePlayer, drawPlayer, hurtPlayer, gainOverdrive, addScore } from './player.js';
+import { pilotTimeScale, domeErase, onGraze, phasing } from './pilot.js';
 import { updateModules, updateBeams, drawModules, drawBeams } from './modules.js';
 import { updateEnemies, damageEnemy } from './enemies.js';
 import { drawBoss } from './bosses.js';
@@ -21,9 +22,10 @@ export function step(dt) {
   updateDirector(dt);
   updatePlayer(p, dt);
   updateModules(p, dt);
-  updateEnemies(dt);
+  const et = dt * pilotTimeScale(p, dt); // enemy time (Phase Shift slows it)
+  updateEnemies(et);
   updatePlayerBullets(dt);
-  updateEnemyBullets(dt);
+  updateEnemyBullets(et);
   updateBeams(dt);
   collide(p);
   updatePickups(dt);
@@ -35,7 +37,7 @@ export function step(dt) {
   }
   if (G.pulse > 0) {
     G.pulse += dt * 1100;
-    if (G.pulse > 1100) G.pulse = 0;
+    if (G.pulse > G.pulseMax) G.pulse = 0;
   }
 }
 
@@ -90,8 +92,8 @@ function collide(p) {
       if (e.dead || (!e.entered && !e.boss) || e.state === 'dying') continue;
       if (!hitTest(e, b.x, b.y, b.r)) continue;
       if (b.hits.includes(e)) continue;
-      const isCrit = crit > 0 && Math.random() < crit;
-      const dmg = b.dmg * (isCrit ? 2.5 : 1);
+      const isCrit = b.crit || (crit > 0 && Math.random() < crit);
+      const dmg = b.dmg * (isCrit ? p.st.critMul : 1);
       if (!e.invuln) {
         damageEnemy(e, dmg, b.x, b.y, isCrit);
         sfx.hit();
@@ -104,7 +106,7 @@ function collide(p) {
         const r2 = b.aoe * b.aoe;
         for (const o of enemies) {
           if (o === e || o.dead || !o.entered || o.boss) continue;
-          if (dist2(b.x, b.y, o.x, o.y) < r2) damageEnemy(o, b.dmg * 0.6, o.x, o.y);
+          if (dist2(b.x, b.y, o.x, o.y) < r2) damageEnemy(o, b.dmg * 0.6 * (b.crit ? p.st.critMul : 1), o.x, o.y);
         }
       }
       if (b.pierce > 0 && !e.boss) {
@@ -143,9 +145,11 @@ function collide(p) {
   }
 
   if (p.dead) return;
+  domeErase(p);
 
   // Enemy bullets → player (+ graze)
-  const grazeR = 24;
+  const grazeR = 24 * p.st.grazeR;
+  const ghost = phasing(p);
   for (const b of G.eBullets) {
     if (b.dead || b.delay > 0) continue;
     const dx = b.x - p.x;
@@ -154,7 +158,7 @@ function collide(p) {
     if (dx > lim || dx < -lim || dy > lim || dy < -lim) continue;
     const d2 = dx * dx + dy * dy;
     const hr = b.r + p.r;
-    if (d2 < hr * hr) {
+    if (d2 < hr * hr && !ghost) {
       if (p.iframes <= 0 && p.dashT <= 0) {
         b.dead = true;
         hurtPlayer(p);
@@ -162,10 +166,11 @@ function collide(p) {
     } else if (!b.grazed && d2 < lim * lim) {
       b.grazed = true;
       G.grazes++;
-      gainOverdrive(2.4);
+      gainOverdrive(2.4 * p.st.grazeOd);
       addScore(25);
       sparks(p.x + dx * 0.5, p.y + dy * 0.5, '#ffffff', 2, 140);
       sfx.graze();
+      onGraze(p);
     }
   }
 
@@ -188,9 +193,10 @@ function collide(p) {
 
   // Enemy lasers → player
   for (const beam of G.beams) {
-    if (beam.owner !== 'enemy' || beam.tele > 0) continue;
-    const ex = beam.x + Math.cos(beam.ang) * 1400;
-    const ey = beam.y + Math.sin(beam.ang) * 1400;
+    if (beam.owner !== 'enemy' || beam.tele > 0 || beam.dead) continue;
+    const L = beam.len || 1400;
+    const ex = beam.x + Math.cos(beam.ang) * L;
+    const ey = beam.y + Math.sin(beam.ang) * L;
     const rr = beam.w * 0.8 + p.r;
     if (segDist2(p.x, p.y, beam.x, beam.y, ex, ey) < rr * rr) hurtPlayer(p);
   }
@@ -221,6 +227,15 @@ function drawTelegraphs(ctx) {
       ctx.moveTo(e.x, e.y);
       ctx.lineTo(e.x + Math.cos(e.aim) * 1000, e.y + Math.sin(e.aim) * 1000);
       ctx.stroke();
+    } else if (e.type === 'blinker' && e.state === 'tele') {
+      // Contracting ring: the burst fires when it closes.
+      const t = 1 - e.timer / 0.5;
+      ctx.globalAlpha = 0.25 + t * 0.6;
+      ctx.strokeStyle = e.color;
+      ctx.lineWidth = 1.5 + t * 2;
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, 14 + (1 - t) * 60, 0, TAU);
+      ctx.stroke();
     } else if (e.type === 'mine' && e.state === 'arm') {
       ctx.globalAlpha = 0.5;
       ctx.strokeStyle = '#ff8a3d';
@@ -240,7 +255,41 @@ function drawRot(ctx, img, x, y, a, size, k) {
   ctx.drawImage(img, -size / 2, -size / 2, size, size);
 }
 
+// Shielder tethers + shield rings on linked enemies.
+function drawShieldLinks(ctx) {
+  let any = false;
+  for (const e of G.enemies) {
+    if (e.dead || e.type !== 'shielder' || !e.links || !e.links.length) continue;
+    if (!any) {
+      any = true;
+      ctx.globalCompositeOperation = 'lighter';
+    }
+    const pulse = 0.5 + 0.2 * Math.sin(G.time * 6);
+    ctx.strokeStyle = e.color;
+    ctx.lineWidth = 1.2;
+    ctx.globalAlpha = pulse * 0.8;
+    ctx.beginPath();
+    for (const o of e.links) {
+      if (o.dead) continue;
+      ctx.moveTo(e.x, e.y);
+      ctx.lineTo(o.x, o.y);
+    }
+    ctx.stroke();
+    ctx.globalAlpha = 0.55 + 0.25 * Math.sin(G.time * 6);
+    for (const o of e.links) {
+      if (o.dead) continue;
+      const sz = (o.r + 8) * 2.286;
+      ctx.drawImage(S.shieldRing.img, o.x - sz / 2, o.y - sz / 2, sz, sz);
+    }
+  }
+  if (any) {
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+  }
+}
+
 function drawEnemies(ctx, k) {
+  const dark = !!(G.director && G.director.diff.blackout);
   for (const e of G.enemies) {
     if (e.dead) continue;
     if (e.boss) {
@@ -265,9 +314,22 @@ function drawEnemies(ctx, k) {
     }
     const s = e.spr;
     const img = e.flash > 0 ? s.flash : s.img;
+    if (dark && e.color) {
+      // Blackout: a soft halo so enemies stay readable on the dark field.
+      const gl = glow(e.color, 64);
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = 0.45;
+      const d2 = e.r * 4.4;
+      ctx.drawImage(gl.img, e.x - d2 / 2, e.y - d2 / 2, d2, d2);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
+    }
+    if (e.alpha !== undefined) ctx.globalAlpha = e.alpha;
     drawRot(ctx, img, e.x, e.y, e.rot, s.size * scale, k);
+    if (e.alpha !== undefined) ctx.globalAlpha = 1;
   }
   ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
+  drawShieldLinks(ctx);
 
   // Health bars on tough enemies once damaged
   for (const e of G.enemies) {
@@ -297,10 +359,10 @@ export function renderWorld(ctx, k) {
   // Overdrive shockwave
   if (G.pulse > 0 && G.player) {
     const p = G.player;
-    const t = G.pulse / 1100;
+    const t = G.pulse / G.pulseMax;
     ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = 1 - t;
-    ctx.strokeStyle = '#ff3df2';
+    ctx.strokeStyle = G.pulseColor;
     ctx.lineWidth = 16 * (1 - t) + 2;
     ctx.beginPath();
     ctx.arc(p.x, p.y, G.pulse, 0, TAU);
@@ -309,9 +371,9 @@ export function renderWorld(ctx, k) {
     ctx.globalCompositeOperation = 'source-over';
   }
 
-  // Overdrive tint
+  // Ult tint (class colour)
   if (G.player && G.player.odT > 0) {
-    const g = glow('#ff3df2', 64);
+    const g = glow(G.player.ucol, 64);
     ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = 0.08 + Math.sin(G.time * 6) * 0.03;
     ctx.drawImage(g.img, -view.W * 0.5, -view.H * 0.2, view.W * 2, view.H * 1.4);

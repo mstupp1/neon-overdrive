@@ -27,6 +27,8 @@ export function playerBullet(x, y, angle, speed, dmg, spr, opts = {}) {
   b.homing = opts.homing || 0;
   b.target = null;
   b.aoe = opts.aoe || 0;
+  b.bounce = opts.bounce || 0;
+  b.crit = !!opts.crit; // always crits on hit
   b.kind = opts.kind || 'bullet';
   b.alpha = opts.alpha || 0.9;
   b.hits.length = 0;
@@ -75,6 +77,13 @@ export function updatePlayerBullets(dt) {
       }
       b.x += b.vx * dt;
       b.y += b.vy * dt;
+      if (b.bounce > 0 && (b.x < 0 || b.x > view.W)) {
+        b.bounce--;
+        b.vx = -b.vx;
+        b.x = b.x < 0 ? -b.x : 2 * view.W - b.x;
+        b.hits.length = 0;
+        sparks(b.x < view.W / 2 ? 0 : view.W, b.y, '#ffb066', 3, 140);
+      }
       if (b.life <= 0 || b.y < -30 || b.y > view.H + 30 || b.x < -30 || b.x > view.W + 30) b.dead = true;
     }
     if (b.dead) {

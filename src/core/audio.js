@@ -141,6 +141,12 @@ export const sfx = {
     const f = 660 * Math.pow(2, pickupChain / 12);
     tone({ type: 'sine', f0: f, f1: f * 1.5, dur: 0.07, vol: 0.05 });
   },
+  coin() {
+    if (!ready() || !gate('coin', 40)) return;
+    const f = rand(1500, 1700);
+    tone({ type: 'triangle', f0: f, dur: 0.05, vol: 0.035 });
+    tone({ type: 'triangle', f0: f * 1.5, dur: 0.09, vol: 0.03, delay: 0.045 });
+  },
   levelUp() {
     if (!ready()) return;
     [523, 659, 784, 1047].forEach((f, i) => tone({ type: 'triangle', f0: f, dur: 0.18, vol: 0.12, delay: i * 0.06 }));
@@ -223,7 +229,7 @@ const NORMAL = [
   'Galactic Frenzy 2', 'Galactic Showdown 1', 'Galactic Showdown 2', 'Starfire Rumble 1', 'Starfire Rumble 2',
 ];
 const LATE = ["The Tyrant's March", 'The Final Shadow', 'Galactic Showdown 1', 'Galactic Frenzy 2', 'Starfire Rumble 1'];
-const BOSS = ['Starlover', "The Tyrant's March", 'The Final Shadow'];
+const BOSS = ['Starlover', "The Tyrant's March", 'Galactic Showdown 2', 'The Final Shadow']; // warden, hydra, omega, eclipse
 
 const urlFor = (name) => DIR + encodeURIComponent(name) + '.mp3';
 

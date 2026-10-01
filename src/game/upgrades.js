@@ -3,6 +3,8 @@
 
 import { weightedPick } from '../core/math.js';
 import { WEAPONS } from './ships.js';
+import { applyParts } from './parts.js';
+import { applyPassives } from './pilot.js';
 
 export const MAX_MODULES = 4;
 
@@ -28,6 +30,13 @@ export const ICONS = {
   rail: svg('<path d="M12 2v20M8 6v16M16 6v16M8 6l4-4 4 4"/>'),
   shrapnel: svg('<circle cx="12" cy="12" r="2"/><path d="M12 5v2M12 17v2M5 12h2M17 12h2M7 7l1.5 1.5M15.5 15.5L17 17M7 17l1.5-1.5M15.5 8.5L17 7"/>'),
   dashNova: svg('<path d="M4 20L14 10"/><path d="M14 4l1.5 4.5L20 10l-4.5 1.5L14 16l-1.5-4.5L8 10l4.5-1.5z"/>'),
+  gravity: svg('<circle cx="12" cy="12" r="2.2"/><path d="M12 3a9 9 0 019 9M21 12a9 9 0 01-9 9M12 21a9 9 0 01-9-9M3 12a9 9 0 019-9" stroke-dasharray="3 3"/><path d="M12 7a5 5 0 015 5"/>'),
+  reflector: svg('<path d="M4 17a8 8 0 0116 0"/><path d="M9 11l3-3 3 3M12 8v9"/>'),
+  flak: svg('<circle cx="12" cy="13" r="3"/><path d="M12 2v5M12 19v3M4 13h3M17 13h3M6 7l2 2M18 7l-2 2M6 19l2-2M18 19l-2-2"/>'),
+  hellfire: svg('<path d="M12 2c3 3 4 7 4 11l-4 3-4-3c0-4 1-8 4-11z"/><path d="M5 8c0 3 1 5 3 7M19 8c0 3-1 5-3 7M12 17v5"/>'),
+  stormhalo: svg('<circle cx="12" cy="12" r="2"/><circle cx="12" cy="12" r="8" stroke-dasharray="4 3"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3"/>'),
+  teslastorm: svg('<path d="M13 2L6 12h5l-2 10 8-12h-5l3-8z"/><path d="M4 5l2 2M20 5l-2 2M3 16l3-1M21 16l-3-1"/>'),
+  annihilator: svg('<path d="M12 2v20M7 6v16M17 6v16M3 10v12M21 10v12"/>'),
   credits: svg('<circle cx="12" cy="12" r="9"/><path d="M15 8.5c-.8-1-2-1.5-3-1.5-1.7 0-3 1-3 2.5s1.3 2 3 2.5 3 1 3 2.5-1.3 2.5-3 2.5c-1 0-2.2-.5-3-1.5M12 5v2M12 17v2"/>'),
   repair: svg('<path d="M12 5v14M5 12h14"/>'),
 };
@@ -59,6 +68,15 @@ export const UPGRADES = [
   { id: 'rail', name: 'Rail Lance', cat: 'module', max: 5, weight: 0.9, desc: (lv) => (lv === 1 ? 'Fire a massive piercing beam forward.' : 'Wider beam, more damage, faster charge.') },
   { id: 'shrapnel', name: 'Shrapnel', cat: 'module', max: 5, weight: 0.8, desc: () => 'Destroyed enemies burst into damaging fragments.' },
   { id: 'dashNova', name: 'Shock Dash', cat: 'module', max: 5, weight: 0.8, desc: (lv) => (lv === 1 ? 'Dashing unleashes blades and erases nearby bullets.' : 'More blades, larger erase radius.') },
+  { id: 'gravity', name: 'Gravity Well', cat: 'module', max: 5, weight: 0.85, desc: (lv) => (lv === 1 ? 'Drop a singularity that drags enemies and bullets in and crushes them.' : 'Bigger, stronger, more frequent wells.') },
+  { id: 'reflector', name: 'Reflector', cat: 'module', max: 5, weight: 0.85, desc: (lv) => (lv === 1 ? 'A pulsing shield bubble turns enemy bullets back on their owners.' : 'Wider bubble, more frequent, harder-hitting returns.') },
+  { id: 'flak', name: 'Flak Burst', cat: 'module', max: 5, weight: 0.85, desc: (lv) => (lv === 1 ? 'Slow flak shells airburst near enemies into shrapnel rings.' : 'More fragments and damage per burst.') },
+
+  // Evolutions: cat 'evolution', unlocked by a maxed module plus an owned partner stat (mod / stat). Never sold in the market.
+  { id: 'hellfire', name: 'Hellfire Swarm', cat: 'evolution', max: 1, weight: 7, mod: 'missiles', stat: 'crit', desc: () => 'Missiles: double the salvo, bigger blasts, and missile hits always crit.' },
+  { id: 'stormhalo', name: 'Storm Halo', cat: 'evolution', max: 1, weight: 7, mod: 'orbitals', stat: 'thrusters', desc: () => 'Orbit: +3 blades, a pulsing orbit radius and a wider bullet-shredding field.' },
+  { id: 'teslastorm', name: 'Tesla Storm', cat: 'evolution', max: 1, weight: 7, mod: 'arc', stat: 'capacitor', desc: () => 'Arc: fires twice as often, +3 chains, and never stops during your ultimate.' },
+  { id: 'annihilator', name: 'Annihilator', cat: 'evolution', max: 1, weight: 7, mod: 'rail', stat: 'pierce', desc: () => 'Rail: a huge beam, twice as often, leaving a burning afterglow.' },
 ];
 
 export const CAT_COLORS = {
@@ -67,12 +85,18 @@ export const CAT_COLORS = {
   stat: '#ffe14d',
   defense: '#ff4d6d',
   bonus: '#7dff6b',
+  evolution: '#ffb300',
 };
 
 const byId = new Map(UPGRADES.map((u) => [u.id, u]));
 export const upgradeById = (id) => byId.get(id);
 
-export function moduleCount(p) {
+// An evolution is offered once its module is maxed, its partner stat is owned and it has not been taken.
+function evolutionReady(p, u) {
+  return u.cat === 'evolution' && !p.up[u.id] && (p.up[u.mod] || 0) >= byId.get(u.mod).max && (p.up[u.stat] || 0) >= 1;
+}
+
+function moduleCount(p) {
   let n = 0;
   for (const u of UPGRADES) if (u.cat === 'module' && (p.up[u.id] || 0) > 0) n++;
   return n;
@@ -84,7 +108,7 @@ export function recomputeStats(p) {
   const w = WEAPONS[p.ship.weapon];
   const st = p.st;
   st.mainLv = 1 + lv('main');
-  st.dmg = 1 + 0.15 * lv('power');
+  st.dmg = (1 + 0.15 * lv('power')) * (p.dmgMod || 1); // dmgMod: Overcharged Reactor event
   st.rate = 1 + 0.12 * lv('rate');
   st.crit = 0.07 * lv('crit');
   st.pierce = (w.pierce || 0) + lv('pierce');
@@ -93,9 +117,19 @@ export function recomputeStats(p) {
   st.magnet = 80 * (1 + 0.55 * lv('magnet'));
   st.odGain = 1 + 0.25 * lv('capacitor');
   st.odDur = 6 + lv('capacitor');
-  st.maxHp = p.ship.hp + lv('hull');
+  st.maxHp = Math.max(1, p.ship.hp + lv('hull') + (p.hullMod || 0)); // hullMod: dock reinforcement (+) / contraband (-)
   st.shieldInterval = lv('aegis') ? 16 - 3 * lv('aegis') : 0;
   st.maxCharges = p.ship.dashes + lv('dashes');
+  // Neutral defaults for fields only parts / pilots touch (attract mode and later steps rely on these).
+  st.xpMul = 1;
+  st.creditMul = 1;
+  st.grazeR = 1;
+  st.grazeOd = 1;
+  st.dashDur = 1;
+  st.critMul = 2.5;
+  applyParts(st, p);
+  applyPassives(st, p);
+  st.maxHp = Math.max(1, st.maxHp);
   p.maxHp = st.maxHp;
   p.maxCharges = st.maxCharges;
 }
@@ -117,13 +151,15 @@ export function applyUpgrade(p, id, G) {
   if (id === 'dashes') p.charges = Math.min(p.maxCharges, p.charges + 1);
 }
 
-// Build a draft of 3 choices. `kind` is 'level' or 'sector'.
-export function rollDraft(p, kind) {
+// Rolls up to n distinct upgrade ids from the current pool (weighted). `kind` is 'level' or 'sector'.
+// `evo` lets eligible Evolutions into the pool (drafts only; the Black Market and Contraband leave it off).
+export function rollUpgradeIds(p, kind, n = 3, rng = Math.random, evo = false) {
   const mods = moduleCount(p);
   const pool = UPGRADES.filter((u) => {
     const l = p.up[u.id] || 0;
+    if (u.cat === 'evolution') return evo && evolutionReady(p, u);
     if (l >= u.max) return false;
-    if (u.cat === 'module' && l === 0 && mods >= MAX_MODULES) return false;
+    if (u.cat === 'module' && l === 0 && mods >= p.st.maxModules) return false;
     return true;
   });
   const choices = [];
@@ -140,11 +176,18 @@ export function rollDraft(p, kind) {
     return wgt;
   };
   const remaining = [...pool];
-  while (choices.length < 3 && remaining.length) {
-    const u = weightedPick(remaining, weight);
+  while (choices.length < n && remaining.length) {
+    const u = weightedPick(remaining, weight, rng);
     choices.push(u.id);
     remaining.splice(remaining.indexOf(u), 1);
+    if (u.cat === 'evolution') for (let i = remaining.length - 1; i >= 0; i--) if (remaining[i].cat === 'evolution') remaining.splice(i, 1); // at most one per draft
   }
+  return choices;
+}
+
+// Build a draft of 3 choices. `kind` is 'level' or 'sector'.
+export function rollDraft(p, kind) {
+  const choices = rollUpgradeIds(p, kind, 3, Math.random, true);
   if (choices.length < 3 && p.hp < p.maxHp) choices.push('repair');
   while (choices.length < 3) choices.push('credits');
   return choices;
@@ -159,5 +202,5 @@ export function cardInfo(p, id) {
   }
   const u = byId.get(id);
   const lv = p.up[id] || 0;
-  return { id, name: u.name, cat: u.cat, icon: ICONS[id], desc: u.desc(lv + 1), lv, max: u.max };
+  return { id, name: u.name, cat: u.cat, icon: ICONS[id], desc: u.desc(lv + 1), lv, max: u.max, evo: u.cat === 'evolution' };
 }
