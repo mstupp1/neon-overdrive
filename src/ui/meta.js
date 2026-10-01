@@ -63,7 +63,7 @@ export const meta = {
     document.querySelectorAll('#sys-map .sys').forEach((b) => b.classList.toggle('sel', +b.dataset.i === i));
     const boss = bossById(s.boss);
     $('#sys-detail').style.setProperty('--c', hsl(s.hue));
-    $('#sys-detail').innerHTML = `<h4>${s.name}</h4><p>${s.blurb}</p><div class="sys-meta"><span>${s.rows + 1} SECTORS</span><span>BOSS · ${boss.name}</span></div>`;
+    $('#sys-detail').innerHTML = `<h4>${s.name}</h4><p>${s.blurb}</p><div class="sys-meta"><span>${s.rows + 1} SECTORS</span><span>BOSS · ${boss.name}</span>${s.supply ? `<span>SUPPLY DROP ×${s.supply}</span>` : ""}</div>`;
     return $('#launch-btn');
   },
 
@@ -170,8 +170,10 @@ export const meta = {
       b.dataset.act = 'buy';
       b.dataset.i = i;
       b.style.setProperty('--c', CAT_COLORS[o.cat] || '#ffd24a');
-      const dis = o.sold || !!o.blocked || w < o.price;
-      b.disabled = dis;
+      const cant = !o.sold && !o.blocked && w < o.price; // unaffordable: dimmed but still focusable
+      const dis = o.sold || !!o.blocked || cant;
+      b.disabled = o.sold || !!o.blocked;
+      if (cant) b.setAttribute('aria-disabled', 'true');
       const status = o.sold ? 'SOLD' : o.blocked || (w < o.price ? 'NEED ' + (o.price - w) : '');
       b.innerHTML = `<div class="card-icon">${o.icon}</div><div><div class="card-top"><span class="card-name">${o.name}</span><span class="card-tag">${o.tag}</span></div><div class="card-desc">${o.desc}</div></div><div class="price${dis ? ' dim' : ''}"><span>${o.sold ? '' : coin}<b>${o.sold ? 'SOLD' : o.price}</b></span>${status && !o.sold ? `<i>${status}</i>` : ''}</div>`;
       wrap.appendChild(b);

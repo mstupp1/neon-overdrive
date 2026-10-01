@@ -1231,13 +1231,6 @@ input[type='range']::-moz-range-thumb {
     display: block;
 }
 
-.node-body {
-    max-width: 20em;
-    text-align: center;
-    color: var(--dim);
-    line-height: 1.3;
-}
-
 #scr-extract .screen-title {
     color: var(--green);
     text-shadow: 0 0 0.35em var(--green), 0 0 1.2em rgba(125, 255, 107, 0.5);
@@ -1302,6 +1295,16 @@ input[type='range']::-moz-range-thumb {
     filter: grayscale(0.7) brightness(0.7);
     transform: none !important;
     box-shadow: none !important;
+}
+
+/* Unaffordable but readable: dimmed, still focusable (keyboard / pad). */
+.card[aria-disabled="true"] {
+    cursor: default;
+    filter: grayscale(0.6) brightness(0.8);
+}
+
+.card[aria-disabled="true"].focus {
+    filter: grayscale(0.3) brightness(0.95);
 }
 
 .price {
@@ -1722,6 +1725,11 @@ input[type='range']::-moz-range-thumb {
 .swatch[disabled] {
     opacity: 0.35;
     pointer-events: none;
+}
+
+.swatch[aria-disabled="true"],
+.btn[aria-disabled="true"] {
+    opacity: 0.55;
 }
 
 .paints {
@@ -2167,7 +2175,8 @@ input[type='range']::-moz-range-thumb {
 }
 
 .comms.live {
-    top: calc(var(--safe-top) + 5.7em);
+    /* Lower-middle, below the boss title card: the boss and the HUD live at the top, the ship at the bottom. */
+    top: 63%;
     bottom: auto;
     align-items: flex-start;
 }

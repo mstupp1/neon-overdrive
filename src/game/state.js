@@ -14,10 +14,9 @@ export const view = {
 
 export const G = {
   mode: 'attract', // 'attract' (bot demo behind menus) | 'run'
-  screen: 'title', // title | ships | settings | help | play | pause | draft | gameover
+  screen: 'title', // title | campaign | hangar | parts | pilot | help | settings | route | market | dock | event | comms | play | pause | pause-settings | draft | extract | gameover
   time: 0, // simulation time (seconds)
   realTime: 0,
-  timeScale: 1,
   slowmo: 0, // seconds of slow motion remaining
   hitstop: 0,
 
@@ -45,6 +44,7 @@ export const G = {
   runTime: 0,
   rerolls: 1,
   pendingLevels: 0,
+  supplyLeft: 0, // campaign supply-drop drafts still to claim at system start
   director: null,
 
   shake: 0,
@@ -56,7 +56,10 @@ export const G = {
   pulseColor: '#ff3df2',
   enemyTimeScale: 1, // Phase Shift: scales enemies, bosses, enemy bullets and enemy beams (not the player)
 
-  stats: null, // end-of-run summary
+  run: null, // campaign / endless run record (see agents.md); null in attract
+  autopilot: false, // debug: the bot flies the player
+  vacuum: false, // sector clear: pickups fly to the player
+  deathT: 0, // delay before the game-over screen
 };
 
 export function sectorDifficulty(sector, loop) {

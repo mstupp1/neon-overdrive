@@ -91,14 +91,12 @@ export const CAT_COLORS = {
 const byId = new Map(UPGRADES.map((u) => [u.id, u]));
 export const upgradeById = (id) => byId.get(id);
 
-export const evolved = (p, id) => (p.up[id] || 0) > 0;
-
 // An evolution is offered once its module is maxed, its partner stat is owned and it has not been taken.
-export function evolutionReady(p, u) {
+function evolutionReady(p, u) {
   return u.cat === 'evolution' && !p.up[u.id] && (p.up[u.mod] || 0) >= byId.get(u.mod).max && (p.up[u.stat] || 0) >= 1;
 }
 
-export function moduleCount(p) {
+function moduleCount(p) {
   let n = 0;
   for (const u of UPGRADES) if (u.cat === 'module' && (p.up[u.id] || 0) > 0) n++;
   return n;

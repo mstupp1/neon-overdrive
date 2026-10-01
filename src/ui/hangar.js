@@ -83,10 +83,11 @@ function render() {
   const act = $('#hs-act');
   act.className = 'btn primary hs-act';
   act.disabled = false;
+  act.setAttribute('aria-disabled', 'false');
   if (!owned) {
     const afford = profile.credits >= ship.price;
     act.innerHTML = `BUY ${coin}${fmt(ship.price)}`;
-    act.disabled = !afford;
+    act.setAttribute('aria-disabled', afford ? 'false' : 'true'); // dim but focusable
     act.dataset.mode = 'buy';
     if (!afford) act.innerHTML += `<small>NEED ${fmt(ship.price - profile.credits)}</small>`;
   } else if (sel) {
@@ -111,8 +112,9 @@ function render() {
     const has = ownsPaint(ship.id, i);
     const on = owned && has && (profile.paint[ship.id] || 0) === i;
     const afford = profile.credits >= pt.price;
-    const dis = !owned || (!has && !afford);
-    return `<button class="swatch${on ? ' on' : ''}${has ? '' : ' buy'}" data-act="hpaint" data-i="${i}" ${dis ? 'disabled' : ''} style="--c:${pt.color}" aria-label="${pt.name}"><span class="sw-dot"></span><b>${pt.name}</b><i>${on ? 'EQUIPPED' : has ? 'OWNED' : coin + pt.price}</i></button>`;
+    const dis = !owned;
+    const cant = owned && !has && !afford;
+    return `<button class="swatch${on ? ' on' : ''}${has ? '' : ' buy'}" data-act="hpaint" data-i="${i}" ${dis ? 'disabled' : ''}${cant ? ' aria-disabled="true"' : ''} style="--c:${pt.color}" aria-label="${pt.name}"><span class="sw-dot"></span><b>${pt.name}</b><i>${on ? 'EQUIPPED' : has ? 'OWNED' : coin + pt.price}</i></button>`;
   }).join('');
 
   renderStats(ship, owned);
@@ -155,9 +157,10 @@ function showParts(focus) {
     b.dataset.act = 'hpart';
     b.dataset.id = part.id;
     b.style.setProperty('--c', info.color);
-    b.disabled = !owned && !afford;
+    const cant = !owned && !afford; // dim but focusable
+    if (cant) b.setAttribute('aria-disabled', 'true');
     const right = on ? '<span><b class="eq">UNEQUIP</b></span>' : owned ? '<span><b class="eq">EQUIP</b></span>' : `<span>${coin}<b>${fmt(part.price)}</b></span>${afford ? '' : `<i>NEED ${fmt(part.price - profile.credits)}</i>`}`;
-    b.innerHTML = `<div class="card-icon">${part.icon}</div><div><div class="card-top"><span class="card-name">${part.name}</span>${on ? '<span class="card-tag">ON</span>' : ''}</div><div class="card-desc">${part.desc}</div></div><div class="price${b.disabled ? ' dim' : owned ? ' own' : ''}">${right}</div>`;
+    b.innerHTML = `<div class="card-icon">${part.icon}</div><div><div class="card-top"><span class="card-name">${part.name}</span>${on ? '<span class="card-tag">ON</span>' : ''}</div><div class="card-desc">${part.desc}</div></div><div class="price${cant ? ' dim' : owned ? ' own' : ''}">${right}</div>`;
     wrap.appendChild(b);
   }
   let el = focus;

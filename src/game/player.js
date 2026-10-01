@@ -13,7 +13,6 @@ import { particle, explosion, ring, sparks, floatText, addShake, flash, hitstop,
 import { sfx } from '../core/audio.js';
 import { input, readDirection } from '../core/input.js';
 import { botControl } from './bot.js';
-import { damageEnemy } from './enemies.js';
 import { vacuumAll } from './pickups.js';
 import { dashNova, resetModules } from './modules.js';
 import { CLASSES, activeClass, equippedPassives, initPilot, castUlt, boosted, phasing, fortressOn, bloodrush, onEliteKilled, updatePilot, spawnEchoes } from './pilot.js';

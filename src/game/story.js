@@ -5,6 +5,7 @@
 import { G } from './state.js';
 import { mulberry32 } from '../core/math.js';
 import { rollUpgradeIds, applyUpgrade, cardInfo, recomputeStats } from './upgrades.js';
+import { nodeLevel } from './campaign.js';
 
 // color: ECHO uses the active class colour (resolved in ui/comms.js).
 export const SPEAKERS = {
@@ -112,7 +113,7 @@ function makeCtx(rng = Math.random) {
   return {
     p: G.player, run, rng,
     scale: 1 + 0.5 * (((sys && sys.act) || 1) - 1), // credit scale per act, like the Black Market
-    lvl: sys ? sys.level + Math.max(0, run.row) * sys.step : 1,
+    lvl: sys ? nodeLevel(sys, Math.max(0, run.row)) : 1,
   };
 }
 
@@ -148,6 +149,7 @@ function grantUpgrades(c, n) {
     names.push(cardInfo(c.p, id).name);
     applyUpgrade(c.p, id, G);
   }
+  c.granted = names.length; // callers (Derelict Carrier) skip the hazard when nothing was installed
   if (!names.length) return `No room left to install anything. Salvaged ${payout(c, 120)} credits instead.`;
   return `Installed: ${names.join(', ')}.`;
 }
@@ -164,6 +166,7 @@ export const EVENTS = [
         label: 'Strip the hull', tag: 'RISKY', desc: '+2 random upgrade levels. The next fight gets a hazard modifier.',
         effect(c) {
           const r = grantUpgrades(c, 2);
+          if (!c.granted) return r; // the pool was dry: credits only, no hazard curse
           const m = curse(c, RISKY_MODS[Math.floor(c.rng() * RISKY_MODS.length)]);
           return `${r} Alarms tripped: next fight is ${modName(m)}.`;
         },
@@ -244,7 +247,7 @@ export const EVENTS = [
       {
         label: 'Crack it open', tag: 'RISKY', desc: '50/50: a big credit haul, or an ambush (an elite fight with a hazard).',
         effect(c) {
-          if (c.rng() < 0.5) return `Jackpot. +${payout(c, 220 + 20 * c.lvl)} credits.`;
+          if (c.rng() < 0.5) return `Jackpot. +${payout(c, 240)} credits.`;
           c.run.ambush = true;
           const m = curse(c, RISKY_MODS[Math.floor(c.rng() * RISKY_MODS.length)]);
           return `Trap! The next fight is an ELITE ambush (${modName(m)}).`;

@@ -63,7 +63,7 @@ export function unequipSlot(shipId, slot) {
 }
 
 // Applies the ship's equipped paint to its baked sprites (one ship only; cheap).
-export function applyPaint(ship) {
+function applyPaint(ship) {
   const p = activePaint(profile, ship);
   rebuildShipSprite(ship, p.color, p.bullet);
 }

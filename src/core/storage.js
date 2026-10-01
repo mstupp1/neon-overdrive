@@ -32,7 +32,6 @@ const DEFAULTS = {
   paint: {}, // shipId → palette index
   paintsOwned: {}, // shipId → [owned palette indices] (0 = stock, always owned)
   pilot: { cls: 'striker', passives: {} }, // passives: cls → [ids]
-  endlessBest: 0,
 };
 
 const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v);
@@ -63,8 +62,26 @@ function migrate(old) {
   return grantShips(p);
 }
 
+// Hand-edited / corrupt saves: coerce every collection and counter to a safe shape (types are only checked shallowly by merge).
+function sanitize(p) {
+  const strs = (a) => (Array.isArray(a) ? a.filter((x) => typeof x === 'string') : []);
+  const num = (v) => (Number.isFinite(v) ? Math.max(0, v) : 0);
+  p.credits = num(p.credits);
+  p.rankXp = num(p.rankXp);
+  p.ownedParts = strs(p.ownedParts);
+  p.ownedShips = strs(p.ownedShips);
+  p.campaign.cleared = strs(p.campaign.cleared);
+  if (!isObj(p.campaign.seenStory)) p.campaign.seenStory = {};
+  for (const k of Object.keys(p.equip)) if (!isObj(p.equip[k])) delete p.equip[k];
+  for (const k of Object.keys(p.paint)) if (!Number.isFinite(p.paint[k])) delete p.paint[k];
+  for (const k of Object.keys(p.paintsOwned)) p.paintsOwned[k] = Array.isArray(p.paintsOwned[k]) ? p.paintsOwned[k].filter(Number.isFinite) : [];
+  for (const k of Object.keys(p.pilot.passives)) p.pilot.passives[k] = strs(p.pilot.passives[k]);
+  return p;
+}
+
 const grantShips = (p) => {
   // Union: legacy unlock conditions top up ownership but never remove bought ships.
+  sanitize(p);
   p.ownedShips = [...new Set([...p.ownedShips, ...SHIPS.filter((s) => (s.unlock ? isUnlocked(s, p) : !s.price)).map((s) => s.id)])];
   return p;
 };

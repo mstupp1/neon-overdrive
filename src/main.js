@@ -23,7 +23,6 @@ import { buyShip, buyPart, equipPart, unequipSlot, setPaint, selectShip, applyAl
 import { SYSTEMS, systemById, generateRoute, nodeSpec, reachableNodes, routeNode, systemUnlocked } from './game/campaign.js';
 import { rand, pick } from './core/math.js';
 import { STORY, eventFor, eventById, startEvent, resolveChoice, choiceBlocked } from './game/story.js';
-import { bossById } from './game/bosses.js';
 import { rollMarket, buyOffer, dockRepair, dockReinforce, settleRun, rankFor } from './game/economy.js';
 
 const app = document.getElementById('app');
@@ -79,11 +78,16 @@ window.addEventListener('orientationchange', () => setTimeout(layout, 200));
 
 // --- World lifecycle -----------------------------------------------------------------
 
+function hideBossCard() {
+  clearTimeout(bossCardT);
+  bossCard.classList.remove('show');
+}
+
 function newWorld(mode, shipDef, run = null) {
   G.mode = mode;
   G.run = run;
   comms.clear();
-  bossCard.classList.remove('show');
+  hideBossCard();
   if (run) Object.assign(run, { wallet: 0, earned: 0, frac: 0, curse: null, ambush: false, bonusXp: 0, events: [] });
   G.time = 0;
   G.runTime = 0;
@@ -106,6 +110,8 @@ function newWorld(mode, shipDef, run = null) {
   G.bossKills = 0;
   G.rerolls = 1;
   G.pendingLevels = 0;
+  G.supplyLeft = 0;
+  afterDraft = null;
   G.deathT = 0;
   G.slowmo = 0;
   G.hitstop = 0;
@@ -147,7 +153,15 @@ function launchSystem(sys) {
   saveProfile();
   const route = generateRoute(sys, Math.floor(Math.random() * 2147483647));
   newWorld('run', ship, { mode: 'campaign', system: sys, route, row: -1, nodeId: null, sectors: 0, victory: false, visited: [] });
-  blockingStory('intro:' + sys.id, STORY.systems[sys.id].intro, {}, showRoute);
+  blockingStory('intro:' + sys.id, STORY.systems[sys.id].intro, {}, () => startSupply(sys.supply || 0));
+}
+
+// Later systems open with a supply drop: salvaged tech so a fresh ship is not outmatched at row 0.
+function startSupply(n) {
+  G.supplyLeft = n;
+  afterDraft = 'route';
+  if (n > 0) openDraft('supply');
+  else showRoute();
 }
 
 // --- Story --------------------------------------------------------------------------------
@@ -170,7 +184,10 @@ function storyLines(key, lines, { once = true, short = null } = {}) {
 // overlay: keep the current menu behind the box instead of freezing the world on G.screen 'comms'.
 function blockingStory(key, lines, opts, done) {
   const ls = storyLines(key, lines, opts);
-  if (!ls) return done();
+  if (!ls) {
+    comms.clear(); // e.g. a live pre-boss line still up when the boss dies
+    return done();
+  }
   if (!opts.overlay) {
     G.screen = 'comms';
     ui.hide();
@@ -283,7 +300,7 @@ function buy(btn) {
   sfx.levelUp();
   const cards = () => [...document.querySelectorAll('#market-cards .card')];
   meta.renderMarket(G, marketOffers, false);
-  const next = cards().find((c, i) => i >= +btn.dataset.i && !c.disabled) || cards().find((c) => !c.disabled) || document.getElementById('market-leave');
+  const next = cards().find((c, i) => i >= +btn.dataset.i && !c.disabled && !c.hasAttribute('aria-disabled')) || cards().find((c) => !c.disabled && !c.hasAttribute('aria-disabled')) || document.getElementById('market-leave');
   ui.show('market', { focus: next });
 }
 
@@ -309,6 +326,8 @@ function extract() {
 }
 
 function finishExtract(final) {
+  comms.clear();
+  hideBossCard();
   const p = G.player;
   const r = G.run;
   r.victory = true;
@@ -365,9 +384,9 @@ function pause() {
 
 function openDraft(kind) {
   draftKind = kind;
-  draftChoices = rollDraft(G.player, kind);
+  draftChoices = rollDraft(G.player, kind === 'supply' ? 'sector' : kind);
   G.screen = 'draft';
-  ui.renderDraft(G.player, draftChoices, kind, G.rerolls, pickUpgrade);
+  ui.renderDraft(G.player, draftChoices, kind, G.rerolls, pickUpgrade, G.supplyLeft);
   ui.show('draft', { lock: 420 });
   pauseBtn.hidden = true;
   music.setDuck(0.6);
@@ -377,6 +396,7 @@ function openDraft(kind) {
 function pickUpgrade(id) {
   applyUpgrade(G.player, id, G);
   if (draftKind === 'level') G.pendingLevels = Math.max(0, G.pendingLevels - 1);
+  if (draftKind === 'supply' && --G.supplyLeft > 0) return openDraft('supply');
   G.player.iframes = Math.max(G.player.iframes, 0.5);
   if (draftKind === 'sector') {
     if (G.run.mode === 'campaign') afterDraft = 'route';
@@ -413,6 +433,7 @@ function onSectorClear() {
 
 function gameOver() {
   comms.clear();
+  hideBossCard();
   const p = G.player;
   const newBest = G.score > profile.best;
   const { unlocked, reward } = bankRun();
@@ -517,8 +538,8 @@ ui.init({
   reroll() {
     if (G.rerolls <= 0) return;
     G.rerolls--;
-    draftChoices = rollDraft(G.player, draftKind);
-    ui.renderDraft(G.player, draftChoices, draftKind, G.rerolls, pickUpgrade);
+    draftChoices = rollDraft(G.player, draftKind === 'supply' ? 'sector' : draftKind);
+    ui.renderDraft(G.player, draftChoices, draftKind, G.rerolls, pickUpgrade, G.supplyLeft);
     ui.show('draft', { lock: 200 });
   },
   fullscreen() {
@@ -646,7 +667,7 @@ function frame(now) {
   G.flash = Math.max(0, G.flash - raw * 2.5);
   updateBanner(raw);
   const boost = G.player && (G.player.odT > 0 || G.player.dashT > 0) ? 3 : G.director && G.director.state === 'clear' ? 4 : 1;
-  const dk = !!(G.mode === 'run' && G.director.diff.blackout && G.director.state !== 'clear' && G.director.state !== 'await');
+  const dk = !!(G.mode === 'run' && (G.screen === 'play' || G.screen === 'pause' || G.screen === 'pause-settings') && G.director.diff.blackout && G.director.state !== 'clear' && G.director.state !== 'await'); // not on result screens
   bg.setDark(dk);
   vignette.classList.toggle('dark', dk);
   bg.update(simulating() ? raw : raw * 0.25, boost);

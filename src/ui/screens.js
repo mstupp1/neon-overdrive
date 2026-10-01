@@ -27,6 +27,8 @@ export const ui = {
         const btn = e.target.closest('[data-act]');
         if (!btn || btn.disabled) return;
         if (performance.now() < lockUntil) return;
+        // Unaffordable items stay focusable (aria-disabled) so their price and text can be read with keys / a pad.
+        if (btn.getAttribute('aria-disabled') === 'true') return sfx.ui();
         sfx.select();
         handlers[btn.dataset.act]?.(btn);
       });
@@ -62,7 +64,14 @@ export const ui = {
   update() {
     if (!current) return;
     const items = focusables();
-    if (!items.length) return;
+    if (!items.length) {
+      // Nothing focusable: back must still escape the screen.
+      if (input.consume('back')) {
+        const act = screens[current].dataset.back;
+        if (act && handlers[act]) handlers[act]();
+      }
+      return;
+    }
     const el = items[focusIdx];
     const isRange = el && el.tagName === 'INPUT' && el.type === 'range';
     const isRow = el && el.classList.contains('set-row') && el.querySelector('input[type=range]');
@@ -111,10 +120,10 @@ export const ui = {
   },
 
   // --- Draft --------------------------------------------------------------------
-  renderDraft(player, choices, kind, rerolls, onPick) {
-    $('#draft-title').textContent = kind === 'sector' ? 'SECTOR CLEAR' : 'LEVEL UP';
-    $('#draft-title').style.color = kind === 'sector' ? '#7dff6b' : '#fff';
-    $('#draft-sub').textContent = kind === 'sector' ? 'Claim a reward for the next sector' : `Level ${player.level} — choose an upgrade`;
+  renderDraft(player, choices, kind, rerolls, onPick, left = 0) {
+    $('#draft-title').textContent = kind === 'sector' ? 'SECTOR CLEAR' : kind === 'supply' ? 'SUPPLY DROP' : 'LEVEL UP';
+    $('#draft-title').style.color = kind === 'sector' ? '#7dff6b' : kind === 'supply' ? '#ffd24a' : '#fff';
+    $('#draft-sub').textContent = kind === 'sector' ? 'Claim a reward for the next sector' : kind === 'supply' ? `Salvaged tech for this system — ${left} to claim` : `Level ${player.level} — choose an upgrade`;
     const wrap = $('#draft-cards');
     wrap.innerHTML = '';
     wrap.classList.toggle('no-keys', input.device === 'touch');

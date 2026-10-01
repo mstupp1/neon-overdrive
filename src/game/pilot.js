@@ -20,8 +20,8 @@ import { sfx } from '../core/audio.js';
 
 const svg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 
-export const DOME_R = 85;
-export const PHASE_SCALE = 0.4;
+const DOME_R = 85;
+const PHASE_SCALE = 0.4;
 export const MAX_PASSIVES = 2;
 const OVERFLOW_MODULES = 5;
 
@@ -68,11 +68,10 @@ const byClass = new Map(CLASSES.map((c) => [c.id, c]));
 const byPassive = new Map();
 for (const c of CLASSES) for (const ps of c.passives) byPassive.set(ps.id, ps);
 export const classById = (id) => byClass.get(id);
-export const passiveById = (id) => byPassive.get(id);
 
 // --- Profile: rank gating, class, equipped passives ---------------------------------------
 
-export const currentRank = () => rankFor(profile.rankXp).rank;
+const currentRank = () => rankFor(profile.rankXp).rank;
 export const classUnlocked = (c) => currentRank() >= c.unlockRank;
 export const passiveUnlocked = (c, ps) => classUnlocked(c) && currentRank() >= ps.rank;
 
@@ -185,7 +184,7 @@ function blastNear(p, radius) {
 }
 
 // Each takes the caster (the player; step 6's ECLIPSE can call these with a boss-shaped caster).
-export const ULTS = {
+const ULTS = {
   striker(p) {
     G.pulse = 0.001;
     G.pulseMax = 1100;
