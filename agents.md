@@ -111,7 +111,7 @@ Title PLAY → `scr-campaign` (select system, LAUNCH / HANGAR + PILOT pair / END
 
 - Everything is sized in `em` off `#app`'s font-size (16px x playfield scale); `button { font: inherit }` keeps buttons on that scale too. Keep menu text at 0.72em or larger.
 - Menus never scroll: `ui.show` calls `fit(screen)`, which shrinks the screen's font-size (down to `MIN_FIT` 0.72) until its content fits, and `ui.update` re-checks every 250 ms (content changes, resizes). Scrollbars are hidden as a last resort.
-- Look: square corners, thin neon borders and corner brackets drawn by a shared `::before` (colour `--fc`, defaults to the element's `--c`); focus / hover pops the brackets outward. New panels or buttons join the selector lists in the "HUD frames" section. No `clip-path` cut corners.
+- Look: square (2px) corners and thin neon borders; the focused item brightens its border and glow, and buttons add a sliding arrow. No corner brackets on containers and no `clip-path` cut corners (Myles rejected both).
 - How to Play is tabbed (`data-act="helpTab"`, blocks with matching `data-tab`).
 
 ## Story, events and system themes (step 7a)
