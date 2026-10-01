@@ -12,6 +12,8 @@ The game is a set of ES modules (see README "Project layout"). All mutable world
 | `view` | Logical size, scale, safe-area insets, quality |
 | `profile` | Persisted records/settings |
 | `startRun(shipId)` | Start a run (`vector`, `needle`, `bulwark`, `phantom`) |
+| `startEndless(shipId)` | Alias of `startRun` (endless mode) |
+| `startSpec(spec, shipId?)` | Start a run, then `startSector` with a sector spec `{index, level, loop, boss, elite, modifiers[], hue, name, duration}` (missing fields default to `endlessSpec(1)`) |
 | `toTitle()` | Back to title/attract mode |
 | `applyUpgrade(id)` | Grant an upgrade (ids in `src/game/upgrades.js`) |
 | `simulate(seconds, pickFn?)` | Fast-forward synchronously at 60 Hz, auto-picking drafts (`pickFn(choices) → id`). Returns a summary. |

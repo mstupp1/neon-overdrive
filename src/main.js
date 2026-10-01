@@ -9,7 +9,7 @@ import { bg } from './render/background.js';
 import { drawHud, updateBanner } from './render/hud.js';
 import { SHIPS, shipById, isUnlocked } from './game/ships.js';
 import { createPlayer } from './game/player.js';
-import { createDirector, startSector, nextSector } from './game/director.js';
+import { createDirector, startSector, nextSector, endlessSpec } from './game/director.js';
 import { rollDraft, applyUpgrade } from './game/upgrades.js';
 import { step, renderWorld } from './game/world.js';
 import { ui } from './ui/screens.js';
@@ -89,7 +89,7 @@ function newWorld(mode, shipDef) {
   G.director = createDirector();
   G.director.onClear = onSectorClear;
   G.player = createPlayer(shipDef);
-  startSector(1);
+  startSector(endlessSpec(1));
   setSfxMuted(mode === 'attract');
 }
 
@@ -448,6 +448,12 @@ function boot() {
 window.NEON = {
   G, view, profile, input, toTitle,
   startRun: (id) => startRun(shipById(id || 'vector')),
+  startEndless: (id) => startRun(shipById(id || 'vector')),
+  // Start a run on an arbitrary sector spec (see endlessSpec in director.js).
+  startSpec(spec, id) {
+    startRun(shipById(id || 'vector'));
+    startSector({ ...endlessSpec(1), ...spec });
+  },
   applyUpgrade: (id) => applyUpgrade(G.player, id, G),
   simulate(seconds, pickFn = (choices) => pick(choices)) {
     const dt = 1 / 60;

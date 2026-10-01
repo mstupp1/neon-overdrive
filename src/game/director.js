@@ -1,9 +1,10 @@
 // Sector flow and wave spawning: intro → waves → (boss) → clear → reward draft.
 
 import { G, view, sectorDifficulty, sectorInfo, isBossSector } from './state.js';
+import { applyModifiers, patternMul } from './modifiers.js';
 import { rand, chance, weightedPick } from '../core/math.js';
 import { spawnEnemy } from './enemies.js';
-import { spawnBoss, bossFor } from './bosses.js';
+import { spawnBoss, bossById, bossIndex, BOSS_IDS } from './bosses.js';
 import { banner, floatText } from './fx.js';
 import { vacuumAll } from './pickups.js';
 import { bg } from '../render/background.js';
@@ -12,7 +13,7 @@ import { sfx, music } from '../core/audio.js';
 export function createDirector() {
   return {
     state: 'intro', t: 0, sectorT: 0, duration: 40, spawnT: 0, queue: [],
-    diff: sectorDifficulty(1, 0), last: null, progress: 0, onClear: null,
+    diff: sectorDifficulty(1, 0), spec: null, last: null, progress: 0, onClear: null,
   };
 }
 
@@ -156,26 +157,43 @@ const PATTERNS = [
   },
 ];
 
-export function startSector(sector) {
+// Spec for endless mode: sector n → 9-sector cycle (boss every 3rd) that loops harder.
+export function endlessSpec(n) {
+  const local = ((n - 1) % 9) + 1;
+  const info = sectorInfo(n);
+  const base = 36 + Math.min(6, local) * 4;
+  const boss = isBossSector(local) ? BOSS_IDS[(Math.floor(local / 3) - 1) % BOSS_IDS.length] : null;
+  return {
+    index: n, level: local, loop: Math.floor((n - 1) / 9), boss, elite: false, modifiers: [],
+    hue: info.hue, name: info.name, duration: boss ? base * 0.7 : base,
+  };
+}
+
+export function startSector(spec) {
   const d = G.director;
-  G.sector = sector;
-  G.loop = Math.floor((sector - 1) / 9);
-  const local = ((sector - 1) % 9) + 1;
-  d.diff = sectorDifficulty(local, G.loop);
+  d.spec = spec;
+  G.sector = spec.index;
+  G.loop = spec.loop;
+  const diff = sectorDifficulty(spec.level, spec.loop);
+  diff.credits = 1;
+  diff.eliteBonus = 0;
+  if (spec.elite) {
+    diff.hp *= 1.1;
+    diff.eliteBonus = 0.12;
+  }
+  d.diff = applyModifiers(diff, spec.modifiers);
   d.state = 'intro';
   d.t = 0;
   d.sectorT = 0;
   d.queue.length = 0;
   d.spawnT = 1.4;
   d.progress = 0;
-  const base = 36 + Math.min(6, local) * 4;
-  d.duration = isBossSector(local) ? base * 0.7 : base;
-  const info = sectorInfo(sector);
-  bg.setHue(info.hue);
+  d.duration = spec.duration;
+  bg.setHue(spec.hue);
   G.vacuum = false;
   if (G.mode === 'run') {
-    banner(`SECTOR ${sector}`, info.name + (G.loop ? `  ·  LOOP ${G.loop + 1}` : ''), `hsl(${info.hue},100%,70%)`, 2.6);
-    music.setSet(local >= 7 ? 'late' : 'normal');
+    banner(`SECTOR ${spec.index}`, spec.name + (spec.loop ? `  ·  LOOP ${spec.loop + 1}` : ''), `hsl(${spec.hue},100%,70%)`, 2.6);
+    music.setSet(spec.level >= 7 ? 'late' : 'normal');
   }
 }
 
@@ -200,7 +218,8 @@ export function updateDirector(dt) {
     }
   }
 
-  const local = ((G.sector - 1) % 9) + 1;
+  const spec = d.spec;
+  const local = spec.level;
   switch (d.state) {
     case 'intro':
       if (d.t > 1.2) d.state = 'waves';
@@ -211,10 +230,10 @@ export function updateDirector(dt) {
       d.spawnT -= dt;
       const alive = aliveEnemies();
       if (alive === 0 && !d.queue.length) d.spawnT = Math.min(d.spawnT, 0.4);
-      const cap = 16 + local * 2 + G.loop * 6;
+      const cap = 16 + local * 2 + spec.loop * 6;
       if (d.spawnT <= 0 && alive < cap) {
-        const pool = PATTERNS.filter((p) => p.min <= local + G.loop * 9 && p.id !== d.last);
-        const pat = weightedPick(pool, (p) => p.w(local));
+        const pool = PATTERNS.filter((p) => p.min <= local + spec.loop * 9 && p.id !== d.last);
+        const pat = weightedPick(pool, (p) => p.w(local) * patternMul(spec.modifiers, p.id));
         d.last = pat.id;
         pat.run();
         d.spawnT = pat.cost * 1.35 * d.diff.spawn + rand(0, 0.5);
@@ -229,14 +248,14 @@ export function updateDirector(dt) {
       d.progress = 1;
       if ((aliveEnemies() === 0 && !d.queue.length) || d.t > 7) {
         d.t = 0;
-        if (isBossSector(local)) {
+        if (spec.boss) {
           d.state = 'warn';
           if (G.mode === 'run') {
-            const b = bossFor(local);
+            const b = bossById(spec.boss);
             banner('WARNING', `${b.name} · ${b.title.toUpperCase()}`, '#ff2e55', 3);
             G.warning = 3;
             sfx.warn();
-            music.bossTrack(Math.floor(local / 3) - 1);
+            music.bossTrack(bossIndex(spec.boss));
           }
         } else {
           sectorClear();
@@ -245,7 +264,7 @@ export function updateDirector(dt) {
       break;
     case 'warn':
       if (d.t > 3) {
-        spawnBoss(local, G.loop);
+        spawnBoss(spec.boss, spec.level, spec.loop);
         d.state = 'boss';
         d.t = 0;
       }
@@ -292,5 +311,5 @@ function sectorClear() {
 }
 
 export function nextSector() {
-  startSector(G.sector + 1);
+  startSector(endlessSpec(G.sector + 1));
 }

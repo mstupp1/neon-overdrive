@@ -58,7 +58,7 @@ export function spawnEnemy(type, x, y, opts = {}) {
   e.state = 'enter';
   e.parts = null;
   let hp = def.hp * d.hp;
-  if (opts.elite || (type !== 'swarm' && type !== 'mine' && G.sector + G.loop * 9 >= 2 && chance(0.04 + 0.008 * G.sector))) {
+  if (opts.elite || (type !== 'swarm' && type !== 'mine' && G.sector + G.loop * 9 >= 2 && chance(0.04 + 0.008 * G.sector + (d.eliteBonus || 0)))) {
     e.elite = true;
     hp *= 3.2;
     e.r *= 1.2;

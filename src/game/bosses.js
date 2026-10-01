@@ -17,13 +17,14 @@ const BOSSES = [
   { id: 'omega', name: 'OMEGA', title: 'Core Intelligence', hp: 17000, r: 36, color: '#3ff6ff', homeY: 210 },
 ];
 
-export function bossFor(sector) {
-  return BOSSES[(Math.floor(sector / 3) - 1) % BOSSES.length];
-}
+export const BOSS_IDS = BOSSES.map((b) => b.id);
+export const bossById = (id) => BOSSES.find((b) => b.id === id) || BOSSES[BOSSES.length - 1];
+// Music track index per boss (unknown ids fall back to the last).
+export const bossIndex = (id) => (BOSS_IDS.includes(id) ? BOSS_IDS.indexOf(id) : BOSSES.length - 1);
 
-export function spawnBoss(sector, loop) {
-  const def = bossFor(sector);
-  const hp = def.hp * Math.pow(3.2, loop) * (1 + 0.15 * Math.floor((sector - 1) / 9));
+export function spawnBoss(id, level, loop) {
+  const def = bossById(id);
+  const hp = def.hp * Math.pow(3.2, loop) * (1 + 0.15 * loop);
   const e = {
     type: 'boss', boss: true, kind: def.id, name: def.name, title: def.title,
     x: view.W / 2, y: -160, vx: 0, vy: 0, r: def.r, hp, maxHp: hp, color: def.color,
