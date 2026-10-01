@@ -134,6 +134,8 @@ const SHIP_SHAPES = {
   needle: [[0, -24], [5, -6], [9, 12], [3, 9], [0, 15], [-3, 9], [-9, 12], [-5, -6]],
   bulwark: [[0, -16], [10, -10], [19, 4], [19, 12], [8, 14], [0, 10], [-8, 14], [-19, 12], [-19, 4], [-10, -10]],
   phantom: [[0, -20], [4, -8], [18, -2], [8, 4], [12, 16], [0, 8], [-12, 16], [-8, 4], [-18, -2], [-4, -8]],
+  corsair: [[0, -21], [4, -7], [19, -12], [15, 4], [7, 6], [6, 14], [0, 9], [-6, 14], [-7, 6], [-15, 4], [-19, -12], [-4, -7]],
+  monolith: [[0, -22], [7, -15], [12, -15], [13, 10], [8, 17], [-8, 17], [-13, 10], [-12, -15], [-7, -15]],
 };
 
 // --- Build all sprites --------------------------------------------------------
@@ -163,6 +165,19 @@ function bulletSprite(sh, c) {
       g.beginPath(); poly([[0, -6], [3.5, 0], [0, 6], [-3.5, 0]])(g); g.fill();
       g.fillStyle = '#fff'; g.shadowBlur = 0;
       g.beginPath(); poly([[0, -3], [1.5, 0], [0, 3], [-1.5, 0]])(g); g.fill();
+    } else if (sh.weapon === 'ricochet') {
+      g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 8;
+      g.beginPath(); poly([[0, -9], [3, 0], [0, 7], [-3, 0]])(g); g.fill();
+      g.fillStyle = '#fff'; g.shadowBlur = 0;
+      g.beginPath(); poly([[0, -6], [1.2, 0], [0, 4], [-1.2, 0]])(g); g.fill();
+    } else if (sh.weapon === 'charge') {
+      // Soft orb (drawn ~8 units radius; scaled up by weapon level in firePrimary).
+      const grd = g.createRadialGradient(0, 0, 0, 0, 0, 9);
+      grd.addColorStop(0, '#ffffff'); grd.addColorStop(0.35, c); grd.addColorStop(1, withAlpha(c, 0));
+      g.fillStyle = grd;
+      g.beginPath(); g.arc(0, 0, 9, 0, TAU); g.fill();
+      g.strokeStyle = c; g.lineWidth = 1.2; g.shadowColor = c; g.shadowBlur = 6;
+      g.beginPath(); g.arc(0, 0, 6.5, 0, TAU); g.stroke();
     } else if (sh.weapon === 'phase') {
       g.strokeStyle = c; g.shadowColor = c; g.shadowBlur = 8; g.lineWidth = 3;
       g.beginPath(); g.arc(0, 4, 7, Math.PI * 1.15, Math.PI * 1.85); g.stroke();
@@ -188,6 +203,7 @@ export function buildSprites(ships) {
 
   // Player bullets ---------------------------------------------------------
   for (const sh of ships) S['pb_' + sh.id] = bulletSprite(sh, sh.bullet);
+  buildGearSpritesV2();
   S.pb_od = makeSprite(26, (g) => {
     g.fillStyle = '#fff'; g.shadowColor = '#ff3df2'; g.shadowBlur = 10;
     g.beginPath(); g.roundRect(-3, -10, 6, 20, 3); g.fill();
@@ -413,5 +429,59 @@ export function buildSprites(ships) {
     g.fillStyle = '#fff'; g.shadowColor = '#ff3df2'; g.shadowBlur = 8;
     g.fillRect(-11, -5, 22, 2.4);
     g.restore();
+  });
+}
+
+// --- Step 6b: Gravity Well, Reflector, Flak Burst and reflected-bullet sprites ----------------------------
+function buildGearSpritesV2() {
+  // Singularity core, radius ~50 at scale 1 (drawn rotated and scaled per frame).
+  S.gwell = makeSprite(120, (g) => {
+    const R = 52;
+    const grd = g.createRadialGradient(0, 0, 0, 0, 0, R);
+    grd.addColorStop(0, 'rgba(0,0,0,0.95)');
+    grd.addColorStop(0.3, 'rgba(20,4,40,0.8)');
+    grd.addColorStop(0.75, 'rgba(160,60,255,0.25)');
+    grd.addColorStop(1, 'rgba(160,60,255,0)');
+    g.fillStyle = grd;
+    g.beginPath(); g.arc(0, 0, R, 0, TAU); g.fill();
+    for (let i = 0; i < 3; i++) {
+      const a0 = (i / 3) * TAU;
+      glowStroke(g, '#b86bff', 2.2, 8, (c) => {
+        c.moveTo(Math.cos(a0) * 14, Math.sin(a0) * 14);
+        for (let t = 0.1; t <= 1; t += 0.1) c.lineTo(Math.cos(a0 + t * 2.2) * (14 + t * 34), Math.sin(a0 + t * 2.2) * (14 + t * 34));
+      }, 1);
+    }
+    glowStroke(g, '#e0b3ff', 1.8, 8, (c) => c.arc(0, 0, 9, 0, TAU), 1);
+  });
+  // Reflector bubble, ring radius 50 at scale 1.
+  S.reflect = makeSprite(120, (g) => {
+    const R = 50;
+    const grd = g.createRadialGradient(0, 0, R * 0.5, 0, 0, R);
+    grd.addColorStop(0, 'rgba(127,255,230,0)');
+    grd.addColorStop(1, 'rgba(127,255,230,0.3)');
+    g.fillStyle = grd;
+    g.beginPath(); g.arc(0, 0, R, 0, TAU); g.fill();
+    glowStroke(g, '#7fffe6', 2.6, 12, (c) => c.arc(0, 0, R, 0, TAU));
+  });
+  S.flak = makeSprite(20, (g) => {
+    g.fillStyle = '#ffcf6b'; g.shadowColor = '#ff8a3d'; g.shadowBlur = 8;
+    g.beginPath(); g.arc(0, 0, 4.2, 0, TAU); g.fill();
+    g.shadowBlur = 0; g.fillStyle = '#fff';
+    g.beginPath(); g.arc(0, 0, 2, 0, TAU); g.fill();
+  });
+  S.pb_refl = makeSprite(22, (g) => {
+    g.fillStyle = '#7fffe6'; g.shadowColor = '#7fffe6'; g.shadowBlur = 8;
+    g.beginPath(); g.arc(0, 0, 4.4, 0, TAU); g.fill();
+    g.shadowBlur = 0; g.fillStyle = '#fff';
+    g.beginPath(); g.arc(0, 0, 2.2, 0, TAU); g.fill();
+  });
+  // Annihilator afterglow strip (stretched vertically per frame).
+  S.afterglow = makeSprite(24, (g) => {
+    const grd = g.createLinearGradient(-12, 0, 12, 0);
+    grd.addColorStop(0, 'rgba(255,61,242,0)');
+    grd.addColorStop(0.5, 'rgba(255,200,250,0.9)');
+    grd.addColorStop(1, 'rgba(255,61,242,0)');
+    g.fillStyle = grd;
+    g.fillRect(-12, -12, 24, 24);
   });
 }

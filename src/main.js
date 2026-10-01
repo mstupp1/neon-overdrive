@@ -627,6 +627,7 @@ window.NEON = {
     startSector({ ...endlessSpec(1), ...spec });
   },
   applyUpgrade: (id) => applyUpgrade(G.player, id, G),
+  rollDraft: (kind = 'level') => rollDraft(G.player, kind),
   // Start a campaign run (1-based index or system id); lands on the route screen.
   launch(sys = 1) {
     launchSystem(typeof sys === 'number' ? SYSTEMS[sys - 1] : systemById(sys));

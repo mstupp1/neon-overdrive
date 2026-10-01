@@ -11,7 +11,7 @@ The game is a set of ES modules (see README "Project layout"). All mutable world
 | `G` | Live game state (see below) |
 | `view` | Logical size, scale, safe-area insets, quality |
 | `profile` | Persisted records/settings |
-| `startRun(shipId)` | Start a run (`vector`, `needle`, `bulwark`, `phantom`); uses that ship's equipped hangar parts and paint |
+| `startRun(shipId)` | Start a run (`vector`, `needle`, `bulwark`, `phantom`, `corsair`, `monolith`); uses that ship's equipped hangar parts and paint |
 | `startEndless(shipId)` | Alias of `startRun` (endless mode) |
 | `startSpec(spec, shipId?)` | Start a run, then `startSector` with a sector spec `{index, level, loop, boss, elite, modifiers[], hue, name, duration}` (missing fields default to `endlessSpec(1)`) |
 | `launch(system)` | Start a campaign run (1-based index or id: `genesis crimson cyclone void`); lands on the route screen |
@@ -23,6 +23,7 @@ The game is a set of ES modules (see README "Project layout"). All mutable world
 | `buyShip(id)` `buyPart(id)` `selectShip(id)` `equip(shipId, partId)` `unequip(shipId, slot)` `paint(shipId, idx)` | Hangar actions; return `''` or a reason (`NEED n`, `OWNED`, ...). They spend profile credits, so `grant({credits})` first |
 | `toTitle()` | Back to title/attract mode |
 | `applyUpgrade(id)` | Grant an upgrade (ids in `src/game/upgrades.js`) |
+| `rollDraft(kind?)` | Roll a draft (`'level'`/`'sector'`) for the current player (may include an Evolution card) |
 | `simulate(seconds, pickFn?, opts?)` | Fast-forward synchronously at 60 Hz, auto-picking drafts (`pickFn(choices) → id`) and route nodes (`opts.nodePick(nodes) → index`, default random fighting node). Market: buys the cheapest affordable upgrade offer (override `opts.marketPick(offers, wallet) → index | -1`), then leaves; dock: repairs if damaged else reinforces; anomaly auto-continues. Stops on `gameover` or `extract`. Returns `{screen, sector, hp, level, score, time, run:{system,row}, victory}`. |
 
 Set `G.autopilot = true` to let the built-in bot (`src/game/bot.js`) fly a real run; `G.player.god = true` for invulnerability.
@@ -83,3 +84,11 @@ Title PLAY → `scr-campaign` (select system, LAUNCH / HANGAR + PILOT pair / END
 - Parts: `PARTS` in `parts.js`, `{id, slot, name, desc, price, icon, apply(st, p), start?}`. `createPlayer(ship, gear)` sets `p.parts` (empty in attract) and `p.color` (painted colour; use it instead of `p.ship.color` for visuals). `recomputeStats` runs `applyParts(st, p)` after upgrades and before `maxHp` is clamped to >= 1. `start: {upgradeId: lv}` grants free upgrade levels at run start (Aegis Emitter).
 - New `p.st` fields (neutral defaults set in `recomputeStats`): `xpMul` (gainXp), `creditMul` (gainCredits), `grazeR` / `grazeOd` (graze radius / Overdrive per graze, world.js), `dashDur` (dash length and i-frames), `critMul` (2.5 default; world.js crit).
 - Profile: `ownedParts[]`, `equip{shipId:{core,plating,thrusters}}`, `paint{shipId: idx}`, `paintsOwned{shipId:[idx]}` (0 is stock, always owned). `rebuildShipSprite(ship, color, bullet)` re-bakes one ship sprite and its primary bullet; run for painted ships on boot (`applyAllPaints`) and on paint change.
+
+## Modules, evolutions and the newer ships (step 6b)
+
+- Upgrade ids. Modules (`cat 'module'`, max 5): `missiles orbitals drones arc nova rail shrapnel dashNova` plus `gravity` (Gravity Well), `reflector`, `flak` (Flak Burst). Evolutions (`cat 'evolution'`, max 1, gold `CAT_COLORS.evolution`): `hellfire` (missiles + `crit`), `stormhalo` (orbitals + `thrusters`), `teslastorm` (arc + `capacitor`), `annihilator` (rail + `pierce`). A def's `mod` / `stat` fields name its prerequisites; `evolutionReady(p, u)` is true at module level 5 + stat >= 1 + not yet taken.
+- `rollUpgradeIds(p, kind, n, rng, evo=false)`: evolutions only enter the pool when `evo` is true (`rollDraft` passes it; the Black Market and Contraband do not), carry weight 7 and at most one appears per draft. `cardInfo` returns `evo: true`; `renderDraft` shows an `EVOLVE` tag and the gold `.card.evo` style; `renderBuild` draws a gold `.chip.evo`. Evolutions never count towards `moduleCount`. Module code checks them with `evo(p, id)` in `modules.js`.
+- `p.mod` gained `gravT/reflT/flakT`, `wells[]`, `flaks[]`, `refl/reflMax`. New-module bullet spawns respect `MAX_PBULLETS` (520). Annihilator's afterglow is a `G.beams` entry with `owner: 'afterglow'` (fixed position, ticks damage, handled in `updateBeams`/`drawBeams`, ignored by `collide`).
+- `playerBullet` opts: `bounce` (reflect `vx` at the side walls that many times, `updatePlayerBullets`) and `crit` (always crits; also on missile AoE). WEAPONS `ricochet` (CORSAIR) and `charge` (MONOLITH, whose orb radius/scale grows with weapon level in `firePrimary`; a muzzle charge glow is drawn in `drawPlayer`).
+- Sprites for all of this live in `buildGearSpritesV2()` at the end of `sprites.js` (`S.gwell`, `S.reflect`, `S.flak`, `S.pb_refl`, `S.afterglow`).

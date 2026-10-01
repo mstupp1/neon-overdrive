@@ -61,6 +61,36 @@ export const SHIPS = [
     price: 1400,
     unlock: { kind: 'bestSector', n: 8, text: 'Reach Sector 8' },
   },
+  {
+    id: 'corsair',
+    name: 'CORSAIR',
+    role: 'Skirmisher',
+    desc: 'Angled bolts ricochet off the side walls. Fans wider with every weapon level.',
+    color: '#ff8a3d',
+    bullet: '#ffb066',
+    weapon: 'ricochet',
+    hp: 3,
+    speed: 1.08,
+    dashes: 2,
+    start: { thrusters: 1 },
+    price: 1100,
+    unlock: null,
+  },
+  {
+    id: 'monolith',
+    name: 'MONOLITH',
+    role: 'Siege',
+    desc: 'Slow, heavy charge cannon. Huge piercing orbs that grow with every weapon level.',
+    color: '#6f8bff',
+    bullet: '#a9bbff',
+    weapon: 'charge',
+    hp: 5,
+    speed: 0.85,
+    dashes: 1,
+    start: { power: 1 },
+    price: 1600,
+    unlock: null,
+  },
 ];
 
 export function isUnlocked(ship, profile) {
@@ -80,6 +110,8 @@ const PAINT_SETS = {
   needle: [['CRIMSON', '#ff3b5c'], ['GHOST', '#e4f2ff'], ['ULTRAVIOLET', '#9a6bff']],
   bulwark: [['CRIMSON', '#ff3b5c'], ['GHOST', '#e4f2ff'], ['TOXIC', '#b6ff00']],
   phantom: [['CRIMSON', '#ff3b5c'], ['GOLD', '#ffc933'], ['TOXIC', '#b6ff00']],
+  corsair: [['ICE', '#9fe9ff'], ['TOXIC', '#b6ff00'], ['ULTRAVIOLET', '#9a6bff']],
+  monolith: [['CRIMSON', '#ff3b5c'], ['GOLD', '#ffc933'], ['GHOST', '#e4f2ff']],
 };
 const FALLBACK_PAINTS = [['CRIMSON', '#ff3b5c'], ['GOLD', '#ffc933'], ['GHOST', '#e4f2ff']];
 export const PAINT_PRICE = 120;
@@ -107,6 +139,8 @@ export const WEAPONS = {
   lance: { interval: 0.15, dmg: 2.1, speed: 1300, r: 3.5, pierce: 1 },
   scatter: { interval: 0.19, dmg: 0.85, speed: 780, r: 4, life: 0.62 },
   phase: { interval: 0.12, dmg: 1.05, speed: 820, r: 5, homing: 3.2 },
+  ricochet: { interval: 0.11, dmg: 1.1, speed: 900, r: 4, life: 1.5, bounce: 1 },
+  charge: { interval: 0.5, dmg: 12, speed: 620, r: 9, life: 1.6, pierce: 4 },
 };
 
 // Returns an array of [xOffset, angleOffsetRadians] streams for a weapon level (1..8).
@@ -138,6 +172,14 @@ export function weaponStreams(weapon, lv) {
     const n = [2, 2, 3, 3, 4, 4, 5, 6][lv - 1];
     const spread = [16, 22, 28, 34, 40, 46, 52, 60][lv - 1] * deg;
     for (let i = 0; i < n; i++) out.push([(i - (n - 1) / 2) * 7, n > 1 ? -spread / 2 + (spread * i) / (n - 1) : 0]);
+  } else if (weapon === 'ricochet') {
+    // Angled bolts only (no straight stream): the fan widens with level and the walls fold it back in.
+    const n = [2, 3, 4, 5, 6, 6, 7, 8][lv - 1];
+    const spread = [18, 26, 34, 40, 46, 52, 58, 64][lv - 1] * deg;
+    for (let i = 0; i < n; i++) out.push([(i - (n - 1) / 2) * 4, -spread / 2 + (spread * i) / (n - 1)]);
+  } else if (weapon === 'charge') {
+    const n = [1, 1, 2, 2, 2, 3, 3, 3][lv - 1];
+    for (let i = 0; i < n; i++) out.push([(i - (n - 1) / 2) * 20, (i - (n - 1) / 2) * 0.05]);
   }
   return out;
 }

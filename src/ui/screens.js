@@ -122,13 +122,13 @@ export const ui = {
       const info = cardInfo(player, id);
       const c = CAT_COLORS[info.cat];
       const b = document.createElement('button');
-      b.className = 'card';
+      b.className = info.evo ? 'card evo' : 'card';
       b.style.setProperty('--c', c);
       let pips = '';
-      if (info.max) {
+      if (info.max && !info.evo) {
         for (let k = 0; k < info.max; k++) pips += `<i class="${k < info.lv ? 'on' : k === info.lv ? 'next' : ''}"></i>`;
       }
-      const tag = info.max ? (info.lv === 0 ? 'NEW' : `LV ${info.lv + 1}`) : 'BONUS';
+      const tag = info.evo ? 'EVOLVE' : info.max ? (info.lv === 0 ? 'NEW' : `LV ${info.lv + 1}`) : 'BONUS';
       b.innerHTML = `<div class="card-icon">${info.icon}</div><div><div class="card-top"><span class="card-name">${info.name}</span><span class="card-tag">${tag}</span></div><div class="card-desc">${info.desc}</div>${pips ? `<div class="pips">${pips}</div>` : ''}</div>${input.device === 'touch' ? '' : `<kbd>${i + 1}</kbd>`}`;
       b.addEventListener('click', () => {
         if (performance.now() < lockUntil) return;
@@ -225,7 +225,7 @@ export function renderBuild(el, p) {
   for (const u of UPGRADES) {
     const lv = p.up[u.id] || 0;
     if (!lv) continue;
-    html += `<div class="chip" style="--c:${CAT_COLORS[u.cat]}" title="${u.name}">${ICONS[u.id]}<b>${lv}</b></div>`;
+    html += `<div class="${u.cat === 'evolution' ? 'chip evo' : 'chip'}" style="--c:${CAT_COLORS[u.cat]}" title="${u.name}">${ICONS[u.id]}${u.cat === 'evolution' ? '' : `<b>${lv}</b>`}</div>`;
   }
   el.innerHTML = html;
 }

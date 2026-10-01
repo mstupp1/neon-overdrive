@@ -2111,3 +2111,19 @@ input[type='range']::-moz-range-thumb {
 #scr-pilot .screen-title {
     font-size: 1.55em;
 }
+
+/* Evolution cards / chips (gold) */
+.card.evo {
+    border-color: color-mix(in srgb, var(--c) 80%, transparent);
+    box-shadow: 0 0 1.2em color-mix(in srgb, var(--c) 35%, transparent), inset 0 0 1.4em color-mix(in srgb, var(--c) 14%, transparent);
+}
+
+.card.evo .card-name {
+    color: var(--c);
+}
+
+.build .chip.evo {
+    background: color-mix(in srgb, var(--c) 28%, transparent);
+    border-color: var(--c);
+    box-shadow: 0 0 0.6em color-mix(in srgb, var(--c) 55%, transparent);
+}
