@@ -5,10 +5,13 @@ import { mulberry32 } from '../core/math.js';
 
 // level = difficulty at route row 0; each row adds `step` (boss row ≈ level + rows*step). dur = fighting sector seconds;
 // bossHp multiplies the boss's base HP (campaign bosses are tuned per system, endless keeps the base);
-// supply = free upgrade drafts at system start (a fresh ship at row 0 of a late system would otherwise be hopelessly outgunned).
+// supply = free upgrade drafts at system start (a fresh ship at row 0 of a late system would otherwise be hopelessly outgunned);
+// warm = level eased off per row short of row 2 (default WARM).
+// Genesis follows the endless opening (row 0 ≈ endless sector 1, boss row ≈ sector 5-6): a fresh ship with no supply
+// drop starts here, so its waves must be thin and quick to kill.
 export const SYSTEMS = [
   {
-    id: 'genesis', name: 'NEON GENESIS', short: 'GENESIS', act: 1, hue: 215, level: 4.2, step: 0.8, rows: 5, dur: 54, bossHp: 1.3, supply: 0, pay: 0.72, boss: 'warden',
+    id: 'genesis', name: 'NEON GENESIS', short: 'GENESIS', act: 1, hue: 215, level: 1, step: 0.9, warm: 0, rows: 5, dur: 46, bossHp: 1.3, supply: 0, pay: 0.8, boss: 'warden',
     blurb: 'The Grid\'s outer lattice. A siege mech guards the gate.',
   },
   {
@@ -25,7 +28,7 @@ export const SYSTEMS = [
   },
 ];
 
-const WARM = 0.9; // level eased off per row short of row 2
+const WARM = 0.9; // default `warm`
 
 export const systemById = (id) => SYSTEMS.find((s) => s.id === id) || SYSTEMS[0];
 
@@ -80,9 +83,9 @@ export function generateRoute(system, seed) {
     cand[ri(0, cand.length - 1)].type = rnd() < 0.5 ? 'market' : 'dock';
   }
   rows.push([make(system.rows, 0, 1, 'boss')]);
-  // Modifiers: elites always one, combat sometimes.
+  // Modifiers: elites always one, combat sometimes (never on row 0: the opening fight stays plain).
   for (const nd of nodes) {
-    if (nd.type === 'elite' || (nd.type === 'combat' && rnd() < 0.35)) nd.modifiers = [MOD_IDS[ri(0, MOD_IDS.length - 1)]];
+    if (nd.type === 'elite' || (nd.type === 'combat' && rnd() < 0.35 && nd.row > 0)) nd.modifiers = [MOD_IDS[ri(0, MOD_IDS.length - 1)]];
   }
   // Links: each node → nearest 1–2 nodes in the next row; then every orphan gets an inbound link.
   for (let r = 0; r < rows.length - 1; r++) {
@@ -111,7 +114,7 @@ export function reachableNodes(route, nodeId) {
 
 // Difficulty level of a route row. The first two rows ease in: a ship that has only its supply drop must not meet
 // full-strength waves at row 0.
-export const nodeLevel = (system, row) => system.level + row * system.step - Math.max(0, 2 - row) * WARM;
+export const nodeLevel = (system, row) => system.level + row * system.step - Math.max(0, 2 - row) * (system.warm ?? WARM);
 
 // Director spec for a fighting node. sectorIndex is 1-based (sectors fought so far + 1).
 export function nodeSpec(system, node, sectorIndex) {
