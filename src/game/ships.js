@@ -114,7 +114,7 @@ const PAINT_SETS = {
   monolith: [['CRIMSON', '#ff3b5c'], ['GOLD', '#ffc933'], ['GHOST', '#e4f2ff']],
 };
 const FALLBACK_PAINTS = [['CRIMSON', '#ff3b5c'], ['GOLD', '#ffc933'], ['GHOST', '#e4f2ff']];
-export const PAINT_PRICE = 120;
+const PAINT_PRICE = 120;
 
 export function paintsFor(ship) {
   return [
@@ -137,9 +137,9 @@ export const shipById = (id) => SHIPS.find((s) => s.id === id) || SHIPS[0];
 export const WEAPONS = {
   pulse: { interval: 0.1, dmg: 1, speed: 980, r: 4 },
   lance: { interval: 0.15, dmg: 2.1, speed: 1300, r: 3.5, pierce: 1 },
-  scatter: { interval: 0.19, dmg: 0.85, speed: 780, r: 4, life: 0.62 },
-  phase: { interval: 0.12, dmg: 1.05, speed: 820, r: 5, homing: 3.2 },
-  ricochet: { interval: 0.11, dmg: 1.1, speed: 900, r: 4, life: 1.5, bounce: 1 },
+  scatter: { interval: 0.19, dmg: 1.05, speed: 780, r: 4, life: 0.8, homing: 1.8 },
+  phase: { interval: 0.12, dmg: 1.45, speed: 820, r: 5, homing: 3.2 },
+  ricochet: { interval: 0.11, dmg: 1.6, speed: 900, r: 4, life: 1.5, bounce: 1 },
   charge: { interval: 0.5, dmg: 12, speed: 620, r: 9, life: 1.6, pierce: 4 },
 };
 
@@ -166,7 +166,7 @@ export function weaponStreams(weapon, lv) {
     }
   } else if (weapon === 'scatter') {
     const n = [5, 6, 7, 8, 9, 10, 11, 13][lv - 1];
-    const spread = [36, 40, 46, 52, 58, 62, 66, 72][lv - 1] * deg;
+    const spread = [30, 33, 37, 41, 45, 49, 53, 58][lv - 1] * deg;
     for (let i = 0; i < n; i++) out.push([0, -spread / 2 + (spread * i) / (n - 1)]);
   } else if (weapon === 'phase') {
     const n = [2, 2, 3, 3, 4, 4, 5, 6][lv - 1];

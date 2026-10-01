@@ -3,25 +3,29 @@
 import { MODIFIERS } from './modifiers.js';
 import { mulberry32 } from '../core/math.js';
 
-// level = difficulty at route row 0; each row adds `step` (boss row ≈ level + rows*step).
+// level = difficulty at route row 0; each row adds `step` (boss row ≈ level + rows*step). dur = fighting sector seconds;
+// bossHp multiplies the boss's base HP (campaign bosses are tuned per system, endless keeps the base);
+// supply = free upgrade drafts at system start (a fresh ship at row 0 of a late system would otherwise be hopelessly outgunned).
 export const SYSTEMS = [
   {
-    id: 'genesis', name: 'NEON GENESIS', short: 'GENESIS', act: 1, hue: 215, level: 1, step: 0.4, rows: 5, boss: 'warden',
+    id: 'genesis', name: 'NEON GENESIS', short: 'GENESIS', act: 1, hue: 215, level: 4.2, step: 0.8, rows: 5, dur: 54, bossHp: 1.3, supply: 0, pay: 0.72, boss: 'warden',
     blurb: 'The Grid\'s outer lattice. A siege mech guards the gate.',
   },
   {
-    id: 'crimson', name: 'CRIMSON TIDE', short: 'CRIMSON', act: 2, hue: 345, level: 3.5, step: 0.5, rows: 5, boss: 'hydra',
+    id: 'crimson', name: 'CRIMSON TIDE', short: 'CRIMSON', act: 2, hue: 345, level: 7.6, step: 1.2, rows: 5, dur: 54, bossHp: 1, supply: 3, pay: 0.64, boss: 'hydra',
     blurb: 'Bio-corrupted sectors. Something huge is breeding in the dark.',
   },
   {
-    id: 'cyclone', name: 'CYAN CYCLONE', short: 'CYCLONE', act: 3, hue: 185, level: 6.3, step: 0.5, rows: 6, boss: 'omega',
+    id: 'cyclone', name: 'CYAN CYCLONE', short: 'CYCLONE', act: 3, hue: 185, level: 11, step: 1.2, rows: 6, dur: 54, bossHp: 0.5, supply: 4, pay: 0.68, boss: 'omega',
     blurb: 'Storm-lit data winds. The core intelligence waits at the eye.',
   },
   {
-    id: 'void', name: 'THE VOID', short: 'VOID', act: 4, hue: 275, level: 8.5, step: 0.45, rows: 6, boss: 'eclipse',
+    id: 'void', name: 'THE VOID', short: 'VOID', act: 4, hue: 275, level: 12, step: 1.2, rows: 6, dur: 54, bossHp: 0.22, supply: 4, pay: 0.82, boss: 'eclipse',
     blurb: 'Beyond the Grid. The Signal\'s source. No one has returned.',
   },
 ];
+
+const WARM = 0.9; // level eased off per row short of row 2
 
 export const systemById = (id) => SYSTEMS.find((s) => s.id === id) || SYSTEMS[0];
 
@@ -105,13 +109,17 @@ export function reachableNodes(route, nodeId) {
   return routeNode(route, nodeId).links.map((id) => routeNode(route, id));
 }
 
+// Difficulty level of a route row. The first two rows ease in: a ship that has only its supply drop must not meet
+// full-strength waves at row 0.
+export const nodeLevel = (system, row) => system.level + row * system.step - Math.max(0, 2 - row) * WARM;
+
 // Director spec for a fighting node. sectorIndex is 1-based (sectors fought so far + 1).
 export function nodeSpec(system, node, sectorIndex) {
-  const level = system.level + node.row * system.step;
+  const level = nodeLevel(system, node.row);
   const boss = node.type === 'boss' ? system.boss : null;
-  const base = 36 + Math.min(6, Math.floor(level)) * 4;
+  const base = system.dur;
   return {
     index: sectorIndex, row: node.row, level, loop: 0, boss, elite: node.type === 'elite', modifiers: node.modifiers.slice(),
-    hue: system.hue, name: system.name, duration: boss ? base * 0.7 : base,
+    hue: system.hue, name: system.name, duration: boss ? base * 0.7 : base, bossHp: system.bossHp, pay: system.pay,
   };
 }

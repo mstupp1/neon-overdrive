@@ -20,7 +20,6 @@ export const ECON_ICONS = {
 // --- Wallet ------------------------------------------------------------------------
 
 const wallet = () => (G.run ? G.run.wallet || 0 : 0);
-export const getWallet = wallet;
 
 // Adds credits to the run wallet after multipliers. Returns the amount actually gained (0 in attract).
 export function gainCredits(amount, at) {
@@ -48,7 +47,7 @@ export function gainCredits(amount, at) {
   return gain;
 }
 
-export function spendCredits(n) {
+function spendCredits(n) {
   if (!G.run || wallet() < n) return false;
   G.run.wallet -= n;
   return true;
@@ -58,7 +57,7 @@ export function spendCredits(n) {
 function unit() {
   const sp = G.director && G.director.spec;
   const lvl = sp ? sp.level + sp.loop * 9 : 1;
-  return Math.max(0.8, 0.95 * lvl - 0.1);
+  return Math.max(0.8, 0.95 * lvl - 0.1) * ((sp && sp.pay) || 1); // pay: per-system credit scale (campaign)
 }
 
 // Called from killEnemy: small chance of a chip from normal kills, a guaranteed haul from elites.
@@ -100,8 +99,8 @@ export function rankFor(xp) {
 }
 
 // Rank XP for a finished run.
-export function runRankXp(score, sectors, bosses, victory) {
-  return Math.round(Math.sqrt(Math.max(0, score)) * 0.25 + sectors * 40 + bosses * 120 + (victory ? 250 : 0));
+function runRankXp(score, sectors, bosses, victory) {
+  return Math.round(Math.sqrt(Math.max(0, score)) * 0.08 + sectors * 20 + bosses * 90 + (victory ? 120 : 0));
 }
 
 // Folds the run's wallet + rank XP into the profile. Returns the reward summary for results screens.
@@ -113,7 +112,8 @@ export function settleRun(victory) {
   const banked = Math.floor(w * pct);
   // Cleared sectors: campaign counts fought sectors (the fatal one excluded); endless counts passed sectors.
   const cleared = Math.max(0, mode === 'campaign' ? (victory ? r.sectors : r.sectors - 1) : G.sector - 1);
-  const gainXp = runRankXp(G.score, cleared, G.bossKills, victory) + (r.bonusXp || 0); // bonusXp: Ghost Signal event
+  const actMul = mode === 'campaign' ? 1 + 0.15 * (r.system.act - 1) : 1; // later systems teach more
+  const gainXp = Math.round(runRankXp(G.score, cleared, G.bossKills, victory) * actMul) + (r.bonusXp || 0); // bonusXp: Ghost Signal event
   const before = rankFor(profile.rankXp);
   profile.credits += banked;
   profile.rankXp += gainXp;

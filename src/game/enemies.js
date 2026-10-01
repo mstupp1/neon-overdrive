@@ -27,7 +27,7 @@ export const TYPES = {
   shielder: { hp: 18, r: 15, xp: 5, score: 500, spr: 'shielder' },
   weaver: { hp: 12, r: 13, xp: 4, score: 400, spr: 'weaver', plain: true },
   blinker: { hp: 10, r: 13, xp: 4, score: 450, spr: 'blinker' },
-  hunter: { hp: 75, r: 24, xp: 40, score: 6000, spr: 'hunter', keep: true, plain: true }, // ~25x a dart; elite-node mini-boss
+  hunter: { hp: 110, r: 24, xp: 40, score: 6000, spr: 'hunter', keep: true, plain: true }, // elite-node mini-boss; hp scales with the sector level, not diff.hp (see spawnEnemy)
   eclipsedrone: { hp: 30, r: 11, xp: 3, score: 500, spr: 'eclipseDrone', keep: true, plain: true }, // ECLIPSE's Dark Fortress turrets
 };
 
@@ -66,7 +66,8 @@ export function spawnEnemy(type, x, y, opts = {}) {
   e.curve = opts.curve || 0;
   e.state = 'enter';
   e.parts = null;
-  let hp = def.hp * d.hp;
+  // The Hunter is a mini-boss: ~15-25s to kill with a typical build, so it scales very gently with level (+3% per level) instead of diff.hp.
+  let hp = type === 'hunter' ? def.hp * (1 + 0.03 * (G.director.spec ? G.director.spec.level : 1)) : def.hp * d.hp;
   if (opts.elite || (type !== 'swarm' && type !== 'mine' && !def.plain && G.sector + G.loop * 9 >= 2 && chance(0.04 + 0.008 * G.sector + (d.eliteBonus || 0)))) {
     e.elite = true;
     hp *= 3.2;

@@ -25,9 +25,9 @@ export const bossById = (id) => BOSSES.find((b) => b.id === id) || BOSSES[BOSSES
 // Music track index per boss (unknown ids fall back to the last).
 export const bossIndex = (id) => (BOSS_IDS.includes(id) ? BOSS_IDS.indexOf(id) : BOSSES.length - 1);
 
-export function spawnBoss(id, level, loop) {
+export function spawnBoss(id, level, loop, hpMul = 1) {
   const def = bossById(id);
-  const hp = def.hp * Math.pow(3.2, loop) * (1 + 0.15 * loop);
+  const hp = def.hp * hpMul * Math.pow(3.2, loop) * (1 + 0.15 * loop);
   const e = {
     type: 'boss', boss: true, kind: def.id, name: def.name, title: def.title,
     x: view.W / 2, y: -160, vx: 0, vy: 0, r: def.r, hp, maxHp: hp, color: def.color,
@@ -46,7 +46,7 @@ export function spawnBoss(id, level, loop) {
   return e;
 }
 
-const speedFor = (e) => [1, 1.15, 1.32][e.phase - 1] * (1 + G.loop * 0.12);
+const speedFor = (e) => (e.kind === 'eclipse' ? [1.08, 1.25, 1.45] : [1, 1.15, 1.32])[e.phase - 1] * (1 + G.loop * 0.12);
 
 export function every(a, dt, interval, fn) {
   a.acc = (a.acc ?? 0) - dt;
@@ -119,6 +119,7 @@ const COPY = {
           e.drones.push(d);
         }
         e.dome = true;
+        e.domeT = 0;
         e.invuln = true;
         explosion(e.x, e.y, '#c23bff', 1.4);
       }
@@ -347,7 +348,7 @@ const ATTACKS = {
 
   eclipse: {
     cycles: [
-      ['mirrorFan', 'ring', 'dashLanes'],
+      ['mirrorFan', 'ring', 'dashLanes', 'mirrorFan'],
       ['mirrorFan', 'dashLanes', 'overdriveWave', 'ring', 'dashLanes'],
       ['copyUlt', 'dashLanes', 'mirrorFan', 'overdriveWave', 'ring'],
     ],
@@ -372,14 +373,14 @@ const ATTACKS = {
     // Lanes are telegraphed for 0.8s, then ECLIPSE dashes lane to lane and each lane erupts as a lethal beam.
     dashLanes(e, a, dt, sp) {
       const TELE = 0.8;
-      const STEP = 0.4 / sp;
+      const STEP = 0.34 / sp;
       if (!a.lanes) {
-        const n = e.phase === 1 ? 2 : 3;
+        const n = e.phase + 1; // 2 / 3 / 4 lanes
         const p = G.player;
         const xs = [clamp(p.x + rand(-40, 40), 50, view.W - 50)];
         for (let g = 0; xs.length < n && g < 60; g++) {
           const x = rand(50, view.W - 50);
-          if (xs.every((q) => Math.abs(q - x) > 120)) xs.push(x);
+          if (xs.every((q) => Math.abs(q - x) > (n > 3 ? 92 : 120))) xs.push(x);
         }
         xs.sort((m, k) => Math.abs(m - e.x) - Math.abs(k - e.x));
         a.lanes = xs.map((x) => ({ x, dash: false, fired: false, t: 0 }));
@@ -508,6 +509,9 @@ function eclipseTick(e, dt) {
   if (e.alpha < 1) e.alpha = Math.min(1, e.alpha + dt * 3);
   if (e.warp) slowPlayerBulletsNear(e, dt);
   if (e.dome) {
+    e.domeT = (e.domeT || 0) + dt;
+    // Safety valve: drones the player cannot reach (or a bot that ignores them) must not make ECLIPSE invulnerable forever.
+    if (e.domeT > 14) for (const d of e.drones) if (!d.dead) killEnemy(d, true);
     let alive = 0;
     for (const d of e.drones) if (!d.dead) alive++;
     if (!alive) {
@@ -541,7 +545,7 @@ export function updateBoss(e, dt) {
     } else if (e.atk) {
       if (set[e.atk.name](e, e.atk, dt, speedFor(e))) {
         e.atk = null;
-        e.gap = 0.85 / speedFor(e);
+        e.gap = (e.kind === 'eclipse' ? 0.6 : 0.85) / speedFor(e);
       }
     } else {
       e.gap -= dt;
@@ -582,7 +586,8 @@ export function bossDamaged(e, dmg) {
 }
 
 function removeBossBeams(e) {
-  G.beams = G.beams.filter((b) => b.src !== e && b.boss !== e);
+  // Flag in place (never reassign G.beams: callers may be mid-iteration or compacting it, e.g. an afterglow tick killing the boss).
+  for (const b of G.beams) if (b.src === e || b.boss === e) b.dead = true;
 }
 
 // Drop any transient attack state (ECLIPSE lanes / dash / dome / warp) on a phase shift or death.

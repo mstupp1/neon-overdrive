@@ -27,7 +27,7 @@ export function botControl() {
   }
   // Enemy beams (lasers, lanes, weaver tripwires): push away from the segment once lethal or about to be.
   for (const bm of G.beams) {
-    if (bm.owner !== 'enemy' || bm.tele > 0.25) continue;
+    if (bm.owner !== 'enemy' || bm.tele > 0.25 || bm.dead) continue;
     const L = bm.len || 1400;
     const ex = bm.x + Math.cos(bm.ang) * L;
     const ey = bm.y + Math.sin(bm.ang) * L;
@@ -73,7 +73,7 @@ export function botControl() {
       }
     }
   }
-  const homeY = view.H * 0.8;
+  const homeY = view.H * (p.ship && p.ship.weapon === 'scatter' ? 0.6 : 0.8); // the shotgun has to get close, like a human would
   if (target) fx += clamp((target.x - p.x) * 0.012, -1, 1);
   else fx += clamp((view.W / 2 - p.x) * 0.004, -0.5, 0.5);
   fy += clamp((homeY - p.y) * 0.01, -1, 1);

@@ -193,7 +193,7 @@ function collide(p) {
 
   // Enemy lasers → player
   for (const beam of G.beams) {
-    if (beam.owner !== 'enemy' || beam.tele > 0) continue;
+    if (beam.owner !== 'enemy' || beam.tele > 0 || beam.dead) continue;
     const L = beam.len || 1400;
     const ex = beam.x + Math.cos(beam.ang) * L;
     const ey = beam.y + Math.sin(beam.ang) * L;

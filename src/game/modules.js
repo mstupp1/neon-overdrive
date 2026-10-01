@@ -19,7 +19,7 @@ export function resetModules(p) {
 
 const MAX_PBULLETS = 520; // new-module spawns respect this cap (reflections just erase the bullet when full)
 const evo = (p, id) => (p.up[id] || 0) > 0;
-const REFL_R = [46, 52, 58, 64, 72];
+const REFL_R = [52, 58, 65, 72, 80];
 
 // Razor Orbit geometry (Storm Halo: +3 blades, a pulsing radius, a wider erase field).
 const orbitBlades = (p) => p.up.orbitals + 1 + (evo(p, 'stormhalo') ? 3 : 0);
@@ -52,7 +52,7 @@ export function updateModules(p, dt) {
       for (let i = 0; i < n; i++) {
         const side = i % 2 ? 1 : -1;
         const a = -Math.PI / 2 + side * (0.9 + Math.floor(i / 2) * step);
-        playerBullet(p.x + side * 10, p.y + 4, a, 240, (5 + 1.5 * lv) * dm, S.missile, {
+        playerBullet(p.x + side * 10, p.y + 4, a, 240, (4.4 + 1.35 * lv) * dm, S.missile, {
           homing: 5.5, kind: 'missile', life: 2.6, aoe: (40 + lv * 4) * (hell ? 1.7 : 1), r: 6, alpha: 1, crit: hell,
         });
       }
@@ -67,16 +67,17 @@ export function updateModules(p, dt) {
     const radius = orbitRadius(p);
     const erase = evo(p, 'stormhalo') ? 17 : 9;
     m.orbA += dt * (3.2 + lv * 0.2);
-    const dmg = (2.5 + lv) * dm;
+    const halo = evo(p, 'stormhalo');
+    const dmg = (4 + 1.8 * lv) * dm * (halo ? 1.4 : 1);
     for (let i = 0; i < n; i++) {
       const a = m.orbA + (i / n) * TAU;
       const bx = p.x + Math.cos(a) * radius;
       const by = p.y + Math.sin(a) * radius;
       for (const e of G.enemies) {
         if (e.dead || !e.entered) continue;
-        const rr = e.r + 10;
+        const rr = e.r + (halo ? 14 : 10);
         if (dist2(bx, by, e.x, e.y) < rr * rr && (e.orbCd || 0) <= G.time) {
-          e.orbCd = G.time + 0.22;
+          e.orbCd = G.time + 0.2;
           sparks(bx, by, '#ff3df2', 3, 200);
           damageEnemy(e, dmg, bx, by);
         }
@@ -109,7 +110,7 @@ export function updateModules(p, dt) {
     m.droneT -= dt * rate;
     if (m.droneT <= 0) {
       m.droneT = lvl([0.42, 0.36, 0.3, 0.26, 0.22], lv);
-      const dmg = lvl([1.3, 1.5, 1.7, 2.0, 2.3], lv) * dm;
+      const dmg = lvl([2.2, 2.6, 3.0, 3.5, 4.0], lv) * dm;
       for (const d of p.drones) {
         let a = -Math.PI / 2;
         if (lv >= 3) {
@@ -162,11 +163,11 @@ export function updateModules(p, dt) {
     const lv = up.nova;
     m.novaT -= dt * rate;
     if (m.novaT <= 0) {
-      m.novaT = lvl([2.8, 2.4, 2.1, 1.8, 1.5], lv);
-      const n = 10 + 3 * lv;
+      m.novaT = lvl([2.3, 1.95, 1.65, 1.4, 1.2], lv);
+      const n = 12 + 3 * lv;
       const off = rand(0, TAU);
       for (let i = 0; i < n; i++) {
-        playerBullet(p.x, p.y, off + (i / n) * TAU, 430, (1.8 + 0.4 * lv) * dm, S.pb_nova, { life: 0.8, r: 5, pierce: 1, alpha: 1 });
+        playerBullet(p.x, p.y, off + (i / n) * TAU, 430, (3.4 + 0.9 * lv) * dm, S.pb_nova, { life: 0.8, r: 5, pierce: 1, alpha: 1 });
       }
       ring(p.x, p.y, 60, '#ff3df2', 0.35);
       sfx.nova();
@@ -269,7 +270,17 @@ export function updateModules(p, dt) {
     if (m.refl > 0) {
       m.refl -= dt;
       const R = lvl(REFL_R, lv);
-      const dmg = lvl([3, 3.8, 4.6, 5.4, 6.4], lv) * dm;
+      const dmg = lvl([4.5, 5.5, 6.5, 7.6, 9], lv) * dm;
+      // The bubble itself burns whatever drifts inside it (a few ticks per pulse).
+      m.reflHit = (m.reflHit || 0) - dt;
+      if (m.reflHit <= 0) {
+        m.reflHit = 0.25;
+        const touch = lvl([6, 8, 10, 12, 15], lv) * dm;
+        for (const e of G.enemies) {
+          if (e.dead || !e.entered || e.invuln) continue;
+          if (dist2(p.x, p.y, e.x, e.y) < (R + e.r) * (R + e.r)) damageEnemy(e, touch, e.x, e.y);
+        }
+      }
       for (const b of G.eBullets) {
         if (b.dead || b.delay > 0 || b.hp) continue;
         if (dist2(p.x, p.y, b.x, b.y) > (R + b.r) * (R + b.r)) continue;
@@ -284,7 +295,7 @@ export function updateModules(p, dt) {
       m.reflT -= dt * rate;
       if (m.reflT <= 0) {
         m.reflT = lvl([8, 7.2, 6.4, 5.6, 4.8], lv);
-        m.refl = m.reflMax = 0.6 + 0.04 * lv;
+        m.refl = m.reflMax = 0.9 + 0.1 * lv;
         ring(p.x, p.y, lvl(REFL_R, lv), '#7fffe6', 0.3);
         sfx.shield();
       }
@@ -311,7 +322,7 @@ export function updateModules(p, dt) {
   if (m.flaks.length) {
     const lv = up.flak || 1;
     const n = lvl([8, 9, 10, 12, 14], lv);
-    const dmg = lvl([2.2, 2.6, 3.0, 3.4, 3.8], lv) * dm;
+    const dmg = lvl([2.8, 3.3, 3.8, 4.4, 5.0], lv) * dm;
     let w = 0;
     for (const f of m.flaks) {
       f.life -= dt;
@@ -372,6 +383,7 @@ export function updateBeams(rawDt) {
   const p = G.player;
   let w = 0;
   for (const b of G.beams) {
+    if (b.dead) continue;
     const dt = b.owner === 'enemy' ? rawDt * G.enemyTimeScale : rawDt; // Phase Shift slows enemy beams too
     if (b.owner === 'afterglow') {
       // Annihilator afterglow: stays where the beam fired and ticks damage once the main beam has faded.
@@ -458,6 +470,7 @@ export function drawBeams(ctx) {
   const p = G.player;
   ctx.globalCompositeOperation = 'lighter';
   for (const b of G.beams) {
+    if (b.dead) continue;
     const t = b.life / b.max;
     if (b.owner === 'afterglow') {
       ctx.globalAlpha = Math.min(1, t * 1.6) * 0.8;

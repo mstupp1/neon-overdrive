@@ -283,7 +283,7 @@ export function updateDirector(dt) {
     case 'waves': {
       d.sectorT += dt;
       d.progress = Math.min(1, d.sectorT / d.duration);
-      d.spawnT -= dt;
+      d.spawnT -= dt * G.enemyTimeScale; // Phase Shift slows the wave timer too
       if (spec.elite && !d.hunterSpawned && d.progress > 0.6) spawnHunter();
       const alive = aliveEnemies();
       if (alive === 0 && !d.queue.length) d.spawnT = Math.min(d.spawnT, 0.4);
@@ -311,7 +311,6 @@ export function updateDirector(dt) {
           if (G.mode === 'run') {
             const b = bossById(spec.boss);
             banner('WARNING', 'BOSS INCOMING', '#ff2e55', 3);
-            G.warning = 3;
             if (d.onWarn) d.onWarn(b, spec);
             sfx.warn();
             music.bossTrack(bossIndex(spec.boss));
@@ -323,7 +322,7 @@ export function updateDirector(dt) {
       break;
     case 'warn':
       if (d.t > 3) {
-        spawnBoss(spec.boss, spec.level, spec.loop);
+        spawnBoss(spec.boss, spec.level, spec.loop, spec.bossHp || 1);
         d.state = 'boss';
         d.t = 0;
       }
