@@ -418,7 +418,7 @@ body {
     flex-direction: column;
     align-items: stretch;
     gap: 0.65em;
-    width: min(17em, 100%);
+    width: min(18.5em, 100%);
 }
 
 .menu.row {
@@ -428,7 +428,6 @@ body {
 }
 
 .btn {
-    --fc: var(--cyan);
     position: relative;
     font-family: Orbitron, sans-serif;
     font-weight: 700;
@@ -455,7 +454,6 @@ body {
 }
 
 .btn.ghost {
-    --fc: rgba(233, 244, 255, 0.45);
     background: rgba(5, 3, 15, 0.35);
     border-color: rgba(255, 255, 255, 0.14);
     color: rgba(233, 244, 255, 0.72);
@@ -486,7 +484,6 @@ body {
 .btn:focus-visible,
 .btn.focus,
 .btn:hover {
-    --fc: #fff;
     color: #fff;
     background: linear-gradient(180deg, rgba(63, 246, 255, 0.34), rgba(63, 246, 255, 0.14) 55%, rgba(63, 246, 255, 0.28));
     border-color: var(--cyan);
@@ -1134,7 +1131,8 @@ input[type='range']::-moz-range-thumb {
 .menu .pair .btn {
     padding-left: 0.3em;
     padding-right: 0.3em;
-    letter-spacing: 0.05em;
+    font-size: 0.8em;
+    letter-spacing: 0.04em;
     white-space: nowrap;
 }
 
@@ -2597,115 +2595,6 @@ input[type='range']::-moz-range-thumb {
     }
 }
 
-/* ---------------------------------------------------------------- HUD frames
-   Buttons and panels share one look: square corners, a thin neon border and bright corner brackets
-   (like the line-art reticles in play). Focus / hover pops the brackets outward like a lock-on. */
-
-.set-row,
-.help-block,
-.sys-detail,
-.run-stats div,
-.hs-card,
-.hs-nav,
-.slot,
-.swatch,
-.hs-stats,
-.pilot-card,
-.cls-tab,
-.cls-info,
-.extract-rewards,
-.event-result,
-.comms-box {
-    position: relative;
-}
-
-.card,
-.set-row,
-.help-block,
-.sys,
-.sys-detail,
-.hs-card,
-.hs-nav,
-.slot,
-.swatch,
-.hs-stats,
-.pilot-card,
-.cls-tab,
-.cls-info,
-.extract-rewards,
-.event-result,
-.comms-box {
-    --fc: color-mix(in srgb, var(--c, var(--cyan)) 85%, transparent);
-}
-
-.run-stats div,
-.help-block,
-.set-row,
-.hs-stats {
-    --fc: rgba(63, 246, 255, 0.55);
-}
-
-.btn::before,
-.card::before,
-.set-row::before,
-.help-block::before,
-.sys::before,
-.sys-detail::before,
-.run-stats div::before,
-.hs-card::before,
-.hs-nav::before,
-.slot::before,
-.swatch::before,
-.hs-stats::before,
-.pilot-card::before,
-.cls-tab::before,
-.cls-info::before,
-.extract-rewards::before,
-.event-result::before,
-.comms-box::before {
-    --k: 0.55em;
-    --t: 2px;
-    content: '';
-    position: absolute;
-    inset: -1px;
-    pointer-events: none;
-    background:
-        linear-gradient(var(--fc), var(--fc)) left top / var(--k) var(--t) no-repeat,
-        linear-gradient(var(--fc), var(--fc)) left top / var(--t) var(--k) no-repeat,
-        linear-gradient(var(--fc), var(--fc)) right top / var(--k) var(--t) no-repeat,
-        linear-gradient(var(--fc), var(--fc)) right top / var(--t) var(--k) no-repeat,
-        linear-gradient(var(--fc), var(--fc)) left bottom / var(--k) var(--t) no-repeat,
-        linear-gradient(var(--fc), var(--fc)) left bottom / var(--t) var(--k) no-repeat,
-        linear-gradient(var(--fc), var(--fc)) right bottom / var(--k) var(--t) no-repeat,
-        linear-gradient(var(--fc), var(--fc)) right bottom / var(--t) var(--k) no-repeat;
-    transition: inset 0.15s ease-out;
-}
-
-.btn.focus::before,
-.btn:hover::before,
-.btn:focus-visible::before,
-.card.focus::before,
-.card:hover::before,
-.set-row.focus::before,
-.set-row:hover::before,
-.sys.focus::before,
-.sys:hover::before,
-.hs-nav.focus::before,
-.hs-nav:hover::before,
-.slot.focus::before,
-.slot:hover::before,
-.swatch.focus::before,
-.swatch:hover::before,
-.cls-tab.focus::before,
-.cls-tab:hover::before {
-    inset: -5px;
-}
-
-.screen.guarded .card.focus:not(:hover)::before,
-.card:disabled::before {
-    inset: -1px;
-}
-
 /* Section headers: a fading neon rule under every screen title. */
 .screen-title {
     padding-bottom: 0.18em;
@@ -2728,7 +2617,6 @@ input[type='range']::-moz-range-thumb {
 }
 
 .help-tabs .btn.on {
-    --fc: var(--cyan);
     color: #fff;
     border-color: var(--cyan);
     background: linear-gradient(180deg, rgba(63, 246, 255, 0.24), rgba(63, 246, 255, 0.08) 55%, rgba(63, 246, 255, 0.18));
