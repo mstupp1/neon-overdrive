@@ -37,8 +37,8 @@ Title **PLAY** opens the campaign map: pick a **system**, then LAUNCH. Systems u
 | 4 | THE VOID | ECLIPSE | 7 | 4 | Final system |
 
 - **Route.** Every row offers 2-3 nodes; you may only jump to nodes linked from your current one. Node types: **Combat**, **Elite** (a Hunter mini-boss late in the sector, pays ~3 elites of credits), **Market**, **Dock**, **Anomaly** and the **Boss**. Every row keeps at least one fight, and a Market or Dock is guaranteed from row 3 on.
-- **Modifiers.** Elites always, and combat nodes sometimes, carry a sector modifier: ION STORM (faster bullets, +50% credits), SWARM FRONT, MINEFIELD, BLACKOUT (lights out, enemies glow), OVERCLOCKED (enemies fire faster, +30% XP), BOUNTY (elites drop extra credits).
-- **Supply Drop.** Systems 2-4 open with free upgrade drafts so a fresh ship is not helpless at row 0. The first two rows of each system also ease in.
+- **Modifiers.** Elites always, and combat nodes past the first row sometimes, carry a sector modifier: ION STORM (faster bullets, +50% credits), SWARM FRONT, MINEFIELD, BLACKOUT (lights out, enemies glow), OVERCLOCKED (enemies fire faster, +30% XP), BOUNTY (elites drop extra credits).
+- **Supply Drop.** Systems 2-4 open with free upgrade drafts so a fresh ship is not helpless at row 0. The first two rows of systems 2-4 also ease in, and Genesis starts as gently as the first Endless sector.
 - **Black Market.** Two upgrade offers, a repair, a reroll token and **Contraband** (+2 random upgrade levels, -1 max hull). Paid from the run wallet; prices rise with the system.
 - **Repair Dock.** Full repair, or **Reinforce** (+1 max hull).
 - **Anomalies.** Risk-for-reward events with 2-3 choices: Derelict Carrier, Signal Echo, Smuggler Beacon, Cryo Pod, Glitched Cache, Ghost Signal, Overcharged Reactor, Quiet Drift, Wreckage Field, MAG Uplink. Some curse the next fight (a hazard modifier or an elite ambush).
