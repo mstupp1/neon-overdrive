@@ -7,6 +7,8 @@ import { $, stat, renderBuild } from './screens.js';
 import { SYSTEMS, NODE_TYPES, systemUnlocked, reachableNodes, routeNode } from '../game/campaign.js';
 import { MODIFIERS } from '../game/modifiers.js';
 import { bossById } from '../game/bosses.js';
+import { rankFor, ECON_ICONS } from '../game/economy.js';
+import { CAT_COLORS } from '../game/upgrades.js';
 
 const svg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 
@@ -21,6 +23,8 @@ export const NODE_ICONS = {
   check: svg('<path d="M5 12.5l4.5 4.5L19 7"/>'),
 };
 
+const coin = '<svg class="coin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5l3.5 4.5-3.5 4.5-3.5-4.5z"/></svg>';
+const fmt = (n) => Math.floor(n).toLocaleString();
 const hsl = (h, l = 62) => `hsl(${h},100%,${l}%)`;
 
 // --- Campaign map ---------------------------------------------------------------
@@ -45,6 +49,8 @@ export const meta = {
       btns += `<button class="sys${done ? ' done' : ''}${open ? '' : ' locked'}" data-act="sys" data-i="${i}" ${open ? '' : 'disabled'} style="--c:${hsl(s.hue)};left:${MAP_X[i]}%;top:${mapY(i)}%"><span class="sys-orb">${!open ? NODE_ICONS.lock : done ? NODE_ICONS.check : s.act}</span><span class="sys-txt"><b>${s.name}</b><i>${sub}</i></span></button>`;
     });
     map.innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none">${lines}</svg>${btns}`;
+    const rk = rankFor(profile.rankXp);
+    $('#camp-pilot').innerHTML = `<span class="gold">${coin}${fmt(profile.credits)}</span><span class="rank">RANK <b>${rk.rank}</b></span><span class="rankbar"><i style="width:${rk.need ? Math.round((100 * rk.into) / rk.need) : 100}%"></i></span>`;
     $('#ship-btn').textContent = `SHIP: ${shipName}`;
     return this.selectSystem(sel);
   },
@@ -71,7 +77,7 @@ export const meta = {
     const visited = new Set(run.visited);
     $('#route-title').textContent = sys.name;
     $('#route-title').style.textShadow = `0 0 0.35em ${hsl(sys.hue)}, 0 0 1.2em ${hsl(sys.hue, 55)}`;
-    $('#route-stats').innerHTML = stat('HULL', `${p.hp}/${p.maxHp}`) + stat('LEVEL', p.level) + stat('ROUTE', `${visited.size}/${total}`);
+    $('#route-stats').innerHTML = stat('HULL', `${p.hp}/${p.maxHp}`) + stat('LEVEL', p.level) + stat('CREDITS', `<span class="gold">${fmt(run.wallet || 0)}</span>`) + stat('ROUTE', `${visited.size}/${total}`);
     const px = (n) => 12 + n.x * 76;
     const py = (n) => 90 - (n.row / (total - 1)) * 84;
     let lines = '';
@@ -105,6 +111,57 @@ export const meta = {
     $('#node-body').textContent = 'Nothing here yet. Continue along the route.';
   },
 
+  // --- Black Market ------------------------------------------------------------
+  // first = play the card entrance animation; later re-renders (after a purchase) stay still.
+  renderMarket(G, offers, first) {
+    const w = G.run.wallet || 0;
+    $('#market-wallet').innerHTML = `${coin}<b>${fmt(w)}</b>`;
+    $('#market-hint').textContent = `${G.player.hp}/${G.player.maxHp} HULL · ${G.rerolls} REROLL${G.rerolls === 1 ? '' : 'S'}`;
+    const wrap = $('#market-cards');
+    wrap.classList.toggle('still', !first);
+    wrap.innerHTML = '';
+    offers.forEach((o, i) => {
+      const b = document.createElement('button');
+      b.className = 'card offer' + (o.sold ? ' sold' : '');
+      b.dataset.act = 'buy';
+      b.dataset.i = i;
+      b.style.setProperty('--c', CAT_COLORS[o.cat] || '#ffd24a');
+      const dis = o.sold || !!o.blocked || w < o.price;
+      b.disabled = dis;
+      const status = o.sold ? 'SOLD' : o.blocked || (w < o.price ? 'NEED ' + (o.price - w) : '');
+      b.innerHTML = `<div class="card-icon">${o.icon}</div><div><div class="card-top"><span class="card-name">${o.name}</span><span class="card-tag">${o.tag}</span></div><div class="card-desc">${o.desc}</div></div><div class="price${dis ? ' dim' : ''}"><span>${o.sold ? '' : coin}<b>${o.sold ? 'SOLD' : o.price}</b></span>${status && !o.sold ? `<i>${status}</i>` : ''}</div>`;
+      wrap.appendChild(b);
+    });
+    renderBuild($('#market-build'), G.player);
+  },
+
+  // --- Repair dock -----------------------------------------------------------------
+  renderDock(p) {
+    $('#dock-hull').textContent = `HULL ${p.hp}/${p.maxHp}`;
+    const full = p.hp >= p.maxHp;
+    $('#dock-repair').innerHTML = `<div class="card-icon">${ECON_ICONS.repairFull}</div><div><div class="card-top"><span class="card-name">Full Repair</span><span class="card-tag">HEAL</span></div><div class="card-desc">${full ? 'Hull is already full.' : `Restore hull to ${p.maxHp}/${p.maxHp}.`}</div></div>`;
+    $('#dock-reinforce').innerHTML = `<div class="card-icon">${ECON_ICONS.reinforce}</div><div><div class="card-top"><span class="card-name">Hull Reinforcement</span><span class="card-tag">+1 MAX</span></div><div class="card-desc">+1 max hull for this run. No repair.</div></div>`;
+  },
+
+  // --- Rewards block (extraction + game over) -------------------------------------
+  renderRewards(el, rw, campaignDeath) {
+    const bar = (rk) => `<span class="rankbar big"><i style="width:${rk.need ? Math.round((100 * rk.into) / rk.need) : 100}%"></i></span>`;
+    const rk = rw.rankAfter;
+    el.innerHTML = `
+      <div class="rw-grid">
+        <div>EARNED<b class="gold">${coin}${fmt(rw.earned)}</b></div>
+        <div>${rw.spent > 0 ? `SPENT<b>${fmt(rw.spent)}</b>` : 'WALLET<b>' + fmt(rw.wallet) + '</b>'}</div>
+        <div>BANKED<b class="gold">${coin}${fmt(rw.banked)}</b></div>
+      </div>
+      ${campaignDeath ? `<p class="rw-note">${Math.round(rw.pct * 100)}% SALVAGED${rw.wallet ? ` · ${fmt(rw.wallet - rw.banked)} LOST` : ''}</p>` : ''}
+      <div class="rw-total">PROFILE ${coin}<b>${fmt(rw.total)}</b></div>
+      <div class="rw-rank">
+        <span>RANK <b>${rk.rank}</b></span>${bar(rk)}<span class="rw-xp">+${fmt(rw.rankXp)} XP</span>
+      </div>
+      ${rw.rankUp ? `<div class="rankup">RANK UP → ${rk.rank}</div>` : ''}`;
+    el.hidden = false;
+  },
+
   // --- Extraction -------------------------------------------------------------
   renderExtract(sum) {
     $('#extract-title').textContent = 'SYSTEM SECURED';
@@ -116,7 +173,7 @@ export const meta = {
     const un = $('#extract-unlock');
     un.hidden = !sum.unlocked.length;
     un.textContent = sum.unlocked.map((s) => `NEW SHIP UNLOCKED: ${s.name}`).join(' · ');
-    $('#extract-rewards').innerHTML = ''; // step 3: credits / rank XP banked on extraction
+    this.renderRewards($('#extract-rewards'), sum.reward, false);
     renderBuild($('#extract-build'), sum.player);
   },
 };

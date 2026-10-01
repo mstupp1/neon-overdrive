@@ -320,6 +320,12 @@ export function buildSprites(ships) {
   S.gem2 = gem(22, 6, '#7dff6b');
   S.gem3 = gem(28, 8, '#ff3df2');
   S.gem4 = gem(34, 10, '#ffe14d');
+  S.credit = makeSprite(26, (g) => {
+    const p = (c) => c.arc(0, 0, 6.5, 0, TAU);
+    glowFill(g, '#ffd24a', 0, p, 0.55); glowStroke(g, '#ffd24a', 1.8, 8, p, 1);
+    g.strokeStyle = '#fff6c9'; g.lineWidth = 1.4;
+    g.beginPath(); g.moveTo(-2.6, 0); g.lineTo(0, -3.2); g.lineTo(2.6, 0); g.lineTo(0, 3.2); g.closePath(); g.stroke();
+  });
   S.heart = makeSprite(36, (g) => {
     const p = (c) => {
       c.moveTo(0, 9);

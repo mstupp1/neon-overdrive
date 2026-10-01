@@ -16,6 +16,7 @@ import { ui } from './ui/screens.js';
 import { meta } from './ui/meta.js';
 import { SYSTEMS, systemById, generateRoute, nodeSpec, reachableNodes, routeNode, systemUnlocked } from './game/campaign.js';
 import { rand, pick } from './core/math.js';
+import { rollMarket, buyOffer, dockRepair, dockReinforce, settleRun, rankFor } from './game/economy.js';
 
 const app = document.getElementById('app');
 const canvas = document.getElementById('game');
@@ -32,6 +33,7 @@ let draftKind = null;
 let draftChoices = null;
 let shipsMode = 'run'; // ship select: 'run' (pick → endless run) | 'campaign' (just sets the ship)
 let selSystem = 0;
+let marketOffers = null; // current Black Market stock
 let afterDraft = null; // 'route' | 'extract': where to go once the sector reward / level drafts are done
 
 // --- Layout -------------------------------------------------------------------------
@@ -65,6 +67,7 @@ window.addEventListener('orientationchange', () => setTimeout(layout, 200));
 function newWorld(mode, shipDef, run = null) {
   G.mode = mode;
   G.run = run;
+  if (run) Object.assign(run, { wallet: 0, earned: 0, frac: 0, curse: null });
   G.time = 0;
   G.runTime = 0;
   G.enemies.length = 0;
@@ -156,21 +159,53 @@ function pickRouteNode(node) {
   r.row = node.row;
   r.visited.push(node.id);
   if (node.type === 'combat' || node.type === 'elite' || node.type === 'boss') {
-    startSector(nodeSpec(r.system, node, r.sectors + 1));
+    const spec = nodeSpec(r.system, node, r.sectors + 1);
+    if (r.curse) spec.modifiers.push(r.curse); // Contraband drawback
+    r.curse = null;
+    startSector(spec);
     r.sectors++;
     enterPlay();
   } else visitNode(node);
 }
 
-// Market / dock / anomaly stops. PLACEHOLDER (step 3 economy / step 7 events replace the
-// body of this switch); every stop must end by calling nodeContinue().
+// Non-fighting stops. Market and dock live here; anomaly is a PLACEHOLDER (step 7 events replace it).
+// Every stop must end by calling nodeContinue().
 function visitNode(node) {
   switch (node.type) {
+    case 'market':
+      marketOffers = rollMarket(G.player, G.run.system);
+      G.screen = 'market';
+      meta.renderMarket(G, marketOffers, true);
+      ui.show('market', { lock: 250 });
+      break;
+    case 'dock':
+      G.screen = 'dock';
+      meta.renderDock(G.player);
+      ui.show('dock', { lock: 250 });
+      break;
     default:
       meta.renderNode(node);
       G.screen = 'node';
       ui.show('node', { lock: 250 });
   }
+}
+
+function buy(btn) {
+  const o = marketOffers[+btn.dataset.i];
+  if (!o || buyOffer(o)) return;
+  sfx.coin();
+  sfx.levelUp();
+  const cards = () => [...document.querySelectorAll('#market-cards .card')];
+  meta.renderMarket(G, marketOffers, false);
+  const next = cards().find((c, i) => i >= +btn.dataset.i && !c.disabled) || cards().find((c) => !c.disabled) || document.getElementById('market-leave');
+  ui.show('market', { focus: next });
+}
+
+function dockChoose(btn) {
+  if (btn.dataset.opt === 'repair') dockRepair();
+  else dockReinforce();
+  sfx.heal();
+  nodeContinue();
 }
 
 function nodeContinue() {
@@ -182,10 +217,10 @@ function extract() {
   const r = G.run;
   r.victory = true;
   if (!profile.campaign.cleared.includes(r.system.id)) profile.campaign.cleared.push(r.system.id);
-  const unlocked = bankRun();
+  const { unlocked, reward } = bankRun();
   meta.renderExtract({
     system: r.system, score: Math.floor(G.score), time: G.runTime, level: p.level, kills: G.kills, sectors: r.sectors,
-    maxCombo: G.maxCombo, grazes: G.grazes, unlocked, player: p,
+    maxCombo: G.maxCombo, grazes: G.grazes, unlocked, reward, player: p,
   });
   const idx = SYSTEMS.indexOf(r.system);
   if (idx < SYSTEMS.length - 1) selSystem = idx + 1;
@@ -196,7 +231,8 @@ function extract() {
   music.setDuck(0.5);
 }
 
-// Folds the finished run into the profile records; returns newly unlocked ships.
+// Folds the finished run into the profile records and banks credits / rank XP.
+// Returns { unlocked: newly unlocked ships, reward: economy.settleRun summary }.
 function bankRun() {
   const before = SHIPS.filter((s) => isUnlocked(s, profile));
   profile.runs++;
@@ -205,8 +241,9 @@ function bankRun() {
   if (!G.run || G.run.mode === 'endless') profile.bestSector = Math.max(profile.bestSector, G.sector);
   profile.bestCombo = Math.max(profile.bestCombo, G.maxCombo);
   profile.bossKills += G.bossKills;
+  const reward = settleRun(!!(G.run && G.run.victory));
   saveProfile();
-  return SHIPS.filter((s) => isUnlocked(s, profile) && !before.includes(s));
+  return { unlocked: SHIPS.filter((s) => isUnlocked(s, profile) && !before.includes(s)), reward };
 }
 
 function enterPlay() {
@@ -278,14 +315,15 @@ function onSectorClear() {
 function gameOver() {
   const p = G.player;
   const newBest = G.score > profile.best;
-  const unlocked = bankRun();
+  const { unlocked, reward } = bankRun();
   const campaign = G.run.mode === 'campaign';
   document.getElementById('over-campaign').hidden = !campaign;
   document.getElementById('over-ships').hidden = campaign;
   ui.renderGameOver({
     score: Math.floor(G.score), newBest: newBest && profile.runs > 1, sector: G.sector, time: G.runTime,
-    level: p.level, kills: G.kills, maxCombo: G.maxCombo, grazes: G.grazes, unlocked, player: p,
+    level: p.level, kills: G.kills, maxCombo: G.maxCombo, grazes: G.grazes, unlocked, reward, player: p,
   });
+  meta.renderRewards(document.getElementById('over-rewards'), reward, campaign);
   G.screen = 'gameover';
   ui.show('over', { lock: 700 });
   pauseBtn.hidden = true;
@@ -377,6 +415,8 @@ ui.init({
     pickRouteNode(routeNode(G.run.route, btn.dataset.id));
   },
   nodeDone: () => nodeContinue(),
+  buy,
+  dock: dockChoose,
   abandon: () => showCampaign(),
   resume: () => {
     enterPlay();
@@ -601,6 +641,18 @@ window.NEON = {
     pickRouteNode(node);
     return true;
   },
+  // Test helper: grant profile credits / rank XP, and/or run wallet credits.
+  grant({ credits = 0, rankXp = 0, wallet = 0 } = {}) {
+    profile.credits += credits;
+    profile.rankXp += rankXp;
+    if (G.run && wallet) {
+      G.run.wallet = (G.run.wallet || 0) + wallet;
+      G.run.earned = (G.run.earned || 0) + wallet;
+    }
+    saveProfile();
+    return { credits: profile.credits, rankXp: profile.rankXp, rank: rankFor(profile.rankXp), wallet: G.run && G.run.wallet };
+  },
+  market: () => marketOffers,
   campaign: { SYSTEMS, generateRoute, nodeSpec, reachableNodes },
   // opts.nodePick(nodes) → index overrides the default (random fighting node).
   simulate(seconds, pickFn = (choices) => pick(choices), opts = {}) {
@@ -611,9 +663,25 @@ window.NEON = {
     });
     for (let t = 0; t < seconds; t += dt) {
       if (G.screen === 'draft') pickUpgrade(pickFn(draftChoices));
-      for (let guard = 0; guard < 4 && (G.screen === 'route' || G.screen === 'node'); guard++) {
+      for (let guard = 0; guard < 6 && (G.screen === 'route' || G.screen === 'node' || G.screen === 'market' || G.screen === 'dock'); guard++) {
         if (G.screen === 'node') nodeContinue();
-        else {
+        else if (G.screen === 'market') {
+          // Default: buy the cheapest affordable upgrade offer. opts.marketPick(offers, wallet) → index | -1.
+          const w = G.run.wallet;
+          let i = -1;
+          if (opts.marketPick) i = opts.marketPick(marketOffers, w);
+          else {
+            const ok = marketOffers.map((o, k) => k).filter((k) => marketOffers[k].kind === 'upgrade' && marketOffers[k].price <= w);
+            if (ok.length) i = ok.reduce((a, b) => (marketOffers[b].price < marketOffers[a].price ? b : a));
+          }
+          if (i >= 0) buyOffer(marketOffers[i]);
+          nodeContinue();
+        } else if (G.screen === 'dock') {
+          const p = G.player;
+          if (p.hp < p.maxHp) dockRepair();
+          else dockReinforce();
+          nodeContinue();
+        } else {
           const nodes = reachableNodes(G.run.route, G.run.nodeId);
           pickRouteNode(nodes[nodePick(nodes)]);
         }
@@ -625,7 +693,7 @@ window.NEON = {
     }
     return {
       screen: G.screen, sector: G.sector, hp: G.player.hp, level: G.player.level, score: Math.floor(G.score), time: Math.round(G.runTime),
-      run: G.run && { system: G.run.system && G.run.system.id, row: G.run.row }, victory: !!(G.run && G.run.victory),
+      run: G.run && { system: G.run.system && G.run.system.id, row: G.run.row, wallet: G.run.wallet, earned: G.run.earned }, victory: !!(G.run && G.run.victory),
     };
   },
 };

@@ -6,6 +6,7 @@ import { rand, damp, TAU, clamp, chance, dist2 } from '../core/math.js';
 import { shoot, ring, fan, aimAt } from './bullets.js';
 import { explosion, sparks, damageNumber, addShake, floatText, hitstop } from './fx.js';
 import { dropXp, dropPickup } from './pickups.js';
+import { dropKillCredits } from './economy.js';
 import { sfx } from '../core/audio.js';
 import { onEnemyKilled } from './player.js';
 import { bossDamaged, updateBoss } from './bosses.js';
@@ -377,6 +378,7 @@ export function killEnemy(e, silent = false) {
   }
   const d = G.director.diff;
   dropXp(e.x, e.y, Math.max(1, Math.round(e.xp * d.xp)));
+  dropKillCredits(e);
   if (e.elite) {
     dropPickup(e.x, e.y, chance(0.3) ? 'heart' : chance(0.5) ? 'magnet' : 'cell');
     floatText(e.x, e.y - 20, 'ELITE DOWN', '#ffd84d', 12, 1);

@@ -7,6 +7,7 @@ import { spawnEnemy } from './enemies.js';
 import { spawnBoss, bossById, bossIndex, BOSS_IDS } from './bosses.js';
 import { banner, floatText } from './fx.js';
 import { vacuumAll } from './pickups.js';
+import { sectorPayout } from './economy.js';
 import { bg } from '../render/background.js';
 import { sfx, music } from '../core/audio.js';
 
@@ -300,7 +301,8 @@ function sectorClear() {
   vacuumAll();
   const p = G.player;
   if (G.mode === 'run') {
-    banner('SECTOR CLEAR', `+${(1000 * G.sector).toLocaleString()} BONUS`, '#7dff6b', 2.2);
+    const cr = sectorPayout();
+    banner('SECTOR CLEAR', `+${(1000 * G.sector).toLocaleString()} BONUS` + (cr ? `  ·  +${cr} CREDITS` : ''), '#7dff6b', 2.2);
     G.score += 1000 * G.sector * (1 + G.loop);
     sfx.sector();
     if (p && !p.dead && p.hp < p.maxHp) {

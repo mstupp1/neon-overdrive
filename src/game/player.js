@@ -6,6 +6,7 @@ import { clamp, damp, rand, TAU } from '../core/math.js';
 import { WEAPONS, weaponStreams, weaponDamageScale } from './ships.js';
 import { recomputeStats } from './upgrades.js';
 import { playerBullet, clearBullets } from './bullets.js';
+import { gainCredits } from './economy.js';
 import { particle, explosion, ring, sparks, floatText, addShake, flash, hitstop, slowmo } from './fx.js';
 import { sfx } from '../core/audio.js';
 import { input, readDirection } from '../core/input.js';
@@ -350,6 +351,10 @@ export function collectPickup(pk) {
     gainXp(p, pk.val);
     G.score += pk.val * 5;
     sfx.pickup();
+  } else if (pk.type === 'credit') {
+    gainCredits(pk.val, pk);
+    G.score += 10;
+    sfx.coin();
   } else if (pk.type === 'heart') {
     if (p.hp < p.maxHp) {
       p.hp++;

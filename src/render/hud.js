@@ -103,6 +103,12 @@ export function drawHud(ctx) {
     ctx.arc(rx + 1, y0 + 25, 4, 0, TAU);
     ctx.fill();
   }
+  // Credits wallet (under the sector bar, left of the clock)
+  if (run) {
+    const flash = G.realTime - (run.flash || -9) < 0.25;
+    ctx.drawImage(S.credit.img, rx - 85, y0 + 31, 14, 14);
+    text(ctx, Math.floor(run.wallet || 0).toLocaleString(), rx - 69, y0 + 38.5, 10, flash ? '#fff' : '#ffd24a', 'left', 700);
+  }
   text(ctx, `${Math.floor(G.runTime / 60)}:${Math.floor(G.runTime % 60).toString().padStart(2, '0')}`, rx, y0 + 38, 9, 'rgba(255,255,255,0.5)', 'right', 600);
 
   // Boss bar

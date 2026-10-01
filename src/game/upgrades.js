@@ -93,7 +93,7 @@ export function recomputeStats(p) {
   st.magnet = 80 * (1 + 0.55 * lv('magnet'));
   st.odGain = 1 + 0.25 * lv('capacitor');
   st.odDur = 6 + lv('capacitor');
-  st.maxHp = p.ship.hp + lv('hull');
+  st.maxHp = Math.max(1, p.ship.hp + lv('hull') + (p.hullMod || 0)); // hullMod: dock reinforcement (+) / contraband (-)
   st.shieldInterval = lv('aegis') ? 16 - 3 * lv('aegis') : 0;
   st.maxCharges = p.ship.dashes + lv('dashes');
   p.maxHp = st.maxHp;
@@ -117,8 +117,8 @@ export function applyUpgrade(p, id, G) {
   if (id === 'dashes') p.charges = Math.min(p.maxCharges, p.charges + 1);
 }
 
-// Build a draft of 3 choices. `kind` is 'level' or 'sector'.
-export function rollDraft(p, kind) {
+// Rolls up to n distinct upgrade ids from the current pool (weighted). `kind` is 'level' or 'sector'.
+export function rollUpgradeIds(p, kind, n = 3, rng = Math.random) {
   const mods = moduleCount(p);
   const pool = UPGRADES.filter((u) => {
     const l = p.up[u.id] || 0;
@@ -140,11 +140,17 @@ export function rollDraft(p, kind) {
     return wgt;
   };
   const remaining = [...pool];
-  while (choices.length < 3 && remaining.length) {
-    const u = weightedPick(remaining, weight);
+  while (choices.length < n && remaining.length) {
+    const u = weightedPick(remaining, weight, rng);
     choices.push(u.id);
     remaining.splice(remaining.indexOf(u), 1);
   }
+  return choices;
+}
+
+// Build a draft of 3 choices. `kind` is 'level' or 'sector'.
+export function rollDraft(p, kind) {
+  const choices = rollUpgradeIds(p, kind, 3);
   if (choices.length < 3 && p.hp < p.maxHp) choices.push('repair');
   while (choices.length < 3) choices.push('credits');
   return choices;

@@ -42,6 +42,14 @@ export function dropXp(x, y, amount) {
   }
 }
 
+// Gold credit chip; `val` is the raw amount (multipliers apply on collection).
+export function dropCredit(x, y, val) {
+  if (G.pickups.length > 300) return;
+  const p = make('credit', x + rand(-6, 6), y + rand(-6, 6), val);
+  p.life = 16;
+  return p;
+}
+
 export function dropPickup(x, y, type) {
   const p = make(type, x, y, 0);
   p.vy = -60;
@@ -104,7 +112,7 @@ export function drawPickups(ctx) {
     if (!p.pull && p.life < 3) a = Math.sin(p.life * 18) > 0 ? 0.9 : 0.25;
     ctx.globalAlpha = a;
     let sz = s.size;
-    if (p.type !== 'xp') sz *= 1 + Math.sin(time * 6) * 0.08;
+    if (p.type !== 'xp' && p.type !== 'credit') sz *= 1 + Math.sin(time * 6) * 0.08;
     ctx.drawImage(s.img, p.x - sz / 2, p.y - sz / 2, sz, sz);
   }
   ctx.globalAlpha = 1;

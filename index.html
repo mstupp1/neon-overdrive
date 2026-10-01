@@ -64,6 +64,7 @@
         <section class="screen" id="scr-campaign" data-back="back">
             <h2 class="screen-title">CAMPAIGN</h2>
             <p class="screen-sub">Choose a star system</p>
+            <div class="pilot-line" id="camp-pilot"></div>
             <div class="sysmap" id="sys-map"></div>
             <div class="sys-detail" id="sys-detail"></div>
             <nav class="menu">
@@ -96,6 +97,28 @@
             <nav class="menu">
                 <button class="btn primary" data-act="nodeDone">CONTINUE</button>
             </nav>
+        </section>
+
+        <!-- BLACK MARKET -->
+        <section class="screen" id="scr-market" data-back="nodeDone">
+            <h2 class="screen-title" id="market-title">BLACK MARKET</h2>
+            <div class="wallet" id="market-wallet"></div>
+            <p class="route-hint" id="market-hint"></p>
+            <div class="cards" id="market-cards"></div>
+            <div class="build" id="market-build"></div>
+            <nav class="menu row">
+                <button class="btn primary" data-act="nodeDone" id="market-leave">LEAVE</button>
+            </nav>
+        </section>
+
+        <!-- REPAIR DOCK -->
+        <section class="screen" id="scr-dock" data-back="">
+            <h2 class="screen-title" id="dock-title">REPAIR DOCK</h2>
+            <p class="screen-sub" id="dock-hull"></p>
+            <div class="cards">
+                <button class="card dock-card" data-act="dock" data-opt="repair" id="dock-repair" style="--c:#7dff6b"></button>
+                <button class="card dock-card" data-act="dock" data-opt="reinforce" id="dock-reinforce" style="--c:#3ff6ff"></button>
+            </div>
         </section>
 
         <!-- EXTRACTION -->
@@ -192,6 +215,7 @@
             <div class="best-badge" id="over-best" hidden>NEW BEST</div>
             <div class="run-stats" id="over-stats"></div>
             <div class="unlock" id="over-unlock" hidden></div>
+            <div class="extract-rewards" id="over-rewards"></div>
             <div class="build big" id="over-build"></div>
             <nav class="menu">
                 <button class="btn primary" data-act="retry">RETRY</button>

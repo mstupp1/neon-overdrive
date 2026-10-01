@@ -34,11 +34,11 @@ export function turnToward(a, b, step) {
   return a + Math.sign(d) * step;
 }
 
-export function weightedPick(items, weightFn) {
+export function weightedPick(items, weightFn, rng = Math.random) {
   let total = 0;
   for (const it of items) total += Math.max(0, weightFn(it));
   if (total <= 0) return null;
-  let r = Math.random() * total;
+  let r = rng() * total;
   for (const it of items) {
     r -= Math.max(0, weightFn(it));
     if (r <= 0) return it;
