@@ -436,6 +436,57 @@ export function buildSprites(ships) {
     g.fillRect(-11, -5, 22, 2.4);
     g.restore();
   });
+
+  // MAG, the mission AI: a hex frame around a watching eye. 96x96 box.
+  S.portrait_mag = makeSprite(96, (g) => {
+    const C = '#3ff6ff';
+    const hex = poly(regular(6, 37, Math.PI / 2));
+    glowFill(g, C, 0, hex, 0.12);
+    glowStroke(g, C, 2.4, 10, hex);
+    glowStroke(g, C, 1.2, 5, poly(regular(6, 28, Math.PI / 2)), 1);
+    glowStroke(g, C, 1.4, 5, (c) => {
+      for (let i = 0; i < 6; i++) {
+        const a = Math.PI / 2 + (i / 6) * TAU;
+        c.moveTo(Math.cos(a) * 37, Math.sin(a) * 37);
+        c.lineTo(Math.cos(a) * 45, Math.sin(a) * 45);
+      }
+    }, 1);
+    const eye = (c) => { c.moveTo(-23, 0); c.quadraticCurveTo(0, -21, 23, 0); c.quadraticCurveTo(0, 21, -23, 0); c.closePath(); };
+    glowFill(g, C, 0, eye, 0.28);
+    glowStroke(g, C, 2, 8, eye);
+    glowStroke(g, '#ff3df2', 1.6, 6, (c) => c.arc(0, 0, 8.5, 0, TAU), 1);
+    g.save();
+    g.fillStyle = '#fff'; g.shadowColor = C; g.shadowBlur = 8;
+    g.fillRect(-1.6, -7, 3.2, 14);
+    g.restore();
+  });
+
+  // SIGNAL, the hostile intelligence: a cracked, glitch-sliced mask. 96x96 box.
+  S.portrait_signal = makeSprite(96, (g) => {
+    const R = '#ff3d6e';
+    const M = '#ff3df2';
+    const mask = (c) => {
+      c.moveTo(-26, -34); c.lineTo(26, -34); c.lineTo(30, -4); c.lineTo(20, 24); c.lineTo(8, 36); c.lineTo(-8, 36); c.lineTo(-20, 24); c.lineTo(-30, -4); c.closePath();
+    };
+    glowFill(g, R, 0, mask, 0.16);
+    glowStroke(g, R, 2.4, 10, mask);
+    // eyes: jagged slits, one displaced
+    const eyeL = (c) => { c.moveTo(-21, -10); c.lineTo(-5, -14); c.lineTo(-8, -3); c.lineTo(-19, -4); c.closePath(); };
+    const eyeR = (c) => { c.moveTo(21, -10); c.lineTo(5, -14); c.lineTo(8, -3); c.lineTo(19, -4); c.closePath(); };
+    glowFill(g, R, 0, eyeL, 0.7); glowStroke(g, R, 1.8, 8, eyeL);
+    glowFill(g, R, 0, eyeR, 0.7); glowStroke(g, R, 1.8, 8, eyeR);
+    // crack down the face + mouth grille
+    glowStroke(g, M, 1.4, 6, (c) => { c.moveTo(2, -34); c.lineTo(-4, -20); c.lineTo(3, -8); c.lineTo(-2, 6); c.lineTo(4, 18); }, 1);
+    glowStroke(g, R, 1.2, 4, (c) => { for (const x of [-9, -3, 3, 9]) { c.moveTo(x, 20); c.lineTo(x, 29); } }, 1);
+    // glitch slices: shifted copies of the outline
+    g.save();
+    g.globalCompositeOperation = 'lighter';
+    g.strokeStyle = '#3ff6ff'; g.lineWidth = 1.4; g.globalAlpha = 0.7;
+    g.beginPath(); g.moveTo(-34, -22); g.lineTo(-18, -22); g.moveTo(22, -22); g.lineTo(38, -22); g.stroke();
+    g.strokeStyle = M;
+    g.beginPath(); g.moveTo(-36, 10); g.lineTo(-12, 10); g.moveTo(14, 10); g.lineTo(36, 10); g.moveTo(-30, 30); g.lineTo(-16, 30); g.stroke();
+    g.restore();
+  });
 }
 
 // --- Step 6a enemies: Carrier, Shielder, Weaver, Blinker, Hunter, ECLIPSE (+ its drones) --------------

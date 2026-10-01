@@ -2127,3 +2127,347 @@ input[type='range']::-moz-range-thumb {
     border-color: var(--c);
     box-shadow: 0 0 0.6em color-mix(in srgb, var(--c) 55%, transparent);
 }
+
+/* ---------------------------------------------------------------- Story: comms, events, boss card (step 7a) */
+
+.help .gold { color: #ffd24a; }
+.help .green { color: var(--green); }
+.help .violet { color: #b48bff; }
+
+/* Comms overlay: blocking (between screens) and live (non-blocking, during play) */
+.comms {
+    --c: var(--cyan);
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    display: flex;
+    justify-content: center;
+    padding: 0 0.8em;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.comms.on {
+    opacity: 1;
+}
+
+.comms.hold {
+    opacity: 0;
+}
+
+.comms.block {
+    inset: 0;
+    align-items: flex-end;
+    padding-bottom: calc(var(--safe-bottom) + 1.4em);
+    background: linear-gradient(180deg, rgba(5, 3, 13, 0.35) 30%, rgba(5, 3, 13, 0.8));
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.comms.live {
+    top: calc(var(--safe-top) + 5.7em);
+    bottom: auto;
+    align-items: flex-start;
+}
+
+.comms-box {
+    display: grid;
+    grid-template-columns: 4.8em 1fr;
+    gap: 0.8em;
+    align-items: center;
+    width: 100%;
+    max-width: 24em;
+    min-height: 6.4em;
+    padding: 0.7em 0.9em;
+    background: linear-gradient(100deg, color-mix(in srgb, var(--c) 18%, rgba(8, 6, 24, 0.92)) 0%, rgba(8, 6, 24, 0.92) 70%);
+    border: 1px solid color-mix(in srgb, var(--c) 60%, transparent);
+    box-shadow: 0 0 1.4em color-mix(in srgb, var(--c) 25%, transparent), inset 0 0 1.2em color-mix(in srgb, var(--c) 10%, transparent);
+    clip-path: polygon(0.7em 0, 100% 0, 100% calc(100% - 0.7em), calc(100% - 0.7em) 100%, 0 100%, 0 0.7em);
+}
+
+.comms.on .comms-box {
+    animation: comms-in 0.28s cubic-bezier(.2, .9, .3, 1.1) both;
+}
+
+@keyframes comms-in {
+    from {
+        transform: translateY(1em);
+        opacity: 0;
+    }
+}
+
+.comms.live .comms-box {
+    grid-template-columns: 3.2em 1fr;
+    min-height: 0;
+    padding: 0.5em 0.7em;
+    gap: 0.6em;
+    background: linear-gradient(100deg, color-mix(in srgb, var(--c) 18%, rgba(8, 6, 24, 0.78)) 0%, rgba(8, 6, 24, 0.7) 75%);
+}
+
+.comms-face {
+    width: 100%;
+    aspect-ratio: 1;
+    display: block;
+    background: radial-gradient(circle, color-mix(in srgb, var(--c) 18%, transparent), transparent 70%);
+    border: 1px solid color-mix(in srgb, var(--c) 45%, transparent);
+}
+
+.comms-name {
+    font-family: Orbitron, sans-serif;
+    font-weight: 900;
+    font-size: 0.72em;
+    letter-spacing: 0.28em;
+    color: var(--c);
+    text-shadow: 0 0 0.6em var(--c);
+}
+
+.comms-line {
+    margin-top: 0.25em;
+    min-height: 3.4em;
+    font-size: 1.05em;
+    line-height: 1.22;
+    color: #fff;
+}
+
+.comms.live .comms-line {
+    min-height: 2.4em;
+    font-size: 0.95em;
+    line-height: 1.15;
+}
+
+.comms-hint {
+    margin-top: 0.3em;
+    font-family: Orbitron, sans-serif;
+    font-size: 0.6em;
+    letter-spacing: 0.2em;
+    color: var(--dim);
+    text-align: right;
+    animation: blink 1s infinite;
+}
+
+.comms.glitchy .comms-line,
+.comms.glitchy .comms-name {
+    animation: sig-glitch 2.4s infinite steps(1);
+}
+
+.comms.glitchy .comms-line {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #ffd2dc;
+}
+
+@keyframes sig-glitch {
+    0%, 86%, 100% { text-shadow: 0 0 0.5em var(--c); transform: none; }
+    88% { text-shadow: -0.12em 0 #3ff6ff, 0.12em 0 #ff3df2; transform: translateX(0.06em); }
+    92% { text-shadow: 0.1em 0 #3ff6ff, -0.1em 0 #ff3df2; transform: translateX(-0.08em); }
+    95% { text-shadow: 0 0 0.5em var(--c); transform: skewX(-6deg); }
+}
+
+/* Anomaly events */
+#scr-event {
+    justify-content: safe center;
+    gap: 0.7em;
+    padding-top: calc(var(--safe-top) + 0.9em);
+    padding-bottom: calc(var(--safe-bottom) + 0.9em);
+}
+
+#scr-event .node-icon {
+    width: 3.6em;
+    height: 3.6em;
+    padding: 0.75em;
+    flex: none;
+}
+
+#scr-event .screen-title {
+    font-size: 1.5em;
+    color: var(--c);
+    text-shadow: 0 0 0.35em var(--c), 0 0 1.2em color-mix(in srgb, var(--c) 50%, transparent);
+}
+
+.event-text {
+    margin: 0;
+    max-width: 22em;
+    text-align: center;
+    font-size: 1.05em;
+    line-height: 1.28;
+    color: var(--text);
+}
+
+.card.choice {
+    grid-template-columns: 1fr auto;
+    padding: 0.7em 0.9em;
+}
+
+.card.choice .card-name {
+    font-size: 0.9em;
+}
+
+.card.choice .card-desc {
+    font-size: 0.9em;
+}
+
+.card.choice .price {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.1em;
+    font-family: Orbitron, sans-serif;
+    font-size: 0.85em;
+    color: #ffd24a;
+}
+
+.card.choice .price i {
+    font-style: normal;
+    font-size: 0.65em;
+    letter-spacing: 0.1em;
+    color: var(--red);
+}
+
+.card.choice.safe .card-tag { background: var(--green); }
+.card.choice.risky .card-tag { background: var(--pink); }
+
+.event-result {
+    width: 100%;
+    max-width: 24em;
+    padding: 0.8em 1em;
+    text-align: center;
+    line-height: 1.3;
+    color: #fff;
+    background: linear-gradient(100deg, color-mix(in srgb, var(--c) 16%, var(--panel)), var(--panel));
+    border: 1px solid color-mix(in srgb, var(--c) 55%, transparent);
+    border-radius: 0.5em;
+    animation: card-in 0.3s both;
+}
+
+.event-result small {
+    display: block;
+    margin-bottom: 0.3em;
+    font-family: Orbitron, sans-serif;
+    font-size: 0.65em;
+    letter-spacing: 0.2em;
+    color: var(--c);
+}
+
+/* Boss intro title card (DOM, shown during the WARNING phase) */
+.boss-card {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 47%;
+    z-index: 25;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3em;
+    pointer-events: none;
+    text-align: center;
+}
+
+.boss-card.show {
+    display: flex;
+    animation: bc-life 3.4s both;
+}
+
+.bc-kicker {
+    font-family: Orbitron, sans-serif;
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.4em;
+    color: rgba(255, 255, 255, 0.75);
+    animation: bc-kick 0.7s 0.1s both;
+}
+
+.bc-name {
+    position: relative;
+    font-family: Orbitron, sans-serif;
+    font-weight: 900;
+    font-size: 3.1em;
+    line-height: 1;
+    color: #fff;
+    text-shadow: 0 0 0.3em var(--c), 0 0 1em color-mix(in srgb, var(--c) 60%, transparent);
+    animation: bc-name 0.8s cubic-bezier(.2, .9, .3, 1) both;
+}
+
+.bc-name::before,
+.bc-name::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    opacity: 0.8;
+    pointer-events: none;
+}
+
+.bc-name::before {
+    color: #3ff6ff;
+    clip-path: inset(0 0 55% 0);
+    animation: bc-gl1 0.9s 0.2s steps(1) 2, bc-gl1 0.25s 2.2s steps(1) 2;
+}
+
+.bc-name::after {
+    color: #ff3df2;
+    clip-path: inset(50% 0 0 0);
+    animation: bc-gl2 0.9s 0.25s steps(1) 2, bc-gl2 0.25s 2.2s steps(1) 2;
+}
+
+.bc-title {
+    font-family: Orbitron, sans-serif;
+    font-size: 0.95em;
+    font-weight: 700;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--c);
+    text-shadow: 0 0 0.6em var(--c);
+    animation: bc-title 0.8s 0.35s both;
+}
+
+@keyframes bc-life {
+    0%, 85% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@keyframes bc-kick {
+    from { opacity: 0; letter-spacing: 0.9em; }
+}
+
+@keyframes bc-name {
+    0% { transform: translateX(-120%) skewX(-24deg); opacity: 0; letter-spacing: 0.4em; }
+    60% { transform: translateX(4%) skewX(6deg); opacity: 1; }
+    100% { transform: none; letter-spacing: 0.06em; }
+}
+
+@keyframes bc-title {
+    from { opacity: 0; transform: translateX(120%); letter-spacing: 0.7em; }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes bc-gl1 {
+    0% { transform: translate(-0.06em, 0); }
+    25% { transform: translate(0.08em, 0.02em); }
+    50% { transform: translate(-0.04em, -0.02em); }
+    75% { transform: translate(0.05em, 0); }
+    100% { transform: none; }
+}
+
+@keyframes bc-gl2 {
+    0% { transform: translate(0.07em, 0); }
+    25% { transform: translate(-0.09em, 0); }
+    50% { transform: translate(0.03em, 0.02em); }
+    75% { transform: translate(-0.06em, 0); }
+    100% { transform: none; }
+}
+
+/* Blackout: heavier vignette */
+.fx-vignette.dark {
+    background: radial-gradient(ellipse at 50% 55%, transparent 25%, rgba(0, 0, 0, 0.8) 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bc-name::before,
+    .bc-name::after,
+    .comms.glitchy .comms-line,
+    .comms.glitchy .comms-name {
+        animation: none;
+    }
+}

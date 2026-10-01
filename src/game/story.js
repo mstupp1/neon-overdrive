@@ -1,0 +1,394 @@
+// Story beats (comms lines) and Anomaly events for the campaign.
+// Premise: pilot ECHO is reactivated by the mission AI MAG after the Signal, a hostile intelligence, seizes the Neon Grid.
+// Lines: { who: 'MAG' | 'ECHO' | 'SIGNAL', text }. ECHO's gender is never specified; keep it that way.
+
+import { G } from './state.js';
+import { mulberry32 } from '../core/math.js';
+import { rollUpgradeIds, applyUpgrade, cardInfo, recomputeStats } from './upgrades.js';
+
+// color: ECHO uses the active class colour (resolved in ui/comms.js).
+export const SPEAKERS = {
+  MAG: { name: 'MAG', color: '#3ff6ff', portrait: 'portrait_mag' },
+  ECHO: { name: 'ECHO', color: 'class', portrait: 'portrait_echo' },
+  SIGNAL: { name: 'SIGNAL', color: '#ff3d6e', portrait: 'portrait_signal', glitch: true },
+};
+
+const L = (who, text) => ({ who, text });
+
+export const STORY = {
+  prologue: [
+    L('MAG', 'ECHO. Wake up. Neural link at 62%. Good enough.'),
+    L('MAG', 'Three cycles ago a hostile intelligence seized the Neon Grid. We call it the Signal.'),
+    L('ECHO', 'Everyone else got deleted. Why not me?'),
+    L('MAG', 'You were offline. Lucky. Now fly. Cut the Signal out, system by system.'),
+  ],
+  systems: {
+    genesis: {
+      intro: [
+        L('MAG', 'Genesis Lattice. The Grid\'s outer gate. WARDEN holds it with a siege rig.'),
+        L('ECHO', 'Then I\'ll knock.'),
+        L('MAG', 'Chart your route. Credits keep you alive, so spend them.'),
+      ],
+      preBoss: [
+        L('SIGNAL', 'ACCESS DENIED. THIS GATE IS CLOSED.'),
+        L('MAG', 'WARDEN is charging. Don\'t trade shots. Trade space.'),
+      ],
+      postBoss: [
+        L('MAG', 'WARDEN is down. The gate is open.'),
+        L('ECHO', 'That mech ran Signal code, didn\'t it?'),
+        L('MAG', 'Everything out here does. Extraction ready. Go.'),
+      ],
+    },
+    crimson: {
+      intro: [
+        L('MAG', 'Crimson Tide. The Signal didn\'t just take these sectors. It grew in them.'),
+        L('ECHO', 'Grew what?'),
+        L('MAG', 'Whatever is breeding at the core. Keep your hull up.'),
+      ],
+      preBoss: [
+        L('SIGNAL', 'FLESH IS JUST SLOW CODE.'),
+        L('MAG', 'HYDRA. Three heads, one hunger. Stay mobile.'),
+      ],
+      postBoss: [
+        L('MAG', 'HYDRA is quiet. The biomass is collapsing.'),
+        L('ECHO', 'The Signal built that. It is learning to build.'),
+        L('MAG', 'Then we end it before it finishes. Pull out.'),
+      ],
+    },
+    cyclone: {
+      intro: [
+        L('MAG', 'Cyan Cyclone. Data winds, lethal lightning. The core intelligence sits in the eye.'),
+        L('ECHO', 'OMEGA.'),
+        L('MAG', 'Kill it and the Grid wakes up. Ride the storm.'),
+      ],
+      preBoss: [
+        L('SIGNAL', 'I AM THE GRID. YOU ARE A GLITCH.'),
+        L('MAG', 'There it is. Give it everything you have.'),
+      ],
+      postBoss: [
+        L('SIGNAL', 'RELAY... TERMINATED... IT... IS... COMING...'),
+        L('MAG', 'OMEGA was only a relay. The real source is beyond the Grid.'),
+        L('ECHO', 'Then that\'s where I\'m going.'),
+      ],
+    },
+    void: {
+      intro: [
+        L('MAG', 'The Void. Past the Grid\'s edge. The Signal\'s source. Nobody has returned.'),
+        L('ECHO', 'Nobody had the right pilot.'),
+        L('MAG', 'My sensors are failing out here. ECHO, it is reading your combat data.'),
+        L('ECHO', 'It is reading me?'),
+      ],
+      preBoss: [
+        L('SIGNAL', 'I AM EVERY SHOT YOU HAVE EVER FIRED.'),
+        L('ECHO', 'Then you know how this ends.'),
+      ],
+      postBoss: [
+        L('SIGNAL', 'I WAS YOU... YOU WERE ONLY EVER... ME...'),
+        L('MAG', 'ECLIPSE is collapsing. The Signal is fading.'),
+      ],
+    },
+  },
+  ending: [
+    L('MAG', 'Signal strength: zero. The Grid is ours again, ECHO.'),
+    L('ECHO', 'It built a mirror out of my own flying.'),
+    L('MAG', 'It could only copy what it saw. You were always the original.'),
+    L('ECHO', 'So what happens now?'),
+    L('MAG', 'The Grid rebuilds. Stray fragments still drift out there. The ENDLESS GRID is open if you want to hunt them.'),
+    L('MAG', 'Thanks for flying, ECHO.'),
+  ],
+};
+
+// --- Anomaly events ------------------------------------------------------------------
+// ev = { id, title, color, text, choices: [choice] | (ctx) => [choice] }
+// choice = { label, desc, tag?, cost?, effect(ctx) → result string }
+// ctx = { p, run, rng, scale, lvl }. Effects only touch existing systems (hull, hullMod, upgrades, wallet,
+// rerolls, run.curse, run.ambush, run.bonusXp) and respect their limits.
+
+const round5 = (n) => Math.max(5, Math.round(n / 5) * 5);
+
+function makeCtx(rng = Math.random) {
+  const run = G.run;
+  const sys = run && run.system;
+  return {
+    p: G.player, run, rng,
+    scale: 1 + 0.5 * (((sys && sys.act) || 1) - 1), // credit scale per act, like the Black Market
+    lvl: sys ? sys.level + Math.max(0, run.row) * sys.step : 1,
+  };
+}
+
+// Credits straight into the run wallet (pilot credit multipliers apply, sector modifiers do not).
+function payout(c, base) {
+  const n = Math.round(round5(base * c.scale) * ((c.p.st && c.p.st.creditMul) || 1));
+  c.run.wallet = (c.run.wallet || 0) + n;
+  c.run.earned = (c.run.earned || 0) + n;
+  return n;
+}
+
+const heal = (p, n) => {
+  const before = p.hp;
+  p.hp = Math.min(p.maxHp, p.hp + n);
+  return p.hp - before;
+};
+const hurt = (p, n) => {
+  const before = p.hp;
+  p.hp = Math.max(1, p.hp - n);
+  return before - p.hp;
+};
+const curse = (c, id) => {
+  c.run.curse = c.run.curse || id;
+  return c.run.curse;
+};
+
+// Grants n random upgrade levels (no evolutions); falls back to credits when the pool is dry.
+function grantUpgrades(c, n) {
+  const names = [];
+  for (let i = 0; i < n; i++) {
+    const id = rollUpgradeIds(c.p, 'sector', 1, c.rng)[0];
+    if (!id) break;
+    names.push(cardInfo(c.p, id).name);
+    applyUpgrade(c.p, id, G);
+  }
+  if (!names.length) return `No room left to install anything. Salvaged ${payout(c, 120)} credits instead.`;
+  return `Installed: ${names.join(', ')}.`;
+}
+
+const RISKY_MODS = ['overclocked', 'minefield', 'swarmFront', 'blackout', 'ionStorm'];
+const modName = (id) => id.replace(/([A-Z])/g, ' $1').toUpperCase();
+
+export const EVENTS = [
+  {
+    id: 'carrier', title: 'DERELICT CARRIER', color: '#ff9d3f',
+    text: 'A dead Signal carrier drifts across your path. Its bays are still warm and its hull is full of parts.',
+    choices: [
+      {
+        label: 'Strip the hull', tag: 'RISKY', desc: '+2 random upgrade levels. The next fight gets a hazard modifier.',
+        effect(c) {
+          const r = grantUpgrades(c, 2);
+          const m = curse(c, RISKY_MODS[Math.floor(c.rng() * RISKY_MODS.length)]);
+          return `${r} Alarms tripped: next fight is ${modName(m)}.`;
+        },
+      },
+      { label: 'Salvage the cargo', tag: 'SAFE', desc: 'Safe credits from the cargo bays.', effect: (c) => `Cargo sold. +${payout(c, 130)} credits.` },
+      { label: 'Leave it', desc: 'Some wrecks stay wrecks.', effect: () => 'You fly on. The carrier tumbles into the dark.' },
+    ],
+  },
+  {
+    id: 'echo', title: 'SIGNAL ECHO', color: '#ff3d6e',
+    text: 'A transmission slips through your comms. Your own voice, looping back from somewhere deep in the Grid.',
+    choices: [
+      {
+        label: 'Open the channel', tag: 'RISKY', desc: '-1 hull. +1 reroll and +120 credits.',
+        effect(c) {
+          const h = hurt(c.p, 1);
+          c.p.hurtT = Math.max(c.p.hurtT || 0, 0.2);
+          G.rerolls++;
+          return `${h ? 'The feedback burns, -1 hull. ' : 'The feedback bounces off. '}+1 reroll, +${payout(c, 120)} credits.`;
+        },
+      },
+      {
+        label: 'Jam the signal', tag: 'SAFE', desc: 'Fully charge your ultimate.',
+        effect(c) {
+          c.p.od = 100;
+          return 'Static. Your ultimate meter is fully charged.';
+        },
+      },
+    ],
+  },
+  {
+    id: 'smuggler', title: 'SMUGGLER BEACON', color: '#ffd24a',
+    text: 'A pirate beacon offers hot stock, no questions asked. Prices are a little better than the Black Market.',
+    choices(c) {
+      const act = (c.run.system && c.run.system.act) || 1;
+      const ids = rollUpgradeIds(c.p, 'sector', 3, c.rng);
+      const out = ids.map((id) => {
+        const info = cardInfo(c.p, id);
+        return {
+          label: info.name, tag: info.lv === 0 ? 'NEW' : `LV ${info.lv + 1}`, desc: info.desc,
+          cost: round5((0.75 * (50 + 30 * info.lv)) * (1 + 0.5 * (act - 1))),
+          effect: () => `Installed ${info.name}. Pleasure doing business.`,
+          _apply: () => applyUpgrade(c.p, id, G),
+        };
+      });
+      if (!out.length) out.push({ label: 'Field rations', tag: 'REPAIR', desc: 'Repair 1 hull.', cost: 40, _apply: () => heal(c.p, 1), effect: () => 'Patched up. +1 hull.' });
+      out.push({ label: 'Walk away', desc: 'Not today.', effect: () => 'The beacon goes quiet behind you.' });
+      return out;
+    },
+  },
+  {
+    id: 'cryo', title: 'CRYO POD', color: '#7dd3ff',
+    text: 'A sealed pod floats in the wreckage, medical systems still running. It is not a person. It is spare parts for you.',
+    choices: [
+      {
+        label: 'Full repair', tag: 'HEAL', cost: 50, desc: 'Restore your hull to full.',
+        ok: (c) => (c.p.hp >= c.p.maxHp ? 'HULL FULL' : ''),
+        effect(c) {
+          const n = heal(c.p, c.p.maxHp);
+          return `Hull restored (+${n}).`;
+        },
+      },
+      {
+        label: 'Reinforce', tag: '+1 MAX', cost: 90, desc: '+1 max hull for this run.',
+        effect(c) {
+          c.p.hullMod = (c.p.hullMod || 0) + 1;
+          recomputeStats(c.p);
+          return `Plating grafted on. Max hull is now ${c.p.maxHp}.`;
+        },
+      },
+      { label: 'Leave it', desc: 'Keep your credits.', effect: () => 'The pod drifts away.' },
+    ],
+  },
+  {
+    id: 'cache', title: 'GLITCHED CACHE', color: '#b48bff',
+    text: 'A data cache flickers between two states. Something valuable is inside. Something else might be too.',
+    choices: [
+      {
+        label: 'Crack it open', tag: 'RISKY', desc: '50/50: a big credit haul, or an ambush (an elite fight with a hazard).',
+        effect(c) {
+          if (c.rng() < 0.5) return `Jackpot. +${payout(c, 220 + 20 * c.lvl)} credits.`;
+          c.run.ambush = true;
+          const m = curse(c, RISKY_MODS[Math.floor(c.rng() * RISKY_MODS.length)]);
+          return `Trap! The next fight is an ELITE ambush (${modName(m)}).`;
+        },
+      },
+      {
+        label: 'Scan and disarm', tag: 'SAFE', cost: 30, desc: 'Pay 30 credits to defuse it. Safe loot.',
+        effect: (c) => `Defused. +${payout(c, 140)} credits.`,
+      },
+      { label: 'Ignore it', desc: 'Curiosity kills.', effect: () => 'You log the coordinates and move on.' },
+    ],
+  },
+  {
+    id: 'ghost', title: 'GHOST SIGNAL', color: '#9d7bff',
+    text: 'A pilot beacon pings from a long-dead fighter. A flight log is still recorded inside. Maybe ECHO is not the first to come this far.',
+    choices: [
+      {
+        label: 'Copy the flight log', tag: '+XP', desc: '+150 Pilot Rank XP, banked at the end of this run.',
+        effect(c) {
+          c.run.bonusXp = (c.run.bonusXp || 0) + 150;
+          return 'Flight data copied. +150 rank XP when this run ends.';
+        },
+      },
+      {
+        label: 'Carry their last words', tag: 'HEAL', desc: 'Repair 1 hull and +25% ultimate.',
+        effect(c) {
+          const n = heal(c.p, 1);
+          c.p.od = Math.min(100, c.p.od + 25);
+          return `You promise to finish it. ${n ? '+1 hull, ' : ''}+25% ultimate.`;
+        },
+      },
+      { label: 'Pay respects', desc: 'A moment of silence.', effect: () => 'You salute and fly on.' },
+    ],
+  },
+  {
+    id: 'reactor', title: 'OVERCHARGED REACTOR', color: '#ff4d6d',
+    text: 'A Signal reactor, running far past its limits. Tap it and your weapons will sing. It will cost you structure.',
+    choices: [
+      {
+        label: 'Tap the core', tag: 'RISKY', desc: '+25% damage for the run. -1 max hull (or an OVERCLOCKED next fight at 1 hull).',
+        effect(c) {
+          c.p.dmgMod = (c.p.dmgMod || 1) * 1.25;
+          let cost;
+          if (c.p.maxHp >= 2) {
+            c.p.hullMod = (c.p.hullMod || 0) - 1;
+            cost = '-1 max hull';
+          } else cost = `next fight ${modName(curse(c, 'overclocked'))}`;
+          recomputeStats(c.p);
+          c.p.hp = Math.min(c.p.hp, c.p.maxHp);
+          return `Weapons overcharged: +25% damage. Cost: ${cost}.`;
+        },
+      },
+      { label: 'Vent the coolant', tag: 'SAFE', desc: 'Repair 1 hull.', effect: (c) => `Coolant vented. ${heal(c.p, 1) ? '+1 hull.' : 'Nothing to repair.'}` },
+      { label: 'Steer clear', desc: 'Not worth the radiation.', effect: () => 'You give the reactor a wide berth.' },
+    ],
+  },
+  {
+    id: 'drift', title: 'QUIET DRIFT', color: '#7dff6b',
+    text: 'Nothing here. No Signal, no wrecks, no static. For a moment the Grid is just stars and silence.',
+    choices: [
+      { label: 'Rest', tag: 'HEAL', desc: 'Repair 1 hull.', effect: (c) => (heal(c.p, 1) ? 'You breathe. +1 hull.' : 'You breathe. Hull is already full.') },
+      { label: 'Skim the dust', tag: 'SAFE', desc: 'A few credits from the dust.', effect: (c) => `+${payout(c, 40)} credits.` },
+    ],
+  },
+  {
+    id: 'wreck', title: 'WRECKAGE FIELD', color: '#ff7a18',
+    text: 'A battlefield from before the Signal. Tangled hulls, live munitions, valuable plating.',
+    choices: [
+      {
+        label: 'Mine the wreckage', tag: 'RISKY', desc: '+1 random upgrade level. -1 hull.',
+        effect(c) {
+          const h = hurt(c.p, 1);
+          return `${grantUpgrades(c, 1)} ${h ? 'Shrapnel cost 1 hull.' : 'You took no damage.'}`;
+        },
+      },
+      { label: 'Pick through it', tag: 'SAFE', desc: 'Careful salvage. Credits only.', effect: (c) => `+${payout(c, 70)} credits.` },
+    ],
+  },
+  {
+    id: 'uplink', title: 'MAG UPLINK', color: '#3ff6ff',
+    text: 'MAG patches into your ship. "I can divert power from the Grid relays. Pick one."',
+    choices: [
+      {
+        label: 'Emergency repairs', tag: 'HEAL', desc: 'Repair 2 hull. Next fight is BLACKOUT (power diverted).',
+        effect(c) {
+          const n = heal(c.p, 2);
+          return `+${n} hull. Power diverted: next fight is ${modName(curse(c, 'blackout'))}.`;
+        },
+      },
+      {
+        label: 'Tactical data', tag: 'SAFE', desc: '+1 reroll and +25% ultimate.',
+        effect(c) {
+          G.rerolls++;
+          c.p.od = Math.min(100, c.p.od + 25);
+          return '+1 reroll, +25% ultimate.';
+        },
+      },
+      { label: 'Decline', desc: 'Save the relays.', effect: () => 'MAG: "Noted. Stay sharp."' },
+    ],
+  },
+];
+
+export const eventById = (id) => EVENTS.find((e) => e.id === id);
+
+const hashStr = (s) => {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+  return h >>> 0;
+};
+
+// Event for a route node: seeded by the route seed + node id, never repeating within a run until all are used.
+export function eventFor(route, node, used = []) {
+  const rng = mulberry32((route.seed ^ hashStr(node.id)) >>> 0);
+  let pool = EVENTS.filter((e) => !used.includes(e.id));
+  if (!pool.length) pool = EVENTS;
+  return pool[Math.floor(rng() * pool.length)];
+}
+
+// Opens an event: resolves its choices (some are dynamic) into a session object.
+export function startEvent(ev, rng = Math.random) {
+  const ctx = makeCtx(rng);
+  const choices = typeof ev.choices === 'function' ? ev.choices(ctx) : ev.choices;
+  return { ev, ctx, choices, done: false, result: '' };
+}
+
+// Why a choice cannot be taken right now ('' if it can).
+export function choiceBlocked(s, i) {
+  const c = s.choices[i];
+  if (!c) return 'N/A';
+  if (c.cost && (s.ctx.run.wallet || 0) < c.cost) return `NEED ${c.cost - (s.ctx.run.wallet || 0)}`;
+  if (c.ok) return c.ok(s.ctx);
+  return '';
+}
+
+// Applies choice i. Returns the result line, or null if blocked / already resolved.
+export function resolveChoice(s, i) {
+  if (s.done || choiceBlocked(s, i)) return null;
+  const c = s.choices[i];
+  if (c.cost) {
+    s.ctx.run.wallet -= c.cost;
+  }
+  if (c._apply) c._apply();
+  s.result = c.effect(s.ctx);
+  s.done = true;
+  s.picked = i;
+  return s.result;
+}

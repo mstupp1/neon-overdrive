@@ -113,7 +113,7 @@ export function settleRun(victory) {
   const banked = Math.floor(w * pct);
   // Cleared sectors: campaign counts fought sectors (the fatal one excluded); endless counts passed sectors.
   const cleared = Math.max(0, mode === 'campaign' ? (victory ? r.sectors : r.sectors - 1) : G.sector - 1);
-  const gainXp = runRankXp(G.score, cleared, G.bossKills, victory);
+  const gainXp = runRankXp(G.score, cleared, G.bossKills, victory) + (r.bonusXp || 0); // bonusXp: Ghost Signal event
   const before = rankFor(profile.rankXp);
   profile.credits += banked;
   profile.rankXp += gainXp;

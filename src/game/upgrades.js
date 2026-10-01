@@ -110,7 +110,7 @@ export function recomputeStats(p) {
   const w = WEAPONS[p.ship.weapon];
   const st = p.st;
   st.mainLv = 1 + lv('main');
-  st.dmg = 1 + 0.15 * lv('power');
+  st.dmg = (1 + 0.15 * lv('power')) * (p.dmgMod || 1); // dmgMod: Overcharged Reactor event
   st.rate = 1 + 0.12 * lv('rate');
   st.crit = 0.07 * lv('crit');
   st.pierce = (w.pierce || 0) + lv('pierce');

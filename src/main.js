@@ -14,6 +14,7 @@ import { rollDraft, applyUpgrade } from './game/upgrades.js';
 import { spawnEnemy, spawnWeavers } from './game/enemies.js';
 import { step, renderWorld } from './game/world.js';
 import { ui } from './ui/screens.js';
+import { comms } from './ui/comms.js';
 import { meta } from './ui/meta.js';
 import { hangarActs, openHangar } from './ui/hangar.js';
 import { pilotActs, openPilot } from './ui/pilot.js';
@@ -21,6 +22,8 @@ import { setClass, setPassives } from './game/pilot.js';
 import { buyShip, buyPart, equipPart, unequipSlot, setPaint, selectShip, applyAllPaints } from './game/hangar.js';
 import { SYSTEMS, systemById, generateRoute, nodeSpec, reachableNodes, routeNode, systemUnlocked } from './game/campaign.js';
 import { rand, pick } from './core/math.js';
+import { STORY, eventFor, eventById, startEvent, resolveChoice, choiceBlocked } from './game/story.js';
+import { bossById } from './game/bosses.js';
 import { rollMarket, buyOffer, dockRepair, dockReinforce, settleRun, rankFor } from './game/economy.js';
 
 const app = document.getElementById('app');
@@ -30,6 +33,8 @@ const pauseBtn = document.getElementById('pause-btn');
 const touchUi = document.getElementById('touch-ui');
 const dangerEl = document.getElementById('danger');
 const probe = document.getElementById('safe-probe');
+const bossCard = document.getElementById('boss-card');
+const vignette = document.querySelector('.fx-vignette');
 
 let dprCap = 2;
 // The ship flown by Endless / campaign launches: the hangar's selection (profile.lastShip), if still owned.
@@ -42,6 +47,8 @@ let draftKind = null;
 let draftChoices = null;
 let selSystem = 0;
 let marketOffers = null; // current Black Market stock
+let curEvent = null; // open anomaly event session (story.startEvent)
+let bossCardT = 0;
 let afterDraft = null; // 'route' | 'extract': where to go once the sector reward / level drafts are done
 
 // --- Layout -------------------------------------------------------------------------
@@ -75,7 +82,9 @@ window.addEventListener('orientationchange', () => setTimeout(layout, 200));
 function newWorld(mode, shipDef, run = null) {
   G.mode = mode;
   G.run = run;
-  if (run) Object.assign(run, { wallet: 0, earned: 0, frac: 0, curse: null });
+  comms.clear();
+  bossCard.classList.remove('show');
+  if (run) Object.assign(run, { wallet: 0, earned: 0, frac: 0, curse: null, ambush: false, bonusXp: 0, events: [] });
   G.time = 0;
   G.runTime = 0;
   G.enemies.length = 0;
@@ -106,6 +115,7 @@ function newWorld(mode, shipDef, run = null) {
   G.vacuum = false;
   G.director = createDirector();
   G.director.onClear = onSectorClear;
+  G.director.onWarn = onBossWarn;
   G.player = createPlayer(shipDef, mode !== 'attract'); // hangar parts only in real runs
   startSector(endlessSpec(1));
   if (run && run.mode === 'campaign') {
@@ -137,7 +147,56 @@ function launchSystem(sys) {
   saveProfile();
   const route = generateRoute(sys, Math.floor(Math.random() * 2147483647));
   newWorld('run', ship, { mode: 'campaign', system: sys, route, row: -1, nodeId: null, sectors: 0, victory: false, visited: [] });
-  showRoute();
+  blockingStory('intro:' + sys.id, STORY.systems[sys.id].intro, {}, showRoute);
+}
+
+// --- Story --------------------------------------------------------------------------------
+
+const storyOn = () => profile.settings.story !== false;
+
+// Lines to play for a beat, or null to skip it. once: play only the first time (profile.campaign.seenStory[key]);
+// otherwise replay a short version (short: 'first' | 'last' line) after the first time.
+function storyLines(key, lines, { once = true, short = null } = {}) {
+  if (!storyOn()) return null;
+  const seen = !!profile.campaign.seenStory[key];
+  if (seen && once) return null;
+  profile.campaign.seenStory[key] = true;
+  saveProfile();
+  if (seen) return short === 'first' ? lines.slice(0, 1) : short === 'last' ? lines.slice(-1) : lines;
+  return lines;
+}
+
+// Blocking dialogue between screens; `done` runs afterwards (or at once when the beat is skipped / already seen).
+// overlay: keep the current menu behind the box instead of freezing the world on G.screen 'comms'.
+function blockingStory(key, lines, opts, done) {
+  const ls = storyLines(key, lines, opts);
+  if (!ls) return done();
+  if (!opts.overlay) {
+    G.screen = 'comms';
+    ui.hide();
+    pauseBtn.hidden = true;
+    touchUi.hidden = true;
+    music.setDuck(0.6);
+  }
+  comms.play(ls, { blocking: true, onDone: done });
+}
+
+// Director hook (WARNING phase): boss title card + a short non-blocking exchange.
+function onBossWarn(boss) {
+  const r = G.run;
+  const camp = r && r.mode === 'campaign';
+  const kick = camp ? `ACT ${r.system.act} · ${r.system.name}` : `ENDLESS GRID · SECTOR ${G.sector}`;
+  bossCard.style.setProperty('--c', boss.color);
+  bossCard.innerHTML = `<div class="bc-kicker">${kick}</div><div class="bc-name" data-text="${boss.name}">${boss.name}</div><div class="bc-title">${boss.title}</div>`;
+  bossCard.classList.remove('show');
+  void bossCard.offsetWidth;
+  bossCard.classList.add('show');
+  clearTimeout(bossCardT);
+  bossCardT = setTimeout(() => bossCard.classList.remove('show'), 3500);
+  if (camp) {
+    const ls = storyLines('pre:' + r.system.id, STORY.systems[r.system.id].preBoss, { once: false, short: 'first' });
+    if (ls) comms.play(ls, { blocking: false });
+  }
 }
 
 function showCampaign() {
@@ -150,6 +209,7 @@ function showCampaign() {
   if (!systemUnlocked(SYSTEMS[selSystem], profile)) selSystem = 0;
   const focus = meta.renderCampaign(selSystem, curShip().name);
   ui.show('campaign', { focus });
+  blockingStory('prologue', STORY.prologue, { overlay: true }, () => {});
 }
 
 function showRoute() {
@@ -169,15 +229,17 @@ function pickRouteNode(node) {
   r.visited.push(node.id);
   if (node.type === 'combat' || node.type === 'elite' || node.type === 'boss') {
     const spec = nodeSpec(r.system, node, r.sectors + 1);
-    if (r.curse) spec.modifiers.push(r.curse); // Contraband drawback
+    if (r.curse) spec.modifiers.push(r.curse); // Contraband / event drawback
     r.curse = null;
+    if (r.ambush && !spec.boss) spec.elite = true; // Glitched Cache ambush
+    r.ambush = false;
     startSector(spec);
     r.sectors++;
     enterPlay();
   } else visitNode(node);
 }
 
-// Non-fighting stops. Market and dock live here; anomaly is a PLACEHOLDER (step 7 events replace it).
+// Non-fighting stops: market, dock and anomaly events.
 // Every stop must end by calling nodeContinue().
 function visitNode(node) {
   switch (node.type) {
@@ -193,10 +255,25 @@ function visitNode(node) {
       ui.show('dock', { lock: 250 });
       break;
     default:
-      meta.renderNode(node);
-      G.screen = 'node';
-      ui.show('node', { lock: 250 });
+      openEvent(eventFor(G.run.route, node, G.run.events));
   }
+}
+
+function openEvent(ev, rng) {
+  curEvent = startEvent(ev, rng);
+  if (!G.run.events.includes(ev.id)) G.run.events.push(ev.id);
+  meta.renderEvent(curEvent, G);
+  G.screen = 'event';
+  ui.show('event', { lock: 250 });
+}
+
+function eventPick(btn) {
+  const s = curEvent;
+  if (!s || s.done) return;
+  if (resolveChoice(s, +btn.dataset.i) === null) return;
+  sfx.levelUp();
+  meta.renderEventResult(s, G);
+  ui.show('event', { focus: document.getElementById('event-continue'), lock: 200 });
 }
 
 function buy(btn) {
@@ -221,7 +298,17 @@ function nodeContinue() {
   showRoute();
 }
 
+// Boss down: post-boss dialogue (and the ending after the last system), then the extraction screen.
 function extract() {
+  const sys = G.run.system;
+  const final = SYSTEMS.indexOf(sys) === SYSTEMS.length - 1;
+  blockingStory('post:' + sys.id, STORY.systems[sys.id].postBoss, { once: false, short: 'last' }, () => {
+    if (final) blockingStory('ending', STORY.ending, {}, () => finishExtract(true));
+    else finishExtract(false);
+  });
+}
+
+function finishExtract(final) {
   const p = G.player;
   const r = G.run;
   r.victory = true;
@@ -229,7 +316,7 @@ function extract() {
   const { unlocked, reward } = bankRun();
   meta.renderExtract({
     system: r.system, score: Math.floor(G.score), time: G.runTime, level: p.level, kills: G.kills, sectors: r.sectors,
-    maxCombo: G.maxCombo, grazes: G.grazes, unlocked, reward, player: p,
+    maxCombo: G.maxCombo, grazes: G.grazes, unlocked, reward, player: p, final,
   });
   const idx = SYSTEMS.indexOf(r.system);
   if (idx < SYSTEMS.length - 1) selSystem = idx + 1;
@@ -325,6 +412,7 @@ function onSectorClear() {
 }
 
 function gameOver() {
+  comms.clear();
   const p = G.player;
   const newBest = G.score > profile.best;
   const { unlocked, reward } = bankRun();
@@ -414,6 +502,8 @@ ui.init({
     pickRouteNode(routeNode(G.run.route, btn.dataset.id));
   },
   nodeDone: () => nodeContinue(),
+  event: eventPick,
+  eventDone: () => nodeContinue(),
   buy,
   dock: dockChoose,
   abandon: () => showCampaign(),
@@ -525,9 +615,10 @@ function frame(now) {
     }
   } else slowFrames = 0;
 
+  comms.update(raw, G.screen === 'play');
   if (G.screen === 'play') {
     if (input.consume('pause')) pause();
-  } else {
+  } else if (!comms.blocking) {
     ui.update();
     input.consume('pause') && G.screen === 'pause' && enterPlay();
   }
@@ -555,6 +646,9 @@ function frame(now) {
   G.flash = Math.max(0, G.flash - raw * 2.5);
   updateBanner(raw);
   const boost = G.player && (G.player.odT > 0 || G.player.dashT > 0) ? 3 : G.director && G.director.state === 'clear' ? 4 : 1;
+  const dk = !!(G.mode === 'run' && G.director.diff.blackout && G.director.state !== 'clear' && G.director.state !== 'await');
+  bg.setDark(dk);
+  vignette.classList.toggle('dark', dk);
   bg.update(simulating() ? raw : raw * 0.25, boost);
   music.update(raw);
   render();
@@ -638,9 +732,26 @@ window.NEON = {
   },
   rollDraft: (kind = 'level') => rollDraft(G.player, kind),
   // Start a campaign run (1-based index or system id); lands on the route screen.
-  launch(sys = 1) {
+  // The intro dialogue is skipped (still marked seen) unless opts.story is true.
+  launch(sys = 1, opts = {}) {
     launchSystem(typeof sys === 'number' ? SYSTEMS[sys - 1] : systemById(sys));
+    if (!opts.story) comms.skipAll();
   },
+  comms,
+  // Debug: open anomaly event `id` (campaign run required; opts.rng forces rolls). pickEvent(i) chooses; the result screen then has #event-continue.
+  event(id, opts = {}) {
+    if (!G.run || G.run.mode !== 'campaign' || !eventById(id)) return false;
+    openEvent(eventById(id), opts.rng);
+    return true;
+  },
+  pickEvent(i) {
+    if (G.screen !== 'event' || !curEvent) return false;
+    eventPick({ dataset: { i } });
+    return curEvent.done;
+  },
+  eventState: () => curEvent,
+  extract, // debug: end the campaign run now (post-boss dialogue → extraction screen)
+  showBossCard: onBossWarn,
   // Pick the i-th currently reachable route node.
   pickNode(i = 0) {
     if (G.screen !== 'route') return false;
@@ -678,10 +789,17 @@ window.NEON = {
       return pick(fights.length ? fights : nodes.map((n, i) => i));
     });
     for (let t = 0; t < seconds; t += dt) {
+      if (comms.blocking) comms.skipAll(); // dialogue never blocks the simulator
       if (G.screen === 'draft') pickUpgrade(pickFn(draftChoices));
-      for (let guard = 0; guard < 6 && (G.screen === 'route' || G.screen === 'node' || G.screen === 'market' || G.screen === 'dock'); guard++) {
-        if (G.screen === 'node') nodeContinue();
-        else if (G.screen === 'market') {
+      for (let guard = 0; guard < 6 && (G.screen === 'route' || G.screen === 'event' || G.screen === 'market' || G.screen === 'dock'); guard++) {
+        if (G.screen === 'event') {
+          // Default: the first choice that can be taken. opts.eventPick(event, session) → index.
+          const s = curEvent;
+          let i = opts.eventPick ? opts.eventPick(s.ev, s) : -1;
+          if (!(i >= 0) || choiceBlocked(s, i)) i = s.choices.findIndex((c, k) => !choiceBlocked(s, k));
+          if (i >= 0) eventPick({ dataset: { i } });
+          nodeContinue();
+        } else if (G.screen === 'market') {
           // Default: buy the cheapest affordable upgrade offer. opts.marketPick(offers, wallet) → index | -1.
           const w = G.run.wallet;
           let i = -1;

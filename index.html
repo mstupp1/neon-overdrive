@@ -35,6 +35,19 @@
 
         <div id="toast" class="toast"><span class="eq"><i></i><i></i><i></i></span><span id="toast-text"></span></div>
 
+        <div id="boss-card" class="boss-card" aria-hidden="true"></div>
+
+        <div id="comms" class="comms" hidden>
+            <div class="comms-box">
+                <canvas class="comms-face" width="96" height="96"></canvas>
+                <div class="comms-txt">
+                    <div class="comms-name"></div>
+                    <div class="comms-line"></div>
+                    <div class="comms-hint" hidden></div>
+                </div>
+            </div>
+        </div>
+
         <!-- TITLE -->
         <section class="screen" id="scr-title" data-back="">
             <div class="logo" aria-label="Neon Overdrive">
@@ -131,14 +144,17 @@
             </nav>
         </section>
 
-        <!-- ROUTE STOP (market / dock / anomaly placeholder; later steps fill #node-body) -->
-        <section class="screen" id="scr-node" data-back="nodeDone">
-            <div class="node-icon" id="node-icon"></div>
-            <h2 class="screen-title" id="node-title">STOP</h2>
-            <p class="screen-sub" id="node-sub"></p>
-            <div class="node-body" id="node-body"></div>
+        <!-- ANOMALY EVENT -->
+        <section class="screen" id="scr-event" data-back="">
+            <div class="node-icon" id="event-icon"></div>
+            <h2 class="screen-title" id="event-title">ANOMALY</h2>
+            <p class="screen-sub">ANOMALY DETECTED</p>
+            <p class="event-text" id="event-text"></p>
+            <div class="cards still" id="event-choices"></div>
+            <div class="event-result" id="event-result" hidden></div>
+            <div class="run-stats" id="event-stats"></div>
             <nav class="menu">
-                <button class="btn primary" data-act="nodeDone">CONTINUE</button>
+                <button class="btn primary" data-act="eventDone" id="event-continue" hidden>CONTINUE</button>
             </nav>
         </section>
 
@@ -213,6 +229,7 @@
                 <button class="set-row toggle" data-set="shake"><span>Screen shake</span><b></b></button>
                 <button class="set-row toggle" data-set="flashes"><span>Screen flashes</span><b></b></button>
                 <button class="set-row toggle" data-set="damageNumbers"><span>Damage numbers</span><b></b></button>
+                <button class="set-row toggle" data-set="story"><span>Story dialogue</span><b></b></button>
                 <button class="set-row" data-act="fullscreen"><span>Fullscreen</span><b>⤢</b></button>
                 <button class="set-row danger" data-act="reset"><span id="reset-label">Reset progress</span><b>⟲</b></button>
             </div>
@@ -244,6 +261,14 @@
                         <li>Pick your class and two passives on the <b>Pilot</b> screen of the campaign map. Pilot Rank unlocks more.</li>
                         <li>Collect <b class="cyan">data shards</b> to level up and draft upgrades. Build around up to 4 weapon modules.</li>
                         <li>Clear sectors for bonus picks. Every third sector hides a boss.</li>
+                    </ul>
+                </div>
+                <div class="help-block">
+                    <h3>Campaign</h3>
+                    <ul>
+                        <li>Pick a star system, then jump along a <b>route</b>: combat, elite, <b class="gold">market</b>, <b class="green">dock</b>, <b class="violet">anomaly</b>, then the boss.</li>
+                        <li>You earn <b class="gold">credits</b> in a run. Extract after the boss to bank them all; die and keep half. Spend them in the <b>Hangar</b> on ships, gear and paint.</li>
+                        <li>Anomalies are risk-for-reward choices. Black Market and Docks heal and upgrade mid-run.</li>
                     </ul>
                 </div>
             </div>

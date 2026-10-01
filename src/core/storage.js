@@ -13,6 +13,7 @@ const DEFAULTS = {
     shake: true,
     flashes: true,
     damageNumbers: true,
+    story: true,
   },
   best: 0,
   bestSector: 0,

@@ -111,7 +111,7 @@ export function nodeSpec(system, node, sectorIndex) {
   const boss = node.type === 'boss' ? system.boss : null;
   const base = 36 + Math.min(6, Math.floor(level)) * 4;
   return {
-    index: sectorIndex, level, loop: 0, boss, elite: node.type === 'elite', modifiers: node.modifiers.slice(),
+    index: sectorIndex, row: node.row, level, loop: 0, boss, elite: node.type === 'elite', modifiers: node.modifiers.slice(),
     hue: system.hue, name: system.name, duration: boss ? base * 0.7 : base,
   };
 }

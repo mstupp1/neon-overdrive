@@ -62,7 +62,7 @@ Title PLAY → `scr-campaign` (select system, LAUNCH / HANGAR + PILOT pair / END
 
 - `src/game/campaign.js`: `SYSTEMS`, `generateRoute`, `reachableNodes`, `nodeSpec`, `systemUnlocked`. Progress: `profile.campaign.cleared` (system ids).
 - `src/ui/meta.js`: render functions for campaign / route / route stop / extraction.
-- Stops: `visitNode(node)` in `src/main.js`: market → `scr-market`, dock → `scr-dock`, anomaly is still the `scr-node` placeholder (body `#node-body`, step 7). Every stop must finish via `nodeContinue()`.
+- Stops: `visitNode(node)` in `src/main.js`: market → `scr-market`, dock → `scr-dock`, anomaly → `scr-event` (`openEvent`). Every stop must finish via `nodeContinue()`.
 - Extraction rewards go in `#extract-rewards` (game over: `#over-rewards`), both filled by `meta.renderRewards(el, reward, campaignDeath)`; banking happens in `extract()` / `gameOver()` via `bankRun()` in `main.js` → `economy.settleRun(victory)`.
 
 ## Economy (`src/game/economy.js`)
@@ -99,3 +99,11 @@ Title PLAY → `scr-campaign` (select system, LAUNCH / HANGAR + PILOT pair / END
 - `p.mod` gained `gravT/reflT/flakT`, `wells[]`, `flaks[]`, `refl/reflMax`. New-module bullet spawns respect `MAX_PBULLETS` (520). Annihilator's afterglow is a `G.beams` entry with `owner: 'afterglow'` (fixed position, ticks damage, handled in `updateBeams`/`drawBeams`, ignored by `collide`).
 - `playerBullet` opts: `bounce` (reflect `vx` at the side walls that many times, `updatePlayerBullets`) and `crit` (always crits; also on missile AoE). WEAPONS `ricochet` (CORSAIR) and `charge` (MONOLITH, whose orb radius/scale grows with weapon level in `firePrimary`; a muzzle charge glow is drawn in `drawPlayer`).
 - Sprites for all of this live in `buildGearSpritesV2()` at the end of `sprites.js` (`S.gwell`, `S.reflect`, `S.flak`, `S.pb_refl`, `S.afterglow`).
+
+## Story, events and system themes (step 7a)
+
+- `src/game/story.js`: `SPEAKERS` (MAG cyan, ECHO class colour, SIGNAL red), `STORY` = `{prologue, systems:{id:{intro, preBoss, postBoss}}, ending}` (lines are `{who, text}`), and `EVENTS` (10 anomalies: `{id, title, color, text, choices: [] | (ctx) => []}`, choice = `{label, desc, tag?, cost?, ok?(ctx), effect(ctx) → result string}`, `ctx = {p, run, rng, scale, lvl}`). `eventFor(route, node, used)` is seeded by route seed + node id and avoids repeats via `G.run.events`; `startEvent / choiceBlocked / resolveChoice` drive the session. Effects use `p.hullMod`, `p.dmgMod` (damage multiplier read by `recomputeStats`), `G.rerolls`, `run.wallet`, `run.curse` (modifier id for the next fight), `run.ambush` (next fight is elite) and `run.bonusXp` (added to rank XP in `settleRun`).
+- Story flow in `main.js`: `blockingStory(key, lines, opts, done)` (launch intro, first campaign open prologue, post-boss in `extract()`, ending after ECLIPSE) and `onBossWarn` (director `onWarn` hook: boss title card + non-blocking pre-boss lines). Seen beats are `profile.campaign.seenStory[key]`; intro / prologue / ending play once, boss pre/post lines replay one short line. `profile.settings.story` (settings toggle) turns all dialogue off.
+- `src/ui/comms.js` (`#comms`): `comms.play(lines, {blocking, onDone})`. Blocking: `comms.update()` runs before `ui.update`, and while `comms.blocking` main skips `ui.update`; confirm / tap = finish line then next, back = skip all. Non-blocking: top of the field, auto-advances, only while `G.screen === 'play'`. Portraits: `S.portrait_echo / portrait_mag / portrait_signal`.
+- Backgrounds: `bg.setTheme(systemId | null)` (set by `startSector`; one baked layer per theme, grid variant per theme), `bg.setDark(bool)` (blackout; set each frame in `main.js`, plus `.fx-vignette.dark` and enemy halos in `world.js`).
+- Debug: `NEON.launch(sys, {story})` skips dialogue by default; `NEON.event(id, {rng})`, `NEON.pickEvent(i)`, `NEON.eventState()`, `NEON.comms`, `NEON.extract()`. `simulate` auto-skips blocking comms and picks the first available event choice (`opts.eventPick(event, session) → index`).

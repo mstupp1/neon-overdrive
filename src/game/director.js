@@ -15,7 +15,7 @@ import { sfx, music } from '../core/audio.js';
 export function createDirector() {
   return {
     state: 'intro', t: 0, sectorT: 0, duration: 40, spawnT: 0, queue: [],
-    diff: sectorDifficulty(1, 0), spec: null, last: null, progress: 0, onClear: null,
+    diff: sectorDifficulty(1, 0), spec: null, last: null, progress: 0, onClear: null, onWarn: null,
   };
 }
 
@@ -233,9 +233,11 @@ export function startSector(spec) {
   d.hunterSpawned = false;
   d.duration = spec.duration;
   bg.setHue(spec.hue);
+  bg.setTheme(G.run && G.run.mode === 'campaign' ? G.run.system.id : null);
   G.vacuum = false;
   if (G.mode === 'run') {
-    banner(`SECTOR ${spec.index}`, spec.name + (spec.loop ? `  ·  LOOP ${spec.loop + 1}` : ''), `hsl(${spec.hue},100%,70%)`, 2.6);
+    // Campaign banners count route rows (spec.row), not sectors fought.
+    banner(`SECTOR ${spec.row != null ? spec.row + 1 : spec.index}`, spec.name + (spec.loop ? `  ·  LOOP ${spec.loop + 1}` : ''), `hsl(${spec.hue},100%,70%)`, 2.6);
     music.setSet(spec.level >= 7 ? 'late' : 'normal');
   }
 }
@@ -308,8 +310,9 @@ export function updateDirector(dt) {
           d.state = 'warn';
           if (G.mode === 'run') {
             const b = bossById(spec.boss);
-            banner('WARNING', `${b.name} · ${b.title.toUpperCase()}`, '#ff2e55', 3);
+            banner('WARNING', 'BOSS INCOMING', '#ff2e55', 3);
             G.warning = 3;
+            if (d.onWarn) d.onWarn(b, spec);
             sfx.warn();
             music.bossTrack(bossIndex(spec.boss));
           }

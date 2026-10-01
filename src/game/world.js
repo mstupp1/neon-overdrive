@@ -289,6 +289,7 @@ function drawShieldLinks(ctx) {
 }
 
 function drawEnemies(ctx, k) {
+  const dark = !!(G.director && G.director.diff.blackout);
   for (const e of G.enemies) {
     if (e.dead) continue;
     if (e.boss) {
@@ -313,6 +314,16 @@ function drawEnemies(ctx, k) {
     }
     const s = e.spr;
     const img = e.flash > 0 ? s.flash : s.img;
+    if (dark && e.color) {
+      // Blackout: a soft halo so enemies stay readable on the dark field.
+      const gl = glow(e.color, 64);
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = 0.45;
+      const d2 = e.r * 4.4;
+      ctx.drawImage(gl.img, e.x - d2 / 2, e.y - d2 / 2, d2, d2);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
+    }
     if (e.alpha !== undefined) ctx.globalAlpha = e.alpha;
     drawRot(ctx, img, e.x, e.y, e.rot, s.size * scale, k);
     if (e.alpha !== undefined) ctx.globalAlpha = 1;

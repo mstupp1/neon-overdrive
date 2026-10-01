@@ -1,4 +1,4 @@
-// Campaign-layer screens: campaign map, in-run route, route stop (placeholder), extraction.
+// Campaign-layer screens: campaign map, in-run route, anomaly event, market, dock, extraction.
 // Render-only; flow/handlers live in main.js. Shared helpers come from screens.js.
 
 import { profile } from '../core/storage.js';
@@ -11,6 +11,7 @@ import { rankFor, ECON_ICONS } from '../game/economy.js';
 import { CAT_COLORS } from '../game/upgrades.js';
 import { SLOT_INFO } from '../game/parts.js';
 import { CLASSES, activeClass } from '../game/pilot.js';
+import { choiceBlocked } from '../game/story.js';
 
 const svg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 
@@ -103,19 +104,56 @@ export const meta = {
       btns += `<button class="rnode t-${n.type}${state}" data-act="node" data-id="${n.id}" ${can ? '' : 'disabled'} style="--c:${info.color};left:${px(n)}%;top:${py(n)}%" aria-label="${info.name}"><span class="rn-ico">${visited.has(n.id) && n.id !== run.nodeId ? NODE_ICONS.check : NODE_ICONS[n.type]}</span><span class="rn-lab">${info.name}${mod ? `<em style="--c:${mod.color}">${mod.name}</em>` : ''}</span></button>`;
     }
     $('#route-map').innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none">${lines}</svg>${btns}`;
-    $('#route-hint').textContent = `${total - visited.size === 1 ? 'FINAL SECTOR' : `${total - visited.size} SECTORS TO THE BOSS`} · CHOOSE YOUR NEXT JUMP`;
+    const nextRow = run.row + 1;
+    $('#route-hint').textContent = `${nextRow >= total - 1 ? 'BOSS SECTOR' : `SECTOR ${nextRow + 1} · ${total - 1 - nextRow} TO THE BOSS`} · CHOOSE YOUR NEXT JUMP`;
     return document.querySelector('#route-map .rnode.reach');
   },
 
-  // --- Route stop placeholder (market / dock / anomaly; replaced in later steps) ---
-  renderNode(node) {
-    const info = NODE_TYPES[node.type];
-    $('#node-icon').innerHTML = NODE_ICONS[node.type];
-    $('#node-icon').style.setProperty('--c', info.color);
-    $('#node-title').textContent = { market: 'BLACK MARKET', dock: 'REPAIR DOCK', anomaly: 'ANOMALY' }[node.type] || info.name;
-    $('#node-sub').textContent = 'Systems offline';
-    $('#node-body').textContent = 'Nothing here yet. Continue along the route.';
+  // --- Anomaly event ---------------------------------------------------------------
+  // s = story.startEvent() session. Choices render as cards; renderEventResult swaps them for the outcome.
+  renderEvent(s, G) {
+    const ev = s.ev;
+    const box = $('#scr-event');
+    box.style.setProperty('--c', ev.color);
+    $('#event-icon').innerHTML = NODE_ICONS.anomaly;
+    $('#event-icon').style.setProperty('--c', ev.color);
+    $('#event-title').textContent = ev.title;
+    $('#event-text').textContent = ev.text;
+    const wrap = $('#event-choices');
+    wrap.hidden = false;
+    wrap.innerHTML = '';
+    s.choices.forEach((c, i) => {
+      const why = choiceBlocked(s, i);
+      const b = document.createElement('button');
+      b.className = 'card choice' + (c.tag === 'RISKY' ? ' risky' : c.tag === 'SAFE' ? ' safe' : '');
+      b.dataset.act = 'event';
+      b.dataset.i = i;
+      b.style.setProperty('--c', c.tag === 'RISKY' ? '#ff3df2' : c.tag === 'SAFE' ? '#7dff6b' : ev.color);
+      b.disabled = !!why;
+      b.innerHTML = `<div><div class="card-top"><span class="card-name">${c.label}</span>${c.tag ? `<span class="card-tag">${c.tag}</span>` : ''}</div><div class="card-desc">${c.desc}</div></div>${c.cost ? `<div class="price"><span>${coin}<b>${c.cost}</b></span>${why && why.startsWith('NEED') ? `<i>${why}</i>` : ''}</div>` : why ? `<div class="price"><i>${why}</i></div>` : ''}`;
+      wrap.appendChild(b);
+    });
+    $('#event-result').hidden = true;
+    $('#event-continue').hidden = true;
+    this.eventStats(G);
   },
+
+  eventStats(G) {
+    const p = G.player;
+    $('#event-stats').innerHTML = stat('HULL', `${p.hp}/${p.maxHp}`) + stat('CREDITS', `<span class="gold">${fmt(G.run.wallet || 0)}</span>`) + stat('REROLLS', G.rerolls);
+  },
+
+  renderEventResult(s, G) {
+    $('#event-choices').hidden = true;
+    const c = s.choices[s.picked];
+    const r = $('#event-result');
+    r.innerHTML = `<small>${c.label.toUpperCase()}</small>${s.result}`;
+    r.hidden = false;
+    $('#event-continue').hidden = false;
+    this.eventStats(G);
+  },
+
+  // --- Route stop (market / dock live in their own screens; anomalies in scr-event) ---
 
   // --- Black Market ------------------------------------------------------------
   // first = play the card entrance animation; later re-renders (after a purchase) stay still.
@@ -170,8 +208,8 @@ export const meta = {
 
   // --- Extraction -------------------------------------------------------------
   renderExtract(sum) {
-    $('#extract-title').textContent = 'SYSTEM SECURED';
-    $('#extract-sub').textContent = `${sum.system.name} · EXTRACTION COMPLETE`;
+    $('#extract-title').textContent = sum.final ? 'SIGNAL SILENCED' : 'SYSTEM SECURED';
+    $('#extract-sub').textContent = sum.final ? `${sum.system.name} · THE GRID IS FREE · ENDLESS GRID OPEN` : `${sum.system.name} · EXTRACTION COMPLETE`;
     $('#extract-score').textContent = formatScore(sum.score);
     $('#extract-stats').innerHTML =
       stat('TIME', formatTime(sum.time)) + stat('LEVEL', sum.level) + stat('KILLS', sum.kills) +
