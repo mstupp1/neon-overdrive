@@ -27,7 +27,8 @@ In menus: arrows/d-pad to move, Enter/Space/A to select, Esc/B to go back, `1`�
 
 ### The loop
 
-- **Sectors.** Each run is a sequence of ~40–60 s sectors of enemy formations. Every **3rd sector ends in a boss** (WARDEN → HYDRA → OMEGA, each with three phases). After sector 9 the cycle loops with much harder enemies — it's endless, chase the high score.
+- **Sectors.** Each run is a sequence of ~40–60 s sectors of enemy formations. Every **3rd sector ends in a boss** (WARDEN → HYDRA → OMEGA, each with three phases; the campaign's final system ends with **ECLIPSE**, a dark mirror of your ship whose last phase copies your class ultimate). After sector 9 the cycle loops with much harder enemies — it's endless, chase the high score.
+- **Enemies.** Darts, swarms, spinners, dashers, snakes, snipers, tanks, splitters and mines, plus from later systems: **Carriers** (launch swarm pods), **Shielders** (shield their neighbours until killed: kill them first), **Weavers** (a pair that stretches a lethal laser tripwire between them), **Blinkers** (teleport next to you and fire a ring) and, on Elite nodes, the **Hunter** mini-boss.
 - **Data shards → level ups.** Enemies drop XP shards (magnetised when close). Each level offers a draft of 3 upgrades; clearing a sector grants a bonus draft and repairs 1 hull. Rerolls: 1 per run + 1 per boss kill.
 - **Build.** Upgrade your main cannon, stats (damage, fire rate, crit, pierce, speed, magnet, overdrive capacitor) and defenses (hull, regenerating Aegis shield, extra dashes), and slot up to **4 weapon modules**: Swarm Missiles, Razor Orbit, Wingmen, Arc Coil, Pulse Nova, Rail Lance, Shrapnel, Shock Dash.
 - **Combo.** Kills chain into a score multiplier (up to x8). Getting hit breaks the chain.

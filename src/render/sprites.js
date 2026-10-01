@@ -150,6 +150,12 @@ export const ENEMY_COLORS = {
   tank: '#ffe14d',
   splitter: '#ff5ce1',
   mine: '#ff8a3d',
+  carrier: '#ffc27a',
+  shielder: '#7aa7ff',
+  weaver: '#d6ff3a',
+  blinker: '#e0d4ff',
+  hunter: '#ff2d2d',
+  eclipsedrone: '#c23bff',
 };
 
 function bulletSprite(sh, c) {
@@ -414,4 +420,93 @@ export function buildSprites(ships) {
     g.fillRect(-11, -5, 22, 2.4);
     g.restore();
   });
+}
+
+// --- Step 6a enemies: Carrier, Shielder, Weaver, Blinker, Hunter, ECLIPSE (+ its drones) --------------
+// Kept in one function (called from boot after buildSprites) so it stays separate from the roster above.
+
+export function buildEnemySpritesV2() {
+  const E = ENEMY_COLORS;
+  S.carrier = makeSprite(84, (g) => {
+    const hull = poly([[0, 24], [14, 18], [30, 2], [24, -14], [10, -22], [-10, -22], [-24, -14], [-30, 2], [-14, 18]]);
+    glowFill(g, E.carrier, 0, hull, 0.2); glowStroke(g, E.carrier, 2.6, 12, hull);
+    // launch bays
+    for (const s of [-1, 1]) {
+      const bay = poly([[s * 8, 12], [s * 18, 8], [s * 18, -6], [s * 8, -6]]);
+      glowStroke(g, E.carrier, 1.6, 6, bay, 1);
+    }
+    glowStroke(g, E.carrier, 1.4, 5, (c) => { c.moveTo(-12, -14); c.lineTo(12, -14); }, 1);
+    g.fillStyle = '#fff'; g.beginPath(); g.arc(0, 2, 4, 0, TAU); g.fill();
+  }, true);
+  S.shielder = makeSprite(52, (g) => {
+    const p = poly(regular(6, 15, Math.PI / 2));
+    glowFill(g, E.shielder, 0, p, 0.25); glowStroke(g, E.shielder, 2.2, 10, p);
+    glowStroke(g, E.shielder, 1.5, 6, (c) => c.arc(0, 0, 8, 0, TAU), 1);
+    for (let i = 0; i < 3; i++) {
+      const a = -Math.PI / 2 + (i / 3) * TAU;
+      glowStroke(g, E.shielder, 1.6, 6, (c) => { c.moveTo(Math.cos(a) * 15, Math.sin(a) * 15); c.lineTo(Math.cos(a) * 22, Math.sin(a) * 22); }, 1);
+    }
+    g.fillStyle = '#fff'; g.beginPath(); g.arc(0, 0, 3, 0, TAU); g.fill();
+  }, true);
+  S.shieldRing = makeSprite(64, (g) => {
+    g.save();
+    g.globalAlpha = 0.16; g.fillStyle = E.shielder; g.beginPath(); g.arc(0, 0, 28, 0, TAU); g.fill();
+    g.restore();
+    glowStroke(g, E.shielder, 1.8, 8, (c) => c.arc(0, 0, 28, 0, TAU), 1);
+  });
+  S.weaver = makeSprite(40, (g) => {
+    const p = poly([[0, 13], [12, 0], [0, -13], [-12, 0]]);
+    glowFill(g, E.weaver, 0, p, 0.3); glowStroke(g, E.weaver, 2.2, 10, p);
+    glowStroke(g, E.weaver, 1.6, 6, poly([[0, 6], [5, 0], [0, -6], [-5, 0]]), 1);
+    g.fillStyle = '#fff'; g.beginPath(); g.arc(0, 0, 2.4, 0, TAU); g.fill();
+  }, true);
+  S.blinker = makeSprite(44, (g) => {
+    const p = poly([[0, -14], [12, 0], [0, 14], [-12, 0]]);
+    glowFill(g, E.blinker, 0, p, 0.25); glowStroke(g, E.blinker, 2, 10, p);
+    glowStroke(g, E.blinker, 1.5, 6, (c) => { c.moveTo(-17, 0); c.lineTo(-9, 0); c.moveTo(17, 0); c.lineTo(9, 0); c.moveTo(0, -17); c.lineTo(0, -9); c.moveTo(0, 17); c.lineTo(0, 9); }, 1);
+    g.fillStyle = '#fff'; g.shadowColor = E.blinker; g.shadowBlur = 8;
+    g.beginPath(); g.arc(0, 0, 3.2, 0, TAU); g.fill();
+  }, true);
+  S.hunter = makeSprite(84, (g) => {
+    // Gunship: swept wings, nose pointing down at the player, targeting reticle in the middle.
+    const hull = poly([[0, 28], [9, 12], [30, -6], [34, -22], [14, -14], [8, -24], [-8, -24], [-14, -14], [-34, -22], [-30, -6], [-9, 12]]);
+    glowFill(g, E.hunter, 0, hull, 0.22); glowStroke(g, E.hunter, 2.6, 12, hull);
+    glowStroke(g, E.hunter, 1.6, 6, (c) => c.arc(0, 2, 9, 0, TAU), 1);
+    glowStroke(g, E.hunter, 1.4, 5, (c) => { c.moveTo(0, -8); c.lineTo(0, 12); c.moveTo(-10, 2); c.lineTo(10, 2); }, 1);
+    for (const s of [-1, 1]) glowStroke(g, '#ffd0d0', 1.4, 5, (c) => { c.moveTo(s * 22, -8); c.lineTo(s * 28, -18); }, 1);
+    g.fillStyle = '#fff'; g.beginPath(); g.arc(0, 2, 3, 0, TAU); g.fill();
+  }, true);
+  S.eclipseDrone = makeSprite(36, (g) => {
+    const p = poly([[0, 11], [9, -8], [0, -3], [-9, -8]]);
+    g.fillStyle = '#08000f'; g.beginPath(); p(g); g.fill();
+    glowStroke(g, E.eclipsedrone, 2, 9, p);
+    g.fillStyle = '#ff3df2'; g.beginPath(); g.arc(0, 0, 2.4, 0, TAU); g.fill();
+  }, true);
+
+  // ECLIPSE: an inverted, black-hulled dark mirror of the player's ship with a magenta-white rim.
+  S.eclipse = makeSprite(210, (g) => {
+    const K = 4.2;
+    const shape = [[0, -20], [7, -4], [17, 10], [8, 8], [5, 14], [-5, 14], [-8, 8], [-17, 10], [-7, -4]]
+      .map(([x, y]) => [x * K, -y * K - 12]); // flipped: nose points down
+    const path = poly(shape);
+    g.save();
+    g.shadowColor = '#c23bff'; g.shadowBlur = 26;
+    g.fillStyle = '#06000d'; g.beginPath(); path(g); g.fill();
+    g.restore();
+    g.fillStyle = '#06000d'; g.beginPath(); path(g); g.fill();
+    glowStroke(g, '#ff3df2', 3, 16, path);
+    // inner echo of the hull
+    const inner = poly(shape.map(([x, y]) => [x * 0.55, (y + 12) * 0.55 - 14]));
+    glowStroke(g, '#8a2bd6', 1.8, 8, inner, 1);
+    // panel lines
+    glowStroke(g, '#c23bff', 1.2, 5, (c) => {
+      c.moveTo(-34, -40); c.lineTo(-14, -14); c.moveTo(34, -40); c.lineTo(14, -14);
+      c.moveTo(-16, -52); c.lineTo(16, -52);
+    }, 1);
+    // dark core eye
+    g.save();
+    g.fillStyle = '#000'; g.beginPath(); g.ellipse(0, -2, 11, 17, 0, 0, TAU); g.fill();
+    g.restore();
+    glowStroke(g, '#ffffff', 1.8, 8, (c) => c.ellipse(0, -2, 11, 17, 0, 0, TAU), 1);
+  }, true);
 }

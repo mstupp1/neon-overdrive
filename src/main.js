@@ -4,13 +4,14 @@ import { G, view } from './game/state.js';
 import { profile, saveProfile, resetProfile } from './core/storage.js';
 import { input, bindPointer, pollGamepads } from './core/input.js';
 import { unlockAudio, music, setSfxVolume, setSfxMuted, sfx } from './core/audio.js';
-import { buildSprites } from './render/sprites.js';
+import { buildSprites, buildEnemySpritesV2 } from './render/sprites.js';
 import { bg } from './render/background.js';
 import { drawHud, updateBanner } from './render/hud.js';
 import { SHIPS, shipById, ownsShip, isUnlocked } from './game/ships.js';
 import { createPlayer } from './game/player.js';
 import { createDirector, startSector, nextSector, endlessSpec } from './game/director.js';
 import { rollDraft, applyUpgrade } from './game/upgrades.js';
+import { spawnEnemy, spawnWeavers } from './game/enemies.js';
 import { step, renderWorld } from './game/world.js';
 import { ui } from './ui/screens.js';
 import { meta } from './ui/meta.js';
@@ -603,6 +604,7 @@ function render() {
 function boot() {
   layout();
   buildSprites(SHIPS);
+  buildEnemySpritesV2();
   applyAllPaints();
   bg.init();
   setSfxVolume(profile.settings.sfx);
@@ -627,6 +629,13 @@ window.NEON = {
     startSector({ ...endlessSpec(1), ...spec });
   },
   applyUpgrade: (id) => applyUpgrade(G.player, id, G),
+  // Debug: spawn an enemy (already on screen). 'weaver' spawns the linked pair and returns both nodes.
+  spawn(type, x = view.W / 2, y = 150, opts = {}) {
+    if (type === 'weaver') return spawnWeavers(x, y, opts.gap || 200).map((e) => ((e.entered = true), e));
+    const e = spawnEnemy(type, x, y, { tx: x, ty: y, ...opts });
+    e.entered = true;
+    return e;
+  },
   // Start a campaign run (1-based index or system id); lands on the route screen.
   launch(sys = 1) {
     launchSystem(typeof sys === 'number' ? SYSTEMS[sys - 1] : systemById(sys));

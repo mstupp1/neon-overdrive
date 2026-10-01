@@ -291,8 +291,9 @@ export function drawBeams(ctx) {
       ctx.drawImage(g.img, b.x - 40, bottom - 40, 80, 80);
     } else {
       // Enemy laser: telegraph thin line, then thick beam.
-      const ex = b.x + Math.cos(b.ang) * 1400;
-      const ey = b.y + Math.sin(b.ang) * 1400;
+      const L = b.len || 1400; // weaver tripwires are finite segments
+      const ex = b.x + Math.cos(b.ang) * L;
+      const ey = b.y + Math.sin(b.ang) * L;
       if (b.tele > 0) {
         ctx.globalAlpha = 0.35 + 0.35 * Math.sin(G.time * 30);
         ctx.strokeStyle = '#ff2e88';

@@ -65,9 +65,9 @@ function unit() {
 export function dropKillCredits(e) {
   if (!G.run || G.mode !== 'run') return;
   const u = unit();
-  if (e.elite) {
-    const n = 3 * (G.director.diff.eliteCredits || 1);
-    for (let i = 0; i < n; i++) dropCredit(e.x, e.y, u * 0.9);
+  if (e.elite || e.hunter) {
+    const n = (e.hunter ? 9 : 3) * (G.director.diff.eliteCredits || 1); // the Hunter pays out three elites
+    for (let i = 0; i < n; i++) dropCredit(e.x, e.y, u * (e.hunter ? 1.1 : 0.9));
   } else {
     const c = e.type === 'swarm' || e.type === 'mine' ? 0.025 : e.r > 20 ? 0.3 : 0.1;
     if (chance(c)) dropCredit(e.x, e.y, u * (e.r > 20 ? 1.4 : 0.7));

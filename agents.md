@@ -14,6 +14,7 @@ The game is a set of ES modules (see README "Project layout"). All mutable world
 | `startRun(shipId)` | Start a run (`vector`, `needle`, `bulwark`, `phantom`); uses that ship's equipped hangar parts and paint |
 | `startEndless(shipId)` | Alias of `startRun` (endless mode) |
 | `startSpec(spec, shipId?)` | Start a run, then `startSector` with a sector spec `{index, level, loop, boss, elite, modifiers[], hue, name, duration}` (missing fields default to `endlessSpec(1)`) |
+| `spawn(type, x?, y?, opts?)` | Debug: spawn an on-screen enemy (`dart swarm spinner dasher snake sniper tank splitter mine carrier shielder weaver blinker hunter`). `weaver` spawns the linked pair (`opts.gap`) and returns both nodes. Test bosses with `startSpec({boss:'eclipse', level:11, duration:3})` |
 | `launch(system)` | Start a campaign run (1-based index or id: `genesis crimson cyclone void`); lands on the route screen |
 | `grant({credits, rankXp, wallet})` | Add profile credits / rank XP, and/or credits to the current run wallet |
 | `market()` | Current Black Market offers (array, see Economy) |
@@ -43,6 +44,12 @@ NEON.simulate(600); // → { screen, sector, hp, level, score, time }
 - `G.eBullets` (`x, y, vx, vy, r, type`), `G.pBullets`, `G.pickups`, `G.beams`
 - `G.director`: `state (intro|waves|clearing|warn|boss|bossDown|clear|await)`, `progress`, `diff`
 - `G.sector`, `G.loop`, `G.score`, `G.combo`, `G.kills`, `G.grazes`
+
+## Enemy roster notes (step 6a)
+
+- TYPES in `enemies.js` (`hp` is scaled by `diff.hp`; `keep` = never despawned, `plain` = no elite roll). Beyond the originals: **carrier** (descends, hovers, launches 3 diving swarm pods up to 3x), **shielder** (tethers a shield to up to 3 nearby enemies via `e.links` / `target.shieldedBy`; `damageEnemy` takes -80% while the shielder lives; drawn by `drawShieldLinks` in world.js), **weaver** (spawned in pairs by `spawnWeavers`; the lead node owns an enemy beam in `G.beams` with `len` = segment length, `tele` 0.6s; it vanishes when either node dies; beams without `len` are 1400px rays), **blinker** (fade in, 0.5s ring telegraph, ring of 10-14, teleports to a spot >= 140px from the player via `blinkSpot`, repeats `shots` times then leaves; `e.alpha` fades, `invuln` while faint).
+- Director patterns (min level): carrier 2, shielder 4, weavers 5, blinkers 6. Elite nodes (`spec.elite`) spawn one **Hunter** at progress > 0.6 (`d.hunter`, compact HUD bar, `keep`, never times out the `clearing` state, pays ~3 elites of credits + heart + magnet/cell, counts for Nanorepair).
+- **ECLIPSE** (`bosses.js`, campaign system 4 only, not in the endless rotation, music index 3 = "The Final Shadow"): attacks `mirrorFan ring dashLanes overdriveWave` and phase-3 `copyUlt` which dispatches on `G.player.cls` (`COPY.striker` Dark Overdrive / `engineer` Dark Fortress: 2 `eclipsedrone` turrets + invulnerable dome, max 2 casts / `ghost` Dark Phase: blinks, slows player bullets near it). Lane beams are `G.beams` entries tagged `boss: e` (removed on phase shift / death). The autopilot (`bot.js`) steers away from enemy beam segments.
 
 ## Driving input programmatically
 

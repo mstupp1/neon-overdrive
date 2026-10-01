@@ -194,8 +194,9 @@ function collide(p) {
   // Enemy lasers → player
   for (const beam of G.beams) {
     if (beam.owner !== 'enemy' || beam.tele > 0) continue;
-    const ex = beam.x + Math.cos(beam.ang) * 1400;
-    const ey = beam.y + Math.sin(beam.ang) * 1400;
+    const L = beam.len || 1400;
+    const ex = beam.x + Math.cos(beam.ang) * L;
+    const ey = beam.y + Math.sin(beam.ang) * L;
     const rr = beam.w * 0.8 + p.r;
     if (segDist2(p.x, p.y, beam.x, beam.y, ex, ey) < rr * rr) hurtPlayer(p);
   }
@@ -226,6 +227,15 @@ function drawTelegraphs(ctx) {
       ctx.moveTo(e.x, e.y);
       ctx.lineTo(e.x + Math.cos(e.aim) * 1000, e.y + Math.sin(e.aim) * 1000);
       ctx.stroke();
+    } else if (e.type === 'blinker' && e.state === 'tele') {
+      // Contracting ring: the burst fires when it closes.
+      const t = 1 - e.timer / 0.5;
+      ctx.globalAlpha = 0.25 + t * 0.6;
+      ctx.strokeStyle = e.color;
+      ctx.lineWidth = 1.5 + t * 2;
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, 14 + (1 - t) * 60, 0, TAU);
+      ctx.stroke();
     } else if (e.type === 'mine' && e.state === 'arm') {
       ctx.globalAlpha = 0.5;
       ctx.strokeStyle = '#ff8a3d';
@@ -243,6 +253,39 @@ function drawRot(ctx, img, x, y, a, size, k) {
   const s = Math.sin(a) * k;
   ctx.setTransform(c, s, -s, c, x * k + view.ox, y * k + view.oy);
   ctx.drawImage(img, -size / 2, -size / 2, size, size);
+}
+
+// Shielder tethers + shield rings on linked enemies.
+function drawShieldLinks(ctx) {
+  let any = false;
+  for (const e of G.enemies) {
+    if (e.dead || e.type !== 'shielder' || !e.links || !e.links.length) continue;
+    if (!any) {
+      any = true;
+      ctx.globalCompositeOperation = 'lighter';
+    }
+    const pulse = 0.5 + 0.2 * Math.sin(G.time * 6);
+    ctx.strokeStyle = e.color;
+    ctx.lineWidth = 1.2;
+    ctx.globalAlpha = pulse * 0.8;
+    ctx.beginPath();
+    for (const o of e.links) {
+      if (o.dead) continue;
+      ctx.moveTo(e.x, e.y);
+      ctx.lineTo(o.x, o.y);
+    }
+    ctx.stroke();
+    ctx.globalAlpha = 0.55 + 0.25 * Math.sin(G.time * 6);
+    for (const o of e.links) {
+      if (o.dead) continue;
+      const sz = (o.r + 8) * 2.286;
+      ctx.drawImage(S.shieldRing.img, o.x - sz / 2, o.y - sz / 2, sz, sz);
+    }
+  }
+  if (any) {
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+  }
 }
 
 function drawEnemies(ctx, k) {
@@ -270,9 +313,12 @@ function drawEnemies(ctx, k) {
     }
     const s = e.spr;
     const img = e.flash > 0 ? s.flash : s.img;
+    if (e.alpha !== undefined) ctx.globalAlpha = e.alpha;
     drawRot(ctx, img, e.x, e.y, e.rot, s.size * scale, k);
+    if (e.alpha !== undefined) ctx.globalAlpha = 1;
   }
   ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
+  drawShieldLinks(ctx);
 
   // Health bars on tough enemies once damaged
   for (const e of G.enemies) {

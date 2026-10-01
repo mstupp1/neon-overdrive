@@ -2,8 +2,8 @@
 
 import { G, view, sectorDifficulty, sectorInfo, isBossSector } from './state.js';
 import { applyModifiers, patternMul } from './modifiers.js';
-import { rand, chance, weightedPick } from '../core/math.js';
-import { spawnEnemy } from './enemies.js';
+import { rand, chance, weightedPick, randInt } from '../core/math.js';
+import { spawnEnemy, spawnWeavers, blinkSpot } from './enemies.js';
 import { spawnBoss, bossById, bossIndex, BOSS_IDS } from './bosses.js';
 import { banner, floatText } from './fx.js';
 import { vacuumAll } from './pickups.js';
@@ -157,6 +157,45 @@ const PATTERNS = [
       later(0.8, () => spawnEnemy('spinner', W() / 2, -30, { mv: 'hover', tx: W() / 2, ty: 200 + top(), stay: 6 }));
     },
   },
+  {
+    id: 'carrier', min: 2, w: (s) => (s < 3 ? 0.55 : 1.1), cost: 2.8,
+    run() {
+      spawnEnemy('carrier', rand(120, W() - 120), -40, { ty: rand(110, 170) + top() });
+    },
+  },
+  {
+    id: 'shielder', min: 4, w: () => 1.2, cost: 3,
+    run() {
+      // Shielder with spinner escorts close enough to be tethered (link radius 210).
+      const cx = rand(130, W() - 130);
+      const tys = 118 + top();
+      spawnEnemy('shielder', cx, -30, { mv: 'hover', tx: cx, ty: tys, stay: 13, fireDelay: 2 });
+      const xs = G.sector + G.loop * 9 >= 7 ? [-100, 0, 100] : [-95, 95];
+      xs.forEach((dx, i) => {
+        const tx = Math.max(50, Math.min(W() - 50, cx + dx));
+        later(0.5 + i * 0.3, () => spawnEnemy('spinner', tx, -30, { mv: 'hover', tx, ty: tys + (dx === 0 ? 120 : 75), stay: 11, fireDelay: 1 + i * 0.4 }));
+      });
+    },
+  },
+  {
+    id: 'weavers', min: 5, w: () => 1.2, cost: 2.4,
+    run() {
+      const gap = rand(170, 240);
+      spawnWeavers(rand(gap / 2 + 50, W() - gap / 2 - 50), -20, gap);
+    },
+  },
+  {
+    id: 'blinkers', min: 6, w: () => 1.1, cost: 2.2,
+    run() {
+      const n = G.sector + G.loop * 9 >= 8 ? 2 : 1;
+      for (let i = 0; i < n; i++) {
+        later(i * 0.9, () => {
+          const b = spawnEnemy('blinker', 0, 0, { shots: randInt(2, 3) });
+          blinkSpot(b);
+        });
+      }
+    },
+  },
 ];
 
 // Spec for endless mode: sector n → 9-sector cycle (boss every 3rd) that loops harder.
@@ -190,6 +229,8 @@ export function startSector(spec) {
   d.queue.length = 0;
   d.spawnT = 1.4;
   d.progress = 0;
+  d.hunter = null;
+  d.hunterSpawned = false;
   d.duration = spec.duration;
   bg.setHue(spec.hue);
   G.vacuum = false;
@@ -203,6 +244,17 @@ function aliveEnemies() {
   let n = 0;
   for (const e of G.enemies) if (!e.dead && !e.boss) n++;
   return n;
+}
+
+// Elite nodes: one Hunter mini-boss late in the sector (HUD draws its compact bar from d.hunter).
+function spawnHunter() {
+  const d = G.director;
+  d.hunterSpawned = true;
+  d.hunter = spawnEnemy('hunter', W() / 2, -50, { ty: 135 + top() });
+  if (G.mode === 'run') {
+    banner('HUNTER', 'ELITE TARGET INBOUND', '#ff3b3b', 2);
+    sfx.warn();
+  }
 }
 
 export function updateDirector(dt) {
@@ -230,6 +282,7 @@ export function updateDirector(dt) {
       d.sectorT += dt;
       d.progress = Math.min(1, d.sectorT / d.duration);
       d.spawnT -= dt;
+      if (spec.elite && !d.hunterSpawned && d.progress > 0.6) spawnHunter();
       const alive = aliveEnemies();
       if (alive === 0 && !d.queue.length) d.spawnT = Math.min(d.spawnT, 0.4);
       const cap = 16 + local * 2 + spec.loop * 6;
@@ -248,7 +301,8 @@ export function updateDirector(dt) {
     }
     case 'clearing':
       d.progress = 1;
-      if ((aliveEnemies() === 0 && !d.queue.length) || d.t > 7) {
+      // The Hunter never times out: the sector only clears once it is dead.
+      if ((aliveEnemies() === 0 && !d.queue.length) || (d.t > 7 && !(d.hunter && !d.hunter.dead))) {
         d.t = 0;
         if (spec.boss) {
           d.state = 'warn';

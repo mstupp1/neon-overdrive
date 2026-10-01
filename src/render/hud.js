@@ -129,6 +129,22 @@ export function drawHud(ctx) {
     ctx.fillRect(16 + bw * 0.33, by, 2, 6);
   }
 
+  // Hunter (elite-node mini-boss): compact bar under the sector info
+  const hu = d.hunter;
+  if (hu && !hu.dead && !boss) {
+    const hy = y0 + 58;
+    const hw = Math.min(190, W - 120);
+    const hx = (W - hw) / 2;
+    const fill = clamp(hu.hp / hu.maxHp, 0, 1);
+    text(ctx, 'HUNTER', hx, hy - 6, 9, '#ff3b3b', 'left', 900);
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(hx, hy, hw, 4);
+    ctx.fillStyle = hu.flash > 0 ? '#ffffff' : '#ff3b3b';
+    ctx.fillRect(hx, hy, hw * fill, 4);
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillRect(hx + hw * 0.5, hy, 2, 4);
+  }
+
   // Gauges (fade when the ship flies near them)
   const gy = view.H - view.safeBottom - 46;
   drawGauge(ctx, 44, gy, p, 'od');

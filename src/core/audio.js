@@ -229,7 +229,7 @@ const NORMAL = [
   'Galactic Frenzy 2', 'Galactic Showdown 1', 'Galactic Showdown 2', 'Starfire Rumble 1', 'Starfire Rumble 2',
 ];
 const LATE = ["The Tyrant's March", 'The Final Shadow', 'Galactic Showdown 1', 'Galactic Frenzy 2', 'Starfire Rumble 1'];
-const BOSS = ['Starlover', "The Tyrant's March", 'The Final Shadow'];
+const BOSS = ['Starlover', "The Tyrant's March", 'Galactic Showdown 2', 'The Final Shadow']; // warden, hydra, omega, eclipse
 
 const urlFor = (name) => DIR + encodeURIComponent(name) + '.mp3';
 
