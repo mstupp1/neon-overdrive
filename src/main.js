@@ -25,7 +25,7 @@ import { achInit, achTick } from './game/achievements.js';
 import { rollRelicDrop } from './game/collectables.js';
 import { setClass, setPassives } from './game/pilot.js';
 import { buyShip, buyPart, equipPart, unequipSlot, setPaint, selectShip, applyAllPaints } from './game/hangar.js';
-import { SYSTEMS, systemById, generateRoute, nodeSpec, reachableNodes, routeNode, systemUnlocked } from './game/campaign.js';
+import { SYSTEMS, systemById, generateRoute, nodeSpec, reachableNodes, routeNode } from './game/campaign.js';
 import { rand, pick, lerp, easeInOut } from './core/math.js';
 import { ring } from './game/fx.js';
 import { cine } from './game/cinematic.js';
@@ -54,11 +54,10 @@ const curShip = () => {
 let settingsReturn = 'title';
 let draftKind = null;
 let draftChoices = null;
-let selSystem = 0;
 let marketOffers = null; // current Black Market stock
 let curEvent = null; // open anomaly event session (story.startEvent)
 let bossCardT = 0;
-let afterDraft = null; // 'route' | 'extract': where to go once the sector reward / level drafts are done
+let afterDraft = null; // 'route' | 'extract' | 'next': where to go once the sector reward / level drafts are done
 // Level-up pacing: the world slows into the draft and eases back out of it instead of hard cuts.
 const LEVEL_INTRO = 0.5; // real seconds of slow-down before the level-up draft opens
 const RESUME_EASE = 0.45; // real seconds to ramp back to full speed after a draft
@@ -159,6 +158,7 @@ function startAttract() {
   for (const id of ['main', 'main', 'main', pick(['missiles', 'orbitals', 'drones', 'arc'])]) applyUpgrade(p, id, G);
 }
 
+// Debug sandbox run (NEON.startRun / startSpec / balance sims): the classic endless sector chain. Not reachable from the menus.
 function startRun(s) {
   profile.lastShip = s.id;
   saveProfile();
@@ -168,13 +168,23 @@ function startRun(s) {
 
 // --- Campaign flow ---------------------------------------------------------------------
 
-function launchSystem(sys) {
+// A campaign run flies every system in order with one ship and build; dying anywhere ends it (the next run starts at
+// system 1 again). `from` (debug) starts at another system index.
+function launchRun(from = 0) {
   const ship = curShip();
   profile.lastShip = ship.id;
   saveProfile();
-  const route = generateRoute(sys, Math.floor(Math.random() * 2147483647));
-  newWorld('run', ship, { mode: 'campaign', system: sys, route, row: -1, nodeId: null, sectors: 0, victory: false, visited: [] });
-  playSectorIntro(sys, SYSTEMS.indexOf(sys), () => blockingStory('intro:' + sys.id, STORY.systems[sys.id].intro, {}, () => startSupply(sys.supply || 0)));
+  newWorld('run', ship, { mode: 'campaign', sysIdx: from, system: SYSTEMS[from], route: null, row: -1, nodeId: null, sectors: 0, victory: false, visited: [] });
+  enterSystem(from);
+}
+
+// Puts the run at row -1 of system `idx` (fresh route), plays the warp-in and its intro, then opens the route (after any supply drop).
+function enterSystem(idx) {
+  const r = G.run;
+  const sys = SYSTEMS[idx];
+  Object.assign(r, { sysIdx: idx, system: sys, route: generateRoute(sys, Math.floor(Math.random() * 2147483647)), row: -1, nodeId: null, visited: [] });
+  noteProgress();
+  playSectorIntro(sys, idx, () => blockingStory('intro:' + sys.id, STORY.systems[sys.id].intro, {}, () => startSupply(sys.supply || 0)));
 }
 
 // Entering a star system: the warp-in title animation (render/sectorIntro.js), then `done` (dialogue, supply, route).
@@ -198,7 +208,37 @@ function finishSectorIntro() {
   if (done) done();
 }
 
-// Later systems open with a supply drop: salvaged tech so a fresh ship is not outmatched at row 0.
+// Furthest point any run has reached (campaign screen / title records).
+function noteProgress() {
+  const c = profile.campaign;
+  const r = G.run;
+  if (r.sysIdx > c.bestSys || (r.sysIdx === c.bestSys && r.row > c.bestRow)) {
+    c.bestSys = r.sysIdx;
+    c.bestRow = r.row;
+  }
+}
+
+// System boss down (not the last): post-boss dialogue, patch up half the missing hull, then warp to the next system.
+function nextSystem() {
+  const r = G.run;
+  markCleared(r.system);
+  blockingStory('post:' + r.system.id, STORY.systems[r.system.id].postBoss, { once: false, short: 'last' }, () => {
+    comms.clear();
+    hideBossCard();
+    const p = G.player;
+    const heal = Math.ceil((p.maxHp - p.hp) / 2);
+    if (heal > 0) p.hp += heal;
+    music.setSet('normal');
+    enterSystem(r.sysIdx + 1);
+  });
+}
+
+function markCleared(sys) {
+  if (!profile.campaign.cleared.includes(sys.id)) profile.campaign.cleared.push(sys.id);
+  saveProfile();
+}
+
+// Optional supply drop at system start (SYSTEMS[].supply; 0 everywhere now that the build carries over).
 function startSupply(n) {
   G.supplyLeft = n;
   afterDraft = 'route';
@@ -266,8 +306,7 @@ function showCampaign(focusId) {
   touchUi.hidden = true;
   music.setSet('normal');
   music.setDuck(1);
-  if (!systemUnlocked(SYSTEMS[selSystem], profile)) selSystem = 0;
-  const launchBtn = meta.renderCampaign(selSystem, curShip().name);
+  const launchBtn = meta.renderCampaign(curShip().name);
   ui.show('campaign', { focus: (focusId && document.getElementById(focusId)) || launchBtn });
   blockingStory('prologue', STORY.prologue, { overlay: true }, () => {});
 }
@@ -287,6 +326,7 @@ function pickRouteNode(node) {
   r.nodeId = node.id;
   r.row = node.row;
   r.visited.push(node.id);
+  noteProgress();
   if (node.type === 'combat' || node.type === 'elite' || node.type === 'boss') {
     const spec = nodeSpec(r.system, node, r.sectors + 1);
     if (r.curse) spec.modifiers.push(r.curse); // Contraband / event drawback
@@ -358,7 +398,7 @@ function nodeContinue() {
   showRoute();
 }
 
-// Boss down: post-boss dialogue (and the ending after the last system), then the extraction screen.
+// Last boss down: post-boss dialogue and the ending, then the extraction screen. extract() also ends a run early (debug).
 function extract() {
   const sys = G.run.system;
   const final = SYSTEMS.indexOf(sys) === SYSTEMS.length - 1;
@@ -374,14 +414,12 @@ function finishExtract(final) {
   const p = G.player;
   const r = G.run;
   r.victory = true;
-  if (!profile.campaign.cleared.includes(r.system.id)) profile.campaign.cleared.push(r.system.id);
+  markCleared(r.system);
   const { unlocked, reward } = bankRun();
   meta.renderExtract({
     system: r.system, score: Math.floor(G.score), time: G.runTime, level: p.level, kills: G.kills, sectors: r.sectors,
     maxCombo: G.maxCombo, grazes: G.grazes, unlocked, reward, player: p, final,
   });
-  const idx = SYSTEMS.indexOf(r.system);
-  if (idx < SYSTEMS.length - 1) selSystem = idx + 1;
   G.screen = 'extract';
   ui.show('extract', { lock: 700 });
   pauseBtn.hidden = true;
@@ -395,7 +433,7 @@ function bankRun() {
   profile.runs++;
   profile.kills += G.kills;
   profile.best = Math.max(profile.best, Math.floor(G.score));
-  if (!G.run || G.run.mode === 'endless') profile.bestSector = Math.max(profile.bestSector, G.sector);
+  profile.bestSector = Math.max(profile.bestSector, G.sector); // most sectors fought in one run
   profile.bestCombo = Math.max(profile.bestCombo, G.maxCombo);
   profile.bossKills += G.bossKills;
   const reward = settleRun(!!(G.run && G.run.victory));
@@ -461,7 +499,7 @@ function pickUpgrade(id) {
   if (draftKind === 'supply' && --G.supplyLeft > 0) return openDraft('supply');
   G.player.iframes = Math.max(G.player.iframes, 0.5);
   if (draftKind === 'sector') {
-    if (G.run.mode === 'campaign') afterDraft = 'route';
+    if (G.run.mode === 'campaign') afterDraft = afterDraft === 'next' ? 'next' : 'route';
     else nextSector();
   }
   if (G.pendingLevels > 0) return openDraft('level');
@@ -469,6 +507,7 @@ function pickUpgrade(id) {
   afterDraft = null;
   if (next === 'route') return showRoute();
   if (next === 'extract') return extract();
+  if (next === 'next') return nextSystem();
   enterPlay();
   resumeEase = RESUME_EASE;
   input.holdTarget(); // the cursor was on the menu: don't yank the ship toward it
@@ -482,6 +521,12 @@ function onSectorClear() {
   }
   if (G.player.dead) return;
   if (G.screen !== 'play') return;
+  if (G.run.mode === 'campaign' && G.director.spec.boss && G.run.sysIdx < SYSTEMS.length - 1) {
+    // System boss: a reward draft, then on to the next system.
+    afterDraft = 'next';
+    openDraft('sector');
+    return;
+  }
   if (G.run.mode === 'campaign' && G.director.spec.boss) {
     // Final boss: skip the reward draft, finish any pending level-ups, then extract.
     afterDraft = 'extract';
@@ -580,12 +625,7 @@ ui.init({
   helpTab(btn) {
     document.querySelectorAll('#scr-help [data-tab]').forEach((el) => el.classList.toggle('on', el.dataset.tab === btn.dataset.tab));
   },
-  sys(btn) {
-    selSystem = +btn.dataset.i;
-    meta.selectSystem(selSystem);
-  },
-  launch: () => launchSystem(SYSTEMS[selSystem]),
-  endless: () => startRun(curShip()),
+  launch: () => launchRun(),
   hangar: () => openHangar(),
   leaveHangar: () => showCampaign(),
   ...hangarActs,
@@ -609,9 +649,9 @@ ui.init({
   resume: () => {
     enterPlay();
   },
-  restart: () => (G.run.mode === 'campaign' ? launchSystem(G.run.system) : startRun(curShip())),
+  restart: () => (G.run.mode === 'campaign' ? launchRun() : startRun(curShip())),
   quit: () => (G.run.mode === 'campaign' ? showCampaign() : toTitle()),
-  retry: () => (G.run.mode === 'campaign' ? launchSystem(G.run.system) : startRun(curShip())),
+  retry: () => (G.run.mode === 'campaign' ? launchRun() : startRun(curShip())),
   title: () => toTitle(),
   reroll() {
     if (G.rerolls <= 0) return;
@@ -889,11 +929,11 @@ window.NEON = {
     return e;
   },
   rollDraft: (kind = 'level') => rollDraft(G.player, kind),
-  // Start a campaign run (1-based index or system id); lands on the route screen.
+  // Start a campaign run (1 = the normal start; a later 1-based index or system id starts there, debug); lands on the route screen.
   // The intro dialogue is skipped (still marked seen) unless opts.story is true.
   // The sector intro animation is skipped too unless opts.intro is true.
   launch(sys = 1, opts = {}) {
-    launchSystem(typeof sys === 'number' ? SYSTEMS[sys - 1] : systemById(sys));
+    launchRun(typeof sys === 'number' ? sys - 1 : SYSTEMS.indexOf(systemById(sys)));
     if (!opts.intro && G.screen === 'sector-intro') finishSectorIntro();
     if (!opts.story) comms.skipAll();
   },

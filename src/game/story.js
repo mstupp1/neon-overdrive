@@ -94,7 +94,7 @@ export const STORY = {
     L('ECHO', 'It built a mirror out of my own flying.'),
     L('MAG', 'It could only copy what it saw. You were always the original.'),
     L('ECHO', 'So what happens now?'),
-    L('MAG', 'The Grid rebuilds. Stray fragments still drift out there. The ENDLESS GRID is open if you want to hunt them.'),
+    L('MAG', 'The Grid rebuilds. Stray fragments still drift out there. Go hunt them down whenever you like.'),
     L('MAG', 'Thanks for flying, ECHO.'),
   ],
 };

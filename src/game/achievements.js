@@ -28,7 +28,7 @@ export const ACHIEVEMENTS = [
   { id: 'boss_10', group: 'COMBAT', tier: 's', name: 'Boss Rush', desc: 'Defeat 10 bosses.' },
   { id: 'clear_1', group: 'COMBAT', tier: 's', name: 'System Secured', desc: 'Extract from a star system.' },
   { id: 'clear_all', group: 'CAREER', tier: 'g', name: 'Overdrive', desc: 'Clear all four star systems.' },
-  { id: 'endless_10', group: 'COMBAT', tier: 's', name: 'Deep Grid', desc: 'Reach sector 10 in the Endless Grid.' },
+  { id: 'endless_10', group: 'COMBAT', tier: 's', name: 'Deep Grid', desc: 'Fight 10 sectors in a single run.' },
   { id: 'ult_1', group: 'COMBAT', tier: 'b', name: 'Unleashed', desc: 'Fire your ultimate.' },
   { id: 'evolve', group: 'COMBAT', tier: 's', name: 'Metamorphosis', desc: 'Evolve a weapon module.' },
   { id: 'rank_5', group: 'CAREER', tier: 'b', name: 'Promoted', desc: 'Reach Pilot Rank 5.' },
@@ -197,7 +197,7 @@ function runTick() {
   at(G.grazes, 250, 'graze_250');
   at(p.level, 15, 'level_15');
   at(r.wallet || 0, 1000, 'hoard');
-  if (r.mode === 'endless') at(G.sector, 10, 'endless_10');
+  at(G.sector, 10, 'endless_10');
   if (!hasAch('evolve') && Object.keys(p.up).some((id) => upgradeById(id)?.cat === 'evolution')) unlock('evolve');
 }
 

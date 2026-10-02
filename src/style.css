@@ -1037,7 +1037,6 @@ input[type='range']::-moz-range-thumb {
     background: #0a0720;
     border: 1px solid color-mix(in srgb, var(--c) 40%, transparent);
     border-radius: 2px;
-    cursor: pointer;
     outline: none;
     transition: border-color 0.15s, box-shadow 0.15s;
 }
@@ -1081,9 +1080,7 @@ input[type='range']::-moz-range-thumb {
     white-space: nowrap;
 }
 
-.sys.sel,
-.sys.focus,
-.sys:hover {
+.sys.sel {
     border-color: var(--c);
     box-shadow: 0 0 1.2em color-mix(in srgb, var(--c) 50%, transparent), inset 0 0 1.4em color-mix(in srgb, var(--c) 14%, transparent);
 }
@@ -1096,7 +1093,6 @@ input[type='range']::-moz-range-thumb {
 .sys.locked {
     filter: grayscale(1);
     opacity: 0.45;
-    cursor: not-allowed;
 }
 
 .sys-detail {

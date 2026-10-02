@@ -147,7 +147,7 @@
         <!-- CAMPAIGN MAP -->
         <section class="screen" id="scr-campaign" data-back="back">
             <h2 class="screen-title">CAMPAIGN</h2>
-            <p class="screen-sub">Choose a star system</p>
+            <p class="screen-sub">Fight through every system in one run</p>
             <div class="pilot-line" id="camp-pilot"></div>
             <div class="sysmap" id="sys-map"></div>
             <div class="sys-detail" id="sys-detail"></div>
@@ -157,10 +157,7 @@
                     <button class="btn small" data-act="hangar" id="ship-btn">HANGAR</button>
                     <button class="btn small" data-act="pilot" id="pilot-btn">PILOT</button>
                 </div>
-                <div class="pair">
-                    <button class="btn small" data-act="endless">ENDLESS GRID</button>
-                    <button class="btn ghost small" data-act="back">BACK</button>
-                </div>
+                <button class="btn ghost small" data-act="back">BACK</button>
             </nav>
         </section>
 
@@ -326,7 +323,7 @@
             <div class="extract-rewards" id="over-rewards"></div>
             <div class="build big" id="over-build"></div>
             <p class="over-next" id="over-next" hidden></p>
-            <!-- Campaign loss: UPGRADE SHIP leads, RETRY is secondary. Endless: RETRY leads. Filled by renderGameOver. -->
+            <!-- Campaign loss: UPGRADE SHIP leads, RETRY is secondary (debug sandbox runs: RETRY leads). Filled by renderGameOver. -->
             <nav class="menu">
                 <button class="btn primary" data-act="upgrade" id="over-main">UPGRADE SHIP</button>
                 <div class="pair">

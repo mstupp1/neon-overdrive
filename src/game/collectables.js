@@ -1,6 +1,6 @@
 // Relics: themed collectables. Bought in the Gallery (commons and rares, or a random Data Capsule)
 // or found in the field as a rare drop; legendaries are field finds only. One set per campaign
-// system plus one for the Endless Grid; completing a set pays a bounty.
+// system plus Grid Junk, which turns up anywhere; completing a set pays a bounty.
 
 import { G } from './state.js';
 import { profile, saveProfile } from '../core/storage.js';
@@ -20,13 +20,13 @@ export const RARITY = {
 export const CAPSULE_PRICE = 180;
 export const SET_BONUS = 250;
 
-// `system`: the campaign system whose fields drop this set (null = Endless Grid).
+// `system`: the campaign system whose fields drop this set (null = Grid Junk, a small share of finds in every system).
 export const THEMES = [
   { id: 'genesis', system: 'genesis', name: 'GRID ORIGINS', color: '#5b9cff', blurb: 'Salvage from the outer lattice, where it all began.' },
   { id: 'crimson', system: 'crimson', name: 'BIO BLOOM', color: '#ff3b6b', blurb: 'Specimens from the Crimson Tide. Handle with gloves.' },
   { id: 'cyclone', system: 'cyclone', name: 'DATA STORM', color: '#3fffd2', blurb: 'Debris swept up by the Cyan Cyclone\'s data winds.' },
   { id: 'void', system: 'void', name: 'EVENTIDE', color: '#b48bff', blurb: 'Things that came back from the Void. Mostly.' },
-  { id: 'junk', system: null, name: 'GRID JUNK', color: '#ffd24a', blurb: 'Pilot clutter lost on the Endless Grid.' },
+  { id: 'junk', system: null, name: 'GRID JUNK', color: '#ffd24a', blurb: 'Pilot clutter lost all over the Grid.' },
 ];
 
 export const RELICS = [
@@ -140,7 +140,9 @@ export function seenRelics() {
 function fieldTheme() {
   const r = G.run;
   const sys = r && r.mode === 'campaign' && r.system ? r.system.id : null;
-  return THEMES.find((t) => t.system === sys) || THEMES[THEMES.length - 1];
+  const junk = THEMES[THEMES.length - 1];
+  if (Math.random() < 0.2) return junk;
+  return THEMES.find((t) => t.system === sys) || junk;
 }
 
 function relicSprite() {

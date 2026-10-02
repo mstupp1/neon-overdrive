@@ -21,7 +21,7 @@ let flashId = null; // relic just acquired (pop animation)
 let back = null; // where BACK goes
 
 const theme = () => THEMES[tab];
-const fieldName = (t) => (t.system ? SYSTEMS.find((s) => s.id === t.system).name : 'THE ENDLESS GRID');
+const fieldName = (t) => (t.system ? SYSTEMS.find((s) => s.id === t.system).name : 'ANY SYSTEM');
 
 function renderGallery() {
   const t = theme();
