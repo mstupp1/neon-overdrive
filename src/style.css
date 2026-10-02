@@ -3429,6 +3429,7 @@ input[type='range']::-moz-range-thumb {
 
 .hs-stats div {
     min-height: 1.25em;
+}
 
 /* Boot intro (src/game/intro.js). Every line is absolutely placed, so nothing shifts as text types on. */
 .intro {
