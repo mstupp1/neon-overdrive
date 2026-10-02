@@ -12,7 +12,7 @@ import { drawHud, updateBanner } from './render/hud.js';
 import { SHIPS, shipById, ownsShip, isUnlocked } from './game/ships.js';
 import { createPlayer } from './game/player.js';
 import { createDirector, startSector, nextSector, endlessSpec } from './game/director.js';
-import { rollDraft, applyUpgrade, UPGRADES } from './game/upgrades.js';
+import { rollDraft, applyUpgrade, UPGRADES, discover } from './game/upgrades.js';
 import { spawnEnemy, spawnWeavers } from './game/enemies.js';
 import { step, renderWorld } from './game/world.js';
 import { ui } from './ui/screens.js';
@@ -189,6 +189,7 @@ function enterSystem(idx) {
   const r = G.run;
   const sys = SYSTEMS[idx];
   Object.assign(r, { sysIdx: idx, system: sys, route: generateRoute(sys, Math.floor(Math.random() * 2147483647)), row: -1, nodeId: null, visited: [] });
+  G.player.techTier = Math.max(G.player.techTier || 0, idx); // this system's tech joins the upgrade pool (upgrades.js tiers); Deep Grid cycles keep it all
   noteProgress();
   playSectorIntro(sys, idx, () => blockingStory('intro:' + sys.id, STORY.systems[sys.id].intro, {}, () => startSupply(sys.supply || 0)));
 }
@@ -384,6 +385,7 @@ function visitNode(node) {
   switch (node.type) {
     case 'market':
       marketOffers = rollMarket(G.player, G.run.system);
+      discover(marketOffers.filter((o) => o.kind === 'upgrade').map((o) => o.up));
       G.screen = 'market';
       meta.renderMarket(G, marketOffers, true);
       ui.show('market', { lock: 250 });
@@ -549,16 +551,23 @@ function rollFor(kind) {
 function openDraft(kind, quiet = false) {
   levelIntro = -1;
   draftKind = kind;
+  if (G.run.mode !== 'campaign') G.player.techTier = Math.min(3, Math.floor((G.sector - 1) / 3)); // debug sandbox
   draftChoices = rollFor(kind);
   G.screen = 'draft';
   curNote = draftNote;
   draftNote = '';
-  ui.renderDraft(G.player, draftChoices, kind, G.rerolls, pickUpgrade, G.supplyLeft, curNote);
+  showDraftCards(kind);
   // guard: keys already held for flying (or a stray dash) don't drive the menu until released.
   ui.show('draft', { lock: 420, guard: true });
   pauseBtn.hidden = true;
   music.setDuck(0.6);
   if (kind === 'level' && !quiet) sfx.levelUp();
+}
+
+// Renders the draft (cards flag never-seen tech), then records those options as discovered.
+function showDraftCards(kind) {
+  ui.renderDraft(G.player, draftChoices, kind, G.rerolls, pickUpgrade, G.supplyLeft, curNote);
+  if (discover(draftChoices).length) sfx.achieve(true);
 }
 
 // Level-up during play: a short slow-motion beat (ring + chime) before the draft opens.
@@ -798,7 +807,7 @@ ui.init({
     if (G.rerolls <= 0) return;
     G.rerolls--;
     draftChoices = rollFor(draftKind);
-    ui.renderDraft(G.player, draftChoices, draftKind, G.rerolls, pickUpgrade, G.supplyLeft, curNote);
+    showDraftCards(draftKind);
     ui.show('draft', { lock: 200 });
   },
   fullscreen() {

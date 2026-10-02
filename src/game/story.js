@@ -4,7 +4,7 @@
 
 import { G } from './state.js';
 import { mulberry32 } from '../core/math.js';
-import { rollUpgradeIds, applyUpgrade, cardInfo, recomputeStats } from './upgrades.js';
+import { rollUpgradeIds, applyUpgrade, cardInfo, recomputeStats, discover } from './upgrades.js';
 import { nodeLevel } from './campaign.js';
 
 // color: ECHO uses the active class colour (resolved in ui/comms.js).
@@ -212,12 +212,13 @@ export const EVENTS = [
       const out = ids.map((id) => {
         const info = cardInfo(c.p, id);
         return {
-          label: info.name, tag: info.lv === 0 ? 'NEW' : `LV ${info.lv + 1}`, desc: info.desc,
+          label: info.name, tag: info.fresh ? 'DISCOVERY' : info.lv === 0 ? 'NEW' : `LV ${info.lv + 1}`, desc: info.desc, fresh: info.fresh,
           cost: round5((0.75 * (50 + 30 * info.lv)) * (1 + 0.5 * (act - 1))),
           effect: () => `Installed ${info.name}. Pleasure doing business.`,
           _apply: () => applyUpgrade(c.p, id, G),
         };
       });
+      discover(ids);
       if (!out.length) out.push({ label: 'Field rations', tag: 'REPAIR', desc: 'Repair 1 hull.', cost: 40, _apply: () => heal(c.p, 1), effect: () => 'Patched up. +1 hull.' });
       out.push({ label: 'Walk away', desc: 'Not today.', effect: () => 'The beacon goes quiet behind you.' });
       return out;

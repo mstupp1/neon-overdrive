@@ -164,14 +164,19 @@ export const ui = {
       const info = cardInfo(player, id);
       const c = CAT_COLORS[info.cat];
       const b = document.createElement('button');
-      b.className = info.evo ? 'card evo' : 'card';
+      // Two "new" levels, each with its own flag on the card's top edge: never seen in any run (DISCOVERY, white,
+      // outlined card) vs. seen before but not owned this run (NEW THIS RUN, category colour).
+      const fresh = info.max > 0 && info.fresh;
+      const runNew = info.max > 0 && !fresh && !info.evo && info.cat !== 'weapon' && info.lv === 0; // you always fly a main cannon
+      b.className = 'card' + (info.evo ? ' evo' : '') + (fresh ? ' fresh' : '');
       b.style.setProperty('--c', c);
       let pips = '';
       if (info.max && !info.evo) {
         for (let k = 0; k < info.max; k++) pips += `<i class="${k < info.lv ? 'on' : k === info.lv ? 'next' : ''}"></i>`;
       }
-      const tag = info.evo ? 'EVOLVE' : info.max ? (info.lv === 0 ? 'NEW' : `LV ${info.lv + 1}`) : 'BONUS';
-      b.innerHTML = `<div class="card-icon">${info.icon}</div><div><div class="card-top"><span class="card-name">${info.name}</span><span class="card-tag">${tag}</span></div><div class="card-desc">${info.desc}</div>${pips ? `<div class="pips">${pips}</div>` : ''}</div>${input.device === 'touch' ? '' : `<kbd>${i + 1}</kbd>`}`;
+      const tag = info.evo ? 'EVOLVE' : info.max ? `LV ${info.lv + 1}` : 'BONUS';
+      const flag = fresh ? `<span class="card-flag disc">${STAR}NEW DISCOVERY</span>` : runNew ? '<span class="card-flag run">NEW THIS RUN</span>' : '';
+      b.innerHTML = `${flag}<div class="card-icon">${info.icon}</div><div><div class="card-top"><span class="card-name">${info.name}</span><span class="card-tag">${tag}</span></div><div class="card-desc">${info.desc}</div>${pips ? `<div class="pips">${pips}</div>` : ''}</div>${input.device === 'touch' ? '' : `<kbd>${i + 1}</kbd>`}`;
       b.addEventListener('click', () => {
         if (performance.now() < lockUntil) return;
         sfx.select();
@@ -266,6 +271,8 @@ export const ui = {
     this._toastT = setTimeout(() => t.classList.remove('show'), 3500);
   },
 };
+
+const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l2.9 6.6 7.1.7-5.4 4.8 1.6 7-6.2-3.7-6.2 3.7 1.6-7L2 9.3l7.1-.7z"/></svg>';
 
 export function stat(label, value) {
   return `<div>${label}<b>${value}</b></div>`;
