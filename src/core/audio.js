@@ -24,7 +24,7 @@ export function unlockAudio() {
     sfxBus.gain.value = profile.settings.sfx;
     sfxBus.connect(comp);
 
-    const len = ac.sampleRate;
+    const len = ac.sampleRate * 2; // 2 s: long sweeps (warp, overdrive) start at a random offset up to 0.5 s
     noiseBuf = ac.createBuffer(1, len, ac.sampleRate);
     const d = noiseBuf.getChannelData(0);
     for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
@@ -220,6 +220,25 @@ export const sfx = {
     if (!ac || ac.state !== 'running' || profile.settings.sfx <= 0.001) return;
     const notes = legendary ? [784, 988, 1175, 1568, 1976] : [1175, 1568, 1976];
     notes.forEach((f, i) => tone({ type: 'sine', f0: f, f1: f * 1.01, dur: 0.28, vol: 0.06, delay: i * 0.055 }));
+  },
+  // Finisher cam hit: a deep impact plus a rising swell (rank 1 Hunter … 5 final boss).
+  finisher(rank = 2) {
+    if (!ready()) return;
+    tone({ type: 'sine', f0: 140, f1: 32, dur: 0.6 + rank * 0.15, vol: 0.22 + rank * 0.04 });
+    noise({ dur: 0.35 + rank * 0.1, vol: 0.12 + rank * 0.03, f0: 6000, f1: 200 });
+    tone({ type: 'triangle', f0: 1568, f1: 1760, dur: 0.5 + rank * 0.12, vol: 0.035, delay: 0.08 });
+  },
+  // Sector intro: warp spool-up, then the drop out of hyperspace.
+  warp() {
+    if (!ready()) return;
+    noise({ dur: 1.0, vol: 0.18, f0: 300, f1: 7000, type: 'bandpass', q: 1.2, attack: 0.6 });
+    tone({ type: 'sawtooth', f0: 60, f1: 520, dur: 0.95, vol: 0.06, filter: 1800, attack: 0.5 });
+  },
+  warpOut() {
+    if (!ready()) return;
+    tone({ type: 'sine', f0: 110, f1: 36, dur: 1.1, vol: 0.32 });
+    noise({ dur: 0.5, vol: 0.16, f0: 5000, f1: 300 });
+    [523, 784, 1047].forEach((f, i) => tone({ type: 'triangle', f0: f, dur: 0.4, vol: 0.06, delay: 0.25 + i * 0.08 }));
   },
   sector() {
     if (!ready()) return;

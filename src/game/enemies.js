@@ -10,6 +10,7 @@ import { dropKillCredits } from './economy.js';
 import { rollRelicDrop } from './collectables.js';
 import { sfx } from '../core/audio.js';
 import { onEnemyKilled } from './player.js';
+import { onKill as cineOnKill } from './cinematic.js';
 import { onEliteKilled } from './pilot.js';
 import { bossDamaged, updateBoss, every } from './bosses.js';
 
@@ -673,4 +674,5 @@ export function killEnemy(e, silent = false) {
     }
   }
   onEnemyKilled(e);
+  cineOnKill(e); // last enemy of the node / a Hunter: finisher cam
 }

@@ -18,6 +18,7 @@ import { dashNova, resetModules } from './modules.js';
 import { collectRelic } from './collectables.js';
 import { achEvent } from './achievements.js';
 import { CLASSES, activeClass, equippedPassives, initPilot, castUlt, boosted, phasing, fortressOn, bloodrush, onEliteKilled, updatePilot, spawnEchoes } from './pilot.js';
+import { cine } from './cinematic.js';
 
 export const xpFor = (l) => Math.floor(5 + 4.5 * l + 0.9 * l * l);
 
@@ -136,8 +137,20 @@ export function updatePlayer(p, dt) {
     mvy = c.dy;
   }
 
+  // Cinematic fly-through (cinematic.js transit): the jet follows a scripted point, no dashing.
+  const auto = p.auto;
+  if (auto) {
+    tvx = (auto.x - p.x) * 12;
+    tvy = (auto.y - p.y) * 12;
+    const m = Math.hypot(tvx, tvy);
+    if (m > 900) {
+      tvx *= 900 / m;
+      tvy *= 900 / m;
+    }
+  }
+
   // --- Dash ---
-  if (c.dash && p.charges > 0 && p.dashT <= 0) {
+  if (c.dash && !auto && p.charges > 0 && p.dashT <= 0) {
     let dx = mvx;
     let dy = mvy;
     const m = Math.hypot(dx, dy);
@@ -332,7 +345,7 @@ export function onEnemyKilled(e) {
 }
 
 export function hurtPlayer(p) {
-  if (p.dead || p.iframes > 0 || p.dashT > 0 || p.god || G.mode === 'attract' || phasing(p)) return;
+  if (p.dead || p.iframes > 0 || p.dashT > 0 || p.god || G.mode === 'attract' || phasing(p) || cine.on) return;
   if (p.shield) {
     p.shield = 0;
     p.shieldT = 0;
