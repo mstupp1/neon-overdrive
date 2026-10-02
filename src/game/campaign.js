@@ -8,23 +8,23 @@ import { mulberry32 } from '../core/math.js';
 // supply = free upgrade drafts at system start (a fresh ship at row 0 of a late system would otherwise be hopelessly outgunned);
 // warm = level eased off per row short of row 2 (default WARM).
 // One run flies all four systems with one build, so levels form one continuous climb: Genesis opens like the old endless
-// sector 1 and each system starts where the previous boss row left off. Boss HP is set so boss fights last about a minute
-// for a build that has kept pace (bot sims).
+// sector 1 and each system starts where the previous boss row left off, never above the old standalone levels. Boss HP stays
+// at most as hard as when each system was flown alone (OMEGA x0.5, ECLIPSE x0.22 as before).
 export const SYSTEMS = [
   {
     id: 'genesis', name: 'NEON GENESIS', short: 'GENESIS', act: 1, hue: 215, level: 1, step: 0.9, warm: 0, rows: 5, dur: 46, bossHp: 1.3, supply: 0, pay: 0.8, boss: 'warden',
     blurb: 'The Grid\'s outer lattice. A siege mech guards the gate.',
   },
   {
-    id: 'crimson', name: 'CRIMSON TIDE', short: 'CRIMSON', act: 2, hue: 345, level: 6, step: 0.6, warm: 0, rows: 5, dur: 46, bossHp: 1, supply: 0, pay: 0.64, boss: 'hydra',
+    id: 'crimson', name: 'CRIMSON TIDE', short: 'CRIMSON', act: 2, hue: 345, level: 5.8, step: 0.6, warm: 0, rows: 5, dur: 46, bossHp: 1, supply: 0, pay: 0.64, boss: 'hydra',
     blurb: 'Bio-corrupted sectors. Something huge is breeding in the dark.',
   },
   {
-    id: 'cyclone', name: 'CYAN CYCLONE', short: 'CYCLONE', act: 3, hue: 185, level: 9.4, step: 0.6, warm: 0, rows: 6, dur: 46, bossHp: 1, supply: 0, pay: 0.68, boss: 'omega',
+    id: 'cyclone', name: 'CYAN CYCLONE', short: 'CYCLONE', act: 3, hue: 185, level: 9.2, step: 0.6, warm: 0, rows: 6, dur: 46, bossHp: 0.5, supply: 0, pay: 0.68, boss: 'omega',
     blurb: 'Storm-lit data winds. The core intelligence waits at the eye.',
   },
   {
-    id: 'void', name: 'THE VOID', short: 'VOID', act: 4, hue: 275, level: 13.4, step: 0.6, warm: 0, rows: 6, dur: 46, bossHp: 0.9, supply: 0, pay: 0.82, boss: 'eclipse',
+    id: 'void', name: 'THE VOID', short: 'VOID', act: 4, hue: 275, level: 10.2, step: 1.1, warm: 0, rows: 6, dur: 46, bossHp: 0.22, supply: 0, pay: 0.82, boss: 'eclipse',
     blurb: 'Beyond the Grid. The Signal\'s source. No one has returned.',
   },
 ];
