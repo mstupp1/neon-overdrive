@@ -1415,6 +1415,11 @@ input[type='range']::-moz-range-thumb {
     white-space: nowrap;
 }
 
+.price.flux,
+.flux {
+    color: #b48bff;
+}
+
 .price b {
     font-size: 1.25em;
 }
@@ -1571,7 +1576,9 @@ input[type='range']::-moz-range-thumb {
 }
 
 #route-stats {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr); /* 4 tiles, 5 with FLUX on heated runs */
 }
 
 #scr-market {

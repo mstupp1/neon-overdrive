@@ -133,6 +133,16 @@
             </nav>
         </section>
 
+        <!-- FLUX CORE (endgame upgrades) -->
+        <section class="screen" id="scr-core" data-back="leaveCore">
+            <h2 class="screen-title">FLUX CORE</h2>
+            <p class="screen-sub" id="core-sub"></p>
+            <div class="cards still" id="core-list"></div>
+            <nav class="menu row">
+                <button class="btn ghost small" data-act="leaveCore">BACK</button>
+            </nav>
+        </section>
+
         <!-- HANGAR PART LIST -->
         <section class="screen" id="scr-parts" data-back="partsBack">
             <h2 class="screen-title" id="parts-title">CORE</h2>
@@ -157,6 +167,10 @@
                     <button class="btn small" data-act="hangar" id="ship-btn">HANGAR</button>
                     <button class="btn small" data-act="pilot" id="pilot-btn">PILOT</button>
                 </div>
+                <div class="pair">
+                    <button class="btn small" data-act="tier" id="tier-btn">OVERDRIVE 0</button>
+                    <button class="btn small" data-act="core" id="core-btn">FLUX CORE</button>
+                </div>
                 <button class="btn ghost small" data-act="back">BACK</button>
             </nav>
         </section>
@@ -169,7 +183,7 @@
             <div class="routemap" id="route-map"></div>
             <p class="route-hint" id="route-hint"></p>
             <nav class="menu row">
-                <button class="btn ghost small" data-act="abandon">ABANDON RUN</button>
+                <button class="btn ghost small" data-act="abandon" id="route-leave">ABANDON RUN</button>
             </nav>
         </section>
 

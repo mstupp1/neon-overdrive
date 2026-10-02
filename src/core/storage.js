@@ -38,6 +38,11 @@ const DEFAULTS = {
   ach: {}, // achievement id → unlock timestamp
   stats: {}, // lifetime counters for achievements (swarm, capsules, ...)
   tech: [], // upgrade ids ever seen in a draft / market / event (upgrades.js discovery)
+  flux: 0, // endgame currency (core.js): drops on Overdrive tiers / in the Deep Grid, always banked in full
+  core: {}, // Flux Core node id → level
+  tier: 0, // Overdrive tier picked for the next launch
+  tierMax: 0, // highest tier unlocked (clearing THE VOID at tier t unlocks t + 1)
+  bestDeep: 0, // deepest Deep Grid cycle reached
 };
 
 // Upgrades that existed before discovery was tracked: saves that had already played get them as discovered,
@@ -95,7 +100,11 @@ function sanitize(p) {
   p.relics = [...new Set(strs(p.relics))];
   p.relicNew = strs(p.relicNew);
   p.tech = [...new Set(strs(p.tech))];
-  for (const m of [p.ach, p.stats]) for (const k of Object.keys(m)) if (!Number.isFinite(m[k])) delete m[k];
+  for (const m of [p.ach, p.stats, p.core]) for (const k of Object.keys(m)) if (!Number.isFinite(m[k])) delete m[k];
+  p.flux = num(p.flux);
+  p.bestDeep = num(p.bestDeep);
+  p.tierMax = Math.min(10, Math.floor(num(p.tierMax)));
+  p.tier = Math.min(p.tierMax, Math.floor(num(p.tier)));
   return p;
 }
 

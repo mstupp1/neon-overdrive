@@ -89,6 +89,12 @@ export const STORY = {
       ],
     },
   },
+  // First dive into the Deep Grid (after the ending).
+  deep: [
+    L('MAG', 'Wait. The Grid is folding back on itself. Genesis again, but deeper, and the static is thicker.'),
+    L('MAG', 'Every cycle down hits harder and pays FLUX. Spend it in the FLUX CORE between runs.'),
+    L('MAG', 'Pull out from the pause menu whenever you want: EXTRACT banks everything you carry.'),
+  ],
   ending: [
     L('MAG', 'Signal strength: zero. The Grid is ours again, ECHO.'),
     L('ECHO', 'It built a mirror out of my own flying.'),

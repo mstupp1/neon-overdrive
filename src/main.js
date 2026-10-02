@@ -2,6 +2,7 @@
 
 import { G, view } from './game/state.js';
 import { profile, saveProfile, resetProfile } from './core/storage.js';
+import { TIER_CAP, CORE, coreCost } from './game/core.js';
 import { input, bindPointer, pollGamepads } from './core/input.js';
 import { unlockAudio, music, setSfxVolume, setSfxMuted, sfx } from './core/audio.js';
 import { buildSprites, buildEnemySpritesV2 } from './render/sprites.js';
@@ -18,6 +19,7 @@ import { ui } from './ui/screens.js';
 import { comms } from './ui/comms.js';
 import { meta } from './ui/meta.js';
 import { hangarActs, openHangar } from './ui/hangar.js';
+import { coreActs, openCore } from './ui/fluxcore.js';
 import { pilotActs, openPilot } from './ui/pilot.js';
 import { galleryActs, openGallery, openAchievements } from './ui/gallery.js';
 import { initToasts, notifyBacklog } from './ui/toasts.js';
@@ -102,7 +104,7 @@ function newWorld(mode, shipDef, run = null) {
   G.run = run;
   comms.clear();
   hideBossCard();
-  if (run) Object.assign(run, { wallet: 0, earned: 0, frac: 0, curse: null, ambush: false, riftLeft: 0, bonusXp: 0, events: [] });
+  if (run) Object.assign(run, { wallet: 0, earned: 0, frac: 0, flux: 0, curse: null, ambush: false, riftLeft: 0, bonusXp: 0, events: [] });
   G.time = 0;
   G.runTime = 0;
   G.enemies.length = 0;
@@ -170,7 +172,7 @@ function launchRun(from = 0) {
   const ship = curShip();
   profile.lastShip = ship.id;
   saveProfile();
-  newWorld('run', ship, { mode: 'campaign', sysIdx: from, system: SYSTEMS[from], route: null, row: -1, nodeId: null, sectors: 0, victory: false, visited: [] });
+  newWorld('run', ship, { mode: 'campaign', tier: profile.tier, deep: 0, sysIdx: from, system: SYSTEMS[from], route: null, row: -1, nodeId: null, sectors: 0, victory: false, visited: [] });
   enterSystem(from);
 }
 
@@ -179,7 +181,7 @@ function enterSystem(idx) {
   const r = G.run;
   const sys = SYSTEMS[idx];
   Object.assign(r, { sysIdx: idx, system: sys, route: generateRoute(sys, Math.floor(Math.random() * 2147483647)), row: -1, nodeId: null, visited: [] });
-  G.player.techTier = idx; // this system's tech joins the upgrade pool (upgrades.js tiers)
+  G.player.techTier = Math.max(G.player.techTier || 0, idx); // this system's tech joins the upgrade pool (upgrades.js tiers); Deep Grid cycles keep it all
   noteProgress();
   blockingStory('intro:' + sys.id, STORY.systems[sys.id].intro, {}, () => startSupply(sys.supply || 0));
 }
@@ -208,6 +210,35 @@ function nextSystem() {
     enterSystem(r.sysIdx + 1);
   });
 }
+
+// THE VOID cleared: the run is won (death or EXTRACT now bank everything), the next Overdrive tier unlocks, and the run
+// loops into Deep Grid cycle deep + 1 (harder, pays Flux; core.js). The ending plays after the first clear.
+function diveDeeper() {
+  const r = G.run;
+  markCleared(r.system);
+  r.victory = true;
+  profile.tierMax = Math.min(TIER_CAP, Math.max(profile.tierMax, (r.tier || 0) + 1));
+  saveProfile();
+  const sys = r.system;
+  const go = () => {
+    comms.clear();
+    hideBossCard();
+    const p = G.player;
+    p.hp += Math.ceil((p.maxHp - p.hp) / 2);
+    r.deep = (r.deep || 0) + 1;
+    profile.bestDeep = Math.max(profile.bestDeep, r.deep);
+    saveProfile();
+    music.setSet('normal');
+    blockingStory('deep', STORY.deep, {}, () => enterSystem(0));
+  };
+  blockingStory('post:' + sys.id, STORY.systems[sys.id].postBoss, { once: false, short: 'last' }, () => {
+    if (r.deep === 0) blockingStory('ending', STORY.ending, {}, go);
+    else go();
+  });
+}
+
+// Leave a won run from the pause menu / route: bank everything at the extraction screen.
+const leaveRun = () => (G.run && G.run.mode === 'campaign' && G.run.victory ? finishExtract(true) : showCampaign());
 
 function markCleared(sys) {
   if (!profile.campaign.cleared.includes(sys.id)) profile.campaign.cleared.push(sys.id);
@@ -304,7 +335,7 @@ function pickRouteNode(node) {
   r.visited.push(node.id);
   noteProgress();
   if (node.type === 'combat' || node.type === 'elite' || node.type === 'boss') {
-    const spec = nodeSpec(r.system, node, r.sectors + 1);
+    const spec = nodeSpec(r.system, node, r.sectors + 1, r.tier, r.deep);
     if (r.curse) spec.modifiers.push(r.curse); // Contraband / event drawback
     r.curse = null;
     if (r.ambush && !spec.boss) spec.elite = true; // Glitched Cache ambush
@@ -414,7 +445,7 @@ function finishExtract(final) {
   const { unlocked, reward } = bankRun();
   meta.renderExtract({
     system: r.system, score: Math.floor(G.score), time: G.runTime, level: p.level, kills: G.kills, sectors: r.sectors,
-    maxCombo: G.maxCombo, grazes: G.grazes, unlocked, reward, player: p, final,
+    maxCombo: G.maxCombo, grazes: G.grazes, unlocked, reward, player: p, final, deep: r.deep || 0, tier: r.tier || 0,
   });
   G.screen = 'extract';
   ui.show('extract', { lock: 700 });
@@ -541,7 +572,7 @@ function pickUpgrade(id) {
       extraDrafts--;
       return openDraft('sector', true);
     }
-    if (G.run.mode === 'campaign') afterDraft = afterDraft === 'next' ? 'next' : 'route';
+    if (G.run.mode === 'campaign') afterDraft = afterDraft === 'next' || afterDraft === 'deep' ? afterDraft : 'route';
     else nextSector();
   }
   if (G.pendingLevels > 0) return openDraft('level');
@@ -550,6 +581,7 @@ function pickUpgrade(id) {
   if (next === 'route') return showRoute();
   if (next === 'extract') return extract();
   if (next === 'next') return nextSystem();
+  if (next === 'deep') return diveDeeper();
   enterPlay();
   resumeEase = RESUME_EASE;
   input.holdTarget(); // the cursor was on the menu: don't yank the ship toward it
@@ -570,13 +602,9 @@ function onSectorClear() {
     return;
   }
   if (G.run.mode === 'campaign' && G.director.spec.boss) {
-    // Final boss: skip the reward draft, finish any pending level-ups, then extract.
-    afterDraft = 'extract';
-    if (G.pendingLevels > 0) openDraft('level');
-    else {
-      afterDraft = null;
-      extract();
-    }
+    // THE VOID's boss: a reward draft, then the run dives into the next Deep Grid cycle.
+    afterDraft = 'deep';
+    openDraft('sector');
     return;
   }
   if (G.run.mode === 'campaign') applyFightReward(G.director.spec.reward);
@@ -701,6 +729,15 @@ ui.init({
   },
   launch: () => launchRun(),
   hangar: () => openHangar(),
+  core: () => openCore(() => showCampaign('core-btn')),
+  ...coreActs,
+  // Overdrive tier for the next launch: cycles through the unlocked tiers.
+  tier() {
+    if (!profile.tierMax) return;
+    profile.tier = (profile.tier + 1) % (profile.tierMax + 1);
+    saveProfile();
+    showCampaign('tier-btn');
+  },
   leaveHangar: () => showCampaign(),
   ...hangarActs,
   pilot: () => openPilot(),
@@ -719,12 +756,12 @@ ui.init({
   eventDone: () => nodeContinue(),
   buy,
   dock: dockChoose,
-  abandon: () => showCampaign(),
+  abandon: leaveRun,
   resume: () => {
     enterPlay();
   },
   restart: () => (G.run.mode === 'campaign' ? launchRun() : startRun(curShip())),
-  quit: () => (G.run.mode === 'campaign' ? showCampaign() : toTitle()),
+  quit: () => (G.run.mode === 'campaign' ? leaveRun() : toTitle()),
   retry: () => (G.run.mode === 'campaign' ? launchRun() : startRun(curShip())),
   title: () => toTitle(),
   reroll() {
@@ -807,7 +844,7 @@ let slowFrames = 0;
 
 function simulating() {
   const s = G.screen;
-  return s === 'play' || s === 'gameover' || s === 'title' || s === 'campaign' || s === 'hangar' || s === 'parts' || s === 'pilot' || s === 'settings' || s === 'help' || s === 'gallery' || s === 'achievements';
+  return s === 'play' || s === 'gameover' || s === 'title' || s === 'campaign' || s === 'hangar' || s === 'parts' || s === 'pilot' || s === 'settings' || s === 'help' || s === 'gallery' || s === 'achievements' || s === 'core';
 }
 
 function frame(now) {

@@ -49,10 +49,17 @@ Title **PLAY** opens the campaign map, then LAUNCH. A **run** flies all four sys
 - **Story.** Short comms exchanges (ECHO is your pilot; MAG and the SIGNAL talk to you) play at launch, before and after bosses and at the ending. Toggle in Settings; Esc / B skips.
 - **Hull.** Clearing a sector repairs 1 hull. A system boss gives a reward draft and moves the run on; beating ECLIPSE wins the run and you **extract**.
 
+### Endgame: Deep Grid, Overdrive tiers, Flux
+
+- **Deep Grid.** Beating ECLIPSE no longer ends the run: after a reward draft and the ending, the run loops back to Genesis as **Deep Grid 1**, then 2, 3... Each cycle multiplies enemy HP by 1.8 and pushes bullet speed, fire rate and spawn rate a little, with bigger rewards. The run only ends when you die (everything banks, since the run is already won) or choose **EXTRACT · BANK ALL** from the pause menu or the route.
+- **Overdrive tiers** (Diablo-style torment levels). Clearing THE VOID at tier *t* unlocks tier *t+1* (up to 10). Pick the tier with the OVERDRIVE button on the campaign map before LAUNCH. Each tier: enemy HP ×1.4, slightly faster and denser fire, +25% credits and XP.
+- **Flux** drops only while the run is heated (tier > 0 or in the Deep Grid): bosses, Hunters and sector clears, scaled by heat = tier + Deep cycle. It always banks in full.
+- **Flux Core** (campaign map): permanent stat levels with no cap, prices rising per level: Damage Lattice (+5% damage), Cycle Accelerator (+3% fire rate), Predictive Optics (+1% crit), Hull Weave (+1 max hull), Overdrive Feed (+6% charge), Neural Uplink (+5% XP), Salvage Protocol (+5% credits).
+
 ### Economy and banking
 
 - You earn **credits** in a run: kill chips (`credit` pickups), elites and Hunters, sector clear payouts and the boss. The run **wallet** is what you spend at Markets.
-- **Extraction (victory)** banks 100% of the wallet. **Death** banks 50%. **Abandoning** a run banks nothing.
+- **Extraction / a won run** banks 100% of the wallet. **Death** before beating THE VOID banks 50%. **Abandoning** an unwon run banks nothing.
 - A full run earns a few thousand credits. Spend-vs-bank is the point: every credit spent at a Market is one less for the Hangar.
 - **Pilot Rank** comes from run XP (score, sectors, bosses, +bonus for victory, later systems teach more). Rank 3 = 700 XP, rank 6 = 2500, rank 10 = 6300, cap 15. Rank gates classes and passives.
 

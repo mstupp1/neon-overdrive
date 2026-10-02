@@ -6,6 +6,7 @@ import { formatScore, formatTime } from '../core/math.js';
 import { $, stat, renderBuild } from './screens.js';
 import { SYSTEMS, NODE_TYPES, REWARDS, reachableNodes, routeNode } from '../game/campaign.js';
 import { MODIFIERS } from '../game/modifiers.js';
+import { heatScale } from '../game/core.js';
 import { bossById } from '../game/bosses.js';
 import { rankFor, ECON_ICONS } from '../game/economy.js';
 import { CAT_COLORS, ICONS } from '../game/upgrades.js';
@@ -57,9 +58,16 @@ export const meta = {
     map.innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none">${lines}</svg>${nodes}`;
     const rk = rankFor(profile.rankXp);
     $('#camp-pilot').innerHTML = `<span class="gold">${coin}${fmt(profile.credits)}</span><span class="rank">RANK <b>${rk.rank}</b></span><span class="rankbar"><i style="width:${rk.need ? Math.round((100 * rk.into) / rk.need) : 100}%"></i></span><span class="rank">${shipName}</span><span class="rank cls" style="--c:${activeClass().color}">${activeClass().name}</span>`;
-    const best = c.bestSys < 0 ? 'NO RUNS YET' : c.cleared.length >= SYSTEMS.length ? 'ALL SYSTEMS CLEARED' : `BEST · ${SYSTEMS[c.bestSys].short} SECTOR ${c.bestRow + 1}`;
+    const best = c.bestSys < 0 ? 'NO RUNS YET' : profile.bestDeep ? `BEST · DEEP GRID ${profile.bestDeep}` : c.cleared.length >= SYSTEMS.length ? 'ALL SYSTEMS CLEARED' : `BEST · ${SYSTEMS[c.bestSys].short} SECTOR ${c.bestRow + 1}`;
+    const t = profile.tier;
+    const k = heatScale(t, 0);
+    const heat = t ? `<span style="color:#ff4d6d">OVERDRIVE ${t} · ENEMY HP ×${k.hp.toFixed(1)} · REWARDS +${Math.round((k.reward - 1) * 100)}% · FLUX</span>` : '';
     $('#sys-detail').style.setProperty('--c', hsl(SYSTEMS[0].hue));
-    $('#sys-detail').innerHTML = `<h4>ONE RUN · FOUR SYSTEMS</h4><p>Fly from Genesis to the Void with one ship. Your build carries between systems. If you go down, the next run starts at Genesis.</p><div class="sys-meta"><span>${best}</span></div>`;
+    $('#sys-detail').innerHTML = `<h4>ONE RUN · FOUR SYSTEMS</h4><p>Fly from Genesis to the Void with one ship. Your build carries between systems. If you go down, the next run starts at Genesis. Beat the Void and the run dives on into the Deep Grid.</p><div class="sys-meta"><span>${best}</span>${heat}</div>`;
+    const tb = $('#tier-btn');
+    tb.textContent = profile.tierMax ? `OVERDRIVE ${t}` : 'OVERDRIVE · LOCKED';
+    tb.disabled = !profile.tierMax;
+    $('#core-btn').innerHTML = `FLUX CORE${profile.flux ? ` · ${fmt(profile.flux)}` : ''}`;
     return $('#launch-btn');
   },
 
@@ -73,9 +81,10 @@ export const meta = {
     const reach = reachableNodes(route, run.nodeId);
     const reachIds = new Set(reach.map((n) => n.id));
     const visited = new Set(run.visited);
-    $('#route-title').textContent = sys.name;
+    $('#route-leave').textContent = run.victory ? 'EXTRACT · BANK ALL' : 'ABANDON RUN';
+    $('#route-title').textContent = run.deep ? `DEEP ${run.deep} · ${sys.short}` : sys.name;
     $('#route-title').style.textShadow = `0 0 0.35em ${hsl(sys.hue)}, 0 0 1.2em ${hsl(sys.hue, 55)}`;
-    $('#route-stats').innerHTML = stat('HULL', `${p.hp}/${p.maxHp}`) + stat('LEVEL', p.level) + stat('CREDITS', `<span class="gold">${fmt(run.wallet || 0)}</span>`) + stat('ROUTE', `${visited.size}/${total}`);
+    $('#route-stats').innerHTML = stat('HULL', `${p.hp}/${p.maxHp}`) + stat('LEVEL', p.level) + stat('CREDITS', `<span class="gold">${fmt(run.wallet || 0)}</span>`) + stat('ROUTE', `${visited.size}/${total}`) + (run.tier || run.deep ? stat('FLUX', `<span class="flux">${fmt(run.flux || 0)}</span>`) : '');
     const cls = CLASSES.find((c) => c.id === p.cls) || CLASSES[0];
     $('#route-gear').innerHTML =
       `<div class="chip cls" style="--c:${cls.color}" title="${cls.name}">${cls.icon}</div>` +
@@ -201,7 +210,7 @@ export const meta = {
         <div>BANKED<b class="gold">${coin}${fmt(rw.banked)}</b></div>
       </div>
       ${campaignDeath ? `<p class="rw-note">${Math.round(rw.pct * 100)}% SALVAGED${rw.wallet ? ` · ${fmt(rw.wallet - rw.banked)} LOST` : ''}</p>` : ''}
-      <div class="rw-total">PROFILE ${coin}<b>${fmt(rw.total)}</b></div>
+      <div class="rw-total">PROFILE ${coin}<b>${fmt(rw.total)}</b>${rw.flux ? ` · <span class="flux">+${fmt(rw.flux)} FLUX</span>` : ''}</div>
       <div class="rw-rank">
         <span>RANK <b>${rk.rank}</b></span>${bar(rk)}<span class="rw-xp">+${fmt(rw.rankXp)} XP</span>
       </div>
@@ -211,8 +220,8 @@ export const meta = {
 
   // --- Extraction -------------------------------------------------------------
   renderExtract(sum) {
-    $('#extract-title').textContent = sum.final ? 'SIGNAL SILENCED' : 'SYSTEM SECURED';
-    $('#extract-sub').textContent = sum.final ? `${sum.system.name} · THE GRID IS FREE` : `${sum.system.name} · EXTRACTION COMPLETE`;
+    $('#extract-title').textContent = sum.deep ? 'EXTRACTED' : sum.final ? 'SIGNAL SILENCED' : 'SYSTEM SECURED';
+    $('#extract-sub').textContent = sum.deep ? `DEEP GRID ${sum.deep} · ${sum.system.name}${sum.tier ? ` · OVERDRIVE ${sum.tier}` : ''}` : sum.final ? `${sum.system.name} · THE GRID IS FREE` : `${sum.system.name} · EXTRACTION COMPLETE`;
     $('#extract-score').textContent = formatScore(sum.score);
     $('#extract-stats').innerHTML =
       stat('TIME', formatTime(sum.time)) + stat('LEVEL', sum.level) + stat('KILLS', sum.kills) +
