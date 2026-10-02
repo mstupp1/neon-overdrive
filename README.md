@@ -194,8 +194,10 @@ src/game/director.js  wave director (sector flow, patterns, boss warn)
 src/game/campaign.js  systems, route generation, node specs
 src/game/modifiers.js sector modifiers
 src/game/economy.js   credits, banking, Pilot Rank, Black Market, dock
-src/game/hangar.js    buy / equip ships, parts, paint (pure profile logic)
-src/game/parts.js     12 gear parts
+src/game/hangar.js    ships, paint, the gear Fabricator, equip / sell (pure profile logic)
+src/game/parts.js     gear items: 21 base types, 12 legendaries, random modifiers, build paths
+src/game/rarity.js    Common → Legendary odds and luck (gear and level-up cards)
+src/game/loot.js      gear drops, inventory cap, pilot class / ability finds
 src/game/ships.js     ships, weapons, paint sets
 src/game/story.js     dialogue and the 10 anomaly events
 src/game/intro.js     skippable boot intro (scripted in-engine cinematic)
@@ -203,8 +205,8 @@ src/game/upgrades.js  upgrade pool, drafts, stat recompute
 src/game/bullets.js, pickups.js, fx.js, world.js, bot.js   projectiles, pickups, particles, step + collisions, autopilot
 src/ui/screens.js     menu navigation, draft cards, results
 src/ui/meta.js        campaign / route / market / dock / event / extraction screens
-src/ui/hangar.js      Hangar (ships, parts, paint)
-src/ui/pilot.js       Pilot screen (class, passives)
+src/ui/hangar.js      Hangar (ships, paint), inventory, Fabricator
+src/ui/pilot.js       Pilot screen (class, abilities)
 src/ui/tree.js        Passive tree screen (pan / zoom canvas)
 src/ui/comms.js       dialogue overlay
 src/game/collectables.js   relic sets, buying, capsules, field drops

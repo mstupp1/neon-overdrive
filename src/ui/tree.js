@@ -120,7 +120,7 @@ function setNote(text) {
 
 function toggle(id) {
   if (!owned()) {
-    setNote('UNLOCK THIS CLASS TO USE ITS TREE');
+    setNote('FIND THIS CLASS TO USE ITS TREE');
     sfx.ui();
     return renderDetail();
   }
@@ -192,11 +192,11 @@ function renderDetail() {
   let line;
   let go = false;
   if (performance.now() < noteT) line = note;
-  else if (st === 'root') line = owned() ? `${pointsLeft(cls)} POINTS TO SPEND` : 'UNLOCK THIS CLASS TO USE ITS TREE';
+  else if (st === 'root') line = owned() ? `${pointsLeft(cls)} POINTS TO SPEND` : 'FIND THIS CLASS TO USE ITS TREE';
   else if (st === 'on') line = canRefund(cls, n.id) ? 'ALLOCATED · IN USE BY NODES PAST IT' : `ALLOCATED · ${verb()} TO REFUND`;
   else if (st === 'open') {
     go = owned() && pointsLeft(cls) > 0;
-    line = !owned() ? 'UNLOCK THIS CLASS TO USE ITS TREE' : go ? `${verb()} TO ALLOCATE · 1 POINT` : 'NO POINTS LEFT · RANK UP OR EXPAND THE FLUX CORE';
+    line = !owned() ? 'FIND THIS CLASS TO USE ITS TREE' : go ? `${verb()} TO ALLOCATE · 1 POINT` : 'NO POINTS LEFT · RANK UP OR EXPAND THE FLUX CORE';
   } else line = 'NOT LINKED YET · ALLOCATE A NEIGHBOUR FIRST';
   el.innerHTML = `<div class="td-top"><b>${name}</b><em>${tag}</em></div><span>${desc}</span><i class="${go ? 'go' : ''}">${line}</i>`;
 }

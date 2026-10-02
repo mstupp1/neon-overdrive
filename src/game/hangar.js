@@ -3,7 +3,9 @@
 
 import { profile, saveProfile } from '../core/storage.js';
 import { SHIPS, shipById, ownsShip, paintsFor, activePaint } from './ships.js';
-import { SLOTS, partById, ownsPart } from './parts.js';
+import { SLOTS, makeItem, itemLevel, sellValue, gearByUid, gearInSlot, equippedOn, migrateParts } from './parts.js';
+import { luckFor, rollRarity } from './rarity.js';
+import { addGear } from './loot.js';
 import { rebuildShipSprite } from '../render/sprites.js';
 
 function spend(price) {
@@ -32,24 +34,33 @@ export function buyShip(id) {
   return '';
 }
 
-export function buyPart(id) {
-  const part = partById(id);
-  if (!part) return 'UNKNOWN PART';
-  if (ownsPart(profile, id)) return 'OWNED';
-  const err = spend(part.price);
-  if (err) return err;
-  profile.ownedParts.push(id);
-  saveProfile();
-  return '';
+// --- Gear: the Fabricator, equipping and selling -----------------------------------------------
+
+export const ROLL_COST = { standard: 150, premium: 600 }; // premium: Rare or better
+
+// Fabricator odds: your furthest system, best Overdrive tier and Deep Grid depth (at 75%), plus the active ship's
+// Rarity Find. Item level follows the same progress.
+export function fabLuck(find = 0) {
+  const c = profile.campaign;
+  return 0.75 * luckFor({ sys: Math.max(0, c.bestSys), tier: profile.tierMax, deep: Math.min(3, profile.bestDeep) }) + 3 * find;
+}
+export const fabItemLevel = () => itemLevel({ sys: Math.max(0, profile.campaign.bestSys), tier: profile.tierMax, deep: Math.min(3, profile.bestDeep) });
+
+// Rolls a piece for `slot`. Returns {err} or addGear's result.
+export function rollGear(slot, kind = 'standard', find = 0) {
+  if (!SLOTS.includes(slot)) return { err: 'UNKNOWN SLOT' };
+  const err = spend(ROLL_COST[kind]);
+  if (err) return { err };
+  const r = rollRarity(fabLuck(find), Math.random, kind === 'premium' ? 2 : 0);
+  return addGear(makeItem(slot, r, fabItemLevel()));
 }
 
-// Equips an owned part into its slot on that ship (replacing whatever was there).
-export function equipPart(shipId, partId) {
-  const part = partById(partId);
-  if (!part) return 'UNKNOWN PART';
-  if (!ownsPart(profile, partId)) return 'NOT OWNED';
+// Equips an owned item into its slot on that ship (replacing whatever was there).
+export function equipPart(shipId, uid) {
+  const item = gearByUid(profile, uid);
+  if (!item) return 'NOT OWNED';
   const eq = (profile.equip[shipId] ||= {});
-  eq[part.slot] = partId;
+  eq[item.slot] = uid;
   saveProfile();
   return '';
 }
@@ -60,6 +71,37 @@ export function unequipSlot(shipId, slot) {
   if (eq) delete eq[slot];
   saveProfile();
   return '';
+}
+
+// Sells an item (unequipping it from every ship). Returns '' or a reason.
+export function sellGear(uid) {
+  const item = gearByUid(profile, uid);
+  if (!item) return 'NOT OWNED';
+  for (const s of Object.keys(profile.equip)) for (const sl of SLOTS) if (profile.equip[s][sl] === uid) delete profile.equip[s][sl];
+  profile.gear.splice(profile.gear.indexOf(item), 1);
+  profile.gearNew = profile.gearNew.filter((u) => u !== uid);
+  profile.credits += sellValue(item);
+  saveProfile();
+  return '';
+}
+
+// Unequipped Common / Uncommon pieces in a slot: what SELL JUNK would sell.
+export const junkIn = (slot) => gearInSlot(profile, slot).filter((g) => g.r <= 1 && !equippedOn(profile, g.uid).length);
+
+export function sellJunk(slot) {
+  const junk = junkIn(slot);
+  let total = 0;
+  for (const g of junk) {
+    total += sellValue(g);
+    sellGear(g.uid);
+  }
+  return total;
+}
+
+// Boot: legacy parts become items.
+export function initGear() {
+  migrateParts(profile);
+  saveProfile();
 }
 
 // Applies the ship's equipped paint to its baked sprites (one ship only; cheap).

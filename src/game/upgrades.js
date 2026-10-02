@@ -4,7 +4,9 @@
 import { weightedPick } from '../core/math.js';
 import { WEAPONS } from './ships.js';
 import { applyParts } from './parts.js';
-import { applyPassives } from './pilot.js';
+import { applyPassives, resetPilotStats } from './pilot.js';
+import { STATS, rollMods, itemLevel } from './parts.js';
+import { RARITY, rollRarity } from './rarity.js';
 import { profile, saveProfile } from '../core/storage.js';
 import { applyTree } from './tree.js';
 
@@ -223,6 +225,11 @@ export function recomputeStats(p) {
   st.secondWind = lv('secondWind');
   st.perpetual = 1.2 * lv('perpetual');
   st.nullR = lv('nullField') ? 55 + 15 * lv('nullField') : 0;
+  st.find = 0; // rarity find (gear / ship traits, rarity.js luckFor)
+  st.aegisOd = 0; // ultimate meter per shield break (Aegis Prime)
+  resetPilotStats(st);
+  if (p.ship.trait) p.ship.trait.apply(st, p);
+  for (const [stat, v] of p.runMods || []) STATS[stat].apply(st, v); // bonus modifiers from rare level-up cards
   applyParts(st, p);
   applyPassives(st, p);
   applyTree(st, p);
@@ -242,6 +249,8 @@ export function applyUpgrade(p, id, G) {
     return;
   }
   p.up[id] = (p.up[id] || 0) + 1;
+  const u = byId.get(id);
+  if (p.st.architect && u.cat === 'module' && p.up[id] === 1 && u.max > 1) p.up[id] = 2; // Architect: new modules start at 2
   recomputeStats(p);
   if (id === 'hull') p.hp = Math.min(p.maxHp, p.hp + 1);
   if (id === 'aegis' && p.up.aegis === 1) p.shield = 1;
@@ -275,6 +284,7 @@ export function rollUpgradeIds(p, kind, n = 3, rng = Math.random, evo = false, o
     if (u.id === 'main' && l < 3) wgt *= 1.5;
     if (u.id === 'hull' && p.hp < p.maxHp) wgt *= 1.3;
     if (!k.has(u.id)) wgt *= 1.4; // undiscovered tech surfaces a little sooner
+    wgt *= 1 + 0.15 * Math.min(4, synergy(p, u.id)); // equipped gear's build paths pull matching tech forward
     return wgt;
   };
   const remaining = [...pool];
@@ -287,6 +297,57 @@ export function rollUpgradeIds(p, kind, n = 3, rng = Math.random, evo = false, o
   return choices;
 }
 
+// --- Build paths ---------------------------------------------------------------------------
+// Each option belongs to one build path (parts.js TAGS). p.tags = summed path weights of the equipped gear (player.js).
+export const UP_TAGS = {
+  main: 'firepower', power: 'firepower', rate: 'firepower', pierce: 'firepower', splinter: 'firepower', echoFire: 'firepower', redline: 'firepower',
+  crit: 'crit', overload: 'crit', cull: 'crit', bounty: 'crit',
+  missiles: 'modules', orbitals: 'modules', drones: 'modules', arc: 'modules', nova: 'modules', rail: 'modules', shrapnel: 'modules', flak: 'modules',
+  gravity: 'modules', reflector: 'modules', mines: 'modules', saw: 'modules', stasis: 'modules', prism: 'modules', starfall: 'modules', static: 'modules',
+  thrusters: 'mobility', dashes: 'mobility', blink: 'mobility', dashNova: 'mobility',
+  capacitor: 'overdrive', grazer: 'overdrive', perpetual: 'overdrive', nullField: 'overdrive', chainlink: 'overdrive',
+  hull: 'tank', aegis: 'tank', leech: 'tank', secondWind: 'tank',
+  magnet: 'greed', salvage: 'greed', prospector: 'greed',
+};
+export const synergy = (p, id) => (p.tags && UP_TAGS[id] ? p.tags[UP_TAGS[id]] || 0 : 0);
+export const SYNERGY_MIN = 2; // path weight at which a card shows its SYNERGY mark
+
+// --- Card rarity ------------------------------------------------------------------------------
+// Every regular card in a draft rolls a rarity (rarity.js, luck from the run). Rarer cards install more levels and
+// add bonus modifiers for the rest of the run (p.runMods, half-strength gear modifiers). Bonus / evolution cards stay plain.
+export const CARD_RARITY = [
+  { levels: 1, mods: 0 },
+  { levels: 1, mods: 1 },
+  { levels: 2, mods: 1 },
+  { levels: 2, mods: 2 },
+  { levels: 3, mods: 2 },
+];
+
+export function rollCard(p, id, luck = 0, rng = Math.random) {
+  const u = byId.get(id);
+  if (!u || u.cat === 'evolution') return null;
+  const r = rollRarity(luck, rng);
+  const il = itemLevel({ sys: Math.floor(luck) });
+  const room = u.max - (p.up[id] || 0);
+  const levels = Math.max(1, Math.min(CARD_RARITY[r].levels, room));
+  const extra = CARD_RARITY[r].levels - levels; // levels past the cap turn into one more modifier each
+  return { r, levels, mods: rollMods(r, il, CARD_RARITY[r].mods + extra, rng, 0.5) };
+}
+
+// Installs a picked card: its levels, then its modifiers.
+export function applyCard(p, id, roll, G) {
+  applyUpgrade(p, id, G);
+  if (!roll) return;
+  for (let i = 1; i < roll.levels; i++) if ((p.up[id] || 0) < byId.get(id).max) applyUpgrade(p, id, G);
+  if (roll.mods.length) {
+    (p.runMods ||= []).push(...roll.mods);
+    recomputeStats(p);
+  }
+}
+
+export const modText = ([id, v]) => STATS[id].text(v);
+export { RARITY };
+
 // Build a draft of 3 choices. `kind` is 'level' or 'sector'.
 export function rollDraft(p, kind, only = null) {
   const choices = rollUpgradeIds(p, kind, 3, Math.random, true, only);
@@ -295,7 +356,7 @@ export function rollDraft(p, kind, only = null) {
   return choices;
 }
 
-export function cardInfo(p, id) {
+export function cardInfo(p, id, roll = null) {
   if (id === 'credits') {
     return { id, name: 'Data Cache', cat: 'bonus', icon: ICONS.credits, desc: 'Bank bonus score and +25% Overdrive.', lv: 0, max: 0 };
   }
@@ -305,5 +366,11 @@ export function cardInfo(p, id) {
   const u = byId.get(id);
   const lv = p.up[id] || 0;
   // fresh: never seen in any run before this draft (discover() has not run for it yet).
-  return { id, name: u.name, cat: u.cat, icon: ICONS[id], desc: u.desc(lv + 1), lv, max: u.max, evo: u.cat === 'evolution', fresh: !isDiscovered(id) };
+  const syn = synergy(p, id) >= SYNERGY_MIN ? UP_TAGS[id] : null;
+  const r = roll ? roll.r : null;
+  const levels = roll ? roll.levels : 1;
+  return {
+    id, name: u.name, cat: u.cat, icon: ICONS[id], desc: u.desc(lv + 1), lv, max: u.max, evo: u.cat === 'evolution', fresh: !isDiscovered(id),
+    r, levels, mods: roll ? roll.mods.map(modText) : [], syn,
+  };
 }

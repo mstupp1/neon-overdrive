@@ -69,7 +69,7 @@ export const TREES = {
     { theme: 'fire', big: true, key: K('Glass Cannon', '+40% damage. -2 max hull.', { dmg: 40, hull: -2 }) },
     { theme: 'crit', big: true, key: K('Deadeye', 'Double crit chance. Shots that do not crit deal 20% less.', { critDouble: 1, nonCrit: -20 }) },
     { theme: 'mob', key: K('Momentum', 'Every kill speeds your next dash charge by 0.1s.', { momentum: 1 }) },
-    { theme: 'greed', key: K('High Roller', '+60% credits and +30% rarity luck. -1 max hull.', { credits: 60, luck: 30, hull: -1 }) },
+    { theme: 'greed', key: K('High Roller', '+60% credits and +30% rarity find. -1 max hull.', { credits: 60, luck: 30, hull: -1 }) },
     { theme: 'tank', key: K('Juggernaut', '+3 max hull. -15% move speed.', { hull: 3, speed: -15 }) },
     { theme: 'od', big: true, key: K('Berserker', 'Overdrive lasts 50% longer. The meter charges 25% slower.', { odDurPct: 50, odGain: -25 }) },
   ],
@@ -203,7 +203,7 @@ const MODS = {
   credits: (v) => `${pct(v)} credits`,
   xp: (v) => `${pct(v)} XP`,
   magnet: (v) => `${pct(v)} pickup range`,
-  luck: (v) => `${pct(v)} rarity luck`,
+  luck: (v) => `${pct(v)} rarity find`,
   nonCrit: (v) => `${pct(v)} damage on hits that do not crit`,
 };
 
@@ -317,7 +317,6 @@ export function applyTree(st, p) {
   for (const f of FLAGS) st[f] = false;
   st.nonCrit = 1;
   st.hitIfr = 1;
-  st.luck = st.luck || 0;
   if (!p.tree || !p.tree.length) return;
   const m = sumMods(p.cls, p.tree);
   const inc = (k) => 1 + (m[k] || 0) / 100;
@@ -345,7 +344,7 @@ export function applyTree(st, p) {
   st.creditMul *= inc('credits');
   st.xpMul *= inc('xp');
   st.magnet *= inc('magnet');
-  st.luck += (m.luck || 0) / 100;
+  st.find = (st.find || 0) + (m.luck || 0) / 100; // rarity find (loot.js)
   for (const f of FLAGS) st[f] = !!m[f];
 }
 
