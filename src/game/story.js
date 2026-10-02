@@ -4,7 +4,7 @@
 
 import { G } from './state.js';
 import { mulberry32 } from '../core/math.js';
-import { rollUpgradeIds, applyUpgrade, cardInfo, recomputeStats } from './upgrades.js';
+import { rollUpgradeIds, applyUpgrade, cardInfo, recomputeStats, discover } from './upgrades.js';
 import { nodeLevel } from './campaign.js';
 
 // color: ECHO uses the active class colour (resolved in ui/comms.js).
@@ -89,6 +89,12 @@ export const STORY = {
       ],
     },
   },
+  // First dive into the Deep Grid (after the ending).
+  deep: [
+    L('MAG', 'Wait. The Grid is folding back on itself. Genesis again, but deeper, and the static is thicker.'),
+    L('MAG', 'Every cycle down hits harder and pays FLUX. Spend it in the FLUX CORE between runs.'),
+    L('MAG', 'Pull out from the pause menu whenever you want: EXTRACT banks everything you carry.'),
+  ],
   ending: [
     L('MAG', 'Signal strength: zero. The Grid is ours again, ECHO.'),
     L('ECHO', 'It built a mirror out of my own flying.'),
@@ -206,12 +212,13 @@ export const EVENTS = [
       const out = ids.map((id) => {
         const info = cardInfo(c.p, id);
         return {
-          label: info.name, tag: info.lv === 0 ? 'NEW' : `LV ${info.lv + 1}`, desc: info.desc,
+          label: info.name, tag: info.fresh ? 'DISCOVERY' : info.lv === 0 ? 'NEW' : `LV ${info.lv + 1}`, desc: info.desc, fresh: info.fresh,
           cost: round5((0.75 * (50 + 30 * info.lv)) * (1 + 0.5 * (act - 1))),
           effect: () => `Installed ${info.name}. Pleasure doing business.`,
           _apply: () => applyUpgrade(c.p, id, G),
         };
       });
+      discover(ids);
       if (!out.length) out.push({ label: 'Field rations', tag: 'REPAIR', desc: 'Repair 1 hull.', cost: 40, _apply: () => heal(c.p, 1), effect: () => 'Patched up. +1 hull.' });
       out.push({ label: 'Walk away', desc: 'Not today.', effect: () => 'The beacon goes quiet behind you.' });
       return out;
@@ -357,6 +364,34 @@ const hashStr = (s) => {
   for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
   return h >>> 0;
 };
+
+// Chaos Rift route stop (not in the anomaly pool): power now, hazards on the next fights (run.riftLeft).
+export const RIFT = {
+  id: 'rift', title: 'CHAOS RIFT', color: '#ff4d6d',
+  text: 'Space tears open into raw Signal static. Ships that dive in come out stronger, and something follows them out.',
+  choices: [
+    {
+      label: 'Dive in', tag: 'RISKY', desc: '+3 random upgrade levels. Your next 2 fights each get a hazard modifier.',
+      effect(c) {
+        const r = grantUpgrades(c, 3);
+        if (c.granted) c.run.riftLeft = (c.run.riftLeft || 0) + 2;
+        return c.granted ? `${r} The rift follows you: the next 2 fights carry hazards.` : r;
+      },
+    },
+    {
+      label: 'Skim the edge', desc: '+1 random upgrade level. Your next fight gets a hazard modifier.',
+      effect(c) {
+        const r = grantUpgrades(c, 1);
+        if (c.granted) c.run.riftLeft = (c.run.riftLeft || 0) + 1;
+        return c.granted ? `${r} Static clings to the hull: the next fight carries a hazard.` : r;
+      },
+    },
+    { label: 'Back away', tag: 'SAFE', desc: 'Leave the rift alone.', effect: () => 'The tear seals behind you.' },
+  ],
+};
+
+// A random hazard for Chaos Rift fights.
+export const riftHazard = (rng = Math.random) => RISKY_MODS[Math.floor(rng() * RISKY_MODS.length)];
 
 // Event for a route node: seeded by the route seed + node id, never repeating within a run until all are used.
 export function eventFor(route, node, used = []) {

@@ -32,12 +32,18 @@ function keyHint(kind) {
   return kind === 'dash' ? 'SPACE' : 'E';
 }
 
-export function drawHud(ctx) {
+let hudA = 1; // overall HUD opacity (the finisher cam fades it out)
+
+// alpha: HUD opacity (banners always draw at full strength).
+export function drawHud(ctx, alpha = 1) {
   const p = G.player;
   if (!p) return;
+  hudA = alpha;
+  if (alpha < 0.02) return drawBanner(ctx);
   const W = view.W;
   const y0 = view.safeTop + 10;
   ctx.textBaseline = 'middle';
+  ctx.globalAlpha = alpha;
 
   // Top scrim for legibility
   const grd = ctx.createLinearGradient(0, 0, 0, y0 + 70);
@@ -60,9 +66,9 @@ export function drawHud(ctx) {
   if (p.shield) {
     ctx.drawImage(S.hudShield.img, hx - 11, y0 - 1, 22, 22);
   } else if (p.st.shieldInterval) {
-    ctx.globalAlpha = 0.3;
+    ctx.globalAlpha = 0.3 * hudA;
     ctx.drawImage(S.hudShield.img, hx - 11, y0 - 1, 22, 22);
-    ctx.globalAlpha = 1;
+    ctx.globalAlpha = hudA;
     ctx.strokeStyle = '#3ff6ff';
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -98,6 +104,11 @@ export function drawHud(ctx) {
   text(ctx, label, rx, y0 + 9, 12, hue, 'right', 700);
   const bossSector = !!(d.spec && d.spec.boss);
   bar(ctx, rx - 84, y0 + 23, 84, 4, d.progress, hue);
+  if (d.zones > 1) {
+    // Zone breaks on the progress bar.
+    ctx.fillStyle = 'rgba(3,2,10,0.9)';
+    for (let i = 1; i < d.zones; i++) ctx.fillRect(rx - 84 + (84 * i) / d.zones - 1, y0 + 22, 2, 6);
+  }
   if (bossSector) {
     ctx.fillStyle = '#ff2e55';
     ctx.beginPath();
@@ -149,13 +160,14 @@ export function drawHud(ctx) {
   const gy = view.H - view.safeBottom - 46;
   drawGauge(ctx, 44, gy, p, 'od');
   drawGauge(ctx, W - 44, gy, p, 'dash');
+  ctx.globalAlpha = 1;
 
   drawBanner(ctx);
 }
 
 function drawGauge(ctx, x, y, p, kind) {
   const near = Math.hypot(p.x - x, p.y - y) < 90;
-  ctx.globalAlpha = near ? 0.25 : 0.9;
+  ctx.globalAlpha = (near ? 0.25 : 0.9) * hudA;
   const r = 24;
   ctx.fillStyle = 'rgba(5,3,15,0.55)';
   ctx.beginPath();
@@ -204,15 +216,17 @@ function drawGauge(ctx, x, y, p, kind) {
     text(ctx, hint || 'DASH', x, y - 1, hint.length > 3 ? 9 : 11, p.charges ? '#ffffff' : 'rgba(255,255,255,0.4)', 'center', 700);
     text(ctx, 'DASH', x, y + r + 13, 9, '#9ffcff', 'center', 700);
   }
-  ctx.globalAlpha = 1;
+  ctx.globalAlpha = hudA;
 }
 
 function drawBanner(ctx) {
   const b = G.banner;
   if (!b) return;
+  if (b.kind) return drawBeat(ctx, b);
+  const fade = hudA;
   const inT = Math.min(1, b.t / 0.25);
   const outT = Math.min(1, (b.dur - b.t) / 0.35);
-  const a = Math.min(inT, outT);
+  const a = Math.min(inT, outT) * fade;
   const cy = view.H * 0.38;
   ctx.globalAlpha = a;
   if (b.title === 'WARNING') {
@@ -252,6 +266,88 @@ function drawBanner(ctx) {
   }
   ctx.globalAlpha = 1;
 }
+
+// Node / sector beats: square neon rules and a kicker line, so a node's start, its end and a sector's end each read
+// differently at a glance. start: rules sweep out from the middle. clear: rules close in. secured: a full-width band.
+function drawBeat(ctx, b) {
+  const W = view.W;
+  const cy = view.H * 0.38;
+  const inT = Math.min(1, b.t / 0.3);
+  const outT = Math.min(1, (b.dur - b.t) / 0.4);
+  const a = Math.min(inT, outT) * hudA;
+  const e = easeOutCubic(inT);
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'center';
+  ctx.globalAlpha = a;
+  const secured = b.kind === 'secured';
+  const half = secured ? 52 : 40;
+  if (secured) {
+    // Band in the sector hue with a white sweep crossing it once.
+    ctx.fillStyle = 'rgba(3,2,10,0.62)';
+    ctx.fillRect(0, cy - half, W, half * 2);
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = a * 0.16;
+    ctx.fillStyle = b.color;
+    ctx.fillRect(0, cy - half, W, half * 2);
+    const sx = -80 + (W + 160) * Math.min(1, b.t / 0.9);
+    const sg = ctx.createLinearGradient(sx - 70, 0, sx + 70, 0);
+    sg.addColorStop(0, 'rgba(255,255,255,0)');
+    sg.addColorStop(0.5, 'rgba(255,255,255,0.35)');
+    sg.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.globalAlpha = a;
+    ctx.fillStyle = sg;
+    ctx.fillRect(sx - 70, cy - half, 140, half * 2);
+    ctx.globalCompositeOperation = 'source-over';
+  }
+  // Rules: start = grow out from the centre; clear = close in from the edges; secured = full width, thick.
+  const lw = secured ? 3 : 2;
+  ctx.fillStyle = b.color;
+  ctx.shadowColor = b.color;
+  ctx.shadowBlur = 10;
+  if (b.kind === 'clear') {
+    // Two halves slide in from the edges and meet in the middle.
+    const x = (W / 2) * (e - 1);
+    for (const y of [cy - half, cy + half - lw]) {
+      ctx.fillRect(x, y, W / 2, lw);
+      ctx.fillRect(W - x - W / 2, y, W / 2, lw);
+    }
+  } else {
+    const w = (secured ? W : W * 0.72) * e;
+    ctx.fillRect((W - w) / 2, cy - half, w, lw);
+    ctx.fillRect((W - w) / 2, cy + half - lw, w, lw);
+  }
+  ctx.shadowBlur = 0;
+  if (b.kicker) {
+    ctx.font = `700 ${secured ? 12 : 11}px ${FONT}`;
+    ctx.fillStyle = secured ? '#ffffff' : b.color;
+    ctx.globalAlpha = a * 0.9;
+    ctx.fillText(spaced(b.kicker), W / 2, cy - half + 15);
+    ctx.globalAlpha = a;
+  }
+  const size = secured ? 36 : 32;
+  ctx.font = `900 ${size}px ${FONT}`;
+  const tw = ctx.measureText(b.title).width;
+  const fit = Math.min(1, (W - 30) / tw);
+  ctx.save();
+  ctx.translate(W / 2, cy + 3);
+  // start: drops in with a small overshoot; clear / secured: punches from large.
+  const pop = b.kind === 'start' ? 1 : 1 + (1 - e) * 0.35;
+  ctx.scale(fit * pop, fit * pop);
+  ctx.fillStyle = 'rgba(0,0,0,0.55)';
+  ctx.fillText(b.title, 2, 2);
+  ctx.fillStyle = b.color;
+  ctx.fillText(b.title, 0, 0);
+  ctx.restore();
+  if (b.sub) {
+    ctx.font = `700 13px ${FONT2}`;
+    ctx.fillStyle = '#ffffff';
+    ctx.globalAlpha = a * Math.min(1, Math.max(0, (b.t - 0.15) / 0.25));
+    ctx.fillText(spaced(b.sub), W / 2, cy + half - 13);
+  }
+  ctx.globalAlpha = 1;
+}
+
+const spaced = (s) => s.split('').join(String.fromCharCode(8202));
 
 export function updateBanner(dt) {
   if (!G.banner) return;

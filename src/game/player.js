@@ -14,10 +14,11 @@ import { sfx } from '../core/audio.js';
 import { input, readDirection } from '../core/input.js';
 import { botControl } from './bot.js';
 import { vacuumAll } from './pickups.js';
-import { dashNova, resetModules } from './modules.js';
+import { dashNova, resetModules, staticDischarge } from './modules.js';
 import { collectRelic } from './collectables.js';
 import { achEvent } from './achievements.js';
 import { CLASSES, activeClass, equippedPassives, initPilot, castUlt, boosted, phasing, fortressOn, bloodrush, onEliteKilled, updatePilot, spawnEchoes } from './pilot.js';
+import { cine } from './cinematic.js';
 
 export const xpFor = (l) => Math.floor(5 + 4.5 * l + 0.9 * l * l);
 
@@ -27,6 +28,7 @@ export function createPlayer(ship, gear = true) {
     ship,
     color: activePaint(profile, ship).color,
     parts: gear ? equippedParts(profile, ship.id) : [],
+    fluxCore: gear ? { ...profile.core } : null, // Flux Core levels (core.js)
     x: view.W / 2,
     y: view.H * 0.78,
     vx: 0,
@@ -60,6 +62,9 @@ export function createPlayer(ship, gear = true) {
     focus: false,
     god: false,
     hurtT: 0,
+    echoT: 0, // Echo Fire: delay before the repeated volley
+    leechN: 0, // Leech Protocol kill counter
+    swUsed: 0, // Second Wind charges spent this run
   };
   const cls = gear ? activeClass() : CLASSES[0];
   initPilot(p, cls, gear ? equippedPassives(cls.id).map((x) => x.id) : []);
@@ -136,8 +141,20 @@ export function updatePlayer(p, dt) {
     mvy = c.dy;
   }
 
+  // Cinematic fly-through (cinematic.js transit): the jet follows a scripted point, no dashing.
+  const auto = p.auto;
+  if (auto) {
+    tvx = (auto.x - p.x) * 12;
+    tvy = (auto.y - p.y) * 12;
+    const m = Math.hypot(tvx, tvy);
+    if (m > 900) {
+      tvx *= 900 / m;
+      tvy *= 900 / m;
+    }
+  }
+
   // --- Dash ---
-  if (c.dash && p.charges > 0 && p.dashT <= 0) {
+  if (c.dash && !auto && p.charges > 0 && p.dashT <= 0) {
     let dx = mvx;
     let dy = mvy;
     const m = Math.hypot(dx, dy);
@@ -239,7 +256,13 @@ export function updatePlayer(p, dt) {
   while (p.fireT <= 0) {
     firePrimary(p, w);
     p.fireT += w.interval;
+    if (st.echo && p.echoT <= 0 && Math.random() < st.echo) p.echoT = Math.min(0.07, w.interval * 0.5); // Echo Fire
   }
+  if (p.echoT > 0) {
+    p.echoT -= dt;
+    if (p.echoT <= 0) firePrimary(p, w);
+  }
+  if (st.perpetual && p.odT <= 0) gainOverdrive(st.perpetual * dt); // Perpetual Engine
 }
 
 function firePrimary(p, w) {
@@ -259,6 +282,7 @@ function firePrimary(p, w) {
       scale: charge ? grow * 1.5 : 1,
       bounce: w.bounce || 0,
       kind: charge ? 'orb' : 'bullet',
+      primary: true,
       alpha: G.mode === 'attract' ? 0.6 : 0.85,
     });
   }
@@ -309,7 +333,7 @@ export function onEnemyKilled(e) {
   G.kills++;
   const before = comboMult();
   G.combo++;
-  G.comboTimer = 2.6;
+  G.comboTimer = p.st.comboT || 2.6;
   if (G.combo > G.maxCombo) G.maxCombo = G.combo;
   const after = comboMult();
   if (after > before && G.mode === 'run') {
@@ -320,6 +344,16 @@ export function onEnemyKilled(e) {
   bloodrush(p);
   if (e.elite) onEliteKilled(p);
   gainOverdrive(e.elite ? 10 : e.type === 'swarm' ? 0.8 : 1.6);
+  if (p.st.leech && !p.dead && ++p.leechN >= p.st.leech) {
+    // Leech Protocol
+    p.leechN = 0;
+    if (p.hp < p.maxHp) {
+      p.hp++;
+      floatText(p.x, p.y - 30, '+1 HULL', '#ff4d6d', 11, 0.9);
+      ring(p.x, p.y, 36, '#ff4d6d', 0.35);
+    }
+  }
+  if (p.st.static) staticDischarge(p, e);
   if (p.up.shrapnel) {
     const lv = p.up.shrapnel;
     const n = 2 + lv;
@@ -332,7 +366,7 @@ export function onEnemyKilled(e) {
 }
 
 export function hurtPlayer(p) {
-  if (p.dead || p.iframes > 0 || p.dashT > 0 || p.god || G.mode === 'attract' || phasing(p)) return;
+  if (p.dead || p.iframes > 0 || p.dashT > 0 || p.god || G.mode === 'attract' || phasing(p) || cine.on) return;
   if (p.shield) {
     p.shield = 0;
     p.shieldT = 0;
@@ -344,6 +378,22 @@ export function hurtPlayer(p) {
     addShake(0.35);
     hitstop(0.06);
     floatText(p.x, p.y - 30, 'SHIELD BROKEN', '#3ff6ff', 11, 0.9);
+    return;
+  }
+  if (p.hp <= 1 && p.swUsed < p.st.secondWind) {
+    // Second Wind: the killing blow is shrugged off.
+    p.swUsed++;
+    p.hp = 1;
+    p.iframes = 2.5;
+    G.combo = 0;
+    G.comboTimer = 0;
+    sfx.shield();
+    flash('255,255,255', 0.5);
+    addShake(0.6);
+    hitstop(0.12);
+    ring(p.x, p.y, 160, '#ff4d6d', 0.6);
+    clearBullets(p.x, p.y, 220);
+    floatText(p.x, p.y - 34, 'SECOND WIND', '#ff4d6d', 14, 1.3);
     return;
   }
   p.hp--;

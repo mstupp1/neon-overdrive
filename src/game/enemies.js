@@ -10,6 +10,7 @@ import { dropKillCredits } from './economy.js';
 import { rollRelicDrop } from './collectables.js';
 import { sfx } from '../core/audio.js';
 import { onEnemyKilled } from './player.js';
+import { onKill as cineOnKill } from './cinematic.js';
 import { onEliteKilled } from './pilot.js';
 import { bossDamaged, updateBoss, every } from './bosses.js';
 
@@ -621,13 +622,24 @@ export function damageEnemy(e, dmg, x, y, crit = false) {
     }
   }
   const pl = G.player;
-  if (pl && pl.st.exec) dmg *= e.boss ? 1.1 : e.hp < e.maxHp * 0.3 ? 1.4 : 1; // Executioner
+  if (pl) {
+    const st = pl.st;
+    if (st.exec) dmg *= e.boss ? 1.1 : e.hp < e.maxHp * 0.3 ? 1.4 : 1; // Executioner
+    if (st.redline) dmg *= 1 + st.redline * Math.max(0, pl.maxHp - pl.hp);
+    if (st.bounty && (e.boss || e.elite || e.hunter)) dmg *= 1 + st.bounty;
+    if (st.chainDmg) dmg *= 1 + st.chainDmg * Math.min(14, Math.floor(G.combo / 12)); // Chain Link: per x0.5 combo step
+  }
   e.hp -= dmg;
   e.flash = 0.06;
   damageNumber(x ?? e.x, y ?? e.y, dmg, crit);
   if (e.boss) {
     bossDamaged(e, dmg);
     return false;
+  }
+  if (pl && pl.st.cull && e.hp > 0 && e.hp < e.maxHp * pl.st.cull) {
+    // Culling Edge
+    e.hp = 0;
+    sparks(e.x, e.y, '#ffe14d', 6, 220);
   }
   if (e.hp <= 0) {
     killEnemy(e);
@@ -673,4 +685,5 @@ export function killEnemy(e, silent = false) {
     }
   }
   onEnemyKilled(e);
+  cineOnKill(e); // last enemy of the node / a Hunter: finisher cam
 }

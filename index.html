@@ -148,6 +148,16 @@
             </nav>
         </section>
 
+        <!-- FLUX CORE (endgame upgrades) -->
+        <section class="screen" id="scr-core" data-back="leaveCore">
+            <h2 class="screen-title">FLUX CORE</h2>
+            <p class="screen-sub" id="core-sub"></p>
+            <div class="cards still" id="core-list"></div>
+            <nav class="menu row">
+                <button class="btn ghost small" data-act="leaveCore">BACK</button>
+            </nav>
+        </section>
+
         <!-- HANGAR PART LIST -->
         <section class="screen" id="scr-parts" data-back="partsBack">
             <h2 class="screen-title" id="parts-title">CORE</h2>
@@ -166,11 +176,20 @@
             <div class="pilot-line" id="camp-pilot"></div>
             <div class="sysmap" id="sys-map"></div>
             <div class="sys-detail" id="sys-detail"></div>
+            <div class="info-box" id="run-info" hidden>
+                <h4>HOW A RUN WORKS</h4>
+                <p>Fly from Genesis to the Void with one ship. Your build carries between systems. If you go down, the next run starts at Genesis. Beat the Void and the run dives on into the Deep Grid.</p>
+                <button class="btn small" data-act="runInfo">GOT IT</button>
+            </div>
             <nav class="menu">
                 <button class="btn primary" data-act="launch" id="launch-btn">LAUNCH</button>
                 <div class="pair">
                     <button class="btn small" data-act="hangar" id="ship-btn">HANGAR</button>
                     <button class="btn small" data-act="pilot" id="pilot-btn">PILOT</button>
+                </div>
+                <div class="pair">
+                    <button class="btn small" data-act="tier" id="tier-btn">OVERDRIVE 0</button>
+                    <button class="btn small" data-act="core" id="core-btn">FLUX CORE</button>
                 </div>
                 <button class="btn ghost small" data-act="back">BACK</button>
             </nav>
@@ -184,7 +203,7 @@
             <div class="routemap" id="route-map"></div>
             <p class="route-hint" id="route-hint"></p>
             <nav class="menu row">
-                <button class="btn ghost small" data-act="abandon">ABANDON RUN</button>
+                <button class="btn ghost small" data-act="abandon" id="route-leave">ABANDON RUN</button>
             </nav>
         </section>
 
@@ -216,11 +235,12 @@
 
         <!-- REPAIR DOCK -->
         <section class="screen" id="scr-dock" data-back="">
-            <h2 class="screen-title" id="dock-title">REPAIR DOCK</h2>
+            <h2 class="screen-title" id="dock-title">REST STATION</h2>
             <p class="screen-sub" id="dock-hull"></p>
             <div class="cards">
                 <button class="card dock-card" data-act="dock" data-opt="repair" id="dock-repair" style="--c:#7dff6b"></button>
                 <button class="card dock-card" data-act="dock" data-opt="reinforce" id="dock-reinforce" style="--c:#3ff6ff"></button>
+                <button class="card dock-card" data-act="dock" data-opt="overclock" id="dock-overclock" style="--c:#ffb300"></button>
             </div>
         </section>
 
@@ -321,6 +341,7 @@
                         <li>You earn <b class="gold">credits</b> in a run. Extract after the boss to bank them all; die and keep half. Spend them in the <b>Hangar</b> on ships, gear and paint.</li>
                         <li>Systems 2-4 open with a <b class="gold">Supply Drop</b>: free upgrade picks before the first jump.</li>
                         <li>Anomalies are risk-for-reward choices. Black Market and Docks heal and upgrade mid-run.</li>
+                        <li>Deeper systems add new tech to the draft. <b>NEW DISCOVERY</b> marks one you have never seen, and from then on it can turn up in any system. <b class="cyan">NEW THIS RUN</b> marks one you know but don't own yet.</li>
                     </ul>
                 </div>
             </div>

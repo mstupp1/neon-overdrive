@@ -14,7 +14,7 @@ import { explosion, ring, sparks, particle, flash, addShake, slowmo, hitstop } f
 import { startSector, endlessSpec } from './director.js';
 import { playerBullet } from './bullets.js';
 import { applyUpgrade } from './upgrades.js';
-import { damageEnemy } from './enemies.js';
+import { damageEnemy, spawnEnemy } from './enemies.js';
 import { SHIPS } from './ships.js';
 import { input } from '../core/input.js';
 import { music, sfx, setSfxMuted } from '../core/audio.js';
@@ -254,6 +254,13 @@ function update(raw) {
     G.director.spawnT = 0;
     G.director.diff.spawn *= 0.4;
   }
+  // Scripted waves on top of the director so the action beat is always dense.
+  const W = view.W;
+  if (at(14.3)) for (let k = -3; k <= 3; k++) spawnEnemy('dart', W / 2 + k * 40, -20 - Math.abs(k) * 22, { mv: 'down', speed: 150, wa: 20, wf: 1.8, ph: 0, shots: k % 2 ? 1 : 0 });
+  if (at(15.0)) for (let i = 0; i < 10; i++) spawnEnemy('swarm', 40 + (i * (W - 80)) / 9, -20 - (i % 2) * 26, { mv: 'down', speed: 170, wa: 30, wf: 3, shots: 0 });
+  if (at(15.7)) for (const x of [W * 0.25, W * 0.75]) spawnEnemy('spinner', x, -30, { mv: 'down', speed: 90 });
+  if (at(16.3)) for (let i = 0; i < 6; i++) spawnEnemy('dart', 50 + (i * (W - 100)) / 5, -20, { mv: 'down', speed: 160, wa: 60, wf: 2.2, ph: i, shots: 1 });
+  if (at(16.9)) for (let i = 0; i < 12; i++) spawnEnemy('swarm', W / 2 + Math.cos((i / 12) * TAU) * 150, 120 + Math.sin((i / 12) * TAU) * 60 - 200, { mv: 'down', speed: 200, wa: 15, wf: 4, shots: 0 });
   if (at(17.62)) {
     // After the Overdrive pulse: everything still alive goes off in a staggered chain.
     slowmo(0.9);

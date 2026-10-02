@@ -145,10 +145,18 @@ export const ui = {
   },
 
   // --- Draft --------------------------------------------------------------------
-  renderDraft(player, choices, kind, rerolls, onPick, left = 0) {
-    $('#draft-title').textContent = kind === 'sector' ? 'SECTOR CLEAR' : kind === 'supply' ? 'SUPPLY DROP' : 'LEVEL UP';
-    $('#draft-title').style.color = kind === 'sector' ? '#7dff6b' : kind === 'supply' ? '#ffd24a' : '#fff';
-    $('#draft-sub').textContent = kind === 'sector' ? 'Claim a reward for the next sector' : kind === 'supply' ? `Salvaged tech for this system — ${left} to claim` : `Level ${player.level} — choose an upgrade`;
+  // note: an extra line for the subtitle (campaign fight reward, vault haul).
+  renderDraft(player, choices, kind, rerolls, onPick, left = 0, note = '') {
+    const T = {
+      sector: ['SECTOR CLEAR', '#7dff6b', 'Claim a reward for the next sector'],
+      supply: ['SUPPLY DROP', '#ffd24a', `Salvaged tech for this system — ${left} to claim`],
+      vault: ['TREASURE VAULT', '#ffb300', 'Pick one'],
+      boost: ['OVERCLOCK', '#7dff6b', '+1 level to an upgrade you own'],
+      level: ['LEVEL UP', '#fff', `Level ${player.level} — choose an upgrade`],
+    }[kind] || ['LEVEL UP', '#fff', ''];
+    $('#draft-title').textContent = T[0];
+    $('#draft-title').style.color = T[1];
+    $('#draft-sub').textContent = note ? `${T[2]} · ${note}` : T[2];
     const wrap = $('#draft-cards');
     wrap.innerHTML = '';
     wrap.classList.toggle('no-keys', input.device === 'touch');
@@ -156,14 +164,19 @@ export const ui = {
       const info = cardInfo(player, id);
       const c = CAT_COLORS[info.cat];
       const b = document.createElement('button');
-      b.className = info.evo ? 'card evo' : 'card';
+      // Two "new" levels, each with its own flag on the card's top edge: never seen in any run (DISCOVERY, white,
+      // outlined card) vs. seen before but not owned this run (NEW THIS RUN, category colour).
+      const fresh = info.max > 0 && info.fresh;
+      const runNew = info.max > 0 && !fresh && !info.evo && info.cat !== 'weapon' && info.lv === 0; // you always fly a main cannon
+      b.className = 'card' + (info.evo ? ' evo' : '') + (fresh ? ' fresh' : '');
       b.style.setProperty('--c', c);
       let pips = '';
       if (info.max && !info.evo) {
         for (let k = 0; k < info.max; k++) pips += `<i class="${k < info.lv ? 'on' : k === info.lv ? 'next' : ''}"></i>`;
       }
-      const tag = info.evo ? 'EVOLVE' : info.max ? (info.lv === 0 ? 'NEW' : `LV ${info.lv + 1}`) : 'BONUS';
-      b.innerHTML = `<div class="card-icon">${info.icon}</div><div><div class="card-top"><span class="card-name">${info.name}</span><span class="card-tag">${tag}</span></div><div class="card-desc">${info.desc}</div>${pips ? `<div class="pips">${pips}</div>` : ''}</div>${input.device === 'touch' ? '' : `<kbd>${i + 1}</kbd>`}`;
+      const tag = info.evo ? 'EVOLVE' : info.max ? `LV ${info.lv + 1}` : 'BONUS';
+      const flag = fresh ? `<span class="card-flag disc">${STAR}NEW DISCOVERY</span>` : runNew ? '<span class="card-flag run">NEW THIS RUN</span>' : '';
+      b.innerHTML = `${flag}<div class="card-icon">${info.icon}</div><div><div class="card-top"><span class="card-name">${info.name}</span><span class="card-tag">${tag}</span></div><div class="card-desc">${info.desc}</div>${pips ? `<div class="pips">${pips}</div>` : ''}</div>${input.device === 'touch' ? '' : `<kbd>${i + 1}</kbd>`}`;
       b.addEventListener('click', () => {
         if (performance.now() < lockUntil) return;
         sfx.select();
@@ -182,7 +195,7 @@ export const ui = {
     const p = G.player;
     $('#pause-stats').innerHTML = stat('SECTOR', G.sector) + stat('LEVEL', p.level) + stat('TIME', formatTime(G.runTime));
     renderBuild($('#pause-build'), p);
-    $('#pause-quit').textContent = G.run && G.run.mode === 'campaign' ? 'ABANDON RUN' : 'QUIT TO TITLE';
+    $('#pause-quit').textContent = G.run && G.run.mode === 'campaign' ? (G.run.victory ? 'EXTRACT · BANK ALL' : 'ABANDON RUN') : 'QUIT TO TITLE';
   },
 
   // --- Game over ----------------------------------------------------------------
@@ -258,6 +271,8 @@ export const ui = {
     this._toastT = setTimeout(() => t.classList.remove('show'), 3500);
   },
 };
+
+const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l2.9 6.6 7.1.7-5.4 4.8 1.6 7-6.2-3.7-6.2 3.7 1.6-7L2 9.3l7.1-.7z"/></svg>';
 
 export function stat(label, value) {
   return `<div>${label}<b>${value}</b></div>`;
