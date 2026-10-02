@@ -56,6 +56,8 @@ export function createPlayer(ship, gear = true) {
     up: {},
     st: {},
     ghosts: [],
+    ghostT: 0,
+    pitch: 0,
     trailT: 0,
     muzzle: 0,
     dead: false,
@@ -182,9 +184,16 @@ export function updatePlayer(p, dt) {
       p.vx *= 0.3;
       p.vy *= 0.3;
     }
-  } else {
+  } else if (auto) {
     p.vx = damp(p.vx, tvx, 26, dt);
     p.vy = damp(p.vy, tvy, 26, dt);
+  } else {
+    // A little thrust: the ship spools up to speed (~0.18s) but brakes and turns hard, so it carries without drifting.
+    // Braking = the wanted velocity is slower than, or turned away from, the current one. Same for keys, mouse and touch.
+    const v2 = p.vx * p.vx + p.vy * p.vy;
+    const rate = tvx * p.vx + tvy * p.vy < v2 ? (c.mode === 'target' ? 26 : 22) : 13;
+    p.vx = damp(p.vx, tvx, rate, dt);
+    p.vy = damp(p.vy, tvy, rate, dt);
   }
   if (p.charges < p.maxCharges) {
     p.rechargeT += dt;
@@ -203,7 +212,8 @@ export function updatePlayer(p, dt) {
   p.y = clamp(p.y, b.top, b.bottom);
   // Pointer steering: carry the target along with a dash so the ship stays where it dashed to.
   if (dashing && c.mode === 'target' && c.shift) c.shift(p.x - px, p.y - py);
-  p.bank = damp(p.bank, clamp(p.vx / 420, -1, 1), 10, dt);
+  p.bank = damp(p.bank, clamp(p.vx / 380, -1, 1), 12, dt);
+  p.pitch = damp(p.pitch, clamp(-p.vy / 380, -1, 1), 12, dt); // nose-forward stretch when climbing
 
   for (const g of p.ghosts) g.life -= dt;
   while (p.ghosts.length && p.ghosts[0].life <= 0) p.ghosts.shift();
@@ -241,11 +251,18 @@ export function updatePlayer(p, dt) {
   updatePilot(p, dt);
 
   // --- Engine trail ---
-  p.trailT -= dt;
+  // Throttle: climbing (and the fly-through) burns hotter, with a longer, faster plume.
+  const thr = p.auto ? 2.2 : 1 + Math.max(0, p.pitch) * 0.8;
+  p.trailT -= dt * thr;
   if (p.trailT <= 0) {
     p.trailT = 0.025;
     const col = p.odT > 0 ? p.ucol : p.color;
-    particle('dot', p.x + rand(-3, 3), p.y + 15, rand(-15, 15) - p.vx * 0.1, rand(160, 240), 0.22, rand(5, 8), col, 1);
+    particle('dot', p.x + rand(-3, 3), p.y + 15, rand(-15, 15) - p.vx * 0.1, rand(160, 240) * thr, 0.22, rand(5, 8) * Math.min(1.5, thr), col, 1);
+  }
+  // Fly-through afterimages.
+  if (p.auto && (p.ghostT -= dt) <= 0) {
+    p.ghostT = 0.035;
+    p.ghosts.push({ x: p.x, y: p.y, life: 0.2, bank: p.bank });
   }
 
   // --- Primary fire ---
@@ -521,7 +538,8 @@ export function drawPlayer(ctx, k) {
   if (ph) alpha = 0.5 + Math.sin(G.time * 14) * 0.12;
   ctx.globalAlpha = alpha;
   const sx = 1 - Math.abs(p.bank) * 0.28;
-  ctx.setTransform(k * sx, 0, 0, k, p.x * k + view.ox, p.y * k + view.oy);
+  const sy = 1 + p.pitch * 0.06;
+  ctx.setTransform(k * sx, 0, 0, k * sy, p.x * k + view.ox, p.y * k + view.oy);
   ctx.drawImage(spr.img, -spr.half, -spr.half, spr.size, spr.size);
   ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
   ctx.globalAlpha = 1;

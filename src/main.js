@@ -999,7 +999,7 @@ function frame(now) {
   bg.setDark(dk);
   vignette.classList.toggle('dark', dk);
   const intro = G.screen === 'sector-intro';
-  bg.update(simulating() || intro ? raw : raw * 0.25, intro ? sectorIntro.boost() : boost);
+  bg.update(simulating() || intro ? raw * cine.bgScale() : raw * 0.25, intro ? sectorIntro.boost() : boost);
   music.update(raw);
   render();
 }
