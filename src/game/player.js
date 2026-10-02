@@ -136,8 +136,20 @@ export function updatePlayer(p, dt) {
     mvy = c.dy;
   }
 
+  // Cinematic fly-through (cinematic.js transit): the jet follows a scripted point, no dashing.
+  const auto = p.auto;
+  if (auto) {
+    tvx = (auto.x - p.x) * 12;
+    tvy = (auto.y - p.y) * 12;
+    const m = Math.hypot(tvx, tvy);
+    if (m > 900) {
+      tvx *= 900 / m;
+      tvy *= 900 / m;
+    }
+  }
+
   // --- Dash ---
-  if (c.dash && p.charges > 0 && p.dashT <= 0) {
+  if (c.dash && !auto && p.charges > 0 && p.dashT <= 0) {
     let dx = mvx;
     let dy = mvy;
     const m = Math.hypot(dx, dy);

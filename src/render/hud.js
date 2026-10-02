@@ -104,6 +104,11 @@ export function drawHud(ctx, alpha = 1) {
   text(ctx, label, rx, y0 + 9, 12, hue, 'right', 700);
   const bossSector = !!(d.spec && d.spec.boss);
   bar(ctx, rx - 84, y0 + 23, 84, 4, d.progress, hue);
+  if (d.zones > 1) {
+    // Zone breaks on the progress bar.
+    ctx.fillStyle = 'rgba(3,2,10,0.9)';
+    for (let i = 1; i < d.zones; i++) ctx.fillRect(rx - 84 + (84 * i) / d.zones - 1, y0 + 22, 2, 6);
+  }
   if (bossSector) {
     ctx.fillStyle = '#ff2e55';
     ctx.beginPath();

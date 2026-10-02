@@ -42,6 +42,8 @@ const dangerEl = document.getElementById('danger');
 const probe = document.getElementById('safe-probe');
 const bossCard = document.getElementById('boss-card');
 const vignette = document.querySelector('.fx-vignette');
+const off = document.createElement('canvas'); // fly-through camera: flat world frame, drawn rolled
+const octx = off.getContext('2d', { alpha: false });
 
 let dprCap = 2;
 // The ship flown by Endless / campaign launches: the hangar's selection (profile.lastShip), if still owned.
@@ -751,7 +753,7 @@ function frame(now) {
   G.shake = Math.max(0, G.shake - raw * 1.8);
   G.flash = Math.max(0, G.flash - raw * 2.5);
   updateBanner(raw);
-  const boost = G.player && (G.player.odT > 0 || G.player.dashT > 0) ? 3 : G.director && G.director.state === 'clear' ? 4 : 1;
+  const boost = Math.max(cine.boost(), G.player && (G.player.odT > 0 || G.player.dashT > 0) ? 3 : G.director && G.director.state === 'clear' ? 4 : 1);
   const dk = !!(G.mode === 'run' && (G.screen === 'play' || G.screen === 'pause' || G.screen === 'pause-settings') && G.director.diff.blackout && G.director.state !== 'clear' && G.director.state !== 'await'); // not on result screens
   bg.setDark(dk);
   vignette.classList.toggle('dark', dk);
@@ -804,13 +806,32 @@ function render() {
   // Finisher / node-start camera: zoom about a world point (screen = world * z + cam offset).
   const live = G.mode === 'run' && (G.screen === 'play' || G.screen === 'pause' || G.screen === 'pause-settings');
   const cam = live ? cine.camera() : null;
-  const kz = cam ? k * cam.z : k;
-  if (cam) {
-    view.ox += cam.x * k;
-    view.oy += cam.y * k;
+  if (cam && cam.rot) {
+    // Rolled fly-through camera: sprites set axis-aligned transforms of their own, so the world is drawn flat into an
+    // offscreen copy and that is blitted rolled, zoomed and skewed (one extra full-frame drawImage, transit only).
+    if (off.width !== canvas.width || off.height !== canvas.height) {
+      off.width = canvas.width;
+      off.height = canvas.height;
+    }
+    octx.setTransform(k, 0, 0, k, view.ox, view.oy);
+    renderWorld(octx, k);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = '#05030d';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.translate(cam.px * k, cam.py * k);
+    ctx.rotate(cam.rot);
+    ctx.transform(cam.z, 0, cam.skew * cam.z, cam.z * cam.sy, 0, 0);
+    ctx.translate(-cam.fx * k, -cam.fy * k);
+    ctx.drawImage(off, 0, 0);
+  } else {
+    const kz = cam ? k * cam.z : k;
+    if (cam) {
+      view.ox += cam.x * k;
+      view.oy += cam.y * k;
+    }
+    ctx.setTransform(kz, 0, 0, kz, view.ox, view.oy);
+    renderWorld(ctx, kz);
   }
-  ctx.setTransform(kz, 0, 0, kz, view.ox, view.oy);
-  renderWorld(ctx, kz);
   bloom(ctx, live ? 1 + 0.25 * cine.amount() : 1);
   ctx.setTransform(k, 0, 0, k, 0, 0);
   if (live) cine.overlay(ctx);
