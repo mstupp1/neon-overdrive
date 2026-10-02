@@ -229,7 +229,8 @@ function onBossWarn(boss) {
   }
 }
 
-function showCampaign() {
+// focusId: element to focus instead of LAUNCH (a campaign loss lands on HANGAR).
+function showCampaign(focusId) {
   if (G.mode !== 'attract') startAttract();
   G.screen = 'campaign';
   pauseBtn.hidden = true;
@@ -237,8 +238,8 @@ function showCampaign() {
   music.setSet('normal');
   music.setDuck(1);
   if (!systemUnlocked(SYSTEMS[selSystem], profile)) selSystem = 0;
-  const focus = meta.renderCampaign(selSystem, curShip().name);
-  ui.show('campaign', { focus });
+  const launchBtn = meta.renderCampaign(selSystem, curShip().name);
+  ui.show('campaign', { focus: (focusId && document.getElementById(focusId)) || launchBtn });
   blockingStory('prologue', STORY.prologue, { overlay: true }, () => {});
 }
 
@@ -474,7 +475,7 @@ function gameOver() {
   const campaign = G.run.mode === 'campaign';
   ui.renderGameOver({
     score: Math.floor(G.score), newBest: newBest && profile.runs > 1, sector: G.sector, time: G.runTime,
-    level: p.level, kills: G.kills, maxCombo: G.maxCombo, grazes: G.grazes, unlocked, reward, player: p,
+    level: p.level, kills: G.kills, maxCombo: G.maxCombo, grazes: G.grazes, unlocked, reward, player: p, campaign,
   });
   meta.renderRewards(document.getElementById('over-rewards'), reward, campaign);
   G.screen = 'gameover';
@@ -566,6 +567,7 @@ ui.init({
   achievements: () => openAchievements(() => titleMenu('[data-act=achievements]')),
   ...galleryActs,
   campaign: () => showCampaign(),
+  upgrade: () => showCampaign('ship-btn'),
   node(btn) {
     pickRouteNode(routeNode(G.run.route, btn.dataset.id));
   },

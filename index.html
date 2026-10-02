@@ -325,10 +325,14 @@
             <div class="unlock" id="over-unlock" hidden></div>
             <div class="extract-rewards" id="over-rewards"></div>
             <div class="build big" id="over-build"></div>
+            <p class="over-next" id="over-next" hidden></p>
+            <!-- Campaign loss: UPGRADE SHIP leads, RETRY is secondary. Endless: RETRY leads. Filled by renderGameOver. -->
             <nav class="menu">
-                <button class="btn primary" data-act="retry">RETRY</button>
-                <button class="btn" data-act="campaign" id="over-campaign">CAMPAIGN</button>
-                <button class="btn ghost" data-act="title">TITLE</button>
+                <button class="btn primary" data-act="upgrade" id="over-main">UPGRADE SHIP</button>
+                <div class="pair">
+                    <button class="btn small" data-act="retry" id="over-alt">RETRY</button>
+                    <button class="btn ghost small" data-act="title">TITLE</button>
+                </div>
             </nav>
         </section>
 
