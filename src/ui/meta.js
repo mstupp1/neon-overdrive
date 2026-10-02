@@ -63,9 +63,10 @@ export const meta = {
     const k = heatScale(t, 0);
     const heat = t ? `<span style="color:#ff4d6d">OVERDRIVE ${t} · ENEMY HP ×${k.hp.toFixed(1)} · REWARDS +${Math.round((k.reward - 1) * 100)}% · FLUX</span>` : '';
     $('#sys-detail').style.setProperty('--c', hsl(SYSTEMS[0].hue));
-    $('#sys-detail').innerHTML = `<h4>ONE RUN · FOUR SYSTEMS</h4><p>Fly from Genesis to the Void with one ship. Your build carries between systems. If you go down, the next run starts at Genesis. Beat the Void and the run dives on into the Deep Grid.</p><div class="sys-meta"><span>${best}</span>${heat}</div>`;
+    $('#sys-detail').innerHTML = `<div class="sys-meta"><span>${best}</span>${heat}</div><button class="info-btn" data-act="runInfo" aria-label="How a run works" title="How a run works">?</button>`;
+    $('#run-info').hidden = profile.seenRunInfo;
     const tb = $('#tier-btn');
-    tb.textContent = profile.tierMax ? `OVERDRIVE ${t}` : 'OVERDRIVE · LOCKED';
+    tb.textContent = profile.tierMax ? `OVERDRIVE ${t}` : 'OVERDRIVE';
     tb.disabled = !profile.tierMax;
     $('#core-btn').innerHTML = `FLUX CORE${profile.flux ? ` · ${fmt(profile.flux)}` : ''}`;
     return $('#launch-btn');
