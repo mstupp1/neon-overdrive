@@ -193,6 +193,7 @@ export function slowmo(sec) {
   G.slowmo = Math.max(G.slowmo, sec);
 }
 
-export function banner(title, sub = '', color = '#3ff6ff', dur = 2.2) {
-  G.banner = { title, sub, color, t: 0, dur };
+// kind: null (plain) | 'start' (node opening) | 'clear' (node end) | 'secured' (system boss down); kicker: small line above.
+export function banner(title, sub = '', color = '#3ff6ff', dur = 2.2, kind = null, kicker = '') {
+  G.banner = { title, sub, color, t: 0, dur, kind, kicker };
 }

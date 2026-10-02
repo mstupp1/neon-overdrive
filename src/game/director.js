@@ -1,15 +1,16 @@
 // Sector flow and wave spawning: intro → waves → (boss) → clear → reward draft.
 
 import { G, view, sectorDifficulty, sectorInfo, isBossSector } from './state.js';
-import { applyModifiers, patternMul } from './modifiers.js';
+import { applyModifiers, patternMul, MODIFIERS } from './modifiers.js';
 import { rand, chance, weightedPick, randInt } from '../core/math.js';
-import { spawnEnemy, spawnWeavers, blinkSpot } from './enemies.js';
+import { spawnEnemy, spawnWeavers, blinkSpot, killEnemy } from './enemies.js';
 import { spawnBoss, bossById, bossIndex, BOSS_IDS } from './bosses.js';
 import { banner, floatText } from './fx.js';
 import { vacuumAll } from './pickups.js';
 import { sectorPayout } from './economy.js';
 import { onSectorClear as onPilotSectorClear } from './pilot.js';
 import { bg } from '../render/background.js';
+import { cine, lateFinisher } from './cinematic.js';
 import { sfx, music } from '../core/audio.js';
 
 export function createDirector() {
@@ -210,6 +211,36 @@ export function endlessSpec(n) {
   };
 }
 
+// Zones: a campaign node is fought in 2-3 zones with a break between them; the jet flies to the next one on a
+// fly-through camera (cine.transit). Each zone has its own name, a hue shift and two favoured spawn patterns.
+// Boss nodes fight one zone, then fly into the boss arena before the WARNING.
+const ZONES = {
+  genesis: ['OUTER LATTICE', 'RELAY SPIRES', 'DATA CANYON', 'SIGNAL ARRAY', 'GATE APPROACH'],
+  crimson: ['BLOOD REEF', 'SPORE FIELDS', 'HIVE TRENCH', 'MARROW DEPTHS', 'THE MAW'],
+  cyclone: ['STORM SHELF', 'ION CURRENTS', 'EYEWALL', 'STATIC FRONT', 'THE EYE'],
+  void: ['EVENT HORIZON', 'NULL DRIFT', 'SHATTERED ORBIT', 'DARK TIDE', 'THE ABYSS'],
+};
+const HUE_SHIFT = [0, 16, -14];
+
+function zoneCount(spec) {
+  if (!(G.mode === 'run' && G.run && G.run.mode === 'campaign' && spec.row != null) || spec.boss) return 1;
+  if (spec.zones) return spec.zones; // a node type may set its own count
+  return spec.elite || spec.row >= 2 ? 3 : 2;
+}
+
+function setZone(d, i) {
+  const spec = d.spec;
+  const names = ZONES[G.run && G.run.system && G.run.system.id] || ZONES.genesis;
+  const pool = PATTERNS.filter((p) => p.min <= spec.level + spec.loop * 9).map((p) => p.id);
+  const focus = [];
+  while (focus.length < 2 && pool.length) focus.push(pool.splice(randInt(0, pool.length - 1), 1)[0]);
+  // The last name of each list is the boss arena; ordinary zones draw from the rest.
+  d.zone = { i, name: names[(d.zoneBase + i) % (names.length - 1)], focus, hue: spec.hue + HUE_SHIFT[i % HUE_SHIFT.length] };
+  bg.setHue(d.zone.hue);
+}
+
+const zoneMul = (d, id) => (d.zone && d.zone.focus.includes(id) ? 2.5 : 1);
+
 export function startSector(spec) {
   const d = G.director;
   d.spec = spec;
@@ -231,13 +262,30 @@ export function startSector(spec) {
   d.progress = 0;
   d.hunter = null;
   d.hunterSpawned = false;
+  d.finished = false; // the node's finisher shot has played (or been ruled out)
+  d.zones = zoneCount(spec);
+  d.zoneBase = randInt(0, 3);
+  d.zone = null;
+  d.arena = false;
   d.duration = spec.duration;
   bg.setHue(spec.hue);
+  if (d.zones > 1) setZone(d, 0);
   bg.setTheme(G.run && G.run.mode === 'campaign' ? G.run.system.id : null);
   G.vacuum = false;
   if (G.mode === 'run') {
-    // Campaign banners count route rows (spec.row), not sectors fought.
-    banner(`SECTOR ${spec.row != null ? spec.row + 1 : spec.index}`, spec.name + (spec.loop ? `  ·  LOOP ${spec.loop + 1}` : ''), `hsl(${spec.hue},100%,70%)`, 2.6);
+    const camp = G.run && G.run.mode === 'campaign' && spec.row != null;
+    if (camp) {
+      // Node opening: the camera settles in, and the card names the node (route row), its type and its modifiers.
+      const rows = G.run.route ? G.run.route.rows.length : 0;
+      const type = spec.boss ? 'BOSS NODE' : spec.elite ? 'ELITE NODE' : 'COMBAT';
+      const mods = spec.modifiers.map((id) => MODIFIERS[id] && MODIFIERS[id].name).filter(Boolean).join('  ·  ');
+      const col = spec.boss ? '#ff2e55' : spec.elite ? '#ff3df2' : `hsl(${spec.hue},100%,70%)`;
+      const where = d.zone ? `ZONE 1 / ${d.zones}  ·  ${d.zone.name}` : '';
+      banner(`NODE ${spec.row + 1}${rows ? ' / ' + rows : ''}`, [where, mods].filter(Boolean).join('  ·  ') || 'HOSTILES INBOUND', col, 2.4, 'start', `${G.run.system.short}  ·  ${type}`);
+      cine.nodeStart();
+    } else {
+      banner(`SECTOR ${spec.index}`, spec.name + (spec.loop ? `  ·  LOOP ${spec.loop + 1}` : ''), `hsl(${spec.hue},100%,70%)`, 2.6);
+    }
     music.setSet(spec.level >= 7 ? 'late' : 'normal');
   }
 }
@@ -290,21 +338,53 @@ export function updateDirector(dt) {
       const cap = 16 + local * 2 + spec.loop * 6;
       if (d.spawnT <= 0 && alive < cap) {
         const pool = PATTERNS.filter((p) => p.min <= local + spec.loop * 9 && p.id !== d.last);
-        const pat = weightedPick(pool, (p) => p.w(local) * patternMul(spec.modifiers, p.id));
+        const pat = weightedPick(pool, (p) => p.w(local) * patternMul(spec.modifiers, p.id) * zoneMul(d, p.id));
         d.last = pat.id;
         pat.run();
         d.spawnT = pat.cost * 1.35 * d.diff.spawn + rand(0, 0.5);
       }
-      if (d.sectorT >= d.duration) {
+      if (d.zone && d.zone.i < d.zones - 1 && d.sectorT >= (d.duration * (d.zone.i + 1)) / d.zones) {
+        d.state = 'break'; // zone done: no new spawns, finish what's left, then fly on
+        d.t = 0;
+      } else if (d.sectorT >= d.duration) {
         d.state = 'clearing';
         d.t = 0;
       }
       break;
     }
+    case 'break':
+      // Like clearing, but stragglers burn out after 3.5 s (the Hunter still has to die).
+      if (cine.busy) break;
+      if ((aliveEnemies() === 0 && !d.queue.length) || (d.t > 3.5 && !(d.hunter && !d.hunter.dead))) {
+        d.queue.length = 0;
+        for (const e of G.enemies) if (!e.dead && !e.boss && !e.hunter) killEnemy(e, true);
+        G.vacuum = true;
+        vacuumAll();
+        const next = d.zone.i + 1;
+        const names = ZONES[G.run.system.id] || ZONES.genesis;
+        const nextName = names[(d.zoneBase + next) % (names.length - 1)];
+        if (cine.transit(`ZONE ${next + 1} / ${d.zones}`, nextName)) d.state = 'transit';
+        else nextZone(d);
+      }
+      break;
+    case 'transit':
+      if (!cine.busy) nextZone(d);
+      break;
     case 'clearing':
       d.progress = 1;
+      if (cine.busy) break; // the finisher shot plays out before the clear
       // The Hunter never times out: the sector only clears once it is dead.
       if ((aliveEnemies() === 0 && !d.queue.length) || (d.t > 7 && !(d.hunter && !d.hunter.dead))) {
+        if (lateFinisher()) break;
+        // Boss node (campaign): fly into the arena first.
+        if (spec.boss && !d.arena && G.mode === 'run' && G.run && G.run.mode === 'campaign') {
+          d.arena = true;
+          const names = ZONES[G.run.system.id] || ZONES.genesis;
+          G.vacuum = true;
+          vacuumAll();
+          if (cine.transit('BOSS ARENA', names[names.length - 1], true)) break;
+        }
+        if (d.arena) G.vacuum = false;
         d.t = 0;
         if (spec.boss) {
           d.state = 'warn';
@@ -334,7 +414,7 @@ export function updateDirector(dt) {
       }
       break;
     case 'bossDown':
-      if (d.t > 1.4) {
+      if (d.t > 1.4 && !cine.busy) {
         if (G.mode === 'run') music.setSet(local >= 6 ? 'late' : 'normal');
         sectorClear();
       }
@@ -350,6 +430,15 @@ export function updateDirector(dt) {
   }
 }
 
+// Arrive in the next zone (its name was shown by the fly-through): new hue and pattern focus; waves pick up quickly.
+function nextZone(d) {
+  setZone(d, d.zone.i + 1);
+  G.vacuum = false;
+  d.state = 'waves';
+  d.t = 0;
+  d.spawnT = 0.6;
+}
+
 function sectorClear() {
   const d = G.director;
   d.state = 'clear';
@@ -360,7 +449,14 @@ function sectorClear() {
   if (p) onPilotSectorClear(p, !!(d.spec && d.spec.boss));
   if (G.mode === 'run') {
     const cr = sectorPayout();
-    banner('SECTOR CLEAR', `+${(1000 * G.sector).toLocaleString()} BONUS` + (cr ? `  ·  +${cr} CREDITS` : ''), '#7dff6b', 2.2);
+    const sub = `+${(1000 * G.sector).toLocaleString()} BONUS` + (cr ? `  ·  +${cr} CREDITS` : '');
+    const run = G.run && G.run.mode === 'campaign' ? G.run : null;
+    if (run && d.spec.boss) {
+      // System boss down: the end of the whole sector gets its own, bigger beat.
+      const i = run.system.act;
+      banner('SECTOR SECURED', sub, `hsl(${d.spec.hue},100%,72%)`, 2.4, 'secured', `SECTOR ${String(i).padStart(2, '0')}  ·  ${run.system.name}`);
+    } else if (run) banner('NODE CLEAR', sub, '#7dff6b', 2.2, 'clear', `${run.system.short}  ·  NODE ${(d.spec.row ?? 0) + 1}`);
+    else banner('SECTOR CLEAR', sub, '#7dff6b', 2.2);
     G.score += 1000 * G.sector * (1 + G.loop);
     sfx.sector();
     if (p && !p.dead && p.hp < p.maxHp) {
