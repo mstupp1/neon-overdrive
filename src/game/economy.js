@@ -138,7 +138,7 @@ export function rollMarket(p, system, rng = Math.random) {
     const info = cardInfo(p, id);
     offers.push({
       id: 'up-' + id, kind: 'upgrade', up: id, name: info.name, desc: info.desc, icon: info.icon, cat: info.cat,
-      tag: info.lv === 0 ? 'NEW' : `LV ${info.lv + 1}`, price: price(50 + 30 * info.lv, system), sold: false,
+      tag: info.fresh ? 'DISCOVERY' : info.lv === 0 ? 'NEW' : `LV ${info.lv + 1}`, fresh: info.fresh, price: price(50 + 30 * info.lv, system), sold: false,
     });
   }
   const missing = p.maxHp - p.hp;

@@ -2242,6 +2242,74 @@ input[type='range']::-moz-range-thumb {
     font-size: 1.55em;
 }
 
+/* "New" flags on the card's top edge (absolute, so they never move the layout).
+   NEW DISCOVERY = never seen in any run (white, the card gets a white outer frame).
+   NEW THIS RUN  = seen in an earlier run, not owned in this one (category colour, outlined). */
+.card-flag {
+    position: absolute;
+    top: -0.62em;
+    left: 0.9em;
+    display: flex;
+    align-items: center;
+    gap: 0.35em;
+    font-family: Orbitron, sans-serif;
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    line-height: 1;
+    padding: 0.2em 0.55em;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.card-flag svg {
+    width: 1em;
+    height: 1em;
+}
+
+.card-flag.run {
+    color: var(--c);
+    background: var(--bg);
+    border: 1px solid var(--c);
+}
+
+.card-flag.disc {
+    color: #05030d;
+    background: #fff;
+    box-shadow: 0 0 0.9em rgba(255, 255, 255, 0.75);
+    animation: disc-flag 1.4s ease-in-out infinite;
+}
+
+@keyframes disc-flag {
+    50% {
+        box-shadow: 0 0 1.6em rgba(255, 255, 255, 0.95), 0 0 0.3em #fff;
+    }
+}
+
+.card.fresh {
+    border-color: rgba(255, 255, 255, 0.85);
+    outline: 1px solid rgba(255, 255, 255, 0.4);
+    outline-offset: 0.22em;
+}
+
+.card.fresh .card-icon {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.7);
+}
+
+.card.fresh.focus,
+.card.fresh:hover,
+.card.fresh:focus-visible {
+    outline-color: #fff;
+}
+
+/* Discovery tag in market / anomaly cards (they keep the tag pill; the white frame matches the draft). */
+.card.offer.fresh .card-tag,
+.card.choice.fresh .card-tag {
+    color: #05030d;
+    background: #fff;
+}
+
 /* Evolution cards / chips (gold) */
 .card.evo {
     border-color: color-mix(in srgb, var(--c) 80%, transparent);

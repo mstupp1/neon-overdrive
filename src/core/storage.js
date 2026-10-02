@@ -37,7 +37,16 @@ const DEFAULTS = {
   relicNew: [], // owned but not yet seen in the gallery
   ach: {}, // achievement id → unlock timestamp
   stats: {}, // lifetime counters for achievements (swarm, capsules, ...)
+  tech: [], // upgrade ids ever seen in a draft / market / event (upgrades.js discovery)
 };
+
+// Upgrades that existed before discovery was tracked: saves that had already played get them as discovered,
+// so nothing they could already draft gets locked behind a later system.
+const LEGACY_TECH = [
+  'main', 'power', 'rate', 'crit', 'pierce', 'thrusters', 'magnet', 'capacitor', 'hull', 'aegis', 'dashes',
+  'missiles', 'orbitals', 'drones', 'arc', 'nova', 'rail', 'shrapnel', 'dashNova', 'gravity', 'reflector', 'flak',
+  'hellfire', 'stormhalo', 'teslastorm', 'annihilator',
+];
 
 const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v);
 
@@ -61,6 +70,7 @@ function merge(base, extra) {
 // One-time v2 → v3: keep records/settings, grant ships the player had unlocked.
 function migrate(old) {
   const p = merge(DEFAULTS, {
+    tech: old.runs > 0 ? LEGACY_TECH : [],
     settings: old.settings, best: old.best, bestSector: old.bestSector, bestCombo: old.bestCombo,
     bossKills: old.bossKills, runs: old.runs, kills: old.kills, lastShip: old.lastShip, seenHelp: old.seenHelp,
   });
@@ -84,6 +94,7 @@ function sanitize(p) {
   for (const k of Object.keys(p.pilot.passives)) p.pilot.passives[k] = strs(p.pilot.passives[k]);
   p.relics = [...new Set(strs(p.relics))];
   p.relicNew = strs(p.relicNew);
+  p.tech = [...new Set(strs(p.tech))];
   for (const m of [p.ach, p.stats]) for (const k of Object.keys(m)) if (!Number.isFinite(m[k])) delete m[k];
   return p;
 }
@@ -98,7 +109,12 @@ const grantShips = (p) => {
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) return grantShips(merge(DEFAULTS, JSON.parse(raw)));
+    if (raw) {
+      const saved = JSON.parse(raw);
+      const p = grantShips(merge(DEFAULTS, saved));
+      if (isObj(saved) && !('tech' in saved) && p.runs > 0) p.tech = [...LEGACY_TECH];
+      return p;
+    }
     const old = localStorage.getItem(OLD_KEY);
     if (old) {
       const p = migrate(JSON.parse(old));

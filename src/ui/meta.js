@@ -119,7 +119,7 @@ export const meta = {
     s.choices.forEach((c, i) => {
       const why = choiceBlocked(s, i);
       const b = document.createElement('button');
-      b.className = 'card choice' + (c.tag === 'RISKY' ? ' risky' : c.tag === 'SAFE' ? ' safe' : '');
+      b.className = 'card choice' + (c.tag === 'RISKY' ? ' risky' : c.tag === 'SAFE' ? ' safe' : '') + (c.fresh ? ' fresh' : '');
       b.dataset.act = 'event';
       b.dataset.i = i;
       b.style.setProperty('--c', c.tag === 'RISKY' ? '#ff3df2' : c.tag === 'SAFE' ? '#7dff6b' : ev.color);
@@ -160,7 +160,7 @@ export const meta = {
     wrap.innerHTML = '';
     offers.forEach((o, i) => {
       const b = document.createElement('button');
-      b.className = 'card offer' + (o.sold ? ' sold' : '');
+      b.className = 'card offer' + (o.sold ? ' sold' : '') + (o.fresh && !o.sold ? ' fresh' : '');
       b.dataset.act = 'buy';
       b.dataset.i = i;
       b.style.setProperty('--c', CAT_COLORS[o.cat] || '#ffd24a');
