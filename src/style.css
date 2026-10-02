@@ -790,6 +790,19 @@ kbd {
     text-shadow: 0 0 0.35em var(--red), 0 0 1em rgba(255, 77, 109, 0.6) !important;
 }
 
+.over-next {
+    margin: 0;
+    max-width: 22em;
+    font-size: 0.85em;
+    letter-spacing: 0.06em;
+    text-align: center;
+    color: rgba(233, 244, 255, 0.82);
+}
+
+.over-next b {
+    color: #ffd24a;
+}
+
 #scr-over .screen-title {
     animation: shake-in 0.5s both;
 }

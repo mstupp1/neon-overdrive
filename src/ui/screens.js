@@ -194,6 +194,19 @@ export const ui = {
     un.hidden = !sum.unlocked.length;
     un.textContent = sum.unlocked.map((s) => `NEW SHIP UNLOCKED: ${s.name}`).join(' · ');
     renderBuild($('#over-build'), sum.player);
+    // Campaign: the way forward is the Hangar (spend what was banked), so UPGRADE SHIP leads and RETRY is secondary.
+    const main = $('#over-main');
+    const alt = $('#over-alt');
+    main.dataset.act = sum.campaign ? 'upgrade' : 'retry';
+    main.textContent = sum.campaign ? 'UPGRADE SHIP' : 'RETRY';
+    alt.dataset.act = sum.campaign ? 'retry' : 'campaign';
+    alt.textContent = sum.campaign ? 'RETRY' : 'CAMPAIGN';
+    const next = $('#over-next');
+    next.hidden = !sum.campaign;
+    if (sum.campaign) {
+      const cr = sum.reward.total;
+      next.innerHTML = cr > 0 ? `Spend your <b>${formatScore(cr)}</b> credits in the HANGAR, then relaunch.` : 'Gear up in the HANGAR, then relaunch.';
+    }
   },
 
   // --- Settings -----------------------------------------------------------------
