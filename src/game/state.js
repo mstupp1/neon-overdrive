@@ -58,6 +58,7 @@ export const G = {
 
   run: null, // campaign / endless run record (see agents.md); null in attract
   autopilot: false, // debug: the bot flies the player
+  scriptCtrl: null, // () => control: scripted ship control (boot intro)
   vacuum: false, // sector clear: pickups fly to the player
   deathT: 0, // delay before the game-over screen
 };

@@ -51,6 +51,21 @@
             </div>
         </div>
 
+        <!-- BOOT INTRO (src/game/intro.js) -->
+        <div id="intro" class="intro" hidden>
+            <div class="in-black"></div>
+            <div class="in-bar top"></div>
+            <div class="in-bar bottom"></div>
+            <div class="in-kicker"><span class="in-line"></span></div>
+            <div class="in-cap"><span class="in-line"></span></div>
+            <div class="in-mag">
+                <canvas class="in-face" width="96" height="96"></canvas>
+                <div><div class="in-who">MAG</div><div class="in-line"></div></div>
+            </div>
+            <div class="in-name"><span class="in-line"></span><small>LAST PILOT OF THE GRID</small></div>
+            <div class="in-skip"><span class="soft">PRESS ANY KEY TO SKIP</span><span class="hard">PRESS AGAIN TO SKIP</span></div>
+        </div>
+
         <!-- TITLE -->
         <section class="screen" id="scr-title" data-back="">
             <div class="logo" aria-label="Neon Overdrive">
@@ -280,6 +295,7 @@
                 <button class="set-row toggle" data-set="bloom"><span>Bloom</span><b></b></button>
                 <button class="set-row toggle" data-set="damageNumbers"><span>Damage numbers</span><b></b></button>
                 <button class="set-row toggle" data-set="story"><span>Story dialogue</span><b></b></button>
+                <button class="set-row" data-act="intro" id="set-intro"><span>Replay intro</span><b>▸</b></button>
                 <button class="set-row" data-act="fullscreen"><span>Fullscreen</span><b>⤢</b></button>
                 <button class="set-row danger" data-act="reset"><span id="reset-label">Reset progress</span><b>⟲</b></button>
             </div>

@@ -79,6 +79,7 @@ export function createPlayer(ship, gear = true) {
 }
 
 function control() {
+  if (G.scriptCtrl) return G.scriptCtrl(); // boot intro (intro.js)
   if (G.mode === 'attract' || G.autopilot) return botControl();
   readDirection();
   return {

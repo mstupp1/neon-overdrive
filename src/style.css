@@ -2813,3 +2813,252 @@ input[type='range']::-moz-range-thumb {
 #draft-cards .card-desc {
     min-height: 2.44em;
 }
+
+/* Boot intro (src/game/intro.js). Every line is absolutely placed, so nothing shifts as text types on. */
+.intro {
+    position: absolute;
+    inset: 0;
+    z-index: 45;
+    overflow: hidden;
+    cursor: pointer;
+    font-family: Orbitron, sans-serif;
+    transition: opacity 0.35s;
+}
+
+.intro.out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.in-black {
+    position: absolute;
+    inset: 0;
+    background: #000;
+}
+
+.in-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 9%;
+    background: #000;
+    animation: in-bar 0.9s cubic-bezier(.2, .9, .3, 1) both;
+}
+
+.in-bar.top {
+    top: 0;
+    box-shadow: 0 1px 0 rgba(63, 246, 255, 0.35);
+    transform-origin: top;
+}
+
+.in-bar.bottom {
+    bottom: 0;
+    box-shadow: 0 -1px 0 rgba(63, 246, 255, 0.35);
+    transform-origin: bottom;
+}
+
+@keyframes in-bar {
+    from { transform: scaleY(0); }
+}
+
+.in-kicker,
+.in-cap,
+.in-mag,
+.in-name {
+    position: absolute;
+    left: 1em;
+    right: 1em;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.35s;
+    pointer-events: none;
+}
+
+.in-kicker.on,
+.in-cap.on,
+.in-mag.on,
+.in-name.on {
+    opacity: 1;
+}
+
+.in-kicker {
+    top: calc(9% + var(--safe-top) + 1em);
+    font-size: 0.78em;
+    font-weight: 700;
+    letter-spacing: 0.4em;
+    color: var(--cyan);
+    text-shadow: 0 0 0.6em var(--cyan);
+}
+
+.in-kicker.on .in-line {
+    display: inline-block;
+    animation: bc-kick 1.4s cubic-bezier(.2, .9, .3, 1) both;
+}
+
+.in-cap {
+    top: 30%;
+    min-height: 2.6em;
+    font-size: 1.15em;
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: 0.14em;
+    line-height: 1.3;
+    color: #fff;
+    text-shadow: 0 0 0.25em #fff, 0 0 0.8em var(--cyan);
+}
+
+.in-cap.signal {
+    color: #ffd2dc;
+    text-shadow: 0 0 0.3em #ff3d6e, 0 0 0.9em #ff3d6e;
+    animation: sig-glitch 0.9s infinite steps(1);
+    --c: #ff3d6e;
+}
+
+.in-mag {
+    --c: var(--cyan);
+    bottom: calc(9% + var(--safe-bottom) + 3.2em);
+    display: grid;
+    grid-template-columns: 4em 1fr;
+    gap: 0.8em;
+    align-items: center;
+    max-width: 22em;
+    margin: 0 auto;
+    padding: 0.6em 0.8em;
+    text-align: left;
+    background: rgba(8, 6, 24, 0.9);
+    border: 1px solid color-mix(in srgb, var(--c) 60%, transparent);
+    box-shadow: 0 0 1.4em color-mix(in srgb, var(--c) 25%, transparent);
+    border-radius: 2px;
+}
+
+.in-face {
+    width: 100%;
+    aspect-ratio: 1;
+    display: block;
+    border: 1px solid color-mix(in srgb, var(--c) 45%, transparent);
+}
+
+.in-who {
+    font-size: 0.8em;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    color: var(--c);
+    text-shadow: 0 0 0.6em var(--c);
+}
+
+.in-mag .in-line {
+    margin-top: 0.25em;
+    min-height: 2.5em; /* two lines */
+    font-family: Rajdhani, system-ui, sans-serif;
+    font-size: 1.1em;
+    font-weight: 600;
+    line-height: 1.15;
+    color: #fff;
+}
+
+.in-name {
+    top: 22%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.in-name .in-line {
+    position: relative;
+    font-size: 4.6em;
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: 0.06em;
+    color: #fff;
+    text-shadow: 0 0 0.12em #fff, 0 0 0.35em var(--pink), 0 0 0.9em var(--pink);
+}
+
+.in-name.on .in-line {
+    animation: bc-name 0.7s cubic-bezier(.2, .9, .3, 1.1) both;
+}
+
+.in-name .in-line::before,
+.in-name .in-line::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    opacity: 0.8;
+}
+
+.in-name .in-line::before {
+    color: var(--cyan);
+    clip-path: inset(0 0 55% 0);
+    animation: bc-gl1 0.9s 0.2s steps(1) 2;
+}
+
+.in-name .in-line::after {
+    color: var(--pink);
+    clip-path: inset(50% 0 0 0);
+    animation: bc-gl2 0.9s 0.25s steps(1) 2;
+}
+
+.in-name small {
+    margin-top: 0.4em;
+    font-size: 0.85em;
+    font-weight: 700;
+    letter-spacing: 0.36em;
+    color: var(--pink);
+    text-shadow: 0 0 0.6em var(--pink);
+}
+
+.in-name.on small {
+    animation: bc-title 0.8s 0.35s both;
+}
+
+.in-skip {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(var(--safe-bottom) + 0.5em);
+    height: 1.4em;
+    font-family: Rajdhani, system-ui, sans-serif;
+    font-size: 0.82em;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-align: center;
+    color: rgba(233, 244, 255, 0.45);
+}
+
+.in-skip span {
+    position: absolute;
+    inset: 0;
+}
+
+.in-skip .hard {
+    visibility: hidden;
+    color: #fff;
+    text-shadow: 0 0 0.6em var(--cyan);
+    animation: blink 0.8s infinite;
+}
+
+.in-skip.armed .soft {
+    visibility: hidden;
+}
+
+.in-skip.armed .hard {
+    visibility: visible;
+}
+
+/* The logo lands harder when the intro hands over to the title. */
+.logo.slam {
+    animation: logo-slam 0.75s cubic-bezier(.2, .9, .3, 1.25) both;
+}
+
+@keyframes logo-slam {
+    0% { opacity: 0; transform: scale(2.4) skewX(-14deg); filter: blur(10px); }
+    55% { opacity: 1; transform: scale(0.94) skewX(3deg); filter: none; }
+    100% { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .in-cap.signal,
+    .in-name .in-line::before,
+    .in-name .in-line::after {
+        animation: none;
+    }
+}

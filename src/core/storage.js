@@ -24,6 +24,7 @@ const DEFAULTS = {
   kills: 0,
   lastShip: 'vector',
   seenHelp: false,
+  seenIntro: false, // the boot intro plays automatically until it has been seen once
   seenRunInfo: false, // campaign "how a run works" box opens once on its own
   credits: 0,
   rankXp: 0,
