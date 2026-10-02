@@ -29,7 +29,7 @@ export const sectorIntro = {
   start(sys, idx) {
     Object.assign(st, { on: true, t: 0, sys, idx, dropped: false, blurb: null });
     st.stars.length = 0;
-    const n = Math.round(110 * Math.max(0.5, view.quality));
+    const n = Math.round(160 * Math.max(0.5, view.quality));
     for (let i = 0; i < n; i++) st.stars.push({ a: Math.random() * TAU, r: 4 + Math.random() * 60, v: 0.6 + Math.random() * 0.9, w: Math.random() < 0.2 ? 2 : 1 });
     bg.setTheme(sys.id);
     bg.setHue(sys.hue);
@@ -50,7 +50,7 @@ export const sectorIntro = {
     if (!st.on) return false;
     st.t += dt;
     const warp = clamp(st.t / DROP, 0, 1);
-    const speed = 0.5 + 9 * warp * warp;
+    const speed = 0.5 + 14 * warp * warp * warp + 2 * warp;
     for (const s of st.stars) {
       s.r += s.r * s.v * speed * dt + 30 * dt;
       if (s.r > 700) s.r = 4 + Math.random() * 20;
@@ -62,9 +62,11 @@ export const sectorIntro = {
     }
     return false;
   },
-  // Background speed-star boost while warping (bg.update).
+  // Backdrop boost: full rush while warping, then the system's grid decelerates out of the drop.
   boost() {
-    return st.on && st.t < DROP ? 6 : 1;
+    if (!st.on) return 1;
+    if (st.t < DROP) return 9;
+    return 1 + 8 * Math.exp(-2.6 * (st.t - DROP));
   },
   draw(ctx) {
     if (!st.on) return;
@@ -123,7 +125,7 @@ function drawWarp(ctx, W, H, cx, cy, k) {
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H);
   ctx.globalCompositeOperation = 'lighter';
-  const stretch = 0.05 + 0.6 * k * k;
+  const stretch = 0.05 + 1.3 * k * k * k + 0.25 * k;
   for (const w of [1, 2]) {
     ctx.lineWidth = w * 1.2;
     ctx.strokeStyle = w === 1 ? hue(0.75, 80) : 'rgba(255,255,255,0.9)';
