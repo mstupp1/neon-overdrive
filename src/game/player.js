@@ -19,6 +19,7 @@ import { collectRelic } from './collectables.js';
 import { achEvent } from './achievements.js';
 import { CLASSES, activeClass, equippedPassives, passiveById, initPilot, castUlt, boosted, phasing, fortressOn, bloodrush, onEliteKilled, updatePilot, spawnEchoes } from './pilot.js';
 import { cine } from './cinematic.js';
+import { treeForRun, treeOnKill, treeOnDash } from './tree.js';
 
 export const xpFor = (l) => Math.floor(5 + 4.5 * l + 0.9 * l * l);
 
@@ -72,6 +73,7 @@ export function createPlayer(ship, gear = true) {
   };
   const cls = gear ? activeClass() : CLASSES[0];
   initPilot(p, cls, gear ? equippedPassives(cls.id).map((x) => x.id) : []);
+  p.tree = treeForRun(cls.id, gear); // passive tree node ids (tree.js)
   for (const [id, lv] of Object.entries(ship.start)) p.up[id] = lv;
   for (const part of p.parts) for (const [id, lv] of Object.entries(part.start || {})) p.up[id] = Math.max(p.up[id] || 0, lv); // free levels (max-capped by the upgrade pool)
   for (const id of p.passives) for (const [uid, lv] of Object.entries(passiveById(id).start || {})) p.up[uid] = (p.up[uid] || 0) + lv; // Gunsmith / Field Kit
@@ -180,6 +182,7 @@ export function updatePlayer(p, dt) {
     ring(p.x, p.y, 34, p.color, 0.3);
     if (p.up.dashNova) dashNova(p);
     if (st.afterimage) spawnEchoes(p, dx, dy);
+    treeOnDash(p);
   }
   const dashing = p.dashT > 0;
   if (dashing) {
@@ -381,6 +384,7 @@ export function onEnemyKilled(e) {
   addScore(e.score);
   achEvent('kill', e);
   bloodrush(p);
+  treeOnKill(p);
   if (e.elite) onEliteKilled(p);
   gainOverdrive(e.elite ? 10 : e.type === 'swarm' ? 0.8 : 1.6);
   if (p.st.leech && !p.dead && ++p.leechN >= p.st.leech) {
@@ -450,7 +454,7 @@ export function hurtPlayer(p) {
   if (p.hp <= 0) {
     killPlayer(p);
   } else {
-    p.iframes = 1.8;
+    p.iframes = 1.8 * p.st.hitIfr;
   }
 }
 

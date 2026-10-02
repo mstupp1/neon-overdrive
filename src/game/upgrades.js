@@ -8,6 +8,7 @@ import { applyPassives, resetPilotStats } from './pilot.js';
 import { STATS, rollMods, itemLevel } from './parts.js';
 import { RARITY, rollRarity } from './rarity.js';
 import { profile, saveProfile } from '../core/storage.js';
+import { applyTree } from './tree.js';
 
 export const MAX_MODULES = 4;
 
@@ -231,6 +232,7 @@ export function recomputeStats(p) {
   for (const [stat, v] of p.runMods || []) STATS[stat].apply(st, v); // bonus modifiers from rare level-up cards
   applyParts(st, p);
   applyPassives(st, p);
+  applyTree(st, p);
   st.maxHp = Math.max(1, st.maxHp);
   p.maxHp = st.maxHp;
   p.maxCharges = st.maxCharges;

@@ -39,6 +39,7 @@ const DEFAULTS = {
   paint: {}, // shipId → palette index
   paintsOwned: {}, // shipId → [owned palette indices] (0 = stock, always owned)
   pilot: { cls: 'striker', passives: {}, classes: ['striker'], found: ['killstreak'], pity: 0 }, // passives: cls → [ids]; classes / found: discovered classes and abilities (pilot.js)
+  tree: {}, // passive tree (game/tree.js): cls → [allocated node ids]
   relics: [], // owned relic ids (collectables.js)
   relicNew: [], // owned but not yet seen in the gallery
   ach: {}, // achievement id → unlock timestamp
@@ -110,6 +111,7 @@ function sanitize(p) {
   for (const k of Object.keys(p.paint)) if (!Number.isFinite(p.paint[k])) delete p.paint[k];
   for (const k of Object.keys(p.paintsOwned)) p.paintsOwned[k] = Array.isArray(p.paintsOwned[k]) ? p.paintsOwned[k].filter(Number.isFinite) : [];
   for (const k of Object.keys(p.pilot.passives)) p.pilot.passives[k] = strs(p.pilot.passives[k]);
+  for (const k of Object.keys(p.tree)) p.tree[k] = strs(p.tree[k]); // ids / point budget: tree.sanitizeTrees() on boot
   p.relics = [...new Set(strs(p.relics))];
   p.relicNew = strs(p.relicNew);
   p.tech = [...new Set(strs(p.tech))];

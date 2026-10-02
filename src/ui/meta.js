@@ -14,6 +14,7 @@ import { rankFor, ECON_ICONS } from '../game/economy.js';
 import { CAT_COLORS, ICONS } from '../game/upgrades.js';
 import { SLOT_INFO } from '../game/parts.js';
 import { CLASSES, activeClass } from '../game/pilot.js';
+import { POINTS_PER_RANK } from '../game/tree.js';
 import { choiceBlocked } from '../game/story.js';
 
 const svg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
@@ -224,7 +225,7 @@ export const meta = {
       <div class="rw-rank">
         <span>RANK <b>${rk.rank}</b></span>${bar(rk)}<span class="rw-xp">+${fmt(rw.rankXp)} XP</span>
       </div>
-      ${rw.rankUp ? `<div class="rankup">RANK UP → ${rk.rank}</div>` : ''}
+      ${rw.rankUp ? `<div class="rankup">RANK UP → ${rk.rank} · +${POINTS_PER_RANK * (rk.rank - rw.rankBefore.rank)} TREE POINTS</div>` : ''}
       ${lootLine(rw)}`;
     el.hidden = false;
   },

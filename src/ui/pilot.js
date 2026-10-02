@@ -9,6 +9,7 @@ import { rankFor } from '../game/economy.js';
 import { CLASSES, classById, activeClass, classUnlocked, passiveUnlocked, passiveFound, equippedPassives, setClass, togglePassive, abilitySlots, rarityCap, rankForRarity, nextSlotRank } from '../game/pilot.js';
 import { RARITY } from '../game/rarity.js';
 import { ui, $ } from './screens.js';
+import { treeLabel } from './tree.js';
 
 let viewCls = 'striker'; // class whose details are open (may be a locked one, preview only)
 
@@ -48,6 +49,8 @@ function render() {
   info.style.setProperty('--c', view.color);
   info.classList.toggle('locked', !owned);
   info.innerHTML = `<div class="ci-top"><span class="role">${view.role.toUpperCase()}${owned ? '' : ' · NOT FOUND · DROPS FROM BOSSES'}</span></div><p>${view.desc}</p><div class="ci-ult"><em>ULTIMATE</em><b>${view.ult.name}</b><span>${view.ult.desc}</span></div>`;
+
+  $('#pl-tree').textContent = treeLabel(view.id);
 
   // Abilities: found ones equip into rank-gated slots; rarity above the rank cap stays locked.
   const eq = equippedPassives(view.id).map((x) => x.id);

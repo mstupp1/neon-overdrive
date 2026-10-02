@@ -22,7 +22,9 @@ import { comms } from './ui/comms.js';
 import { meta } from './ui/meta.js';
 import { hangarActs, openHangar, openFab, initHangarUi } from './ui/hangar.js';
 import { coreActs, openCore } from './ui/fluxcore.js';
-import { pilotActs, openPilot } from './ui/pilot.js';
+import { pilotActs, openPilot, showPilot } from './ui/pilot.js';
+import { treeActs, openTree, treeView } from './ui/tree.js';
+import * as passiveTree from './game/tree.js';
 import { galleryActs, openGallery, openAchievements } from './ui/gallery.js';
 import { initToasts, notifyBacklog } from './ui/toasts.js';
 import { achInit, achTick } from './game/achievements.js';
@@ -866,6 +868,11 @@ ui.init({
   pilot: () => openPilot(),
   leavePilot: () => showCampaign(),
   ...pilotActs,
+  tree() {
+    openTree(document.querySelector('#pl-tabs .view')?.dataset.id, () => showPilot('#pl-tree'));
+    tip('tree');
+  },
+  ...treeActs,
   gallery: () => openGallery(() => titleMenu('[data-act=gallery]')),
   achievements: () => openAchievements(() => titleMenu('[data-act=achievements]')),
   ...galleryActs,
@@ -979,7 +986,7 @@ let slowFrames = 0;
 
 function simulating() {
   const s = G.screen;
-  return s === 'play' || s === 'intro' || s === 'gameover' || s === 'title' || s === 'campaign' || s === 'hangar' || s === 'parts' || s === 'fab' || s === 'pilot' || s === 'settings' || s === 'help' || s === 'gallery' || s === 'achievements' || s === 'core';
+  return s === 'play' || s === 'intro' || s === 'gameover' || s === 'title' || s === 'campaign' || s === 'hangar' || s === 'parts' || s === 'fab' || s === 'pilot' || s === 'settings' || s === 'help' || s === 'gallery' || s === 'achievements' || s === 'core' || s === 'tree';
 }
 
 function frame(now) {
@@ -1142,6 +1149,7 @@ function boot() {
   applyAllPaints();
   initGear(); // legacy parts → items
   initPilotProfile(); // legacy saves: classes / abilities their rank had unlocked
+  passiveTree.sanitizeTrees(); // drop unknown / unlinked / over-budget tree nodes from older or edited saves
   bg.init();
   setSfxVolume(profile.settings.sfx);
   initToasts();
@@ -1249,6 +1257,8 @@ window.NEON = {
   // Pilot (return '' on success, else a reason). Classes / passives are rank-gated: grant({rankXp}) first.
   setClass,
   setPassives,
+  // Passive tree (game/tree.js): allocate / refund / resetTree(cls, id) return '' or a reason; openTree(cls) shows it.
+  tree: { ...passiveTree, open: (cls) => openTree(cls, () => showPilot('#pl-tree')), view: treeView },
   campaign: { SYSTEMS, generateRoute, nodeSpec, reachableNodes },
   // opts.nodePick(nodes) → index overrides the default (random fighting node).
   simulate(seconds, pickFn = (choices) => pick(choices), opts = {}) {

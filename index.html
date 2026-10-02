@@ -146,7 +146,21 @@
             <div class="hs-label" id="pl-pass-label">PASSIVES</div>
             <div class="cards still pass-list" id="pl-passives"></div>
             <nav class="menu row">
+                <button class="btn small" data-act="tree" id="pl-tree">PASSIVE TREE</button>
                 <button class="btn ghost small" data-act="leavePilot" id="pl-back">BACK</button>
+            </nav>
+        </section>
+
+        <!-- PASSIVE TREE (per class, opened from PILOT) -->
+        <section class="screen" id="scr-tree" data-back="leaveTree">
+            <h2 class="screen-title">PASSIVE TREE</h2>
+            <div class="cls-tabs tree-tabs" id="tree-tabs"></div>
+            <div class="tree-points" id="tree-points"></div>
+            <button class="tree-view" id="tree-view" data-act="treeView" aria-label="Passive tree"><canvas id="tree-canvas"></canvas><span class="tree-zoom"><i data-zoom="1">+</i><i data-zoom="-1">−</i><i data-zoom="0">⌂</i></span></button>
+            <div class="tree-detail" id="tree-detail"></div>
+            <nav class="menu row">
+                <button class="btn ghost small" data-act="treeReset" id="tree-reset">REFUND ALL</button>
+                <button class="btn ghost small" data-act="leaveTree" id="tree-back">BACK</button>
             </nav>
         </section>
 
