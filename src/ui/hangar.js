@@ -86,7 +86,7 @@ function render() {
   act.setAttribute('aria-disabled', 'false');
   if (!owned) {
     const afford = profile.credits >= ship.price;
-    act.innerHTML = `BUY ${coin}${fmt(ship.price)}`;
+    act.innerHTML = `<span>BUY ${coin}${fmt(ship.price)}</span>`;
     act.setAttribute('aria-disabled', afford ? 'false' : 'true'); // dim but focusable
     act.dataset.mode = 'buy';
     if (!afford) act.innerHTML += `<small>NEED ${fmt(ship.price - profile.credits)}</small>`;

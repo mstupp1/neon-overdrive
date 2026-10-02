@@ -111,6 +111,7 @@ Title PLAY → `scr-campaign` (select system, LAUNCH / HANGAR + PILOT pair / END
 
 - Everything is sized in `em` off `#app`'s font-size (16px x playfield scale); `button { font: inherit }` keeps buttons on that scale too. Keep menu text at 0.72em or larger.
 - Menus never scroll: `ui.show` calls `fit(screen)`, which shrinks the screen's font-size (down to `MIN_FIT` 0.72) until its content fits, and `ui.update` re-checks every 250 ms (content changes, resizes). Scrollbars are hidden as a last resort.
+- Menus never jump: `fit` centres a screen once when it opens, then pins its top (fixed `padding-top`, `justify-content: flex-start`); re-showing the open screen keeps the pin. Lines that appear later (comms continue hint, hangar NEED / unlock lines, class text, passive and draft descriptions) have reserved `min-height`s, so add one for any new conditional line.
 - Look: square (2px) corners and thin neon borders; the focused item brightens its border and glow, and buttons add a sliding arrow. No corner brackets on containers and no `clip-path` cut corners (Myles rejected both).
 - How to Play is tabbed (`data-act="helpTab"`, blocks with matching `data-tab`).
 
