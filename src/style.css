@@ -2813,3 +2813,589 @@ input[type='range']::-moz-range-thumb {
 #draft-cards .card-desc {
     min-height: 2.44em;
 }
+
+/* --- Rarity (rarity.js): Common white, Uncommon green, Rare blue, Epic purple, Legendary orange --------------------
+   Draft cards: a rarity stripe on the left edge, the name in the rarity colour, and a reserved two-line block of
+   bonus modifiers so a reroll never changes the card height. */
+.card.rar::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0.26em;
+    background: var(--rc);
+    box-shadow: 0 0 0.7em var(--rc);
+    pointer-events: none;
+}
+
+.card.rar:not(.r0) .card-name {
+    color: var(--rc);
+    text-shadow: 0 0 0.6em color-mix(in srgb, var(--rc) 60%, transparent);
+}
+
+.card.rar.r3,
+.card.rar.r4 {
+    background: linear-gradient(100deg, color-mix(in srgb, var(--rc) 16%, var(--panel)) 0%, var(--panel) 65%);
+}
+
+.card.rar.r4::before {
+    animation: legend-stripe 1.6s ease-in-out infinite;
+}
+
+@keyframes legend-stripe {
+    50% {
+        box-shadow: 0 0 1.4em var(--rc), 0 0 0.3em #fff;
+    }
+}
+
+.card-rar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.2em 0.7em;
+    margin-top: 0.35em;
+    font-family: Orbitron, sans-serif;
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--rc);
+}
+
+.card-rar span {
+    color: rgba(233, 244, 255, 0.7);
+}
+
+.card-rar .syn {
+    color: var(--t);
+}
+
+.card-mods {
+    min-height: 2.5em;
+    margin-top: 0.15em;
+    font-size: 0.8em;
+    line-height: 1.25;
+    color: var(--rc);
+}
+
+.card-mods i {
+    display: block;
+    font-style: normal;
+}
+
+.card-mods i::before {
+    content: '\203A  ';
+    opacity: 0.6;
+}
+
+/* --- Gear: detail panel, inventory grid, Fabricator (ui/hangar.js) ------------------------------------------------ */
+.gear-detail {
+    --rc: rgba(255, 255, 255, 0.2);
+    position: relative;
+    width: 100%;
+    max-width: 24em;
+    min-height: 11.6em; /* fixed: name + 7 lines + footer, so moving between tiles never shifts the screen */
+    padding: 0.6em 0.8em 1.6em;
+    text-align: left;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--rc) 10%, var(--panel)), var(--panel) 45%);
+    border: 1px solid color-mix(in srgb, var(--rc) 55%, transparent);
+    border-radius: 2px;
+    box-shadow: inset 0 0 1.2em color-mix(in srgb, var(--rc) 10%, transparent);
+}
+
+.gear-detail.legend {
+    animation: legend-panel 1.8s ease-in-out infinite;
+}
+
+@keyframes legend-panel {
+    50% {
+        box-shadow: inset 0 0 1.6em color-mix(in srgb, var(--rc) 22%, transparent), 0 0 1.2em color-mix(in srgb, var(--rc) 35%, transparent);
+    }
+}
+
+.gear-detail.reveal {
+    animation: gear-reveal 0.6s ease-out;
+}
+
+@keyframes gear-reveal {
+    0% {
+        background: color-mix(in srgb, var(--rc) 55%, var(--panel));
+        box-shadow: 0 0 2.4em var(--rc);
+    }
+}
+
+.gd-empty {
+    margin: 2.5em 0.5em 0;
+    text-align: center;
+    color: var(--dim);
+    font-size: 0.9em;
+}
+
+.gd-head {
+    display: grid;
+    grid-template-columns: 2.4em 1fr auto;
+    gap: 0.6em;
+    align-items: center;
+}
+
+.gd-ico {
+    width: 2.4em;
+    height: 2.4em;
+    padding: 0.45em;
+    color: var(--rc);
+    border: 1px solid var(--rc);
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--rc) 12%, transparent);
+    filter: drop-shadow(0 0 0.3em var(--rc));
+}
+
+.gd-ico svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.gd-title b {
+    display: block;
+    font-family: Orbitron, sans-serif;
+    font-size: 0.95em;
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 0.6em currentColor;
+}
+
+.gd-title em {
+    display: block;
+    font-style: normal;
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: var(--dim);
+}
+
+.gd-state {
+    font-family: Orbitron, sans-serif;
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--green);
+}
+
+.gd-lines {
+    margin: 0.45em 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.82em;
+    line-height: 1.28;
+}
+
+.gd-lines li {
+    position: relative;
+    padding-left: 0.95em;
+}
+
+.gd-lines li::before {
+    content: '';
+    position: absolute;
+    left: 0.1em;
+    top: 0.5em;
+    width: 0.38em;
+    height: 0.38em;
+    background: currentColor;
+}
+
+.gd-lines .base {
+    color: #fff;
+}
+
+.gd-lines .drawback {
+    color: #ff8fa3;
+}
+
+.gd-lines .unique {
+    color: #ffb44d;
+    font-weight: 700;
+}
+
+.gd-lines .mod {
+    color: color-mix(in srgb, var(--rc) 55%, #fff);
+}
+
+.gd-lines .mod::before {
+    background: var(--t);
+    box-shadow: 0 0 0.3em var(--t);
+}
+
+.gd-foot {
+    position: absolute;
+    left: 0.8em;
+    right: 0.8em;
+    bottom: 0.4em;
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+}
+
+.gd-tags {
+    display: flex;
+    gap: 0.4em;
+}
+
+.gd-tags span {
+    color: var(--t);
+}
+
+.gd-cmp {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--dim);
+}
+
+.gd-sell {
+    margin-left: auto;
+    color: #ffd24a;
+    white-space: nowrap;
+}
+
+.gd-hint {
+    position: absolute;
+    right: 0.8em;
+    top: -0.62em;
+    padding: 0.15em 0.5em;
+    font-family: Orbitron, sans-serif;
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--rc);
+    background: var(--bg);
+    border: 1px solid color-mix(in srgb, var(--rc) 55%, transparent);
+}
+
+.gd-hint:empty {
+    display: none;
+}
+
+.gd-sell .coin,
+.fab-rolls .coin,
+#parts-sell .coin {
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.12em;
+}
+
+.inv-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5em;
+    width: 100%;
+    max-width: 24em;
+}
+
+.inv-tile {
+    --rc: rgba(255, 255, 255, 0.25);
+    position: relative;
+    aspect-ratio: 1;
+    padding: 0.9em;
+    color: var(--rc);
+    background: color-mix(in srgb, var(--rc) 9%, var(--panel));
+    border: 1px solid color-mix(in srgb, var(--rc) 60%, transparent);
+    border-radius: 2px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+}
+
+.inv-tile svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 0.35em var(--rc));
+}
+
+.inv-tile.empty {
+    border-style: dashed;
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(8, 6, 24, 0.5);
+    cursor: default;
+}
+
+.inv-tile.r4 {
+    box-shadow: inset 0 0 1em color-mix(in srgb, var(--rc) 30%, transparent);
+}
+
+.inv-tile.on {
+    border-width: 2px;
+    border-color: var(--rc);
+}
+
+.inv-tile:focus-visible,
+.inv-tile.focus,
+.inv-tile:hover {
+    border-color: #fff;
+    box-shadow: 0 0 1.2em color-mix(in srgb, var(--rc) 70%, transparent), inset 0 0 1em color-mix(in srgb, var(--rc) 25%, transparent);
+    transform: scale(1.04);
+}
+
+.inv-tile i {
+    position: absolute;
+    font-style: normal;
+    font-family: Orbitron, sans-serif;
+    font-size: 0.72em;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.inv-tile .il {
+    left: 0.35em;
+    bottom: 0.3em;
+    color: var(--dim);
+}
+
+.inv-tile .eqm {
+    right: 0.3em;
+    top: 0.3em;
+    padding: 0.12em 0.3em;
+    color: #05030d;
+    background: var(--rc);
+}
+
+.inv-tile .nw {
+    right: 0.25em;
+    top: 0.3em;
+    color: #fff;
+    text-shadow: 0 0 0.5em #fff;
+}
+
+.btn.warn {
+    color: #fff;
+    border-color: var(--red);
+    box-shadow: 0 0 1em color-mix(in srgb, var(--red) 50%, transparent);
+}
+
+.btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.fab-odds {
+    width: 100%;
+    max-width: 24em;
+    padding: 0.5em 0.7em;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+}
+
+.fo-row {
+    display: grid;
+    grid-template-columns: 5.2em repeat(5, minmax(0, 1fr));
+    gap: 0.3em;
+    align-items: baseline;
+    font-size: 0.8em;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-align: center;
+}
+
+.fo-row span {
+    text-align: left;
+    color: var(--dim);
+    letter-spacing: 0.12em;
+}
+
+.fo-row i {
+    font-style: normal;
+    font-family: Orbitron, sans-serif;
+    color: #fff;
+}
+
+.fo-head b {
+    font-family: Orbitron, sans-serif;
+    font-size: 0.9em;
+    letter-spacing: 0.08em;
+}
+
+.fo-note {
+    margin-top: 0.3em;
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: var(--dim);
+    text-align: center;
+}
+
+.fab-slots {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5em;
+    width: 100%;
+    max-width: 24em;
+}
+
+.fab-slot {
+    --c: var(--cyan);
+    padding: 0.55em 0.4em;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--panel);
+    border: 1px solid color-mix(in srgb, var(--c) 30%, transparent);
+    border-radius: 2px;
+    cursor: pointer;
+    outline: none;
+}
+
+.fab-slot b {
+    display: block;
+    font-family: Orbitron, sans-serif;
+    font-size: 0.85em;
+    letter-spacing: 0.1em;
+    color: var(--c);
+}
+
+.fab-slot i {
+    font-style: normal;
+    font-size: 0.78em;
+    font-weight: 700;
+    color: var(--dim);
+}
+
+.fab-slot.on {
+    background: color-mix(in srgb, var(--c) 16%, var(--panel));
+    border-color: var(--c);
+}
+
+.fab-slot.focus,
+.fab-slot:hover,
+.fab-slot:focus-visible {
+    border-color: var(--c);
+    box-shadow: 0 0 1.2em color-mix(in srgb, var(--c) 45%, transparent);
+}
+
+.fab-rolls .btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15em;
+    min-width: 9.5em;
+    padding: 0.7em 1em;
+}
+
+.fab-rolls .btn small {
+    font-size: 0.72em;
+    letter-spacing: 0.12em;
+    color: #4d9dff;
+}
+
+.fab-rolls .btn.prem {
+    border-color: rgba(196, 91, 255, 0.8);
+    box-shadow: 0 0 0.9em rgba(196, 91, 255, 0.3), inset 0 0 1.4em rgba(196, 91, 255, 0.18);
+    background: linear-gradient(180deg, rgba(196, 91, 255, 0.24), rgba(196, 91, 255, 0.06) 55%, rgba(196, 91, 255, 0.16));
+}
+
+.fab-rolls .cost {
+    color: #ffd24a;
+}
+
+.hs-paths {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.3em 0.9em;
+    width: 100%;
+    max-width: 24em;
+    min-height: 1.3em;
+    font-size: 0.78em;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+}
+
+.hs-paths span {
+    color: var(--t);
+}
+
+.hs-paths b {
+    margin-left: 0.35em;
+    font-family: Orbitron, sans-serif;
+    color: #fff;
+}
+
+.hs-paths em {
+    font-style: normal;
+    color: var(--dim);
+}
+
+.hs-path {
+    margin-left: 0.6em;
+    color: var(--t);
+}
+
+.hs-trait {
+    color: #ffd24a !important;
+}
+
+.slot-go .newdot {
+    margin-right: 0.4em;
+    font-style: normal;
+    font-family: Orbitron, sans-serif;
+    font-size: 0.55em;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    vertical-align: 0.35em;
+    color: #fff;
+    text-shadow: 0 0 0.5em #fff;
+}
+
+/* Pilot abilities: rarity label + stripe (shared .card.rar), unfound ones are dim. */
+.card.pass .card-top {
+    flex-wrap: wrap;
+    gap: 0.1em 0.45em;
+}
+
+.pass-rar {
+    font-family: Orbitron, sans-serif;
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--rc);
+}
+
+.card.pass.unfound .card-name,
+.card.pass.unfound .card-desc {
+    opacity: 0.55;
+}
+
+#pl-pass-label b {
+    font-weight: 700;
+}
+
+.rw-loot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2em;
+    margin-top: 0.4em;
+    font-size: 0.8em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--dim);
+    text-align: center;
+}
+
+.rw-loot b {
+    font-family: Orbitron, sans-serif;
+    font-size: 0.95em;
+    letter-spacing: 0.04em;
+}
+
+.rw-found {
+    color: #fff;
+}
+
+.hs-stats div {
+    min-height: 1.25em;
+}

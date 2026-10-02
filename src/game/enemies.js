@@ -8,6 +8,7 @@ import { explosion, sparks, damageNumber, addShake, floatText, hitstop } from '.
 import { dropXp, dropPickup } from './pickups.js';
 import { dropKillCredits } from './economy.js';
 import { rollRelicDrop } from './collectables.js';
+import { rollGearDrop } from './loot.js';
 import { sfx } from '../core/audio.js';
 import { onEnemyKilled } from './player.js';
 import { onEliteKilled } from './pilot.js';
@@ -664,6 +665,7 @@ export function killEnemy(e, silent = false) {
   dropXp(e.x, e.y, Math.max(1, Math.round(e.xp * d.xp)));
   dropKillCredits(e);
   rollRelicDrop(e);
+  rollGearDrop(e);
   if (e.hunter) {
     dropPickup(e.x - 10, e.y, 'heart');
     dropPickup(e.x + 10, e.y, chance(0.5) ? 'magnet' : 'cell');

@@ -114,7 +114,9 @@
             <div class="paints" id="hs-paints"></div>
             <div class="hs-label">LOADOUT</div>
             <div class="hs-stats" id="hs-stats"></div>
+            <div class="hs-paths" id="hs-paths"></div>
             <nav class="menu row">
+                <button class="btn small" data-act="hfab" id="hs-fab">FABRICATOR</button>
                 <button class="btn ghost small" data-act="leaveHangar" id="hs-back">BACK</button>
             </nav>
         </section>
@@ -148,9 +150,33 @@
             <h2 class="screen-title" id="parts-title">CORE</h2>
             <p class="screen-sub" id="parts-sub"></p>
             <div class="pilot-line" id="parts-credits"></div>
-            <div class="cards still" id="parts-list"></div>
+            <div class="gear-detail" id="parts-detail"></div>
+            <div class="inv-grid" id="parts-list"></div>
             <nav class="menu row">
+                <button class="btn small" data-act="gsell" id="parts-sell">SELL</button>
+                <button class="btn small" data-act="gjunk" id="parts-junk">SELL JUNK</button>
+            </nav>
+            <nav class="menu row">
+                <button class="btn small" data-act="gfab" id="parts-fab">FABRICATOR</button>
                 <button class="btn ghost small" data-act="partsBack" id="parts-back">BACK</button>
+            </nav>
+        </section>
+
+        <!-- FABRICATOR (roll new gear) -->
+        <section class="screen" id="scr-fab" data-back="fabBack">
+            <h2 class="screen-title">FABRICATOR</h2>
+            <p class="screen-sub">Roll new gear. The odds climb the further you fly and the higher your Overdrive tier.</p>
+            <div class="pilot-line" id="fab-credits"></div>
+            <div class="fab-odds" id="fab-odds"></div>
+            <div class="fab-slots" id="fab-slots"></div>
+            <nav class="menu row fab-rolls">
+                <button class="btn primary" data-act="froll" data-kind="standard"><span>ROLL</span><span class="cost"></span></button>
+                <button class="btn primary prem" data-act="froll" data-kind="premium"><span>PREMIUM</span><span class="cost"></span><small>RARE OR BETTER</small></button>
+            </nav>
+            <div class="gear-detail" id="fab-result"></div>
+            <nav class="menu row">
+                <button class="btn small" data-act="finv" id="fab-inv">INVENTORY</button>
+                <button class="btn ghost small" data-act="fabBack" id="fab-back">BACK</button>
             </nav>
         </section>
 
@@ -313,7 +339,7 @@
                         <li>Your ship fires automatically. Only the <b>white core</b> can be hit.</li>
                         <li><b>Dash</b> through danger — you're untouchable mid-dash.</li>
                         <li><b>Graze</b> bullets and chain kills to charge your <b class="pink">Ultimate</b>. Your pilot class replaces Overdrive: <b>Striker</b> erases every bullet and doubles fire and damage, <b>Engineer</b> raises a bullet-eating dome with extra wingmen, <b>Ghost</b> slows time around you and turns grazes into strikes. All of them double your score.</li>
-                        <li>Pick your class and two passives on the <b>Pilot</b> screen of the campaign map. Pilot Rank unlocks more.</li>
+                        <li>Classes and abilities are <b>found</b>: bosses and the Hunter drop them, and every Pilot Rank hands you one. Your rank sets how many abilities you can equip on the <b>Pilot</b> screen, and how rare.</li>
                         <li>Collect <b class="cyan">data shards</b> to level up and draft upgrades. Build around up to 4 weapon modules.</li>
                         <li>Clear sectors for bonus picks. Every third sector hides a boss.</li>
                     </ul>
@@ -322,7 +348,8 @@
                     <h3>Campaign</h3>
                     <ul>
                         <li>Pick a star system, then jump along a <b>route</b>: combat, elite, <b class="gold">market</b>, <b class="green">dock</b>, <b class="violet">anomaly</b>, then the boss.</li>
-                        <li>You earn <b class="gold">credits</b> in a run. Extract after the boss to bank them all; die and keep half. Spend them in the <b>Hangar</b> on ships, gear and paint.</li>
+                        <li>You earn <b class="gold">credits</b> in a run. Extract after the boss to bank them all; die and keep half. Spend them in the <b>Hangar</b> on ships and paint, or roll gear in the <b>Fabricator</b>.</li>
+                        <li>Upgrade cards and gear roll a rarity: <b style="color:#d9dee8">Common</b>, <b style="color:#5dff6a">Uncommon</b>, <b style="color:#4d9dff">Rare</b>, <b style="color:#c45bff">Epic</b>, <b style="color:#ff9a1f">Legendary</b>. Deeper systems and higher Overdrive tiers roll rarer. Bosses always drop gear, and you keep every piece you find.</li>
                         <li>Systems 2-4 open with a <b class="gold">Supply Drop</b>: free upgrade picks before the first jump.</li>
                         <li>Anomalies are risk-for-reward choices. Black Market and Docks heal and upgrade mid-run.</li>
                         <li>Deeper systems add new tech to the draft. <b>NEW DISCOVERY</b> marks one you have never seen, and from then on it can turn up in any system. <b class="cyan">NEW THIS RUN</b> marks one you know but don't own yet.</li>
