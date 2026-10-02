@@ -318,6 +318,14 @@ function fit(el, keep = false) {
     el.style.fontSize = `${k}em`;
   }
   pin(el);
+  // Pinning can add a pixel or two of padding to a screen that only just fit: shrink a hair more so it can't scroll.
+  if (el.scrollHeight > el.clientHeight && k < 1 && k > MIN_FIT) {
+    k = Math.max(MIN_FIT, k * 0.99);
+    el.style.fontSize = `${k}em`;
+    el.style.justifyContent = '';
+    el.style.paddingTop = '';
+    pin(el);
+  }
   el._fitH = el.clientHeight;
   el._fitW = el.clientWidth;
 }

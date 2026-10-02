@@ -12,6 +12,7 @@ import { ui, $ } from './screens.js';
 import { treeLabel } from './tree.js';
 
 let viewCls = 'striker'; // class whose details are open (may be a locked one, preview only)
+let detailId = null; // ability shown in the detail panel
 
 const lockSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>';
 const fmt = (n) => Math.floor(n).toLocaleString();
@@ -61,16 +62,46 @@ function render() {
   $('#pl-pass-label').innerHTML = `ABILITIES ${eq.length}/${slots} · UP TO <b style="color:${RARITY[cap].color}">${RARITY[cap].name}</b>${nextTxt}`;
   const wrap = $('#pl-passives');
   wrap.style.setProperty('--c', view.color);
-  wrap.innerHTML = [...view.passives].sort((a, b) => a.r - b.r).map((ps) => {
-    const found = passiveFound(ps);
+  const list = [...view.passives].sort((a, b) => a.r - b.r);
+  if (!list.some((ps) => ps.id === detailId)) detailId = (list.find((ps) => eq.includes(ps.id)) || list[0]).id;
+  wrap.innerHTML = list.map((ps) => {
     const open = passiveUnlocked(view, ps);
     const on = eq.includes(ps.id);
-    const rc = RARITY[ps.r].color;
-    const tag = on ? '<span class="card-tag">ON</span>' : '';
-    const lock = !owned ? 'CLASS' : !found ? 'NOT FOUND' : `RANK ${rankForRarity(ps.r)}`;
-    const right = open ? `<b class="eq${on ? ' tick' : ''}">${on ? '✓' : 'EQUIP'}</b>` : `<span class="lk">${lockSvg}</span><i>${lock}</i>`;
-    return `<button class="card offer pass rar r${ps.r}${on ? ' on' : ''}${open ? '' : ' locked'}${found ? '' : ' unfound'}" data-act="ppass" data-id="${ps.id}" style="--c:${view.color};--rc:${rc}" aria-pressed="${on}"><div class="card-icon">${ps.icon}</div><div><div class="card-top"><span class="card-name">${ps.name}</span><span class="pass-rar">${RARITY[ps.r].name}</span>${tag}</div><div class="card-desc">${ps.desc}</div></div><div class="price${open ? (on ? ' own' : '') : ' dim'}">${right}</div></button>`;
+    const mark = on ? '<b class="ab-mark">✓</b>' : open ? '' : `<span class="ab-mark lk">${lockSvg}</span>`;
+    return `<button class="ab-tile r${ps.r}${on ? ' on' : ''}${open ? '' : ' locked'}${passiveFound(ps) ? '' : ' unfound'}" data-act="ppass" data-id="${ps.id}" style="--rc:${RARITY[ps.r].color}" aria-pressed="${on}"><span class="ab-icon">${ps.icon}</span><span class="ab-name">${ps.name}</span>${mark}</button>`;
   }).join('');
+  renderDetail();
+}
+
+// The focused ability's text, rarity and state, in one fixed-height panel (moving between tiles never shifts the screen).
+function renderDetail() {
+  const view = classById(viewCls);
+  const ps = view.passives.find((x) => x.id === detailId);
+  const el = $('#pl-detail');
+  if (!ps) {
+    el.innerHTML = '';
+    return;
+  }
+  const owned = classUnlocked(view);
+  const open = passiveUnlocked(view, ps);
+  const on = equippedPassives(view.id).some((x) => x.id === ps.id);
+  const state = on ? '<b class="ok">EQUIPPED · SELECT TO REMOVE</b>' : open ? '<b>SELECT TO EQUIP</b>'
+    : !owned ? '<i>FIND THIS CLASS FIRST</i>' : !passiveFound(ps) ? '<i>NOT FOUND · DROPS FROM BOSSES AND RANK-UPS</i>' : `<i>NEEDS RANK ${rankForRarity(ps.r)}</i>`;
+  el.style.setProperty('--rc', RARITY[ps.r].color);
+  el.innerHTML = `<div class="ad-top"><span class="ad-name">${ps.name}</span><span class="pass-rar">${RARITY[ps.r].name}</span></div><p>${ps.desc}</p><div class="ad-state">${state}</div>`;
+}
+
+// Tile focus (keys / pad / hover) picks what the detail panel shows.
+function onTileFocus(e) {
+  const t = e.target.closest && e.target.closest('.ab-tile');
+  if (!t || t.dataset.id === detailId) return;
+  detailId = t.dataset.id;
+  renderDetail();
+}
+
+export function initPilotUi() {
+  $('#pl-passives').addEventListener('menufocus', onTileFocus);
+  $('#pl-passives').addEventListener('pointerover', onTileFocus);
 }
 
 function focusEl(sel) {
@@ -105,6 +136,7 @@ export const pilotActs = {
     const id = btn.dataset.id;
     const err = togglePassive(viewCls, id);
     if (err) sfx.ui();
-    showPilot(`.card[data-id="${id}"]`);
+    detailId = id;
+    showPilot(`.ab-tile[data-id="${id}"]`);
   },
 };
