@@ -4,26 +4,27 @@ import { MODIFIERS } from './modifiers.js';
 import { mulberry32 } from '../core/math.js';
 
 // level = difficulty at route row 0; each row adds `step` (boss row ≈ level + rows*step). dur = fighting sector seconds;
-// bossHp multiplies the boss's base HP (campaign bosses are tuned per system, endless keeps the base);
+// bossHp multiplies the boss's base HP (campaign bosses are tuned per system, the debug sandbox keeps the base);
 // supply = free upgrade drafts at system start (a fresh ship at row 0 of a late system would otherwise be hopelessly outgunned);
 // warm = level eased off per row short of row 2 (default WARM).
-// Genesis follows the endless opening (row 0 ≈ endless sector 1, boss row ≈ sector 5-6): a fresh ship with no supply
-// drop starts here, so its waves must be thin and quick to kill.
+// One run flies all four systems with one build, so levels form one continuous climb: Genesis opens like the old endless
+// sector 1 and each system starts where the previous boss row left off. Boss HP is set so boss fights last about a minute
+// for a build that has kept pace (bot sims).
 export const SYSTEMS = [
   {
     id: 'genesis', name: 'NEON GENESIS', short: 'GENESIS', act: 1, hue: 215, level: 1, step: 0.9, warm: 0, rows: 5, dur: 46, bossHp: 1.3, supply: 0, pay: 0.8, boss: 'warden',
     blurb: 'The Grid\'s outer lattice. A siege mech guards the gate.',
   },
   {
-    id: 'crimson', name: 'CRIMSON TIDE', short: 'CRIMSON', act: 2, hue: 345, level: 7.6, step: 1.2, rows: 5, dur: 54, bossHp: 1, supply: 3, pay: 0.64, boss: 'hydra',
+    id: 'crimson', name: 'CRIMSON TIDE', short: 'CRIMSON', act: 2, hue: 345, level: 6, step: 0.6, warm: 0, rows: 5, dur: 46, bossHp: 1, supply: 0, pay: 0.64, boss: 'hydra',
     blurb: 'Bio-corrupted sectors. Something huge is breeding in the dark.',
   },
   {
-    id: 'cyclone', name: 'CYAN CYCLONE', short: 'CYCLONE', act: 3, hue: 185, level: 11, step: 1.2, rows: 6, dur: 54, bossHp: 0.5, supply: 4, pay: 0.68, boss: 'omega',
+    id: 'cyclone', name: 'CYAN CYCLONE', short: 'CYCLONE', act: 3, hue: 185, level: 9.4, step: 0.6, warm: 0, rows: 6, dur: 46, bossHp: 1, supply: 0, pay: 0.68, boss: 'omega',
     blurb: 'Storm-lit data winds. The core intelligence waits at the eye.',
   },
   {
-    id: 'void', name: 'THE VOID', short: 'VOID', act: 4, hue: 275, level: 12, step: 1.2, rows: 6, dur: 54, bossHp: 0.22, supply: 4, pay: 0.82, boss: 'eclipse',
+    id: 'void', name: 'THE VOID', short: 'VOID', act: 4, hue: 275, level: 13.4, step: 0.6, warm: 0, rows: 6, dur: 46, bossHp: 0.9, supply: 0, pay: 0.82, boss: 'eclipse',
     blurb: 'Beyond the Grid. The Signal\'s source. No one has returned.',
   },
 ];
@@ -31,12 +32,6 @@ export const SYSTEMS = [
 const WARM = 0.9; // default `warm`
 
 export const systemById = (id) => SYSTEMS.find((s) => s.id === id) || SYSTEMS[0];
-
-// System n is open once the previous system is cleared; system 1 always.
-export function systemUnlocked(sys, profile) {
-  const i = SYSTEMS.indexOf(sys);
-  return i <= 0 || profile.campaign.cleared.includes(SYSTEMS[i - 1].id);
-}
 
 export const NODE_TYPES = {
   combat: { name: 'COMBAT', color: '#3ff6ff' },

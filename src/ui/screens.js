@@ -5,6 +5,7 @@ import { profile, saveProfile } from '../core/storage.js';
 import { sfx } from '../core/audio.js';
 import { cardInfo, CAT_COLORS, UPGRADES, ICONS } from '../game/upgrades.js';
 import { formatScore, formatTime } from '../core/math.js';
+import { SYSTEMS } from '../game/campaign.js';
 
 export const $ = (sel) => document.querySelector(sel);
 
@@ -137,7 +138,7 @@ export const ui = {
   renderTitle() {
     const r = $('#title-records');
     r.innerHTML = profile.runs
-      ? `<div>BEST<b>${formatScore(profile.best)}</b></div><div>SECTOR<b>${profile.bestSector}</b></div><div>RUNS<b>${profile.runs}</b></div>`
+      ? `<div>BEST<b>${formatScore(profile.best)}</b></div><div>FURTHEST<b>${profile.campaign.bestSys < 0 ? '-' : SYSTEMS[profile.campaign.bestSys].short}</b></div><div>RUNS<b>${profile.runs}</b></div>`
       : '';
     $('#title-hint').textContent = input.isTouchDevice ? 'Tap PLAY to begin' : 'Enter / Space to select';
   },

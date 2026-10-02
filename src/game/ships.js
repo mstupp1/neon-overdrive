@@ -44,7 +44,7 @@ export const SHIPS = [
     dashes: 1,
     start: { aegis: 1 },
     price: 900,
-    unlock: { kind: 'bestSector', n: 5, text: 'Reach Sector 5' },
+    unlock: { kind: 'bestSector', n: 5, text: 'Fight 5 sectors in one run' },
   },
   {
     id: 'phantom',
@@ -59,7 +59,7 @@ export const SHIPS = [
     dashes: 3,
     start: { dashNova: 1, capacitor: 1 },
     price: 1400,
-    unlock: { kind: 'bestSector', n: 8, text: 'Reach Sector 8' },
+    unlock: { kind: 'bestSector', n: 8, text: 'Fight 8 sectors in one run' },
   },
   {
     id: 'corsair',
