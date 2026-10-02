@@ -359,6 +359,34 @@ const hashStr = (s) => {
   return h >>> 0;
 };
 
+// Chaos Rift route stop (not in the anomaly pool): power now, hazards on the next fights (run.riftLeft).
+export const RIFT = {
+  id: 'rift', title: 'CHAOS RIFT', color: '#ff4d6d',
+  text: 'Space tears open into raw Signal static. Ships that dive in come out stronger, and something follows them out.',
+  choices: [
+    {
+      label: 'Dive in', tag: 'RISKY', desc: '+3 random upgrade levels. Your next 2 fights each get a hazard modifier.',
+      effect(c) {
+        const r = grantUpgrades(c, 3);
+        if (c.granted) c.run.riftLeft = (c.run.riftLeft || 0) + 2;
+        return c.granted ? `${r} The rift follows you: the next 2 fights carry hazards.` : r;
+      },
+    },
+    {
+      label: 'Skim the edge', desc: '+1 random upgrade level. Your next fight gets a hazard modifier.',
+      effect(c) {
+        const r = grantUpgrades(c, 1);
+        if (c.granted) c.run.riftLeft = (c.run.riftLeft || 0) + 1;
+        return c.granted ? `${r} Static clings to the hull: the next fight carries a hazard.` : r;
+      },
+    },
+    { label: 'Back away', tag: 'SAFE', desc: 'Leave the rift alone.', effect: () => 'The tear seals behind you.' },
+  ],
+};
+
+// A random hazard for Chaos Rift fights.
+export const riftHazard = (rng = Math.random) => RISKY_MODS[Math.floor(rng() * RISKY_MODS.length)];
+
 // Event for a route node: seeded by the route seed + node id, never repeating within a run until all are used.
 export function eventFor(route, node, used = []) {
   const rng = mulberry32((route.seed ^ hashStr(node.id)) >>> 0);

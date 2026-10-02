@@ -11,7 +11,7 @@ import { drawHud, updateBanner } from './render/hud.js';
 import { SHIPS, shipById, ownsShip, isUnlocked } from './game/ships.js';
 import { createPlayer } from './game/player.js';
 import { createDirector, startSector, nextSector, endlessSpec } from './game/director.js';
-import { rollDraft, applyUpgrade, discover } from './game/upgrades.js';
+import { rollDraft, applyUpgrade, UPGRADES, discover } from './game/upgrades.js';
 import { spawnEnemy, spawnWeavers } from './game/enemies.js';
 import { step, renderWorld } from './game/world.js';
 import { ui } from './ui/screens.js';
@@ -25,11 +25,11 @@ import { achInit, achTick } from './game/achievements.js';
 import { rollRelicDrop } from './game/collectables.js';
 import { setClass, setPassives } from './game/pilot.js';
 import { buyShip, buyPart, equipPart, unequipSlot, setPaint, selectShip, applyAllPaints } from './game/hangar.js';
-import { SYSTEMS, systemById, generateRoute, nodeSpec, reachableNodes, routeNode } from './game/campaign.js';
+import { SYSTEMS, systemById, generateRoute, nodeSpec, reachableNodes, routeNode, REWARDS } from './game/campaign.js';
 import { rand, pick, lerp, easeInOut } from './core/math.js';
 import { ring } from './game/fx.js';
-import { STORY, eventFor, eventById, startEvent, resolveChoice, choiceBlocked } from './game/story.js';
-import { rollMarket, buyOffer, dockRepair, dockReinforce, settleRun, rankFor } from './game/economy.js';
+import { STORY, eventFor, eventById, startEvent, resolveChoice, choiceBlocked, RIFT, riftHazard } from './game/story.js';
+import { rollMarket, buyOffer, dockRepair, dockReinforce, settleRun, rankFor, cachePayout } from './game/economy.js';
 
 const app = document.getElementById('app');
 const canvas = document.getElementById('game');
@@ -53,6 +53,10 @@ let draftChoices = null;
 let marketOffers = null; // current Black Market stock
 let curEvent = null; // open anomaly event session (story.startEvent)
 let bossCardT = 0;
+let draftOnly = null; // category filter for the next 'sector' draft (campaign fight rewards)
+let extraDrafts = 0; // further 'sector' drafts owed (elite fights pay two)
+let draftNote = ''; // extra line for the next draft's subtitle (fight reward / vault haul)
+let curNote = ''; // the open draft's note (kept for rerolls)
 let afterDraft = null; // 'route' | 'extract' | 'next': where to go once the sector reward / level drafts are done
 // Level-up pacing: the world slows into the draft and eases back out of it instead of hard cuts.
 const LEVEL_INTRO = 0.5; // real seconds of slow-down before the level-up draft opens
@@ -98,7 +102,7 @@ function newWorld(mode, shipDef, run = null) {
   G.run = run;
   comms.clear();
   hideBossCard();
-  if (run) Object.assign(run, { wallet: 0, earned: 0, frac: 0, curse: null, ambush: false, bonusXp: 0, events: [] });
+  if (run) Object.assign(run, { wallet: 0, earned: 0, frac: 0, curse: null, ambush: false, riftLeft: 0, bonusXp: 0, events: [] });
   G.time = 0;
   G.runTime = 0;
   G.enemies.length = 0;
@@ -305,6 +309,10 @@ function pickRouteNode(node) {
     r.curse = null;
     if (r.ambush && !spec.boss) spec.elite = true; // Glitched Cache ambush
     r.ambush = false;
+    if (r.riftLeft > 0 && !spec.boss) {
+      spec.modifiers.push(riftHazard()); // Chaos Rift aftermath
+      r.riftLeft--;
+    }
     startSector(spec);
     r.sectors++;
     enterPlay();
@@ -324,8 +332,18 @@ function visitNode(node) {
       break;
     case 'dock':
       G.screen = 'dock';
-      meta.renderDock(G.player);
+      meta.renderDock(G.player, boostChoices(G.player).length > 0);
       ui.show('dock', { lock: 250 });
+      break;
+    case 'vault': {
+      const cr = cachePayout();
+      draftNote = `${cr ? `+${cr} credits in the vault · ` : ''}each pick installs 2 levels`;
+      afterDraft = 'route';
+      openDraft('vault', true);
+      break;
+    }
+    case 'rift':
+      openEvent(RIFT);
       break;
     default:
       openEvent(eventFor(G.run.route, node, G.run.events));
@@ -361,6 +379,11 @@ function buy(btn) {
 }
 
 function dockChoose(btn) {
+  if (btn.dataset.opt === 'overclock') {
+    if (!boostChoices(G.player).length) return;
+    afterDraft = 'route';
+    return openDraft('boost', true);
+  }
   if (btn.dataset.opt === 'repair') dockRepair();
   else dockReinforce();
   sfx.heal();
@@ -436,12 +459,43 @@ function pause() {
   music.setDuck(0.45);
 }
 
+// Owned, non-maxed, non-evolution upgrades (Rest Station overclock / BOOST reward).
+function boostChoices(p) {
+  return UPGRADES.filter((u) => u.cat !== 'evolution' && (p.up[u.id] || 0) > 0 && p.up[u.id] < u.max).map((u) => u.id);
+}
+
+const DRAFT_ONLY = {
+  offense: (u) => u.cat === 'weapon' || u.cat === 'stat',
+  defense: (u) => u.cat === 'defense',
+  module: (u) => u.cat === 'module' || u.cat === 'evolution',
+};
+
+// Choices for a draft of `kind`: level | sector | supply | vault (2 levels per pick) | boost (+1 to an owned upgrade).
+function rollFor(kind) {
+  const p = G.player;
+  if (kind === 'boost') {
+    const ids = boostChoices(p);
+    for (let i = ids.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [ids[i], ids[j]] = [ids[j], ids[i]];
+    }
+    return ids.length ? ids.slice(0, 3) : ['credits'];
+  }
+  if (kind === 'sector' && draftOnly) {
+    const only = rollDraft(p, 'sector', DRAFT_ONLY[draftOnly]);
+    if (only.filter((id) => id !== 'repair' && id !== 'credits').length >= 2) return only; // else the category is spent
+  }
+  return rollDraft(p, kind === 'level' ? 'level' : 'sector');
+}
+
 function openDraft(kind, quiet = false) {
   levelIntro = -1;
   draftKind = kind;
   if (G.run.mode !== 'campaign') G.player.techTier = Math.min(3, Math.floor((G.sector - 1) / 3)); // debug sandbox
-  draftChoices = rollDraft(G.player, kind === 'supply' ? 'sector' : kind);
+  draftChoices = rollFor(kind);
   G.screen = 'draft';
+  curNote = draftNote;
+  draftNote = '';
   showDraftCards(kind);
   // guard: keys already held for flying (or a stray dash) don't drive the menu until released.
   ui.show('draft', { lock: 420, guard: true });
@@ -452,7 +506,7 @@ function openDraft(kind, quiet = false) {
 
 // Renders the draft (cards flag never-seen tech), then records those options as discovered.
 function showDraftCards(kind) {
-  ui.renderDraft(G.player, draftChoices, kind, G.rerolls, pickUpgrade, G.supplyLeft);
+  ui.renderDraft(G.player, draftChoices, kind, G.rerolls, pickUpgrade, G.supplyLeft, curNote);
   if (discover(draftChoices).length) sfx.achieve(true);
 }
 
@@ -474,11 +528,19 @@ function draftTimeScale() {
 }
 
 function pickUpgrade(id) {
-  applyUpgrade(G.player, id, G);
+  const p = G.player;
+  applyUpgrade(p, id, G);
+  // Treasure Vault: each pick is worth two levels (where the upgrade has room).
+  if (draftKind === 'vault' && p.up[id] && p.up[id] < (UPGRADES.find((u) => u.id === id) || {}).max) applyUpgrade(p, id, G);
   if (draftKind === 'level') G.pendingLevels = Math.max(0, G.pendingLevels - 1);
   if (draftKind === 'supply' && --G.supplyLeft > 0) return openDraft('supply');
-  G.player.iframes = Math.max(G.player.iframes, 0.5);
+  p.iframes = Math.max(p.iframes, 0.5);
   if (draftKind === 'sector') {
+    draftOnly = null;
+    if (extraDrafts > 0) {
+      extraDrafts--;
+      return openDraft('sector', true);
+    }
     if (G.run.mode === 'campaign') afterDraft = afterDraft === 'next' ? 'next' : 'route';
     else nextSector();
   }
@@ -517,7 +579,39 @@ function onSectorClear() {
     }
     return;
   }
+  if (G.run.mode === 'campaign') applyFightReward(G.director.spec.reward);
   openDraft('sector');
+}
+
+// The reward a campaign fight showed on the map (campaign.js REWARDS), paid at sector clear around its sector draft.
+function applyFightReward(rw) {
+  const p = G.player;
+  const notes = [];
+  const say = (t) => notes.push(t);
+  draftOnly = rw === 'offense' || rw === 'defense' || rw === 'module' ? rw : null;
+  extraDrafts = rw === 'double' ? 1 : 0;
+  if (rw === 'defense' && p.hp < p.maxHp) {
+    p.hp++;
+    say('repaired 1 hull');
+  }
+  if (rw === 'credits') {
+    const cr = cachePayout();
+    if (cr) say(`+${cr} credit cache`);
+  }
+  if (rw === 'hull') {
+    dockReinforce(p);
+    p.hp = Math.min(p.maxHp, p.hp + 1);
+    say('+1 max hull');
+  }
+  if (rw === 'boost') {
+    const ids = boostChoices(p);
+    if (ids.length) {
+      const id = ids[Math.floor(Math.random() * ids.length)];
+      applyUpgrade(p, id, G);
+      say(`${UPGRADES.find((u) => u.id === id).name} +1 level`);
+    }
+  }
+  if (rw && REWARDS[rw]) draftNote = `${REWARDS[rw].name} reward${notes.length ? ': ' + notes.join(' · ') : ''}`;
 }
 
 function gameOver() {
@@ -636,7 +730,7 @@ ui.init({
   reroll() {
     if (G.rerolls <= 0) return;
     G.rerolls--;
-    draftChoices = rollDraft(G.player, draftKind === 'supply' ? 'sector' : draftKind);
+    draftChoices = rollFor(draftKind);
     showDraftCards(draftKind);
     ui.show('draft', { lock: 200 });
   },
