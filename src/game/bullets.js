@@ -30,6 +30,7 @@ export function playerBullet(x, y, angle, speed, dmg, spr, opts = {}) {
   b.bounce = opts.bounce || 0;
   b.crit = !!opts.crit; // always crits on hit
   b.kind = opts.kind || 'bullet';
+  b.primary = !!opts.primary; // main-gun shot (Splinter Rounds)
   b.alpha = opts.alpha || 0.9;
   b.hits.length = 0;
   b.dead = false;
@@ -152,6 +153,7 @@ export function shoot(x, y, angle, speed, type = 'orb', opts = {}) {
   b.hp = opts.hp || 0;
   b.flash = 0;
   b.grazed = false;
+  b.slowed = false; // Stasis Pulse / Null Field already applied
   b.dead = false;
   b.delay = opts.delay || 0;
   b.curve = opts.curve || 0;

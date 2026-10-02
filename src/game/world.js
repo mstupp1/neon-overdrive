@@ -11,9 +11,9 @@ import { treeOnGraze, forcedCrit } from './tree.js';
 import { updateModules, updateBeams, drawModules, drawBeams } from './modules.js';
 import { updateEnemies, damageEnemy } from './enemies.js';
 import { drawBoss } from './bosses.js';
-import { updatePlayerBullets, updateEnemyBullets, drawPlayerBullets, drawEnemyBullets } from './bullets.js';
+import { updatePlayerBullets, updateEnemyBullets, drawPlayerBullets, drawEnemyBullets, playerBullet } from './bullets.js';
 import { updatePickups, drawPickups } from './pickups.js';
-import { updateParticles, drawParticles, updateTexts, drawTexts, sparks, explosion } from './fx.js';
+import { updateParticles, drawParticles, updateTexts, drawTexts, sparks, explosion, ring } from './fx.js';
 import { sfx } from '../core/audio.js';
 
 export function step(dt) {
@@ -61,6 +61,17 @@ function hitTest(e, x, y, r) {
   return dx * dx + dy * dy < rr * rr;
 }
 
+// Overload Rounds: a crit splashes the enemies around the one it hit.
+function overloadBlast(p, hit, x, y, dmg) {
+  const lv = p.st.overload;
+  const R = 34 + 10 * lv;
+  ring(x, y, R, '#ffe14d', 0.22);
+  for (const o of G.enemies) {
+    if (o === hit || o.dead || !o.entered || o.boss) continue;
+    if (dist2(x, y, o.x, o.y) < (R + o.r) * (R + o.r)) damageEnemy(o, dmg * (0.25 + 0.1 * lv), o.x, o.y);
+  }
+}
+
 function collide(p) {
   const enemies = G.enemies;
   const crit = forcedCrit(p) ? 1 : p.st.crit; // Shadow Strike (tree keystone)
@@ -102,6 +113,12 @@ function collide(p) {
         sparks(b.x, b.y, '#ffffff', 1, 120);
       }
       sparks(b.x, b.y, e.color, isCrit ? 4 : 2, 160, Math.atan2(b.vy, b.vx) + Math.PI, 1.6);
+      if (isCrit && p.st.overload && !b.aoe) overloadBlast(p, e, b.x, b.y, dmg);
+      if (b.primary && p.st.splinter && Math.random() < p.st.splinter && G.pBullets.length < 520) {
+        // Splinter Rounds: two fragments fan out past the target.
+        const a = Math.atan2(b.vy, b.vx);
+        for (const s of [-0.5, 0.5]) playerBullet(b.x, b.y, a + s, 520, b.dmg * 0.45, S.pb_frag, { life: 0.4, r: 4, alpha: 0.9 }).hits.push(e);
+      }
       if (b.aoe) {
         explosion(b.x, b.y, '#ff9e3d', 0.6);
         const r2 = b.aoe * b.aoe;

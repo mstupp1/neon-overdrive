@@ -5,7 +5,7 @@ import { S, glow } from '../render/sprites.js';
 import { TAU, damp, dist2, rand } from '../core/math.js';
 import { playerBullet, nearestEnemy, clearBullets } from './bullets.js';
 import { damageEnemy } from './enemies.js';
-import { ring, sparks } from './fx.js';
+import { ring, sparks, explosion } from './fx.js';
 import { sfx } from '../core/audio.js';
 import { boosted, fortressOn } from './pilot.js';
 
@@ -13,7 +13,10 @@ const lvl = (arr, lv) => arr[Math.min(arr.length, lv) - 1];
 const TEMP_SLOTS = [[-62, 30], [62, 30]];
 
 export function resetModules(p) {
-  p.mod = { missT: 1, arcT: 1.2, novaT: 2, railT: 2, orbA: 0, droneT: 0.2, gravT: 2.5, reflT: 3, flakT: 0.6, wells: [], flaks: [], refl: 0, reflMax: 0 };
+  p.mod = {
+    missT: 1, arcT: 1.2, novaT: 2, railT: 2, orbA: 0, droneT: 0.2, gravT: 2.5, reflT: 3, flakT: 0.6, wells: [], flaks: [], refl: 0, reflMax: 0,
+    mineT: 0.8, mines: [], sawT: 1, saws: [], stasisT: 2, stasisFx: 0, prismT: 0, prism: [], starT: 1.5,
+  };
   p.drones = [];
 }
 
@@ -97,11 +100,12 @@ export function updateModules(p, dt) {
   const fort = fortressOn(p);
   if (up.drones || fort) {
     const lv = up.drones || 3;
-    const nPerm = up.drones ? (lv >= 5 ? 3 : 2) : 0;
+    const phx = evo(p, 'phalanx'); // Phalanx: five drones, faster fire
+    const nPerm = up.drones ? (phx ? 5 : lv >= 5 ? 3 : 2) : 0;
     const n = nPerm + (fort ? 2 : 0);
     while (p.drones.length < n) p.drones.push({ x: p.x, y: p.y + 20, ang: -Math.PI / 2 });
     p.drones.length = n;
-    const slots = nPerm === 3 ? [[-36, 14], [36, 14], [0, 34]] : [[-34, 12], [34, 12]];
+    const slots = nPerm === 5 ? [[-36, 14], [36, 14], [0, 34], [-60, 32], [60, 32]] : nPerm === 3 ? [[-36, 14], [36, 14], [0, 34]] : [[-34, 12], [34, 12]];
     p.drones.forEach((d, i) => {
       const sl = i < nPerm ? slots[i] : TEMP_SLOTS[i - nPerm];
       d.x = damp(d.x, p.x + sl[0], 9, dt);
@@ -109,7 +113,7 @@ export function updateModules(p, dt) {
     });
     m.droneT -= dt * rate;
     if (m.droneT <= 0) {
-      m.droneT = lvl([0.42, 0.36, 0.3, 0.26, 0.22], lv);
+      m.droneT = lvl([0.42, 0.36, 0.3, 0.26, 0.22], lv) * (phx ? 0.75 : 1);
       const dmg = lvl([2.2, 2.6, 3.0, 3.5, 4.0], lv) * dm;
       for (const d of p.drones) {
         let a = -Math.PI / 2;
@@ -164,12 +168,14 @@ export function updateModules(p, dt) {
     m.novaT -= dt * rate;
     if (m.novaT <= 0) {
       m.novaT = lvl([2.3, 1.95, 1.65, 1.4, 1.2], lv);
-      const n = 12 + 3 * lv;
+      const sn = evo(p, 'supernova'); // Supernova: denser rings that pierce deep and wipe bullets around you
+      const n = Math.round((12 + 3 * lv) * (sn ? 1.5 : 1));
       const off = rand(0, TAU);
       for (let i = 0; i < n; i++) {
-        playerBullet(p.x, p.y, off + (i / n) * TAU, 430, (3.4 + 0.9 * lv) * dm, S.pb_nova, { life: 0.8, r: 5, pierce: 1, alpha: 1 });
+        playerBullet(p.x, p.y, off + (i / n) * TAU, 430, (3.4 + 0.9 * lv) * dm * (sn ? 1.25 : 1), S.pb_nova, { life: 0.8, r: 5, pierce: sn ? 4 : 1, alpha: 1 });
       }
-      ring(p.x, p.y, 60, '#ff3df2', 0.35);
+      if (sn) clearBullets(p.x, p.y, 95);
+      ring(p.x, p.y, sn ? 95 : 60, '#ff3df2', 0.35);
       sfx.nova();
     }
   }
@@ -212,7 +218,8 @@ export function updateModules(p, dt) {
         m.gravT = 0.5; // nothing to drag in yet
       } else {
         m.gravT = lvl([7.5, 6.6, 5.8, 5.0, 4.3], lv);
-        wells.push({ x: tx, y: ty, r: lvl([95, 105, 115, 126, 140], lv), life: 2.5, max: 2.5, tick: 0 });
+        const eh = evo(p, 'eventHorizon'); // Event Horizon: huge, long-lived wells that collapse in a blast
+        wells.push({ x: tx, y: ty, r: lvl([95, 105, 115, 126, 140], lv) * (eh ? 1.5 : 1), life: eh ? 4 : 2.5, max: eh ? 4 : 2.5, tick: 0, eh });
         ring(tx, ty, 50, '#b86bff', 0.4);
         sfx.nova();
       }
@@ -260,7 +267,10 @@ export function updateModules(p, dt) {
   }
   if (wells.length) {
     let ww = 0;
-    for (const w of wells) if (w.life > 0) wells[ww++] = w;
+    for (const w of wells) {
+      if (w.life > 0) wells[ww++] = w;
+      else if (w.eh) collapseWell(w, dm);
+    }
     wells.length = ww;
   }
 
@@ -290,11 +300,12 @@ export function updateModules(p, dt) {
         const t = nearestEnemy(b.x, b.y, 1e9);
         const a = t ? Math.atan2(t.y - b.y, t.x - b.x) : -Math.PI / 2;
         playerBullet(b.x, b.y, a, 720, dmg, S.pb_refl, { life: 1.3, r: 4.5, alpha: 1 });
+        if (evo(p, 'mirrorstorm')) for (const s of [-0.25, 0.25]) playerBullet(b.x, b.y, a + s, 720, dmg * 0.7, S.pb_refl, { life: 1.1, r: 4, alpha: 1 }); // Mirror Storm
       }
     } else {
       m.reflT -= dt * rate;
       if (m.reflT <= 0) {
-        m.reflT = lvl([8, 7.2, 6.4, 5.6, 4.8], lv);
+        m.reflT = lvl([8, 7.2, 6.4, 5.6, 4.8], lv) * (evo(p, 'mirrorstorm') ? 0.5 : 1);
         m.refl = m.reflMax = 0.9 + 0.1 * lv;
         ring(p.x, p.y, lvl(REFL_R, lv), '#7fffe6', 0.3);
         sfx.shield();
@@ -349,6 +360,250 @@ export function updateModules(p, dt) {
     }
     m.flaks.length = w;
   }
+
+  updateNewModules(p, dt, rate, dm);
+}
+
+// --- Crimson / Cyclone / Void modules ---------------------------------------------------
+
+const MINE_MAX = 8;
+
+function updateNewModules(p, dt, rate, dm) {
+  const up = p.up;
+  const m = p.mod;
+
+  // Proximity mines: dropped behind the ship, armed after a beat, blow when an enemy gets close.
+  if (up.mines) {
+    const lv = up.mines;
+    m.mineT -= dt * rate;
+    if (m.mineT <= 0) {
+      m.mineT = lvl([1.6, 1.4, 1.25, 1.1, 0.95], lv);
+      if (m.mines.length >= MINE_MAX) m.mines.shift();
+      m.mines.push({ x: p.x + rand(-8, 8), y: p.y + 20, arm: 0.45, life: 9, t: 0 });
+    }
+  }
+  if (m.mines.length) {
+    const lv = up.mines || 1;
+    const R = lvl([58, 64, 70, 78, 86], lv);
+    let w = 0;
+    for (const mn of m.mines) {
+      mn.life -= dt;
+      mn.arm -= dt;
+      mn.t += dt;
+      mn.y += 26 * dt; // drifts down with the scroll
+      let boom = mn.life <= 0;
+      if (!boom && mn.arm <= 0) {
+        for (const e of G.enemies) {
+          if (e.dead || !e.entered || e.untargetable) continue;
+          const rr = 34 + e.r;
+          if (dist2(mn.x, mn.y, e.x, e.y) < rr * rr) { boom = true; break; }
+        }
+      }
+      if (boom) {
+        const dmg = lvl([14, 18, 23, 28, 34], lv) * dm;
+        for (const e of G.enemies) {
+          if (e.dead || !e.entered) continue;
+          if (dist2(mn.x, mn.y, e.x, e.y) < (R + e.r) * (R + e.r)) damageEnemy(e, dmg, e.x, e.y);
+        }
+        explosion(mn.x, mn.y, '#ff6b3d', 0.8);
+        ring(mn.x, mn.y, R, '#ff9e3d', 0.3);
+        sfx.explode(0.7);
+        continue;
+      }
+      if (mn.y < view.H + 20) m.mines[w++] = mn;
+    }
+    m.mines.length = w;
+  }
+
+  // Buzzsaw: thrown at the nearest enemy, carves through everything, then boomerangs home.
+  if (up.saw) {
+    const lv = up.saw;
+    m.sawT -= dt * rate;
+    if (m.sawT <= 0 && m.saws.length < 4) {
+      m.sawT = lvl([2.6, 2.3, 2.1, 1.9, 1.6], lv);
+      const t = nearestEnemy(p.x, p.y, 520 * 520);
+      const base = t ? Math.atan2(t.y - p.y, t.x - p.x) : -Math.PI / 2;
+      const n = lv >= 3 ? 2 : 1;
+      for (let i = 0; i < n; i++) {
+        const a = base + (n > 1 ? (i ? 0.35 : -0.35) : 0);
+        m.saws.push({ x: p.x, y: p.y, vx: Math.cos(a) * 560, vy: Math.sin(a) * 560, out: 0.55, life: 3, rot: 0, size: lvl([1.5, 1.65, 1.8, 1.95, 2.2], lv) });
+      }
+      sfx.dash();
+    }
+  }
+  if (m.saws.length) {
+    const lv = up.saw || 1;
+    const dmg = lvl([6, 7.5, 9, 10.5, 12.5], lv) * dm;
+    let w = 0;
+    for (const sw of m.saws) {
+      sw.life -= dt;
+      sw.rot += dt * 22;
+      if (sw.out > 0) sw.out -= dt;
+      else {
+        // Return leg: steer back to the ship.
+        const dx = p.x - sw.x;
+        const dy = p.y - sw.y;
+        const d = Math.hypot(dx, dy) || 1;
+        sw.vx = damp(sw.vx, (dx / d) * 680, 6, dt);
+        sw.vy = damp(sw.vy, (dy / d) * 680, 6, dt);
+        if (d < 22) continue;
+      }
+      sw.x += sw.vx * dt;
+      sw.y += sw.vy * dt;
+      const hr = 14 * sw.size;
+      for (const e of G.enemies) {
+        if (e.dead || !e.entered) continue;
+        const rr = e.r + hr;
+        if (dist2(sw.x, sw.y, e.x, e.y) < rr * rr && (e.sawCd || 0) <= G.time) {
+          e.sawCd = G.time + 0.22;
+          sparks(sw.x, sw.y, '#ffd24a', 3, 220);
+          damageEnemy(e, dmg, sw.x, sw.y);
+        }
+      }
+      for (const b of G.eBullets) {
+        if (b.dead || b.hp || b.type === 'big') continue;
+        const rr = b.r + hr * 0.7;
+        if (dist2(sw.x, sw.y, b.x, b.y) < rr * rr) b.dead = true;
+      }
+      if (sw.life > 0) m.saws[w++] = sw;
+    }
+    m.saws.length = w;
+  }
+
+  // Stasis pulse: bullets inside the ring crawl at a third of their speed; enemies take a jolt.
+  if (up.stasis) {
+    const lv = up.stasis;
+    m.stasisT -= dt * rate;
+    if (m.stasisT <= 0) {
+      m.stasisT = lvl([6.5, 6, 5.4, 4.9, 4.3], lv);
+      const R = lvl([140, 155, 170, 185, 200], lv);
+      m.stasisFx = 0.5;
+      m.stasisR = R;
+      for (const b of G.eBullets) {
+        if (b.dead || b.slowed || dist2(p.x, p.y, b.x, b.y) > R * R) continue;
+        slowBullet(b, 0.33);
+      }
+      const dmg = lvl([5, 6.5, 8, 9.5, 11], lv) * dm;
+      for (const e of G.enemies) {
+        if (e.dead || !e.entered) continue;
+        if (dist2(p.x, p.y, e.x, e.y) < (R + e.r) * (R + e.r)) damageEnemy(e, dmg, e.x, e.y);
+      }
+      ring(p.x, p.y, R, '#9ffcff', 0.45);
+      sfx.shield();
+    }
+  }
+  if (m.stasisFx > 0) m.stasisFx -= dt;
+
+  // Null field (defense): bullets that come close slow down once.
+  if (p.st.nullR) {
+    const R = p.st.nullR;
+    for (const b of G.eBullets) {
+      if (b.dead || b.slowed || b.delay > 0) continue;
+      const dx = b.x - p.x;
+      const dy = b.y - p.y;
+      if (dx > R || dx < -R || dy > R || dy < -R || dx * dx + dy * dy > R * R) continue;
+      slowBullet(b, 0.55);
+    }
+  }
+
+  // Prism beam: a locked-on beam that burns its targets (splits at level 3 and 5).
+  m.prism.length = 0;
+  if (up.prism) {
+    const lv = up.prism;
+    const reach = lvl([380, 410, 440, 470, 500], lv);
+    const n = lv >= 5 ? 3 : lv >= 3 ? 2 : 1;
+    const taken = new Set();
+    for (let i = 0; i < n; i++) {
+      let best = null;
+      let bd = reach * reach;
+      for (const e of G.enemies) {
+        if (e.dead || !e.entered || e.untargetable || taken.has(e)) continue;
+        const d = dist2(p.x, p.y, e.x, e.y);
+        if (d < bd) { bd = d; best = e; }
+      }
+      if (!best) break;
+      taken.add(best);
+      m.prism.push(best);
+    }
+    m.prismT -= dt;
+    if (m.prismT <= 0 && m.prism.length) {
+      m.prismT = 0.1 / rate;
+      const dmg = lvl([1.5, 1.9, 2.2, 2.6, 3.0], lv) * dm;
+      for (const e of m.prism) {
+        damageEnemy(e, dmg, e.x, e.y);
+        if (Math.random() < 0.3) sparks(e.x, e.y, '#ffffff', 2, 160);
+      }
+    }
+  }
+
+  // Starfall: stars drop from the top of the screen onto enemies and burst.
+  if (up.starfall) {
+    const lv = up.starfall;
+    m.starT -= dt * rate;
+    if (m.starT <= 0) {
+      const live = G.enemies.filter((e) => !e.dead && e.entered && !e.untargetable);
+      if (!live.length) m.starT = 0.4;
+      else {
+        m.starT = lvl([3.4, 3.0, 2.7, 2.4, 2.1], lv);
+        const n = lvl([2, 3, 3, 4, 5], lv);
+        for (let i = 0; i < n && G.pBullets.length < MAX_PBULLETS; i++) {
+          const t = live[Math.floor(Math.random() * live.length)];
+          const sx = t.x + rand(-60, 60);
+          const sy = view.safeTop - 10;
+          playerBullet(sx, sy, Math.atan2(t.y - sy, t.x - sx), 900, lvl([9, 11, 13, 15.5, 18], lv) * dm, S.pb_od, {
+            life: 1.6, r: 9, scale: 1.8, aoe: lvl([50, 56, 62, 68, 76], lv), pierce: 0, alpha: 1,
+          });
+        }
+        sfx.missile();
+      }
+    }
+  }
+}
+
+function slowBullet(b, k) {
+  b.slowed = true;
+  b.vx *= k;
+  b.vy *= k;
+  if (b.maxSpeed) b.maxSpeed *= k;
+  if (b.acc) b.acc *= k;
+  sparks(b.x, b.y, '#9ffcff', 1, 60);
+}
+
+// Event Horizon: the well implodes, crushing whatever it held.
+function collapseWell(w, dm) {
+  const dmg = 30 * dm;
+  for (const e of G.enemies) {
+    if (e.dead || !e.entered) continue;
+    if (dist2(w.x, w.y, e.x, e.y) < (w.r + e.r) * (w.r + e.r)) damageEnemy(e, dmg, e.x, e.y);
+  }
+  clearBullets(w.x, w.y, w.r);
+  explosion(w.x, w.y, '#b86bff', 1.4);
+  ring(w.x, w.y, w.r * 1.2, '#d9a8ff', 0.5);
+  sfx.explode(1.2);
+}
+
+// Static Discharge (stat): a kill arcs into nearby enemies. Arcs never chain off their own kills.
+let discharging = false;
+export function staticDischarge(p, from) {
+  if (discharging || G.mode !== 'run') return;
+  discharging = true;
+  const n = p.st.static;
+  const dmg = (6 + 3 * n) * dmgMul(p);
+  const hit = new Set();
+  for (let i = 0; i < n; i++) {
+    let best = null;
+    let bd = 170 * 170;
+    for (const e of G.enemies) {
+      if (e.dead || !e.entered || e === from || hit.has(e)) continue;
+      const d = dist2(from.x, from.y, e.x, e.y);
+      if (d < bd) { bd = d; best = e; }
+    }
+    if (!best) break;
+    hit.add(best);
+    G.bolts.push({ pts: jagged([from.x, from.y, best.x, best.y]), life: 0.15, max: 0.15 });
+    damageEnemy(best, dmg, best.x, best.y);
+  }
+  discharging = false;
 }
 
 function jagged(pts) {
@@ -569,5 +824,70 @@ function drawGearV2(ctx, k, p) {
     const s = S.flak;
     ctx.drawImage(s.img, f.x - s.half, f.y - s.half, s.size, s.size);
   }
+  // Mines: a blinking core inside a ring (dim until armed).
+  for (const mn of m.mines) {
+    const armed = mn.arm <= 0;
+    const blink = armed ? 0.6 + 0.4 * Math.sin(mn.t * 12) : 0.35;
+    ctx.globalAlpha = blink;
+    ctx.strokeStyle = '#ff9e3d';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(mn.x, mn.y, 7, 0, TAU);
+    ctx.stroke();
+    ctx.fillStyle = armed ? '#ffd0a0' : '#ff9e3d';
+    ctx.fillRect(mn.x - 2, mn.y - 2, 4, 4);
+  }
+  ctx.globalAlpha = 1;
+  // Buzzsaws
+  for (const sw of m.saws) {
+    const s = S.blade;
+    const c = Math.cos(sw.rot) * k;
+    const sn = Math.sin(sw.rot) * k;
+    ctx.setTransform(c, sn, -sn, c, sw.x * k + view.ox, sw.y * k + view.oy);
+    const sz = s.size * sw.size;
+    ctx.drawImage(s.img, -sz / 2, -sz / 2, sz, sz);
+    ctx.rotate(Math.PI / 4);
+    ctx.drawImage(s.img, -sz / 2, -sz / 2, sz, sz);
+  }
+  ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
+  // Prism beam: a white core with a magenta-cyan sheath, flickering.
+  for (const e of m.prism) {
+    if (e.dead) continue;
+    const fl = 0.75 + Math.random() * 0.25;
+    ctx.globalAlpha = 0.35 * fl;
+    ctx.strokeStyle = '#ff3df2';
+    ctx.lineWidth = 7;
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y - 14);
+    ctx.lineTo(e.x, e.y);
+    ctx.stroke();
+    ctx.globalAlpha = 0.8 * fl;
+    ctx.strokeStyle = '#9ffcff';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.globalAlpha = fl;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+  }
+  // Stasis pulse afterglow and the Null Field boundary.
+  if (m.stasisFx > 0) {
+    ctx.globalAlpha = (m.stasisFx / 0.5) * 0.25;
+    ctx.fillStyle = '#9ffcff';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, m.stasisR, 0, TAU);
+    ctx.fill();
+  }
+  if (p.st.nullR) {
+    ctx.globalAlpha = 0.12 + 0.05 * Math.sin(G.time * 3);
+    ctx.strokeStyle = '#9ffcff';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 6]);
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.st.nullR, 0, TAU);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = 'source-over';
 }

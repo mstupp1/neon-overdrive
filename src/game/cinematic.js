@@ -171,7 +171,8 @@ export const cine = {
       const a = trAmount();
       const u = tr.t / TRANSIT;
       const p = G.player;
-      cam.z = 1 + 0.42 * a + 0.08 * Math.sin(u * TAU) * a;
+      const kick = Math.sin(Math.PI * clamp((u - 0.06) / 0.26, 0, 1)); // the lurch as the jet hits speed
+      cam.z = 1 + 0.42 * a + 0.08 * Math.sin(u * TAU) * a + 0.1 * kick;
       cam.rot = 0.16 * Math.sin(u * TAU) * a + 1e-6; // swing one way, then the other
       cam.sy = 1 - 0.12 * a; // low angle: the field squashes toward the horizon
       cam.skew = 0.07 * Math.sin(u * TAU + 1.2) * a;
@@ -211,9 +212,17 @@ export const cine = {
     return 1 - 0.85 * Math.max(this.amount(), trAmount());
   },
 
-  // Backdrop speed (bg.update boost): the transit rushes the stars and the grid.
+  // Backdrop speed (bg.update boost): the transit rushes the stars and the grid; a finisher holds the backdrop nearly
+  // still through the slow-mo and then snaps it back with a surge as the world lets go.
   boost() {
-    return 1 + 6 * trAmount();
+    let b = 1 + 11 * trAmount();
+    if (fin.on && fin.t >= fin.outAt) b = Math.max(b, 1 + 3.5 * Math.sin(Math.PI * clamp((fin.t - fin.outAt) / (fin.def.outT + 0.5), 0, 1)));
+    return b;
+  },
+  // Backdrop clock multiplier (the finisher's slow-mo reaches the sky too).
+  bgScale() {
+    if (!fin.on || fin.t >= fin.outAt) return 1;
+    return Math.max(0.12, this.timeScale());
   },
 
   // Screen-space overlay (logical units, identity camera): vignette on the target, speed lines, letterbox bars.
@@ -268,6 +277,7 @@ export const cine = {
     }
     const ta = trAmount();
     if (ta > 0 && !fin.on) {
+      col = `hsl(${G.director && G.director.spec ? G.director.spec.hue : 200},100%,70%)`;
       // Speed streaks raking past at the camera's roll, and the destination title as a lower third.
       let s = tr.seed + Math.floor(G.realTime * 30);
       const rnd = () => ((s = (s * 16807 + 11) % 2147483647) / 2147483647);
@@ -276,21 +286,41 @@ export const cine = {
       ctx.rotate(-cam.rot * 0.6);
       ctx.globalCompositeOperation = 'lighter';
       ctx.strokeStyle = 'rgba(200,240,255,1)';
-      ctx.globalAlpha = 0.22 * ta;
+      ctx.globalAlpha = 0.26 * ta;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
-      for (let i = 0; i < 26; i++) {
+      for (let i = 0; i < 40; i++) {
         const x = (rnd() - 0.5) * W * 1.3;
         const y = (rnd() - 0.5) * H * 1.3;
-        const len = 60 + rnd() * 160;
+        const len = 90 + rnd() * 280 * ta;
         ctx.moveTo(x, y);
         ctx.lineTo(x, y + len);
       }
       ctx.stroke();
       ctx.restore();
+      // Tunnel rush: streaks bursting outward from the vanishing point ahead of the jet, kept to the edges of the frame.
+      const vx = W / 2;
+      const vy = H * 0.18;
+      const far = Math.hypot(W, H);
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.strokeStyle = col;
+      ctx.globalAlpha = 0.3 * ta;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < 22; i++) {
+        const ang = rnd() * TAU;
+        const r0 = far * (0.32 + rnd() * 0.3);
+        const r1 = r0 + 80 + rnd() * 260 * ta;
+        const c = Math.cos(ang);
+        const sn = Math.sin(ang);
+        ctx.moveTo(vx + c * r0, vy + sn * r0);
+        ctx.lineTo(vx + c * r1, vy + sn * r1);
+      }
+      ctx.stroke();
+      ctx.restore();
       bars = Math.max(bars, 0.075 * ta);
       edge = Math.max(edge, ta);
-      col = `hsl(${G.director && G.director.spec ? G.director.spec.hue : 200},100%,70%)`;
     }
     if (bars > 0.001) {
       const h = bars * H;

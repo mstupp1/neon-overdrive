@@ -138,8 +138,17 @@ Open **PILOT** on the campaign map to pick a class and equip **2 passives**. Ran
 | Gravity Well | A singularity that drags in enemies and bullets |
 | Reflector | A pulsing bubble that burns what it touches and returns enemy bullets |
 | Flak Burst | Slow shells that airburst into fragment rings |
+| Proximity Mines | Mines dropped in your wake blow when enemies come close (Crimson) |
+| Buzzsaw | A saw that carves through enemies and boomerangs back (Cyclone) |
+| Stasis Pulse | Freezes nearby bullets to a crawl and shocks enemies (Cyclone) |
+| Prism Beam | A locked-on beam that burns up to three targets (Void) |
+| Starfall | Stars fall from the top of the screen onto enemies (Void) |
 
-**Evolutions.** Max a module (level 5) while owning its partner stat and a gold **EVOLVE** card can appear in drafts: Swarm Missiles + Targeting AI = **Hellfire Swarm**, Razor Orbit + Thrusters = **Storm Halo**, Arc Coil + Capacitor = **Tesla Storm**, Rail Lance + Phase Rounds = **Annihilator**. Evolutions take no module slot and are never sold in the Black Market.
+**Evolutions.** Max a module (level 5) while owning its partner stat and a gold **EVOLVE** card can appear in drafts: Swarm Missiles + Targeting AI = **Hellfire Swarm**, Razor Orbit + Thrusters = **Storm Halo**, Arc Coil + Capacitor = **Tesla Storm**, Pulse Nova + Plasma Core = **Supernova**, Wingmen + Overclock = **Phalanx**, Rail Lance + Phase Rounds = **Annihilator**, Reflector + Aegis Shield = **Mirror Storm**, Gravity Well + Tractor Field = **Event Horizon**. Evolutions take no module slot and are never sold in the Black Market.
+
+### Tech tiers and discovery
+
+The level-up pool grows as a run goes deeper. Genesis drafts from the core set. Reaching Crimson, Cyclone and the Void each adds a tier of rarer tech (Rail Lance, Reflector, Gravity Well, the new modules above, and perks such as Overload Rounds, Culling Edge, Second Wind, Echo Fire, Static Discharge, Perpetual Engine and Null Field). Seeing an option in any draft, Black Market or smuggler beacon **discovers** it: from then on it can turn up from Genesis in every later run. Cards mark the difference: a white **NEW DISCOVERY** flag and white frame for tech never seen before, and a **NEW THIS RUN** flag for tech you know but don't own in the current run. Saves that had already played keep everything that existed before tiers, so nothing they could draft goes missing.
 
 ### Enemies and bosses
 
@@ -162,7 +171,9 @@ Best score, unlocks, credits, rank, gear and settings persist in `localStorage` 
 
 ## Settings
 
-Music / SFX volume, screen shake, screen flashes, damage numbers, story dialogue, fullscreen, reset progress.
+Music / SFX volume, screen shake, screen flashes, damage numbers, story dialogue, replay intro, fullscreen, reset progress.
+
+The first boot plays a short, skippable in-engine intro (ECHO's squadron falls at the Genesis gate, MAG wakes ECHO, one burst of combat) before the title menu; any key arms the skip, a second press (or Esc) skips.
 
 ## Project layout
 
@@ -187,6 +198,7 @@ src/game/hangar.js    buy / equip ships, parts, paint (pure profile logic)
 src/game/parts.js     12 gear parts
 src/game/ships.js     ships, weapons, paint sets
 src/game/story.js     dialogue and the 10 anomaly events
+src/game/intro.js     skippable boot intro (scripted in-engine cinematic)
 src/game/upgrades.js  upgrade pool, drafts, stat recompute
 src/game/bullets.js, pickups.js, fx.js, world.js, bot.js   projectiles, pickups, particles, step + collisions, autopilot
 src/ui/screens.js     menu navigation, draft cards, results

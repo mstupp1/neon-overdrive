@@ -362,6 +362,7 @@ export const bg = {
   scroll: 0,
   boost: 1,
   stars: [],
+  rush: [], // speed lines: faint at cruise and kept to the side lanes, raking the whole field when boosting
   nebula: [],
   theme: null, // system id (campaign) or null (endless / attract: the classic look)
   dark: 0, // blackout darkness 0..1 (smoothed toward darkTarget)
@@ -379,6 +380,8 @@ export const bg = {
         this.stars.push({ x: rand(0, 1), y: rand(0, 1), speed: L.speed * rand(0.8, 1.2), size: L.size, a: L.a * rand(0.6, 1) });
       }
     }
+    this.rush.length = 0;
+    for (let i = 0; i < 14; i++) this.rush.push({ x: Math.random(), y: Math.random(), v: rand(0.8, 1.25), len: rand(0.6, 1.3) });
     this.nebula = [
       { x: 0.2, y: 0.25, r: 0.9, h: 0, s: 0.004 },
       { x: 0.85, y: 0.6, r: 1.1, h: 50, s: 0.006 },
@@ -419,16 +422,23 @@ export const bg = {
     // Shortest way around the colour wheel.
     const diff = wrapAngle(((this.target - this.hue) * Math.PI) / 180) * (180 / Math.PI);
     this.hue = (this.hue + diff * Math.min(1, dt * 1.5) + 360) % 360;
-    this.boost = damp(this.boost, boost, 3, dt);
+    this.boost = damp(this.boost, boost, boost > this.boost ? 7 : 2.2, dt); // kicks in fast, coasts down
     this.dark = damp(this.dark, this.darkTarget, 2.5, dt);
     this.t += dt;
-    this.scroll += dt * 0.55 * this.boost;
+    this.scroll += dt * 0.78 * this.boost;
     this.updateField(dt);
     for (const s of this.stars) {
       s.y += (s.speed * this.boost * dt) / view.H;
       if (s.y > 1) {
         s.y -= 1;
         s.x = Math.random();
+      }
+    }
+    for (const r of this.rush) {
+      r.y += (r.v * (1.6 + 0.9 * this.boost) * dt);
+      if (r.y > 1.3) {
+        r.y -= 1.5;
+        r.x = Math.random();
       }
     }
   },
@@ -595,12 +605,34 @@ export const bg = {
 
     // Stars (streak when boosting). Tinted toward the sky and kept dim so they read as backdrop, not as pickups.
     ctx.fillStyle = `hsl(${(h + 20) % 360},60%,82%)`;
-    const streak = Math.max(0, this.boost - 1.2) * 14;
+    // Capped and faded at high boost so a fly-through reads as rush, not rain (the speed lines carry the rest).
+    const streak = Math.min(70, Math.max(0, this.boost - 1.2) * 14);
+    const sa = 1 / (1 + 0.07 * Math.max(0, this.boost - 1));
     for (const s of this.stars) {
-      ctx.globalAlpha = s.a;
+      ctx.globalAlpha = s.a * sa;
       const len = s.size + streak * (s.speed / 110);
       ctx.fillRect(s.x * W, s.y * H, s.size, len);
     }
+    // Speed lines. At cruise only the outer lanes carry a few faint ones (the middle stays clean for bullets); boosting
+    // fades them up, stretches them and lets them sweep across the whole field.
+    const b = Math.max(0, this.boost - 1);
+    const lane = Math.min(1, b / 3);
+    const ra = 0.07 + 0.2 * Math.min(1, b / 6);
+    const rl = 46 + 26 * Math.min(b, 10);
+    ctx.strokeStyle = `hsl(${(h + 20) % 360},70%,80%)`;
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = ra;
+    ctx.beginPath();
+    for (const r of this.rush) {
+      // x in 0..1 → the outer 16% each side at cruise, spread over the whole width at speed
+      const side = r.x < 0.5 ? r.x * 2 : (r.x - 0.5) * 2;
+      const w = 0.16 + 0.34 * lane;
+      const x = (r.x < 0.5 ? side * w : 1 - side * w) * W;
+      const y = r.y * H;
+      ctx.moveTo(x, y);
+      ctx.lineTo(x, y - rl * r.len);
+    }
+    ctx.stroke();
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
     if (this.dark > 0.01) {
