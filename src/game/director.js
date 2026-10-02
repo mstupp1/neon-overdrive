@@ -224,6 +224,7 @@ const HUE_SHIFT = [0, 16, -14];
 
 function zoneCount(spec) {
   if (!(G.mode === 'run' && G.run && G.run.mode === 'campaign' && spec.row != null) || spec.boss) return 1;
+  if (spec.zones) return spec.zones; // a node type may set its own count
   return spec.elite || spec.row >= 2 ? 3 : 2;
 }
 
