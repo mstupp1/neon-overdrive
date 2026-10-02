@@ -38,6 +38,7 @@ export const ui = {
         handlers[btn.dataset.act]?.(btn);
       });
       el.addEventListener('pointerover', (e) => {
+        if (guarded) return; // a cursor resting where a new screen's button appears doesn't grab focus
         const items = focusables();
         const t = e.target.closest('button, .set-row');
         const i = items.indexOf(t);

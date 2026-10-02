@@ -256,6 +256,37 @@ body {
     transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s;
 }
 
+/* Route map transitions (main.js routeZoom): the map pulls back out of the node just fought, and dives into the
+   node picked. Centred on that node via --zx / --zy; transforms only, so nothing reflows. */
+#scr-route.zoom-in {
+    transform-origin: var(--zx, 50%) var(--zy, 60%);
+    animation: route-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+#scr-route.zoom-out {
+    transform-origin: var(--zx, 50%) var(--zy, 60%);
+    animation: route-out 0.38s cubic-bezier(0.55, 0, 0.9, 0.4) both;
+}
+
+@keyframes route-in {
+    from { opacity: 0; transform: scale(2.6); }
+    45% { opacity: 1; }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes route-out {
+    from { opacity: 1; transform: none; }
+    70% { opacity: 1; }
+    to { opacity: 0; transform: scale(3.2); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #scr-route.zoom-in,
+    #scr-route.zoom-out {
+        animation-duration: 0.01s;
+    }
+}
+
 #scr-title {
     background: linear-gradient(180deg, rgba(5, 3, 13, 0.25) 0%, rgba(5, 3, 13, 0.55) 55%, rgba(5, 3, 13, 0.8) 100%);
 }

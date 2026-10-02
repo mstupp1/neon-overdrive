@@ -28,7 +28,7 @@ const TIERS = {
 };
 const MAX_WAIT = 6; // real-seconds cap on a boss's death hold
 const START_DUR = 1.25; // node opening settle
-const START_ZOOM = 1.07;
+const START_ZOOM = 1.16; // continues the map's dive into the node
 const START_BARS = 0.06;
 
 const fin = { on: false, tier: null, def: null, t: 0, outAt: 0, target: null, x: 0, y: 0, color: '#ffffff', seed: 0 };
