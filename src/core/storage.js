@@ -24,6 +24,7 @@ const DEFAULTS = {
   kills: 0,
   lastShip: 'vector',
   seenHelp: false,
+  seenRunInfo: false, // campaign "how a run works" box opens once on its own
   credits: 0,
   rankXp: 0,
   campaign: { cleared: [], seenStory: {}, bestSys: -1, bestRow: -1 }, // best*: furthest system index / route row any run reached
