@@ -12,21 +12,23 @@ import { drawHud, updateBanner } from './render/hud.js';
 import { SHIPS, shipById, ownsShip, isUnlocked } from './game/ships.js';
 import { createPlayer } from './game/player.js';
 import { createDirector, startSector, nextSector, endlessSpec } from './game/director.js';
-import { rollDraft, applyUpgrade, UPGRADES, discover } from './game/upgrades.js';
+import { rollDraft, applyUpgrade, UPGRADES, discover, rollCard, applyCard } from './game/upgrades.js';
+import { runLuck, rankUpFinds, dropGear, dropAbility, addGear } from './game/loot.js';
+import { makeItem } from './game/parts.js';
 import { spawnEnemy, spawnWeavers } from './game/enemies.js';
 import { step, renderWorld } from './game/world.js';
 import { ui } from './ui/screens.js';
 import { comms } from './ui/comms.js';
 import { meta } from './ui/meta.js';
-import { hangarActs, openHangar } from './ui/hangar.js';
+import { hangarActs, openHangar, openFab, initHangarUi } from './ui/hangar.js';
 import { coreActs, openCore } from './ui/fluxcore.js';
 import { pilotActs, openPilot } from './ui/pilot.js';
 import { galleryActs, openGallery, openAchievements } from './ui/gallery.js';
 import { initToasts, notifyBacklog } from './ui/toasts.js';
 import { achInit, achTick } from './game/achievements.js';
 import { rollRelicDrop } from './game/collectables.js';
-import { setClass, setPassives } from './game/pilot.js';
-import { buyShip, buyPart, equipPart, unequipSlot, setPaint, selectShip, applyAllPaints } from './game/hangar.js';
+import { setClass, setPassives, initPilotProfile, findClass, findPassive } from './game/pilot.js';
+import { buyShip, equipPart, unequipSlot, setPaint, selectShip, applyAllPaints, rollGear, sellGear, sellJunk, initGear } from './game/hangar.js';
 import { SYSTEMS, systemById, generateRoute, nodeSpec, reachableNodes, routeNode, REWARDS } from './game/campaign.js';
 import { rand, pick, lerp, easeInOut } from './core/math.js';
 import { ring } from './game/fx.js';
@@ -57,6 +59,7 @@ const curShip = () => {
 let settingsReturn = 'title';
 let draftKind = null;
 let draftChoices = null;
+let draftRolls = {}; // card id → rarity roll (upgrades.js rollCard) for the open draft
 let marketOffers = null; // current Black Market stock
 let curEvent = null; // open anomaly event session (story.startEvent)
 let bossCardT = 0;
@@ -116,7 +119,7 @@ function newWorld(mode, shipDef, run = null) {
   cine.clear();
   sectorIntro.stop();
   introDone = null;
-  if (run) Object.assign(run, { wallet: 0, earned: 0, frac: 0, flux: 0, curse: null, ambush: false, riftLeft: 0, bonusXp: 0, events: [] });
+  if (run) Object.assign(run, { wallet: 0, earned: 0, frac: 0, flux: 0, curse: null, ambush: false, riftLeft: 0, bonusXp: 0, events: [], loot: [], found: [] });
   G.time = 0;
   G.runTime = 0;
   G.enemies.length = 0;
@@ -532,6 +535,9 @@ function bankRun() {
   profile.bestCombo = Math.max(profile.bestCombo, G.maxCombo);
   profile.bossKills += G.bossKills;
   const reward = settleRun(!!(G.run && G.run.victory));
+  rankUpFinds(reward.rankBefore.rank, reward.rankAfter.rank); // each rank gained finds an ability (lands in run.found)
+  reward.loot = (G.run && G.run.loot) || [];
+  reward.found = (G.run && G.run.found) || [];
   saveProfile();
   // Legacy unlock conditions still grant ships for free (they join ownedShips).
   const unlocked = SHIPS.filter((s) => s.unlock && isUnlocked(s, profile) && !ownsShip(profile, s));
@@ -593,6 +599,7 @@ function openDraft(kind, quiet = false) {
   draftKind = kind;
   if (G.run.mode !== 'campaign') G.player.techTier = Math.min(3, Math.floor((G.sector - 1) / 3)); // debug sandbox
   draftChoices = rollFor(kind);
+  rollRarities(kind);
   G.screen = 'draft';
   curNote = draftNote;
   draftNote = '';
@@ -606,9 +613,17 @@ function openDraft(kind, quiet = false) {
   if (kind === 'level' || kind === 'sector') tip('draft');
 }
 
+// Card rarities for the open draft (Rest Station boosts stay plain).
+function rollRarities(kind) {
+  draftRolls = {};
+  if (kind === 'boost') return;
+  const luck = runLuck();
+  for (const id of draftChoices) draftRolls[id] = rollCard(G.player, id, luck);
+}
+
 // Renders the draft (cards flag never-seen tech), then records those options as discovered. Returns the new ids.
 function showDraftCards(kind) {
-  ui.renderDraft(G.player, draftChoices, kind, G.rerolls, pickUpgrade, G.supplyLeft, curNote);
+  ui.renderDraft(G.player, draftChoices, kind, G.rerolls, pickUpgrade, G.supplyLeft, curNote, draftRolls);
   const fresh = discover(draftChoices);
   if (fresh.length) sfx.achieve(true);
   return fresh;
@@ -633,7 +648,8 @@ function draftTimeScale() {
 
 function pickUpgrade(id) {
   const p = G.player;
-  applyUpgrade(p, id, G);
+  applyCard(p, id, draftRolls[id], G);
+  draftRolls = {};
   // Treasure Vault: each pick is worth two levels (where the upgrade has room).
   if (draftKind === 'vault' && p.up[id] && p.up[id] < (UPGRADES.find((u) => u.id === id) || {}).max) applyUpgrade(p, id, G);
   if (draftKind === 'level') G.pendingLevels = Math.max(0, G.pendingLevels - 1);
@@ -882,6 +898,7 @@ ui.init({
     if (G.rerolls <= 0) return;
     G.rerolls--;
     draftChoices = rollFor(draftKind);
+    rollRarities(draftKind);
     showDraftCards(draftKind);
     ui.show('draft', { lock: 200 });
   },
@@ -962,7 +979,7 @@ let slowFrames = 0;
 
 function simulating() {
   const s = G.screen;
-  return s === 'play' || s === 'intro' || s === 'gameover' || s === 'title' || s === 'campaign' || s === 'hangar' || s === 'parts' || s === 'pilot' || s === 'settings' || s === 'help' || s === 'gallery' || s === 'achievements' || s === 'core';
+  return s === 'play' || s === 'intro' || s === 'gameover' || s === 'title' || s === 'campaign' || s === 'hangar' || s === 'parts' || s === 'fab' || s === 'pilot' || s === 'settings' || s === 'help' || s === 'gallery' || s === 'achievements' || s === 'core';
 }
 
 function frame(now) {
@@ -1123,9 +1140,12 @@ function boot() {
   buildSprites(SHIPS);
   buildEnemySpritesV2();
   applyAllPaints();
+  initGear(); // legacy parts → items
+  initPilotProfile(); // legacy saves: classes / abilities their rank had unlocked
   bg.init();
   setSfxVolume(profile.settings.sfx);
   initToasts();
+  initHangarUi();
   const past = achInit(); // achievements older saves already earned
   if (past) setTimeout(() => notifyBacklog(past), 1200);
   if (profile.seenIntro) toTitle();
@@ -1209,8 +1229,21 @@ window.NEON = {
   // Debug: drop a relic cache (run only) at x, y (default: above the ship).
   dropRelic: (x = G.player.x, y = G.player.y - 120) => rollRelicDrop({ x, y }, true),
   // Hangar (return '' on success, else a reason). Costs credits; use grant() first in tests.
-  buyShip, buyPart, selectShip,
-  equip: (shipId, partId) => (partId ? equipPart(shipId, partId) : 'NO PART'),
+  buyShip, selectShip,
+  equip: (shipId, uid) => (uid ? equipPart(shipId, uid) : 'NO PART'),
+  // Gear (parts.js / hangar.js / loot.js). rollGear(slot, 'standard'|'premium') spends credits → {item, salvaged} | {err}.
+  rollGear, sellGear, sellJunk,
+  gear: () => profile.gear,
+  giveGear: (slot = 'core', r = 0, il = 1, base = null) => addGear(makeItem(slot, r, il, Math.random, base)).item,
+  dropGear: (bonus = 0) => dropGear(G.player.x, G.player.y - 100, bonus),
+  findClass, findPassive,
+  dropAbility: (luck = 2) => dropAbility(G.player ? G.player.x : 0, 300, luck),
+  rolls: () => draftRolls,
+  openDraft: (kind = 'level') => openDraft(kind),
+  // Menus (debug / screenshots): open the Hangar, Fabricator or Pilot screen over the campaign map.
+  openHangar: () => (showCampaign(), openHangar()),
+  openFab: () => (showCampaign(), openHangar(), openFab()),
+  openPilot: () => (showCampaign(), openPilot()),
   unequip: unequipSlot,
   paint: setPaint,
   // Pilot (return '' on success, else a reason). Classes / passives are rank-gated: grant({rankXp}) first.

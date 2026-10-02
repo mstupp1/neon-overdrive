@@ -30,11 +30,15 @@ const DEFAULTS = {
   rankXp: 0,
   campaign: { cleared: [], seenStory: {}, bestSys: -1, bestRow: -1 }, // best*: furthest system index / route row any run reached
   ownedShips: [],
-  ownedParts: [],
-  equip: {}, // shipId → { core, plating, thrusters }
+  ownedParts: [], // legacy fixed parts (pre-loot saves); migrated once into `gear` (parts.js migrateParts)
+  gear: [], // equipment items {uid, base, slot, r, il, mods} (parts.js)
+  gearSeq: 0, // last item uid number
+  gearMigrated: false,
+  gearNew: [], // item uids not yet seen in the inventory
+  equip: {}, // shipId → { core, plating, thrusters } item uids
   paint: {}, // shipId → palette index
   paintsOwned: {}, // shipId → [owned palette indices] (0 = stock, always owned)
-  pilot: { cls: 'striker', passives: {} }, // passives: cls → [ids]
+  pilot: { cls: 'striker', passives: {}, classes: ['striker'], found: ['killstreak'], pity: 0 }, // passives: cls → [ids]; classes / found: discovered classes and abilities (pilot.js)
   relics: [], // owned relic ids (collectables.js)
   relicNew: [], // owned but not yet seen in the gallery
   ach: {}, // achievement id → unlock timestamp
@@ -92,6 +96,13 @@ function sanitize(p) {
   p.rankXp = num(p.rankXp);
   p.ownedParts = strs(p.ownedParts);
   p.ownedShips = strs(p.ownedShips);
+  p.gear = Array.isArray(p.gear) ? p.gear.filter((g) => isObj(g) && typeof g.uid === 'string' && typeof g.base === 'string' && typeof g.slot === 'string' && Number.isInteger(g.r) && g.r >= 0 && g.r <= 4 && Number.isFinite(g.il) && Array.isArray(g.mods)) : [];
+  for (const g of p.gear) g.mods = g.mods.filter((m) => Array.isArray(m) && typeof m[0] === 'string' && Number.isFinite(m[1]));
+  p.gearSeq = Math.max(num(p.gearSeq), ...p.gear.map((g) => +g.uid.slice(1) || 0));
+  p.gearNew = strs(p.gearNew);
+  p.pilot.classes = [...new Set(['striker', ...strs(p.pilot.classes)])];
+  p.pilot.found = [...new Set(strs(p.pilot.found))];
+  p.pilot.pity = num(p.pilot.pity);
   p.campaign.cleared = strs(p.campaign.cleared);
   if (!isObj(p.campaign.seenStory)) p.campaign.seenStory = {};
   for (const k of ['bestSys', 'bestRow']) if (!Number.isInteger(p.campaign[k]) || p.campaign[k] < -1) p.campaign[k] = -1;
@@ -124,6 +135,7 @@ function load() {
       const saved = JSON.parse(raw);
       const p = grantShips(merge(DEFAULTS, saved));
       if (isObj(saved) && !('tech' in saved) && p.runs > 0) p.tech = [...LEGACY_TECH];
+      if (isObj(saved) && isObj(saved.pilot) && !('found' in saved.pilot)) p.pilot.legacy = true; // pilot.js grants what rank had unlocked
       return p;
     }
     const old = localStorage.getItem(OLD_KEY);

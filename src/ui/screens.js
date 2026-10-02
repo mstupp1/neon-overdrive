@@ -3,7 +3,8 @@
 import { input } from '../core/input.js';
 import { profile, saveProfile } from '../core/storage.js';
 import { sfx } from '../core/audio.js';
-import { cardInfo, CAT_COLORS, UPGRADES, ICONS } from '../game/upgrades.js';
+import { cardInfo, CAT_COLORS, UPGRADES, ICONS, RARITY } from '../game/upgrades.js';
+import { TAGS } from '../game/parts.js';
 import { formatScore, formatTime } from '../core/math.js';
 import { SYSTEMS } from '../game/campaign.js';
 
@@ -147,7 +148,7 @@ export const ui = {
 
   // --- Draft --------------------------------------------------------------------
   // note: an extra line for the subtitle (campaign fight reward, vault haul).
-  renderDraft(player, choices, kind, rerolls, onPick, left = 0, note = '') {
+  renderDraft(player, choices, kind, rerolls, onPick, left = 0, note = '', rolls = {}) {
     const T = {
       sector: ['SECTOR CLEAR', '#7dff6b', 'Claim a reward for the next sector'],
       supply: ['SUPPLY DROP', '#ffd24a', `Salvaged tech for this system — ${left} to claim`],
@@ -162,22 +163,27 @@ export const ui = {
     wrap.innerHTML = '';
     wrap.classList.toggle('no-keys', input.device === 'touch');
     choices.forEach((id, i) => {
-      const info = cardInfo(player, id);
+      const info = cardInfo(player, id, rolls[id]);
       const c = CAT_COLORS[info.cat];
       const b = document.createElement('button');
       // Two "new" levels, each with its own flag on the card's top edge: never seen in any run (DISCOVERY, white,
       // outlined card) vs. seen before but not owned this run (NEW THIS RUN, category colour).
       const fresh = info.max > 0 && info.fresh;
       const runNew = info.max > 0 && !fresh && !info.evo && info.cat !== 'weapon' && info.lv === 0; // you always fly a main cannon
-      b.className = 'card' + (info.evo ? ' evo' : '') + (fresh ? ' fresh' : '');
+      b.className = 'card' + (info.evo ? ' evo' : '') + (fresh ? ' fresh' : '') + (info.r != null ? ` rar r${info.r}` : '');
       b.style.setProperty('--c', c);
+      if (info.r != null) b.style.setProperty('--rc', RARITY[info.r].color);
       let pips = '';
       if (info.max && !info.evo) {
-        for (let k = 0; k < info.max; k++) pips += `<i class="${k < info.lv ? 'on' : k === info.lv ? 'next' : ''}"></i>`;
+        for (let k = 0; k < info.max; k++) pips += `<i class="${k < info.lv ? 'on' : k < info.lv + info.levels ? 'next' : ''}"></i>`;
       }
-      const tag = info.evo ? 'EVOLVE' : info.max ? `LV ${info.lv + 1}` : 'BONUS';
+      const tag = info.evo ? 'EVOLVE' : info.max ? (info.levels > 1 ? `LV ${info.lv + 1}-${info.lv + info.levels}` : `LV ${info.lv + 1}`) : 'BONUS';
+      // Rarity line (always present on regular cards so rerolls never change the card height): rarity, bonus levels, modifiers, build-path synergy.
+      const rar = info.r != null
+        ? `<div class="card-rar"><b>${RARITY[info.r].name}</b>${info.levels > 1 ? `<span>+${info.levels} LEVELS</span>` : ''}${info.syn ? `<span class="syn" style="--t:${TAGS[info.syn].color}">${TAGS[info.syn].name} SYNERGY</span>` : ''}</div><div class="card-mods">${info.mods.map((m) => `<i>${m}</i>`).join('')}</div>`
+        : '';
       const flag = fresh ? `<span class="card-flag disc">${STAR}NEW DISCOVERY</span>` : runNew ? '<span class="card-flag run">NEW THIS RUN</span>' : '';
-      b.innerHTML = `${flag}<div class="card-icon">${info.icon}</div><div><div class="card-top"><span class="card-name">${info.name}</span><span class="card-tag">${tag}</span></div><div class="card-desc">${info.desc}</div>${pips ? `<div class="pips">${pips}</div>` : ''}</div>${input.device === 'touch' ? '' : `<kbd>${i + 1}</kbd>`}`;
+      b.innerHTML = `${flag}<div class="card-icon">${info.icon}</div><div><div class="card-top"><span class="card-name">${info.name}</span><span class="card-tag">${tag}</span></div><div class="card-desc">${info.desc}</div>${rar}${pips ? `<div class="pips">${pips}</div>` : ''}</div>${input.device === 'touch' ? '' : `<kbd>${i + 1}</kbd>`}`;
       b.addEventListener('click', () => {
         if (performance.now() < lockUntil) return;
         sfx.select();
@@ -338,6 +344,7 @@ function applyFocus() {
   if (!items.length) return;
   focusIdx = ((focusIdx % items.length) + items.length) % items.length;
   items[focusIdx].classList.add('focus');
+  items[focusIdx].dispatchEvent(new CustomEvent('menufocus', { bubbles: true })); // detail panels follow the focus
   items[focusIdx].scrollIntoView({ block: 'nearest' });
 }
 
