@@ -8,6 +8,7 @@ import { S } from '../render/sprites.js';
 import { rankFor } from '../game/economy.js';
 import { CLASSES, MAX_PASSIVES, classById, activeClass, classUnlocked, passiveUnlocked, equippedPassives, setClass, togglePassive } from '../game/pilot.js';
 import { ui, $ } from './screens.js';
+import { treeLabel } from './tree.js';
 
 let viewCls = 'striker'; // class whose details are open (may be a locked one, preview only)
 
@@ -47,6 +48,8 @@ function render() {
   info.style.setProperty('--c', view.color);
   info.classList.toggle('locked', !owned);
   info.innerHTML = `<div class="ci-top"><span class="role">${view.role.toUpperCase()}${owned ? '' : ` · UNLOCKS AT RANK ${view.unlockRank}`}</span></div><p>${view.desc}</p><div class="ci-ult"><em>ULTIMATE</em><b>${view.ult.name}</b><span>${view.ult.desc}</span></div>`;
+
+  $('#pl-tree').textContent = treeLabel(view.id);
 
   // Passives
   const eq = equippedPassives(view.id).map((x) => x.id);

@@ -14,7 +14,7 @@ export const view = {
 
 export const G = {
   mode: 'attract', // 'attract' (bot demo behind menus) | 'run'
-  screen: 'title', // title | campaign | hangar | parts | pilot | help | settings | route | market | dock | event | comms | play | pause | pause-settings | draft | extract | gameover
+  screen: 'title', // title | campaign | hangar | parts | pilot | tree | help | settings | route | market | dock | event | comms | play | pause | pause-settings | draft | extract | gameover
   time: 0, // simulation time (seconds)
   realTime: 0,
   slowmo: 0, // seconds of slow motion remaining

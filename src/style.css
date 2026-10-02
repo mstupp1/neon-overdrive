@@ -2745,3 +2745,178 @@ input[type='range']::-moz-range-thumb {
 #draft-cards .card-desc {
     min-height: 2.44em;
 }
+
+/* ---------------------------------------------------------------- Passive tree (src/ui/tree.js) */
+
+#scr-tree {
+    gap: 0.7em;
+}
+
+.tree-tabs .cls-tab {
+    flex-direction: row;
+    justify-content: center;
+    gap: 0.45em;
+    padding: 0.45em 0.2em;
+}
+
+.tree-tabs .cls-ico {
+    width: 1.3em;
+    height: 1.3em;
+}
+
+.tree-tabs .cls-tab.view {
+    border-color: var(--c);
+    background: color-mix(in srgb, var(--c) 14%, var(--panel));
+}
+
+.tree-points {
+    flex: none;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 24em;
+    min-height: 1.3em;
+    font-size: 0.85em;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--dim);
+}
+
+.tree-points b {
+    color: var(--c, var(--cyan));
+}
+
+.tree-points .free {
+    color: var(--text);
+}
+
+/* The tree view is one focusable button: arrows walk the nodes, confirm allocates / refunds. It pans and zooms inside
+   its own frame, so the screen itself never scrolls. */
+.tree-view {
+    --c: var(--cyan);
+    position: relative;
+    display: block;
+    flex: none;
+    width: 100%;
+    max-width: 24em;
+    height: 24em;
+    padding: 0;
+    background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--c) 8%, rgba(8, 6, 24, 0.9)) 0%, rgba(5, 3, 13, 0.92) 70%);
+    border: 1px solid color-mix(in srgb, var(--c) 35%, transparent);
+    border-radius: 2px;
+    cursor: grab;
+    outline: none;
+    overflow: hidden;
+    touch-action: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.tree-view.drag {
+    cursor: grabbing;
+}
+
+.tree-view.focus,
+.tree-view:focus-visible {
+    border-color: var(--c);
+    box-shadow: 0 0 1.2em color-mix(in srgb, var(--c) 35%, transparent);
+}
+
+.tree-view canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.tree-zoom {
+    position: absolute;
+    right: 0.4em;
+    bottom: 0.4em;
+    display: flex;
+    gap: 0.3em;
+}
+
+.tree-zoom i {
+    display: grid;
+    place-items: center;
+    width: 1.7em;
+    height: 1.7em;
+    font-style: normal;
+    font-weight: 700;
+    color: var(--dim);
+    background: rgba(5, 3, 13, 0.85);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.tree-zoom i:hover {
+    color: var(--text);
+    border-color: var(--c);
+}
+
+/* Fixed height: the longest keystone text, so moving between nodes never shifts the buttons below. */
+.tree-detail {
+    --c: var(--cyan);
+    flex: none;
+    display: grid;
+    align-content: start;
+    gap: 0.15em;
+    width: 100%;
+    max-width: 24em;
+    height: 7.4em;
+    padding: 0.5em 0.8em;
+    background: var(--panel);
+    border: 1px solid color-mix(in srgb, var(--c) 35%, transparent);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.tree-detail .td-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.6em;
+}
+
+.tree-detail b {
+    font-family: Orbitron, sans-serif;
+    font-size: 0.9em;
+    letter-spacing: 0.08em;
+    color: var(--c);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tree-detail em {
+    flex: none;
+    font-style: normal;
+    font-size: 0.74em;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: var(--dim);
+}
+
+.tree-detail span {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+    font-size: 0.92em;
+    line-height: 1.25;
+    color: rgba(233, 244, 255, 0.85);
+}
+
+.tree-detail i {
+    font-style: normal;
+    font-size: 0.76em;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--dim);
+}
+
+.tree-detail i.go {
+    color: var(--c);
+}

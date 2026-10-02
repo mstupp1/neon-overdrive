@@ -5,6 +5,7 @@ import { weightedPick } from '../core/math.js';
 import { WEAPONS } from './ships.js';
 import { applyParts } from './parts.js';
 import { applyPassives } from './pilot.js';
+import { applyTree } from './tree.js';
 
 export const MAX_MODULES = 4;
 
@@ -129,6 +130,7 @@ export function recomputeStats(p) {
   st.critMul = 2.5;
   applyParts(st, p);
   applyPassives(st, p);
+  applyTree(st, p);
   st.maxHp = Math.max(1, st.maxHp);
   p.maxHp = st.maxHp;
   p.maxCharges = st.maxCharges;

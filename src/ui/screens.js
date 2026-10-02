@@ -98,6 +98,7 @@ export const ui = {
       return;
     }
     const el = items[focusIdx];
+    if (el && el._keys) el._keys(); // a focused widget with its own arrow handling (tree view); it re-queues what it skips
     const isRange = el && el.tagName === 'INPUT' && el.type === 'range';
     const isRow = el && el.classList.contains('set-row') && el.querySelector('input[type=range]');
     const range = isRange ? el : isRow ? el.querySelector('input') : null;

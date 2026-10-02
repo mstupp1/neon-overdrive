@@ -7,6 +7,7 @@ import { bg } from '../render/background.js';
 import { updateDirector } from './director.js';
 import { updatePlayer, drawPlayer, hurtPlayer, gainOverdrive, addScore } from './player.js';
 import { pilotTimeScale, domeErase, onGraze, phasing } from './pilot.js';
+import { treeOnGraze, forcedCrit } from './tree.js';
 import { updateModules, updateBeams, drawModules, drawBeams } from './modules.js';
 import { updateEnemies, damageEnemy } from './enemies.js';
 import { drawBoss } from './bosses.js';
@@ -62,7 +63,7 @@ function hitTest(e, x, y, r) {
 
 function collide(p) {
   const enemies = G.enemies;
-  const crit = p.st.crit;
+  const crit = forcedCrit(p) ? 1 : p.st.crit; // Shadow Strike (tree keystone)
 
   // Player bullets → torpedoes (destroyable enemy shots)
   for (const t of G.eBullets) {
@@ -93,7 +94,7 @@ function collide(p) {
       if (!hitTest(e, b.x, b.y, b.r)) continue;
       if (b.hits.includes(e)) continue;
       const isCrit = b.crit || (crit > 0 && Math.random() < crit);
-      const dmg = b.dmg * (isCrit ? p.st.critMul : 1);
+      const dmg = b.dmg * (isCrit ? p.st.critMul : p.st.nonCrit);
       if (!e.invuln) {
         damageEnemy(e, dmg, b.x, b.y, isCrit);
         sfx.hit();
@@ -171,6 +172,7 @@ function collide(p) {
       sparks(p.x + dx * 0.5, p.y + dy * 0.5, '#ffffff', 2, 140);
       sfx.graze();
       onGraze(p);
+      treeOnGraze(p);
     }
   }
 
