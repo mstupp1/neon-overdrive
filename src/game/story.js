@@ -21,7 +21,8 @@ export const STORY = {
     L('MAG', 'ECHO. Wake up. Neural link at 62%. Good enough.'),
     L('MAG', 'Three cycles ago a hostile intelligence seized the Neon Grid. We call it the Signal.'),
     L('ECHO', 'Everyone else got deleted. Why not me?'),
-    L('MAG', 'You were offline. Lucky. Now fly. Cut the Signal out, system by system.'),
+    L('MAG', 'You were in cold storage. It never saw you fly, so it can\'t predict you. You\'re our last pilot.'),
+    L('MAG', 'Four systems stand between us and its source. If you go down, I pull your link back to Genesis.'),
   ],
   systems: {
     genesis: {
@@ -30,6 +31,11 @@ export const STORY = {
         L('ECHO', 'Then I\'ll knock.'),
         L('MAG', 'Chart your route. Credits keep you alive, so spend them.'),
       ],
+      // Played once, the first time a run reaches the middle of the system's map.
+      mid: [
+        L('MAG', 'Picking up old defense logs. Your squadron held this gate for six minutes the night the Grid fell.'),
+        L('ECHO', 'Six minutes. Then I\'ll hold it longer.'),
+      ],
       preBoss: [
         L('SIGNAL', 'ACCESS DENIED. THIS GATE IS CLOSED.'),
         L('MAG', 'WARDEN is charging. Don\'t trade shots. Trade space.'),
@@ -37,7 +43,8 @@ export const STORY = {
       postBoss: [
         L('MAG', 'WARDEN is down. The gate is open.'),
         L('ECHO', 'That mech ran Signal code, didn\'t it?'),
-        L('MAG', 'Everything out here does. Extraction ready. Go.'),
+        L('MAG', 'Everything out here does. I patched half your damage. Your build jumps with you.'),
+        L('MAG', 'Next stop, Crimson Tide. Go.'),
       ],
     },
     crimson: {
@@ -46,6 +53,11 @@ export const STORY = {
         L('ECHO', 'Grew what?'),
         L('MAG', 'Whatever is breeding at the core. Keep your hull up.'),
       ],
+      mid: [
+        L('MAG', 'Bio-readings double with every sector. It isn\'t only infecting the Grid. It\'s farming it.'),
+        L('ECHO', 'Farming what?'),
+        L('MAG', 'Pilots. Ships. Anything that fights back. It learns from whatever it eats.'),
+      ],
       preBoss: [
         L('SIGNAL', 'FLESH IS JUST SLOW CODE.'),
         L('MAG', 'HYDRA. Three heads, one hunger. Stay mobile.'),
@@ -53,7 +65,7 @@ export const STORY = {
       postBoss: [
         L('MAG', 'HYDRA is quiet. The biomass is collapsing.'),
         L('ECHO', 'The Signal built that. It is learning to build.'),
-        L('MAG', 'Then we end it before it finishes. Pull out.'),
+        L('MAG', 'Then we end it before it finishes. Into the storm.'),
       ],
     },
     cyclone: {
@@ -61,6 +73,12 @@ export const STORY = {
         L('MAG', 'Cyan Cyclone. Data winds, lethal lightning. The core intelligence sits in the eye.'),
         L('ECHO', 'OMEGA.'),
         L('MAG', 'Kill it and the Grid wakes up. Ride the storm.'),
+      ],
+      mid: [
+        L('SIGNAL', 'WHY DO YOU KEEP COMING BACK, ECHO?'),
+        L('ECHO', 'MAG. It knows my name.'),
+        L('MAG', 'It keeps the flight data from every run you lose. Every time you go down, it studies you.'),
+        L('ECHO', 'Then I\'ll stop going down.'),
       ],
       preBoss: [
         L('SIGNAL', 'I AM THE GRID. YOU ARE A GLITCH.'),
@@ -79,6 +97,11 @@ export const STORY = {
         L('MAG', 'My sensors are failing out here. ECHO, it is reading your combat data.'),
         L('ECHO', 'It is reading me?'),
       ],
+      mid: [
+        L('MAG', 'ECHO, my link is breaking up. If I go dark, keep flying toward the source.'),
+        L('ECHO', 'You don\'t get to quit on me now.'),
+        L('MAG', '...Wasn\'t planning to.'),
+      ],
       preBoss: [
         L('SIGNAL', 'I AM EVERY SHOT YOU HAVE EVER FIRED.'),
         L('ECHO', 'Then you know how this ends.'),
@@ -92,6 +115,7 @@ export const STORY = {
   // First dive into the Deep Grid (after the ending).
   deep: [
     L('MAG', 'Wait. The Grid is folding back on itself. Genesis again, but deeper, and the static is thicker.'),
+    L('SIGNAL', 'FRAGMENTS... REMEMBER...'),
     L('MAG', 'Every cycle down hits harder and pays FLUX. Spend it in the FLUX CORE between runs.'),
     L('MAG', 'Pull out from the pause menu whenever you want: EXTRACT banks everything you carry.'),
   ],
@@ -100,9 +124,31 @@ export const STORY = {
     L('ECHO', 'It built a mirror out of my own flying.'),
     L('MAG', 'It could only copy what it saw. You were always the original.'),
     L('ECHO', 'So what happens now?'),
-    L('MAG', 'The Grid rebuilds. Stray fragments still drift out there. Go hunt them down whenever you like.'),
+    L('MAG', 'The Grid rebuilds. Your squadron gets a memorial at the gate. You get some rest.'),
     L('MAG', 'Thanks for flying, ECHO.'),
   ],
+  // One-time pointers from MAG the first time a system comes up (main.js tip()). Short on purpose: one or two lines.
+  tips: {
+    route: [
+      L('MAG', 'Your route. Jump to a lit node in the next row, no going back. The boss waits at the top.'),
+      L('MAG', 'Each fight shows its reward under the name. Elites hit harder and pay two drafts.'),
+    ],
+    draft: [L('MAG', 'Pick one. Taking a card again levels it up. Max a module with its partner stat and it can EVOLVE.')],
+    discovery: [L('MAG', 'NEW DISCOVERY means tech you\'ve never seen. From now on it can turn up from Genesis on.')],
+    market: [L('MAG', 'Black Market. Spend here: a dead pilot only banks half their credits, a finished run banks it all.')],
+    dock: [L('MAG', 'Rest Station. Patch the hull, plate on more, or overclock something you already run. One per stop.')],
+    vault: [L('MAG', 'A Treasure Vault. Whatever you take from this one installs two levels at once.')],
+    anomaly: [L('MAG', 'Anomaly. Could be salvage, could be bait. RISKY choices pay more and bite back.')],
+    rift: [
+      L('ECHO', 'MAG, why is it humming?'),
+      L('MAG', 'Because it\'s hungry. The power is real, and so is whatever follows you into the next fights.'),
+    ],
+    elite: [L('MAG', 'Elite signature. A HUNTER will come for you late in this fight. Drop it and the payout is big.')],
+    hazard: [L('MAG', 'Hazard on this sector. It\'s on the map label; some just hurt, some pay extra.')],
+    ult: [L('MAG', 'OVERDRIVE is charged. Save it for when the screen fills up.')],
+    death: [L('MAG', 'Link recovered. I always keep a backup of you, ECHO. Half your credits made it home too.')],
+    tier: [L('MAG', 'OVERDRIVE tiers are open. Launch at a higher tier for a meaner Signal, better pay and FLUX.')],
+  },
 };
 
 // --- Anomaly events ------------------------------------------------------------------

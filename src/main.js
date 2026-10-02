@@ -287,6 +287,15 @@ function blockingStory(key, lines, opts, done) {
   comms.play(ls, { blocking: true, onDone: done });
 }
 
+// A one-time beat over whatever is on screen: mechanic tips and mid-system story (off with the story setting).
+// Waits for a later chance while another line is up. live: a non-blocking line during play.
+function beat(key, lines, live = false) {
+  if (!lines || comms.active || (G.run && G.run.mode !== 'campaign')) return;
+  const ls = storyLines(key, lines);
+  if (ls) comms.play(ls, { blocking: !live });
+}
+const tip = (id, live = false) => beat('tip:' + id, STORY.tips[id], live);
+
 // Director hook (WARNING phase): boss title card + a short non-blocking exchange.
 function onBossWarn(boss) {
   const r = G.run;
@@ -315,7 +324,7 @@ function showCampaign(focusId) {
   music.setDuck(1);
   const launchBtn = meta.renderCampaign(curShip().name);
   ui.show('campaign', { focus: (focusId && document.getElementById(focusId)) || launchBtn });
-  blockingStory('prologue', STORY.prologue, { overlay: true }, () => {});
+  blockingStory('prologue', STORY.prologue, { overlay: true }, () => profile.tierMax > 0 && tip('tier'));
 }
 
 function showRoute() {
@@ -325,6 +334,9 @@ function showRoute() {
   music.setDuck(0.6);
   const focus = meta.renderRoute(G);
   ui.show('route', { focus, lock: 250 });
+  const r = G.run;
+  tip('route');
+  if (r.row >= r.system.rows >> 1) beat('mid:' + r.system.id, STORY.systems[r.system.id].mid);
 }
 
 // Picks a route node: fighting nodes start a sector, the rest go through visitNode.
@@ -347,6 +359,8 @@ function pickRouteNode(node) {
     startSector(spec);
     r.sectors++;
     enterPlay();
+    if (spec.elite) tip('elite', true);
+    else if (spec.modifiers.length) tip('hazard', true);
   } else visitNode(node);
 }
 
@@ -360,24 +374,29 @@ function visitNode(node) {
       G.screen = 'market';
       meta.renderMarket(G, marketOffers, true);
       ui.show('market', { lock: 250 });
+      tip('market');
       break;
     case 'dock':
       G.screen = 'dock';
       meta.renderDock(G.player, boostChoices(G.player).length > 0);
       ui.show('dock', { lock: 250 });
+      tip('dock');
       break;
     case 'vault': {
       const cr = cachePayout();
       draftNote = `${cr ? `+${cr} credits in the vault · ` : ''}each pick installs 2 levels`;
       afterDraft = 'route';
       openDraft('vault', true);
+      tip('vault');
       break;
     }
     case 'rift':
       openEvent(RIFT);
+      tip('rift');
       break;
     default:
       openEvent(eventFor(G.run.route, node, G.run.events));
+      tip('anomaly');
   }
 }
 
@@ -473,6 +492,7 @@ function bankRun() {
 }
 
 function enterPlay() {
+  if (comms.blocking) comms.clear(); // a menu tip still up (debug node picks)
   ui.hide();
   G.screen = 'play';
   pauseBtn.hidden = false;
@@ -527,18 +547,22 @@ function openDraft(kind, quiet = false) {
   G.screen = 'draft';
   curNote = draftNote;
   draftNote = '';
-  showDraftCards(kind);
+  const fresh = showDraftCards(kind);
   // guard: keys already held for flying (or a stray dash) don't drive the menu until released.
   ui.show('draft', { lock: 420, guard: true });
   pauseBtn.hidden = true;
   music.setDuck(0.6);
   if (kind === 'level' && !quiet) sfx.levelUp();
+  if (fresh.length && G.run.sysIdx > 0) tip('discovery'); // a later system's tech: Genesis tech is new to everyone at first
+  if (kind === 'level' || kind === 'sector') tip('draft');
 }
 
-// Renders the draft (cards flag never-seen tech), then records those options as discovered.
+// Renders the draft (cards flag never-seen tech), then records those options as discovered. Returns the new ids.
 function showDraftCards(kind) {
   ui.renderDraft(G.player, draftChoices, kind, G.rerolls, pickUpgrade, G.supplyLeft, curNote);
-  if (discover(draftChoices).length) sfx.achieve(true);
+  const fresh = discover(draftChoices);
+  if (fresh.length) sfx.achieve(true);
+  return fresh;
 }
 
 // Level-up during play: a short slow-motion beat (ring + chime) before the draft opens.
@@ -659,6 +683,7 @@ function gameOver() {
   pauseBtn.hidden = true;
   touchUi.hidden = true;
   music.setDuck(0.5);
+  if (campaign && !G.run.victory) tip('death');
 }
 
 // Back to the title menu without restarting the attract demo.
@@ -925,6 +950,7 @@ function afterStep(raw) {
       levelIntro = -1;
       music.setDuck(1);
     }
+    if (p.odReady && !p.dead && G.run.mode === 'campaign') tip('ult', true);
     if (p.dead) {
       G.deathT -= raw;
       if (G.deathT <= 0) gameOver();
@@ -1000,7 +1026,7 @@ window.NEON = {
   // The intro dialogue is skipped (still marked seen) unless opts.story is true.
   launch(sys = 1, opts = {}) {
     launchRun(typeof sys === 'number' ? sys - 1 : SYSTEMS.indexOf(systemById(sys)));
-    if (!opts.story) comms.skipAll();
+    if (!opts.story) while (comms.blocking) comms.skipAll(); // the intro, then the route tip
   },
   comms,
   // Debug: open anomaly event `id` (campaign run required; opts.rng forces rolls). pickEvent(i) chooses; the result screen then has #event-continue.
