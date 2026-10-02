@@ -28,6 +28,7 @@ import { buyShip, buyPart, equipPart, unequipSlot, setPaint, selectShip, applyAl
 import { SYSTEMS, systemById, generateRoute, nodeSpec, reachableNodes, routeNode } from './game/campaign.js';
 import { rand, pick, lerp, easeInOut } from './core/math.js';
 import { ring } from './game/fx.js';
+import { intro } from './game/intro.js';
 import { STORY, eventFor, eventById, startEvent, resolveChoice, choiceBlocked } from './game/story.js';
 import { rollMarket, buyOffer, dockRepair, dockReinforce, settleRun, rankFor } from './game/economy.js';
 
@@ -537,7 +538,7 @@ function titleMenu(focus) {
   ui.show('title', { focus: document.querySelector('#scr-title ' + focus) });
 }
 
-function toTitle() {
+function toTitle(slam = false) {
   G.screen = 'title';
   pauseBtn.hidden = true;
   touchUi.hidden = true;
@@ -546,6 +547,28 @@ function toTitle() {
   ui.show('title');
   music.setSet('normal');
   music.setDuck(1);
+  const logo = document.querySelector('#scr-title .logo');
+  logo.classList.remove('slam');
+  if (slam) {
+    void logo.offsetWidth;
+    logo.classList.add('slam');
+  }
+}
+
+// Boot intro (src/game/intro.js): plays on a fresh attract world, then lands on the title with the logo slam.
+function playIntro() {
+  ui.hide();
+  pauseBtn.hidden = true;
+  touchUi.hidden = true;
+  comms.clear();
+  intro.start({
+    setup: () => newWorld('attract', curShip()),
+    done: () => {
+      profile.seenIntro = true;
+      saveProfile();
+      toTitle(true);
+    },
+  });
 }
 
 // --- UI handlers ---------------------------------------------------------------------
@@ -571,6 +594,7 @@ ui.init({
     settingsReturn = G.screen === 'pause' ? 'pause' : 'title';
     ui.syncSettings();
     G.screen = settingsReturn === 'pause' ? 'pause-settings' : 'settings';
+    document.getElementById('set-intro').hidden = settingsReturn === 'pause'; // replaying would end the run
     ui.show('settings');
   },
   back() {
@@ -624,6 +648,7 @@ ui.init({
   quit: () => (G.run.mode === 'campaign' ? showCampaign() : toTitle()),
   retry: () => (G.run.mode === 'campaign' ? launchRun() : startRun(curShip())),
   title: () => toTitle(),
+  intro: () => settingsReturn !== 'pause' && playIntro(),
   reroll() {
     if (G.rerolls <= 0) return;
     G.rerolls--;
@@ -704,7 +729,7 @@ let slowFrames = 0;
 
 function simulating() {
   const s = G.screen;
-  return s === 'play' || s === 'gameover' || s === 'title' || s === 'campaign' || s === 'hangar' || s === 'parts' || s === 'pilot' || s === 'settings' || s === 'help' || s === 'gallery' || s === 'achievements';
+  return s === 'play' || s === 'intro' || s === 'gameover' || s === 'title' || s === 'campaign' || s === 'hangar' || s === 'parts' || s === 'pilot' || s === 'settings' || s === 'help' || s === 'gallery' || s === 'achievements';
 }
 
 function frame(now) {
@@ -727,7 +752,8 @@ function frame(now) {
 
   achTick(raw);
   comms.update(raw, G.screen === 'play');
-  if (G.screen === 'play') {
+  if (G.screen === 'intro') intro.update(raw);
+  else if (G.screen === 'play') {
     if (input.consume('pause')) pause();
   } else if (!comms.blocking) {
     ui.update();
@@ -800,6 +826,7 @@ function render() {
   view.oy = sh > 0.001 ? rand(-1, 1) * sh * 12 * k : 0;
   ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
   renderWorld(ctx, k);
+  if (G.screen === 'intro') intro.draw(ctx, k);
   bloom(ctx);
   ctx.setTransform(k, 0, 0, k, 0, 0);
   if (G.mode === 'run' && (G.screen === 'play' || G.screen === 'pause' || G.screen === 'draft' || G.screen === 'pause-settings')) drawHud(ctx);
@@ -827,7 +854,8 @@ function boot() {
   initToasts();
   const past = achInit(); // achievements older saves already earned
   if (past) setTimeout(() => notifyBacklog(past), 1200);
-  toTitle();
+  if (profile.seenIntro) toTitle();
+  else playIntro();
   requestAnimationFrame((t) => {
     last = t;
     frame(t);
@@ -840,6 +868,9 @@ function boot() {
 // headlessly, auto-picking drafts, for balance testing.
 window.NEON = {
   G, view, profile, input, toTitle,
+  intro: () => playIntro(), // replay the boot intro (NEON.introState for its clock)
+  introState: () => ({ active: intro.active, t: intro.t }),
+  skipIntro: () => intro.skip(),
   startRun: (id) => startRun(shipById(id || 'vector')),
   startEndless: (id) => startRun(shipById(id || 'vector')),
   // Start a run on an arbitrary sector spec (see endlessSpec in director.js).

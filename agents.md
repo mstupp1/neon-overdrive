@@ -22,6 +22,7 @@ The game is a set of ES modules (see README "Project layout"). All mutable world
 | `setClass(id)` `setPassives(cls, [ids])` | Pilot class / up to 2 passives; return `''` or a reason (`RANK n`, `SLOTS FULL`). Rank-gated: `grant({rankXp: 9000})` first (rank 3 = 700 XP, 6 = 2500, 10 = 6300) |
 | `buyShip(id)` `buyPart(id)` `selectShip(id)` `equip(shipId, partId)` `unequip(shipId, slot)` `paint(shipId, idx)` | Hangar actions; return `''` or a reason (`NEED n`, `OWNED`, ...). They spend profile credits, so `grant({credits})` first |
 | `toTitle()` | Back to title/attract mode |
+| `intro()` `introState()` `skipIntro()` | Replay the boot intro / `{active, t}` (its clock, real seconds) / skip it |
 | `comms` | Dialogue overlay (`play / skipAll / clear`, `blocking`, `active`) |
 | `event(id, {rng})` `pickEvent(i)` `eventState()` | Open anomaly event `id` (campaign run required), choose choice `i`, inspect the session |
 | `extract()` `showBossCard(boss)` | Debug: end the campaign run now / show the boss title card |
@@ -29,6 +30,8 @@ The game is a set of ES modules (see README "Project layout"). All mutable world
 | `rollDraft(kind?)` | Roll a draft (`'level'`/`'sector'`) for the current player (may include an Evolution card) |
 | `dropRelic(x?, y?)` | Debug: drop a relic cache (run only; default just above the ship) |
 | `simulate(seconds, pickFn?, opts?)` | Fast-forward synchronously at 60 Hz, auto-picking drafts (`pickFn(choices) → id`) and route nodes (`opts.nodePick(nodes) → index`, default random fighting node). Market: buys the cheapest affordable upgrade offer (override `opts.marketPick(offers, wallet) → index | -1`), then leaves; dock: repairs if damaged else reinforces; anomaly auto-continues. Stops on `gameover` or `extract`. Returns `{screen, sector, hp, level, score, time, run:{system,row}, victory}`. |
+
+`G.scriptCtrl` (a function returning the same shape as `player.js control()`) overrides ship control; the boot intro uses it.
 
 Set `G.autopilot = true` to let the built-in bot (`src/game/bot.js`) fly a real run; `G.player.god = true` for invulnerability.
 
@@ -41,7 +44,7 @@ NEON.simulate(600); // → { screen, sector, hp, level, score, time }
 
 ## Useful state
 
-- `G.screen`: `title | campaign | hangar | parts | pilot | help | settings | route | market | dock | event | comms | play | pause | pause-settings | draft | extract | gameover` (`comms` = a blocking dialogue between screens; the world is frozen unless `play`/`title`/menus listed in `simulating()`)
+- `G.screen`: `intro | title | campaign | hangar | parts | pilot | help | settings | route | market | dock | event | comms | play | pause | pause-settings | draft | extract | gameover` (`comms` = a blocking dialogue between screens; the world is frozen unless `play`/`title`/menus listed in `simulating()`)
 - `G.mode`: `attract` (bot demo behind menus, SFX muted) or `run`
 - `G.player`: `x, y, hp, maxHp, shield, charges, od (0–100), odT, level, xp, up {id: level}, st {derived stats}`
 - `G.enemies` (`type, x, y, r, hp, elite, parts?`; bosses have `boss: true, phase, state`), `G.boss`
@@ -49,7 +52,7 @@ NEON.simulate(600); // → { screen, sector, hp, level, score, time }
 - `G.director`: `state (intro|waves|clearing|warn|boss|bossDown|clear|await)`, `progress`, `diff`
 - `G.sector`, `G.loop`, `G.score`, `G.displayScore`, `G.combo`, `G.comboTimer`, `G.maxCombo`, `G.kills`, `G.grazes`, `G.bossKills`, `G.runTime` (run seconds), `G.time` (sim seconds), `G.rerolls`, `G.pendingLevels`, `G.supplyLeft` (supply-drop drafts left), `G.deathT`, `G.vacuum`, `G.autopilot`, `G.enemyTimeScale`, `G.slowmo`, `G.hitstop`, `G.banner`, `G.pulse*`
 - `G.run` (null in attract): `{mode: 'campaign'|'endless', sysIdx, system, route, row, nodeId, sectors, victory, visited[]}` (`endless` = the debug sandbox from `startRun`; `visited` is per system) plus fields reset in `newWorld`: `wallet, earned, frac, curse, ambush, bonusXp, events[]`.
-- `profile` (`src/core/storage.js`, v3): `settings{music,sfx,shake,flashes,damageNumbers,story}, best, bestSector, bestCombo, bossKills, runs, kills, lastShip, seenHelp, credits, rankXp, campaign{cleared[], seenStory{}}, ownedShips[], ownedParts[], equip{ship:{slot:part}}, paint{ship:idx}, paintsOwned{ship:[idx]}, pilot{cls, passives{cls:[ids]}}, relics[], relicNew[], ach{id: timestamp}, stats{swarm, capsules}`. `load()` merges onto defaults, `sanitize()` coerces corrupt collections, a v2 save migrates once, and every storage call is wrapped in try/catch.
+- `profile` (`src/core/storage.js`, v3): `settings{music,sfx,shake,flashes,damageNumbers,story}, best, bestSector, bestCombo, bossKills, runs, kills, lastShip, seenHelp, seenIntro, credits, rankXp, campaign{cleared[], seenStory{}}, ownedShips[], ownedParts[], equip{ship:{slot:part}}, paint{ship:idx}, paintsOwned{ship:[idx]}, pilot{cls, passives{cls:[ids]}}, relics[], relicNew[], ach{id: timestamp}, stats{swarm, capsules}`. `load()` merges onto defaults, `sanitize()` coerces corrupt collections, a v2 save migrates once, and every storage call is wrapped in try/catch.
 - Sector spec (`director.startSector(spec)`): `{index, row?, level, loop, boss, elite, modifiers[], hue, name, duration, bossHp?, pay?}`. `bossHp` multiplies the boss base HP (campaign only, per `SYSTEMS` row), `pay` scales credit values.
 
 ## Enemy roster notes (step 6a)
@@ -123,6 +126,12 @@ Title PLAY → `scr-campaign` (progress track of the 4 systems, LAUNCH / HANGAR 
 - Reactive grid (`background.js` `field`): a screen-space spring lattice (30px cells) under the floor grid. `bg.blast(x, y, size, color)` (called by every `fx.explosion`) kicks nodes outward and adds a floor light pool (`bg.light`); `bg.updateField` also pulls toward live `p.mod.wells` and pushes the band behind the ult shockwave (`G.pulse`). Grid lines are sampled through the lattice only while `field.energy > 0`; at rest the original straight/curved fast path draws. Displacement fades toward the horizon.
 - Post FX: `render/post.js bloom(ctx)` runs in `main.js render()` after `renderWorld` and before the HUD. It shrinks the frame into a 1/4, 1/8, 1/16 mip chain (the 1/4 level is self-multiplied as a soft threshold), folds them into the 1/4 layer and adds it back with one full-size `lighter` blit. No `ctx.filter`. Gated by `profile.settings.bloom` (settings toggle) and `view.quality >= 0.5`.
 - Debug: `NEON.launch(sys, {story})` skips dialogue by default; `NEON.event(id, {rng})`, `NEON.pickEvent(i)`, `NEON.eventState()`, `NEON.comms`, `NEON.extract()`. `simulate` auto-skips blocking comms and picks the first available event choice (`opts.eventPick(event, session) → index`).
+
+## Boot intro (`src/game/intro.js`)
+
+- `boot()` plays it while `profile.seenIntro` is false (first boot, or after a progress reset), else goes straight to the title; Settings has REPLAY INTRO (hidden in the pause menu's settings). It ends in `toTitle(true)`, which plays the `.logo.slam` entrance.
+- ~19 s of live engine on a fresh attract world (`G.screen = 'intro'`, simulated, sfx unmuted): ECHO's six-ship squadron (one per hull, drawn by `intro.draw` after `renderWorld`) holds the Genesis gate until the Signal deletes them, black, MAG wakes ECHO, the hero reveal (aura, name card), then director waves and a scripted Striker Overdrive with a chained clear. The timeline is the `CUES` table plus `at(t)` beats in `update`; text lives in `#intro` (absolutely placed, typed with reserved heights).
+- Skip: Esc / Back / pad B skips; any other key, click or tap arms PRESS AGAIN TO SKIP (and unlocks audio, so the rest plays with music), a second press skips.
 
 ## Relics and achievements
 

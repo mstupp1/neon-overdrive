@@ -24,6 +24,7 @@ const DEFAULTS = {
   kills: 0,
   lastShip: 'vector',
   seenHelp: false,
+  seenIntro: false, // the boot intro plays automatically until it has been seen once
   credits: 0,
   rankXp: 0,
   campaign: { cleared: [], seenStory: {}, bestSys: -1, bestRow: -1 }, // best*: furthest system index / route row any run reached
