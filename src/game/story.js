@@ -133,6 +133,10 @@ export const STORY = {
       L('MAG', 'Your route. Jump to a lit node in the next row, no going back. The boss waits at the top.'),
       L('MAG', 'Each fight shows its reward under the name. Elites hit harder and pay two drafts.'),
     ],
+    overworld: [
+      L('MAG', 'Open space between the jumps. Fly into a lit beacon and hold there to jump in. The boss waits at the top.'),
+      L('MAG', 'Patrols hit back but pay XP and credits. Wrecks and signals are worth a detour. M pulls up the route map.'),
+    ],
     draft: [L('MAG', 'Pick one. Taking a card again levels it up. Max a module with its partner stat and it can EVOLVE.')],
     discovery: [L('MAG', 'NEW DISCOVERY means tech you\'ve never seen. From now on it can turn up from Genesis on.')],
     market: [L('MAG', 'Black Market. Spend here: a dead pilot only banks half their credits, a finished run banks it all.')],

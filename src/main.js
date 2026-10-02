@@ -33,6 +33,7 @@ import { ring } from './game/fx.js';
 import { intro as bootIntro } from './game/intro.js';
 import { cine } from './game/cinematic.js';
 import { sectorIntro } from './render/sectorIntro.js';
+import { overworld } from './game/overworld.js';
 import { STORY, eventFor, eventById, startEvent, resolveChoice, choiceBlocked, RIFT, riftHazard } from './game/story.js';
 import { rollMarket, buyOffer, dockRepair, dockReinforce, settleRun, rankFor, cachePayout } from './game/economy.js';
 
@@ -40,6 +41,7 @@ const app = document.getElementById('app');
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d', { alpha: false });
 const pauseBtn = document.getElementById('pause-btn');
+const mapBtn = document.getElementById('map-btn');
 const touchUi = document.getElementById('touch-ui');
 const dangerEl = document.getElementById('danger');
 const probe = document.getElementById('safe-probe');
@@ -71,6 +73,8 @@ const RESUME_EASE = 0.45; // real seconds to ramp back to full speed after a dra
 let levelIntro = -1; // seconds left in the slow-down (-1 = not running)
 let resumeEase = 0;
 let introDone = null; // callback once the sector intro animation ends
+let owBack = false; // the overworld is the run's current place: menus over it draw it behind them
+let pauseFrom = 'play'; // screen the pause menu returns to (play | overworld)
 
 // --- Layout -------------------------------------------------------------------------
 
@@ -113,6 +117,7 @@ function newWorld(mode, shipDef, run = null) {
   cine.clear();
   sectorIntro.stop();
   introDone = null;
+  owBack = false;
   if (run) Object.assign(run, { wallet: 0, earned: 0, frac: 0, flux: 0, curse: null, ambush: false, riftLeft: 0, bonusXp: 0, events: [] });
   G.time = 0;
   G.runTime = 0;
@@ -357,21 +362,47 @@ function showCampaign(focusId) {
   blockingStory('prologue', STORY.prologue, { overlay: true }, () => profile.tierMax > 0 && tip('tier'));
 }
 
+// Between nodes the run is in the system's overworld (src/game/overworld.js): fly to a lit beacon to pick the next node.
 function showRoute() {
-  G.screen = 'route';
-  pauseBtn.hidden = true;
-  touchUi.hidden = true;
-  music.setDuck(0.6);
-  const focus = meta.renderRoute(G);
-  ui.show('route', { focus, lock: 250 });
   const r = G.run;
-  tip('route');
-  if (r.row >= r.system.rows >> 1) beat('mid:' + r.system.id, STORY.systems[r.system.id].mid);
+  ui.hide();
+  overworld.enter(r);
+  owBack = true;
+  resumeOverworld();
+  tip('overworld', true);
+  if (r.row >= r.system.rows >> 1) beat('mid:' + r.system.id, STORY.systems[r.system.id].mid, true);
 }
+
+// Back to flying in the overworld (after showRoute, or unpausing there).
+function resumeOverworld() {
+  ui.hide();
+  G.screen = 'overworld';
+  pauseBtn.hidden = false;
+  touchUi.hidden = true;
+  input.clear();
+  music.setDuck(0.85);
+}
+
+overworld.init({
+  engage: (node) => pickRouteNode(node),
+  // Distress signal: an anomaly event, seeded by the site like a route node.
+  signal(site) {
+    pauseBtn.hidden = true;
+    openEvent(eventFor(G.run.route, site, G.run.events));
+    tip('anomaly');
+  },
+  levelUp() {
+    afterDraft = 'route';
+    openDraft('level');
+  },
+  dead: () => gameOver(),
+});
 
 // Picks a route node: fighting nodes start a sector, the rest go through visitNode.
 function pickRouteNode(node) {
   const r = G.run;
+  pauseBtn.hidden = true;
+  if (node.type === 'combat' || node.type === 'elite' || node.type === 'boss') overworld.leave();
   r.nodeId = node.id;
   r.row = node.row;
   r.visited.push(node.id);
@@ -523,6 +554,7 @@ function bankRun() {
 
 function enterPlay() {
   if (comms.blocking) comms.clear(); // a menu tip still up (debug node picks)
+  owBack = false;
   ui.hide();
   G.screen = 'play';
   pauseBtn.hidden = false;
@@ -532,12 +564,18 @@ function enterPlay() {
 }
 
 function pause() {
-  if (G.screen !== 'play' || G.player.dead) return;
+  if ((G.screen !== 'play' && G.screen !== 'overworld') || G.player.dead) return;
+  pauseFrom = G.screen;
   G.screen = 'pause';
   ui.renderPause(G);
   ui.show('pause', { lock: 150 });
   pauseBtn.hidden = true;
   music.setDuck(0.45);
+}
+
+function unpause() {
+  if (pauseFrom === 'overworld') resumeOverworld();
+  else enterPlay();
 }
 
 // Owned, non-maxed, non-evolution upgrades (Rest Station overclock / BOOST reward).
@@ -845,9 +883,7 @@ ui.init({
   buy,
   dock: dockChoose,
   abandon: leaveRun,
-  resume: () => {
-    enterPlay();
-  },
+  resume: () => unpause(),
   restart: () => (G.run.mode === 'campaign' ? launchRun() : startRun(curShip())),
   quit: () => (G.run.mode === 'campaign' ? leaveRun() : toTitle()),
   retry: () => (G.run.mode === 'campaign' ? launchRun() : startRun(curShip())),
@@ -893,6 +929,12 @@ pauseBtn.addEventListener('pointerdown', (e) => {
   unlockAudio();
   pause();
 });
+mapBtn.addEventListener('pointerdown', (e) => {
+  e.stopPropagation();
+  e.preventDefault();
+  unlockAudio();
+  if (G.screen === 'overworld') overworld.toggleMap();
+});
 for (const [id, action] of [['touch-od', 'od'], ['touch-dash', 'dash']]) {
   document.getElementById(id).addEventListener('pointerdown', (e) => {
     e.preventDefault();
@@ -903,7 +945,7 @@ for (const [id, action] of [['touch-od', 'od'], ['touch-dash', 'dash']]) {
 }
 
 input.onAnyGesture = unlockAudio;
-input.getAnchor = () => (G.player ? { x: G.player.x, y: G.player.y } : { x: view.W / 2, y: view.H * 0.8 });
+input.getAnchor = () => (G.screen === 'overworld' ? overworld.anchor() : G.player ? { x: G.player.x, y: G.player.y } : { x: view.W / 2, y: view.H * 0.8 });
 input.onDeviceChange = (d) => {
   if (G.screen === 'play') touchUi.hidden = d !== 'touch';
   app.style.cursor = G.screen === 'play' && d === 'mouse' ? 'crosshair' : '';
@@ -949,7 +991,7 @@ function frame(now) {
 
   // Adaptive quality: sustained slow frames lower resolution and particle budget.
   frameAvg += (raw * 1000 - frameAvg) * 0.05;
-  if (frameAvg > 24 && simulating()) {
+  if (frameAvg > 24 && (simulating() || G.screen === 'overworld')) {
     if (++slowFrames > 120 && (view.quality > 0.5 || dprCap > 1)) {
       slowFrames = 0;
       view.quality = Math.max(0.5, view.quality - 0.25);
@@ -959,16 +1001,19 @@ function frame(now) {
   } else slowFrames = 0;
 
   achTick(raw);
-  comms.update(raw, G.screen === 'play');
+  comms.update(raw, G.screen === 'play' || G.screen === 'overworld');
   if (G.screen === 'intro') bootIntro.update(raw);
   else if (G.screen === 'sector-intro') {
     if (input.consume('confirm') || input.consume('back') || input.consume('dash')) sectorIntro.skip();
     if (sectorIntro.update(raw)) finishSectorIntro();
   } else if (G.screen === 'play') {
     if (input.consume('pause')) pause();
+  } else if (G.screen === 'overworld') {
+    if (input.consume('pause')) pause();
+    else if (!comms.blocking) overworld.update(raw);
   } else if (!comms.blocking) {
     ui.update();
-    input.consume('pause') && G.screen === 'pause' && enterPlay();
+    input.consume('pause') && G.screen === 'pause' && unpause();
   }
 
   if (simulating()) {
@@ -994,6 +1039,7 @@ function frame(now) {
   G.shake = Math.max(0, G.shake - raw * 1.8);
   G.flash = Math.max(0, G.flash - raw * 2.5);
   updateBanner(raw);
+  mapBtn.hidden = G.screen !== 'overworld';
   const boost = Math.max(cine.boost(), G.player && (G.player.odT > 0 || G.player.dashT > 0) ? 3 : G.director && G.director.state === 'clear' ? 4 : 1);
   const dk = !!(G.mode === 'run' && (G.screen === 'play' || G.screen === 'pause' || G.screen === 'pause-settings') && G.director.diff.blackout && G.director.state !== 'clear' && G.director.state !== 'await'); // not on result screens
   bg.setDark(dk);
@@ -1043,6 +1089,22 @@ function render() {
     ctx.setTransform(k, 0, 0, k, 0, 0);
     sectorIntro.draw(ctx);
     bloom(ctx);
+    return;
+  }
+  if (owBack && G.mode === 'run' && G.screen !== 'play') {
+    // Overworld (and the menus a beacon opens over it).
+    overworld.drawWorld(ctx, k);
+    bloom(ctx);
+    ctx.setTransform(k, 0, 0, k, 0, 0);
+    overworld.drawHud(ctx, G.screen === 'overworld');
+    if (G.flash > 0.01) {
+      ctx.fillStyle = `rgba(${G.flashColor},${Math.min(0.8, G.flash)})`;
+      ctx.fillRect(0, 0, view.W, view.H);
+    }
+    if (G.screen !== 'overworld' && G.screen !== 'gameover') {
+      ctx.fillStyle = 'rgba(5,3,13,0.45)';
+      ctx.fillRect(0, 0, view.W, view.H);
+    }
     return;
   }
   // Finisher / node-start camera: zoom about a world point (screen = world * z + cam offset).
@@ -1146,6 +1208,7 @@ window.NEON = {
   },
   cine,
   sectorIntro,
+  overworld, // overworld.state (G.run.ow), warp(nodeId | x, y), toggleMap()
   comms,
   // Debug: open anomaly event `id` (campaign run required; opts.rng forces rolls). pickEvent(i) chooses; the result screen then has #event-continue.
   event(id, opts = {}) {
@@ -1163,7 +1226,7 @@ window.NEON = {
   showBossCard: onBossWarn,
   // Pick the i-th currently reachable route node.
   pickNode(i = 0) {
-    if (G.screen !== 'route') return false;
+    if (G.screen !== 'route' && G.screen !== 'overworld') return false;
     const node = reachableNodes(G.run.route, G.run.nodeId)[i];
     if (!node) return false;
     pickRouteNode(node);
@@ -1203,7 +1266,7 @@ window.NEON = {
       if (G.screen === 'sector-intro') finishSectorIntro(); // nor does the sector intro
       if (comms.blocking) comms.skipAll(); // dialogue never blocks the simulator
       if (G.screen === 'draft') pickUpgrade(pickFn(draftChoices));
-      for (let guard = 0; guard < 6 && (G.screen === 'route' || G.screen === 'event' || G.screen === 'market' || G.screen === 'dock'); guard++) {
+      for (let guard = 0; guard < 6 && (G.screen === 'route' || G.screen === 'overworld' || G.screen === 'event' || G.screen === 'market' || G.screen === 'dock'); guard++) {
         if (G.screen === 'event') {
           // Default: the first choice that can be taken. opts.eventPick(event, session) → index.
           const s = curEvent;

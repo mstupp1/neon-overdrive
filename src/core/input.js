@@ -18,6 +18,7 @@ const BIND = {
   one: ['Digit1', 'Numpad1'],
   two: ['Digit2', 'Numpad2'],
   three: ['Digit3', 'Numpad3'],
+  map: ['KeyM', 'Tab'], // overworld route map overlay
 };
 
 const codeToActions = new Map();
@@ -47,6 +48,7 @@ export const input = {
   ox: 0,
   oy: 0,
   holding: false,
+  mouseDown: false, // left mouse button held (overworld click-to-fly)
   padX: 0,
   padY: 0,
   getAnchor: () => ({ x: view.W / 2, y: view.H * 0.8 }),
@@ -130,6 +132,7 @@ window.addEventListener('keyup', (e) => {
 });
 
 window.addEventListener('blur', () => {
+  input.mouseDown = false;
   held.clear();
   padHeld.clear();
 });
@@ -182,7 +185,10 @@ export function bindPointer(surface) {
       e.preventDefault();
     } else {
       input.setDevice('mouse');
-      if (e.button === 0) input.press('dash');
+      if (e.button === 0) {
+        input.press('dash');
+        input.mouseDown = true;
+      }
       else if (e.button === 2) input.press('od');
       mouseTarget(e, 0);
     }
@@ -218,6 +224,7 @@ export function bindPointer(surface) {
   }, { passive: false });
 
   const end = (e) => {
+    if (e.pointerType !== 'touch' && e.button === 0) input.mouseDown = false;
     if (input.touch && input.touch.id === e.pointerId) {
       input.touch = null;
       // Hold position where the ship is.
@@ -227,6 +234,9 @@ export function bindPointer(surface) {
     }
   };
   surface.addEventListener('pointerup', end);
+  window.addEventListener('pointerup', (e) => {
+    if (e.pointerType !== 'touch' && e.button === 0) input.mouseDown = false; // released off the canvas
+  });
   surface.addEventListener('pointercancel', end);
 }
 
@@ -242,7 +252,7 @@ const PAD_BUTTONS = {
   5: ['focus'],
   6: ['focus'],
   7: ['dash'],
-  8: ['back'],
+  8: ['back', 'map'],
   9: ['pause'],
   12: ['up'],
   13: ['down'],
