@@ -728,6 +728,16 @@ ui.init({
     document.querySelectorAll('#scr-help [data-tab]').forEach((el) => el.classList.toggle('on', el.dataset.tab === btn.dataset.tab));
   },
   launch: () => launchRun(),
+  // Campaign "how a run works" box: toggled by the ? button, opens once by itself.
+  runInfo() {
+    const box = document.getElementById('run-info');
+    box.hidden = !box.hidden;
+    if (!profile.seenRunInfo) {
+      profile.seenRunInfo = true;
+      saveProfile();
+    }
+    (box.hidden ? document.querySelector('#sys-detail .info-btn') : box.querySelector('.btn')).focus();
+  },
   hangar: () => openHangar(),
   core: () => openCore(() => showCampaign('core-btn')),
   ...coreActs,
