@@ -4,11 +4,12 @@
 import { profile } from '../core/storage.js';
 import { formatScore, formatTime } from '../core/math.js';
 import { $, stat, renderBuild } from './screens.js';
-import { SYSTEMS, NODE_TYPES, reachableNodes, routeNode } from '../game/campaign.js';
+import { SYSTEMS, NODE_TYPES, REWARDS, reachableNodes, routeNode } from '../game/campaign.js';
 import { MODIFIERS } from '../game/modifiers.js';
+import { heatScale } from '../game/core.js';
 import { bossById } from '../game/bosses.js';
 import { rankFor, ECON_ICONS } from '../game/economy.js';
-import { CAT_COLORS } from '../game/upgrades.js';
+import { CAT_COLORS, ICONS } from '../game/upgrades.js';
 import { SLOT_INFO } from '../game/parts.js';
 import { CLASSES, activeClass } from '../game/pilot.js';
 import { choiceBlocked } from '../game/story.js';
@@ -21,6 +22,8 @@ export const NODE_ICONS = {
   market: svg('<path d="M5 8h14l-1 12H6z"/><path d="M9 8a3 3 0 016 0"/>'),
   dock: svg('<circle cx="12" cy="12" r="8"/><path d="M12 8v8M8 12h8"/>'),
   anomaly: svg('<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 115 0c0 1.8-2.5 2-2.5 3.5M12 17v.5"/>'),
+  vault: svg('<rect x="3" y="6" width="18" height="14" rx="1"/><path d="M3 11h18M10 11v3h4v-3"/>'),
+  rift: svg('<path d="M12 2l-3 7 4 2-5 11"/><path d="M15 4l-2 5M7 15l-3 4"/>'),
   boss: svg('<path d="M12 3l9 5-2 12H5L3 8z"/><path d="M9 11v2M15 11v2M10 17h4"/>'),
   lock: svg('<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>'),
   check: svg('<path d="M5 12.5l4.5 4.5L19 7"/>'),
@@ -55,9 +58,17 @@ export const meta = {
     map.innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none">${lines}</svg>${nodes}`;
     const rk = rankFor(profile.rankXp);
     $('#camp-pilot').innerHTML = `<span class="gold">${coin}${fmt(profile.credits)}</span><span class="rank">RANK <b>${rk.rank}</b></span><span class="rankbar"><i style="width:${rk.need ? Math.round((100 * rk.into) / rk.need) : 100}%"></i></span><span class="rank">${shipName}</span><span class="rank cls" style="--c:${activeClass().color}">${activeClass().name}</span>`;
-    const best = c.bestSys < 0 ? 'NO RUNS YET' : c.cleared.length >= SYSTEMS.length ? 'ALL SYSTEMS CLEARED' : `BEST · ${SYSTEMS[c.bestSys].short} SECTOR ${c.bestRow + 1}`;
+    const best = c.bestSys < 0 ? 'NO RUNS YET' : profile.bestDeep ? `BEST · DEEP GRID ${profile.bestDeep}` : c.cleared.length >= SYSTEMS.length ? 'ALL SYSTEMS CLEARED' : `BEST · ${SYSTEMS[c.bestSys].short} SECTOR ${c.bestRow + 1}`;
+    const t = profile.tier;
+    const k = heatScale(t, 0);
+    const heat = t ? `<span style="color:#ff4d6d">OVERDRIVE ${t} · ENEMY HP ×${k.hp.toFixed(1)} · REWARDS +${Math.round((k.reward - 1) * 100)}% · FLUX</span>` : '';
     $('#sys-detail').style.setProperty('--c', hsl(SYSTEMS[0].hue));
-    $('#sys-detail').innerHTML = `<h4>ONE RUN · FOUR SYSTEMS</h4><p>Fly from Genesis to the Void with one ship. Your build carries between systems. If you go down, the next run starts at Genesis.</p><div class="sys-meta"><span>${best}</span></div>`;
+    $('#sys-detail').innerHTML = `<div class="sys-meta"><span>${best}</span>${heat}</div><button class="info-btn" data-act="runInfo" aria-label="How a run works" title="How a run works">?</button>`;
+    $('#run-info').hidden = profile.seenRunInfo;
+    const tb = $('#tier-btn');
+    tb.textContent = profile.tierMax ? `OVERDRIVE ${t}` : 'OVERDRIVE';
+    tb.disabled = !profile.tierMax;
+    $('#core-btn').innerHTML = `FLUX CORE${profile.flux ? ` · ${fmt(profile.flux)}` : ''}`;
     return $('#launch-btn');
   },
 
@@ -71,9 +82,10 @@ export const meta = {
     const reach = reachableNodes(route, run.nodeId);
     const reachIds = new Set(reach.map((n) => n.id));
     const visited = new Set(run.visited);
-    $('#route-title').textContent = sys.name;
+    $('#route-leave').textContent = run.victory ? 'EXTRACT · BANK ALL' : 'ABANDON RUN';
+    $('#route-title').textContent = run.deep ? `DEEP ${run.deep} · ${sys.short}` : sys.name;
     $('#route-title').style.textShadow = `0 0 0.35em ${hsl(sys.hue)}, 0 0 1.2em ${hsl(sys.hue, 55)}`;
-    $('#route-stats').innerHTML = stat('HULL', `${p.hp}/${p.maxHp}`) + stat('LEVEL', p.level) + stat('CREDITS', `<span class="gold">${fmt(run.wallet || 0)}</span>`) + stat('ROUTE', `${visited.size}/${total}`);
+    $('#route-stats').innerHTML = stat('HULL', `${p.hp}/${p.maxHp}`) + stat('LEVEL', p.level) + stat('CREDITS', `<span class="gold">${fmt(run.wallet || 0)}</span>`) + stat('ROUTE', `${visited.size}/${total}`) + (run.tier || run.deep ? stat('FLUX', `<span class="flux">${fmt(run.flux || 0)}</span>`) : '');
     const cls = CLASSES.find((c) => c.id === p.cls) || CLASSES[0];
     $('#route-gear').innerHTML =
       `<div class="chip cls" style="--c:${cls.color}" title="${cls.name}">${cls.icon}</div>` +
@@ -95,7 +107,8 @@ export const meta = {
       const can = reachIds.has(n.id);
       const state = n.id === run.nodeId ? ' cur' : visited.has(n.id) ? ' done' : can ? ' reach' : '';
       const mod = n.modifiers[0] ? MODIFIERS[n.modifiers[0]] : null;
-      btns += `<button class="rnode t-${n.type}${state}" data-act="node" data-id="${n.id}" ${can ? '' : 'disabled'} style="--c:${info.color};left:${px(n)}%;top:${py(n)}%" aria-label="${info.name}"><span class="rn-ico">${visited.has(n.id) && n.id !== run.nodeId ? NODE_ICONS.check : NODE_ICONS[n.type]}</span><span class="rn-lab">${info.name}${mod ? `<em style="--c:${mod.color}">${mod.name}</em>` : ''}</span></button>`;
+      const rw = n.reward && !visited.has(n.id) ? REWARDS[n.reward] : null;
+      btns += `<button class="rnode t-${n.type}${state}" data-act="node" data-id="${n.id}" ${can ? '' : 'disabled'} style="--c:${info.color};left:${px(n)}%;top:${py(n)}%" aria-label="${info.name}"><span class="rn-ico">${visited.has(n.id) && n.id !== run.nodeId ? NODE_ICONS.check : NODE_ICONS[n.type]}</span>${rw ? `<span class="rn-rw" style="--r:${rw.color}"></span>` : ''}<span class="rn-lab">${info.name}${rw ? `<em style="--c:${rw.color}">${rw.name}</em>` : ''}${mod ? `<em style="--c:${mod.color}">${mod.name}</em>` : ''}</span></button>`;
     }
     $('#route-map').innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none">${lines}</svg>${btns}`;
     const nextRow = run.row + 1;
@@ -109,7 +122,7 @@ export const meta = {
     const ev = s.ev;
     const box = $('#scr-event');
     box.style.setProperty('--c', ev.color);
-    $('#event-icon').innerHTML = NODE_ICONS.anomaly;
+    $('#event-icon').innerHTML = NODE_ICONS[ev.id === 'rift' ? 'rift' : 'anomaly'];
     $('#event-icon').style.setProperty('--c', ev.color);
     $('#event-title').textContent = ev.title;
     $('#event-text').textContent = ev.text;
@@ -176,11 +189,15 @@ export const meta = {
   },
 
   // --- Repair dock -----------------------------------------------------------------
-  renderDock(p) {
+  // canBoost: there is an owned upgrade with a level left (else OVERCLOCK is disabled).
+  renderDock(p, canBoost = true) {
     $('#dock-hull').textContent = `HULL ${p.hp}/${p.maxHp}`;
     const full = p.hp >= p.maxHp;
     $('#dock-repair').innerHTML = `<div class="card-icon">${ECON_ICONS.repairFull}</div><div><div class="card-top"><span class="card-name">Full Repair</span><span class="card-tag">HEAL</span></div><div class="card-desc">${full ? 'Hull is already full.' : `Restore hull to ${p.maxHp}/${p.maxHp}.`}</div></div>`;
     $('#dock-reinforce').innerHTML = `<div class="card-icon">${ECON_ICONS.reinforce}</div><div><div class="card-top"><span class="card-name">Hull Reinforcement</span><span class="card-tag">+1 MAX</span></div><div class="card-desc">+1 max hull for this run. No repair.</div></div>`;
+    const oc = $('#dock-overclock');
+    oc.disabled = !canBoost;
+    oc.innerHTML = `<div class="card-icon">${ICONS.rate}</div><div><div class="card-top"><span class="card-name">Overclock</span><span class="card-tag">+1 LV</span></div><div class="card-desc">${canBoost ? 'Pick an upgrade you own and push it one level higher.' : 'Nothing left to overclock.'}</div></div>`;
   },
 
   // --- Rewards block (extraction + game over) -------------------------------------
@@ -194,7 +211,7 @@ export const meta = {
         <div>BANKED<b class="gold">${coin}${fmt(rw.banked)}</b></div>
       </div>
       ${campaignDeath ? `<p class="rw-note">${Math.round(rw.pct * 100)}% SALVAGED${rw.wallet ? ` · ${fmt(rw.wallet - rw.banked)} LOST` : ''}</p>` : ''}
-      <div class="rw-total">PROFILE ${coin}<b>${fmt(rw.total)}</b></div>
+      <div class="rw-total">PROFILE ${coin}<b>${fmt(rw.total)}</b>${rw.flux ? ` · <span class="flux">+${fmt(rw.flux)} FLUX</span>` : ''}</div>
       <div class="rw-rank">
         <span>RANK <b>${rk.rank}</b></span>${bar(rk)}<span class="rw-xp">+${fmt(rw.rankXp)} XP</span>
       </div>
@@ -204,8 +221,8 @@ export const meta = {
 
   // --- Extraction -------------------------------------------------------------
   renderExtract(sum) {
-    $('#extract-title').textContent = sum.final ? 'SIGNAL SILENCED' : 'SYSTEM SECURED';
-    $('#extract-sub').textContent = sum.final ? `${sum.system.name} · THE GRID IS FREE` : `${sum.system.name} · EXTRACTION COMPLETE`;
+    $('#extract-title').textContent = sum.deep ? 'EXTRACTED' : sum.final ? 'SIGNAL SILENCED' : 'SYSTEM SECURED';
+    $('#extract-sub').textContent = sum.deep ? `DEEP GRID ${sum.deep} · ${sum.system.name}${sum.tier ? ` · OVERDRIVE ${sum.tier}` : ''}` : sum.final ? `${sum.system.name} · THE GRID IS FREE` : `${sum.system.name} · EXTRACTION COMPLETE`;
     $('#extract-score').textContent = formatScore(sum.score);
     $('#extract-stats').innerHTML =
       stat('TIME', formatTime(sum.time)) + stat('LEVEL', sum.level) + stat('KILLS', sum.kills) +

@@ -145,10 +145,18 @@ export const ui = {
   },
 
   // --- Draft --------------------------------------------------------------------
-  renderDraft(player, choices, kind, rerolls, onPick, left = 0) {
-    $('#draft-title').textContent = kind === 'sector' ? 'SECTOR CLEAR' : kind === 'supply' ? 'SUPPLY DROP' : 'LEVEL UP';
-    $('#draft-title').style.color = kind === 'sector' ? '#7dff6b' : kind === 'supply' ? '#ffd24a' : '#fff';
-    $('#draft-sub').textContent = kind === 'sector' ? 'Claim a reward for the next sector' : kind === 'supply' ? `Salvaged tech for this system — ${left} to claim` : `Level ${player.level} — choose an upgrade`;
+  // note: an extra line for the subtitle (campaign fight reward, vault haul).
+  renderDraft(player, choices, kind, rerolls, onPick, left = 0, note = '') {
+    const T = {
+      sector: ['SECTOR CLEAR', '#7dff6b', 'Claim a reward for the next sector'],
+      supply: ['SUPPLY DROP', '#ffd24a', `Salvaged tech for this system — ${left} to claim`],
+      vault: ['TREASURE VAULT', '#ffb300', 'Pick one'],
+      boost: ['OVERCLOCK', '#7dff6b', '+1 level to an upgrade you own'],
+      level: ['LEVEL UP', '#fff', `Level ${player.level} — choose an upgrade`],
+    }[kind] || ['LEVEL UP', '#fff', ''];
+    $('#draft-title').textContent = T[0];
+    $('#draft-title').style.color = T[1];
+    $('#draft-sub').textContent = note ? `${T[2]} · ${note}` : T[2];
     const wrap = $('#draft-cards');
     wrap.innerHTML = '';
     wrap.classList.toggle('no-keys', input.device === 'touch');
@@ -182,7 +190,7 @@ export const ui = {
     const p = G.player;
     $('#pause-stats').innerHTML = stat('SECTOR', G.sector) + stat('LEVEL', p.level) + stat('TIME', formatTime(G.runTime));
     renderBuild($('#pause-build'), p);
-    $('#pause-quit').textContent = G.run && G.run.mode === 'campaign' ? 'ABANDON RUN' : 'QUIT TO TITLE';
+    $('#pause-quit').textContent = G.run && G.run.mode === 'campaign' ? (G.run.victory ? 'EXTRACT · BANK ALL' : 'ABANDON RUN') : 'QUIT TO TITLE';
   },
 
   // --- Game over ----------------------------------------------------------------

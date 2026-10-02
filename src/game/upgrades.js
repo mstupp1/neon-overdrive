@@ -153,9 +153,11 @@ export function applyUpgrade(p, id, G) {
 
 // Rolls up to n distinct upgrade ids from the current pool (weighted). `kind` is 'level' or 'sector'.
 // `evo` lets eligible Evolutions into the pool (drafts only; the Black Market and Contraband leave it off).
-export function rollUpgradeIds(p, kind, n = 3, rng = Math.random, evo = false) {
+// `only(u)` optionally narrows the pool (campaign reward drafts by category).
+export function rollUpgradeIds(p, kind, n = 3, rng = Math.random, evo = false, only = null) {
   const mods = moduleCount(p);
   const pool = UPGRADES.filter((u) => {
+    if (only && !only(u)) return false;
     const l = p.up[u.id] || 0;
     if (u.cat === 'evolution') return evo && evolutionReady(p, u);
     if (l >= u.max) return false;
@@ -186,8 +188,8 @@ export function rollUpgradeIds(p, kind, n = 3, rng = Math.random, evo = false) {
 }
 
 // Build a draft of 3 choices. `kind` is 'level' or 'sector'.
-export function rollDraft(p, kind) {
-  const choices = rollUpgradeIds(p, kind, 3, Math.random, true);
+export function rollDraft(p, kind, only = null) {
+  const choices = rollUpgradeIds(p, kind, 3, Math.random, true, only);
   if (choices.length < 3 && p.hp < p.maxHp) choices.push('repair');
   while (choices.length < 3) choices.push('credits');
   return choices;

@@ -27,28 +27,39 @@ Menus: arrows / d-pad to move, Enter / Space / A to select, Esc / B to go back (
 
 ## Campaign
 
-Title **PLAY** opens the campaign map, then LAUNCH. A **run** flies all four systems in order with one ship: beat a system's boss and you warp straight into the next one with your build, level, hull (half the missing hull is patched) and wallet. **Die anywhere and the next run starts again at Genesis**, so the Hangar, Pilot and banked credits are how you get further each time. Each system is a route of 5-6 rows plus a boss. The campaign map shows the furthest point any run has reached.
+Title **PLAY** opens the campaign map, then LAUNCH. A **run** flies all four systems in order with one ship: beat a system's boss and you warp straight into the next one with your build, level, hull (half the missing hull is patched) and wallet. **Die anywhere and the next run starts again at Genesis**, so the Hangar, Pilot and banked credits are how you get further each time. Each system is a map of 8 rows plus a boss. The campaign map shows the furthest point any run has reached.
 
 | # | System | Boss | Sectors | Notes |
 |---|---|---|---|---|
-| 1 | NEON GENESIS | WARDEN | 6 | Learn the ropes |
-| 2 | CRIMSON TIDE | HYDRA | 6 | Carriers, shielders |
-| 3 | CYAN CYCLONE | OMEGA | 7 | Weavers, blinkers |
-| 4 | THE VOID | ECLIPSE | 7 | Final system |
+| 1 | NEON GENESIS | WARDEN | 9 | Learn the ropes |
+| 2 | CRIMSON TIDE | HYDRA | 9 | Carriers, shielders |
+| 3 | CYAN CYCLONE | OMEGA | 9 | Weavers, blinkers |
+| 4 | THE VOID | ECLIPSE | 9 | Final system |
 
-- **Route.** Every row offers 2-3 nodes; you may only jump to nodes linked from your current one. Node types: **Combat**, **Elite** (a Hunter mini-boss late in the sector, pays ~3 elites of credits), **Market**, **Dock**, **Anomaly** and the **Boss**. Every row keeps at least one fight, and a Market or Dock is guaranteed from row 3 on.
+- **Map.** Slay the Spire style: six paths climb a 4-wide grid without crossing, splitting and merging, and you may only jump along a link. Row 1 is always a fight, the middle row is a **Treasure Vault**, the row before the boss is a **Rest Station**, and every map has a Market. Elites, shops, rests, vaults and rifts never come twice in a row on one path. Only the nodes you can reach next are labelled.
+- **Fight rewards.** Every combat node shows (a coloured dot, and a tag when reachable) what it pays on top of its sector draft: **OFFENSE**, **DEFENSE** or **MODULE** (the draft only offers that category; Defense also repairs 1), **CACHE** (a credit cache), **HULL** (+1 max hull), **BOOST** (+1 level to an upgrade you own). Elites pay **2 DRAFTS**.
+- **Node types:** **Combat**, **Elite** (a Hunter mini-boss late in the sector), **Market**, **Rest**, **Anomaly**, **Vault**, **Rift** and the **Boss**.
 - **Modifiers.** Elites always, and combat nodes past the first row sometimes, carry a sector modifier: ION STORM (faster bullets, +50% credits), SWARM FRONT, MINEFIELD, BLACKOUT (lights out, enemies glow), OVERCLOCKED (enemies fire faster, +30% XP), BOUNTY (elites drop extra credits).
 - **Difficulty.** One continuous climb: Genesis opens gently and every system picks up where the last boss left off, so a build that keeps growing stays roughly level with the waves.
 - **Black Market.** Two upgrade offers, a repair, a reroll token and **Contraband** (+2 random upgrade levels, -1 max hull). Paid from the run wallet; prices rise with the system.
-- **Repair Dock.** Full repair, or **Reinforce** (+1 max hull).
+- **Rest Station.** Full repair, **Reinforce** (+1 max hull), or **Overclock** (+1 level to an upgrade you own, your pick).
+- **Treasure Vault.** A credit cache plus a draft where each pick installs two levels.
+- **Chaos Rift.** Dive in (+3 random upgrade levels, the next 2 fights each get a hazard modifier), skim the edge (+1 level, 1 hazard) or back away.
 - **Anomalies.** Risk-for-reward events with 2-3 choices: Derelict Carrier, Signal Echo, Smuggler Beacon, Cryo Pod, Glitched Cache, Ghost Signal, Overcharged Reactor, Quiet Drift, Wreckage Field, MAG Uplink. Some curse the next fight (a hazard modifier or an elite ambush).
 - **Story.** Short comms exchanges (ECHO is your pilot; MAG and the SIGNAL talk to you) play at launch, before and after bosses and at the ending. Toggle in Settings; Esc / B skips.
 - **Hull.** Clearing a sector repairs 1 hull. A system boss gives a reward draft and moves the run on; beating ECLIPSE wins the run and you **extract**.
 
+### Endgame: Deep Grid, Overdrive tiers, Flux
+
+- **Deep Grid.** Beating ECLIPSE no longer ends the run: after a reward draft and the ending, the run loops back to Genesis as **Deep Grid 1**, then 2, 3... Each cycle multiplies enemy HP by 1.8 and pushes bullet speed, fire rate and spawn rate a little, with bigger rewards. The run only ends when you die (everything banks, since the run is already won) or choose **EXTRACT · BANK ALL** from the pause menu or the route.
+- **Overdrive tiers** (Diablo-style torment levels). Clearing THE VOID at tier *t* unlocks tier *t+1* (up to 10). Pick the tier with the OVERDRIVE button on the campaign map before LAUNCH. Each tier: enemy HP ×1.4, slightly faster and denser fire, +25% credits and XP.
+- **Flux** drops only while the run is heated (tier > 0 or in the Deep Grid): bosses, Hunters and sector clears, scaled by heat = tier + Deep cycle. It always banks in full.
+- **Flux Core** (campaign map): permanent stat levels with no cap, prices rising per level: Damage Lattice (+5% damage), Cycle Accelerator (+3% fire rate), Predictive Optics (+1% crit), Hull Weave (+1 max hull), Overdrive Feed (+6% charge), Neural Uplink (+5% XP), Salvage Protocol (+5% credits).
+
 ### Economy and banking
 
 - You earn **credits** in a run: kill chips (`credit` pickups), elites and Hunters, sector clear payouts and the boss. The run **wallet** is what you spend at Markets.
-- **Extraction (victory)** banks 100% of the wallet. **Death** banks 50%. **Abandoning** a run banks nothing.
+- **Extraction / a won run** banks 100% of the wallet. **Death** before beating THE VOID banks 50%. **Abandoning** an unwon run banks nothing.
 - A full run earns a few thousand credits. Spend-vs-bank is the point: every credit spent at a Market is one less for the Hangar.
 - **Pilot Rank** comes from run XP (score, sectors, bosses, +bonus for victory, later systems teach more). Rank 3 = 700 XP, rank 6 = 2500, rank 10 = 6300, cap 15. Rank gates classes and passives.
 

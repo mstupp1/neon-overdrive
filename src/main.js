@@ -2,6 +2,7 @@
 
 import { G, view } from './game/state.js';
 import { profile, saveProfile, resetProfile } from './core/storage.js';
+import { TIER_CAP, CORE, coreCost } from './game/core.js';
 import { input, bindPointer, pollGamepads } from './core/input.js';
 import { unlockAudio, music, setSfxVolume, setSfxMuted, sfx } from './core/audio.js';
 import { buildSprites, buildEnemySpritesV2 } from './render/sprites.js';
@@ -11,13 +12,14 @@ import { drawHud, updateBanner } from './render/hud.js';
 import { SHIPS, shipById, ownsShip, isUnlocked } from './game/ships.js';
 import { createPlayer } from './game/player.js';
 import { createDirector, startSector, nextSector, endlessSpec } from './game/director.js';
-import { rollDraft, applyUpgrade } from './game/upgrades.js';
+import { rollDraft, applyUpgrade, UPGRADES } from './game/upgrades.js';
 import { spawnEnemy, spawnWeavers } from './game/enemies.js';
 import { step, renderWorld } from './game/world.js';
 import { ui } from './ui/screens.js';
 import { comms } from './ui/comms.js';
 import { meta } from './ui/meta.js';
 import { hangarActs, openHangar } from './ui/hangar.js';
+import { coreActs, openCore } from './ui/fluxcore.js';
 import { pilotActs, openPilot } from './ui/pilot.js';
 import { galleryActs, openGallery, openAchievements } from './ui/gallery.js';
 import { initToasts, notifyBacklog } from './ui/toasts.js';
@@ -25,13 +27,13 @@ import { achInit, achTick } from './game/achievements.js';
 import { rollRelicDrop } from './game/collectables.js';
 import { setClass, setPassives } from './game/pilot.js';
 import { buyShip, buyPart, equipPart, unequipSlot, setPaint, selectShip, applyAllPaints } from './game/hangar.js';
-import { SYSTEMS, systemById, generateRoute, nodeSpec, reachableNodes, routeNode } from './game/campaign.js';
+import { SYSTEMS, systemById, generateRoute, nodeSpec, reachableNodes, routeNode, REWARDS } from './game/campaign.js';
 import { rand, pick, lerp, easeInOut } from './core/math.js';
 import { ring } from './game/fx.js';
 import { cine } from './game/cinematic.js';
 import { sectorIntro } from './render/sectorIntro.js';
-import { STORY, eventFor, eventById, startEvent, resolveChoice, choiceBlocked } from './game/story.js';
-import { rollMarket, buyOffer, dockRepair, dockReinforce, settleRun, rankFor } from './game/economy.js';
+import { STORY, eventFor, eventById, startEvent, resolveChoice, choiceBlocked, RIFT, riftHazard } from './game/story.js';
+import { rollMarket, buyOffer, dockRepair, dockReinforce, settleRun, rankFor, cachePayout } from './game/economy.js';
 
 const app = document.getElementById('app');
 const canvas = document.getElementById('game');
@@ -57,6 +59,10 @@ let draftChoices = null;
 let marketOffers = null; // current Black Market stock
 let curEvent = null; // open anomaly event session (story.startEvent)
 let bossCardT = 0;
+let draftOnly = null; // category filter for the next 'sector' draft (campaign fight rewards)
+let extraDrafts = 0; // further 'sector' drafts owed (elite fights pay two)
+let draftNote = ''; // extra line for the next draft's subtitle (fight reward / vault haul)
+let curNote = ''; // the open draft's note (kept for rerolls)
 let afterDraft = null; // 'route' | 'extract' | 'next': where to go once the sector reward / level drafts are done
 // Level-up pacing: the world slows into the draft and eases back out of it instead of hard cuts.
 const LEVEL_INTRO = 0.5; // real seconds of slow-down before the level-up draft opens
@@ -106,7 +112,7 @@ function newWorld(mode, shipDef, run = null) {
   cine.clear();
   sectorIntro.stop();
   introDone = null;
-  if (run) Object.assign(run, { wallet: 0, earned: 0, frac: 0, curse: null, ambush: false, bonusXp: 0, events: [] });
+  if (run) Object.assign(run, { wallet: 0, earned: 0, frac: 0, flux: 0, curse: null, ambush: false, riftLeft: 0, bonusXp: 0, events: [] });
   G.time = 0;
   G.runTime = 0;
   G.enemies.length = 0;
@@ -174,7 +180,7 @@ function launchRun(from = 0) {
   const ship = curShip();
   profile.lastShip = ship.id;
   saveProfile();
-  newWorld('run', ship, { mode: 'campaign', sysIdx: from, system: SYSTEMS[from], route: null, row: -1, nodeId: null, sectors: 0, victory: false, visited: [] });
+  newWorld('run', ship, { mode: 'campaign', tier: profile.tier, deep: 0, sysIdx: from, system: SYSTEMS[from], route: null, row: -1, nodeId: null, sectors: 0, victory: false, visited: [] });
   enterSystem(from);
 }
 
@@ -232,6 +238,35 @@ function nextSystem() {
     enterSystem(r.sysIdx + 1);
   });
 }
+
+// THE VOID cleared: the run is won (death or EXTRACT now bank everything), the next Overdrive tier unlocks, and the run
+// loops into Deep Grid cycle deep + 1 (harder, pays Flux; core.js). The ending plays after the first clear.
+function diveDeeper() {
+  const r = G.run;
+  markCleared(r.system);
+  r.victory = true;
+  profile.tierMax = Math.min(TIER_CAP, Math.max(profile.tierMax, (r.tier || 0) + 1));
+  saveProfile();
+  const sys = r.system;
+  const go = () => {
+    comms.clear();
+    hideBossCard();
+    const p = G.player;
+    p.hp += Math.ceil((p.maxHp - p.hp) / 2);
+    r.deep = (r.deep || 0) + 1;
+    profile.bestDeep = Math.max(profile.bestDeep, r.deep);
+    saveProfile();
+    music.setSet('normal');
+    blockingStory('deep', STORY.deep, {}, () => enterSystem(0));
+  };
+  blockingStory('post:' + sys.id, STORY.systems[sys.id].postBoss, { once: false, short: 'last' }, () => {
+    if (r.deep === 0) blockingStory('ending', STORY.ending, {}, go);
+    else go();
+  });
+}
+
+// Leave a won run from the pause menu / route: bank everything at the extraction screen.
+const leaveRun = () => (G.run && G.run.mode === 'campaign' && G.run.victory ? finishExtract(true) : showCampaign());
 
 function markCleared(sys) {
   if (!profile.campaign.cleared.includes(sys.id)) profile.campaign.cleared.push(sys.id);
@@ -328,11 +363,15 @@ function pickRouteNode(node) {
   r.visited.push(node.id);
   noteProgress();
   if (node.type === 'combat' || node.type === 'elite' || node.type === 'boss') {
-    const spec = nodeSpec(r.system, node, r.sectors + 1);
+    const spec = nodeSpec(r.system, node, r.sectors + 1, r.tier, r.deep);
     if (r.curse) spec.modifiers.push(r.curse); // Contraband / event drawback
     r.curse = null;
     if (r.ambush && !spec.boss) spec.elite = true; // Glitched Cache ambush
     r.ambush = false;
+    if (r.riftLeft > 0 && !spec.boss) {
+      spec.modifiers.push(riftHazard()); // Chaos Rift aftermath
+      r.riftLeft--;
+    }
     startSector(spec);
     r.sectors++;
     enterPlay();
@@ -351,8 +390,18 @@ function visitNode(node) {
       break;
     case 'dock':
       G.screen = 'dock';
-      meta.renderDock(G.player);
+      meta.renderDock(G.player, boostChoices(G.player).length > 0);
       ui.show('dock', { lock: 250 });
+      break;
+    case 'vault': {
+      const cr = cachePayout();
+      draftNote = `${cr ? `+${cr} credits in the vault · ` : ''}each pick installs 2 levels`;
+      afterDraft = 'route';
+      openDraft('vault', true);
+      break;
+    }
+    case 'rift':
+      openEvent(RIFT);
       break;
     default:
       openEvent(eventFor(G.run.route, node, G.run.events));
@@ -388,6 +437,11 @@ function buy(btn) {
 }
 
 function dockChoose(btn) {
+  if (btn.dataset.opt === 'overclock') {
+    if (!boostChoices(G.player).length) return;
+    afterDraft = 'route';
+    return openDraft('boost', true);
+  }
   if (btn.dataset.opt === 'repair') dockRepair();
   else dockReinforce();
   sfx.heal();
@@ -418,7 +472,7 @@ function finishExtract(final) {
   const { unlocked, reward } = bankRun();
   meta.renderExtract({
     system: r.system, score: Math.floor(G.score), time: G.runTime, level: p.level, kills: G.kills, sectors: r.sectors,
-    maxCombo: G.maxCombo, grazes: G.grazes, unlocked, reward, player: p, final,
+    maxCombo: G.maxCombo, grazes: G.grazes, unlocked, reward, player: p, final, deep: r.deep || 0, tier: r.tier || 0,
   });
   G.screen = 'extract';
   ui.show('extract', { lock: 700 });
@@ -463,12 +517,43 @@ function pause() {
   music.setDuck(0.45);
 }
 
+// Owned, non-maxed, non-evolution upgrades (Rest Station overclock / BOOST reward).
+function boostChoices(p) {
+  return UPGRADES.filter((u) => u.cat !== 'evolution' && (p.up[u.id] || 0) > 0 && p.up[u.id] < u.max).map((u) => u.id);
+}
+
+const DRAFT_ONLY = {
+  offense: (u) => u.cat === 'weapon' || u.cat === 'stat',
+  defense: (u) => u.cat === 'defense',
+  module: (u) => u.cat === 'module' || u.cat === 'evolution',
+};
+
+// Choices for a draft of `kind`: level | sector | supply | vault (2 levels per pick) | boost (+1 to an owned upgrade).
+function rollFor(kind) {
+  const p = G.player;
+  if (kind === 'boost') {
+    const ids = boostChoices(p);
+    for (let i = ids.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [ids[i], ids[j]] = [ids[j], ids[i]];
+    }
+    return ids.length ? ids.slice(0, 3) : ['credits'];
+  }
+  if (kind === 'sector' && draftOnly) {
+    const only = rollDraft(p, 'sector', DRAFT_ONLY[draftOnly]);
+    if (only.filter((id) => id !== 'repair' && id !== 'credits').length >= 2) return only; // else the category is spent
+  }
+  return rollDraft(p, kind === 'level' ? 'level' : 'sector');
+}
+
 function openDraft(kind, quiet = false) {
   levelIntro = -1;
   draftKind = kind;
-  draftChoices = rollDraft(G.player, kind === 'supply' ? 'sector' : kind);
+  draftChoices = rollFor(kind);
   G.screen = 'draft';
-  ui.renderDraft(G.player, draftChoices, kind, G.rerolls, pickUpgrade, G.supplyLeft);
+  curNote = draftNote;
+  draftNote = '';
+  ui.renderDraft(G.player, draftChoices, kind, G.rerolls, pickUpgrade, G.supplyLeft, curNote);
   // guard: keys already held for flying (or a stray dash) don't drive the menu until released.
   ui.show('draft', { lock: 420, guard: true });
   pauseBtn.hidden = true;
@@ -494,12 +579,20 @@ function draftTimeScale() {
 }
 
 function pickUpgrade(id) {
-  applyUpgrade(G.player, id, G);
+  const p = G.player;
+  applyUpgrade(p, id, G);
+  // Treasure Vault: each pick is worth two levels (where the upgrade has room).
+  if (draftKind === 'vault' && p.up[id] && p.up[id] < (UPGRADES.find((u) => u.id === id) || {}).max) applyUpgrade(p, id, G);
   if (draftKind === 'level') G.pendingLevels = Math.max(0, G.pendingLevels - 1);
   if (draftKind === 'supply' && --G.supplyLeft > 0) return openDraft('supply');
-  G.player.iframes = Math.max(G.player.iframes, 0.5);
+  p.iframes = Math.max(p.iframes, 0.5);
   if (draftKind === 'sector') {
-    if (G.run.mode === 'campaign') afterDraft = afterDraft === 'next' ? 'next' : 'route';
+    draftOnly = null;
+    if (extraDrafts > 0) {
+      extraDrafts--;
+      return openDraft('sector', true);
+    }
+    if (G.run.mode === 'campaign') afterDraft = afterDraft === 'next' || afterDraft === 'deep' ? afterDraft : 'route';
     else nextSector();
   }
   if (G.pendingLevels > 0) return openDraft('level');
@@ -508,6 +601,7 @@ function pickUpgrade(id) {
   if (next === 'route') return showRoute();
   if (next === 'extract') return extract();
   if (next === 'next') return nextSystem();
+  if (next === 'deep') return diveDeeper();
   enterPlay();
   resumeEase = RESUME_EASE;
   input.holdTarget(); // the cursor was on the menu: don't yank the ship toward it
@@ -528,16 +622,44 @@ function onSectorClear() {
     return;
   }
   if (G.run.mode === 'campaign' && G.director.spec.boss) {
-    // Final boss: skip the reward draft, finish any pending level-ups, then extract.
-    afterDraft = 'extract';
-    if (G.pendingLevels > 0) openDraft('level');
-    else {
-      afterDraft = null;
-      extract();
-    }
+    // THE VOID's boss: a reward draft, then the run dives into the next Deep Grid cycle.
+    afterDraft = 'deep';
+    openDraft('sector');
     return;
   }
+  if (G.run.mode === 'campaign') applyFightReward(G.director.spec.reward);
   openDraft('sector');
+}
+
+// The reward a campaign fight showed on the map (campaign.js REWARDS), paid at sector clear around its sector draft.
+function applyFightReward(rw) {
+  const p = G.player;
+  const notes = [];
+  const say = (t) => notes.push(t);
+  draftOnly = rw === 'offense' || rw === 'defense' || rw === 'module' ? rw : null;
+  extraDrafts = rw === 'double' ? 1 : 0;
+  if (rw === 'defense' && p.hp < p.maxHp) {
+    p.hp++;
+    say('repaired 1 hull');
+  }
+  if (rw === 'credits') {
+    const cr = cachePayout();
+    if (cr) say(`+${cr} credit cache`);
+  }
+  if (rw === 'hull') {
+    dockReinforce(p);
+    p.hp = Math.min(p.maxHp, p.hp + 1);
+    say('+1 max hull');
+  }
+  if (rw === 'boost') {
+    const ids = boostChoices(p);
+    if (ids.length) {
+      const id = ids[Math.floor(Math.random() * ids.length)];
+      applyUpgrade(p, id, G);
+      say(`${UPGRADES.find((u) => u.id === id).name} +1 level`);
+    }
+  }
+  if (rw && REWARDS[rw]) draftNote = `${REWARDS[rw].name} reward${notes.length ? ': ' + notes.join(' · ') : ''}`;
 }
 
 function gameOver() {
@@ -626,7 +748,26 @@ ui.init({
     document.querySelectorAll('#scr-help [data-tab]').forEach((el) => el.classList.toggle('on', el.dataset.tab === btn.dataset.tab));
   },
   launch: () => launchRun(),
+  // Campaign "how a run works" box: toggled by the ? button, opens once by itself.
+  runInfo() {
+    const box = document.getElementById('run-info');
+    box.hidden = !box.hidden;
+    if (!profile.seenRunInfo) {
+      profile.seenRunInfo = true;
+      saveProfile();
+    }
+    (box.hidden ? document.querySelector('#sys-detail .info-btn') : box.querySelector('.btn')).focus();
+  },
   hangar: () => openHangar(),
+  core: () => openCore(() => showCampaign('core-btn')),
+  ...coreActs,
+  // Overdrive tier for the next launch: cycles through the unlocked tiers.
+  tier() {
+    if (!profile.tierMax) return;
+    profile.tier = (profile.tier + 1) % (profile.tierMax + 1);
+    saveProfile();
+    showCampaign('tier-btn');
+  },
   leaveHangar: () => showCampaign(),
   ...hangarActs,
   pilot: () => openPilot(),
@@ -645,19 +786,19 @@ ui.init({
   eventDone: () => nodeContinue(),
   buy,
   dock: dockChoose,
-  abandon: () => showCampaign(),
+  abandon: leaveRun,
   resume: () => {
     enterPlay();
   },
   restart: () => (G.run.mode === 'campaign' ? launchRun() : startRun(curShip())),
-  quit: () => (G.run.mode === 'campaign' ? showCampaign() : toTitle()),
+  quit: () => (G.run.mode === 'campaign' ? leaveRun() : toTitle()),
   retry: () => (G.run.mode === 'campaign' ? launchRun() : startRun(curShip())),
   title: () => toTitle(),
   reroll() {
     if (G.rerolls <= 0) return;
     G.rerolls--;
-    draftChoices = rollDraft(G.player, draftKind === 'supply' ? 'sector' : draftKind);
-    ui.renderDraft(G.player, draftChoices, draftKind, G.rerolls, pickUpgrade, G.supplyLeft);
+    draftChoices = rollFor(draftKind);
+    ui.renderDraft(G.player, draftChoices, draftKind, G.rerolls, pickUpgrade, G.supplyLeft, curNote);
     ui.show('draft', { lock: 200 });
   },
   fullscreen() {
@@ -737,7 +878,7 @@ let slowFrames = 0;
 
 function simulating() {
   const s = G.screen;
-  return s === 'play' || s === 'gameover' || s === 'title' || s === 'campaign' || s === 'hangar' || s === 'parts' || s === 'pilot' || s === 'settings' || s === 'help' || s === 'gallery' || s === 'achievements';
+  return s === 'play' || s === 'gameover' || s === 'title' || s === 'campaign' || s === 'hangar' || s === 'parts' || s === 'pilot' || s === 'settings' || s === 'help' || s === 'gallery' || s === 'achievements' || s === 'core';
 }
 
 function frame(now) {

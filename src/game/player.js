@@ -28,6 +28,7 @@ export function createPlayer(ship, gear = true) {
     ship,
     color: activePaint(profile, ship).color,
     parts: gear ? equippedParts(profile, ship.id) : [],
+    fluxCore: gear ? { ...profile.core } : null, // Flux Core levels (core.js)
     x: view.W / 2,
     y: view.H * 0.78,
     vx: 0,

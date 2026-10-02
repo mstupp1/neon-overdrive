@@ -65,6 +65,7 @@ export function dropKillCredits(e) {
   if (!G.run || G.mode !== 'run') return;
   const u = unit();
   if (e.elite || e.hunter) {
+    if (e.hunter) gainFlux(3, e);
     const n = (e.hunter ? 9 : 3) * (G.director.diff.eliteCredits || 1); // the Hunter pays out three elites
     for (let i = 0; i < n; i++) dropCredit(e.x, e.y, u * (e.hunter ? 1.1 : 0.9));
   } else {
@@ -75,10 +76,31 @@ export function dropKillCredits(e) {
 
 // Paid out when a sector is cleared (direct to wallet). Returns the amount gained.
 export function sectorPayout() {
+  gainFlux(1);
   return gainCredits(Math.round(unit() * 4.5));
 }
 
+// --- Flux (endgame currency, core.js) -------------------------------------------------
+// Heat = Overdrive tier + Deep Grid cycle. Flux only drops while heat > 0 and always banks in full.
+export const heatOf = (r = G.run) => (r && r.mode === 'campaign' ? (r.tier || 0) + (r.deep || 0) : 0);
+
+export function gainFlux(base, at) {
+  const r = G.run;
+  const h = heatOf(r);
+  if (!h || G.mode !== 'run') return 0;
+  const n = Math.max(1, Math.round(base * h));
+  r.flux = (r.flux || 0) + n;
+  if (at) floatText(at.x, at.y - 40, `+${n} FLUX`, '#b48bff', 12, 1.1);
+  return n;
+}
+
+// Campaign CACHE fight reward / Treasure Vault: a cache worth about four sector payouts.
+export function cachePayout() {
+  return gainCredits(Math.round(unit() * 20));
+}
+
 export function bossPayout(e) {
+  gainFlux(8, e);
   return gainCredits(Math.round(unit() * 14), e);
 }
 
@@ -115,13 +137,15 @@ export function settleRun(victory) {
   const actMul = mode === 'campaign' ? 1 + 0.15 * (r.system.act - 1) : 1; // later systems teach more
   const gainXp = Math.round(runRankXp(G.score, cleared, G.bossKills, victory) * actMul) + (r.bonusXp || 0); // bonusXp: Ghost Signal event
   const before = rankFor(profile.rankXp);
+  const flux = r.flux || 0;
+  profile.flux += flux;
   profile.credits += banked;
   profile.rankXp += gainXp;
   const after = rankFor(profile.rankXp);
   saveProfile();
   return {
     earned: r.earned || 0, spent: (r.earned || 0) - w, wallet: w, pct, banked, total: profile.credits,
-    rankXp: gainXp, rankBefore: before, rankAfter: after, rankUp: after.rank > before.rank, victory,
+    rankXp: gainXp, rankBefore: before, rankAfter: after, rankUp: after.rank > before.rank, victory, flux,
   };
 }
 
