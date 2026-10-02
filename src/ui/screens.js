@@ -50,6 +50,7 @@ export const ui = {
   },
 
   show(name, { lock = 0, focus = 0, guard = false } = {}) {
+    const same = !!name && name === current; // re-render of the open screen (carousel, purchase, result...)
     for (const [k, el] of Object.entries(screens)) el.classList.toggle('active', k === name);
     current = name || null;
     focusIdx = typeof focus === 'number' ? focus : 0;
@@ -60,7 +61,7 @@ export const ui = {
     input.clear();
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     if (focus instanceof Element) focusIdx = Math.max(0, focusables().indexOf(focus)); // focus a given element
-    if (name) fit(screens[name]);
+    if (name) fit(screens[name], same);
     applyFocus();
   },
 
@@ -264,18 +265,34 @@ export function renderBuild(el, p) {
 
 // Menus never scroll: when a screen's content is taller than the window, shrink the whole screen's
 // type (everything is sized in em) until it fits. Below MIN_FIT it stays clipped-but-scrollable (no bar).
+// Menus never jump either: a screen is centred once when it opens, then its top is pinned, so a line that
+// appears or a card that grows only pushes what is below it. `keep` = the screen was already open.
 const MIN_FIT = 0.72;
 let fitCheckAt = 0;
 
-function fit(el) {
+function fit(el, keep = false) {
+  if (keep && el._pinned && el.scrollHeight <= el.clientHeight + 1) return;
   el.style.fontSize = '';
+  el.style.justifyContent = '';
+  el.style.paddingTop = '';
   let k = 1;
   for (let i = 0; i < 6 && k > MIN_FIT && el.scrollHeight > el.clientHeight + 1; i++) {
     k = Math.max(MIN_FIT, k * Math.min(0.97, el.clientHeight / el.scrollHeight));
     el.style.fontSize = `${k}em`;
   }
+  pin(el);
   el._fitH = el.clientHeight;
   el._fitW = el.clientWidth;
+}
+
+// Swap the flex centring for the same top offset as fixed padding.
+function pin(el) {
+  const first = [...el.children].find((c) => c.offsetParent !== null && getComputedStyle(c).position !== 'absolute');
+  el._pinned = !!first;
+  if (!first) return;
+  const top = first.offsetTop - (parseFloat(getComputedStyle(first).marginTop) || 0);
+  el.style.justifyContent = 'flex-start';
+  el.style.paddingTop = `${top}px`;
 }
 
 function focusables() {
