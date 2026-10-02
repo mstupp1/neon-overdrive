@@ -37,6 +37,7 @@ Title **PLAY** opens the campaign map, then LAUNCH. A **run** flies all four sys
 | 4 | THE VOID | ECLIPSE | 9 | Final system |
 
 - **Map.** Slay the Spire style: six paths climb a 4-wide grid without crossing, splitting and merging, and you may only jump along a link. Row 1 is always a fight, the middle row is a **Treasure Vault**, the row before the boss is a **Rest Station**, and every map has a Market. Elites, shops, rests, vaults and rifts never come twice in a row on one path. Only the nodes you can reach next are labelled.
+- **Overworld.** Between nodes you fly your ship around the system yourself (WASD / stick, drag on touch, click or hold the left mouse button). The route is laid out as beacons joined by lanes, bottom to top; fly into a lit beacon and hold there (or press Enter / A) to jump in. **M** / Tab / Select / the MAP button lays the full route map over the screen while you keep flying, and edge arrows point to the next beacons. Space / A boosts. Patrols of darts, snipers and spinners guard the space between rows (your main gun auto-fires at them; they pay XP and credits). Sites: **Salvage** (credits), **Data Cache** (XP), a **Repair Beacon** (+1 hull) and a **Distress Signal** that opens an anomaly. Pause still has ABANDON / EXTRACT.
 - **Fight rewards.** Every combat node shows (a coloured dot, and a tag when reachable) what it pays on top of its sector draft: **OFFENSE**, **DEFENSE** or **MODULE** (the draft only offers that category; Defense also repairs 1), **CACHE** (a credit cache), **HULL** (+1 max hull), **BOOST** (+1 level to an upgrade you own). Elites pay **2 DRAFTS**.
 - **Node types:** **Combat**, **Elite** (a Hunter mini-boss late in the sector), **Market**, **Rest**, **Anomaly**, **Vault**, **Rift** and the **Boss**.
 - **Modifiers.** Elites always, and combat nodes past the first row sometimes, carry a sector modifier: ION STORM (faster bullets, +50% credits), SWARM FRONT, MINEFIELD, BLACKOUT (lights out, enemies glow), OVERCLOCKED (enemies fire faster, +30% XP), BOUNTY (elites drop extra credits).
@@ -51,7 +52,7 @@ Title **PLAY** opens the campaign map, then LAUNCH. A **run** flies all four sys
 
 ### Endgame: Deep Grid, Overdrive tiers, Flux
 
-- **Deep Grid.** Beating ECLIPSE no longer ends the run: after a reward draft and the ending, the run loops back to Genesis as **Deep Grid 1**, then 2, 3... Each cycle multiplies enemy HP by 1.8 and pushes bullet speed, fire rate and spawn rate a little, with bigger rewards. The run only ends when you die (everything banks, since the run is already won) or choose **EXTRACT · BANK ALL** from the pause menu or the route.
+- **Deep Grid.** Beating ECLIPSE no longer ends the run: after a reward draft and the ending, the run loops back to Genesis as **Deep Grid 1**, then 2, 3... Each cycle multiplies enemy HP by 1.8 and pushes bullet speed, fire rate and spawn rate a little, with bigger rewards. The run only ends when you die (everything banks, since the run is already won) or choose **EXTRACT · BANK ALL** from the pause menu.
 - **Overdrive tiers** (Diablo-style torment levels). Clearing THE VOID at tier *t* unlocks tier *t+1* (up to 10). Pick the tier with the OVERDRIVE button on the campaign map before LAUNCH. Each tier: enemy HP ×1.4, slightly faster and denser fire, +25% credits and XP.
 - **Flux** drops only while the run is heated (tier > 0 or in the Deep Grid): bosses, Hunters and sector clears, scaled by heat = tier + Deep cycle. It always banks in full.
 - **Flux Core** (campaign map): permanent stat levels with no cap, prices rising per level: Damage Lattice (+5% damage), Cycle Accelerator (+3% fire rate), Predictive Optics (+1% crit), Hull Weave (+1 max hull), Overdrive Feed (+6% charge), Neural Uplink (+5% XP), Salvage Protocol (+5% credits).
@@ -179,7 +180,7 @@ The first boot plays a short, skippable in-engine intro (ECHO's squadron falls a
 
 ```
 index.html            markup for canvas + DOM menus
-src/main.js           boot, layout, main loop, game flow (title -> campaign -> route -> run -> draft/pause -> results), NEON debug hook
+src/main.js           boot, layout, main loop, game flow (title -> campaign -> overworld -> run -> draft/pause -> results), NEON debug hook
 src/style.css         menu / HUD-overlay styles
 src/core/             math (+ seeded PRNG), input (kb/mouse/touch/gamepad), audio (synth SFX + music), storage (profile v3)
 src/render/           baked glow sprites (ships, enemies, gear, portraits), per-system backgrounds, canvas HUD
@@ -192,6 +193,7 @@ src/game/enemies.js   enemy roster and AI, Hunter, damage / kill
 src/game/bosses.js    WARDEN / HYDRA / OMEGA / ECLIPSE
 src/game/director.js  wave director (sector flow, patterns, boss warn)
 src/game/campaign.js  systems, route generation, node specs
+src/game/overworld.js free-flight overworld per system: beacons, patrols, sites, map overlay
 src/game/modifiers.js sector modifiers
 src/game/economy.js   credits, banking, Pilot Rank, Black Market, dock
 src/game/hangar.js    ships, paint, the gear Fabricator, equip / sell (pure profile logic)

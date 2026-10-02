@@ -142,6 +142,20 @@ body {
     box-shadow: 0 0 0.5em var(--cyan);
 }
 
+/* Overworld route-map toggle, left of the pause button. */
+.map-btn {
+    right: 3.3em;
+    width: auto;
+    padding: 0 0.7em;
+}
+
+.map-btn span {
+    font: 700 0.8em/1 Orbitron, sans-serif;
+    letter-spacing: 0.08em;
+    color: var(--cyan);
+    text-shadow: 0 0 0.5em var(--cyan);
+}
+
 #touch-ui .touch-btn {
     position: absolute;
     bottom: calc(var(--safe-bottom) + 0.6em);
