@@ -28,6 +28,8 @@ import { buyShip, buyPart, equipPart, unequipSlot, setPaint, selectShip, applyAl
 import { SYSTEMS, systemById, generateRoute, nodeSpec, reachableNodes, routeNode, systemUnlocked } from './game/campaign.js';
 import { rand, pick, lerp, easeInOut } from './core/math.js';
 import { ring } from './game/fx.js';
+import { cine } from './game/cinematic.js';
+import { sectorIntro } from './render/sectorIntro.js';
 import { STORY, eventFor, eventById, startEvent, resolveChoice, choiceBlocked } from './game/story.js';
 import { rollMarket, buyOffer, dockRepair, dockReinforce, settleRun, rankFor } from './game/economy.js';
 
@@ -60,6 +62,7 @@ const LEVEL_INTRO = 0.5; // real seconds of slow-down before the level-up draft 
 const RESUME_EASE = 0.45; // real seconds to ramp back to full speed after a draft
 let levelIntro = -1; // seconds left in the slow-down (-1 = not running)
 let resumeEase = 0;
+let introDone = null; // callback once the sector intro animation ends
 
 // --- Layout -------------------------------------------------------------------------
 
@@ -99,6 +102,9 @@ function newWorld(mode, shipDef, run = null) {
   G.run = run;
   comms.clear();
   hideBossCard();
+  cine.clear();
+  sectorIntro.stop();
+  introDone = null;
   if (run) Object.assign(run, { wallet: 0, earned: 0, frac: 0, curse: null, ambush: false, bonusXp: 0, events: [] });
   G.time = 0;
   G.runTime = 0;
@@ -166,7 +172,28 @@ function launchSystem(sys) {
   saveProfile();
   const route = generateRoute(sys, Math.floor(Math.random() * 2147483647));
   newWorld('run', ship, { mode: 'campaign', system: sys, route, row: -1, nodeId: null, sectors: 0, victory: false, visited: [] });
-  blockingStory('intro:' + sys.id, STORY.systems[sys.id].intro, {}, () => startSupply(sys.supply || 0));
+  playSectorIntro(sys, SYSTEMS.indexOf(sys), () => blockingStory('intro:' + sys.id, STORY.systems[sys.id].intro, {}, () => startSupply(sys.supply || 0)));
+}
+
+// Entering a star system: the warp-in title animation (render/sectorIntro.js), then `done` (dialogue, supply, route).
+function playSectorIntro(sys, idx, done) {
+  G.screen = 'sector-intro';
+  ui.hide();
+  pauseBtn.hidden = true;
+  touchUi.hidden = true;
+  music.setDuck(0.7);
+  input.clear();
+  introDone = done;
+  sectorIntro.start(sys, idx);
+}
+
+function finishSectorIntro() {
+  sectorIntro.stop();
+  const done = introDone;
+  introDone = null;
+  input.clear();
+  music.setDuck(1);
+  if (done) done();
 }
 
 // Later systems open with a supply drop: salvaged tech so a fresh ship is not outmatched at row 0.
@@ -641,6 +668,10 @@ input.onDeviceChange = (d) => {
 };
 document.addEventListener('pointerdown', unlockAudio, { capture: true });
 bindPointer(canvas);
+// Tap / click skips the sector intro.
+app.addEventListener('pointerdown', () => {
+  if (G.screen === 'sector-intro') sectorIntro.skip();
+});
 
 music.onTrack = (name) => {
   if (G.mode === 'run' || G.screen === 'title') ui.toast(name);
@@ -687,7 +718,10 @@ function frame(now) {
 
   achTick(raw);
   comms.update(raw, G.screen === 'play');
-  if (G.screen === 'play') {
+  if (G.screen === 'sector-intro') {
+    if (input.consume('confirm') || input.consume('back') || input.consume('dash')) sectorIntro.skip();
+    if (sectorIntro.update(raw)) finishSectorIntro();
+  } else if (G.screen === 'play') {
     if (input.consume('pause')) pause();
   } else if (!comms.blocking) {
     ui.update();
@@ -702,9 +736,9 @@ function frame(now) {
     }
     if (G.slowmo > 0) {
       G.slowmo -= raw;
-      dt *= 0.3;
+      if (!cine.on) dt *= 0.3; // the finisher cam sets its own pace
     }
-    if (G.screen === 'play') dt *= draftTimeScale();
+    if (G.screen === 'play') dt *= draftTimeScale() * cine.timeScale();
     while (dt > 0) {
       const s = Math.min(dt, 1 / 60);
       step(s);
@@ -721,7 +755,8 @@ function frame(now) {
   const dk = !!(G.mode === 'run' && (G.screen === 'play' || G.screen === 'pause' || G.screen === 'pause-settings') && G.director.diff.blackout && G.director.state !== 'clear' && G.director.state !== 'await'); // not on result screens
   bg.setDark(dk);
   vignette.classList.toggle('dark', dk);
-  bg.update(simulating() ? raw : raw * 0.25, boost);
+  const intro = G.screen === 'sector-intro';
+  bg.update(simulating() || intro ? raw : raw * 0.25, intro ? sectorIntro.boost() : boost);
   music.update(raw);
   render();
 }
@@ -738,13 +773,15 @@ function afterStep(raw) {
   }
   if (G.screen === 'play') {
     if (resumeEase > 0) resumeEase = Math.max(0, resumeEase - raw);
-    if (G.pendingLevels > 0 && !p.dead && G.director.state !== 'clear') {
+    // A finisher shot outranks the level-up slow-down: it waits (and one already running is dropped) until the shot ends.
+    if (G.pendingLevels > 0 && !p.dead && G.director.state !== 'clear' && !cine.on) {
       if (levelIntro < 0) startLevelIntro();
       else if ((levelIntro -= raw) <= 0) openDraft('level', true);
     } else if (levelIntro >= 0) {
       levelIntro = -1;
-      music.setDuck(1);
+      if (!cine.on) music.setDuck(1);
     }
+    cine.update(raw); // after the level check, so the director clears the node before a level-up can start
     if (p.dead) {
       G.deathT -= raw;
       if (G.deathT <= 0) gameOver();
@@ -758,11 +795,26 @@ function render() {
   const sh = G.shake * G.shake;
   view.ox = sh > 0.001 ? rand(-1, 1) * sh * 12 * k : 0;
   view.oy = sh > 0.001 ? rand(-1, 1) * sh * 12 * k : 0;
-  ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
-  renderWorld(ctx, k);
-  bloom(ctx);
+  if (G.screen === 'sector-intro') {
+    ctx.setTransform(k, 0, 0, k, 0, 0);
+    sectorIntro.draw(ctx);
+    bloom(ctx);
+    return;
+  }
+  // Finisher / node-start camera: zoom about a world point (screen = world * z + cam offset).
+  const live = G.mode === 'run' && (G.screen === 'play' || G.screen === 'pause' || G.screen === 'pause-settings');
+  const cam = live ? cine.camera() : null;
+  const kz = cam ? k * cam.z : k;
+  if (cam) {
+    view.ox += cam.x * k;
+    view.oy += cam.y * k;
+  }
+  ctx.setTransform(kz, 0, 0, kz, view.ox, view.oy);
+  renderWorld(ctx, kz);
+  bloom(ctx, live ? 1 + 0.25 * cine.amount() : 1);
   ctx.setTransform(k, 0, 0, k, 0, 0);
-  if (G.mode === 'run' && (G.screen === 'play' || G.screen === 'pause' || G.screen === 'draft' || G.screen === 'pause-settings')) drawHud(ctx);
+  if (live) cine.overlay(ctx);
+  if (G.mode === 'run' && (G.screen === 'play' || G.screen === 'pause' || G.screen === 'draft' || G.screen === 'pause-settings')) drawHud(ctx, live ? cine.hudAlpha() : 1);
   if (G.flash > 0.01) {
     ctx.fillStyle = `rgba(${G.flashColor},${Math.min(0.8, G.flash)})`;
     ctx.fillRect(0, 0, view.W, view.H);
@@ -818,10 +870,14 @@ window.NEON = {
   rollDraft: (kind = 'level') => rollDraft(G.player, kind),
   // Start a campaign run (1-based index or system id); lands on the route screen.
   // The intro dialogue is skipped (still marked seen) unless opts.story is true.
+  // The sector intro animation is skipped too unless opts.intro is true.
   launch(sys = 1, opts = {}) {
     launchSystem(typeof sys === 'number' ? SYSTEMS[sys - 1] : systemById(sys));
+    if (!opts.intro && G.screen === 'sector-intro') finishSectorIntro();
     if (!opts.story) comms.skipAll();
   },
+  cine,
+  sectorIntro,
   comms,
   // Debug: open anomaly event `id` (campaign run required; opts.rng forces rolls). pickEvent(i) chooses; the result screen then has #event-continue.
   event(id, opts = {}) {
@@ -876,6 +932,7 @@ window.NEON = {
       return pick(fights.length ? fights : nodes.map((n, i) => i));
     });
     for (let t = 0; t < seconds; t += dt) {
+      if (G.screen === 'sector-intro') finishSectorIntro(); // nor does the sector intro
       if (comms.blocking) comms.skipAll(); // dialogue never blocks the simulator
       if (G.screen === 'draft') pickUpgrade(pickFn(draftChoices));
       for (let guard = 0; guard < 6 && (G.screen === 'route' || G.screen === 'event' || G.screen === 'market' || G.screen === 'dock'); guard++) {

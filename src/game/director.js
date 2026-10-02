@@ -1,7 +1,7 @@
 // Sector flow and wave spawning: intro → waves → (boss) → clear → reward draft.
 
 import { G, view, sectorDifficulty, sectorInfo, isBossSector } from './state.js';
-import { applyModifiers, patternMul } from './modifiers.js';
+import { applyModifiers, patternMul, MODIFIERS } from './modifiers.js';
 import { rand, chance, weightedPick, randInt } from '../core/math.js';
 import { spawnEnemy, spawnWeavers, blinkSpot } from './enemies.js';
 import { spawnBoss, bossById, bossIndex, BOSS_IDS } from './bosses.js';
@@ -10,6 +10,7 @@ import { vacuumAll } from './pickups.js';
 import { sectorPayout } from './economy.js';
 import { onSectorClear as onPilotSectorClear } from './pilot.js';
 import { bg } from '../render/background.js';
+import { cine, lateFinisher } from './cinematic.js';
 import { sfx, music } from '../core/audio.js';
 
 export function createDirector() {
@@ -231,13 +232,24 @@ export function startSector(spec) {
   d.progress = 0;
   d.hunter = null;
   d.hunterSpawned = false;
+  d.finished = false; // the node's finisher shot has played (or been ruled out)
   d.duration = spec.duration;
   bg.setHue(spec.hue);
   bg.setTheme(G.run && G.run.mode === 'campaign' ? G.run.system.id : null);
   G.vacuum = false;
   if (G.mode === 'run') {
-    // Campaign banners count route rows (spec.row), not sectors fought.
-    banner(`SECTOR ${spec.row != null ? spec.row + 1 : spec.index}`, spec.name + (spec.loop ? `  ·  LOOP ${spec.loop + 1}` : ''), `hsl(${spec.hue},100%,70%)`, 2.6);
+    const camp = G.run && G.run.mode === 'campaign' && spec.row != null;
+    if (camp) {
+      // Node opening: the camera settles in, and the card names the node (route row), its type and its modifiers.
+      const rows = G.run.route ? G.run.route.rows.length : 0;
+      const type = spec.boss ? 'BOSS NODE' : spec.elite ? 'ELITE NODE' : 'COMBAT';
+      const mods = spec.modifiers.map((id) => MODIFIERS[id] && MODIFIERS[id].name).filter(Boolean).join('  ·  ');
+      const col = spec.boss ? '#ff2e55' : spec.elite ? '#ff3df2' : `hsl(${spec.hue},100%,70%)`;
+      banner(`NODE ${spec.row + 1}${rows ? ' / ' + rows : ''}`, mods || 'HOSTILES INBOUND', col, 2.4, 'start', `${G.run.system.short}  ·  ${type}`);
+      cine.nodeStart();
+    } else {
+      banner(`SECTOR ${spec.index}`, spec.name + (spec.loop ? `  ·  LOOP ${spec.loop + 1}` : ''), `hsl(${spec.hue},100%,70%)`, 2.6);
+    }
     music.setSet(spec.level >= 7 ? 'late' : 'normal');
   }
 }
@@ -303,8 +315,10 @@ export function updateDirector(dt) {
     }
     case 'clearing':
       d.progress = 1;
+      if (cine.busy) break; // the finisher shot plays out before the clear
       // The Hunter never times out: the sector only clears once it is dead.
       if ((aliveEnemies() === 0 && !d.queue.length) || (d.t > 7 && !(d.hunter && !d.hunter.dead))) {
+        if (lateFinisher()) break;
         d.t = 0;
         if (spec.boss) {
           d.state = 'warn';
@@ -334,7 +348,7 @@ export function updateDirector(dt) {
       }
       break;
     case 'bossDown':
-      if (d.t > 1.4) {
+      if (d.t > 1.4 && !cine.busy) {
         if (G.mode === 'run') music.setSet(local >= 6 ? 'late' : 'normal');
         sectorClear();
       }
@@ -360,7 +374,14 @@ function sectorClear() {
   if (p) onPilotSectorClear(p, !!(d.spec && d.spec.boss));
   if (G.mode === 'run') {
     const cr = sectorPayout();
-    banner('SECTOR CLEAR', `+${(1000 * G.sector).toLocaleString()} BONUS` + (cr ? `  ·  +${cr} CREDITS` : ''), '#7dff6b', 2.2);
+    const sub = `+${(1000 * G.sector).toLocaleString()} BONUS` + (cr ? `  ·  +${cr} CREDITS` : '');
+    const run = G.run && G.run.mode === 'campaign' ? G.run : null;
+    if (run && d.spec.boss) {
+      // System boss down: the end of the whole sector gets its own, bigger beat.
+      const i = run.system.act;
+      banner('SECTOR SECURED', sub, `hsl(${d.spec.hue},100%,72%)`, 2.4, 'secured', `SECTOR ${String(i).padStart(2, '0')}  ·  ${run.system.name}`);
+    } else if (run) banner('NODE CLEAR', sub, '#7dff6b', 2.2, 'clear', `${run.system.short}  ·  NODE ${(d.spec.row ?? 0) + 1}`);
+    else banner('SECTOR CLEAR', sub, '#7dff6b', 2.2);
     G.score += 1000 * G.sector * (1 + G.loop);
     sfx.sector();
     if (p && !p.dead && p.hp < p.maxHp) {

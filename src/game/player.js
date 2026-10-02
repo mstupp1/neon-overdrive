@@ -18,6 +18,7 @@ import { dashNova, resetModules } from './modules.js';
 import { collectRelic } from './collectables.js';
 import { achEvent } from './achievements.js';
 import { CLASSES, activeClass, equippedPassives, initPilot, castUlt, boosted, phasing, fortressOn, bloodrush, onEliteKilled, updatePilot, spawnEchoes } from './pilot.js';
+import { cine } from './cinematic.js';
 
 export const xpFor = (l) => Math.floor(5 + 4.5 * l + 0.9 * l * l);
 
@@ -331,7 +332,7 @@ export function onEnemyKilled(e) {
 }
 
 export function hurtPlayer(p) {
-  if (p.dead || p.iframes > 0 || p.dashT > 0 || p.god || G.mode === 'attract' || phasing(p)) return;
+  if (p.dead || p.iframes > 0 || p.dashT > 0 || p.god || G.mode === 'attract' || phasing(p) || cine.on) return;
   if (p.shield) {
     p.shield = 0;
     p.shieldT = 0;
