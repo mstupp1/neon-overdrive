@@ -161,7 +161,9 @@ Best score, unlocks, credits, rank, gear and settings persist in `localStorage` 
 
 ## Settings
 
-Music / SFX volume, screen shake, screen flashes, damage numbers, story dialogue, fullscreen, reset progress.
+Music / SFX volume, screen shake, screen flashes, damage numbers, story dialogue, replay intro, fullscreen, reset progress.
+
+The first boot plays a short, skippable in-engine intro (ECHO's squadron falls at the Genesis gate, MAG wakes ECHO, one burst of combat) before the title menu; any key arms the skip, a second press (or Esc) skips.
 
 ## Project layout
 
@@ -187,6 +189,7 @@ src/game/rarity.js    Common → Legendary odds and luck (gear and level-up card
 src/game/loot.js      gear drops, inventory cap, pilot class / ability finds
 src/game/ships.js     ships, weapons, paint sets
 src/game/story.js     dialogue and the 10 anomaly events
+src/game/intro.js     skippable boot intro (scripted in-engine cinematic)
 src/game/upgrades.js  upgrade pool, drafts, stat recompute
 src/game/bullets.js, pickups.js, fx.js, world.js, bot.js   projectiles, pickups, particles, step + collisions, autopilot
 src/ui/screens.js     menu navigation, draft cards, results

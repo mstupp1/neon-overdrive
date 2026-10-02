@@ -6,6 +6,7 @@ import { glow, S } from '../render/sprites.js';
 import { TAU, damp, rand, clamp } from '../core/math.js';
 import { shoot, ring, fan, aimAt, clearBullets } from './bullets.js';
 import { explosion, addShake, flash, floatText, slowmo, hitstop, sparks } from './fx.js';
+import { cine } from './cinematic.js';
 import { spawnEnemy, killEnemy } from './enemies.js';
 import { dropXp, dropPickup } from './pickups.js';
 import { bossPayout } from './economy.js';
@@ -639,6 +640,9 @@ function startDeath(e) {
   hitstop(0.2);
   flash('255,255,255', 0.6);
   sfx.bossDie();
+  // Finisher cam: holds on the boss through its death throes (ECLIPSE, the last boss, gets the biggest shot).
+  // The throes are shortened so the slow-motion hold stays around 2.5 real seconds.
+  if (cine.finisher(e, e.kind === 'eclipse' ? 'final' : 'boss', e.color)) e.dieT = 1.3;
 }
 
 function finishBoss(e) {

@@ -114,6 +114,7 @@ export function drawPlayerBullets(ctx, k) {
     const sz = s.size * b.scale;
     ctx.globalAlpha = b.alpha;
     if (b.vx === 0 || b.kind === 'orb') {
+      ctx.setTransform(k, 0, 0, k, view.ox, view.oy); // a rotated shot before this one left its own transform set
       ctx.drawImage(s.img, b.x - sz / 2, b.y - sz / 2, sz, sz);
     } else {
       const a = Math.atan2(b.vy, b.vx) + Math.PI / 2;
@@ -241,6 +242,7 @@ export function updateEnemyBullets(dt) {
 }
 
 export function drawEnemyBullets(ctx, k) {
+  let rotated = false;
   for (const b of G.eBullets) {
     if (b.delay > 0) continue;
     const s = b.flash > 0 && b.type === 'torpedo' ? S.eb_torpedo_flash : b.spr;
@@ -250,7 +252,13 @@ export function drawEnemyBullets(ctx, k) {
       const sn = Math.sin(a) * k;
       ctx.setTransform(c, sn, -sn, c, b.x * k + view.ox, b.y * k + view.oy);
       ctx.drawImage(s.img, -s.half, -s.half, s.size, s.size);
+      rotated = true;
     } else {
+      // Undo the last needle/torpedo's per-bullet transform, or this bullet is drawn offset by that one's position.
+      if (rotated) {
+        ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
+        rotated = false;
+      }
       // Spawn-in pop so new bullets are noticeable.
       const grow = b.t < 0.08 ? 0.6 + b.t * 5 : 1;
       const sz = s.size * grow;
