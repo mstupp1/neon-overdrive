@@ -1,6 +1,6 @@
 # NEON OVERDRIVE
 
-A roguelike neon arcade shooter for the browser: portrait, auto-firing, bullet-dodging, upgrade-drafting. Fight through a four-system **campaign** along a branching route, bank credits and rank between runs, and spend them in the **Hangar** on ships, gear and paint. A classic **Endless Grid** remains for score chasers. Pure HTML5 Canvas + vanilla JS (ES modules), no build step, no dependencies.
+A roguelike neon arcade shooter for the browser: portrait, auto-firing, bullet-dodging, upgrade-drafting. Fight through a four-system **campaign** along a branching route, bank credits and rank between runs, and spend them in the **Hangar** on ships, gear and paint. Pure HTML5 Canvas + vanilla JS (ES modules), no build step, no dependencies.
 
 ## Run it
 
@@ -27,29 +27,29 @@ Menus: arrows / d-pad to move, Enter / Space / A to select, Esc / B to go back (
 
 ## Campaign
 
-Title **PLAY** opens the campaign map: pick a **system**, then LAUNCH. Systems unlock in order (clear one to open the next). Each system is a route of 5-6 rows plus a boss.
+Title **PLAY** opens the campaign map, then LAUNCH. A **run** flies all four systems in order with one ship: beat a system's boss and you warp straight into the next one with your build, level, hull (half the missing hull is patched) and wallet. **Die anywhere and the next run starts again at Genesis**, so the Hangar, Pilot and banked credits are how you get further each time. Each system is a route of 5-6 rows plus a boss. The campaign map shows the furthest point any run has reached.
 
-| # | System | Boss | Sectors | Supply drops | Notes |
-|---|---|---|---|---|---|
-| 1 | NEON GENESIS | WARDEN | 6 | - | Learn the ropes |
-| 2 | CRIMSON TIDE | HYDRA | 6 | 3 | Carriers, shielders |
-| 3 | CYAN CYCLONE | OMEGA | 7 | 4 | Weavers, blinkers |
-| 4 | THE VOID | ECLIPSE | 7 | 4 | Final system |
+| # | System | Boss | Sectors | Notes |
+|---|---|---|---|---|
+| 1 | NEON GENESIS | WARDEN | 6 | Learn the ropes |
+| 2 | CRIMSON TIDE | HYDRA | 6 | Carriers, shielders |
+| 3 | CYAN CYCLONE | OMEGA | 7 | Weavers, blinkers |
+| 4 | THE VOID | ECLIPSE | 7 | Final system |
 
 - **Route.** Every row offers 2-3 nodes; you may only jump to nodes linked from your current one. Node types: **Combat**, **Elite** (a Hunter mini-boss late in the sector, pays ~3 elites of credits), **Market**, **Dock**, **Anomaly** and the **Boss**. Every row keeps at least one fight, and a Market or Dock is guaranteed from row 3 on.
 - **Modifiers.** Elites always, and combat nodes past the first row sometimes, carry a sector modifier: ION STORM (faster bullets, +50% credits), SWARM FRONT, MINEFIELD, BLACKOUT (lights out, enemies glow), OVERCLOCKED (enemies fire faster, +30% XP), BOUNTY (elites drop extra credits).
-- **Supply Drop.** Systems 2-4 open with free upgrade drafts so a fresh ship is not helpless at row 0. The first two rows of systems 2-4 also ease in, and Genesis starts as gently as the first Endless sector.
+- **Difficulty.** One continuous climb: Genesis opens gently and every system picks up where the last boss left off, so a build that keeps growing stays roughly level with the waves.
 - **Black Market.** Two upgrade offers, a repair, a reroll token and **Contraband** (+2 random upgrade levels, -1 max hull). Paid from the run wallet; prices rise with the system.
 - **Repair Dock.** Full repair, or **Reinforce** (+1 max hull).
 - **Anomalies.** Risk-for-reward events with 2-3 choices: Derelict Carrier, Signal Echo, Smuggler Beacon, Cryo Pod, Glitched Cache, Ghost Signal, Overcharged Reactor, Quiet Drift, Wreckage Field, MAG Uplink. Some curse the next fight (a hazard modifier or an elite ambush).
 - **Story.** Short comms exchanges (ECHO is your pilot; MAG and the SIGNAL talk to you) play at launch, before and after bosses and at the ending. Toggle in Settings; Esc / B skips.
-- **Hull.** Clearing a sector repairs 1 hull. Win = beat the system boss and **extract**.
+- **Hull.** Clearing a sector repairs 1 hull. A system boss gives a reward draft and moves the run on; beating ECLIPSE wins the run and you **extract**.
 
 ### Economy and banking
 
 - You earn **credits** in a run: kill chips (`credit` pickups), elites and Hunters, sector clear payouts and the boss. The run **wallet** is what you spend at Markets.
-- **Extraction (victory)** banks 100% of the wallet. **Death** banks 50%. **Abandoning** a run banks nothing. Endless Grid earns half credits but banks all of them.
-- Typical win: ~300 (system 1), 500, 700, 1000 (system 4) credits. Spend-vs-bank is the point: every credit spent at a Market is one less for the Hangar.
+- **Extraction (victory)** banks 100% of the wallet. **Death** banks 50%. **Abandoning** a run banks nothing.
+- A full run earns a few thousand credits. Spend-vs-bank is the point: every credit spent at a Market is one less for the Hangar.
 - **Pilot Rank** comes from run XP (score, sectors, bosses, +bonus for victory, later systems teach more). Rank 3 = 700 XP, rank 6 = 2500, rank 10 = 6300, cap 15. Rank gates classes and passives.
 
 ### Ships
@@ -60,8 +60,8 @@ Ships are bought with credits in the **Hangar** (campaign map -> HANGAR), or gra
 |---|---|---|---|---|
 | VECTOR | Twin pulse cannon, balanced | 3 | owned | - |
 | NEEDLE | Piercing lances, fast, glass cannon | 2 | 600 | Defeat any boss |
-| BULWARK | Short-range homing scatter, starts with a shield | 4 | 900 | Endless: reach sector 5 |
-| PHANTOM | Seeking crescents, 3 dashes, Shock Dash, quick ultimate | 3 | 1400 | Endless: reach sector 8 |
+| BULWARK | Short-range homing scatter, starts with a shield | 4 | 900 | Fight 5 sectors in one run |
+| PHANTOM | Seeking crescents, 3 dashes, Shock Dash, quick ultimate | 3 | 1400 | Fight 8 sectors in one run |
 | CORSAIR | Ricochet bolts that bounce off the side walls | 3 | 1100 | - |
 | MONOLITH | Siege: slow, huge piercing charge orbs | 5 | 1600 | - |
 
@@ -127,15 +127,11 @@ Open **PILOT** on the campaign map to pick a class and equip **2 passives**. Ran
 - **WARDEN** (siege mech), **HYDRA** (bio-leviathan), **OMEGA** (core intelligence): three phases each. Campaign boss HP is tuned per system.
 - **ECLIPSE** (system 4 only): a dark mirror with mirror fans, rings, telegraphed dash-lane beams and shockwaves. Its last phase copies **your** class ultimate (Dark Overdrive, Dark Fortress with two turrets and an invulnerable dome, Dark Phase).
 
-## Endless Grid
-
-**ENDLESS GRID** on the campaign map flies your selected ship and gear on the classic arcade ladder: 9-sector cycles with a boss every 3rd sector (WARDEN, HYDRA, OMEGA), looping with much harder enemies. Half credits, banked in full when you die. Best score and best sector are kept.
-
 Best score, unlocks, credits, rank, gear and settings persist in `localStorage` (profile v3; v2 saves migrate and corrupt saves are sanitised).
 
 ## Gallery and achievements
 
-**GALLERY** (title menu) holds 30 **relics** in five themed sets of six: GRID ORIGINS, BIO BLOOM, DATA STORM and EVENTIDE (one per campaign system) and GRID JUNK (Endless Grid). Each set has 3 commons, 2 rares and a legendary.
+**GALLERY** (title menu) holds 30 **relics** in five themed sets of six: GRID ORIGINS, BIO BLOOM, DATA STORM and EVENTIDE (one per campaign system) and GRID JUNK (a small share of finds in any system). Each set has 3 commons, 2 rares and a legendary.
 
 - **Buy** commons (150) and rares (350) in the Gallery, or open a **Data Capsule** (180) for a random common or rare you don't own yet.
 - **Find** them in the field: any kill has a tiny chance to drop a golden relic cache (elites 4%, Hunters 20%, bosses 35%). It drops a relic from the set of the system you're flying, preferring ones you don't own. **Legendaries are field finds only.** Finds are kept even if you die.

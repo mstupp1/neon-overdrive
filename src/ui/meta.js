@@ -4,7 +4,7 @@
 import { profile } from '../core/storage.js';
 import { formatScore, formatTime } from '../core/math.js';
 import { $, stat, renderBuild } from './screens.js';
-import { SYSTEMS, NODE_TYPES, systemUnlocked, reachableNodes, routeNode } from '../game/campaign.js';
+import { SYSTEMS, NODE_TYPES, reachableNodes, routeNode } from '../game/campaign.js';
 import { MODIFIERS } from '../game/modifiers.js';
 import { bossById } from '../game/bosses.js';
 import { rankFor, ECON_ICONS } from '../game/economy.js';
@@ -36,34 +36,28 @@ const MAP_X = [34, 66, 34, 66];
 const mapY = (i) => 87.5 - i * 25; // act 1 at the bottom
 
 export const meta = {
-  // Builds the system map. Returns the element to focus (the selected system).
-  renderCampaign(sel, shipName) {
+  // The run's four systems as a progress track (furthest point any run reached), plus the run rules. Returns LAUNCH.
+  renderCampaign(shipName) {
     const map = $('#sys-map');
+    const c = profile.campaign;
+    const reached = (i) => i <= c.bestSys || i === 0;
     let lines = '';
     for (let i = 0; i < SYSTEMS.length - 1; i++) {
-      const open = systemUnlocked(SYSTEMS[i + 1], profile);
-      lines += `<line x1="${MAP_X[i]}" y1="${mapY(i)}" x2="${MAP_X[i + 1]}" y2="${mapY(i + 1)}" class="${open ? 'open' : ''}" style="stroke:${hsl(SYSTEMS[i + 1].hue)}"/>`;
+      lines += `<line x1="${MAP_X[i]}" y1="${mapY(i)}" x2="${MAP_X[i + 1]}" y2="${mapY(i + 1)}" class="${reached(i + 1) ? 'open' : ''}" style="stroke:${hsl(SYSTEMS[i + 1].hue)}"/>`;
     }
-    let btns = '';
+    let nodes = '';
     SYSTEMS.forEach((s, i) => {
-      const open = systemUnlocked(s, profile);
-      const done = profile.campaign.cleared.includes(s.id);
-      const sub = !open ? 'LOCKED' : done ? 'CLEARED' : `ACT ${s.act} · ${bossById(s.boss).name}`;
-      btns += `<button class="sys${done ? ' done' : ''}${open ? '' : ' locked'}" data-act="sys" data-i="${i}" ${open ? '' : 'disabled'} style="--c:${hsl(s.hue)};left:${MAP_X[i]}%;top:${mapY(i)}%"><span class="sys-orb">${!open ? NODE_ICONS.lock : done ? NODE_ICONS.check : s.act}</span><span class="sys-txt"><b>${s.name}</b><i>${sub}</i></span></button>`;
+      const done = c.cleared.includes(s.id);
+      const seen = reached(i);
+      const sub = done ? 'CLEARED' : i === c.bestSys ? `BEST · SECTOR ${c.bestRow + 1}` : seen ? `ACT ${s.act} · ${bossById(s.boss).name}` : 'UNCHARTED';
+      nodes += `<div class="sys${done ? ' done' : ''}${seen ? '' : ' locked'}${i === Math.max(0, c.bestSys) ? ' sel' : ''}" style="--c:${hsl(s.hue)};left:${MAP_X[i]}%;top:${mapY(i)}%"><span class="sys-orb">${done ? NODE_ICONS.check : seen ? s.act : NODE_ICONS.lock}</span><span class="sys-txt"><b>${s.name}</b><i>${sub}</i></span></div>`;
     });
-    map.innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none">${lines}</svg>${btns}`;
+    map.innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none">${lines}</svg>${nodes}`;
     const rk = rankFor(profile.rankXp);
     $('#camp-pilot').innerHTML = `<span class="gold">${coin}${fmt(profile.credits)}</span><span class="rank">RANK <b>${rk.rank}</b></span><span class="rankbar"><i style="width:${rk.need ? Math.round((100 * rk.into) / rk.need) : 100}%"></i></span><span class="rank">${shipName}</span><span class="rank cls" style="--c:${activeClass().color}">${activeClass().name}</span>`;
-    return this.selectSystem(sel);
-  },
-
-  // Highlights system `i` and fills the detail panel. Returns the LAUNCH button.
-  selectSystem(i) {
-    const s = SYSTEMS[i];
-    document.querySelectorAll('#sys-map .sys').forEach((b) => b.classList.toggle('sel', +b.dataset.i === i));
-    const boss = bossById(s.boss);
-    $('#sys-detail').style.setProperty('--c', hsl(s.hue));
-    $('#sys-detail').innerHTML = `<h4>${s.name}</h4><p>${s.blurb}</p><div class="sys-meta"><span>${s.rows + 1} SECTORS</span><span>BOSS · ${boss.name}</span>${s.supply ? `<span>SUPPLY DROP ×${s.supply}</span>` : ""}</div>`;
+    const best = c.bestSys < 0 ? 'NO RUNS YET' : c.cleared.length >= SYSTEMS.length ? 'ALL SYSTEMS CLEARED' : `BEST · ${SYSTEMS[c.bestSys].short} SECTOR ${c.bestRow + 1}`;
+    $('#sys-detail').style.setProperty('--c', hsl(SYSTEMS[0].hue));
+    $('#sys-detail').innerHTML = `<h4>ONE RUN · FOUR SYSTEMS</h4><p>Fly from Genesis to the Void with one ship. Your build carries between systems. If you go down, the next run starts at Genesis.</p><div class="sys-meta"><span>${best}</span></div>`;
     return $('#launch-btn');
   },
 
@@ -211,7 +205,7 @@ export const meta = {
   // --- Extraction -------------------------------------------------------------
   renderExtract(sum) {
     $('#extract-title').textContent = sum.final ? 'SIGNAL SILENCED' : 'SYSTEM SECURED';
-    $('#extract-sub').textContent = sum.final ? `${sum.system.name} · THE GRID IS FREE · ENDLESS GRID OPEN` : `${sum.system.name} · EXTRACTION COMPLETE`;
+    $('#extract-sub').textContent = sum.final ? `${sum.system.name} · THE GRID IS FREE` : `${sum.system.name} · EXTRACTION COMPLETE`;
     $('#extract-score').textContent = formatScore(sum.score);
     $('#extract-stats').innerHTML =
       stat('TIME', formatTime(sum.time)) + stat('LEVEL', sum.level) + stat('KILLS', sum.kills) +

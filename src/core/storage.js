@@ -26,7 +26,7 @@ const DEFAULTS = {
   seenHelp: false,
   credits: 0,
   rankXp: 0,
-  campaign: { cleared: [], seenStory: {} },
+  campaign: { cleared: [], seenStory: {}, bestSys: -1, bestRow: -1 }, // best*: furthest system index / route row any run reached
   ownedShips: [],
   ownedParts: [],
   equip: {}, // shipId → { core, plating, thrusters }
@@ -77,6 +77,7 @@ function sanitize(p) {
   p.ownedShips = strs(p.ownedShips);
   p.campaign.cleared = strs(p.campaign.cleared);
   if (!isObj(p.campaign.seenStory)) p.campaign.seenStory = {};
+  for (const k of ['bestSys', 'bestRow']) if (!Number.isInteger(p.campaign[k]) || p.campaign[k] < -1) p.campaign[k] = -1;
   for (const k of Object.keys(p.equip)) if (!isObj(p.equip[k])) delete p.equip[k];
   for (const k of Object.keys(p.paint)) if (!Number.isFinite(p.paint[k])) delete p.paint[k];
   for (const k of Object.keys(p.paintsOwned)) p.paintsOwned[k] = Array.isArray(p.paintsOwned[k]) ? p.paintsOwned[k].filter(Number.isFinite) : [];
