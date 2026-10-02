@@ -71,6 +71,8 @@ const RESUME_EASE = 0.45; // real seconds to ramp back to full speed after a dra
 let levelIntro = -1; // seconds left in the slow-down (-1 = not running)
 let resumeEase = 0;
 let introDone = null; // callback once the sector intro animation ends
+let diveT = 0; // pending zoom-into-node timeout (route → fight); 0 = none
+const routeEl = document.getElementById('scr-route');
 
 // --- Layout -------------------------------------------------------------------------
 
@@ -363,10 +365,26 @@ function showRoute() {
   touchUi.hidden = true;
   music.setDuck(0.6);
   const focus = meta.renderRoute(G);
-  ui.show('route', { focus, lock: 250 });
+  // guard: keys held from flying or from the draft pick don't move the map cursor until released.
+  ui.show('route', { focus, lock: 250, guard: true });
+  routeZoom('in', document.querySelector('#route-map .rnode.cur') || focus);
   const r = G.run;
   tip('route');
   if (r.row >= r.system.rows >> 1) beat('mid:' + r.system.id, STORY.systems[r.system.id].mid);
+}
+
+// Map transitions: the map pulls out of the node just left ('in'), and dives into the node picked ('out').
+// The zoom is centred on that node (CSS transform-origin), so the map and the fight read as one space.
+function routeZoom(dir, nodeEl) {
+  const s = routeEl.getBoundingClientRect();
+  if (nodeEl && s.width) {
+    const r = nodeEl.getBoundingClientRect();
+    routeEl.style.setProperty('--zx', (((r.left + r.width / 2 - s.left) / s.width) * 100).toFixed(1) + '%');
+    routeEl.style.setProperty('--zy', (((r.top + r.height / 2 - s.top) / s.height) * 100).toFixed(1) + '%');
+  }
+  routeEl.classList.remove('zoom-in', 'zoom-out');
+  void routeEl.offsetWidth; // restart the animation
+  routeEl.classList.add('zoom-' + dir);
 }
 
 // Picks a route node: fighting nodes start a sector, the rest go through visitNode.
@@ -837,7 +855,13 @@ ui.init({
   campaign: () => showCampaign(),
   upgrade: () => showCampaign('ship-btn'),
   node(btn) {
-    pickRouteNode(routeNode(G.run.route, btn.dataset.id));
+    if (diveT) return;
+    const node = routeNode(G.run.route, btn.dataset.id);
+    routeZoom('out', btn);
+    diveT = setTimeout(() => {
+      diveT = 0; // zoom-out stays on until the next routeZoom, so the map doesn't flash back while it fades
+      if (G.screen === 'route') pickRouteNode(node);
+    }, 380);
   },
   nodeDone: () => nodeContinue(),
   event: eventPick,
