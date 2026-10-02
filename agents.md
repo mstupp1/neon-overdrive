@@ -31,7 +31,7 @@ The game is a set of ES modules (see README "Project layout"). All mutable world
 | `dropRelic(x?, y?)` | Debug: drop a relic cache (run only; default just above the ship) |
 | `simulate(seconds, pickFn?, opts?)` | Fast-forward synchronously at 60 Hz, auto-picking drafts (`pickFn(choices) → id`) and route nodes (`opts.nodePick(nodes) → index`, default random fighting node). Market: buys the cheapest affordable upgrade offer (override `opts.marketPick(offers, wallet) → index | -1`), then leaves; dock (Rest): repairs if damaged else reinforces; anomaly / rift auto-continue; vault opens a draft. Stops on `gameover` or `extract`. Returns `{screen, sector, hp, level, score, time, run:{system,row}, victory}`. |
 
-`G.scriptCtrl` (a function returning the same shape as `player.js control()`) overrides ship control; the boot intro uses it.
+`G.scriptCtrl` (a function returning the same shape as `player.js control()`) overrides ship control; the boot intro uses it. Starting a run (`newWorld("run")`, so `launch` / `startRun` too) aborts a still-playing boot intro, so bot runs on a fresh page no longer fly its script.
 
 Set `G.autopilot = true` to let the built-in bot (`src/game/bot.js`) fly a real run; `G.player.god = true` for invulnerability.
 

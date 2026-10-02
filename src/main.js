@@ -108,6 +108,7 @@ function hideBossCard() {
 }
 
 function newWorld(mode, shipDef, run = null) {
+  if (mode === 'run') bootIntro.abort(); // its scripted ship control would otherwise fly the run
   G.mode = mode;
   G.run = run;
   comms.clear();
