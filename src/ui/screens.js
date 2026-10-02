@@ -190,7 +190,7 @@ export const ui = {
     const p = G.player;
     $('#pause-stats').innerHTML = stat('SECTOR', G.sector) + stat('LEVEL', p.level) + stat('TIME', formatTime(G.runTime));
     renderBuild($('#pause-build'), p);
-    $('#pause-quit').textContent = G.run && G.run.mode === 'campaign' ? 'ABANDON RUN' : 'QUIT TO TITLE';
+    $('#pause-quit').textContent = G.run && G.run.mode === 'campaign' ? (G.run.victory ? 'EXTRACT · BANK ALL' : 'ABANDON RUN') : 'QUIT TO TITLE';
   },
 
   // --- Game over ----------------------------------------------------------------

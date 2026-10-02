@@ -2,6 +2,7 @@
 
 import { G, view, sectorDifficulty, sectorInfo, isBossSector } from './state.js';
 import { applyModifiers, patternMul } from './modifiers.js';
+import { applyHeat } from './core.js';
 import { rand, chance, weightedPick, randInt } from '../core/math.js';
 import { spawnEnemy, spawnWeavers, blinkSpot } from './enemies.js';
 import { spawnBoss, bossById, bossIndex, BOSS_IDS } from './bosses.js';
@@ -222,7 +223,7 @@ export function startSector(spec) {
     diff.hp *= 1.1;
     diff.eliteBonus = 0.12;
   }
-  d.diff = applyModifiers(diff, spec.modifiers);
+  d.diff = applyHeat(applyModifiers(diff, spec.modifiers), spec);
   d.state = 'intro';
   d.t = 0;
   d.sectorT = 0;

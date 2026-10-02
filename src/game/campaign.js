@@ -2,6 +2,7 @@
 
 import { MODIFIERS } from './modifiers.js';
 import { mulberry32 } from '../core/math.js';
+import { heatScale } from './core.js';
 
 // level = difficulty at route row 0; each row adds `step` (boss row ≈ level + rows*step). dur = fighting sector seconds;
 // bossHp multiplies the boss's base HP (campaign bosses are tuned per system, the debug sandbox keeps the base);
@@ -166,13 +167,14 @@ export function reachableNodes(route, nodeId) {
 // full-strength waves at row 0.
 export const nodeLevel = (system, row) => system.level + row * system.step - Math.max(0, 2 - row) * (system.warm ?? WARM);
 
-// Director spec for a fighting node. sectorIndex is 1-based (sectors fought so far + 1).
-export function nodeSpec(system, node, sectorIndex) {
+// Director spec for a fighting node. sectorIndex is 1-based (sectors fought so far + 1). tier / deep: endgame heat (core.js).
+export function nodeSpec(system, node, sectorIndex, tier = 0, deep = 0) {
   const level = nodeLevel(system, node.row);
   const boss = node.type === 'boss' ? system.boss : null;
   const base = system.dur;
   return {
     index: sectorIndex, row: node.row, level, loop: 0, boss, elite: node.type === 'elite', modifiers: node.modifiers.slice(),
-    hue: system.hue, name: system.name, duration: boss ? base * 0.7 : base, bossHp: system.bossHp, pay: system.pay, reward: node.reward || null,
+    hue: system.hue, name: deep ? `DEEP GRID ${deep} · ${system.name}` : system.name, duration: boss ? base * 0.7 : base,
+    bossHp: system.bossHp * heatScale(tier, deep).hp, pay: system.pay, reward: node.reward || null, tier, deep,
   };
 }
