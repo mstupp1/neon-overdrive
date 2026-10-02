@@ -400,6 +400,13 @@ export const intro = {
   update,
   draw,
   skip: () => finish(true),
+  // Ends the intro without going to the title (a run started over it, e.g. the debug hooks).
+  abort() {
+    if (!s || s.done) return;
+    s.done = true;
+    G.scriptCtrl = null;
+    el.hidden = true;
+  },
   get active() {
     return !!s && !s.done;
   },

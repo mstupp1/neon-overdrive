@@ -151,6 +151,7 @@ export const STORY = {
     hazard: [L('MAG', 'Hazard on this sector. It\'s on the map label; some just hurt, some pay extra.')],
     ult: [L('MAG', 'OVERDRIVE is charged. Save it for when the screen fills up.')],
     death: [L('MAG', 'Link recovered. I always keep a backup of you, ECHO. Half your credits made it home too.')],
+    tree: [L('MAG', 'Your passive tree. Every rank adds 2 points: start at the core and work outward. Refunds are free, so try builds.')],
     tier: [L('MAG', 'OVERDRIVE tiers are open. Launch at a higher tier for a meaner Signal, better pay and FLUX.')],
   },
 };

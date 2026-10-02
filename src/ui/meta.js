@@ -1,6 +1,8 @@
 // Campaign-layer screens: campaign map, in-run route, anomaly event, market, dock, extraction.
 // Render-only; flow/handlers live in main.js. Shared helpers come from screens.js.
 
+import { RARITY as GEAR_RARITY } from '../game/rarity.js';
+import { itemName } from '../game/parts.js';
 import { profile } from '../core/storage.js';
 import { formatScore, formatTime } from '../core/math.js';
 import { $, stat, renderBuild } from './screens.js';
@@ -12,6 +14,7 @@ import { rankFor, ECON_ICONS } from '../game/economy.js';
 import { CAT_COLORS, ICONS } from '../game/upgrades.js';
 import { SLOT_INFO } from '../game/parts.js';
 import { CLASSES, activeClass } from '../game/pilot.js';
+import { POINTS_PER_RANK } from '../game/tree.js';
 import { choiceBlocked } from '../game/story.js';
 
 const svg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
@@ -90,7 +93,7 @@ export const meta = {
     $('#route-gear').innerHTML =
       `<div class="chip cls" style="--c:${cls.color}" title="${cls.name}">${cls.icon}</div>` +
       (p.passives || []).map((id) => cls.passives.find((x) => x.id === id)).filter(Boolean).map((ps) => `<div class="chip" style="--c:${cls.color}" title="${ps.name}">${ps.icon}</div>`).join('') +
-      (p.parts || []).map((pt) => `<div class="chip" style="--c:${SLOT_INFO[pt.slot].color}" title="${pt.name}">${pt.icon}</div>`).join('');
+      (p.parts || []).map((pt) => `<div class="chip" style="--c:${GEAR_RARITY[pt.r].color}" title="${pt.name}">${pt.icon}</div>`).join('');
     const px = (n) => 12 + n.x * 76;
     const py = (n) => 90 - (n.row / (total - 1)) * 84;
     let lines = '';
@@ -202,6 +205,13 @@ export const meta = {
 
   // --- Rewards block (extraction + game over) -------------------------------------
   renderRewards(el, rw, campaignDeath) {
+    const lootLine = (w) => {
+      const loot = [...(w.loot || [])].sort((a, b) => b.r - a.r);
+      const shown = loot.slice(0, 3).map((it) => `<b style="color:${GEAR_RARITY[it.r].color}">${itemName(it)}</b>`).join(' · ');
+      const more = loot.length > 3 ? ` +${loot.length - 3}` : '';
+      const found = (w.found || []).length ? `<span class="rw-found">FOUND ${w.found.join(' · ')}</span>` : '';
+      return loot.length || found ? `<div class="rw-loot">${loot.length ? `<span>GEAR ${shown}${more}</span>` : ''}${found}</div>` : '';
+    };
     const bar = (rk) => `<span class="rankbar big"><i style="width:${rk.need ? Math.round((100 * rk.into) / rk.need) : 100}%"></i></span>`;
     const rk = rw.rankAfter;
     el.innerHTML = `
@@ -215,7 +225,8 @@ export const meta = {
       <div class="rw-rank">
         <span>RANK <b>${rk.rank}</b></span>${bar(rk)}<span class="rw-xp">+${fmt(rw.rankXp)} XP</span>
       </div>
-      ${rw.rankUp ? `<div class="rankup">RANK UP → ${rk.rank}</div>` : ''}`;
+      ${rw.rankUp ? `<div class="rankup">RANK UP → ${rk.rank} · +${POINTS_PER_RANK * (rk.rank - rw.rankBefore.rank)} TREE POINTS</div>` : ''}
+      ${lootLine(rw)}`;
     el.hidden = false;
   },
 

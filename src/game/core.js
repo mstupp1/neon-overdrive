@@ -40,6 +40,7 @@ export const CORE = [
   { id: 'od', name: 'Overdrive Feed', base: 6, growth: 1.2, color: '#ff3df2', icon: svg('<path d="M12 2l8 5v10l-8 5-8-5V7z"/><path d="M13 7l-3 5h4l-3 5"/>'), desc: (lv) => `+6% Overdrive / ultimate charge per level (now +${6 * lv}%).`, apply: (st, lv) => (st.odGain *= 1 + 0.06 * lv) },
   { id: 'xp', name: 'Neural Uplink', base: 6, growth: 1.2, color: '#b48bff', icon: svg('<path d="M12 3l2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9.4l6-.8z"/>'), desc: (lv) => `+5% XP per level (now +${5 * lv}%).`, apply: (st, lv) => (st.xpMul *= 1 + 0.05 * lv) },
   { id: 'credits', name: 'Salvage Protocol', base: 6, growth: 1.2, color: '#ffd24a', icon: svg('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5l3.5 4.5-3.5 4.5-3.5-4.5z"/>'), desc: (lv) => `+5% credits per level (now +${5 * lv}%).`, apply: (st, lv) => (st.creditMul *= 1 + 0.05 * lv) },
+  { id: 'expand', name: 'Neural Expansion', base: 30, growth: 1.45, color: '#3ff6ff', icon: svg('<circle cx="12" cy="12" r="2.5"/><circle cx="12" cy="4" r="1.6"/><circle cx="19" cy="16" r="1.6"/><circle cx="5" cy="16" r="1.6"/><path d="M12 9.5V5.6M14.2 13.3l3.4 1.9M9.8 13.3l-3.4 1.9"/>'), desc: (lv) => `+1 passive tree point per level (now +${lv}).`, apply: () => {} }, // read by tree.js treePoints
 ];
 
 export const coreCost = (node, lv) => Math.round(node.base * Math.pow(node.growth, lv));

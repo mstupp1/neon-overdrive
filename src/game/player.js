@@ -4,7 +4,7 @@ import { G, view } from './state.js';
 import { S, glow } from '../render/sprites.js';
 import { clamp, damp, rand, TAU } from '../core/math.js';
 import { WEAPONS, weaponStreams, weaponDamageScale, activePaint } from './ships.js';
-import { equippedParts } from './parts.js';
+import { equippedParts, itemTags } from './parts.js';
 import { profile } from '../core/storage.js';
 import { recomputeStats } from './upgrades.js';
 import { playerBullet, clearBullets } from './bullets.js';
@@ -17,8 +17,9 @@ import { vacuumAll } from './pickups.js';
 import { dashNova, resetModules, staticDischarge } from './modules.js';
 import { collectRelic } from './collectables.js';
 import { achEvent } from './achievements.js';
-import { CLASSES, activeClass, equippedPassives, initPilot, castUlt, boosted, phasing, fortressOn, bloodrush, onEliteKilled, updatePilot, spawnEchoes } from './pilot.js';
+import { CLASSES, activeClass, equippedPassives, passiveById, initPilot, castUlt, boosted, phasing, fortressOn, bloodrush, onEliteKilled, updatePilot, spawnEchoes } from './pilot.js';
 import { cine } from './cinematic.js';
+import { treeForRun, treeOnKill, treeOnDash } from './tree.js';
 
 export const xpFor = (l) => Math.floor(5 + 4.5 * l + 0.9 * l * l);
 
@@ -67,11 +68,19 @@ export function createPlayer(ship, gear = true) {
     echoT: 0, // Echo Fire: delay before the repeated volley
     leechN: 0, // Leech Protocol kill counter
     swUsed: 0, // Second Wind charges spent this run
+    burstN: 0, // burst weapons: shots left in the current burst
+    burstT: 0,
   };
   const cls = gear ? activeClass() : CLASSES[0];
   initPilot(p, cls, gear ? equippedPassives(cls.id).map((x) => x.id) : []);
+  p.tree = treeForRun(cls.id, gear); // passive tree node ids (tree.js)
   for (const [id, lv] of Object.entries(ship.start)) p.up[id] = lv;
   for (const part of p.parts) for (const [id, lv] of Object.entries(part.start || {})) p.up[id] = Math.max(p.up[id] || 0, lv); // free levels (max-capped by the upgrade pool)
+  for (const id of p.passives) for (const [uid, lv] of Object.entries(passiveById(id).start || {})) p.up[uid] = (p.up[uid] || 0) + lv; // Gunsmith / Field Kit
+  p.tags = {}; // build-path weights of the equipped gear (upgrades.js synergy)
+  for (const part of p.parts) for (const [t, n] of Object.entries(itemTags(part.item))) p.tags[t] = (p.tags[t] || 0) + n;
+  if (ship.path) p.tags[ship.path] = (p.tags[ship.path] || 0) + 1;
+  p.runMods = []; // bonus modifiers from rare level-up cards
   recomputeStats(p);
   p.hp = p.maxHp;
   p.charges = p.maxCharges;
@@ -173,6 +182,7 @@ export function updatePlayer(p, dt) {
     ring(p.x, p.y, 34, p.color, 0.3);
     if (p.up.dashNova) dashNova(p);
     if (st.afterimage) spawnEchoes(p, dx, dy);
+    treeOnDash(p);
   }
   const dashing = p.dashT > 0;
   if (dashing) {
@@ -272,8 +282,20 @@ export function updatePlayer(p, dt) {
   if (p.fireT < -w.interval) p.fireT = 0;
   while (p.fireT <= 0) {
     firePrimary(p, w);
+    if (w.burst) {
+      p.burstN = w.burst - 1; // TALON: the rest of the burst follows `gap` apart
+      p.burstT = w.gap;
+    }
     p.fireT += w.interval;
     if (st.echo && p.echoT <= 0 && Math.random() < st.echo) p.echoT = Math.min(0.07, w.interval * 0.5); // Echo Fire
+  }
+  if (p.burstN > 0) {
+    p.burstT -= dt * rate;
+    if (p.burstT <= 0) {
+      firePrimary(p, w);
+      p.burstN--;
+      p.burstT += w.gap;
+    }
   }
   if (p.echoT > 0) {
     p.echoT -= dt;
@@ -290,8 +312,11 @@ function firePrimary(p, w) {
   const spr = od ? S.pb_od : S['pb_' + p.ship.id];
   const charge = p.ship.weapon === 'charge';
   const grow = charge ? 1 + (lv - 1) * 0.1 : 1; // charge orbs swell with weapon level
-  for (const [ox, a] of streams) {
+  for (const [ox, a, ph] of streams) {
     playerBullet(p.x + ox, p.y - 12, -Math.PI / 2 + a, w.speed, dmg, spr, {
+      wave: w.wave ? w.wave * (1 + (lv - 1) * 0.06) : 0,
+      wphase: ph || 0,
+      wfreq: w.freq || 0,
       pierce: p.st.pierce,
       homing: w.homing || 0,
       life: w.life || 1.2,
@@ -359,6 +384,7 @@ export function onEnemyKilled(e) {
   addScore(e.score);
   achEvent('kill', e);
   bloodrush(p);
+  treeOnKill(p);
   if (e.elite) onEliteKilled(p);
   gainOverdrive(e.elite ? 10 : e.type === 'swarm' ? 0.8 : 1.6);
   if (p.st.leech && !p.dead && ++p.leechN >= p.st.leech) {
@@ -388,6 +414,7 @@ export function hurtPlayer(p) {
     p.shield = 0;
     p.shieldT = 0;
     p.iframes = 1.2;
+    if (p.st.aegisOd) gainOverdrive(p.st.aegisOd); // Aegis Prime
     sfx.shield();
     ring(p.x, p.y, 70, '#3ff6ff', 0.45);
     sparks(p.x, p.y, '#3ff6ff', 16, 300);
@@ -427,7 +454,7 @@ export function hurtPlayer(p) {
   if (p.hp <= 0) {
     killPlayer(p);
   } else {
-    p.iframes = 1.8;
+    p.iframes = 1.8 * p.st.hitIfr;
   }
 }
 

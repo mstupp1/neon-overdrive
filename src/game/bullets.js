@@ -32,6 +32,11 @@ export function playerBullet(x, y, angle, speed, dmg, spr, opts = {}) {
   b.kind = opts.kind || 'bullet';
   b.primary = !!opts.primary; // main-gun shot (Splinter Rounds)
   b.alpha = opts.alpha || 0.9;
+  b.wave = opts.wave || 0; // sine weave amplitude (WRAITH), px
+  b.wph = opts.wphase || 0;
+  b.wf = opts.wfreq || 0;
+  b.wt = 0;
+  b.woff = 0;
   b.hits.length = 0;
   b.dead = false;
   G.pBullets.push(b);
@@ -78,6 +83,12 @@ export function updatePlayerBullets(dt) {
       }
       b.x += b.vx * dt;
       b.y += b.vy * dt;
+      if (b.wave) {
+        b.wt += dt;
+        const off = b.wave * Math.sin(b.wt * b.wf + b.wph) * Math.min(1, b.wt * 8); // eases in from the muzzle
+        b.x += off - b.woff;
+        b.woff = off;
+      }
       if (b.bounce > 0 && (b.x < 0 || b.x > view.W)) {
         b.bounce--;
         b.vx = -b.vx;

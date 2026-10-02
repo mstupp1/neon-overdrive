@@ -106,6 +106,16 @@ Open **PILOT** on the campaign map to pick a class and equip **2 passives**. Ran
 | ENGINEER | 3 | **FORTRESS PROTOCOL**: opening blast, then a bullet-eating dome and 2 extra wingmen | Salvager (3), Overflow (4), Drone Link (5), Nanorepair (7) |
 | GHOST | 6 | **PHASE SHIFT**: enemies, bullets and spawns slow to 40%, you are intangible, grazes strike back | Wide Graze (6), Slipstream (7), Riposte (8), Afterimage (10) |
 
+### Passive tree
+
+**PILOT → PASSIVE TREE** opens each class's own node wheel (64 nodes). You earn **2 points per Pilot Rank**, plus 1 per level of the Flux Core's **Neural Expansion**. Start at the class core and spend points on linked nodes, working outward through six themed wedges that match the gear build paths (Firepower, Crit, Modules, Mobility, Overdrive, Graze, Tank, Greed). Most nodes are small stat bumps. Each wedge has notables and ends in a class-specific **keystone** that changes the rules (Glass Cannon, Swarm Doctrine, Shadow Strike...), and link nodes join neighbouring wedges for hybrid builds. Refunds are free at any time: click an allocated node (if nothing past it depends on it) or REFUND ALL. Drag to pan; wheel, pinch or +/− to zoom; arrows walk the nodes with keys or a pad.
+
+| Class | Big wedges | Small wedges |
+|---|---|---|
+| STRIKER | Firepower, Crit, Overdrive | Mobility, Greed, Tank |
+| ENGINEER | Modules, Greed, Tank | Firepower, Crit, Overdrive |
+| GHOST | Mobility, Graze, Crit | Overdrive, Greed, Firepower |
+
 ## In a run
 
 - **Level ups.** Enemies drop XP shards. Each level offers a draft of 3 upgrades; clearing a sector grants a bonus draft. Rerolls: 1 per run + 1 per boss kill.
@@ -177,6 +187,7 @@ src/render/           baked glow sprites (ships, enemies, gear, portraits), per-
 src/game/state.js     global state G
 src/game/player.js    ship, firing, dash, ult hookup, hit handling
 src/game/pilot.js     classes, ultimates, passives, Phase Shift time scale
+src/game/tree.js      passive trees (per-class node wheels, points, refunds, keystones)
 src/game/modules.js   weapon modules, evolutions, beams
 src/game/enemies.js   enemy roster and AI, Hunter, damage / kill
 src/game/bosses.js    WARDEN / HYDRA / OMEGA / ECLIPSE
@@ -185,8 +196,10 @@ src/game/campaign.js  systems, route generation, node specs
 src/game/overworld.js free-flight overworld per system: beacons, patrols, sites, map overlay
 src/game/modifiers.js sector modifiers
 src/game/economy.js   credits, banking, Pilot Rank, Black Market, dock
-src/game/hangar.js    buy / equip ships, parts, paint (pure profile logic)
-src/game/parts.js     12 gear parts
+src/game/hangar.js    ships, paint, the gear Fabricator, equip / sell (pure profile logic)
+src/game/parts.js     gear items: 21 base types, 12 legendaries, random modifiers, build paths
+src/game/rarity.js    Common → Legendary odds and luck (gear and level-up cards)
+src/game/loot.js      gear drops, inventory cap, pilot class / ability finds
 src/game/ships.js     ships, weapons, paint sets
 src/game/story.js     dialogue and the 10 anomaly events
 src/game/intro.js     skippable boot intro (scripted in-engine cinematic)
@@ -194,8 +207,9 @@ src/game/upgrades.js  upgrade pool, drafts, stat recompute
 src/game/bullets.js, pickups.js, fx.js, world.js, bot.js   projectiles, pickups, particles, step + collisions, autopilot
 src/ui/screens.js     menu navigation, draft cards, results
 src/ui/meta.js        campaign / route / market / dock / event / extraction screens
-src/ui/hangar.js      Hangar (ships, parts, paint)
-src/ui/pilot.js       Pilot screen (class, passives)
+src/ui/hangar.js      Hangar (ships, paint), inventory, Fabricator
+src/ui/pilot.js       Pilot screen (class, abilities)
+src/ui/tree.js        Passive tree screen (pan / zoom canvas)
 src/ui/comms.js       dialogue overlay
 src/game/collectables.js   relic sets, buying, capsules, field drops
 src/game/achievements.js   achievement defs + tracker (polls G / profile each frame)

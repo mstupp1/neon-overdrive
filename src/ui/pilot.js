@@ -1,13 +1,15 @@
 // Pilot screen (campaign map only): ECHO's rank, class selector and passive toggles.
-// Rendering + handlers; the rules (rank gating, 2 passive slots) live in game/pilot.js.
+// Rendering + handlers; the rules (found classes / abilities, rank-gated slots and rarity cap) live in game/pilot.js.
 
 import { G } from '../game/state.js';
 import { profile } from '../core/storage.js';
 import { sfx } from '../core/audio.js';
 import { S } from '../render/sprites.js';
 import { rankFor } from '../game/economy.js';
-import { CLASSES, MAX_PASSIVES, classById, activeClass, classUnlocked, passiveUnlocked, equippedPassives, setClass, togglePassive } from '../game/pilot.js';
+import { CLASSES, classById, activeClass, classUnlocked, passiveUnlocked, passiveFound, equippedPassives, setClass, togglePassive, abilitySlots, rarityCap, rankForRarity, nextSlotRank } from '../game/pilot.js';
+import { RARITY } from '../game/rarity.js';
 import { ui, $ } from './screens.js';
+import { treeLabel } from './tree.js';
 
 let viewCls = 'striker'; // class whose details are open (may be a locked one, preview only)
 
@@ -39,27 +41,35 @@ function render() {
   $('#pl-tabs').innerHTML = CLASSES.map((c) => {
     const open = classUnlocked(c);
     const cur = act.id === c.id;
-    return `<button class="cls-tab${cur ? ' cur' : ''}${viewCls === c.id ? ' view' : ''}${open ? '' : ' locked'}" data-act="pclass" data-id="${c.id}" style="--c:${c.color}" aria-pressed="${cur}"><span class="cls-ico">${open ? c.icon : lockSvg}</span><b>${c.name}</b><i>${open ? (cur ? 'ACTIVE' : c.role.toUpperCase()) : 'RANK ' + c.unlockRank}</i></button>`;
+    return `<button class="cls-tab${cur ? ' cur' : ''}${viewCls === c.id ? ' view' : ''}${open ? '' : ' locked'}" data-act="pclass" data-id="${c.id}" style="--c:${c.color}" aria-pressed="${cur}"><span class="cls-ico">${open ? c.icon : lockSvg}</span><b>${c.name}</b><i>${open ? (cur ? 'ACTIVE' : c.role.toUpperCase()) : 'NOT FOUND'}</i></button>`;
   }).join('');
 
   // Class info
   const info = $('#pl-info');
   info.style.setProperty('--c', view.color);
   info.classList.toggle('locked', !owned);
-  info.innerHTML = `<div class="ci-top"><span class="role">${view.role.toUpperCase()}${owned ? '' : ` · UNLOCKS AT RANK ${view.unlockRank}`}</span></div><p>${view.desc}</p><div class="ci-ult"><em>ULTIMATE</em><b>${view.ult.name}</b><span>${view.ult.desc}</span></div>`;
+  info.innerHTML = `<div class="ci-top"><span class="role">${view.role.toUpperCase()}${owned ? '' : ' · NOT FOUND · DROPS FROM BOSSES'}</span></div><p>${view.desc}</p><div class="ci-ult"><em>ULTIMATE</em><b>${view.ult.name}</b><span>${view.ult.desc}</span></div>`;
 
-  // Passives
+  $('#pl-tree').textContent = treeLabel(view.id);
+
+  // Abilities: found ones equip into rank-gated slots; rarity above the rank cap stays locked.
   const eq = equippedPassives(view.id).map((x) => x.id);
-  $('#pl-pass-label').textContent = `PASSIVES · ${eq.length}/${MAX_PASSIVES} EQUIPPED`;
+  const slots = abilitySlots();
+  const cap = rarityCap();
+  const next = nextSlotRank();
+  const nextTxt = next ? ` · RANK ${next} +1` : '';
+  $('#pl-pass-label').innerHTML = `ABILITIES ${eq.length}/${slots} · UP TO <b style="color:${RARITY[cap].color}">${RARITY[cap].name}</b>${nextTxt}`;
   const wrap = $('#pl-passives');
   wrap.style.setProperty('--c', view.color);
-  wrap.innerHTML = view.passives.map((ps) => {
+  wrap.innerHTML = [...view.passives].sort((a, b) => a.r - b.r).map((ps) => {
+    const found = passiveFound(ps);
     const open = passiveUnlocked(view, ps);
     const on = eq.includes(ps.id);
-    const need = Math.max(ps.rank, view.unlockRank);
+    const rc = RARITY[ps.r].color;
     const tag = on ? '<span class="card-tag">ON</span>' : '';
-    const right = open ? `<b class="eq${on ? ' tick' : ''}">${on ? '✓' : 'EQUIP'}</b>` : `<span class="lk">${lockSvg}</span><i>RANK ${need}</i>`;
-    return `<button class="card offer pass${on ? ' on' : ''}${open ? '' : ' locked'}" data-act="ppass" data-id="${ps.id}" style="--c:${view.color}" aria-pressed="${on}"><div class="card-icon">${ps.icon}</div><div><div class="card-top"><span class="card-name">${ps.name}</span>${tag}</div><div class="card-desc">${ps.desc}</div></div><div class="price${open ? (on ? ' own' : '') : ' dim'}">${right}</div></button>`;
+    const lock = !owned ? 'CLASS' : !found ? 'NOT FOUND' : `RANK ${rankForRarity(ps.r)}`;
+    const right = open ? `<b class="eq${on ? ' tick' : ''}">${on ? '✓' : 'EQUIP'}</b>` : `<span class="lk">${lockSvg}</span><i>${lock}</i>`;
+    return `<button class="card offer pass rar r${ps.r}${on ? ' on' : ''}${open ? '' : ' locked'}${found ? '' : ' unfound'}" data-act="ppass" data-id="${ps.id}" style="--c:${view.color};--rc:${rc}" aria-pressed="${on}"><div class="card-icon">${ps.icon}</div><div><div class="card-top"><span class="card-name">${ps.name}</span><span class="pass-rar">${RARITY[ps.r].name}</span>${tag}</div><div class="card-desc">${ps.desc}</div></div><div class="price${open ? (on ? ' own' : '') : ' dim'}">${right}</div></button>`;
   }).join('');
 }
 
