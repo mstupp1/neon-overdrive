@@ -1225,6 +1225,22 @@ input[type='range']::-moz-range-thumb {
     pointer-events: none;
 }
 
+.rnode:not(.reach) .rn-lab {
+    display: none; /* dense maps: only the nodes you can jump to are labelled */
+}
+
+/* Fight reward marker (campaign.js REWARDS): a small dot on the node's rim. */
+.rn-rw {
+    position: absolute;
+    top: -0.15em;
+    right: -0.15em;
+    width: 0.8em;
+    height: 0.8em;
+    border-radius: 50%;
+    background: var(--r);
+    box-shadow: 0 0 0.5em var(--r);
+}
+
 .rn-lab em {
     font-style: normal;
     padding: 0.1em 0.5em;

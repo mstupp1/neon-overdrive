@@ -78,6 +78,11 @@ export function sectorPayout() {
   return gainCredits(Math.round(unit() * 4.5));
 }
 
+// Campaign CACHE fight reward / Treasure Vault: a cache worth about four sector payouts.
+export function cachePayout() {
+  return gainCredits(Math.round(unit() * 20));
+}
+
 export function bossPayout(e) {
   return gainCredits(Math.round(unit() * 14), e);
 }

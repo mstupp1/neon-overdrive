@@ -28,7 +28,7 @@ The game is a set of ES modules (see README "Project layout"). All mutable world
 | `applyUpgrade(id)` | Grant an upgrade (ids in `src/game/upgrades.js`) |
 | `rollDraft(kind?)` | Roll a draft (`'level'`/`'sector'`) for the current player (may include an Evolution card) |
 | `dropRelic(x?, y?)` | Debug: drop a relic cache (run only; default just above the ship) |
-| `simulate(seconds, pickFn?, opts?)` | Fast-forward synchronously at 60 Hz, auto-picking drafts (`pickFn(choices) → id`) and route nodes (`opts.nodePick(nodes) → index`, default random fighting node). Market: buys the cheapest affordable upgrade offer (override `opts.marketPick(offers, wallet) → index | -1`), then leaves; dock: repairs if damaged else reinforces; anomaly auto-continues. Stops on `gameover` or `extract`. Returns `{screen, sector, hp, level, score, time, run:{system,row}, victory}`. |
+| `simulate(seconds, pickFn?, opts?)` | Fast-forward synchronously at 60 Hz, auto-picking drafts (`pickFn(choices) → id`) and route nodes (`opts.nodePick(nodes) → index`, default random fighting node). Market: buys the cheapest affordable upgrade offer (override `opts.marketPick(offers, wallet) → index | -1`), then leaves; dock (Rest): repairs if damaged else reinforces; anomaly / rift auto-continue; vault opens a draft. Stops on `gameover` or `extract`. Returns `{screen, sector, hp, level, score, time, run:{system,row}, victory}`. |
 
 Set `G.autopilot = true` to let the built-in bot (`src/game/bot.js`) fly a real run; `G.player.god = true` for invulnerability.
 
@@ -68,7 +68,8 @@ Title PLAY → `scr-campaign` (progress track of the 4 systems, LAUNCH / HANGAR 
 
 - `src/game/campaign.js`: `SYSTEMS` (`{id, name, short, act, hue, level, step, rows, dur, bossHp, supply, pay, boss, blurb}`: `level` = row-0 difficulty, `step` per row, `dur` sector seconds (boss sector x0.7), `bossHp` boss HP multiplier, `supply` free drafts at launch, `pay` credit scale, `warm` optional per-row ease for rows 0-1, default 0.9; all systems use 0 now; levels form one continuous climb across the run), `generateRoute`, `reachableNodes`, `nodeLevel(system, row)` (rows 0-1 are eased in by `warm`), `nodeSpec`. `enterSystem` plays the intro, then `startSupply(n)` opens `n` `'supply'` drafts (`G.supplyLeft`, 0 everywhere today) before the route.
 - `src/ui/meta.js`: render functions for campaign / route / route stop / extraction.
-- Stops: `visitNode(node)` in `src/main.js`: market → `scr-market`, dock → `scr-dock`, anomaly → `scr-event` (`openEvent`). Every stop must finish via `nodeContinue()`.
+- Stops: `visitNode(node)` in `src/main.js`: market → `scr-market`, dock (shown as REST) → `scr-dock` (repair / reinforce / overclock = `'boost'` draft), vault → cache + `'vault'` draft (2 levels per pick), rift → `openEvent(RIFT)` (story.js; `run.riftLeft` hazard fights), anomaly → `scr-event` (`openEvent`). Every stop must finish via `nodeContinue()` (draft stops via `afterDraft = 'route'`).
+- Map: `generateRoute` walks `PATHS` non-crossing paths up a `COLS`-wide grid (`system.rows` rows, 8 today); fixed rows: 0 combat, `floor(rows/2)` vault, `rows-1` dock; weighted types otherwise with no repeats of `LIMITED` types along a path. Combat nodes carry `reward` (campaign.js `REWARDS`), elites `'double'`; `nodeSpec` copies it to `spec.reward` and `applyFightReward` in main.js pays it at sector clear (`draftOnly` filters the sector draft by category, `extraDrafts` for elites).
 - Extraction rewards go in `#extract-rewards` (game over: `#over-rewards`), both filled by `meta.renderRewards(el, reward, campaignDeath)`; banking happens in `extract()` / `gameOver()` via `bankRun()` in `main.js` → `economy.settleRun(victory)`.
 
 ## Economy (`src/game/economy.js`)
