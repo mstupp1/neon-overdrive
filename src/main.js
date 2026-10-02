@@ -22,7 +22,7 @@ import { comms } from './ui/comms.js';
 import { meta } from './ui/meta.js';
 import { hangarActs, openHangar, openFab, initHangarUi } from './ui/hangar.js';
 import { coreActs, openCore } from './ui/fluxcore.js';
-import { pilotActs, openPilot, showPilot } from './ui/pilot.js';
+import { pilotActs, openPilot, showPilot, initPilotUi } from './ui/pilot.js';
 import { treeActs, openTree, treeView } from './ui/tree.js';
 import * as passiveTree from './game/tree.js';
 import { galleryActs, openGallery, openAchievements } from './ui/gallery.js';
@@ -1154,6 +1154,7 @@ function boot() {
   setSfxVolume(profile.settings.sfx);
   initToasts();
   initHangarUi();
+  initPilotUi();
   const past = achInit(); // achievements older saves already earned
   if (past) setTimeout(() => notifyBacklog(past), 1200);
   if (profile.seenIntro) toTitle();
