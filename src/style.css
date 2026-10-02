@@ -3061,6 +3061,7 @@ input[type='range']::-moz-range-thumb {
     .in-name .in-line::after {
         animation: none;
     }
+}
 
 /* ---------------------------------------------------------------- Passive tree (src/ui/tree.js) */
 

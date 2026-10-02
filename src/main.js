@@ -833,7 +833,10 @@ ui.init({
   pilot: () => openPilot(),
   leavePilot: () => showCampaign(),
   ...pilotActs,
-  tree: () => openTree(document.querySelector('#pl-tabs .view')?.dataset.id, () => showPilot('#pl-tree')),
+  tree() {
+    openTree(document.querySelector('#pl-tabs .view')?.dataset.id, () => showPilot('#pl-tree'));
+    tip('tree');
+  },
   ...treeActs,
   gallery: () => openGallery(() => titleMenu('[data-act=gallery]')),
   achievements: () => openAchievements(() => titleMenu('[data-act=achievements]')),
