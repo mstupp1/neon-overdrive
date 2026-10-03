@@ -37,8 +37,8 @@ export const THEMES = {
   },
   mob: {
     name: 'MOBILITY', color: '#3ff6ff',
-    small: [{ speed: 4 }, { dashCd: 6 }],
-    notables: [{ name: 'Afterburner', mods: { speed: 10, dashLen: 15 } }, { name: 'Extra Thruster', mods: { charges: 1 } }],
+    small: [{ speed: 4, boostRegen: 5 }, { dashCd: 6, boostCap: 5 }],
+    notables: [{ name: 'Afterburner', mods: { speed: 10, dashLen: 15, boostEff: 15 } }, { name: 'Extra Thruster', mods: { charges: 1, boostCap: 15 } }],
   },
   od: {
     name: 'OVERDRIVE', color: '#ff3df2',
@@ -206,6 +206,9 @@ const MODS = {
   luck: (v) => `${pct(v)} rarity find`,
   rerolls: (v) => `${num(v)} reroll at the start of each run`,
   nonCrit: (v) => `${pct(v)} damage on hits that do not crit`,
+  boostCap: (v) => `${pct(v)} boost capacity`,
+  boostRegen: (v) => `${pct(v)} boost refill speed`,
+  boostEff: (v) => `${pct(v)} boost burn time`,
 };
 
 export function describe(mods) {
@@ -346,6 +349,9 @@ export function applyTree(st, p) {
   st.magnet *= inc('magnet');
   st.find = (st.find || 0) + (m.luck || 0) / 100; // rarity find (loot.js)
   st.rerolls = (st.rerolls || 0) + (m.rerolls || 0);
+  st.boostCap *= inc('boostCap');
+  st.boostRegen *= inc('boostRegen');
+  st.boostEff *= inc('boostEff');
   for (const f of FLAGS) st[f] = !!m[f];
 }
 

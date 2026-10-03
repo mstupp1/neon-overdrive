@@ -233,6 +233,12 @@ export const sv = {
     return { left: 26, right: CW - 26, top: CH * 0.6, bottom: CH - 60 };
   },
 
+  // Screen point the stage flows out of (boost streaks): the chase horizon; top-down / side have none (null).
+  vanish() {
+    if (this.mode !== 'chase') return null;
+    return { x: real().W / 2, y: chaseProj().hy };
+  },
+
   // Virtual → screen (logical). Also returns the local scale s (chase depth).
   toScreen(x, y, out = {}) {
     if (this.mode === 'side') {

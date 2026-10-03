@@ -13,6 +13,7 @@ import { beat as musicBeat } from './core/beat.js';
 import { drawHud, updateBanner, buttonSide } from './render/hud.js';
 import { SHIPS, shipById, ownsShip, isUnlocked } from './game/ships.js';
 import { createPlayer } from './game/player.js';
+import { drawBoostFx } from './game/boost.js';
 import { createDirector, startSector, nextSector, endlessSpec } from './game/director.js';
 import { rollDraft, applyUpgrade, UPGRADES, discover, rollCard, applyCard } from './game/upgrades.js';
 import { runLuck, rankUpFinds, dropGear, dropAbility, addGear } from './game/loot.js';
@@ -452,6 +453,7 @@ function pickRouteNode(node) {
     enterPlay();
     if (spec.elite) tip('elite', true);
     else if (spec.modifiers.length) tip('hazard', true);
+    else tip('boost', true);
   } else visitNode(node);
 }
 
@@ -1034,6 +1036,19 @@ for (const [id, action] of [['touch-od', 'od'], ['touch-dash', 'dash']]) {
     input.press(action);
   });
 }
+// Boost is held, not pressed.
+{
+  const el = document.getElementById('touch-boost');
+  const down = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    input.setDevice('touch');
+    input.hold('focus', true);
+  };
+  const up = () => input.hold('focus', false);
+  el.addEventListener('pointerdown', down);
+  for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) el.addEventListener(ev, up);
+}
 
 input.onAnyGesture = unlockAudio;
 input.getAnchor = () => (G.screen === 'overworld' ? overworld.anchor() : G.player ? (sv.active ? sv.toScreen(G.player.x, G.player.y) : { x: G.player.x, y: G.player.y }) : { x: view.W / 2, y: view.H * 0.8 });
@@ -1107,6 +1122,7 @@ function frame(now) {
     input.consume('pause') && G.screen === 'pause' && unpause();
   }
 
+  G.frameDt = simulating() ? raw : 0; // screen-space effects that should freeze with the game (boost streaks)
   if (simulating()) {
     let dt = raw;
     if (G.hitstop > 0) {
@@ -1131,7 +1147,7 @@ function frame(now) {
   G.flash = Math.max(0, G.flash - raw * 2.5);
   updateBanner(raw);
   mapBtn.hidden = G.screen !== 'overworld';
-  const boost = Math.max(cine.boost(), G.player && (G.player.odT > 0 || G.player.dashT > 0) ? 3 : G.director && G.director.state === 'clear' ? 4 : 1);
+  const boost = Math.max(cine.boost(), G.player && (G.player.odT > 0 || G.player.dashT > 0) ? 3 : G.director && G.director.state === 'clear' ? 4 : 1, G.player && G.player.boostV ? 1 + 3.2 * G.player.boostV : 1);
   const dk = !!(G.mode === 'run' && (G.screen === 'play' || G.screen === 'pause' || G.screen === 'pause-settings') && G.director.diff.blackout && G.director.state !== 'clear' && G.director.state !== 'await'); // not on result screens
   bg.setDark(dk);
   vignette.classList.toggle('dark', dk);
@@ -1235,8 +1251,9 @@ function render() {
     renderWorld(ctx, kz);
   }
   if (G.screen === 'intro') bootIntro.draw(ctx, k);
-  bloom(ctx, live ? 1 + 0.25 * cine.amount() : 1);
+  bloom(ctx, live ? 1 + 0.25 * cine.amount() + 0.3 * ((G.player && G.player.boostV) || 0) : 1);
   ctx.setTransform(k, 0, 0, k, 0, 0);
+  if (live) drawBoostFx(ctx);
   if (live) cine.overlay(ctx);
   if (G.mode === 'run' && (G.screen === 'play' || G.screen === 'pause' || G.screen === 'draft' || G.screen === 'pause-settings')) drawHud(ctx, live ? cine.hudAlpha() : 1);
   if (G.flash > 0.01) {

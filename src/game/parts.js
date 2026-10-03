@@ -57,6 +57,10 @@ export const STATS = {
   xp: { apply: (st, v) => (st.xpMul *= 1 + v), text: (v) => `${sg(v)}${P(v)} XP` },
   credits: { apply: (st, v) => (st.creditMul *= 1 + v), text: (v) => `${sg(v)}${P(v)} credits` },
   find: { apply: (st, v) => (st.find += v), text: (v) => `+${P(v)} rarity find` },
+  boostCap: { apply: (st, v) => (st.boostCap *= 1 + v), text: (v) => `${sg(v)}${P(v)} boost capacity` },
+  boostRegen: { apply: (st, v) => (st.boostRegen *= 1 + v), text: (v) => `Boost refills ${P(v)} ${v < 0 ? 'slower' : 'faster'}` },
+  boostEff: { apply: (st, v) => (st.boostEff *= 1 + v), text: (v) => `${sg(v)}${P(v)} boost burn time` },
+  boostFlow: { apply: (st, v) => (st.boostFlow += v), text: (v) => `Boost rushes the stage +${P(v)} faster (more score)` },
   rerolls: { flat: true, apply: (st, v) => (st.rerolls += v), text: (v) => `+${v} reroll at the start of each run` },
 };
 
@@ -71,6 +75,7 @@ export const AFFIXES = [
   ['hull', 'tank', 1, 1, 2, 0.5], ['shield', 'tank', 0.08, 0.18], ['iframes', 'tank', 0.1, 0.25],
   ['magnet', 'greed', 0.15, 0.35], ['xp', 'greed', 0.04, 0.1], ['credits', 'greed', 0.06, 0.15], ['find', 'greed', 0.05, 0.15],
   ['rerolls', 'greed', 1, 1, 2, 0.35], ['grazeOd', 'overdrive', 0.1, 0.25],
+  ['boostCap', 'mobility', 0.08, 0.2, 0, 0.7], ['boostRegen', 'mobility', 0.08, 0.2, 0, 0.7], ['boostEff', 'mobility', 0.06, 0.15, 0, 0.7],
 ].map(([stat, tag, lo, hi, minR = 0, weight = 1]) => ({ id: stat, stat, tag, lo, hi, minR, weight }));
 const affixById = new Map(AFFIXES.map((a) => [a.id, a]));
 export const affixTag = (id) => (affixById.get(id) || {}).tag;
@@ -114,6 +119,8 @@ export const BASES = [
   { id: 'iontrail', slot: 'thrusters', name: 'Ion Trail', tag: 'overdrive', fx: [['grazeOd', 0.3], ['grazeR', 0.2], ['speed', -0.05]], icon: svg('<path d="M4 20c4-2 6-6 8-16 2 10 4 14 8 16"/><path d="M8 20h8" stroke-dasharray="2 2"/>') },
   { id: 'surge', slot: 'thrusters', name: 'Surge Thrusters', tag: 'overdrive', fx: [['odDur', 1], ['dashCd', -0.1]], icon: svg('<path d="M6 13l6-6 6 6M6 19l6-6 6 6"/><path d="M12 2v3"/>') },
   { id: 'tether', slot: 'thrusters', name: 'Drone Tether', tag: 'modules', fx: [['mod', 0.12], ['speed', -0.06]], icon: svg('<circle cx="12" cy="17" r="3"/><path d="M12 14V8"/><path d="M6 8l3-5 3 5-3-1.5zM12 8l3-5 3 5-3-1.5z"/>') },
+  { id: 'ramjet', slot: 'thrusters', name: 'Ramjet Tank', tag: 'mobility', fx: [['boostCap', 0.35], ['boostRegen', 0.15], ['speed', -0.04]], icon: svg('<circle cx="12" cy="10" r="6"/><path d="M12 10V6M9 16l-2 5M15 16l2 5M12 16v5"/>') },
+  { id: 'nitro', slot: 'thrusters', name: 'Nitro Injector', tag: 'mobility', fx: [['boostFlow', 0.15], ['boostEff', 0.25], ['dashCd', -0.1]], icon: svg('<path d="M10 2h4M12 2v4"/><rect x="8" y="6" width="8" height="10"/><path d="M6 21l6-5 6 5"/>') },
   { id: 'coil', slot: 'thrusters', name: 'Magnet Coil', tag: 'greed', fx: [['magnet', 0.6], ['speed', -0.05]], icon: svg('<path d="M6 4v8a6 6 0 0012 0V4M6 8h4M14 8h4"/>') },
 ];
 

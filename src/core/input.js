@@ -32,6 +32,7 @@ for (const [action, codes] of Object.entries(BIND)) {
 
 const held = new Set(); // actions currently held (keyboard)
 const padHeld = new Set();
+const touchHeld = new Set(); // on-screen buttons held down
 const pressedAt = new Map(); // action -> timestamp of last press
 
 export const input = {
@@ -72,7 +73,12 @@ export const input = {
     pressedAt.clear();
   },
   down(action) {
-    return held.has(action) || padHeld.has(action);
+    return held.has(action) || padHeld.has(action) || touchHeld.has(action);
+  },
+  // On-screen hold buttons (touch BOOST).
+  hold(action, on) {
+    if (on) touchHeld.add(action);
+    else touchHeld.delete(action);
   },
   // Any key / pad button held or stick deflected (menus wait for this to clear).
   anyHeld() {
@@ -137,6 +143,7 @@ window.addEventListener('keyup', (e) => {
 window.addEventListener('blur', () => {
   input.mouseDown = false;
   held.clear();
+  touchHeld.clear();
   padHeld.clear();
 });
 

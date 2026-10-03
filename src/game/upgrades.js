@@ -66,6 +66,10 @@ export const ICONS = {
   phalanx: svg('<path d="M3 10l3-6 3 6-3-1.5zM9 16l3-6 3 6-3-1.5zM15 10l3-6 3 6-3-1.5z"/><path d="M6 13v4M18 13v4M12 19v3"/>'),
   eventHorizon: svg('<circle cx="12" cy="12" r="3"/><path d="M12 3a9 9 0 019 9M21 12a9 9 0 01-9 9M12 21a9 9 0 01-9-9M3 12a9 9 0 019-9"/><path d="M5 5l3 3M19 19l-3-3"/>'),
   mirrorstorm: svg('<path d="M4 17a8 8 0 0116 0"/><path d="M12 15V6M8 9l4-4 4 4M5 10l3 1M19 10l-3 1"/>'),
+  boostTank: svg('<circle cx="12" cy="12" r="8"/><path d="M12 12V4"/><path d="M12 12l5 3" stroke-dasharray="2 2"/><path d="M8 20h8"/>'),
+  ramScoop: svg('<path d="M4 8c4 0 6 2 8 4s4 4 8 4"/><path d="M4 14h5M4 18h8"/><path d="M17 4l3 4-4 1"/>'),
+  injector: svg('<path d="M9 3h6M12 3v4"/><rect x="8" y="7" width="8" height="9"/><path d="M12 16v5M10 19l2 2 2-2"/>'),
+  overthrust: svg('<path d="M3 6l6 6-6 6M10 6l6 6-6 6M17 6l4 6-4 6"/>'),
   credits: svg('<circle cx="12" cy="12" r="9"/><path d="M15 8.5c-.8-1-2-1.5-3-1.5-1.7 0-3 1-3 2.5s1.3 2 3 2.5 3 1 3 2.5-1.3 2.5-3 2.5c-1 0-2.2-.5-3-1.5M12 5v2M12 17v2"/>'),
   repair: svg('<path d="M12 5v14M5 12h14"/>'),
 };
@@ -94,6 +98,8 @@ export const UPGRADES = [
   { id: 'hull', name: 'Reinforced Hull', cat: 'defense', max: 4, weight: 0.9, tier: 0, desc: () => '+1 max hull and repair 1.' },
   { id: 'aegis', name: 'Aegis Shield', cat: 'defense', max: 4, weight: 0.8, tier: 0, desc: (lv) => `Regenerating shield absorbs a hit. Recharge ${16 - 3 * lv}s.` },
   { id: 'dashes', name: 'Afterburner', cat: 'defense', max: 2, weight: 0.6, tier: 0, desc: () => '+1 dash charge.' },
+  { id: 'boostTank', name: 'Boost Tank', cat: 'stat', max: 3, weight: 0.7, tier: 0, desc: (lv) => `+25% boost capacity (${pct(0.25 * lv)}).` },
+  { id: 'ramScoop', name: 'Ram Scoop', cat: 'stat', max: 3, weight: 0.7, tier: 0, desc: (lv) => `Boost refills 30% faster (${pct(0.3 * lv)}).` },
 
   { id: 'missiles', name: 'Swarm Missiles', cat: 'module', max: 5, weight: 1, tier: 0, desc: (lv) => (lv === 1 ? 'Launch homing missiles that explode on impact.' : 'More missiles, faster launches.') },
   { id: 'orbitals', name: 'Razor Orbit', cat: 'module', max: 5, weight: 1, tier: 0, desc: (lv) => (lv === 1 ? 'Blades orbit your ship, shredding enemies and bullets.' : '+1 blade, more damage.') },
@@ -110,6 +116,8 @@ export const UPGRADES = [
   { id: 'redline', name: 'Redline', cat: 'stat', max: 3, weight: 0.6, tier: 1, desc: (lv) => `+${12 * lv}% damage for every missing hull point.` },
   { id: 'bounty', name: 'Bounty Hunter', cat: 'stat', max: 3, weight: 0.6, tier: 1, desc: () => '+15% damage to elites and bosses.' },
   { id: 'blink', name: 'Blink Drive', cat: 'defense', max: 2, weight: 0.6, tier: 1, desc: () => 'Dashes travel 20% further with 20% longer invulnerability.' },
+  { id: 'injector', name: 'Fuel Injector', cat: 'stat', max: 3, weight: 0.6, tier: 1, desc: (lv) => `Boost drains slower: burns ${pct(0.25 * lv)} longer.` },
+  { id: 'overthrust', name: 'Overthrust', cat: 'stat', max: 3, weight: 0.55, tier: 1, desc: (lv) => `Boost rushes the stage faster (x${(1.6 + 0.15 * lv).toFixed(2)}) for a bigger score bonus (x${(1 + 0.8 * (0.6 + 0.15 * lv)).toFixed(2)}).` },
   { id: 'leech', name: 'Leech Protocol', cat: 'defense', max: 3, weight: 0.6, tier: 1, desc: (lv) => `Repair 1 hull every ${[0, 90, 70, 50][lv]} kills.` },
   { id: 'rail', name: 'Rail Lance', cat: 'module', max: 5, weight: 0.9, tier: 1, desc: (lv) => (lv === 1 ? 'Fire a massive piercing beam forward.' : 'Wider beam, more damage, faster charge.') },
   { id: 'reflector', name: 'Reflector', cat: 'module', max: 5, weight: 0.85, tier: 1, desc: (lv) => (lv === 1 ? 'A pulsing shield bubble turns enemy bullets back on their owners.' : 'Wider bubble, more frequent, harder-hitting returns.') },
@@ -230,6 +238,11 @@ export function recomputeStats(p) {
   st.hitIfr = 1; // invulnerability after a hit (gear modifiers, passive tree)
   st.rerolls = 0; // extra draft rerolls at the start of a run (gear, passive tree, Flux Core; main.js newWorld)
   st.aegisOd = 0; // ultimate meter per shield break (Aegis Prime)
+  // Boost (boost.js): capacity, refill rate, burn time (drain ÷ eff) and stage-flow speed.
+  st.boostCap = 1 + 0.25 * lv('boostTank');
+  st.boostRegen = 1 + 0.3 * lv('ramScoop');
+  st.boostEff = 1 + 0.25 * lv('injector');
+  st.boostFlow = 1.6 + 0.15 * lv('overthrust');
   resetPilotStats(st);
   if (p.ship.trait) p.ship.trait.apply(st, p);
   for (const [stat, v] of p.runMods || []) STATS[stat].apply(st, v); // bonus modifiers from rare level-up cards
@@ -308,6 +321,7 @@ export const UP_TAGS = {
   missiles: 'modules', orbitals: 'modules', drones: 'modules', arc: 'modules', nova: 'modules', rail: 'modules', shrapnel: 'modules', flak: 'modules',
   gravity: 'modules', reflector: 'modules', mines: 'modules', saw: 'modules', stasis: 'modules', prism: 'modules', starfall: 'modules', static: 'modules',
   thrusters: 'mobility', dashes: 'mobility', blink: 'mobility', dashNova: 'mobility',
+  boostTank: 'mobility', ramScoop: 'mobility', injector: 'mobility', overthrust: 'mobility',
   capacitor: 'overdrive', grazer: 'overdrive', perpetual: 'overdrive', nullField: 'overdrive', chainlink: 'overdrive',
   hull: 'tank', aegis: 'tank', leech: 'tank', secondWind: 'tank',
   magnet: 'greed', salvage: 'greed', prospector: 'greed',

@@ -188,6 +188,19 @@ body {
     left: 5.15em;
 }
 
+/* Boost (hold): above the dash button, over the boost gauge (hud.js gaugeSpots: 44 in, 120 up). */
+#touch-ui .boost {
+    right: 0.55em;
+    bottom: calc(var(--safe-bottom) + 5.5em);
+    width: 4.4em;
+    height: 4.4em;
+}
+
+#touch-ui.side-left .boost {
+    right: auto;
+    left: 0.55em;
+}
+
 .toast {
     position: absolute;
     left: 50%;

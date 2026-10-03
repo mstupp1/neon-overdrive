@@ -354,7 +354,7 @@ export function updateDirector(dt) {
       if (d.t > 1.2) d.state = 'waves';
       break;
     case 'waves': {
-      d.sectorT += dt;
+      d.sectorT += dt * ((G.player && G.player.flow) || 1); // Boost (boost.js) runs the node clock faster
       d.progress = Math.min(1, d.sectorT / d.duration);
       d.spawnT -= dt * G.enemyTimeScale; // Phase Shift slows the wave timer too
       if (spec.elite && !d.hunterSpawned && d.progress > 0.6) spawnHunter();
