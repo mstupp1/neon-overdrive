@@ -268,6 +268,7 @@ export const ui = {
       sfxR.value = Math.round(s.sfx * 100);
       $('#set-music-v').textContent = music.value;
       $('#set-sfx-v').textContent = sfxR.value;
+      $('#set-side b').textContent = s.touchSide === 'left' ? 'LEFT' : 'RIGHT';
       document.querySelectorAll('[data-set]').forEach((b) => {
         const on = !!s[b.dataset.set];
         const tag = b.querySelector('b');

@@ -10,7 +10,7 @@ import { prewarmBossArt } from './render/bossArt.js';
 import { bg } from './render/background.js';
 import { bloom } from './render/post.js';
 import { beat as musicBeat } from './core/beat.js';
-import { drawHud, updateBanner } from './render/hud.js';
+import { drawHud, updateBanner, buttonSide } from './render/hud.js';
 import { SHIPS, shipById, ownsShip, isUnlocked } from './game/ships.js';
 import { createPlayer } from './game/player.js';
 import { createDirector, startSector, nextSector, endlessSpec } from './game/director.js';
@@ -976,6 +976,12 @@ ui.init({
     showDraftCards(draftKind);
     ui.show('draft', { lock: 200 });
   },
+  touchSide() {
+    profile.settings.touchSide = buttonSide() === 'right' ? 'left' : 'right';
+    saveProfile();
+    ui.syncSettings?.();
+    placeTouchUi();
+  },
   fullscreen() {
     const d = document;
     if (d.fullscreenElement) d.exitFullscreen?.();
@@ -1015,6 +1021,11 @@ mapBtn.addEventListener('pointerdown', (e) => {
   unlockAudio();
   if (G.screen === 'overworld') overworld.toggleMap();
 });
+// Touch buttons go in the corner picked in Settings (hud.js gaugeSpots draws the gauges under them).
+function placeTouchUi() {
+  touchUi.classList.toggle('side-left', buttonSide() === 'left');
+}
+placeTouchUi();
 for (const [id, action] of [['touch-od', 'od'], ['touch-dash', 'dash']]) {
   document.getElementById(id).addEventListener('pointerdown', (e) => {
     e.preventDefault();

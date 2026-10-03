@@ -16,6 +16,7 @@ const DEFAULTS = {
     beat: true, // cosmetic visuals that pulse with the music
     damageNumbers: true,
     story: true,
+    touchSide: 'right', // touch buttons corner: right | left (the other hand steers)
   },
   best: 0,
   bestSector: 0,

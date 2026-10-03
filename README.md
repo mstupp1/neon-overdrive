@@ -23,6 +23,8 @@ It deploys as-is to any static host (itch.io, GitHub Pages, Netlify...). Fonts a
 | Focus (slow, precise) | hold Shift | - | - | LB / RB / LT |
 | Pause | Esc / P | pause button | pause button | Start |
 
+On touch, the DASH and ULT buttons sit together in one bottom corner so one thumb works them while the other hand steers; **Settings → Touch buttons** picks the corner (RIGHT by default, or LEFT).
+
 Menus: arrows / d-pad to move, Enter / Space / A to select, Esc / B to go back (or skip dialogue), `1`-`3` to pick an upgrade, `R` to reroll (or retry on the game-over screen), `F` to lock the focused draft card. Items you cannot afford stay focusable and show their price.
 
 ## Campaign
