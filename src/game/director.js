@@ -5,14 +5,15 @@ import { applyModifiers, patternMul, MODIFIERS } from './modifiers.js';
 import { applyHeat } from './core.js';
 import { rand, chance, weightedPick, randInt } from '../core/math.js';
 import { spawnEnemy, spawnWeavers, blinkSpot, killEnemy } from './enemies.js';
-import { spawnBoss, bossById, bossIndex, BOSS_IDS } from './bosses.js';
-import { banner, floatText } from './fx.js';
+import { spawnBoss, bossVariant, bossIndex, BOSS_IDS } from './bosses.js';
+import { banner, floatText, flash, addShake } from './fx.js';
 import { vacuumAll } from './pickups.js';
 import { sectorPayout } from './economy.js';
 import { onSectorClear as onPilotSectorClear } from './pilot.js';
 import { bg } from '../render/background.js';
 import { cine, lateFinisher } from './cinematic.js';
 import { sfx, music } from '../core/audio.js';
+import { sv, viewName } from './stageview.js';
 
 export function createDirector() {
   return {
@@ -283,6 +284,12 @@ export function startSector(spec) {
   d.zone = null;
   d.arena = false;
   d.duration = spec.duration;
+  // Stage views: spec.views = a view per zone (campaign rolls, campaign.js), spec.arenaView = the boss arena's view,
+  // spec.view = the whole sector in one view (debug). Every node opens top-down unless told otherwise.
+  d.views = spec.views || null;
+  d.swapTo = null;
+  sv.reset();
+  if (spec.view && spec.view !== 'top') sv.enter(spec.view);
   bg.setHue(spec.hue);
   if (d.zones > 1) setZone(d, 0);
   bg.setTheme(G.run && G.run.mode === 'campaign' ? G.run.system.id : null);
@@ -337,6 +344,9 @@ export function updateDirector(dt) {
     }
   }
 
+  // A view change rides the middle of its fly-through (behind the flash).
+  if (d.swapTo && (!cine.transiting || cine.transitU >= 0.42)) changeView(d);
+
   const spec = d.spec;
   const local = spec.level;
   switch (d.state) {
@@ -378,12 +388,23 @@ export function updateDirector(dt) {
         const next = d.zone.i + 1;
         const names = ZONES[G.run.system.id] || ZONES.genesis;
         const nextName = names[(d.zoneBase + next) % (names.length - 1)];
-        if (cine.transit(`ZONE ${next + 1} / ${d.zones}`, nextName)) d.state = 'transit';
-        else nextZone(d);
+        const nv = (d.views && d.views[next]) || 'top';
+        const swap = nv !== sv.mode ? nv : null;
+        const kicker = `ZONE ${next + 1} / ${d.zones}` + (swap && nv !== 'top' ? `  ·  ${viewName(nv)}` : '');
+        if (cine.transit(kicker, nextName, false, !!swap)) {
+          d.state = 'transit';
+          d.swapTo = swap;
+        } else {
+          if (swap) sv.enter(swap);
+          nextZone(d);
+        }
       }
       break;
     case 'transit':
-      if (!cine.busy) nextZone(d);
+      if (!cine.busy) {
+        if (d.swapTo) changeView(d);
+        nextZone(d);
+      }
       break;
     case 'clearing':
       d.progress = 1;
@@ -397,14 +418,20 @@ export function updateDirector(dt) {
           const names = ZONES[G.run.system.id] || ZONES.genesis;
           G.vacuum = true;
           vacuumAll();
-          if (cine.transit('BOSS ARENA', names[names.length - 1], true)) break;
+          const av = spec.arenaView || 'top';
+          const swap = av !== sv.mode ? av : null;
+          if (cine.transit('BOSS ARENA' + (swap && av !== 'top' ? `  ·  ${viewName(av)}` : ''), names[names.length - 1], true, !!swap)) {
+            d.swapTo = swap;
+            break;
+          }
+          if (swap) sv.enter(swap);
         }
         if (d.arena) G.vacuum = false;
         d.t = 0;
         if (spec.boss) {
           d.state = 'warn';
           if (G.mode === 'run') {
-            const b = bossById(spec.boss);
+            const b = bossVariant(spec.boss, sv.mode);
             banner('WARNING', 'BOSS INCOMING', '#ff2e55', 3);
             if (d.onWarn) d.onWarn(b, spec);
             sfx.warn();
@@ -443,6 +470,17 @@ export function updateDirector(dt) {
     default:
       break;
   }
+}
+
+// Switch the camera to d.swapTo (stageview.js): the jet is moved to the new view's home spot and the fly-through
+// finishes there.
+function changeView(d) {
+  sv.enter(d.swapTo);
+  d.swapTo = null;
+  cine.retarget(sv.home());
+  flash('255,255,255', 0.85);
+  addShake(0.25);
+  if (d.onView) d.onView(sv.mode);
 }
 
 // Arrive in the next zone (its name was shown by the fly-through): new hue and pattern focus; waves pick up quickly.

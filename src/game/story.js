@@ -152,6 +152,8 @@ export const STORY = {
     ult: [L('MAG', 'OVERDRIVE is charged. Save it for when the screen fills up.')],
     death: [L('MAG', 'Link recovered. I always keep a backup of you, ECHO. Half your credits made it home too.')],
     tree: [L('MAG', 'Your passive tree. Every rank adds 2 points: start at the core and work outward. Refunds are free, so try builds.')],
+    view_side: [L('MAG', 'Side run. You\'re flying flat out to the right now: up and down steer. Don\'t scrape the walls, they take hull.')],
+    view_chase: [L('MAG', 'Pursuit. I\'m behind you, and everything comes out of the distance. Fly the gaps in the laser gates; threading one charges your ult.')],
     tier: [L('MAG', 'OVERDRIVE tiers are open. Launch at a higher tier for a meaner Signal, better pay and FLUX.')],
   },
 };

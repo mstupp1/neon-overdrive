@@ -3,6 +3,7 @@
 
 import { G, view } from './state.js';
 import { clamp, segDist2 } from '../core/math.js';
+import { sv } from './stageview.js';
 
 export function botControl() {
   const p = G.player;
@@ -77,6 +78,12 @@ export function botControl() {
   if (target) fx += clamp((target.x - p.x) * 0.012, -1, 1);
   else fx += clamp((view.W / 2 - p.x) * 0.004, -0.5, 0.5);
   fy += clamp((homeY - p.y) * 0.01, -1, 1);
+  // Other stage views: line up with the next laser gate's gap, keep off the terrain (stageview.js).
+  const hint = sv.botHint(p);
+  if (hint) {
+    fx += hint.x;
+    fy += hint.y;
+  }
   // Stay off the walls.
   if (p.x < 50) fx += (50 - p.x) * 0.03;
   if (p.x > view.W - 50) fx -= (p.x - (view.W - 50)) * 0.03;

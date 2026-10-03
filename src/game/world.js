@@ -15,14 +15,27 @@ import { updatePlayerBullets, updateEnemyBullets, drawPlayerBullets, drawEnemyBu
 import { updatePickups, drawPickups } from './pickups.js';
 import { updateParticles, drawParticles, updateTexts, drawTexts, sparks, explosion, ring } from './fx.js';
 import { sfx } from '../core/audio.js';
+import { sv } from './stageview.js';
 
 // ow: an overworld step (overworld.js): no director, the zone's enemies run their own AI.
 export function step(dt, ow = false) {
+  // Another stage view (stageview.js): the fight runs in its own top-down frame with the view swapped to its size.
+  if (!ow && sv.push()) {
+    try {
+      stepWorld(dt, ow);
+    } finally {
+      sv.pop();
+    }
+  } else stepWorld(dt, ow);
+}
+
+function stepWorld(dt, ow) {
   const p = G.player;
   G.time += dt;
   if (G.mode === 'run' && !p.dead) G.runTime += dt;
   if (!ow) updateDirector(dt);
   updatePlayer(p, dt);
+  if (!ow) sv.update(dt);
   updateModules(p, dt);
   const et = dt * pilotTimeScale(p, dt); // enemy time (Phase Shift slows it)
   updateEnemies(et);
@@ -364,7 +377,8 @@ function drawEnemies(ctx, k) {
 }
 
 export function renderWorld(ctx, k) {
-  if (!field.ow) bg.draw(ctx); // the overworld draws its own space first
+  if (!field.ow && !sv.active) bg.draw(ctx); // the overworld and the other stage views draw their own backdrop
+  sv.drawWorld(ctx);
   drawPickups(ctx);
   drawTelegraphs(ctx);
   drawEnemies(ctx, k);
@@ -374,7 +388,7 @@ export function renderWorld(ctx, k) {
   drawPlayer(ctx, k);
   drawParticles(ctx);
   drawEnemyBullets(ctx, k);
-  drawTexts(ctx);
+  if (!sv.active) drawTexts(ctx); // other views draw them upright after the camera mapping (stageview.js)
 
   // Overdrive shockwave
   if (G.pulse > 0 && G.player) {

@@ -152,7 +152,36 @@ export function generateRoute(system, seed) {
       if (rnd() < 0.3 && nd.row > 0) nd.modifiers = [MOD_IDS[ri(0, MOD_IDS.length - 1)]];
     }
   }
+  // Stage views (stageview.js), rolled on their own seed so the route layout itself never changes: some fights fly
+  // one later zone side-on or from behind the jet, and some boss arenas meet their boss's view variant.
+  for (const nd of nodes) {
+    if (nd.type === 'combat' || nd.type === 'elite') {
+      const views = rollNodeViews(seed, nd, nd.type === 'elite' || nd.row >= 2 ? 3 : 2);
+      if (views) nd.views = views;
+    } else if (nd.type === 'boss') {
+      const v = rollArenaView(seed, system.boss);
+      if (v) nd.arenaView = v;
+    }
+  }
   return { system: system.id, seed, rows, nodes };
+}
+
+// Stage views (stageview.js): which zones of a fighting node fly another view ([view per zone]) or null. Seeded per
+// route node so the exit card can show it before you pick. Never the first zone (views change on a fly-through).
+function rollNodeViews(seed, node, zones) {
+  if (node.row < 1 || zones < 2) return null;
+  const rnd = mulberry32(((seed ^ 0x5eedf00d) >>> 0) + node.row * 977 + node.col * 131);
+  if (rnd() >= (node.type === 'elite' ? 0.45 : 0.3)) return null;
+  const views = new Array(zones).fill('top');
+  views[1 + Math.floor(rnd() * (zones - 1))] = rnd() < 0.5 ? 'side' : 'chase';
+  return views;
+}
+// Bosses with a view variant (bosses.js VARIANTS); their arena flies that view half the time.
+export const BOSS_VIEWS = { hydra: 'side', omega: 'chase' };
+function rollArenaView(seed, boss) {
+  const v = BOSS_VIEWS[boss];
+  if (!v) return null;
+  return mulberry32(((seed ^ 0xb055) >>> 0) + 7)() < 0.5 ? v : null;
 }
 
 export const routeNode = (route, id) => route.nodes.find((n) => n.id === id);
@@ -176,5 +205,6 @@ export function nodeSpec(system, node, sectorIndex, tier = 0, deep = 0) {
     index: sectorIndex, row: node.row, level, loop: 0, boss, elite: node.type === 'elite', modifiers: node.modifiers.slice(),
     hue: system.hue, name: deep ? `DEEP GRID ${deep} · ${system.name}` : system.name, duration: boss ? base * 0.7 : base,
     bossHp: system.bossHp * heatScale(tier, deep).hp, pay: system.pay, reward: node.reward || null, tier, deep,
+    views: node.views || null, arenaView: node.arenaView || null,
   };
 }

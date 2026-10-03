@@ -178,7 +178,9 @@ export function updateTexts(dt) {
   arr.length = w;
 }
 
-export function drawTexts(ctx) {
+// map(x, y, out): optional world → screen mapping (other stage views draw the numbers upright on the screen).
+const tq = {};
+export function drawTexts(ctx, map = null) {
   // In fights, numbers fade out as they rise into the top HUD band instead of drawing through it.
   const band = field.ow ? -1e9 : view.safeTop + 40;
   ctx.textAlign = 'center';
@@ -192,13 +194,14 @@ export function drawTexts(ctx) {
       ctx.font = font;
       lastFont = font;
     }
-    const a = Math.min(1, k * 2, (t.y - band) / 24);
+    const q = map ? map(t.x, t.y, tq) : t;
+    const a = Math.min(1, k * 2, (q.y - band) / 24);
     if (a <= 0) continue;
     ctx.globalAlpha = a;
     ctx.fillStyle = 'rgba(0,0,0,0.6)';
-    ctx.fillText(t.text, t.x + 1, t.y + 1);
+    ctx.fillText(t.text, q.x + 1, q.y + 1);
     ctx.fillStyle = t.color;
-    ctx.fillText(t.text, t.x, t.y);
+    ctx.fillText(t.text, q.x, q.y);
   }
   ctx.globalAlpha = 1;
 }

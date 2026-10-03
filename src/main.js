@@ -35,7 +35,8 @@ import { setClass, setPassives, initPilotProfile, findClass, findPassive } from 
 import { buyShip, equipPart, unequipSlot, setPaint, selectShip, applyAllPaints, rollGear, sellGear, sellJunk, initGear } from './game/hangar.js';
 import { SYSTEMS, systemById, generateRoute, nodeSpec, reachableNodes, routeNode, REWARDS } from './game/campaign.js';
 import { rand, pick, lerp, easeInOut } from './core/math.js';
-import { ring } from './game/fx.js';
+import { ring, drawTexts } from './game/fx.js';
+import { sv } from './game/stageview.js';
 import { intro as bootIntro } from './game/intro.js';
 import { cine } from './game/cinematic.js';
 import { sectorIntro } from './render/sectorIntro.js';
@@ -166,6 +167,7 @@ function newWorld(mode, shipDef, run = null) {
   G.director = createDirector();
   G.director.onClear = onSectorClear;
   G.director.onWarn = onBossWarn;
+  G.director.onView = (mode) => G.run && G.run.mode === 'campaign' && STORY.tips['view_' + mode] && tip('view_' + mode, true);
   G.player = createPlayer(shipDef, mode !== 'attract'); // hangar parts only in real runs
   G.rerolls = START_REROLLS + (G.player.st.rerolls || 0); // + gear, passive tree and Flux Core rerolls
   startSector(endlessSpec(1));
@@ -379,6 +381,7 @@ function showCampaign(focusId) {
 function showRoute() {
   const r = G.run;
   ui.hide();
+  sv.reset(); // the overworld is always top-down
   overworld.enter(r);
   owBack = true;
   resumeOverworld();
@@ -1022,7 +1025,7 @@ for (const [id, action] of [['touch-od', 'od'], ['touch-dash', 'dash']]) {
 }
 
 input.onAnyGesture = unlockAudio;
-input.getAnchor = () => (G.screen === 'overworld' ? overworld.anchor() : G.player ? { x: G.player.x, y: G.player.y } : { x: view.W / 2, y: view.H * 0.8 });
+input.getAnchor = () => (G.screen === 'overworld' ? overworld.anchor() : G.player ? (sv.active ? sv.toScreen(G.player.x, G.player.y) : { x: G.player.x, y: G.player.y }) : { x: view.W / 2, y: view.H * 0.8 });
 input.onDeviceChange = (d) => {
   if (G.screen === 'play') touchUi.hidden = d !== 'touch';
   app.style.cursor = G.screen === 'play' && d === 'mouse' ? 'crosshair' : '';
@@ -1187,8 +1190,14 @@ function render() {
   }
   // Finisher / node-start camera: zoom about a world point (screen = world * z + cam offset).
   const live = G.mode === 'run' && (G.screen === 'play' || G.screen === 'pause' || G.screen === 'pause-settings');
-  const cam = live ? cine.camera() : null;
-  if (cam && cam.rot) {
+  const cam = live && !sv.active ? cine.camera() : null;
+  if (sv.active && G.mode === 'run') {
+    // Side / chase stage (stageview.js): the world renders in its own frame and is mapped onto the screen; the camera
+    // is read inside that frame. Floating numbers are drawn upright afterwards.
+    sv.render(ctx, k, renderWorld, () => (live ? cine.camera() : null));
+    ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
+    drawTexts(ctx, (x, y, o) => sv.toScreen(x, y, o));
+  } else if (cam && cam.rot) {
     // Rolled fly-through camera: sprites set axis-aligned transforms of their own, so the world is drawn flat into an
     // offscreen copy and that is blitted rolled, zoomed and skewed (one extra full-frame drawImage, transit only).
     if (off.width !== canvas.width || off.height !== canvas.height) {
@@ -1291,6 +1300,9 @@ window.NEON = {
     if (!opts.story) while (comms.blocking) comms.skipAll(); // the intro, then the route tip
   },
   cine,
+  // Stage views (stageview.js): sv.mode, sv.enter('side' | 'chase' | 'top') switches the live fight now (debug).
+  sv,
+  stage: (mode) => (G.mode === 'run' && G.screen === 'play' ? (sv.enter(mode), sv.mode) : ''),
   sectorIntro,
   overworld, // overworld.state (G.run.ow), warp(nodeId | x, y), toggleMap()
   comms,
