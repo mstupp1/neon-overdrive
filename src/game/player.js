@@ -1,7 +1,8 @@
 // The player ship: movement, primary fire, dash, overdrive, damage and rewards.
 
 import { G, view, field } from './state.js';
-import { S, glow } from '../render/sprites.js';
+import { S, glow, flame } from '../render/sprites.js';
+import { SHIP_ENGINES } from '../render/shipArt.js';
 import { clamp, damp, rand, TAU } from '../core/math.js';
 import { WEAPONS, weaponStreams, weaponDamageScale, activePaint } from './ships.js';
 import { equippedParts, itemTags } from './parts.js';
@@ -533,6 +534,26 @@ export function gainXp(p, v) {
   }
 }
 
+// Engine flames in ship space (under the hull sprite): longer when climbing or dashing, flickering per nozzle.
+function drawFlames(ctx, p, alpha, od) {
+  const eng = SHIP_ENGINES[p.ship.id];
+  if (!eng) return;
+  const fl = flame(od ? p.ucol : p.color);
+  const speed = Math.min(1, Math.hypot(p.vx, p.vy) / 320);
+  const push = field.ow ? speed : Math.max(0, p.pitch) - Math.max(0, -p.pitch) * 0.4;
+  const len = (0.9 + push * 0.7) * (p.dashT > 0 ? 1.7 : 1) * (od ? 1.25 : 1);
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < eng.length; i++) {
+    const [x, y, w] = eng[i];
+    const flick = 0.85 + 0.15 * Math.sin(G.time * 53 + i * 2.1) + 0.08 * Math.sin(G.time * 97 + i);
+    const h = w * 3.4 * len * flick;
+    ctx.globalAlpha = alpha * 0.95;
+    ctx.drawImage(fl.img, x - w * 0.8, y - 0.6, w * 1.6, h);
+  }
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = alpha;
+}
+
 export function drawPlayer(ctx, k) {
   const p = G.player;
   if (!p || p.dead) return;
@@ -597,6 +618,7 @@ export function drawPlayer(ctx, k) {
     const sy = 1 + p.pitch * 0.06;
     ctx.setTransform(k * sx, 0, 0, k * sy, p.x * k + view.ox, p.y * k + view.oy);
   }
+  drawFlames(ctx, p, alpha, od);
   ctx.drawImage(spr.img, -spr.half, -spr.half, spr.size, spr.size);
   ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
   ctx.globalAlpha = 1;

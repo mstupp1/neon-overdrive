@@ -6,6 +6,7 @@ import { TIER_CAP, CORE, coreCost } from './game/core.js';
 import { input, bindPointer, pollGamepads } from './core/input.js';
 import { unlockAudio, music, setSfxVolume, setSfxMuted, sfx } from './core/audio.js';
 import { buildSprites, buildEnemySpritesV2 } from './render/sprites.js';
+import { prewarmBossArt } from './render/bossArt.js';
 import { bg } from './render/background.js';
 import { bloom } from './render/post.js';
 import { beat as musicBeat } from './core/beat.js';
@@ -1236,6 +1237,7 @@ function boot() {
   layout();
   buildSprites(SHIPS);
   buildEnemySpritesV2();
+  prewarmBossArt();
   applyAllPaints();
   initGear(); // legacy parts → items
   initPilotProfile(); // legacy saves: classes / abilities their rank had unlocked

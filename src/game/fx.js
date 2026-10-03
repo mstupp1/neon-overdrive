@@ -44,6 +44,18 @@ export function explosion(x, y, color, size = 1) {
     const s = rand(80, 380) * (0.6 + size * 0.4);
     particle('spark', x, y, Math.cos(a) * s, Math.sin(a) * s, rand(0.25, 0.55), rand(1.2, 2.4), i % 3 ? color : '#ffffff', 4);
   }
+  // Hull debris: tumbling neon shards of the wreck.
+  const sh = Math.round((3 + 3 * size) * q);
+  for (let i = 0; i < sh; i++) {
+    const a = rand(0, TAU);
+    const s = rand(60, 220) * (0.7 + size * 0.3);
+    particle('shard', x, y, Math.cos(a) * s, Math.sin(a) * s, rand(0.45, 0.85), rand(2.5, 5.5) * Math.min(1.6, 0.7 + size * 0.3), color, 1.8);
+    const p = G.particles[G.particles.length - 1];
+    if (p && p.kind === 'shard') {
+      p.rot = rand(0, TAU);
+      p.spin = rand(-14, 14);
+    }
+  }
   const d = Math.round((3 + 4 * size) * q);
   for (let i = 0; i < d; i++) {
     const a = rand(0, TAU);
@@ -79,6 +91,7 @@ export function updateParticles(dt) {
     p.vy *= k;
     p.x += p.vx * dt;
     p.y += p.vy * dt;
+    if (p.kind === 'shard') p.rot += p.spin * dt;
     arr[w++] = p;
   }
   arr.length = w;
@@ -95,6 +108,17 @@ export function drawParticles(ctx) {
       ctx.beginPath();
       ctx.moveTo(p.x, p.y);
       ctx.lineTo(p.x - p.vx * 0.035, p.y - p.vy * 0.035);
+      ctx.stroke();
+    } else if (p.kind === 'shard') {
+      const cx = Math.cos(p.rot) * p.size;
+      const cy = Math.sin(p.rot) * p.size;
+      ctx.globalAlpha = Math.min(1, t * 1.6);
+      ctx.strokeStyle = p.color;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(p.x - cx, p.y - cy);
+      ctx.lineTo(p.x + cx, p.y + cy);
+      ctx.lineTo(p.x + cx * 0.2 - cy * 0.6, p.y + cy * 0.2 + cx * 0.6);
       ctx.stroke();
     } else if (p.kind === 'dot') {
       const s = glow(p.color, 32);

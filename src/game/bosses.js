@@ -2,7 +2,8 @@
 // with scaling on later loops. Each has three phases and an attack rotation.
 
 import { G, view } from './state.js';
-import { glow, S } from '../render/sprites.js';
+import { glow, S, flame } from '../render/sprites.js';
+import { wardenBody, wardenLegs, hydraBody, hydraPod, omegaCore, omegaRing, omegaNode, omegaShard } from '../render/bossArt.js';
 import { TAU, damp, rand, clamp } from '../core/math.js';
 import { shoot, ring, fan, aimAt, clearBullets } from './bullets.js';
 import { explosion, addShake, flash, floatText, slowmo, hitstop, sparks } from './fx.js';
@@ -681,13 +682,6 @@ function neon(ctx, color, lw, alphaGlow = 0.28) {
   ctx.stroke();
 }
 
-function path(ctx, pts, ox = 0, oy = 0) {
-  ctx.beginPath();
-  ctx.moveTo(pts[0][0] + ox, pts[0][1] + oy);
-  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0] + ox, pts[i][1] + oy);
-  ctx.closePath();
-}
-
 export function drawBoss(ctx, e) {
   const g = glow(e.color, 64);
   ctx.globalCompositeOperation = 'lighter';
@@ -702,185 +696,219 @@ export function drawBoss(ctx, e) {
   else drawOmega(ctx, e, hot);
 }
 
-function drawWarden(ctx, e, hot) {
-  const { x, y } = e;
-  const c = e.phase === 3 ? '#ff3b3b' : e.color;
-  const fill = hot ? '#3a1a22' : '#160a10';
-  // Pods
-  for (const s of [-1, 1]) {
-    ctx.fillStyle = hot ? '#3a1a14' : '#1d0e0a';
-    ctx.beginPath();
-    ctx.roundRect(x + s * 62 - 16, y - 26, 32, 58, 6);
-    ctx.fill();
-    neon(ctx, c, 2);
-    ctx.fillStyle = c;
-    ctx.globalAlpha = 0.6 + 0.4 * Math.sin(G.time * 8 + s);
-    ctx.fillRect(x + s * 62 - 6, y + 22, 12, 4);
+// Baked body sprite centred on (x, y), optionally rotated, with a soft white hit flash.
+function blit(ctx, spr, x, y, hot, a = 0) {
+  const h = spr.half;
+  if (a) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(a);
+    ctx.drawImage(spr.img, -h, -h, spr.size, spr.size);
+    if (hot && spr.flash) { ctx.globalAlpha = 0.2; ctx.drawImage(spr.flash, -h, -h, spr.size, spr.size); }
+    ctx.restore();
+    return;
+  }
+  ctx.drawImage(spr.img, x - h, y - h, spr.size, spr.size);
+  if (hot && spr.flash) {
+    ctx.globalAlpha = 0.2;
+    ctx.drawImage(spr.flash, x - h, y - h, spr.size, spr.size);
     ctx.globalAlpha = 1;
   }
-  // Hull
-  const hull = [[-48, -40], [48, -40], [62, -4], [36, 44], [-36, 44], [-62, -4]];
-  ctx.fillStyle = fill;
-  path(ctx, hull, x, y);
-  ctx.fill();
-  neon(ctx, c, 2.6);
-  // Mandibles
-  for (const s of [-1, 1]) {
-    path(ctx, [[s * 22, 40], [s * 34, 76], [s * 12, 58]], x, y);
-    ctx.fillStyle = fill;
-    ctx.fill();
-    neon(ctx, c, 2);
-  }
-  // Panel lines
-  ctx.strokeStyle = 'rgba(255,122,24,0.35)';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(x - 40, y - 22); ctx.lineTo(x + 40, y - 22);
-  ctx.moveTo(x - 30, y + 30); ctx.lineTo(x + 30, y + 30);
-  ctx.stroke();
-  // Core
-  const pulse = 0.6 + 0.4 * Math.sin(G.time * (4 + e.phase * 2));
-  const cg = glow(e.phase === 3 ? '#ffffff' : c, 64);
+}
+
+function coreGlow(ctx, x, y, color, pulse, size, r) {
+  const cg = glow(color, 64);
   ctx.globalCompositeOperation = 'lighter';
   ctx.globalAlpha = pulse;
-  ctx.drawImage(cg.img, x - 36, y - 36, 72, 72);
+  ctx.drawImage(cg.img, x - size / 2, y - size / 2, size, size);
   ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = 'source-over';
   ctx.fillStyle = '#fff';
   ctx.beginPath();
-  ctx.arc(x, y, 8 + pulse * 3, 0, TAU);
+  ctx.arc(x, y, r, 0, TAU);
   ctx.fill();
-  // Turrets tracking player
+}
+
+function drawWarden(ctx, e, hot) {
+  const { x, y } = e;
+  const c = e.phase === 3 ? '#ff3b3b' : e.color;
+  wardenLegs(ctx, x, y, c, G.time, e.state === 'enter');
+  // exhaust plumes from the rear stacks
+  const fl = flame(c);
+  ctx.globalCompositeOperation = 'lighter';
+  for (const s of [-1, 1]) {
+    const h = 26 + Math.sin(G.time * 31 + s) * 4;
+    ctx.globalAlpha = 0.55;
+    ctx.save();
+    ctx.translate(x + s * 24, y - 44);
+    ctx.scale(1, -1);
+    ctx.drawImage(fl.img, -7, 0, 14, h);
+    ctx.restore();
+  }
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+  blit(ctx, wardenBody(c), x, y, hot);
+  // missile rack launch lights
+  for (const s of [-1, 1]) {
+    ctx.fillStyle = c;
+    ctx.globalAlpha = 0.6 + 0.4 * Math.sin(G.time * 8 + s);
+    ctx.fillRect(x + s * 62 - 8, y + 33, 16, 3);
+    ctx.globalAlpha = 1;
+  }
+  // Reactor: pulsing core and a spinning ring of charge cells
+  const pulse = 0.6 + 0.4 * Math.sin(G.time * (4 + e.phase * 2));
+  coreGlow(ctx, x, y, e.phase === 3 ? '#ffffff' : c, pulse, 72, 7 + pulse * 3);
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.fillStyle = c;
+  for (let i = 0; i < 6; i++) {
+    const a = G.time * (1.5 + e.phase) + (i / 6) * TAU;
+    ctx.globalAlpha = 0.5 + 0.5 * pulse;
+    ctx.beginPath();
+    ctx.arc(x + Math.cos(a) * 12.4, y + Math.sin(a) * 12.4, 1.6, 0, TAU);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+  // Twin-barrel turrets tracking the player
   const p = G.player;
+  const fill = hot ? '#3a1a22' : '#160a10';
   for (const s of [-1, 1]) {
     const tx = x + s * 36;
     const ty = y - 16;
     const a = p ? Math.atan2(p.y - ty, p.x - tx) : Math.PI / 2;
-    ctx.strokeStyle = c;
-    ctx.lineWidth = 4;
+    ctx.save();
+    ctx.translate(tx, ty);
+    ctx.rotate(a - Math.PI / 2);
+    for (const bx of [-2.8, 2.8]) {
+      ctx.beginPath();
+      ctx.rect(bx - 1.6, 2, 3.2, 17);
+      ctx.fillStyle = fill;
+      ctx.fill();
+      neon(ctx, c, 1.1, 0.3);
+    }
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(-4.6, 18.4, 9.2, 1.4);
     ctx.beginPath();
-    ctx.moveTo(tx, ty);
-    ctx.lineTo(tx + Math.cos(a) * 16, ty + Math.sin(a) * 16);
-    ctx.stroke();
+    ctx.moveTo(-7, -5); ctx.lineTo(7, -5); ctx.lineTo(8, 4); ctx.lineTo(4, 8); ctx.lineTo(-4, 8); ctx.lineTo(-8, 4);
+    ctx.closePath();
     ctx.fillStyle = fill;
-    ctx.beginPath();
-    ctx.arc(tx, ty, 7, 0, TAU);
     ctx.fill();
     neon(ctx, c, 1.5);
+    ctx.fillStyle = c;
+    ctx.beginPath();
+    ctx.arc(0, 1, 1.8, 0, TAU);
+    ctx.fill();
+    ctx.restore();
   }
 }
 
 function drawHydra(ctx, e, hot) {
-  const c = e.color;
-  // Tentacles
+  // Tentacles: tapered tubes with a glowing rim, a vein down the middle and sucker rows, ending in petalled pods.
   if (e.tentacles) {
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
+    const pod = hydraPod();
     e.tentacles.forEach((j, i) => {
-      ctx.beginPath();
-      ctx.moveTo(j[0], j[1]);
-      for (let k = 2; k < j.length; k += 2) ctx.lineTo(j[k], j[k + 1]);
-      ctx.strokeStyle = `hsla(${110 + i * 12},90%,25%,0.9)`;
-      ctx.lineWidth = 11;
-      ctx.stroke();
-      ctx.strokeStyle = hot ? `hsl(${110 + i * 12},90%,75%)` : `hsl(${110 + i * 12},90%,55%)`;
-      ctx.lineWidth = 3;
-      ctx.stroke();
+      const n = j.length / 2 - 1;
+      const rim = hot ? `hsl(${110 + i * 12},90%,75%)` : `hsl(${110 + i * 12},90%,55%)`;
+      // three tapering runs per tentacle (round joins keep them smooth) instead of a stroke per segment
+      for (let pass = 0; pass < 3; pass++) {
+        for (let r = 0; r < 3; r++) {
+          const k0 = Math.floor((r * n) / 3);
+          const k1 = Math.floor(((r + 1) * n) / 3);
+          const w = 13 - ((k0 + k1) / 2 / n) * 9;
+          ctx.beginPath();
+          ctx.moveTo(j[k0 * 2], j[k0 * 2 + 1]);
+          for (let k = k0 + 1; k <= k1; k++) ctx.lineTo(j[k * 2], j[k * 2 + 1]);
+          if (pass === 0) { ctx.strokeStyle = rim; ctx.lineWidth = w + 3.2; }
+          else if (pass === 1) { ctx.strokeStyle = hot ? '#1d3a1e' : '#06140a'; ctx.lineWidth = w; }
+          else { ctx.strokeStyle = `hsla(${110 + i * 12},90%,60%,0.45)`; ctx.lineWidth = 1.2; }
+          ctx.stroke();
+        }
+      }
+      // suckers along the underside
+      ctx.fillStyle = '#c04dff';
+      for (let k = 1; k < n - 1; k += 2) {
+        const dx = j[k * 2 + 2] - j[k * 2];
+        const dy = j[k * 2 + 3] - j[k * 2 + 1];
+        const l = Math.hypot(dx, dy) || 1;
+        const w = (13 - (k / n) * 9) * 0.3;
+        ctx.globalAlpha = 0.85;
+        ctx.beginPath();
+        ctx.arc(j[k * 2] - (dy / l) * w, j[k * 2 + 1] + (dx / l) * w, 1.5, 0, TAU);
+        ctx.arc(j[k * 2] + (dy / l) * w, j[k * 2 + 1] - (dx / l) * w, 1.5, 0, TAU);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
       const tx = j[j.length - 2];
       const ty = j[j.length - 1];
-      ctx.fillStyle = '#c04dff';
-      ctx.beginPath();
-      ctx.arc(tx, ty, 6, 0, TAU);
-      ctx.fill();
+      const a = Math.atan2(ty - j[j.length - 3], tx - j[j.length - 4]) + Math.PI / 2;
+      blit(ctx, pod, tx, ty, hot, a);
     });
   }
-  // Body
-  ctx.fillStyle = hot ? '#1d3a1e' : '#0b1f0c';
-  ctx.beginPath();
-  ctx.ellipse(e.x, e.y, 48, 58, 0, 0, TAU);
-  ctx.fill();
-  neon(ctx, c, 2.6);
-  ctx.fillStyle = hot ? '#3d1a55' : '#26083a';
-  ctx.beginPath();
-  ctx.ellipse(e.x, e.y - 14, 30, 34, 0, 0, TAU);
-  ctx.fill();
-  neon(ctx, '#c04dff', 1.8);
-  // Horns
-  for (const s of [-1, 1]) {
-    path(ctx, [[s * 30, -40], [s * 58, -86], [s * 14, -54]], e.x, e.y);
-    ctx.fillStyle = hot ? '#45450f' : '#2a2a05';
-    ctx.fill();
-    neon(ctx, '#ffe14d', 1.8);
-  }
-  // Eye tracks the player
+  blit(ctx, hydraBody(), e.x, e.y, hot);
+  // Eye tracks the player: a slit pupil in a glowing iris
   const p = G.player;
   const a = p ? Math.atan2(p.y - e.y, p.x - e.x) : Math.PI / 2;
-  const blink = e.phase === 3 ? '#ff3b3b' : '#ffe14d';
+  const iris = e.phase === 3 ? '#ff3b3b' : '#ffe14d';
+  const ex = e.x + Math.cos(a) * 6;
+  const ey = e.y - 8 + Math.sin(a) * 4;
+  const cg = glow(iris, 32);
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.globalAlpha = 0.7;
+  ctx.drawImage(cg.img, ex - 14, ey - 14, 28, 28);
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = iris;
+  ctx.beginPath();
+  ctx.arc(ex, ey, 7, 0, TAU);
+  ctx.fill();
   ctx.fillStyle = '#000';
   ctx.beginPath();
-  ctx.ellipse(e.x, e.y - 8, 16, 12, 0, 0, TAU);
+  ctx.ellipse(ex, ey, 1.8 + (e.phase - 1) * 0.6, 6, 0, 0, TAU);
   ctx.fill();
-  ctx.fillStyle = blink;
+  ctx.fillStyle = '#fff';
   ctx.beginPath();
-  ctx.arc(e.x + Math.cos(a) * 7, e.y - 8 + Math.sin(a) * 5, 6, 0, TAU);
+  ctx.arc(ex - 2.6, ey - 2.6, 1.3, 0, TAU);
   ctx.fill();
 }
 
 function drawOmega(ctx, e, hot) {
   const c = e.phase === 3 ? '#ff3df2' : e.color;
-  // Outer ring
-  ctx.strokeStyle = 'rgba(63,246,255,0.25)';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.arc(e.x, e.y, 96, 0, TAU);
-  ctx.stroke();
+  const { x, y } = e;
+  // Outer shard ring
+  const sh = omegaShard();
   for (let i = 0; i < 12; i++) {
     const a = -e.anim * 0.7 + (i / 12) * TAU;
-    const px = e.x + Math.cos(a) * 96;
-    const py = e.y + Math.sin(a) * 96;
-    path(ctx, [[0, -5], [5, 0], [0, 5], [-5, 0]], px, py);
-    ctx.fillStyle = '#ff3df2';
-    ctx.fill();
+    blit(ctx, sh, x + Math.cos(a) * 96, y + Math.sin(a) * 96, false, a + Math.PI / 2);
   }
-  // Inner ring nodes (hittable)
+  blit(ctx, omegaRing(c), x, y, false, e.anim * 0.5);
+  // Data tethers from the core to each node
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.strokeStyle = c;
+  ctx.lineWidth = 1.2;
+  ctx.globalAlpha = 0.45;
+  ctx.setLineDash([3, 5]);
+  ctx.lineDashOffset = -G.time * 40;
   ctx.beginPath();
-  ctx.arc(e.x, e.y, 66, 0, TAU);
-  neon(ctx, c, 1.2, 0.2);
   for (let i = 0; i < 6; i++) {
     const a = e.anim + (i / 6) * TAU;
-    const px = e.x + Math.cos(a) * 66;
-    const py = e.y + Math.sin(a) * 66;
-    ctx.beginPath();
-    for (let k = 0; k < 6; k++) {
-      const b = (k / 6) * TAU + e.anim;
-      ctx.lineTo(px + Math.cos(b) * 11, py + Math.sin(b) * 11);
-    }
-    ctx.closePath();
-    ctx.fillStyle = hot ? '#14343f' : '#06141a';
-    ctx.fill();
-    neon(ctx, c, 1.8);
+    ctx.moveTo(x + Math.cos(a) * 40, y + Math.sin(a) * 40);
+    ctx.lineTo(x + Math.cos(a) * 56, y + Math.sin(a) * 56);
+  }
+  ctx.stroke();
+  ctx.restore();
+  // Inner ring nodes (hittable)
+  const node = omegaNode(c);
+  for (let i = 0; i < 6; i++) {
+    const a = e.anim + (i / 6) * TAU;
+    blit(ctx, node, x + Math.cos(a) * 66, y + Math.sin(a) * 66, hot, e.anim + a);
   }
   // Core
-  ctx.beginPath();
-  for (let k = 0; k < 8; k++) {
-    const b = (k / 8) * TAU - e.anim * 0.5;
-    ctx.lineTo(e.x + Math.cos(b) * 38, e.y + Math.sin(b) * 38);
-  }
-  ctx.closePath();
-  ctx.fillStyle = hot ? '#132640' : '#050b14';
-  ctx.fill();
-  neon(ctx, c, 2.6);
+  blit(ctx, omegaCore(c), x, y, hot, -e.anim * 0.5);
   const pulse = 0.6 + 0.4 * Math.sin(G.time * 5);
-  const cg = glow(c, 64);
-  ctx.globalCompositeOperation = 'lighter';
-  ctx.globalAlpha = pulse;
-  ctx.drawImage(cg.img, e.x - 40, e.y - 40, 80, 80);
-  ctx.globalAlpha = 1;
-  ctx.globalCompositeOperation = 'source-over';
-  ctx.fillStyle = '#fff';
-  ctx.beginPath();
-  ctx.arc(e.x, e.y, 9 + pulse * 3, 0, TAU);
-  ctx.fill();
+  coreGlow(ctx, x, y, c, pulse, 80, 6 + pulse * 3);
 }
 
 function drawEclipse(ctx, e, hot) {
@@ -917,12 +945,25 @@ function drawEclipse(ctx, e, hot) {
     ctx.globalAlpha = 0.3 + 0.1 * Math.sin(G.time * 12);
     ctx.drawImage(spr.img, view.W - e.x - sz / 2, e.y - sz / 2, sz, sz);
   }
+  // Engine plumes (it flies nose down, so they burn upward)
+  const fl = flame(p3 ? '#ffffff' : '#ff3df2');
+  ctx.globalCompositeOperation = 'lighter';
+  for (const s of [-1, 1]) {
+    const h = 40 + Math.sin(G.time * 29 + s) * 6 + (e.frenzy ? 16 : 0);
+    ctx.globalAlpha = 0.7 * (e.alpha ?? 1);
+    ctx.save();
+    ctx.translate(e.x + s * 33.6, e.y - 72);
+    ctx.scale(1, -1);
+    ctx.drawImage(fl.img, -8, 0, 16, h);
+    ctx.restore();
+  }
+  ctx.globalCompositeOperation = 'source-over';
   // Body
   ctx.globalAlpha = (e.alpha ?? 1) * (e.state === 'dying' ? 0.7 + 0.3 * Math.sin(G.time * 40) : 1);
   ctx.drawImage(spr.img, e.x - sz / 2, e.y - sz / 2, sz, sz);
   if (hot) {
     // Soft hit flash so the black hull stays readable under sustained fire.
-    ctx.globalAlpha *= 0.4;
+    ctx.globalAlpha *= 0.2;
     ctx.drawImage(spr.flash, e.x - sz / 2, e.y - sz / 2, sz, sz);
   }
   ctx.globalAlpha = 1;
