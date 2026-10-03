@@ -503,6 +503,8 @@ export function collectPickup(pk) {
   }
 }
 
+const REROLL_EVERY = 5; // levels per free draft reroll
+
 export function gainXp(p, v) {
   p.xp += v * p.st.xpMul;
   while (p.xp >= p.xpNeed) {
@@ -510,6 +512,10 @@ export function gainXp(p, v) {
     p.level++;
     p.xpNeed = xpFor(p.level);
     G.pendingLevels++;
+    if (p.level % REROLL_EVERY === 0) {
+      G.rerolls++; // a trickle of rerolls through the run
+      floatText(p.x, p.y - 44, '+1 REROLL', '#5dff6a', 11, 1);
+    }
   }
 }
 

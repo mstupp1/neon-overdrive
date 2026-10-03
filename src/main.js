@@ -71,6 +71,8 @@ let draftOnly = null; // category filter for the next 'sector' draft (campaign f
 let extraDrafts = 0; // further 'sector' drafts owed (elite fights pay two)
 let draftNote = ''; // extra line for the next draft's subtitle (fight reward / vault haul)
 let curNote = ''; // the open draft's note (kept for rerolls)
+const START_REROLLS = 3; // draft rerolls at the start of a run (+1 every 5 levels and per boss)
+let draftLocks = new Set(); // ids of locked draft cards: a reroll keeps them and replaces the rest
 let afterDraft = null; // 'route' | 'extract' | 'next': where to go once the sector reward / level drafts are done
 // Level-up pacing: the world slows into the draft and eases back out of it instead of hard cuts.
 const LEVEL_INTRO = 0.5; // real seconds of slow-down before the level-up draft opens
@@ -146,7 +148,6 @@ function newWorld(mode, shipDef, run = null) {
   G.kills = 0;
   G.grazes = 0;
   G.bossKills = 0;
-  G.rerolls = 1;
   G.pendingLevels = 0;
   G.supplyLeft = 0;
   afterDraft = null;
@@ -163,6 +164,7 @@ function newWorld(mode, shipDef, run = null) {
   G.director.onClear = onSectorClear;
   G.director.onWarn = onBossWarn;
   G.player = createPlayer(shipDef, mode !== 'attract'); // hangar parts only in real runs
+  G.rerolls = START_REROLLS + (G.player.st.rerolls || 0); // + gear, passive tree and Flux Core rerolls
   startSector(endlessSpec(1));
   if (run && run.mode === 'campaign') {
     G.banner = null;
@@ -615,8 +617,19 @@ const DRAFT_ONLY = {
 };
 
 // Choices for a draft of `kind`: level | sector | supply | vault (2 levels per pick) | boost (+1 to an owned upgrade).
-function rollFor(kind) {
+// avoid: ids a reroll must not repeat (the locked cards).
+function rollFor(kind, avoid = null) {
   const p = G.player;
+  if (avoid && avoid.size) {
+    const noEvo = [...avoid].some((id) => (UPGRADES.find((u) => u.id === id) || {}).cat === 'evolution'); // one evolution per draft
+    const keep = (u) => !avoid.has(u.id) && !(noEvo && u.cat === 'evolution');
+    if (kind === 'boost') return boostChoices(p).filter((id) => !avoid.has(id)).sort(() => Math.random() - 0.5).slice(0, 3);
+    if (kind === 'sector' && draftOnly) {
+      const only = rollDraft(p, 'sector', (u) => keep(u) && DRAFT_ONLY[draftOnly](u));
+      if (only.filter((id) => id !== 'repair' && id !== 'credits').length >= 1) return only;
+    }
+    return rollDraft(p, kind === 'level' ? 'level' : 'sector', keep);
+  }
   if (kind === 'boost') {
     const ids = boostChoices(p);
     for (let i = ids.length - 1; i > 0; i--) {
@@ -637,6 +650,7 @@ function openDraft(kind, quiet = false) {
   draftKind = kind;
   if (G.run.mode !== 'campaign') G.player.techTier = Math.min(3, Math.floor((G.sector - 1) / 3)); // debug sandbox
   draftChoices = rollFor(kind);
+  draftLocks = new Set();
   rollRarities(kind);
   G.screen = 'draft';
   curNote = draftNote;
@@ -652,16 +666,27 @@ function openDraft(kind, quiet = false) {
 }
 
 // Card rarities for the open draft (Rest Station boosts stay plain).
-function rollRarities(kind) {
+// keep: ids whose roll stays (locked cards through a reroll).
+function rollRarities(kind, keep = null) {
+  const old = draftRolls;
   draftRolls = {};
   if (kind === 'boost') return;
   const luck = runLuck();
-  for (const id of draftChoices) draftRolls[id] = rollCard(G.player, id, luck);
+  for (const id of draftChoices) draftRolls[id] = keep && keep.has(id) ? old[id] : rollCard(G.player, id, luck);
+}
+
+// Locked cards survive a reroll; at least one card must stay unlocked to reroll.
+function toggleLock(i) {
+  if (draftLocks.has(i)) draftLocks.delete(i);
+  else if (draftLocks.size < draftChoices.length - 1) draftLocks.add(i);
+  else return false;
+  sfx.ui();
+  return true;
 }
 
 // Renders the draft (cards flag never-seen tech), then records those options as discovered. Returns the new ids.
 function showDraftCards(kind) {
-  ui.renderDraft(G.player, draftChoices, kind, G.rerolls, pickUpgrade, G.supplyLeft, curNote, draftRolls);
+  ui.renderDraft(G.player, draftChoices, kind, G.rerolls, pickUpgrade, G.supplyLeft, curNote, draftRolls, draftLocks, toggleLock);
   const fresh = discover(draftChoices);
   if (fresh.length) sfx.achieve(true);
   return fresh;
@@ -936,10 +961,12 @@ ui.init({
   title: () => toTitle(),
   intro: () => settingsReturn !== 'pause' && playIntro(),
   reroll() {
-    if (G.rerolls <= 0) return;
+    if (G.rerolls <= 0 || draftLocks.size >= draftChoices.length) return;
     G.rerolls--;
-    draftChoices = rollFor(draftKind);
-    rollRarities(draftKind);
+    const kept = new Set([...draftLocks].map((i) => draftChoices[i]));
+    const fresh = rollFor(draftKind, kept);
+    draftChoices = draftChoices.map((id, i) => (draftLocks.has(i) ? id : fresh.shift() || 'credits'));
+    rollRarities(draftKind, kept);
     showDraftCards(draftKind);
     ui.show('draft', { lock: 200 });
   },

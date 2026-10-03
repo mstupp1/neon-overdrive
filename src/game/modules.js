@@ -33,7 +33,7 @@ function dmgMul(p) {
 }
 
 function rateMul(p) {
-  return p.st.rate * (boosted(p) ? 1.4 : 1);
+  return p.st.rate * (p.st.modRate || 1) * (boosted(p) ? 1.4 : 1);
 }
 
 export function updateModules(p, dt) {

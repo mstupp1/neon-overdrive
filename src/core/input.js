@@ -15,6 +15,7 @@ const BIND = {
   confirm: ['Enter', 'NumpadEnter', 'Space'],
   back: ['Escape', 'Backspace'],
   reroll: ['KeyR'],
+  lock: ['KeyF'], // draft: lock the focused card
   one: ['Digit1', 'Numpad1'],
   two: ['Digit2', 'Numpad2'],
   three: ['Digit3', 'Numpad3'],
@@ -246,7 +247,7 @@ const padPrev = [];
 const PAD_BUTTONS = {
   0: ['dash', 'confirm'],
   1: ['od', 'back'],
-  2: ['od'],
+  2: ['od', 'lock'],
   3: ['reroll'],
   4: ['focus'],
   5: ['focus'],
