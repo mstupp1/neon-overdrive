@@ -20,6 +20,23 @@ let guarded = false;
 let guardUntil = 0;
 let handlers = {};
 
+// Draft card locks: the lock marks and the reroll button (its count, and how many cards it will replace).
+const LOCK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="1"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>';
+let draftLock = null;
+let lastLocks = new Set();
+let lastRerolls = 0;
+function syncLocks(locks, rerolls) {
+  lastLocks = locks;
+  lastRerolls = rerolls;
+  const cards = screens.draft.querySelectorAll('#draft-cards .card');
+  cards.forEach((c, i) => c.classList.toggle('locked-card', locks.has(i)));
+  const n = cards.length - locks.size;
+  const keys = input.device === 'keyboard' ? '  [R] · LOCK [F]' : input.device === 'pad' ? ' · LOCK [X]' : '';
+  const rr = $('#reroll-btn');
+  rr.textContent = `${locks.size ? 'REROLL UNLOCKED' : 'REROLL'} (${rerolls})${keys}`;
+  rr.disabled = rerolls <= 0 || n <= 0;
+}
+
 export const ui = {
   get current() {
     return current;
@@ -134,6 +151,10 @@ export const ui = {
         }
       });
       if (input.consume('reroll')) $('#reroll-btn').click();
+      if (input.consume('lock')) {
+        const card = screens.draft.querySelector('.card.focus');
+        if (card && draftLock && draftLock(+card.dataset.i)) syncLocks(lastLocks, lastRerolls);
+      }
     }
     if (current === 'over' && input.consume('reroll') && performance.now() >= lockUntil) handlers.retry();
   },
@@ -149,7 +170,8 @@ export const ui = {
 
   // --- Draft --------------------------------------------------------------------
   // note: an extra line for the subtitle (campaign fight reward, vault haul).
-  renderDraft(player, choices, kind, rerolls, onPick, left = 0, note = '', rolls = {}) {
+  // locks: indices of locked cards (kept through a reroll); onLock(i) toggles one and returns whether it changed.
+  renderDraft(player, choices, kind, rerolls, onPick, left = 0, note = '', rolls = {}, locks = new Set(), onLock = null) {
     const T = {
       sector: ['SECTOR CLEAR', '#7dff6b', 'Claim a reward for the next sector'],
       supply: ['SUPPLY DROP', '#ffd24a', `Salvaged tech for this system — ${left} to claim`],
@@ -171,7 +193,8 @@ export const ui = {
       // outlined card) vs. seen before but not owned this run (NEW THIS RUN, category colour).
       const fresh = info.max > 0 && info.fresh;
       const runNew = info.max > 0 && !fresh && !info.evo && info.cat !== 'weapon' && info.lv === 0; // you always fly a main cannon
-      b.className = 'card' + (info.evo ? ' evo' : '') + (fresh ? ' fresh' : '') + (info.r != null ? ` rar r${info.r}` : '');
+      b.className = 'card' + (info.evo ? ' evo' : '') + (fresh ? ' fresh' : '') + (info.r != null ? ` rar r${info.r}` : '') + (locks.has(i) ? ' locked-card' : '');
+      b.dataset.i = i;
       b.style.setProperty('--c', c);
       if (info.r != null) b.style.setProperty('--rc', RARITY[info.r].color);
       let pips = '';
@@ -184,7 +207,11 @@ export const ui = {
         ? `<div class="card-rar"><b>${RARITY[info.r].name}</b>${info.levels > 1 ? `<span>+${info.levels} LEVELS</span>` : ''}${info.syn ? `<span class="syn" style="--t:${TAGS[info.syn].color}">${TAGS[info.syn].name} SYNERGY</span>` : ''}</div><div class="card-mods">${info.mods.map((m) => `<i>${m}</i>`).join('')}</div>`
         : '';
       const flag = fresh ? `<span class="card-flag disc">${STAR}NEW DISCOVERY</span>` : runNew ? '<span class="card-flag run">NEW THIS RUN</span>' : '';
-      b.innerHTML = `${flag}<div class="card-icon">${info.icon}</div><div><div class="card-top"><span class="card-name">${info.name}</span><span class="card-tag">${tag}</span></div><div class="card-desc">${info.desc}</div>${rar}${pips ? `<div class="pips">${pips}</div>` : ''}</div>${input.device === 'touch' ? '' : `<kbd>${i + 1}</kbd>`}`;
+      b.innerHTML = `${flag}<div class="card-icon">${info.icon}</div><div><div class="card-top"><span class="card-name">${info.name}</span><span class="card-tag">${tag}</span></div><div class="card-desc">${info.desc}</div>${rar}${pips ? `<div class="pips">${pips}</div>` : ''}</div>${input.device === 'touch' ? '' : `<kbd>${i + 1}</kbd>`}<span class="card-lock" title="Lock: keep this card through a reroll">${LOCK_SVG}</span>`;
+      b.querySelector('.card-lock').addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (onLock && onLock(i)) syncLocks(locks, rerolls);
+      });
       b.addEventListener('click', () => {
         if (performance.now() < lockUntil) return;
         sfx.select();
@@ -192,9 +219,8 @@ export const ui = {
       });
       wrap.appendChild(b);
     });
-    const rr = $('#reroll-btn');
-    rr.textContent = `REROLL (${rerolls})${input.device === 'keyboard' ? '  [R]' : ''}`;
-    rr.disabled = rerolls <= 0;
+    draftLock = onLock;
+    syncLocks(locks, rerolls);
     renderBuild($('#draft-build'), player);
   },
 

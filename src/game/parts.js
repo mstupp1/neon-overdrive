@@ -40,6 +40,7 @@ export const STATS = {
   crit: { apply: (st, v) => (st.crit += v), text: (v) => `${sg(v)}${P(v)} crit chance` },
   critMul: { apply: (st, v) => (st.critMul += v), text: (v) => `+${P(v)} crit damage` },
   mod: { apply: (st, v) => (st.modDmg *= 1 + v), text: (v) => `${sg(v)}${P(v)} module damage` },
+  modRate: { apply: (st, v) => (st.modRate *= 1 + v), text: (v) => `+${P(v)} module fire rate` },
   slots: { flat: true, apply: (st, v) => (st.maxModules += v), text: (v) => `${sg(v)}${Math.abs(v)} module slot` },
   speed: { apply: (st, v) => (st.speed *= 1 + v), text: (v) => `${sg(v)}${P(v)} move speed` },
   dashCd: { apply: (st, v) => (st.dashRecharge *= 1 - v), text: (v) => `Dashes recharge ${P(v)} ${v < 0 ? 'slower' : 'faster'}` },
@@ -50,26 +51,34 @@ export const STATS = {
   grazeR: { apply: (st, v) => (st.grazeR *= 1 + v), text: (v) => `+${P(v)} graze radius` },
   grazeOd: { apply: (st, v) => (st.grazeOd *= 1 + v), text: (v) => `+${P(v)} ultimate charge from grazes` },
   hull: { flat: true, apply: (st, v) => (st.maxHp += v), text: (v) => `${sg(v)}${Math.abs(v)} max hull` },
+  iframes: { apply: (st, v) => (st.hitIfr *= 1 + v), text: (v) => `+${P(v)} invulnerability after a hit` },
   shield: { apply: (st, v) => (st.shieldInterval *= 1 - v), text: (v) => `Aegis Shield recharges ${P(v)} faster` },
   magnet: { apply: (st, v) => (st.magnet *= 1 + v), text: (v) => `${sg(v)}${P(v)} pickup range` },
   xp: { apply: (st, v) => (st.xpMul *= 1 + v), text: (v) => `${sg(v)}${P(v)} XP` },
   credits: { apply: (st, v) => (st.creditMul *= 1 + v), text: (v) => `${sg(v)}${P(v)} credits` },
   find: { apply: (st, v) => (st.find += v), text: (v) => `+${P(v)} rarity find` },
+  rerolls: { flat: true, apply: (st, v) => (st.rerolls += v), text: (v) => `+${v} reroll at the start of each run` },
 };
 
 // Random modifiers: [stat, tag, lo, hi, minRarity, weight]. Values grow with item level; rarer items roll higher.
 export const AFFIXES = [
-  ['dmg', 'firepower', 0.03, 0.08], ['rate', 'firepower', 0.03, 0.07], ['bounty', 'firepower', 0.05, 0.12],
+  ['dmg', 'firepower', 0.03, 0.08], ['rate', 'firepower', 0.03, 0.07], ['bounty', 'crit', 0.05, 0.12],
   ['pierce', 'firepower', 1, 1, 3, 0.4],
   ['crit', 'crit', 0.02, 0.05], ['critMul', 'crit', 0.15, 0.4],
-  ['mod', 'modules', 0.05, 0.12], ['slots', 'modules', 1, 1, 4, 0.25],
+  ['mod', 'modules', 0.05, 0.12], ['modRate', 'modules', 0.04, 0.09], ['slots', 'modules', 1, 1, 4, 0.25],
   ['speed', 'mobility', 0.03, 0.07], ['dashCd', 'mobility', 0.05, 0.12], ['dashLen', 'mobility', 0.08, 0.18],
   ['od', 'overdrive', 0.06, 0.14], ['grazeR', 'overdrive', 0.1, 0.22], ['odDur', 'overdrive', 0.4, 1],
-  ['hull', 'tank', 1, 1, 2, 0.5], ['shield', 'tank', 0.08, 0.18],
+  ['hull', 'tank', 1, 1, 2, 0.5], ['shield', 'tank', 0.08, 0.18], ['iframes', 'tank', 0.1, 0.25],
   ['magnet', 'greed', 0.15, 0.35], ['xp', 'greed', 0.04, 0.1], ['credits', 'greed', 0.06, 0.15], ['find', 'greed', 0.05, 0.15],
+  ['rerolls', 'greed', 1, 1, 2, 0.35], ['grazeOd', 'overdrive', 0.1, 0.25],
 ].map(([stat, tag, lo, hi, minR = 0, weight = 1]) => ({ id: stat, stat, tag, lo, hi, minR, weight }));
 const affixById = new Map(AFFIXES.map((a) => [a.id, a]));
 export const affixTag = (id) => (affixById.get(id) || {}).tag;
+
+// Modifiers follow the thing they roll on: the first comes from its own build path, the rest from that path or its
+// kin (Firepower + Crit, Modules + Overdrive, Mobility + Overdrive, Tank + Mobility, Greed + Tank), own path favoured.
+export const PATH_KIN = { firepower: 'crit', crit: 'firepower', modules: 'overdrive', mobility: 'overdrive', overdrive: 'mobility', tank: 'mobility', greed: 'tank' };
+const affixFit = (a, tag, first) => (!tag ? 1 : a.tag === tag ? 2 : !first && a.tag === PATH_KIN[tag] ? 1 : 0);
 
 // Per-rarity tuning: base-effect multiplier, modifier count (+1 with `extra` chance), modifier roll floor, sell value.
 export const RARITY_GEAR = [
@@ -207,13 +216,17 @@ function weightedPick(list, w, rng) {
 }
 
 // Rolls `n` modifiers for rarity r at item level il. `scale` < 1 makes them weaker (level-up card bonuses).
-export function rollMods(r, il, n, rng = Math.random, scale = 1, avoid = []) {
+// tag: build path of the item / card the modifiers roll on (null = any path).
+export function rollMods(r, il, n, rng = Math.random, scale = 1, avoid = [], tag = null) {
   const out = [];
   const used = new Set(avoid);
   for (let i = 0; i < n; i++) {
-    const pool = AFFIXES.filter((a) => a.minR <= r && !used.has(a.id) && !(scale < 1 && STATS[a.stat].flat));
+    const open = AFFIXES.filter((a) => a.minR <= r && !used.has(a.id) && !(scale < 1 && STATS[a.stat].flat));
+    let pool = open.filter((a) => affixFit(a, tag, i === 0) > 0);
+    if (!pool.length) pool = open.filter((a) => affixFit(a, tag, false) > 0);
+    if (!pool.length) pool = open; // the path and its kin are used up
     if (!pool.length) break;
-    const a = weightedPick(pool, (x) => x.weight, rng);
+    const a = weightedPick(pool, (x) => x.weight * (tag ? affixFit(x, tag, false) || 1 : 1), rng);
     used.add(a.id);
     let v = a.lo;
     if (!STATS[a.stat].flat) {
@@ -236,7 +249,7 @@ export function makeItem(slot, r, il, rng = Math.random, baseId = null) {
   }
   const g = RARITY_GEAR[r];
   const n = g.mods + (rng() < g.extra ? 1 : 0);
-  return { base: def.id, slot: def.slot, r, il, mods: rollMods(r, il, n, rng) };
+  return { base: def.id, slot: def.slot, r, il, mods: rollMods(r, il, n, rng, 1, [], def.tag) };
 }
 
 export function itemName(item) {

@@ -58,7 +58,7 @@ export const THEMES = {
   greed: {
     name: 'GREED', color: '#5aa9ff',
     small: [{ credits: 5 }, { xp: 4 }],
-    notables: [{ name: 'Prospector', mods: { credits: 12, luck: 15 } }, { name: 'Scholar', mods: { xp: 12, magnet: 20 } }],
+    notables: [{ name: 'Prospector', mods: { credits: 10, luck: 10, rerolls: 1 } }, { name: 'Scholar', mods: { xp: 12, magnet: 20 } }],
   },
 };
 
@@ -204,6 +204,7 @@ const MODS = {
   xp: (v) => `${pct(v)} XP`,
   magnet: (v) => `${pct(v)} pickup range`,
   luck: (v) => `${pct(v)} rarity find`,
+  rerolls: (v) => `${num(v)} reroll at the start of each run`,
   nonCrit: (v) => `${pct(v)} damage on hits that do not crit`,
 };
 
@@ -316,7 +317,6 @@ const FLAGS = ['momentum', 'edgeRunner', 'shadowStrike'];
 export function applyTree(st, p) {
   for (const f of FLAGS) st[f] = false;
   st.nonCrit = 1;
-  st.hitIfr = 1;
   if (!p.tree || !p.tree.length) return;
   const m = sumMods(p.cls, p.tree);
   const inc = (k) => 1 + (m[k] || 0) / 100;
@@ -338,13 +338,14 @@ export function applyTree(st, p) {
   st.grazeR *= inc('grazeR');
   st.grazeOd *= inc('grazeOd');
   st.maxHp += Math.trunc(m.hull || 0);
-  st.hitIfr = inc('hitIfr');
+  st.hitIfr *= inc('hitIfr');
   if (m.shieldBase) st.shieldInterval = st.shieldInterval ? Math.min(st.shieldInterval, m.shieldBase) : m.shieldBase;
   if (m.shield) st.shieldInterval = st.shieldInterval ? st.shieldInterval / 1.2 : m.shield;
   st.creditMul *= inc('credits');
   st.xpMul *= inc('xp');
   st.magnet *= inc('magnet');
   st.find = (st.find || 0) + (m.luck || 0) / 100; // rarity find (loot.js)
+  st.rerolls = (st.rerolls || 0) + (m.rerolls || 0);
   for (const f of FLAGS) st[f] = !!m[f];
 }
 

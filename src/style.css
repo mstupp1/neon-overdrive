@@ -3935,3 +3935,88 @@ input[type='range']::-moz-range-thumb {
 .tree-detail i.go {
     color: var(--c);
 }
+
+/* Draft card locks (main.js toggleLock): a locked card keeps its option and roll through a reroll. */
+.card-lock {
+    position: absolute;
+    right: 0.5em;
+    bottom: 0.45em;
+    display: grid;
+    place-items: center;
+    width: 1.9em;
+    height: 1.9em;
+    padding: 0.38em;
+    color: var(--dim);
+    background: rgba(8, 6, 24, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: color 0.12s, border-color 0.12s, box-shadow 0.12s;
+}
+
+.card-lock svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.card-lock:hover {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.card.locked-card {
+    border-color: #ffd24a;
+    box-shadow: 0 0 0 1px #ffd24a inset, 0 0 1em rgba(255, 210, 74, 0.25);
+}
+
+.card.locked-card .card-lock {
+    color: #05030d;
+    background: #ffd24a;
+    border-color: #ffd24a;
+    box-shadow: 0 0 0.8em rgba(255, 210, 74, 0.6);
+}
+
+/* Flux Core: a two-column grid of compact nodes (icon | name, text, cost) so every node fits without scrolling. */
+#core-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45em;
+    width: 100%;
+    max-width: 24em;
+}
+
+#core-list .card {
+    grid-template-columns: 2em minmax(0, 1fr);
+    align-items: start;
+    gap: 0.2em 0.5em;
+    padding: 0.5em 0.55em;
+}
+
+#core-list .card-icon {
+    width: 2em;
+    height: 2em;
+    padding: 0.4em;
+}
+
+#core-list .card-top {
+    flex-wrap: wrap;
+    gap: 0.1em 0.4em;
+}
+
+#core-list .card-name {
+    font-size: 0.78em;
+}
+
+#core-list .card-desc {
+    font-size: 0.82em;
+}
+
+#core-list .price {
+    grid-column: 2;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5em;
+    min-width: 0;
+}

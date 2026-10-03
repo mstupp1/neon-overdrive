@@ -23,7 +23,7 @@ It deploys as-is to any static host (itch.io, GitHub Pages, Netlify...). Fonts a
 | Focus (slow, precise) | hold Shift | - | - | LB / RB / LT |
 | Pause | Esc / P | pause button | pause button | Start |
 
-Menus: arrows / d-pad to move, Enter / Space / A to select, Esc / B to go back (or skip dialogue), `1`-`3` to pick an upgrade, `R` to reroll (or retry on the game-over screen). Items you cannot afford stay focusable and show their price.
+Menus: arrows / d-pad to move, Enter / Space / A to select, Esc / B to go back (or skip dialogue), `1`-`3` to pick an upgrade, `R` to reroll (or retry on the game-over screen), `F` to lock the focused draft card. Items you cannot afford stay focusable and show their price.
 
 ## Campaign
 
@@ -118,7 +118,7 @@ Open **PILOT** on the campaign map to pick a class and equip **2 passives**. Ran
 
 ## In a run
 
-- **Level ups.** Enemies drop XP shards. Each level offers a draft of 3 upgrades; clearing a sector grants a bonus draft. Rerolls: 1 per run + 1 per boss kill.
+- **Level ups.** Enemies drop XP shards. Each level offers a draft of 3 upgrades; clearing a sector grants a bonus draft. Rerolls: 3 per run, +1 every 5 levels and +1 per boss kill (more from Greed gear, the Prospector tree notable and the Flux Core). Lock a card (lock icon, `F`, or X on a pad) to keep it through a reroll.
 - **Build.** Main cannon, stats (damage, fire rate, crit, pierce, speed, magnet, capacitor), defenses (hull, regenerating Aegis shield, extra dashes) and up to **4 weapon modules** (5 with Engineer's Overflow).
 - **Combo.** Kills chain into a score multiplier (up to x8). Getting hit breaks the chain.
 - **Graze and ultimate.** Skimming bullets and killing fills the ult meter. Every ultimate doubles your score while it lasts.

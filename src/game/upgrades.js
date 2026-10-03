@@ -226,6 +226,9 @@ export function recomputeStats(p) {
   st.perpetual = 1.2 * lv('perpetual');
   st.nullR = lv('nullField') ? 55 + 15 * lv('nullField') : 0;
   st.find = 0; // rarity find (gear / ship traits, rarity.js luckFor)
+  st.modRate = 1; // module fire rate (gear modifiers; modules.js rateMul)
+  st.hitIfr = 1; // invulnerability after a hit (gear modifiers, passive tree)
+  st.rerolls = 0; // extra draft rerolls at the start of a run (gear, passive tree, Flux Core; main.js newWorld)
   st.aegisOd = 0; // ultimate meter per shield break (Aegis Prime)
   resetPilotStats(st);
   if (p.ship.trait) p.ship.trait.apply(st, p);
@@ -331,7 +334,7 @@ export function rollCard(p, id, luck = 0, rng = Math.random) {
   const room = u.max - (p.up[id] || 0);
   const levels = Math.max(1, Math.min(CARD_RARITY[r].levels, room));
   const extra = CARD_RARITY[r].levels - levels; // levels past the cap turn into one more modifier each
-  return { r, levels, mods: rollMods(r, il, CARD_RARITY[r].mods + extra, rng, 0.5) };
+  return { r, levels, mods: rollMods(r, il, CARD_RARITY[r].mods + extra, rng, 0.5, [], UP_TAGS[id] || null) };
 }
 
 // Installs a picked card: its levels, then its modifiers.
