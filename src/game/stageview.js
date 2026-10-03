@@ -37,6 +37,9 @@ const CW = 450; // chase playfield width (virtual)
 const CH = 1100; // chase playfield depth (virtual)
 const CHASE_HOME = 150; // the jet's resting distance from the near edge (virtual)
 const FOG = 260; // chase: virtual depth over which things fade in from the far edge
+// Chase depth cues: ships fly at this height over the floor (in virtual units; screen lift = HOVER * local scale),
+// so their lit shadows sit visibly below them and the floor reads as a ground plane rather than the play surface.
+const HOVER = 24;
 
 // Real (screen) metrics, saved while the view is swapped.
 const R = { W: 450, H: 800, top: 0, bottom: 0 };
@@ -68,7 +71,20 @@ function chaseProj() {
   P.A = rp * dp * P.f;
   P.Yc = CH - CHASE_HOME + dp;
   P.yFar = P.hy + P.A / P.Yc;
+  // The air plane (where ships fly): the same projection lifted by HOVER * scale, i.e. y = hy + (A - HOVER f) / d.
+  P.Aair = P.A - HOVER * P.f;
+  P.yFarAir = P.hy + P.Aair / P.Yc;
   return P;
+}
+// A virtual point on the chase floor (shadows, gates, lane furniture) → screen.
+function floorPt(x, y, out = {}) {
+  const Pp = chaseProj();
+  const d = Math.max(30, Pp.Yc - y);
+  const s = Pp.f / d;
+  out.x = real().W / 2 + (x - CW / 2) * s;
+  out.y = Pp.hy + Pp.A / d;
+  out.s = s;
+  return out;
 }
 
 const off = typeof document !== 'undefined' ? document.createElement('canvas') : null;
@@ -230,7 +246,7 @@ export const sv = {
       const d = Math.max(30, Pp.Yc - y);
       const s = Pp.f / d;
       out.x = r.W / 2 + (x - CW / 2) * s;
-      out.y = Pp.hy + Pp.A / d;
+      out.y = Pp.hy + Pp.Aair / d; // where ships are drawn (the air plane, above their shadows)
       out.s = s;
     } else {
       out.x = x;
@@ -248,7 +264,7 @@ export const sv = {
     } else if (this.mode === 'chase') {
       const r = real();
       const Pp = chaseProj();
-      const d = Pp.A / Math.max(4, y - Pp.hy);
+      const d = Pp.Aair / Math.max(4, y - Pp.hy);
       out.x = CW / 2 + ((x - r.W / 2) * d) / Pp.f;
       out.y = Pp.Yc - d;
     } else {
@@ -361,7 +377,10 @@ export const sv = {
   render(ctx, k, renderWorld, getCam) {
     const r = real();
     ctx.setTransform(k, 0, 0, k, 0, 0);
-    if (this.mode === 'side') drawSideBack(ctx, r);
+    if (this.mode === 'side') {
+      drawSideBack(ctx, r);
+      drawSideGlow(ctx, r);
+    }
     else drawChaseBack(ctx, r);
     const shakeX = view.ox || 0;
     const shakeY = view.oy || 0;
@@ -390,7 +409,14 @@ export const sv = {
       ctx.setTransform(0, 1, -1, 0, r.W * k + shakeX, shakeY);
       ctx.drawImage(off, 0, 0);
     } else {
+      // Depth cues before the ships: lane pylons standing up off the floor, then each ship's shadow and the light it
+      // casts on the floor. The world itself is laid on the air plane, lifted above those shadows.
+      ctx.setTransform(k, 0, 0, k, shakeX, shakeY);
+      drawPylons(ctx, r);
+      drawShadows(ctx);
       drawChaseFloor(ctx, k, kk, r, shakeX, shakeY);
+      ctx.setTransform(k, 0, 0, k, shakeX, shakeY);
+      drawHaze(ctx, r);
     }
     ctx.setTransform(k, 0, 0, k, shakeX, shakeY);
     if (this.mode === 'chase') drawGates(ctx, r);
@@ -445,6 +471,11 @@ function drawWalls(ctx) {
   const step = SEG / 2;
   const y0 = -40;
   const y1 = H + 40;
+  // Vanishing point (virtual): screen (W/2, 0.7H), where drawSideBack puts the horizon.
+  const r = real();
+  const vpx = (r.H * 0.7) / SZ;
+  const vpy = (r.W * 0.5) / SZ;
+  const DEPTH = 0.085;
   for (const top of [true, false]) {
     const pts = [];
     for (let y = y0; y <= y1 + step; y += step) {
@@ -453,6 +484,33 @@ function drawWalls(ctx) {
       pts.push(top ? dpt : W - dpt, y);
     }
     const edge = top ? -20 : W + 20;
+    // Solid depth: the rock's far rim, pulled toward the backdrop's vanishing point (the horizon, mid screen), and
+    // the receding face between the two rims (the ceiling's underside, the floor's top). As the terrain scrolls past,
+    // the face swings like a real extruded shape.
+    const back = [];
+    for (let i = 0; i < pts.length; i += 2) back.push(pts[i] + (vpx - pts[i]) * DEPTH, pts[i + 1] + (vpy - pts[i + 1]) * DEPTH);
+    ctx.beginPath();
+    for (let i = 0; i < pts.length; i += 2) (i ? ctx.lineTo : ctx.moveTo).call(ctx, pts[i], pts[i + 1]);
+    for (let i = back.length - 2; i >= 0; i -= 2) ctx.lineTo(back[i], back[i + 1]);
+    ctx.closePath();
+    ctx.fillStyle = `hsla(${(h + 20) % 360},60%,15%,0.92)`;
+    ctx.fill();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.3;
+    ctx.beginPath();
+    for (let i = 0; i < pts.length; i += 2) {
+      ctx.moveTo(pts[i], pts[i + 1]);
+      ctx.lineTo(back[i], back[i + 1]);
+    }
+    ctx.stroke();
+    ctx.globalAlpha = 0.6;
+    ctx.beginPath();
+    for (let i = 0; i < back.length; i += 2) (i ? ctx.lineTo : ctx.moveTo).call(ctx, back[i], back[i + 1]);
+    ctx.stroke();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
     // Dark rock body
     ctx.beginPath();
     ctx.moveTo(edge, y0);
@@ -577,6 +635,29 @@ function drawSideBack(ctx, r) {
   }
 }
 
+// Each ship's light thrown down onto the backdrop's floor grid below it: brighter and tighter the lower it flies,
+// so ships read as hanging in front of the scenery instead of being painted on it. (Projectiles get none.)
+function drawSideGlow(ctx, r) {
+  const hor = r.H * 0.7;
+  const fy = hor + (r.H - hor) * 0.3;
+  const q = {};
+  ctx.globalCompositeOperation = 'lighter';
+  const one = (x, y, rad, color, w) => {
+    sv.toScreen(x, y, q);
+    if (q.x < -60 || q.x > r.W + 60) return;
+    const near = clamp(q.y / fy, 0, 1); // 0 at the top of the screen, 1 down at the floor
+    const rx = rad * SZ * (2.6 - near);
+    ctx.globalAlpha = 0.1 + 0.28 * near * near * w;
+    const g = glow(color, 64);
+    ctx.drawImage(g.img, q.x - rx * 1.6, fy - rx * 0.3, rx * 3.2, rx * 0.6);
+  };
+  for (const e of G.enemies) if (!e.dead && e.r) one(e.x, e.y, Math.min(e.r, 120), e.color || '#ff3d7a', e.r > 40 ? 0.7 : 1);
+  const p = G.player;
+  if (p && !p.dead) one(p.x, p.y, Math.max(16, p.r * 1.6), p.color || '#3ff6ff', 1.2);
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+}
+
 // --- Chase view ----------------------------------------------------------------------------------------------------
 
 function spawnGate() {
@@ -660,7 +741,7 @@ function drawChaseBack(ctx, r) {
   // Long lines converging on the vanishing point
   ctx.beginPath();
   for (let vx = -CW * 2; vx <= CW * 3; vx += 56) {
-    const near = sv.toScreen(vx, CH + 200);
+    const near = floorPt(vx, CH + 200);
     ctx.moveTo(W / 2, hy);
     ctx.lineTo(near.x, near.y);
   }
@@ -669,8 +750,8 @@ function drawChaseBack(ctx, r) {
   // Lane edges: the playfield's sides, brighter
   ctx.beginPath();
   for (const vx of [0, CW]) {
-    const a = sv.toScreen(vx, 0);
-    const b = sv.toScreen(vx, CH + 200);
+    const a = floorPt(vx, 0);
+    const b = floorPt(vx, CH + 200);
     ctx.moveTo(a.x, a.y);
     ctx.lineTo(b.x, b.y);
   }
@@ -688,18 +769,20 @@ function drawChaseBack(ctx, r) {
   }
 }
 
-// The virtual frame laid on the floor plane, one thin screen row band at a time (far to near).
+// The virtual frame laid on the air plane (the floor projection lifted by HOVER), one thin screen row band at a
+// time (far to near).
 function drawChaseFloor(ctx, k, kk, r, sx, sy) {
   const Pp = chaseProj();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const H = r.H;
   const step = 2;
-  let y = Math.max(Pp.yFar, Pp.hy + 1);
+  const A = Pp.Aair;
+  let y = Math.max(Pp.yFarAir, Pp.hy + 1);
   const srcW = CW * kk;
   while (y < H) {
     const y1 = Math.min(H, y + step);
-    const d0 = Pp.A / (y - Pp.hy);
-    const d1 = Pp.A / (y1 - Pp.hy);
+    const d0 = A / (y - Pp.hy);
+    const d1 = A / (y1 - Pp.hy);
     let v0 = Pp.Yc - d0;
     const v1 = Pp.Yc - d1;
     if (v1 > 0) {
@@ -727,14 +810,14 @@ function drawGates(ctx, r) {
     const g = gates[i];
     if (g.y < -20) continue;
     const fog = clamp((g.y + 20) / FOG, 0, 1);
-    sv.toScreen(0, g.y, q);
+    floorPt(0, g.y, q);
     const s = q.s;
     const base = q.y;
     const hh = 58 * s;
     const xl = q.x;
-    const xr = sv.toScreen(CW, g.y).x;
-    const ga = sv.toScreen(g.gx - g.gw / 2, g.y).x;
-    const gb = sv.toScreen(g.gx + g.gw / 2, g.y).x;
+    const xr = floorPt(CW, g.y).x;
+    const ga = floorPt(g.gx - g.gw / 2, g.y).x;
+    const gb = floorPt(g.gx + g.gw / 2, g.y).x;
     const col = g.hit ? '#ffffff' : '#ff3d7a';
     const passed = g.done ? clamp(1 - (g.y - G.player.y) / 120, 0, 1) : 1;
     const a = fog * passed;
@@ -781,4 +864,92 @@ function drawGates(ctx, r) {
     ctx.globalCompositeOperation = 'source-over';
   }
   ctx.globalAlpha = 1;
+}
+
+// Neon pylons along both lane edges: vertical billboards scrolling with the floor grid, so there is something with
+// height in the scene to measure the ships' hover and speed against.
+const PYLON_GAP = 180;
+function drawPylons(ctx, r) {
+  const h = Math.round(bg.hue);
+  const col = `hsl(${(h + 30) % 360},100%,66%)`;
+  const cap = glow(`hsl(${Math.round(((h + 30) % 360) / 10) * 10},100%,62%)`, 64);
+  const ph = (bg.scroll * 260) % PYLON_GAP;
+  const P0 = chaseProj();
+  const q = {};
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.strokeStyle = col;
+  // Far to near, so near posts draw over far ones.
+  for (let vy = -720; vy < CH + PYLON_GAP; vy += PYLON_GAP) {
+    const y = vy + ph;
+    if (P0.Yc - y < 60) continue;
+    const a = clamp((y + 720) / 520, 0, 1) * (0.55 + beat.pulse * 0.2);
+    if (a < 0.02) continue;
+    for (const vx of [-34, CW + 34]) {
+      floorPt(vx, y, q);
+      if (q.y > r.H + 40) continue;
+      const s = q.s;
+      const top = q.y - 118 * s;
+      ctx.globalAlpha = a * 0.35;
+      ctx.lineWidth = Math.max(1, 6 * s);
+      ctx.beginPath();
+      ctx.moveTo(q.x, q.y);
+      ctx.lineTo(q.x, top);
+      ctx.stroke();
+      ctx.globalAlpha = a;
+      ctx.lineWidth = Math.max(0.8, 1.6 * s);
+      ctx.stroke();
+      // Cap light, and its pool on the floor
+      const cs = 30 * s;
+      ctx.globalAlpha = a * 0.9;
+      ctx.drawImage(cap.img, q.x - cs / 2, top - cs / 2, cs, cs);
+      ctx.globalAlpha = a * 0.35;
+      ctx.drawImage(cap.img, q.x - cs, q.y - cs * 0.3, cs * 2, cs * 0.6);
+    }
+  }
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+// Under every ship: a dark core shadow and a pool of its own colour lit on the floor. With the ships lifted onto the
+// air plane, the gap between a ship and its shadow is what sells the height. (Projectiles get none.)
+function drawShadows(ctx) {
+  const q = {};
+  const one = (x, y, rad, color, w) => {
+    if (y < -40) return;
+    const fog = clamp((y + 20) / FOG, 0, 1);
+    if (fog < 0.02) return;
+    floorPt(x, y, q);
+    const s = q.s;
+    const rx = rad * s * 1.15;
+    const ry = rx * 0.42;
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = 0.3 * fog * w;
+    const g = glow(color, 64);
+    ctx.drawImage(g.img, q.x - rx * 2.4, q.y - ry * 2.4, rx * 4.8, ry * 4.8);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 0.6 * fog;
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.ellipse(q.x, q.y, rx * 0.8, ry * 0.8, 0, 0, Math.PI * 2);
+    ctx.fill();
+  };
+  for (const e of G.enemies) {
+    if (e.dead || !e.r) continue;
+    one(e.x, e.y, Math.min(e.r, 120), e.color || '#ff3d7a', e.r > 40 ? 0.7 : 1);
+  }
+  const p = G.player;
+  if (p && !p.dead) one(p.x, p.y, Math.max(16, p.r * 1.6), p.color || '#3ff6ff', 1.2);
+  ctx.globalAlpha = 1;
+}
+
+// Aerial perspective: a horizon-coloured haze over the far rows, so distant ships sink into the glow.
+function drawHaze(ctx, r) {
+  const P0 = chaseProj();
+  const h = Math.round(bg.hue);
+  const y1 = P0.hy + (r.H * 0.8 - P0.hy) * 0.42;
+  const grd = ctx.createLinearGradient(0, P0.hy, 0, y1);
+  grd.addColorStop(0, `hsla(${(h + 30) % 360},70%,12%,0.55)`);
+  grd.addColorStop(1, `hsla(${(h + 30) % 360},70%,12%,0)`);
+  ctx.fillStyle = grd;
+  ctx.fillRect(-20, P0.hy, r.W + 40, y1 - P0.hy);
 }
