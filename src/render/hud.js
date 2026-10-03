@@ -7,6 +7,7 @@ import { comboMult } from '../game/player.js';
 import { CLASSES } from '../game/pilot.js';
 import { input } from '../core/input.js';
 import { sv } from '../game/stageview.js';
+import { profile } from '../core/storage.js';
 
 const FONT = 'Orbitron, "Segoe UI", sans-serif';
 const FONT2 = 'Rajdhani, "Segoe UI", sans-serif';
@@ -207,10 +208,8 @@ export function drawHud(ctx, alpha = 1) {
   }
 
   // Gauges (fade when the ship flies near them)
-  const gy = view.H - view.safeBottom - 46;
   const sp = sv.active ? sv.toScreen(p.x, p.y) : p; // where the ship is on screen (other stage views map it)
-  drawGauge(ctx, 44, gy, p, 'od', sp.x, sp.y);
-  drawGauge(ctx, W - 44, gy, p, 'dash', sp.x, sp.y);
+  drawBothGauges(ctx, p, sp.x, sp.y);
   ctx.globalAlpha = 1;
 
   drawBanner(ctx);
@@ -222,10 +221,27 @@ export function drawGauges(ctx, sx, sy) {
   if (!p) return;
   hudA = 1;
   ctx.textBaseline = 'middle';
-  const gy = view.H - view.safeBottom - 46;
-  drawGauge(ctx, 44, gy, p, 'od', sx, sy);
-  drawGauge(ctx, view.W - 44, gy, p, 'dash', sx, sy);
+  drawBothGauges(ctx, p, sx, sy);
   ctx.globalAlpha = 1;
+}
+
+// Touch buttons side (Settings): both gauges sit in one bottom corner, dash in the corner and the ult beside it,
+// so one thumb works them and the other hand steers. The #touch-ui buttons sit on top (style.css, side-left).
+export function buttonSide() {
+  return profile.settings.touchSide === 'left' ? 'left' : 'right';
+}
+
+export function gaugeSpots() {
+  const y = view.H - view.safeBottom - 46;
+  const left = buttonSide() === 'left';
+  const at = (d) => (left ? d : view.W - d);
+  return { dash: { x: at(44), y }, od: { x: at(120), y } };
+}
+
+function drawBothGauges(ctx, p, sx, sy) {
+  const g = gaugeSpots();
+  drawGauge(ctx, g.od.x, g.od.y, p, 'od', sx, sy);
+  drawGauge(ctx, g.dash.x, g.dash.y, p, 'dash', sx, sy);
 }
 
 function drawGauge(ctx, x, y, p, kind, sx = p.x, sy = p.y) {

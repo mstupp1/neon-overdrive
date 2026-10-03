@@ -156,10 +156,12 @@ body {
     text-shadow: 0 0 0.5em var(--cyan);
 }
 
+/* Both buttons in one bottom corner over the canvas gauges (hud.js gaugeSpots: dash 44 and ult 120 units from
+   the edge, 46 up); .side-left mirrors them. */
 #touch-ui .touch-btn {
     position: absolute;
-    bottom: calc(var(--safe-bottom) + 0.6em);
-    width: 5.6em;
+    bottom: calc(var(--safe-bottom) + 0.1em);
+    width: 4.7em;
     height: 5.6em;
     border-radius: 50%;
     border: none;
@@ -168,12 +170,22 @@ body {
     touch-action: none;
 }
 
-#touch-ui .od {
-    left: 0.1em;
+#touch-ui .dash {
+    right: 0.4em;
 }
 
-#touch-ui .dash {
-    right: 0.1em;
+#touch-ui .od {
+    right: 5.15em;
+}
+
+#touch-ui.side-left .dash {
+    right: auto;
+    left: 0.4em;
+}
+
+#touch-ui.side-left .od {
+    right: auto;
+    left: 5.15em;
 }
 
 .toast {
@@ -197,6 +209,11 @@ body {
     pointer-events: none;
     transition: opacity 0.5s, transform 0.5s;
     z-index: 6;
+}
+
+/* In flight (the pause button is up) it sits above the dash / ult gauges. */
+#pause-btn:not([hidden]) ~ .toast {
+    bottom: calc(var(--safe-bottom) + 5em);
 }
 
 .toast.show {
