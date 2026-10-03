@@ -263,12 +263,25 @@ export const sfx = {
 
 const DIR = 'src/audio/music/';
 const NORMAL = [
-  'Exploratory Depths 1', 'Exploratory Depths 2', 'Game World Theme 1', 'Game World Theme 2', 'Mist Level 1',
-  'Mist Level 2', 'Nournal Exploration 1', 'Nournal Exploration 2', 'Weightless Adventure 1', 'Weightless Adventure 2',
+  'Console Boot 1', 'Console Boot 2',
+  'Enderal 1', 'Enderal 2',
+  'Exploratory Depths 1', 'Exploratory Depths 2',
+  'Game World Mix 1', 'Game World Mix 2',
+  'Game World Theme 1', 'Game World Theme 2',
+  'Glassy Nocturnal',
+  'Mist Level 1', 'Mist Level 2',
+  'Misty Minor Pads',
+  'Nournal Exploration 1', 'Nournal Exploration 2',
+  'Tense Exploration',
+  'Underground Arcade',
+  'Weightless Adventure 1', 'Weightless Adventure 2',
   'Weightless Breaks 1', 'Weightless Breaks 2',
 ];
 // The loudest, busiest tracks carry the late sectors and the bosses.
-const LATE = ['Weightless Breaks 1', 'Weightless Breaks 2', 'Nournal Exploration 2', 'Weightless Adventure 2', 'Mist Level 2'];
+const LATE = [
+  'Weightless Breaks 1', 'Weightless Breaks 2', 'Nournal Exploration 2', 'Weightless Adventure 2', 'Mist Level 2',
+  'Console Boot 1', 'Console Boot 2', 'Enderal 2', 'Underground Arcade',
+];
 const BOSS = ['Mist Level 2', 'Weightless Adventure 2', 'Nournal Exploration 2', 'Weightless Breaks 1']; // warden, hydra, omega, eclipse
 
 const urlFor = (name) => DIR + encodeURIComponent(name) + '.mp3';
