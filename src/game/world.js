@@ -13,7 +13,7 @@ import { updateEnemies, damageEnemy } from './enemies.js';
 import { drawBoss } from './bosses.js';
 import { updatePlayerBullets, updateEnemyBullets, drawPlayerBullets, drawEnemyBullets, playerBullet } from './bullets.js';
 import { updatePickups, drawPickups } from './pickups.js';
-import { updateParticles, drawParticles, updateTexts, drawTexts, sparks, explosion, ring } from './fx.js';
+import { updateParticles, drawParticles, updateTexts, drawTexts, sparks, explosion, ring, impact } from './fx.js';
 import { sfx } from '../core/audio.js';
 import { sv } from './stageview.js';
 
@@ -100,9 +100,10 @@ function collide(p) {
         t.hp -= b.dmg;
         t.flash = 0.05;
         b.dead = true;
+        sparks(b.x, b.y, '#b4ff3a', 2, 150);
         if (t.hp <= 0) {
           t.dead = true;
-          explosion(t.x, t.y, '#ff3b3b', 0.8);
+          explosion(t.x, t.y, t.type === 'shell' ? '#ff6a2b' : '#ff3b3b', 0.8);
           addScore(150);
           sfx.explode(0.8);
           break;
@@ -127,6 +128,7 @@ function collide(p) {
         sparks(b.x, b.y, '#ffffff', 1, 120);
       }
       sparks(b.x, b.y, e.color, isCrit ? 4 : 2, 160, Math.atan2(b.vy, b.vx) + Math.PI, 1.6);
+      if (b.spr.pop) impact(b.x, b.y, b.spr.hit, b.spr.pop * b.scale * (isCrit ? 1.5 : 1), b.kind === 'orb');
       if (isCrit && p.st.overload && !b.aoe) overloadBlast(p, e, b.x, b.y, dmg);
       if (b.primary && p.st.splinter && Math.random() < p.st.splinter && G.pBullets.length < 520) {
         // Splinter Rounds: two fragments fan out past the target.
@@ -168,7 +170,7 @@ function collide(p) {
       }
     }
     for (const b of G.eBullets) {
-      if (b.dead || b.type === 'torpedo') continue;
+      if (b.dead || b.hp > 0) continue; // shootable shots take real hits instead
       if (beam.ang !== undefined ? onBeam(beam, b.x, b.y, half + b.r) : b.y <= p.y && Math.abs(b.x - beam.x) < half + b.r) {
         b.dead = true;
         sparks(b.x, b.y, '#ff9ad5', 2, 120);

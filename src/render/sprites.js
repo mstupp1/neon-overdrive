@@ -2,9 +2,10 @@
 // shadowBlur so the per-frame renderer never pays for blur.
 
 import { TAU } from '../core/math.js';
-import { withAlpha, poly, regular, glowStroke } from './ink.js';
+import { withAlpha, poly, regular, glowStroke, shade } from './ink.js';
 import { drawShip } from './shipArt.js';
 import { buildEnemyArt } from './enemyArt.js';
+import { shotStyle, superKi, moduleShot, withTrail } from './shots.js';
 
 export { withAlpha };
 
@@ -116,6 +117,53 @@ export function glow(color, size = 64) {
   return s;
 }
 
+// --- Particle sprites (fx.js): shockwave ring, anime cross flare, twinkle glint ---------------------------------
+
+const fxCache = new Map();
+function cachedFx(key, size, draw) {
+  let s = fxCache.get(key);
+  if (!s) fxCache.set(key, (s = makeSprite(size, draw)));
+  return s;
+}
+// Soft shock band with a crisp bright edge; ring radius 28 in a 64 box (drawn scaled).
+export function shockSpr(color) {
+  return cachedFx('shock|' + color, 64, (g) => {
+    const grd = g.createRadialGradient(0, 0, 14, 0, 0, 31);
+    grd.addColorStop(0, withAlpha(color, 0));
+    grd.addColorStop(0.7, withAlpha(color, 0.16));
+    grd.addColorStop(0.88, withAlpha(color, 0.8));
+    grd.addColorStop(1, withAlpha(color, 0));
+    g.fillStyle = grd;
+    g.beginPath(); g.arc(0, 0, 31, 0, TAU); g.fill();
+    g.strokeStyle = 'rgba(255,255,255,0.75)'; g.lineWidth = 1;
+    g.beginPath(); g.arc(0, 0, 27.5, 0, TAU); g.stroke();
+  });
+}
+// Horizontal + vertical lens streaks over a hot centre (explosion cores, big hits). 64 box, streak radius 31.
+export function flareSpr(color) {
+  return cachedFx('flare|' + color, 64, (g) => {
+    const core = g.createRadialGradient(0, 0, 0, 0, 0, 12);
+    core.addColorStop(0, '#ffffff'); core.addColorStop(0.4, withAlpha(color, 0.7)); core.addColorStop(1, withAlpha(color, 0));
+    g.fillStyle = core; g.beginPath(); g.arc(0, 0, 12, 0, TAU); g.fill();
+    for (const [w, h, a] of [[31, 1.8, 1], [1.6, 18, 0.8]]) {
+      const lg = w > h ? g.createLinearGradient(-w, 0, w, 0) : g.createLinearGradient(0, -h, 0, h);
+      lg.addColorStop(0, withAlpha(color, 0)); lg.addColorStop(0.5, `rgba(255,255,255,${a})`); lg.addColorStop(1, withAlpha(color, 0));
+      g.fillStyle = lg;
+      g.beginPath(); g.ellipse(0, 0, w, h, 0, 0, TAU); g.fill();
+    }
+  });
+}
+// Four-point twinkle. 24 box.
+export function glintSpr(color) {
+  return cachedFx('glint|' + color, 24, (g) => {
+    g.fillStyle = color; g.shadowColor = color; g.shadowBlur = 6;
+    g.beginPath();
+    g.moveTo(0, -10); g.lineTo(1.2, -1.2); g.lineTo(10, 0); g.lineTo(1.2, 1.2); g.lineTo(0, 10); g.lineTo(-1.2, 1.2); g.lineTo(-10, 0); g.lineTo(-1.2, -1.2);
+    g.closePath(); g.fill();
+    g.shadowBlur = 0; g.fillStyle = '#fff'; g.beginPath(); g.arc(0, 0, 1.6, 0, TAU); g.fill();
+  });
+}
+
 // --- Ships -------------------------------------------------------------------
 
 // Ship art lives in shipArt.js (layered parts, weapons, seams, engines, canopy) and bakes from one paint colour.
@@ -145,66 +193,9 @@ export const ENEMY_COLORS = {
   eclipsedrone: '#c23bff',
 };
 
+// Primary gun shots: animated ki-style heads + trails per weapon (shots.js).
 function bulletSprite(sh, c) {
-  return makeSprite(24, (g) => {
-    if (sh.weapon === 'lance') {
-      g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 8;
-      g.fillRect(-1.6, -11, 3.2, 22);
-      g.fillStyle = '#fff'; g.shadowBlur = 0; g.fillRect(-0.7, -10, 1.4, 20);
-    } else if (sh.weapon === 'scatter') {
-      g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 8;
-      g.beginPath(); poly([[0, -6], [3.5, 0], [0, 6], [-3.5, 0]])(g); g.fill();
-      g.fillStyle = '#fff'; g.shadowBlur = 0;
-      g.beginPath(); poly([[0, -3], [1.5, 0], [0, 3], [-1.5, 0]])(g); g.fill();
-    } else if (sh.weapon === 'ricochet') {
-      g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 8;
-      g.beginPath(); poly([[0, -9], [3, 0], [0, 7], [-3, 0]])(g); g.fill();
-      g.fillStyle = '#fff'; g.shadowBlur = 0;
-      g.beginPath(); poly([[0, -6], [1.2, 0], [0, 4], [-1.2, 0]])(g); g.fill();
-    } else if (sh.weapon === 'charge') {
-      // Soft orb (drawn ~8 units radius; scaled up by weapon level in firePrimary).
-      const grd = g.createRadialGradient(0, 0, 0, 0, 0, 9);
-      grd.addColorStop(0, '#ffffff'); grd.addColorStop(0.35, c); grd.addColorStop(1, withAlpha(c, 0));
-      g.fillStyle = grd;
-      g.beginPath(); g.arc(0, 0, 9, 0, TAU); g.fill();
-      g.strokeStyle = c; g.lineWidth = 1.2; g.shadowColor = c; g.shadowBlur = 6;
-      g.beginPath(); g.arc(0, 0, 6.5, 0, TAU); g.stroke();
-    } else if (sh.weapon === 'wave') {
-      // Teardrop with a bright head (weaving lances).
-      g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 9;
-      g.beginPath(); poly([[0, -8], [2.6, -2], [1.6, 6], [0, 9], [-1.6, 6], [-2.6, -2]])(g); g.fill();
-      g.fillStyle = '#fff'; g.shadowBlur = 0;
-      g.beginPath(); g.ellipse(0, -2.5, 1.2, 3.6, 0, 0, TAU); g.fill();
-    } else if (sh.weapon === 'burst') {
-      // Thin, hot needle round.
-      g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 8;
-      g.beginPath(); poly([[0, -11], [1.6, -3], [1.2, 9], [-1.2, 9], [-1.6, -3]])(g); g.fill();
-      g.fillStyle = '#fff'; g.shadowBlur = 0;
-      g.fillRect(-0.5, -9, 1, 15);
-    } else if (sh.weapon === 'spark') {
-      // Four-point spark.
-      g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 10;
-      g.beginPath(); poly([[0, -6], [1.3, -1.3], [5, 0], [1.3, 1.3], [0, 6], [-1.3, 1.3], [-5, 0], [-1.3, -1.3]])(g); g.fill();
-      g.fillStyle = '#fff'; g.shadowBlur = 0;
-      g.beginPath(); g.arc(0, 0, 1.4, 0, TAU); g.fill();
-    } else if (sh.weapon === 'shard') {
-      // Faceted crystal shard.
-      g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 8;
-      g.beginPath(); poly([[0, -8], [4, -3], [3, 5], [0, 8], [-3, 5], [-4, -3]])(g); g.fill();
-      g.strokeStyle = '#fff'; g.lineWidth = 0.9; g.shadowBlur = 0;
-      g.beginPath(); g.moveTo(0, -7); g.lineTo(0, 7); g.moveTo(-3.5, -2.5); g.lineTo(0, 0); g.lineTo(3.5, -2.5); g.stroke();
-    } else if (sh.weapon === 'phase') {
-      g.strokeStyle = c; g.shadowColor = c; g.shadowBlur = 8; g.lineWidth = 3;
-      g.beginPath(); g.arc(0, 4, 7, Math.PI * 1.15, Math.PI * 1.85); g.stroke();
-      g.strokeStyle = '#fff'; g.lineWidth = 1.2; g.shadowBlur = 0;
-      g.beginPath(); g.arc(0, 4, 7, Math.PI * 1.2, Math.PI * 1.8); g.stroke();
-    } else {
-      g.fillStyle = c; g.shadowColor = c; g.shadowBlur = 8;
-      g.beginPath(); g.roundRect(-2.4, -8, 4.8, 16, 2.4); g.fill();
-      g.fillStyle = '#fff'; g.shadowBlur = 0;
-      g.beginPath(); g.roundRect(-1, -6.5, 2, 13, 1); g.fill();
-    }
-  });
+  return shotStyle(sh.weapon, c, makeSprite);
 }
 
 // Re-bakes one ship's sprite and its primary bullet in a paint colour (cosmetic; ship defs stay immutable).
@@ -219,27 +210,27 @@ export function buildSprites(ships) {
   // Player bullets ---------------------------------------------------------
   for (const sh of ships) S['pb_' + sh.id] = bulletSprite(sh, sh.bullet);
   buildGearSpritesV2();
-  S.pb_od = makeSprite(26, (g) => {
-    g.fillStyle = '#fff'; g.shadowColor = '#ff3df2'; g.shadowBlur = 10;
-    g.beginPath(); g.roundRect(-3, -10, 6, 20, 3); g.fill();
-  });
-  S.pb_drone = makeSprite(16, (g) => {
+  S.pb_od = superKi(makeSprite);
+  S.pb_drone = moduleShot('#3ff6ff', makeSprite, { size: 16, draw: (g) => {
     g.fillStyle = '#9ffcff'; g.shadowColor = '#3ff6ff'; g.shadowBlur = 6;
     g.beginPath(); g.arc(0, 0, 2.6, 0, TAU); g.fill();
-  });
-  S.pb_frag = makeSprite(14, (g) => {
+    g.fillStyle = '#fff'; g.shadowBlur = 0; g.beginPath(); g.arc(0, 0, 1.2, 0, TAU); g.fill();
+  } }, 16, 4);
+  S.pb_frag = moduleShot('#ff8a3d', makeSprite, { size: 14, draw: (g) => {
     g.fillStyle = '#ffcf6b'; g.shadowColor = '#ff8a3d'; g.shadowBlur = 6;
     g.beginPath(); poly(regular(3, 3.4, -Math.PI / 2))(g); g.fill();
-  });
-  S.pb_nova = makeSprite(18, (g) => {
-    g.fillStyle = '#ffffff'; g.shadowColor = '#ff3df2'; g.shadowBlur = 8;
-    g.beginPath(); g.arc(0, 0, 3.4, 0, TAU); g.fill();
-  });
+  } }, 10, 4);
+  S.pb_nova = moduleShot('#ff3df2', makeSprite, { size: 20, draw: (g) => {
+    const grd = g.createRadialGradient(0, 0, 0, 0, 0, 7);
+    grd.addColorStop(0, '#ffffff'); grd.addColorStop(0.4, '#ff9cf8'); grd.addColorStop(1, 'rgba(255,61,242,0)');
+    g.fillStyle = grd; g.beginPath(); g.arc(0, 0, 7, 0, TAU); g.fill();
+  } }, 18, 6);
   S.missile = makeSprite(22, (g) => {
     const p = poly([[0, -8], [3, -2], [3, 6], [-3, 6], [-3, -2]]);
     glowFill(g, '#ff9e3d', 0, p, 0.5);
     glowStroke(g, '#ff9e3d', 1.6, 6, p);
   });
+  withTrail(S.missile, '#ff9e3d', 22, 6);
   S.blade = makeSprite(30, (g) => {
     const p = poly([[0, -11], [3, -3], [11, 0], [3, 3], [0, 11], [-3, 3], [-11, 0], [-3, -3]]);
     glowFill(g, '#ff3df2', 0, p, 0.35);
@@ -258,34 +249,96 @@ export function buildSprites(ships) {
     g.beginPath(); g.arc(0, 0, 36, 0, TAU); g.stroke();
   });
 
-  // Enemy bullets: bright white cores + dark halo so they read on any background.
+  // Enemy bullets: hard, solid pellets. A dark halo and outline, a hot rim and a white core, never a trail, so they
+  // read against the additive, trailing player ki on any background. Shootable projectiles (torpedo, shell) are
+  // armoured plates instead, wrapped in a lime target ring and an HP arc (bullets.js drawArmored).
   const bullet = (size, r, color) => makeSprite(size, (g) => {
-    g.fillStyle = 'rgba(0,0,0,0.55)';
-    g.beginPath(); g.arc(0, 0, r + 2.4, 0, TAU); g.fill();
+    g.fillStyle = 'rgba(0,0,0,0.6)';
+    g.beginPath(); g.arc(0, 0, r + 2.8, 0, TAU); g.fill();
+    g.strokeStyle = 'rgba(0,0,0,0.85)'; g.lineWidth = 1.2;
+    g.beginPath(); g.arc(0, 0, r + 1.1, 0, TAU); g.stroke();
     g.fillStyle = color; g.shadowColor = color; g.shadowBlur = 10;
     g.beginPath(); g.arc(0, 0, r, 0, TAU); g.fill();
-    g.shadowBlur = 0; g.fillStyle = '#fff';
-    g.beginPath(); g.arc(0, 0, r * 0.55, 0, TAU); g.fill();
+    g.shadowBlur = 0;
+    g.strokeStyle = 'rgba(40,0,30,0.5)'; g.lineWidth = Math.max(0.8, r * 0.16);
+    g.beginPath(); g.arc(0, 0, r * 0.74, 0, TAU); g.stroke();
+    g.fillStyle = '#fff';
+    g.beginPath(); g.arc(0, 0, r * 0.5, 0, TAU); g.fill();
+    g.strokeStyle = shade(color, 0.45); g.lineWidth = 1;
+    g.beginPath(); g.arc(0, 0, r - 0.4, 0, TAU); g.stroke();
   });
   S.eb_orb = bullet(26, 5.2, '#ff2e88');
   S.eb_small = bullet(20, 4, '#ff5ce1');
-  S.eb_big = bullet(40, 9.5, '#ff7a18');
+  S.eb_big = makeSprite(42, (g) => {
+    // Heavy round: a second outer rim so it reads as bigger than an orb at a glance.
+    g.fillStyle = 'rgba(0,0,0,0.6)';
+    g.beginPath(); g.arc(0, 0, 13, 0, TAU); g.fill();
+    g.strokeStyle = '#ff7a18'; g.shadowColor = '#ff7a18'; g.shadowBlur = 8; g.lineWidth = 1.6;
+    g.beginPath(); g.arc(0, 0, 11.4, 0, TAU); g.stroke();
+    g.fillStyle = '#ff7a18'; g.shadowBlur = 12;
+    g.beginPath(); g.arc(0, 0, 8.6, 0, TAU); g.fill();
+    g.shadowBlur = 0;
+    g.strokeStyle = 'rgba(40,0,0,0.5)'; g.lineWidth = 1.4;
+    g.beginPath(); g.arc(0, 0, 6.4, 0, TAU); g.stroke();
+    g.fillStyle = '#fff'; g.beginPath(); g.arc(0, 0, 4.6, 0, TAU); g.fill();
+  });
   S.eb_wobble = bullet(26, 5.2, '#c04dff');
   S.eb_needle = makeSprite(30, (g) => {
-    g.fillStyle = 'rgba(0,0,0,0.5)';
-    g.beginPath(); g.ellipse(0, 0, 5, 11, 0, 0, TAU); g.fill();
+    g.fillStyle = 'rgba(0,0,0,0.55)';
+    g.beginPath(); g.ellipse(0, 0, 5.4, 11.6, 0, 0, TAU); g.fill();
     g.fillStyle = '#ffb02e'; g.shadowColor = '#ffb02e'; g.shadowBlur = 10;
     g.beginPath(); g.ellipse(0, 0, 3.4, 9, 0, 0, TAU); g.fill();
     g.shadowBlur = 0; g.fillStyle = '#fff';
     g.beginPath(); g.ellipse(0, 0, 1.6, 6, 0, 0, TAU); g.fill();
   });
+  // Torpedo (WARDEN): an armoured warhead with plating seams and a glowing seeker eye.
+  const torp = poly([[0, 12], [6, 3], [5.5, -8], [3, -11], [-3, -11], [-5.5, -8], [-6, 3]]);
   S.eb_torpedo = makeSprite(36, (g) => {
-    const p = poly([[0, 12], [6, 2], [5, -10], [-5, -10], [-6, 2]]);
-    g.fillStyle = 'rgba(0,0,0,0.5)'; g.beginPath(); g.arc(0, 0, 13, 0, TAU); g.fill();
-    glowFill(g, '#ff3b3b', 0, p, 0.6); glowStroke(g, '#ff3b3b', 2, 10, p);
+    g.fillStyle = 'rgba(0,0,0,0.55)'; g.beginPath(); g.arc(0, 0, 14, 0, TAU); g.fill();
+    glowFill(g, '#ff3b3b', 0, torp, 0.55);
+    glowStroke(g, '#ff3b3b', 2, 10, torp);
+    g.strokeStyle = 'rgba(255,220,220,0.75)'; g.lineWidth = 0.9;
+    g.beginPath(); g.moveTo(-5.6, -3); g.lineTo(5.6, -3); g.moveTo(-5.2, -7); g.lineTo(5.2, -7); g.moveTo(0, -3); g.lineTo(0, 9); g.stroke();
+    g.fillStyle = '#fff'; g.shadowColor = '#ff3b3b'; g.shadowBlur = 8;
+    g.beginPath(); g.arc(0, 4.5, 2, 0, TAU); g.fill();
   });
   S.eb_torpedo_flash = makeSprite(36, (g) => {
-    g.fillStyle = '#fff'; g.beginPath(); poly([[0, 12], [6, 2], [5, -10], [-5, -10], [-6, 2]])(g); g.fill();
+    g.fillStyle = '#fff'; g.beginPath(); torp(g); g.fill();
+  });
+  // Shell (tanks): an armoured hex bomb on a fuse; it bursts into a ring of shots unless it is shot down first.
+  const hex = poly(regular(6, 8, 0));
+  S.eb_shell = makeSprite(36, (g) => {
+    g.fillStyle = 'rgba(0,0,0,0.6)'; g.beginPath(); g.arc(0, 0, 13, 0, TAU); g.fill();
+    glowFill(g, '#ff6a2b', 0, hex, 0.55);
+    glowStroke(g, '#ff6a2b', 2, 10, hex);
+    g.strokeStyle = 'rgba(255,225,200,0.75)'; g.lineWidth = 0.9;
+    g.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * TAU;
+      g.moveTo(Math.cos(a) * 4.2, Math.sin(a) * 4.2);
+      g.lineTo(Math.cos(a) * 7.4, Math.sin(a) * 7.4);
+    }
+    g.stroke();
+    g.strokeStyle = '#ff6a2b'; g.lineWidth = 1.2;
+    g.beginPath(); poly(regular(6, 4.2, 0))(g); g.stroke();
+  });
+  S.eb_shell_flash = makeSprite(36, (g) => {
+    g.fillStyle = '#fff'; g.beginPath(); hex(g); g.fill();
+  });
+  // Target ring around shootable projectiles: lime (no other shot or enemy marker uses it), four ticks, dashed.
+  S.eb_target = makeSprite(48, (g) => {
+    g.strokeStyle = '#b4ff3a'; g.shadowColor = '#b4ff3a'; g.shadowBlur = 6; g.lineWidth = 1.4;
+    g.setLineDash([5, 4]);
+    g.beginPath(); g.arc(0, 0, 17, 0, TAU); g.stroke();
+    g.setLineDash([]);
+    g.lineWidth = 2;
+    g.beginPath();
+    for (let i = 0; i < 4; i++) {
+      const a = (i / 4) * TAU;
+      g.moveTo(Math.cos(a) * 19, Math.sin(a) * 19);
+      g.lineTo(Math.cos(a) * 23, Math.sin(a) * 23);
+    }
+    g.stroke();
   });
 
   // Pickups -----------------------------------------------------------------
@@ -488,12 +541,12 @@ function buildGearSpritesV2() {
     g.shadowBlur = 0; g.fillStyle = '#fff';
     g.beginPath(); g.arc(0, 0, 2, 0, TAU); g.fill();
   });
-  S.pb_refl = makeSprite(22, (g) => {
+  S.pb_refl = moduleShot('#7fffe6', makeSprite, { size: 22, draw: (g) => {
     g.fillStyle = '#7fffe6'; g.shadowColor = '#7fffe6'; g.shadowBlur = 8;
     g.beginPath(); g.arc(0, 0, 4.4, 0, TAU); g.fill();
     g.shadowBlur = 0; g.fillStyle = '#fff';
     g.beginPath(); g.arc(0, 0, 2.2, 0, TAU); g.fill();
-  });
+  } }, 18, 6);
   // Annihilator afterglow strip (stretched vertically per frame).
   S.afterglow = makeSprite(24, (g) => {
     const grd = g.createLinearGradient(-12, 0, 12, 0);

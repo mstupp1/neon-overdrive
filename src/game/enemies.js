@@ -338,6 +338,10 @@ const BEHAVIOR = {
           e.burst = 0;
           e.fireT = 1.6;
           fan(e.x, e.y, aimAt(e.x, e.y), 5, 0.7, 150, 'big');
+          // Later sectors: also lob a shootable shell that bursts into a ring if it is left alone.
+          if (e.elite || G.sector + G.loop * 9 >= 3) {
+            shoot(e.x, e.y, aimAt(e.x, e.y), 105, 'shell', { hp: 3.5 * Math.sqrt(G.director.diff.hp), acc: -50, fuse: 2.6, burst: e.elite ? 12 : 9 });
+          }
         }
       }
     }

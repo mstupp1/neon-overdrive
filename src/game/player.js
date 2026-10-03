@@ -589,7 +589,11 @@ export function drawPlayer(ctx, k) {
   const nx = Math.cos(p.aim); // nose direction
   const ny = Math.sin(p.aim);
   if (p.muzzle > 0) {
-    ctx.globalAlpha = 0.7;
+    // Muzzle flash: a ki flare in the shot colour around a white pop.
+    ctx.globalAlpha = 0.55;
+    const cg = glow(boosted(p) ? '#ffd23f' : p.ship.bullet, 64);
+    ctx.drawImage(cg.img, p.x + nx * 16 - 16, p.y + ny * 16 - 16, 32, 32);
+    ctx.globalAlpha = 0.75;
     const mg = glow('#ffffff', 32);
     ctx.drawImage(mg.img, p.x + nx * 16 - 10, p.y + ny * 16 - 10, 20, 20);
   }

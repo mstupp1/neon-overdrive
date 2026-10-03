@@ -1,7 +1,7 @@
 // Weapon modules picked up from upgrade drafts.
 
 import { G, view, field, inField } from './state.js';
-import { S, glow } from '../render/sprites.js';
+import { S, glow, flareSpr } from '../render/sprites.js';
 import { TAU, damp, dist2, rand } from '../core/math.js';
 import { playerBullet, nearestEnemy, clearBullets } from './bullets.js';
 import { damageEnemy } from './enemies.js';
@@ -96,7 +96,7 @@ export function updateModules(p, dt) {
         }
       }
       for (const b of G.eBullets) {
-        if (b.dead || b.type === 'torpedo' || (b.type === 'big' && lv < 3)) continue;
+        if (b.dead || b.hp > 0 || (b.type === 'big' && lv < 3)) continue;
         const rr = b.r + erase;
         if (dist2(bx, by, b.x, b.y) < rr * rr) {
           b.dead = true;
@@ -763,18 +763,11 @@ export function drawBeams(ctx) {
       const gw = b.w * (0.8 + 0.2 * t);
       ctx.drawImage(S.afterglow.img, b.x - gw / 2, 0, gw, b.y);
     } else if (b.owner === 'player') {
-      const top = 0;
-      const bottom = p ? p.y - 18 : view.H;
-      ctx.globalAlpha = t * 0.5;
-      ctx.fillStyle = '#ff3df2';
-      ctx.fillRect(b.x - b.w, top, b.w * 2, bottom - top);
-      ctx.globalAlpha = t;
-      ctx.fillStyle = '#9ffcff';
-      ctx.fillRect(b.x - b.w / 2, top, b.w, bottom - top);
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(b.x - b.w / 5, top, b.w / 2.5, bottom - top);
-      const g = glow('#ff3df2', 64);
-      ctx.drawImage(g.img, b.x - 40, bottom - 40, 80, 80);
+      const y0 = p ? p.y - 18 : view.H;
+      ctx.save();
+      ctx.translate(b.x, y0);
+      kiBeam(ctx, b, t, y0 + 30);
+      ctx.restore();
     } else {
       // Enemy laser: telegraph thin line, then thick beam.
       const L = b.len || 1400; // weaver tripwires are finite segments
@@ -833,6 +826,53 @@ export function onBeam(b, x, y, half) {
   return along > 0 && along < b.len && Math.abs(dy * c - dx * s) < half;
 }
 
+// Rail lance as a ki beam wave: a rippling magenta fringe around a cyan body and a white-hot core, energy rings
+// rushing up it and a blazing ball at the muzzle. Local frame: origin at the muzzle, the beam runs up -y for len.
+function kiBeam(ctx, b, t, len) {
+  const age = 1 - t;
+  const env = Math.min(1, age * 12) * (0.35 + 0.65 * t); // snaps open, then thins out
+  const w = b.w * env;
+  const T = G.time;
+  const step = 22;
+  const edge = (k, ph) => {
+    ctx.beginPath();
+    ctx.moveTo(-w * k, 0);
+    for (let y = 0; y <= len; y += step) ctx.lineTo(-w * k * (1 + 0.14 * Math.sin(y * 0.045 + T * 46 + ph)), -y);
+    for (let y = len - (len % step); y >= 0; y -= step) ctx.lineTo(w * k * (1 + 0.14 * Math.sin(y * 0.05 - T * 41 + ph)), -y);
+    ctx.closePath();
+    ctx.fill();
+  };
+  ctx.globalAlpha = 0.45 * t + 0.1;
+  ctx.fillStyle = '#ff3df2';
+  edge(1.05, 0);
+  ctx.globalAlpha = Math.min(1, t * 1.5);
+  ctx.fillStyle = '#3ff6ff';
+  edge(0.62, 2);
+  ctx.fillStyle = '#ffffff';
+  edge(0.26, 4);
+  // Energy rings rushing up the beam.
+  ctx.strokeStyle = '#c8fdff';
+  ctx.lineWidth = 1.6;
+  ctx.globalAlpha = 0.7 * t;
+  const gap = 74;
+  const off = (T * 1100) % gap;
+  ctx.beginPath();
+  for (let y = off; y < len; y += gap) {
+    ctx.moveTo(w * 0.85, -y);
+    ctx.ellipse(0, -y, w * 0.85, w * 0.26, 0, 0, TAU);
+  }
+  ctx.stroke();
+  // Muzzle ball.
+  const r = 16 + b.w * 1.3 * env;
+  ctx.globalAlpha = Math.min(1, t * 1.6);
+  const gl = glow('#3ff6ff', 64);
+  ctx.drawImage(gl.img, -r * 1.6, -r * 1.6, r * 3.2, r * 3.2);
+  const fl = flareSpr('#ff3df2');
+  ctx.drawImage(fl.img, -r * 1.5, -r * 1.5, r * 3, r * 3);
+  const wg = glow('#ffffff', 64);
+  ctx.drawImage(wg.img, -r * 0.7, -r * 0.7, r * 1.4, r * 1.4);
+}
+
 function drawAimedBeam(ctx, b, t) {
   ctx.save();
   ctx.translate(b.x, b.y);
@@ -842,18 +882,8 @@ function drawAimedBeam(ctx, b, t) {
     const gw = b.w * (0.8 + 0.2 * t);
     ctx.drawImage(S.afterglow.img, -gw / 2, -b.len, gw, b.len);
   } else {
-    const top = -b.len;
-    const bottom = -18;
-    ctx.globalAlpha = t * 0.5;
-    ctx.fillStyle = '#ff3df2';
-    ctx.fillRect(-b.w, top, b.w * 2, bottom - top);
-    ctx.globalAlpha = t;
-    ctx.fillStyle = '#9ffcff';
-    ctx.fillRect(-b.w / 2, top, b.w, bottom - top);
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(-b.w / 5, top, b.w / 2.5, bottom - top);
-    const g = glow('#ff3df2', 64);
-    ctx.drawImage(g.img, -40, bottom - 40, 80, 80);
+    ctx.translate(0, -18);
+    kiBeam(ctx, b, t, b.len);
   }
   ctx.restore();
 }
