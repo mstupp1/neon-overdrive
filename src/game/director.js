@@ -200,6 +200,20 @@ const PATTERNS = [
   },
 ];
 
+// Enemy types each pattern brings (what a level can field: the overworld's packs and its node previews).
+const PATTERN_FOES = {
+  dartLine: ['dart'], dartV: ['dart'], dartWeave: ['dart'], dartDive: ['dart'], swarmSweep: ['swarm'], swarmRain: ['swarm'],
+  spinner: ['spinner'], dashers: ['dasher'], snake: ['snake'], snipers: ['sniper'], tank: ['tank', 'dart'], splitters: ['splitter'],
+  mines: ['mine'], pincer: ['swarm', 'spinner'], carrier: ['carrier', 'swarm'], shielder: ['shielder', 'spinner'], weavers: ['weaver'], blinkers: ['blinker'],
+};
+
+// Enemy types the director can spawn at a level, in roster order (patterns unlock by `min` level, like updateDirector).
+export function foesAt(level, loop = 0) {
+  const out = [];
+  for (const p of PATTERNS) if (p.min <= level + loop * 9) for (const t of PATTERN_FOES[p.id]) if (!out.includes(t)) out.push(t);
+  return out;
+}
+
 // Spec for endless mode: sector n → 9-sector cycle (boss every 3rd) that loops harder.
 export function endlessSpec(n) {
   const local = ((n - 1) % 9) + 1;
@@ -223,7 +237,7 @@ const ZONES = {
 };
 const HUE_SHIFT = [0, 16, -14];
 
-function zoneCount(spec) {
+export function zoneCount(spec) {
   if (!(G.mode === 'run' && G.run && G.run.mode === 'campaign' && spec.row != null) || spec.boss) return 1;
   if (spec.zones) return spec.zones; // a node type may set its own count
   return spec.elite || spec.row >= 2 ? 3 : 2;

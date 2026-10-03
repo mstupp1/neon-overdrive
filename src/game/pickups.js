@@ -1,6 +1,6 @@
 // XP gems and power-up pickups with magnet behaviour.
 
-import { G, view } from './state.js';
+import { G, view, field } from './state.js';
 import { S, glow } from '../render/sprites.js';
 import { rand, TAU, dist2 } from '../core/math.js';
 import { collectPickup } from './player.js';
@@ -80,15 +80,18 @@ export function updatePickups(dt) {
         p.vy += ((pl.y - p.y) / d * sp - p.vy) * k;
       } else {
         p.vx *= 1 - 2.5 * dt;
-        p.vy += (35 - p.vy) * 2 * dt; // gentle downward drift
+        if (field.ow) p.vy *= 1 - 2.5 * dt; // open space: no scroll to drift with
+        else p.vy += (35 - p.vy) * 2 * dt; // gentle downward drift
         p.life -= dt;
         if (p.life <= 0) p.dead = true;
       }
       p.x += p.vx * dt;
       p.y += p.vy * dt;
-      if (p.x < 8) { p.x = 8; p.vx = Math.abs(p.vx); }
-      if (p.x > view.W - 8) { p.x = view.W - 8; p.vx = -Math.abs(p.vx); }
-      if (p.y > view.H + 20) p.dead = true;
+      if (!field.ow) {
+        if (p.x < 8) { p.x = 8; p.vx = Math.abs(p.vx); }
+        if (p.x > view.W - 8) { p.x = view.W - 8; p.vx = -Math.abs(p.vx); }
+        if (p.y > view.H + 20) p.dead = true;
+      }
       if (!pl.dead && d2 < 20 * 20) {
         p.dead = true;
         collectPickup(p);

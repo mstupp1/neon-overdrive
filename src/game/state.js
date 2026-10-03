@@ -93,3 +93,18 @@ export function sectorInfo(sector) {
 }
 
 export const isBossSector = (sector) => sector % 3 === 0;
+
+// The live playfield in world units. In a fight it is the screen (0..view.W, 0..view.H). In the overworld
+// (overworld.js sets `ow`) the fight systems run in open space: the field is the camera's view of a big zone, bullets
+// and pickups are culled against it, enemies count as on the field (`entered`) only inside it, and the ship aims freely.
+export const field = {
+  ow: false,
+  x0: 0, y0: 0, x1: 450, y1: 800, // camera view (overworld only)
+  W: 0, H: 0, // zone size (overworld only)
+  z: 1, // overworld camera zoom (floating text is scaled up by 1 / z so it reads at the usual size)
+};
+
+export function inField(x, y, m = 0) {
+  if (!field.ow) return x > -m && x < view.W + m && y > -m && y < view.H + m;
+  return x > field.x0 - m && x < field.x1 + m && y > field.y0 - m && y < field.y1 + m;
+}

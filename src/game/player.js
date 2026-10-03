@@ -1,6 +1,6 @@
 // The player ship: movement, primary fire, dash, overdrive, damage and rewards.
 
-import { G, view } from './state.js';
+import { G, view, field } from './state.js';
 import { S, glow } from '../render/sprites.js';
 import { clamp, damp, rand, TAU } from '../core/math.js';
 import { WEAPONS, weaponStreams, weaponDamageScale, activePaint } from './ships.js';
@@ -35,6 +35,7 @@ export function createPlayer(ship, gear = true) {
     vx: 0,
     vy: 0,
     r: 3.5,
+    aim: -Math.PI / 2, // facing (radians); always straight up in a fight, free in the overworld
     bank: 0,
     hp: ship.hp,
     maxHp: ship.hp,
@@ -107,6 +108,7 @@ function control() {
 }
 
 export function playfieldBounds() {
+  if (field.ow) return { left: 30, right: field.W - 30, top: 30, bottom: field.H - 30 };
   return {
     left: 14,
     right: view.W - 14,
@@ -171,7 +173,7 @@ export function updatePlayer(p, dt) {
     const m = Math.hypot(dx, dy);
     if (m < 0.2) {
       const vm = Math.hypot(p.vx, p.vy);
-      if (vm > 40) { dx = p.vx / vm; dy = p.vy / vm; } else { dx = 0; dy = -1; }
+      if (vm > 40) { dx = p.vx / vm; dy = p.vy / vm; } else if (p.aim === -Math.PI / 2) { dx = 0; dy = -1; } else { dx = Math.cos(p.aim); dy = Math.sin(p.aim); }
     } else { dx /= m; dy /= m; }
     p.dashDx = dx;
     p.dashDy = dy;
@@ -267,7 +269,14 @@ export function updatePlayer(p, dt) {
   if (p.trailT <= 0) {
     p.trailT = 0.025;
     const col = p.odT > 0 ? p.ucol : p.color;
-    particle('dot', p.x + rand(-3, 3), p.y + 15, rand(-15, 15) - p.vx * 0.1, rand(160, 240) * thr, 0.22, rand(5, 8) * Math.min(1.5, thr), col, 1);
+    if (field.ow) {
+      // Free flight: the plume leaves the tail, whichever way the ship faces.
+      const fx = Math.cos(p.aim);
+      const fy = Math.sin(p.aim);
+      const j = rand(-3, 3);
+      const sp = rand(160, 240) * thr;
+      particle('dot', p.x - fx * 15 - fy * j, p.y - fy * 15 + fx * j, -fx * sp + p.vx * 0.3, -fy * sp + p.vy * 0.3, 0.22, rand(5, 8) * Math.min(1.5, thr), col, 1);
+    } else particle('dot', p.x + rand(-3, 3), p.y + 15, rand(-15, 15) - p.vx * 0.1, rand(160, 240) * thr, 0.22, rand(5, 8) * Math.min(1.5, thr), col, 1);
   }
   // Fly-through afterimages.
   if (p.auto && (p.ghostT -= dt) <= 0) {
@@ -312,8 +321,13 @@ function firePrimary(p, w) {
   const spr = od ? S.pb_od : S['pb_' + p.ship.id];
   const charge = p.ship.weapon === 'charge';
   const grow = charge ? 1 + (lv - 1) * 0.1 : 1; // charge orbs swell with weapon level
+  // Muzzle frame: x across the nose, -y out of it (straight up in a fight).
+  const c = Math.cos(p.aim + Math.PI / 2);
+  const sn = Math.sin(p.aim + Math.PI / 2);
+  const wn = field.ow ? [c, sn] : null;
   for (const [ox, a, ph] of streams) {
-    playerBullet(p.x + ox, p.y - 12, -Math.PI / 2 + a, w.speed, dmg, spr, {
+    playerBullet(p.x + ox * c + 12 * sn, p.y + ox * sn - 12 * c, p.aim + a, w.speed, dmg, spr, {
+      wn,
       wave: w.wave ? w.wave * (1 + (lv - 1) * 0.06) : 0,
       wphase: ph || 0,
       wfreq: w.freq || 0,
@@ -329,8 +343,8 @@ function firePrimary(p, w) {
     });
   }
   if (charge) {
-    ring(p.x, p.y - 14, 26, p.ship.bullet, 0.18);
-    sparks(p.x, p.y - 16, p.ship.bullet, 6, 220, -Math.PI / 2, 1.2);
+    ring(p.x + 14 * sn, p.y - 14 * c, 26, p.ship.bullet, 0.18);
+    sparks(p.x + 16 * sn, p.y - 16 * c, p.ship.bullet, 6, 220, p.aim, 1.2);
   }
   p.muzzle = 0.05;
   sfx.shoot();
@@ -549,10 +563,12 @@ export function drawPlayer(ctx, k) {
   ctx.globalAlpha = od ? 0.55 + Math.sin(G.time * 20) * 0.15 : 0.28;
   const gs = od ? 70 : 42;
   ctx.drawImage(gl.img, p.x - gs / 2, p.y - gs / 2 + 4, gs, gs);
+  const nx = Math.cos(p.aim); // nose direction
+  const ny = Math.sin(p.aim);
   if (p.muzzle > 0) {
     ctx.globalAlpha = 0.7;
     const mg = glow('#ffffff', 32);
-    ctx.drawImage(mg.img, p.x - 10, p.y - 26, 20, 20);
+    ctx.drawImage(mg.img, p.x + nx * 16 - 10, p.y + ny * 16 - 10, 20, 20);
   }
   if (p.ship.weapon === 'charge' && G.mode !== 'attract') {
     // Charge-up orb at the muzzle: grows as the next shot comes online.
@@ -561,7 +577,7 @@ export function drawPlayer(ctx, k) {
     const cg = glow(p.ship.bullet, 64);
     const cs = 8 + t * 26;
     ctx.globalAlpha = 0.25 + t * 0.55;
-    ctx.drawImage(cg.img, p.x - cs / 2, p.y - 20 - cs / 2, cs, cs);
+    ctx.drawImage(cg.img, p.x + nx * 20 - cs / 2, p.y + ny * 20 - cs / 2, cs, cs);
   }
   ctx.globalCompositeOperation = 'source-over';
 
@@ -570,9 +586,17 @@ export function drawPlayer(ctx, k) {
   if (p.iframes > 0 && p.dashT <= 0 && Math.floor(G.time * 20) % 2 === 0) alpha = 0.35;
   if (ph) alpha = 0.5 + Math.sin(G.time * 14) * 0.12;
   ctx.globalAlpha = alpha;
-  const sx = 1 - Math.abs(p.bank) * 0.28;
-  const sy = 1 + p.pitch * 0.06;
-  ctx.setTransform(k * sx, 0, 0, k * sy, p.x * k + view.ox, p.y * k + view.oy);
+  if (field.ow) {
+    // Free flight: the sprite turns to the facing (it points up at aim -90 degrees).
+    const a = p.aim + Math.PI / 2;
+    const c = Math.cos(a) * k;
+    const sn = Math.sin(a) * k;
+    ctx.setTransform(c, sn, -sn, c, p.x * k + view.ox, p.y * k + view.oy);
+  } else {
+    const sx = 1 - Math.abs(p.bank) * 0.28;
+    const sy = 1 + p.pitch * 0.06;
+    ctx.setTransform(k * sx, 0, 0, k * sy, p.x * k + view.ox, p.y * k + view.oy);
+  }
   ctx.drawImage(spr.img, -spr.half, -spr.half, spr.size, spr.size);
   ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
   ctx.globalAlpha = 1;

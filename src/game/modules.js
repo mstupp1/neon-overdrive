@@ -1,6 +1,6 @@
 // Weapon modules picked up from upgrade drafts.
 
-import { G, view } from './state.js';
+import { G, view, field, inField } from './state.js';
 import { S, glow } from '../render/sprites.js';
 import { TAU, damp, dist2, rand } from '../core/math.js';
 import { playerBullet, nearestEnemy, clearBullets } from './bullets.js';
@@ -10,6 +10,15 @@ import { sfx } from '../core/audio.js';
 import { boosted, fortressOn } from './pilot.js';
 
 const lvl = (arr, lv) => arr[Math.min(arr.length, lv) - 1];
+const UP = -Math.PI / 2;
+
+// Ship-relative offset (x across the nose, y toward the tail) to world, for the ship's facing (p.aim; up in a fight).
+function local(p, x, y) {
+  if (p.aim === UP) return [p.x + x, p.y + y];
+  const c = Math.cos(p.aim + Math.PI / 2);
+  const s = Math.sin(p.aim + Math.PI / 2);
+  return [p.x + x * c - y * s, p.y + x * s + y * c];
+}
 const TEMP_SLOTS = [[-62, 30], [62, 30]];
 
 export function resetModules(p) {
@@ -54,9 +63,10 @@ export function updateModules(p, dt) {
       const step = hell ? 0.2 : 0.35;
       for (let i = 0; i < n; i++) {
         const side = i % 2 ? 1 : -1;
-        const a = -Math.PI / 2 + side * (0.9 + Math.floor(i / 2) * step);
-        playerBullet(p.x + side * 10, p.y + 4, a, 240, (4.4 + 1.35 * lv) * dm, S.missile, {
-          homing: 5.5, kind: 'missile', life: 2.6, aoe: (40 + lv * 4) * (hell ? 1.7 : 1), r: 6, alpha: 1, crit: hell,
+        const a = p.aim + side * (0.9 + Math.floor(i / 2) * step);
+        const [mx, my] = local(p, side * 10, 4);
+        playerBullet(mx, my, a, 240, (4.4 + 1.35 * lv) * dm, S.missile, {
+          homing: 5.5, kind: 'missile', life: 2.6, aoe: (40 + lv * 4) * (hell ? 1.7 : 1), r: 6, alpha: 1, crit: hell, home: p.aim,
         });
       }
       sfx.missile();
@@ -103,20 +113,21 @@ export function updateModules(p, dt) {
     const phx = evo(p, 'phalanx'); // Phalanx: five drones, faster fire
     const nPerm = up.drones ? (phx ? 5 : lv >= 5 ? 3 : 2) : 0;
     const n = nPerm + (fort ? 2 : 0);
-    while (p.drones.length < n) p.drones.push({ x: p.x, y: p.y + 20, ang: -Math.PI / 2 });
+    while (p.drones.length < n) p.drones.push({ x: p.x, y: p.y + 20, ang: p.aim });
     p.drones.length = n;
     const slots = nPerm === 5 ? [[-36, 14], [36, 14], [0, 34], [-60, 32], [60, 32]] : nPerm === 3 ? [[-36, 14], [36, 14], [0, 34]] : [[-34, 12], [34, 12]];
     p.drones.forEach((d, i) => {
       const sl = i < nPerm ? slots[i] : TEMP_SLOTS[i - nPerm];
-      d.x = damp(d.x, p.x + sl[0], 9, dt);
-      d.y = damp(d.y, p.y + sl[1], 9, dt);
+      const [sx, sy] = local(p, sl[0], sl[1]);
+      d.x = damp(d.x, sx, 9, dt);
+      d.y = damp(d.y, sy, 9, dt);
     });
     m.droneT -= dt * rate;
     if (m.droneT <= 0) {
       m.droneT = lvl([0.42, 0.36, 0.3, 0.26, 0.22], lv) * (phx ? 0.75 : 1);
       const dmg = lvl([2.2, 2.6, 3.0, 3.5, 4.0], lv) * dm;
       for (const d of p.drones) {
-        let a = -Math.PI / 2;
+        let a = p.aim;
         if (lv >= 3) {
           const t = nearestEnemy(d.x, d.y, 380 * 380);
           if (t) a = Math.atan2(t.y - d.y, t.x - d.x);
@@ -188,12 +199,16 @@ export function updateModules(p, dt) {
       const ann = evo(p, 'annihilator'); // Annihilator: huge beam, twice as often, 0.5s afterglow
       m.railT = lvl([3.2, 2.8, 2.4, 2.1, 1.8], lv) * (ann ? 0.5 : 1);
       const w = (12 + 5 * lv) * (ann ? 2.4 : 1);
-      G.beams.push({
+      const beam = {
         owner: 'player', x: p.x, w, life: 0.3, max: 0.3,
         dmg: (20 + 10 * lv) * dm, hit: new Set(),
-      });
+      };
+      if (field.ow) Object.assign(beam, { y: p.y, ang: p.aim, len: 1100 }); // free flight: fires along the facing
+      G.beams.push(beam);
       if (ann) {
-        G.beams.push({ owner: 'afterglow', x: p.x, y: p.y - 18, w: w * 0.9, life: 0.8, max: 0.8, age: 0, tick: 0, dmg: (4 + 2 * lv) * dm });
+        const glowBeam = { owner: 'afterglow', x: p.x, y: p.y - 18, w: w * 0.9, life: 0.8, max: 0.8, age: 0, tick: 0, dmg: (4 + 2 * lv) * dm };
+        if (field.ow) Object.assign(glowBeam, { x: p.x + Math.cos(p.aim) * 18, y: p.y + Math.sin(p.aim) * 18, ang: p.aim, len: 1100 });
+        G.beams.push(glowBeam);
       }
       sfx.rail();
     }
@@ -205,11 +220,11 @@ export function updateModules(p, dt) {
     const lv = up.gravity;
     m.gravT -= dt * rate;
     if (m.gravT <= 0) {
-      let tx = p.x;
-      let ty = Math.max(view.safeTop + 120, p.y - 220);
+      let tx = field.ow ? p.x + Math.cos(p.aim) * 220 : p.x;
+      let ty = field.ow ? p.y + Math.sin(p.aim) * 220 : Math.max(view.safeTop + 120, p.y - 220);
       let best = 0;
       for (const e of G.enemies) {
-        if (e.dead || !e.entered || e.boss || e.y > p.y - 40) continue;
+        if (e.dead || !e.entered || e.boss || (!field.ow && e.y > p.y - 40)) continue;
         let n = 0;
         for (const o of G.enemies) if (!o.dead && o.entered && dist2(e.x, e.y, o.x, o.y) < 90 * 90) n++;
         if (n > best) { best = n; tx = e.x; ty = e.y; }
@@ -298,7 +313,7 @@ export function updateModules(p, dt) {
         sparks(b.x, b.y, '#7fffe6', 3, 160);
         if (G.pBullets.length >= MAX_PBULLETS) continue;
         const t = nearestEnemy(b.x, b.y, 1e9);
-        const a = t ? Math.atan2(t.y - b.y, t.x - b.x) : -Math.PI / 2;
+        const a = t ? Math.atan2(t.y - b.y, t.x - b.x) : p.aim;
         playerBullet(b.x, b.y, a, 720, dmg, S.pb_refl, { life: 1.3, r: 4.5, alpha: 1 });
         if (evo(p, 'mirrorstorm')) for (const s of [-0.25, 0.25]) playerBullet(b.x, b.y, a + s, 720, dmg * 0.7, S.pb_refl, { life: 1.1, r: 4, alpha: 1 }); // Mirror Storm
       }
@@ -321,11 +336,18 @@ export function updateModules(p, dt) {
       m.flakT = lvl([1.7, 1.5, 1.35, 1.2, 1.05], lv);
       const shells = lv >= 4 ? 2 : 1;
       const t = nearestEnemy(p.x, p.y, 520 * 520);
-      let base = -Math.PI / 2;
-      if (t) base = Math.max(-Math.PI / 2 - 0.5, Math.min(-Math.PI / 2 + 0.5, Math.atan2(t.y - p.y, t.x - p.x)));
+      let base = p.aim;
+      if (t && p.aim === UP) base = Math.max(-Math.PI / 2 - 0.5, Math.min(-Math.PI / 2 + 0.5, Math.atan2(t.y - p.y, t.x - p.x)));
+      else if (t) {
+        // Within half a radian of the nose.
+        let d = Math.atan2(t.y - p.y, t.x - p.x) - p.aim;
+        d = Math.atan2(Math.sin(d), Math.cos(d));
+        base = p.aim + Math.max(-0.5, Math.min(0.5, d));
+      }
+      const [fx, fy] = local(p, 0, -14);
       for (let i = 0; i < shells; i++) {
         const a = base + (shells > 1 ? (i ? 0.18 : -0.18) : 0);
-        m.flaks.push({ x: p.x, y: p.y - 14, vx: Math.cos(a) * 330, vy: Math.sin(a) * 330, life: 1.9 });
+        m.flaks.push({ x: fx, y: fy, vx: Math.cos(a) * 330, vy: Math.sin(a) * 330, life: 1.9 });
       }
       sfx.missile();
     }
@@ -356,7 +378,7 @@ export function updateModules(p, dt) {
         sfx.nova();
         continue;
       }
-      if (f.life > 0 && f.y > -20 && f.x > -20 && f.x < view.W + 20) m.flaks[w++] = f;
+      if (f.life > 0 && (field.ow ? inField(f.x, f.y, 20) : f.y > -20 && f.x > -20 && f.x < view.W + 20)) m.flaks[w++] = f;
     }
     m.flaks.length = w;
   }
@@ -379,7 +401,8 @@ function updateNewModules(p, dt, rate, dm) {
     if (m.mineT <= 0) {
       m.mineT = lvl([1.6, 1.4, 1.25, 1.1, 0.95], lv);
       if (m.mines.length >= MINE_MAX) m.mines.shift();
-      m.mines.push({ x: p.x + rand(-8, 8), y: p.y + 20, arm: 0.45, life: 9, t: 0 });
+      const [mx, my] = local(p, rand(-8, 8), 20);
+      m.mines.push({ x: mx, y: my, arm: 0.45, life: 9, t: 0 });
     }
   }
   if (m.mines.length) {
@@ -390,7 +413,7 @@ function updateNewModules(p, dt, rate, dm) {
       mn.life -= dt;
       mn.arm -= dt;
       mn.t += dt;
-      mn.y += 26 * dt; // drifts down with the scroll
+      if (!field.ow) mn.y += 26 * dt; // drifts down with the scroll
       let boom = mn.life <= 0;
       if (!boom && mn.arm <= 0) {
         for (const e of G.enemies) {
@@ -410,7 +433,7 @@ function updateNewModules(p, dt, rate, dm) {
         sfx.explode(0.7);
         continue;
       }
-      if (mn.y < view.H + 20) m.mines[w++] = mn;
+      if (field.ow || mn.y < view.H + 20) m.mines[w++] = mn;
     }
     m.mines.length = w;
   }
@@ -422,7 +445,7 @@ function updateNewModules(p, dt, rate, dm) {
     if (m.sawT <= 0 && m.saws.length < 4) {
       m.sawT = lvl([2.6, 2.3, 2.1, 1.9, 1.6], lv);
       const t = nearestEnemy(p.x, p.y, 520 * 520);
-      const base = t ? Math.atan2(t.y - p.y, t.x - p.x) : -Math.PI / 2;
+      const base = t ? Math.atan2(t.y - p.y, t.x - p.x) : p.aim;
       const n = lv >= 3 ? 2 : 1;
       for (let i = 0; i < n; i++) {
         const a = base + (n > 1 ? (i ? 0.35 : -0.35) : 0);
@@ -541,7 +564,7 @@ function updateNewModules(p, dt, rate, dm) {
     const lv = up.starfall;
     m.starT -= dt * rate;
     if (m.starT <= 0) {
-      const live = G.enemies.filter((e) => !e.dead && e.entered && !e.untargetable);
+      const live = G.enemies.filter((e) => !e.dead && e.entered && !e.untargetable && (!field.ow || inField(e.x, e.y)));
       if (!live.length) m.starT = 0.4;
       else {
         m.starT = lvl([3.4, 3.0, 2.7, 2.4, 2.1], lv);
@@ -549,7 +572,7 @@ function updateNewModules(p, dt, rate, dm) {
         for (let i = 0; i < n && G.pBullets.length < MAX_PBULLETS; i++) {
           const t = live[Math.floor(Math.random() * live.length)];
           const sx = t.x + rand(-60, 60);
-          const sy = view.safeTop - 10;
+          const sy = field.ow ? field.y0 - 10 : view.safeTop - 10;
           playerBullet(sx, sy, Math.atan2(t.y - sy, t.x - sx), 900, lvl([9, 11, 13, 15.5, 18], lv) * dm, S.pb_od, {
             life: 1.6, r: 9, scale: 1.8, aoe: lvl([50, 56, 62, 68, 76], lv), pierce: 0, alpha: 1,
           });
@@ -650,7 +673,7 @@ export function updateBeams(rawDt) {
         for (const e of G.enemies) {
           if (e.dead || !e.entered || e.state === 'dying') continue;
           for (const pt of e.parts || [e]) {
-            if (pt.y < b.y && Math.abs(pt.x - b.x) < b.w / 2 + pt.r) { damageEnemy(e, b.dmg, pt.x, pt.y); break; }
+            if (onBeam(b, pt.x, pt.y, b.w / 2 + pt.r)) { damageEnemy(e, b.dmg, pt.x, pt.y); break; }
           }
         }
       }
@@ -673,7 +696,13 @@ export function updateBeams(rawDt) {
     }
     b.life -= dt;
     if (b.life <= 0) continue;
-    if (b.owner === 'player' && p) b.x = p.x;
+    if (b.owner === 'player' && p) {
+      b.x = p.x;
+      if (b.ang !== undefined) {
+        b.y = p.y;
+        b.ang = p.aim;
+      }
+    }
     G.beams[w++] = b;
   }
   G.beams.length = w;
@@ -712,7 +741,7 @@ export function drawModules(ctx, k) {
   // Drones
   for (const d of p.drones) {
     const s = S.drone;
-    const a = (d.ang || -Math.PI / 2) + Math.PI / 2;
+    const a = (d.ang ?? p.aim) + Math.PI / 2;
     const c = Math.cos(a) * k;
     const sn = Math.sin(a) * k;
     ctx.setTransform(c, sn, -sn, c, d.x * k + view.ox, d.y * k + view.oy);
@@ -727,7 +756,9 @@ export function drawBeams(ctx) {
   for (const b of G.beams) {
     if (b.dead) continue;
     const t = b.life / b.max;
-    if (b.owner === 'afterglow') {
+    if (b.ang !== undefined && b.owner !== 'enemy') {
+      drawAimedBeam(ctx, b, t);
+    } else if (b.owner === 'afterglow') {
       ctx.globalAlpha = Math.min(1, t * 1.6) * 0.8;
       const gw = b.w * (0.8 + 0.2 * t);
       ctx.drawImage(S.afterglow.img, b.x - gw / 2, 0, gw, b.y);
@@ -789,6 +820,42 @@ export function drawBeams(ctx) {
   }
   ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = 'source-over';
+}
+
+// A player beam (rail lance / afterglow) aimed along `ang` (overworld). Fight beams have no `ang` and go straight up.
+export function onBeam(b, x, y, half) {
+  if (b.ang === undefined) return y < b.y && Math.abs(x - b.x) < half;
+  const dx = x - b.x;
+  const dy = y - b.y;
+  const c = Math.cos(b.ang);
+  const s = Math.sin(b.ang);
+  const along = dx * c + dy * s;
+  return along > 0 && along < b.len && Math.abs(dy * c - dx * s) < half;
+}
+
+function drawAimedBeam(ctx, b, t) {
+  ctx.save();
+  ctx.translate(b.x, b.y);
+  ctx.rotate(b.ang + Math.PI / 2); // local -y = along the beam
+  if (b.owner === 'afterglow') {
+    ctx.globalAlpha = Math.min(1, t * 1.6) * 0.8;
+    const gw = b.w * (0.8 + 0.2 * t);
+    ctx.drawImage(S.afterglow.img, -gw / 2, -b.len, gw, b.len);
+  } else {
+    const top = -b.len;
+    const bottom = -18;
+    ctx.globalAlpha = t * 0.5;
+    ctx.fillStyle = '#ff3df2';
+    ctx.fillRect(-b.w, top, b.w * 2, bottom - top);
+    ctx.globalAlpha = t;
+    ctx.fillStyle = '#9ffcff';
+    ctx.fillRect(-b.w / 2, top, b.w, bottom - top);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(-b.w / 5, top, b.w / 2.5, bottom - top);
+    const g = glow('#ff3df2', 64);
+    ctx.drawImage(g.img, -40, bottom - 40, 80, 80);
+  }
+  ctx.restore();
 }
 
 // Gravity wells, the Reflector bubble and flak shells.
@@ -858,7 +925,7 @@ function drawGearV2(ctx, k, p) {
     ctx.strokeStyle = '#ff3df2';
     ctx.lineWidth = 7;
     ctx.beginPath();
-    ctx.moveTo(p.x, p.y - 14);
+    ctx.moveTo(p.x + Math.cos(p.aim) * 14, p.y + Math.sin(p.aim) * 14);
     ctx.lineTo(e.x, e.y);
     ctx.stroke();
     ctx.globalAlpha = 0.8 * fl;

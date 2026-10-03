@@ -1,6 +1,6 @@
 // Enemy roster: spawning, behaviours, damage and death rewards.
 
-import { G, view } from './state.js';
+import { G, view, field } from './state.js';
 import { S, ENEMY_COLORS } from '../render/sprites.js';
 import { rand, damp, TAU, clamp, chance, dist2 } from '../core/math.js';
 import { shoot, ring, fan, aimAt } from './bullets.js';
@@ -71,7 +71,7 @@ export function spawnEnemy(type, x, y, opts = {}) {
   e.parts = null;
   // The Hunter is a mini-boss: ~15-25s to kill with a typical build, so it scales very gently with level (+3% per level) instead of diff.hp.
   let hp = type === 'hunter' ? def.hp * (1 + 0.03 * (G.director.spec ? G.director.spec.level : 1)) : def.hp * d.hp;
-  if (opts.elite || (type !== 'swarm' && type !== 'mine' && !def.plain && G.sector + G.loop * 9 >= 2 && chance(0.04 + 0.008 * G.sector + (d.eliteBonus || 0)))) {
+  if (opts.elite || (!opts.plain && type !== 'swarm' && type !== 'mine' && !def.plain && G.sector + G.loop * 9 >= 2 && chance(0.04 + 0.008 * G.sector + (d.eliteBonus || 0)))) {
     e.elite = true;
     hp *= 3.2;
     e.r *= 1.2;
@@ -99,8 +99,20 @@ export function spawnEnemy(type, x, y, opts = {}) {
     e.parts = [];
     for (let i = 0; i < 9; i++) e.parts.push({ x, y, r: i === 0 ? e.r : 9 });
   }
+  if (field.ow) {
+    // Overworld enemy: overworld.js drives it (owAI) instead of the fight behaviours.
+    e.ow = true;
+    e.state = 'idle';
+    e.alpha = undefined;
+    e.invuln = false;
+  }
   G.enemies.push(e);
   return e;
+}
+
+let owAI = null; // (e, dt) => void, set by overworld.js
+export function setOverworldAI(fn) {
+  owAI = fn;
 }
 
 // --- Behaviours -------------------------------------------------------------------
@@ -185,6 +197,31 @@ function moveCommon(e, dt) {
   }
 }
 
+// Snake body: segments follow the head's trail at fixed spacing (the fight and the overworld both move the head).
+export function snakeBody(e) {
+  e.trail.unshift(e.x, e.y);
+  if (e.trail.length > 400) e.trail.length = 400;
+  const parts = e.parts;
+  parts[0].x = e.x;
+  parts[0].y = e.y;
+  let seg = 1;
+  let acc = 0;
+  const spacing = 15;
+  for (let i = 2; i < e.trail.length && seg < parts.length; i += 2) {
+    acc += Math.hypot(e.trail[i] - e.trail[i - 2], e.trail[i + 1] - e.trail[i - 1]);
+    if (acc >= spacing * seg) {
+      parts[seg].x = e.trail[i];
+      parts[seg].y = e.trail[i + 1];
+      seg++;
+    }
+  }
+  for (; seg < parts.length; seg++) {
+    parts[seg].x = parts[seg - 1].x;
+    parts[seg].y = parts[seg - 1].y - 1;
+  }
+  e.rot = Math.atan2(e.y - parts[1].y, e.x - parts[1].x) - Math.PI / 2;
+}
+
 const BEHAVIOR = {
   dart(e, dt) {
     moveCommon(e, dt);
@@ -245,28 +282,7 @@ const BEHAVIOR = {
   snake(e, dt) {
     e.y += 62 * dt;
     e.x = e.x0 + Math.sin(e.t * 1.5 + e.ph) * e.wa;
-    e.trail.unshift(e.x, e.y);
-    if (e.trail.length > 400) e.trail.length = 400;
-    // Place body segments along the trail at fixed spacing.
-    const parts = e.parts;
-    parts[0].x = e.x;
-    parts[0].y = e.y;
-    let seg = 1;
-    let acc = 0;
-    const spacing = 15;
-    for (let i = 2; i < e.trail.length && seg < parts.length; i += 2) {
-      acc += Math.hypot(e.trail[i] - e.trail[i - 2], e.trail[i + 1] - e.trail[i - 1]);
-      if (acc >= spacing * seg) {
-        parts[seg].x = e.trail[i];
-        parts[seg].y = e.trail[i + 1];
-        seg++;
-      }
-    }
-    for (; seg < parts.length; seg++) {
-      parts[seg].x = parts[seg - 1].x;
-      parts[seg].y = parts[seg - 1].y - 1;
-    }
-    e.rot = Math.atan2(e.y - parts[1].y, e.x - parts[1].x) - Math.PI / 2;
+    snakeBody(e);
     if (e.y > 20 && e.y < view.H * 0.65) {
       e.fireT -= dt * G.director.diff.fireRate;
       if (e.fireT <= 0) {
@@ -388,7 +404,7 @@ BEHAVIOR.carrier = function carrier(e, dt) {
 
 const LINK_R = 210;
 
-function relink(e) {
+export function relink(e) {
   const L = e.links || (e.links = []);
   for (let i = L.length - 1; i >= 0; i--) {
     const o = L[i];
@@ -445,6 +461,11 @@ export function spawnWeavers(cx, y, gap = 200) {
 BEHAVIOR.weaver = function weaver(e, dt) {
   moveCommon(e, dt);
   e.rot += dt * 2.4;
+  weaverBeam(e);
+};
+
+// The lead node's tripwire to its partner (fight and overworld).
+export function weaverBeam(e) {
   if (!e.lead) return;
   const o = e.partner;
   const bm = e.beam;
@@ -464,7 +485,7 @@ BEHAVIOR.weaver = function weaver(e, dt) {
     bm.ang = Math.atan2(o.y - e.y, o.x - e.x);
     bm.len = Math.hypot(o.x - e.x, o.y - e.y);
   }
-};
+}
 
 // Blinker spot: near-but-not-on the player (>= 140px away), inside the upper play area.
 function blinkSpot(e) {
@@ -598,7 +619,10 @@ export function updateEnemies(dt) {
     e.t += dt;
     if (e.flash > 0) e.flash -= dt;
     if (e.boss) updateBoss(e, dt);
-    else BEHAVIOR[e.type](e, dt);
+    else if (e.ow) {
+      owAI(e, dt); // sets e.entered (on camera) and handles its own despawning
+      continue;
+    } else BEHAVIOR[e.type](e, dt);
     if (!e.entered && inBounds(e, -e.r * 0.5)) e.entered = true;
     // Despawn once they leave the play area (after having entered), or if stuck off-screen.
     if (!e.boss && !e.keep && ((e.entered && !inBounds(e, 70)) || e.t > 30 || (!e.entered && e.t > 9))) e.dead = true;

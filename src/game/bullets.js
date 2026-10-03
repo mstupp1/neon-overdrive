@@ -1,6 +1,6 @@
 // Player and enemy projectiles (pooled).
 
-import { G, view } from './state.js';
+import { G, view, field, inField } from './state.js';
 import { S } from '../render/sprites.js';
 import { TAU, turnToward, dist2 } from '../core/math.js';
 import { sparks } from './fx.js';
@@ -37,6 +37,9 @@ export function playerBullet(x, y, angle, speed, dmg, spr, opts = {}) {
   b.wf = opts.wfreq || 0;
   b.wt = 0;
   b.woff = 0;
+  b.wnx = opts.wn ? opts.wn[0] : 1; // weave axis (sideways to the ship's facing)
+  b.wny = opts.wn ? opts.wn[1] : 0;
+  b.home = opts.home ?? -Math.PI / 2; // heading a missile settles on with nothing to chase
   b.hits.length = 0;
   b.dead = false;
   G.pBullets.push(b);
@@ -76,7 +79,7 @@ export function updatePlayerBullets(dt) {
         } else if (b.kind === 'missile') {
           b.speed = Math.min(760, b.speed + 900 * dt);
           const a = Math.atan2(b.vy, b.vx);
-          const na = turnToward(a, -Math.PI / 2, 3 * dt);
+          const na = turnToward(a, b.home, 3 * dt);
           b.vx = Math.cos(na) * b.speed;
           b.vy = Math.sin(na) * b.speed;
         }
@@ -86,17 +89,20 @@ export function updatePlayerBullets(dt) {
       if (b.wave) {
         b.wt += dt;
         const off = b.wave * Math.sin(b.wt * b.wf + b.wph) * Math.min(1, b.wt * 8); // eases in from the muzzle
-        b.x += off - b.woff;
+        b.x += (off - b.woff) * b.wnx;
+        b.y += (off - b.woff) * b.wny;
         b.woff = off;
       }
-      if (b.bounce > 0 && (b.x < 0 || b.x > view.W)) {
+      const L = field.ow ? field.x0 : 0;
+      const R = field.ow ? field.x1 : view.W;
+      if (b.bounce > 0 && (b.x < L || b.x > R)) {
         b.bounce--;
         b.vx = -b.vx;
-        b.x = b.x < 0 ? -b.x : 2 * view.W - b.x;
+        b.x = b.x < L ? 2 * L - b.x : 2 * R - b.x;
         b.hits.length = 0;
-        sparks(b.x < view.W / 2 ? 0 : view.W, b.y, '#ffb066', 3, 140);
+        sparks(b.x < (L + R) / 2 ? L : R, b.y, '#ffb066', 3, 140);
       }
-      if (b.life <= 0 || b.y < -30 || b.y > view.H + 30 || b.x < -30 || b.x > view.W + 30) b.dead = true;
+      if (b.life <= 0 || !inField(b.x, b.y, 30)) b.dead = true;
     }
     if (b.dead) {
       pFree.push(b);
@@ -230,7 +236,7 @@ export function updateEnemyBullets(dt) {
       }
       b.x = x;
       b.y += b.vy * dt;
-      if (b.x < -40 || b.x > view.W + 40 || b.y < -60 || b.y > view.H + 40) b.dead = true;
+      if (field.ow ? !inField(b.x, b.y, 120) : b.x < -40 || b.x > view.W + 40 || b.y < -60 || b.y > view.H + 40) b.dead = true;
     }
     if (b.dead) {
       eFree.push(b);
