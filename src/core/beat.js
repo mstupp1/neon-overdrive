@@ -35,12 +35,14 @@ function track(name) {
 export const beat = {
   pulse: 0, // 0..1, peaks on each beat and decays; already scaled by music volume and the setting
   phase: 0, // 0..1 progress through the current beat (0 = on the beat)
+  level: 0, // the current beat's strength x volume (not decayed), for effects that travel across the beat
   count: 0, // beats seen since load; bumps once per beat
   idx: -1,
   name: null,
 
   update() {
     this.pulse = 0;
+    this.level = 0;
     const el = music.el;
     if (profile.settings.beat === false || !el || el.paused || !music.current) return;
     const tr = track(music.current);
@@ -62,6 +64,7 @@ export const beat = {
     if (since > 2) return; // past the last beat or in a long gap
     this.phase = Math.min(1, since / len);
     const vol = Math.min(1, el.volume / FULL_AT);
-    this.pulse = str[i] * Math.exp(-since / DECAY) * vol;
+    this.level = str[i] * vol;
+    this.pulse = this.level * Math.exp(-since / DECAY);
   },
 };

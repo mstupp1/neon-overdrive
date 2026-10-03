@@ -489,7 +489,7 @@ export const bg = {
       const r = n.r * W;
       const x = n.x * W + Math.sin(this.t * n.s * 20) * 30;
       const y = ((n.y + this.scroll * 0.03) % 1.4) * H - 0.2 * H;
-      ctx.globalAlpha = 0.16 * (T ? T.neb : 1);
+      ctx.globalAlpha = 0.16 * (T ? T.neb : 1) * (1 + 0.45 * beat.pulse);
       ctx.drawImage(s.img, x - r, y - r, r * 2, r * 2);
     }
 
@@ -531,14 +531,18 @@ export const bg = {
     const bend = GR.bend || 0;
     const wave = GR.wave || 0;
     const live = field.energy > 0;
-    // Music beat: the near floor brightens a touch on each beat (cosmetic; 0 when the music is off).
+    // Music beat (cosmetic; 0 when the music is off): the floor brightens on each beat and a bright band rolls from
+    // the horizon toward the ship across the beat.
     const bp = beat.pulse;
+    const band = 1 - (1 - beat.phase) * (1 - beat.phase); // ease-out: leaves the horizon fast, settles near the ship
+    const bandA = beat.level * (1 - beat.phase) * 0.2;
     // Displacement fades out toward the horizon so the far grid stays calm.
     const fade = (y) => Math.min(1, Math.max(0, (y - horizon) / (depth * 0.35)));
     for (let i = 0; i < rows; i++) {
       const f = (i + phase) / rows;
       const y = horizon + depth * f * f;
-      const baseA = (0.04 + f * 0.14 + bp * 0.07 * f) * GR.a;
+      const db = (f - band) * 6;
+      const baseA = (0.04 + f * 0.14 + bp * 0.15 * f + (bandA > 0.002 ? bandA * Math.exp(-db * db) : 0)) * GR.a;
       const wa = wave ? wave * (0.3 + f) * Math.sin(this.t * 0.8 + i * 0.7) : 0;
       ctx.beginPath();
       if (live) {
@@ -575,7 +579,7 @@ export const bg = {
       }
       ctx.stroke();
     }
-    ctx.globalAlpha = (0.09 + bp * 0.035) * GR.a;
+    ctx.globalAlpha = (0.09 + bp * 0.08) * GR.a;
     ctx.beginPath();
     const cols = GR.cols;
     const colW = W / (cols / 2);
@@ -603,7 +607,7 @@ export const bg = {
 
     // Horizon glow line
     const hg = glow(`hsl(${Math.round(h / 10) * 10},100%,60%)`, 64);
-    ctx.globalAlpha = 0.25 + bp * 0.12;
+    ctx.globalAlpha = 0.25 + bp * 0.35;
     ctx.drawImage(hg.img, -W * 0.2, horizon - 30, W * 1.4, 60);
 
     // Stars (streak when boosting). Tinted toward the sky and kept dim so they read as backdrop, not as pickups.

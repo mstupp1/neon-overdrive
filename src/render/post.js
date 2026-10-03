@@ -27,7 +27,7 @@ function fit(m, w, h) {
 
 export function bloom(ctx, strength = 1) {
   if (!profile.settings.bloom || view.quality < 0.5 || strength <= 0) return;
-  strength *= 1 + 0.12 * beat.pulse; // a faint glow swell on the music's beat
+  strength *= 1 + 0.3 * beat.pulse; // a glow swell on the music's beat
   const src = ctx.canvas;
   const W = src.width;
   const H = src.height;

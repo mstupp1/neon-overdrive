@@ -1063,6 +1063,8 @@ app.addEventListener('pointerdown', () => {
   if (G.screen === 'sector-intro') sectorIntro.skip();
 });
 
+let beatCss = -1;
+
 music.onTrack = (name) => {
   if (G.mode === 'run' || G.screen === 'title') ui.toast(name);
 };
@@ -1155,6 +1157,9 @@ function frame(now) {
   bg.update(simulating() || intro ? raw * cine.bgScale() : raw * 0.25, intro ? sectorIntro.boost() : boost);
   music.update(raw);
   musicBeat.update();
+  // Menu titles glow with the beat too (CSS --beat; only written when it moves, so idle frames cost nothing).
+  const bv = Math.round(musicBeat.pulse * 50) / 50;
+  if (bv !== beatCss) document.body.style.setProperty('--beat', (beatCss = bv));
   render();
 }
 

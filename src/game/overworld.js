@@ -1212,7 +1212,7 @@ function drawWorld(ctx, k) {
   const bp = beat.pulse; // music beat, cosmetic only
   for (const major of [false, true]) {
     const st = major ? G0 * 5 : G0;
-    ctx.strokeStyle = hsl(h, 62, major ? 0.13 + bp * 0.06 : 0.055 + bp * 0.02);
+    ctx.strokeStyle = hsl(h, 62, major ? 0.13 + bp * 0.14 : 0.055 + bp * 0.05);
     ctx.beginPath();
     for (let x = Math.max(0, Math.ceil(vx0 / st) * st); x <= Math.min(ow.W, vx1); x += st) {
       ctx.moveTo(x, Math.max(0, vy0));
