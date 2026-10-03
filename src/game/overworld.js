@@ -15,6 +15,7 @@
 import { G, view, field, inField, sectorDifficulty } from './state.js';
 import { input, readDirection } from '../core/input.js';
 import { sfx } from '../core/audio.js';
+import { beat } from '../core/beat.js';
 import { S, glow } from '../render/sprites.js';
 import { TAU, clamp, lerp, damp, dist2, turnToward, mulberry32, easeOutCubic, rand } from '../core/math.js';
 import { NODE_TYPES, REWARDS, reachableNodes, nodeLevel } from './campaign.js';
@@ -1207,9 +1208,10 @@ function drawWorld(ctx, k) {
   const vy0 = field.y0 - 60;
   const vy1 = field.y1 + 60;
   ctx.lineWidth = 1 / z;
+  const bp = beat.pulse; // music beat, cosmetic only
   for (const major of [false, true]) {
     const st = major ? G0 * 5 : G0;
-    ctx.strokeStyle = hsl(h, 62, major ? 0.13 : 0.055);
+    ctx.strokeStyle = hsl(h, 62, major ? 0.13 + bp * 0.06 : 0.055 + bp * 0.02);
     ctx.beginPath();
     for (let x = Math.max(0, Math.ceil(vx0 / st) * st); x <= Math.min(ow.W, vx1); x += st) {
       ctx.moveTo(x, Math.max(0, vy0));

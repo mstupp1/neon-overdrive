@@ -13,6 +13,7 @@ const DEFAULTS = {
     shake: true,
     flashes: true,
     bloom: true,
+    beat: true, // cosmetic visuals that pulse with the music
     damageNumbers: true,
     story: true,
   },
