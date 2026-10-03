@@ -342,7 +342,7 @@ body {
     font-size: 1.9em;
     letter-spacing: 0.08em;
     color: #fff;
-    text-shadow: 0 0 0.35em var(--cyan), 0 0 1.2em rgba(63, 246, 255, 0.5);
+    text-shadow: 0 0 0.35em var(--cyan), 0 0 1.2em rgba(63, 246, 255, calc(0.5 + var(--beat, 0) * 0.45));
     text-align: center;
 }
 
@@ -378,14 +378,14 @@ body {
     font-size: 4.4em;
     letter-spacing: 0.06em;
     color: #fff;
-    text-shadow: 0 0 0.12em #fff, 0 0 0.3em var(--cyan), 0 0 0.8em var(--cyan);
+    text-shadow: 0 0 0.12em #fff, 0 0 0.3em var(--cyan), 0 0 0.8em var(--cyan), 0 0 1.4em rgba(63, 246, 255, calc(var(--beat, 0) * 0.8));
 }
 
 .logo-bottom {
     font-size: 2.3em;
     letter-spacing: 0.18em;
     color: var(--pink);
-    text-shadow: 0 0 0.2em var(--pink), 0 0 0.7em rgba(255, 61, 242, 0.7);
+    text-shadow: 0 0 0.2em var(--pink), 0 0 0.7em rgba(255, 61, 242, 0.7), 0 0 1.3em rgba(255, 61, 242, calc(var(--beat, 0) * 0.8));
     margin-top: 0.15em;
 }
 

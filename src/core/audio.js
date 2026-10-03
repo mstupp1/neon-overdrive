@@ -263,15 +263,13 @@ export const sfx = {
 
 const DIR = 'src/audio/music/';
 const NORMAL = [
-  'Pulse Collider 1', 'Pulse Collider 2', 'Laser Beam 1', 'Laser Beam 2', 'Heavy Gravity 1',
-  'Heavy Gravity 2', 'Nebula Ghosts 1', 'Nebula Ghosts 2', 'Rocket Jungle 1', 'Rocket Jungle 2',
-  'Galactic Shadows 1', 'Galactic Shadows 2', 'Neon Horizons 1', 'Neon Horizons 2', 'Neon Shadows 1',
-  'Neon Shadows 2', 'Photon Drift 1', 'Photon Drift 2', 'Star Echoes 1', 'Star Echoes 2',
-  'Space Crossfire 1', 'Space Crossfire 2', 'Cosmic Waves 1', 'Cosmic Waves 2', 'Galactic Frenzy 1',
-  'Galactic Frenzy 2', 'Galactic Showdown 1', 'Galactic Showdown 2', 'Starfire Rumble 1', 'Starfire Rumble 2',
+  'Exploratory Depths 1', 'Exploratory Depths 2', 'Game World Theme 1', 'Game World Theme 2', 'Mist Level 1',
+  'Mist Level 2', 'Nournal Exploration 1', 'Nournal Exploration 2', 'Weightless Adventure 1', 'Weightless Adventure 2',
+  'Weightless Breaks 1', 'Weightless Breaks 2',
 ];
-const LATE = ["The Tyrant's March", 'The Final Shadow', 'Galactic Showdown 1', 'Galactic Frenzy 2', 'Starfire Rumble 1'];
-const BOSS = ['Starlover', "The Tyrant's March", 'Galactic Showdown 2', 'The Final Shadow']; // warden, hydra, omega, eclipse
+// The loudest, busiest tracks carry the late sectors and the bosses.
+const LATE = ['Weightless Breaks 1', 'Weightless Breaks 2', 'Nournal Exploration 2', 'Weightless Adventure 2', 'Mist Level 2'];
+const BOSS = ['Mist Level 2', 'Weightless Adventure 2', 'Nournal Exploration 2', 'Weightless Breaks 1']; // warden, hydra, omega, eclipse
 
 const urlFor = (name) => DIR + encodeURIComponent(name) + '.mp3';
 

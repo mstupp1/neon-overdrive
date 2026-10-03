@@ -75,7 +75,7 @@ function startMusic() {
   if (s.music || !music.unlocked) return;
   s.music = true;
   music.setDuck(1);
-  music.switchTo('Galactic Showdown 1', false);
+  music.switchTo('Game World Theme 1', false);
 }
 
 // Ship control used by the player while the intro runs (player.js control()).
