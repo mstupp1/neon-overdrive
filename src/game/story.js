@@ -135,7 +135,7 @@ export const STORY = {
     ],
     overworld: [
       L('MAG', 'Open space between the jumps, and you bring every gun you have. The exits are up ahead somewhere. Find one, fly in and hold.'),
-      L('MAG', 'Pick one exit and the others close. Hold Shift to keep your nose on a target. Run past what you can\'t fight. M pulls up the map.'),
+      L('MAG', 'Pick one exit and the others close. Your guns find the nearest awake hostile; hold Shift to lock on and strafe. Run past what you can\'t fight. M pulls up the map.'),
     ],
     draft: [L('MAG', 'Pick one. Taking a card again levels it up. Max a module with its partner stat and it can EVOLVE.')],
     discovery: [L('MAG', 'NEW DISCOVERY means tech you\'ve never seen. From now on it can turn up from Genesis on.')],

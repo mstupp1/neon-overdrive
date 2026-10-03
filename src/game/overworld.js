@@ -3,8 +3,9 @@
 // nodes as exits, placed generally upward (up, up-left or up-right) and hidden until the ship comes close. Taking an
 // exit starts that node (main.js pickRouteNode), so picking one closes the others, and the next leg is a fresh zone.
 // The ship flies with its whole fight loadout: world.js step() runs with field.ow set (state.js), so the main gun,
-// modules, dash, ultimate and passives all work, aimed along the ship's facing. The facing follows the flight; Shift
-// (pad shoulder) holds it to strafe, and with a mouse it aims at the cursor. The right stick aims as well.
+// modules, dash, ultimate and passives all work, aimed along the ship's facing. The ship turns to the nearest awake
+// enemy in range while you steer anywhere; Shift (pad shoulder) locks onto that target, or holds the facing when there
+// is none, and with a mouse Shift aims at the cursor. The right stick aims as well. With no target it faces the flight.
 // Packs of the levels' own enemy types sleep around the zone and wake when the ship comes near (owAI below drives
 // them instead of the fight behaviours), and stragglers roam in from off screen the longer a leg takes. Debris fields
 // block ships and shots. Sites: salvage, data caches, repair beacons, distress signals (an anomaly event) and guarded
@@ -46,6 +47,8 @@ const DWELL = 0.85; // seconds holding inside an exit to take it
 const SEE = 520; // exits and sites are found within this
 const AGGRO = 400; // a pack wakes when the ship is this close to its centre (or when it is shot)
 const LEASH = 1250; // and goes back to sleep past this
+const AIM_R = 460; // the ship auto-faces the nearest awake enemy this close
+const LOCK_R = 720; // a Shift lock breaks past this
 const WAKE = 1500; // asleep enemies further than this are frozen
 const FOG = 160; // map fog cell
 const FOG_R = 560; // the ship uncovers the map this far around it
@@ -570,16 +573,54 @@ function control(p, dt) {
   ctrl.od = input.consume('od');
   ctrl.focus = false; // Shift strafes out here instead of slowing the ship
 
-  // Facing: the right stick aims; Shift holds the facing (with a mouse it aims at the cursor); else it follows the flight.
+  // Facing: the right stick aims; with a mouse Shift aims at the cursor. Otherwise the ship turns to the nearest awake
+  // enemy in range (it keeps flying wherever you steer) and Shift locks onto that target until it dies or gets away.
+  // With nothing to aim at it faces the flight, and Shift holds the facing.
   const hold = input.down('focus');
-  ow.strafe = hold || !!(input.aimX || input.aimY);
+  const stick = !!(input.aimX || input.aimY);
+  const cursor = hold && input.device === 'mouse';
+  pickTarget(p, hold && !cursor);
+  const t = stick || cursor ? null : ow.lock || ow.target;
   let want = null;
-  if (input.aimX || input.aimY) want = Math.atan2(input.aimY, input.aimX);
-  else if (hold && input.device === 'mouse') {
+  if (stick) want = Math.atan2(input.aimY, input.aimX);
+  else if (cursor) {
     const c = toWorld(input.tx, input.ty);
     if (dist2(c.x, c.y, p.x, p.y) > 20 * 20) want = Math.atan2(c.y - p.y, c.x - p.x);
-  } else if (!hold && Math.hypot(dx, dy) > 0.15) want = Math.atan2(dy, dx);
+  } else if (t) want = Math.atan2(t.y - p.y, t.x - p.x);
+  else if (!hold && Math.hypot(dx, dy) > 0.15) want = Math.atan2(dy, dx);
+  ow.aimAt = t;
+  ow.strafe = hold || stick || !!t;
   if (want !== null) p.aim = turnToward(p.aim, want, (ow.strafe ? 16 : 9) * dt);
+}
+
+// Auto-aim targets: visible, live enemies. Asleep packs are skipped (the gun would wake them) unless Shift locks on.
+const aimable = (e) => !e.dead && !(e.alpha < 0.6);
+function nearestFoe(p, r, sleepers) {
+  let best = null;
+  let bd = r * r;
+  for (const e of G.enemies) {
+    if (!aimable(e) || (!sleepers && e.pack && !e.pack.awake)) continue;
+    const d = dist2(e.x, e.y, p.x, p.y);
+    if (d < bd) {
+      bd = d;
+      best = e;
+    }
+  }
+  return best;
+}
+
+function pickTarget(p, lock) {
+  const keep = (e, r) => e && aimable(e) && G.enemies.includes(e) && dist2(e.x, e.y, p.x, p.y) < r * r;
+  if (!lock) ow.lock = null;
+  else if (!keep(ow.lock, LOCK_R)) ow.lock = keep(ow.target, AIM_R) ? ow.target : nearestFoe(p, AIM_R, true);
+  if (ow.lock) {
+    ow.target = ow.lock;
+    return;
+  }
+  // Stay on the current target unless another is clearly closer, so the nose doesn't flick between two.
+  const best = nearestFoe(p, AIM_R, false);
+  const cur = keep(ow.target, AIM_R) && !(ow.target.pack && !ow.target.pack.awake) ? ow.target : null;
+  if (!cur || (best && dist2(best.x, best.y, p.x, p.y) < dist2(cur.x, cur.y, p.x, p.y) * 0.6)) ow.target = best;
 }
 
 function camera(dt) {
@@ -1192,6 +1233,7 @@ function drawWorld(ctx, k) {
 
   // The fight renderer: pickups, enemies, beams, shots, modules, the ship, particles, labels.
   renderWorld(ctx, kz);
+  drawTarget(ctx, z, h);
 
   view.ox = sx;
   view.oy = sy;
@@ -1237,6 +1279,26 @@ function rockPath(ctx, r) {
     else ctx.moveTo(r.x + Math.cos(a) * rr, r.y + Math.sin(a) * rr);
   }
   ctx.closePath();
+}
+
+// Auto-aim target: a thin square; a Shift lock is brighter with a second square that tightens in.
+function drawTarget(ctx, z, h) {
+  const p = G.player;
+  const e = ow.aimAt;
+  if (!e || p.dead || !aimable(e)) return;
+  const s = e.r + 9;
+  ctx.lineWidth = 1.5 / z;
+  if (ow.lock === e) {
+    const q = (G.time * 2) % 1;
+    ctx.strokeStyle = hsl(h, 80, 0.95);
+    ctx.strokeRect(e.x - s, e.y - s, s * 2, s * 2);
+    const s2 = s + 10 * (1 - q);
+    ctx.strokeStyle = hsl(h, 70, 0.5 * q);
+    ctx.strokeRect(e.x - s2, e.y - s2, s2 * 2, s2 * 2);
+  } else {
+    ctx.strokeStyle = hsl(h, 70, 0.4);
+    ctx.strokeRect(e.x - s, e.y - s, s * 2, s * 2);
+  }
 }
 
 function drawRocks(ctx, vis, h) {
@@ -1465,7 +1527,7 @@ function drawCard(ctx, live) {
   const site = !e && nearSite();
   if (!e && !site) {
     const a = ow.hintT < 10 ? 0.85 : 0.5;
-    const go = input.device === 'touch' ? 'DRAG TO FLY' : input.device === 'mouse' ? 'CLICK TO FLY · SHIFT AIMS' : input.device === 'pad' ? 'RIGHT STICK OR SHOULDER AIMS' : 'SHIFT HOLDS AIM';
+    const go = input.device === 'touch' ? 'DRAG TO FLY' : input.device === 'mouse' ? 'CLICK TO FLY · SHIFT AIMS' : input.device === 'pad' ? 'AUTO-AIM · SHOULDER LOCKS ON' : 'AUTO-AIM · SHIFT LOCKS ON';
     text(ctx, `FIND AN EXIT  ·  ${go}  ·  ${mapKey()} MAP`, W / 2, by + bh - 8, 12, `rgba(255,255,255,${a})`, 'center', 700, FONT2);
     return;
   }
