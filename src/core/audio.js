@@ -156,6 +156,18 @@ export const sfx = {
     if (!ready()) return;
     noise({ dur: 0.22, vol: 0.14, f0: 800, f1: 5000, type: 'bandpass', q: 1.5 });
   },
+  // Boost ignition: a rising jet roar with a low thump; boostOut: the burner sputtering out.
+  boost() {
+    if (!ready()) return;
+    noise({ dur: 0.7, vol: 0.2, f0: 300, f1: 6000, type: 'bandpass', q: 0.9, attack: 0.03 });
+    tone({ type: 'sawtooth', f0: 70, f1: 220, dur: 0.5, vol: 0.12, filter: 900 });
+    tone({ type: 'sine', f0: 90, f1: 40, dur: 0.25, vol: 0.2 });
+  },
+  boostOut() {
+    if (!ready()) return;
+    noise({ dur: 0.35, vol: 0.12, f0: 2500, f1: 200, type: 'bandpass', q: 1.2 });
+    tone({ type: 'square', f0: 180, f1: 60, dur: 0.25, vol: 0.05, filter: 600 });
+  },
   graze() {
     if (!ready() || !gate('graze', 55)) return;
     tone({ type: 'sine', f0: rand(2300, 2600), dur: 0.035, vol: 0.025 });

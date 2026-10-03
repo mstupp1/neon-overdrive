@@ -8,6 +8,7 @@ import { CLASSES } from '../game/pilot.js';
 import { input } from '../core/input.js';
 import { sv } from '../game/stageview.js';
 import { profile } from '../core/storage.js';
+import { BOOST, boostAllowed, boostCap, boostScore } from '../game/boost.js';
 
 const FONT = 'Orbitron, "Segoe UI", sans-serif';
 const FONT2 = 'Rajdhani, "Segoe UI", sans-serif';
@@ -28,6 +29,7 @@ function bar(ctx, x, y, w, h, t, color, back = 'rgba(255,255,255,0.12)') {
 
 function keyHint(kind) {
   const d = input.device;
+  if (kind === 'boost') return d === 'pad' ? 'LB' : d === 'touch' ? '' : 'SHIFT';
   if (d === 'pad') return kind === 'dash' ? 'A' : 'B';
   if (d === 'mouse') return kind === 'dash' ? 'LMB' : 'RMB';
   if (d === 'touch') return '';
@@ -209,7 +211,7 @@ export function drawHud(ctx, alpha = 1) {
 
   // Gauges (fade when the ship flies near them)
   const sp = sv.active ? sv.toScreen(p.x, p.y) : p; // where the ship is on screen (other stage views map it)
-  drawBothGauges(ctx, p, sp.x, sp.y);
+  drawBothGauges(ctx, p, sp.x, sp.y, true);
   ctx.globalAlpha = 1;
 
   drawBanner(ctx);
@@ -235,13 +237,61 @@ export function gaugeSpots() {
   const y = view.H - view.safeBottom - 46;
   const left = buttonSide() === 'left';
   const at = (d) => (left ? d : view.W - d);
-  return { dash: { x: at(44), y }, od: { x: at(120), y } };
+  return { dash: { x: at(44), y }, od: { x: at(120), y }, boost: { x: at(44), y: y - 74 } };
 }
 
-function drawBothGauges(ctx, p, sx, sy) {
+// boost: fights only (the overworld keeps Shift as lock-on, so it has no boost gauge).
+function drawBothGauges(ctx, p, sx, sy, boost = false) {
   const g = gaugeSpots();
   drawGauge(ctx, g.od.x, g.od.y, p, 'od', sx, sy);
   drawGauge(ctx, g.dash.x, g.dash.y, p, 'dash', sx, sy);
+  if (boost) drawBoostGauge(ctx, g.boost.x, g.boost.y, p, sx, sy);
+}
+
+// Boost meter: a ring that drains while boosting and refills after a pause. Dim when boost can't run (boss fights,
+// fly-throughs), red while it is locked after burning empty. While boosting the centre shows the score bonus.
+function drawBoostGauge(ctx, x, y, p, sx, sy) {
+  const near = Math.hypot(sx - x, sy - y) < 90;
+  const ok = boostAllowed(p);
+  ctx.globalAlpha = (near ? 0.25 : ok ? 0.9 : 0.4) * hudA;
+  const r = 24;
+  const cap = boostCap(p);
+  const t = clamp((p.boost ?? cap) / cap, 0, 1);
+  const on = p.boosting;
+  const low = !on && (p.boostLock || (p.boost ?? cap) < BOOST.min);
+  const col = low ? '#ff4d6d' : '#ffb13d';
+  ctx.fillStyle = on ? 'rgba(40,18,4,0.7)' : 'rgba(5,3,15,0.55)';
+  ctx.beginPath();
+  ctx.arc(x, y, r + 4, 0, TAU);
+  ctx.fill();
+  ctx.strokeStyle = withAlpha(col, 0.2);
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, TAU);
+  ctx.stroke();
+  // Ignition threshold tick
+  const ma = -Math.PI / 2 + TAU * (BOOST.min / cap);
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x + Math.cos(ma) * (r - 4), y + Math.sin(ma) * (r - 4));
+  ctx.lineTo(x + Math.cos(ma) * (r + 4), y + Math.sin(ma) * (r + 4));
+  ctx.stroke();
+  ctx.strokeStyle = on ? '#fff3d6' : col;
+  ctx.lineWidth = on ? 5 + Math.sin(G.realTime * 30) * 1 : 4;
+  if (on) {
+    ctx.shadowColor = '#ffb13d';
+    ctx.shadowBlur = 10;
+  }
+  ctx.beginPath();
+  ctx.arc(x, y, r, -Math.PI / 2, -Math.PI / 2 + TAU * t);
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+  const hint = keyHint('boost');
+  const label = on ? `x${boostScore(p).toFixed(1)}` : hint || 'HOLD';
+  text(ctx, label, x, y - 1, fitSize(ctx, label, r * 1.6, 11, 700), on ? '#ffffff' : withAlpha(col, 0.9), 'center', 700);
+  text(ctx, 'BOOST', x, y + r + 13, 9, col, 'center', 700);
+  ctx.globalAlpha = hudA;
 }
 
 function drawGauge(ctx, x, y, p, kind, sx = p.x, sy = p.y) {

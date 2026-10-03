@@ -149,6 +149,7 @@ export const STORY = {
     ],
     elite: [L('MAG', 'Elite signature. A HUNTER will come for you late in this fight. Drop it and the payout is big.')],
     hazard: [L('MAG', 'Hazard on this sector. It\'s on the map label; some just hurt, some pay extra.')],
+    boost: [L('MAG', 'Hold BOOST (Shift) and the whole fight rushes at you. Clear it sooner and score more, if you can take the heat. The meter refills once you let go.')],
     ult: [L('MAG', 'OVERDRIVE is charged. Save it for when the screen fills up.')],
     death: [L('MAG', 'Link recovered. I always keep a backup of you, ECHO. Half your credits made it home too.')],
     tree: [L('MAG', 'Your passive tree. Every rank adds 2 points: start at the core and work outward. Refunds are free, so try builds.')],

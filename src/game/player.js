@@ -22,6 +22,7 @@ import { CLASSES, activeClass, equippedPassives, passiveById, initPilot, castUlt
 import { cine } from './cinematic.js';
 import { treeForRun, treeOnKill, treeOnDash } from './tree.js';
 import { sv } from './stageview.js';
+import { updateBoost, resetBoost, boostSpeed, boostScore, drawBoostShip, boostLen } from './boost.js';
 
 export const xpFor = (l) => Math.floor(5 + 4.5 * l + 0.9 * l * l);
 
@@ -87,6 +88,7 @@ export function createPlayer(ship, gear = true) {
   recomputeStats(p);
   p.hp = p.maxHp;
   p.charges = p.maxCharges;
+  resetBoost(p);
   if (p.up.aegis) p.shield = 1;
   resetModules(p);
   return p;
@@ -104,7 +106,8 @@ function control() {
     ty: input.ty,
     dash: input.consume('dash'),
     od: input.consume('od'),
-    focus: input.down('focus'),
+    focus: false, // Shift is Boost in fights (the autopilot still uses focus to slow down)
+    boost: input.down('focus'),
     shift: (dx, dy) => input.shiftTarget(dx, dy),
   });
 }
@@ -125,9 +128,10 @@ export function updatePlayer(p, dt) {
   const c = control();
   const st = p.st;
   p.focus = c.focus;
+  updateBoost(p, dt, !!c.boost);
 
   // --- Movement ---
-  const maxSpeed = 340 * st.speed * (c.focus ? 0.45 : 1) * (boosted(p) ? 1.1 : 1) * (p.slipT > 0 ? 1.15 : 1);
+  const maxSpeed = 340 * st.speed * (c.focus ? 0.45 : 1) * (boosted(p) ? 1.1 : 1) * (p.slipT > 0 ? 1.15 : 1) * boostSpeed(p);
   let tvx;
   let tvy;
   let mvx = 0;
@@ -230,7 +234,10 @@ export function updatePlayer(p, dt) {
   p.bank = damp(p.bank, clamp(p.vx / 380, -1, 1), 12, dt);
   p.pitch = damp(p.pitch, clamp(-p.vy / 380, -1, 1), 12, dt); // nose-forward stretch when climbing
 
-  for (const g of p.ghosts) g.life -= dt;
+  for (const g of p.ghosts) {
+    g.life -= dt;
+    if (g.boost) g.y += 720 * dt; // boost trail streams back like the stage
+  }
   while (p.ghosts.length && p.ghosts[0].life <= 0) p.ghosts.shift();
 
   // --- Timers ---
@@ -378,7 +385,7 @@ export function comboMult() {
 
 export function addScore(base) {
   const p = G.player;
-  G.score += base * comboMult() * (p && p.odT > 0 ? 2 : 1) * G.director.diff.score;
+  G.score += base * comboMult() * (p && p.odT > 0 ? 2 : 1) * boostScore(p) * G.director.diff.score;
 }
 
 export function gainOverdrive(amount) {
@@ -543,7 +550,7 @@ function drawFlames(ctx, p, alpha, od) {
   const fl = flame(od ? p.ucol : p.color);
   const speed = Math.min(1, Math.hypot(p.vx, p.vy) / 320);
   const push = field.ow ? speed : Math.max(0, p.pitch) - Math.max(0, -p.pitch) * 0.4;
-  const len = (0.9 + push * 0.7) * (p.dashT > 0 ? 1.7 : 1) * (od ? 1.25 : 1);
+  const len = (0.9 + push * 0.7) * (p.dashT > 0 ? 1.7 : 1) * (od ? 1.25 : 1) * boostLen(p);
   ctx.globalCompositeOperation = 'lighter';
   for (let i = 0; i < eng.length; i++) {
     const [x, y, w] = eng[i];
@@ -566,9 +573,10 @@ export function drawPlayer(ctx, k) {
   // Afterimages
   ctx.globalCompositeOperation = 'lighter';
   for (const g of p.ghosts) {
-    ctx.globalAlpha = (g.life / 0.22) * (ph ? 0.5 : 0.35);
+    ctx.globalAlpha = g.boost ? (g.life / 0.22) * 0.2 : (g.life / 0.22) * (ph ? 0.5 : 0.35);
     ctx.drawImage(spr.img, g.x - spr.half, g.y - spr.half, spr.size, spr.size);
   }
+  drawBoostShip(ctx, p);
   // Afterimage passive: pending echoes
   if (p.st.afterimage) {
     for (const e of p.echoes) {

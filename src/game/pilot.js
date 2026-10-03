@@ -306,8 +306,8 @@ export function pilotTimeScale(p, dt) {
   if (!p) return (G.enemyTimeScale = 1);
   p.tsc += (target - p.tsc) * Math.min(1, 14 * dt);
   if (Math.abs(p.tsc - target) < 0.012) p.tsc = target;
-  G.enemyTimeScale = p.tsc;
-  return p.tsc;
+  G.enemyTimeScale = p.tsc * (p.flow || 1); // Boost (boost.js) speeds the whole stage up
+  return G.enemyTimeScale;
 }
 
 function detonate(p, e) {
