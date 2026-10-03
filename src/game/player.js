@@ -618,7 +618,9 @@ export function drawPlayer(ctx, k) {
   } else {
     const sx = 1 - Math.abs(p.bank) * 0.28;
     const sy = 1 + p.pitch * 0.06;
-    ctx.setTransform(k * sx, 0, 0, k * sy, p.x * k + view.ox, p.y * k + view.oy);
+    // Chase view: seen from behind, a bank tips the wings (one rises, one dips) instead of only narrowing them.
+    const roll = sv.mode === 'chase' ? p.bank * 0.32 : 0;
+    ctx.setTransform(k * sx, k * sx * roll, 0, k * sy, p.x * k + view.ox, p.y * k + view.oy);
   }
   drawFlames(ctx, p, alpha, od);
   ctx.drawImage(spr.img, -spr.half, -spr.half, spr.size, spr.size);
