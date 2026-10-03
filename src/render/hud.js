@@ -32,6 +32,53 @@ function keyHint(kind) {
   return kind === 'dash' ? 'SPACE' : 'E';
 }
 
+// Largest font size (<= size) at which str fits in w.
+function fitSize(ctx, str, w, size, weight = 700, font = FONT) {
+  ctx.font = `${weight} ${size}px ${font}`;
+  const m = ctx.measureText(str).width;
+  return m <= w ? size : Math.max(6, Math.floor(size * (w / m) * 10) / 10);
+}
+
+// Hull readout starting at x (vertical centre y) within width w: a heart per hull point while they fit (one slot is
+// kept for the shield so it never reflows), else one heart with HP / MAX. Shared with the overworld HUD.
+export function drawHull(ctx, x, y, w, p, a = 1, sz = 22, step = 19) {
+  const low = p.hp === 1;
+  const pulse = low ? 1 + Math.sin(G.realTime * 10) * 0.12 : 1;
+  let sx;
+  if ((p.maxHp + 1) * step <= w) {
+    let hx = x + step / 2;
+    for (let i = 0; i < p.maxHp; i++) {
+      const full = i < p.hp;
+      const s = full && low ? sz * pulse : sz;
+      ctx.drawImage((full ? S.hudHeart : S.hudHeartEmpty).img, hx - s / 2, y - s / 2, s, s);
+      hx += step;
+    }
+    sx = hx;
+  } else {
+    const s = sz * pulse;
+    ctx.drawImage((p.hp > 0 ? S.hudHeart : S.hudHeartEmpty).img, x + step / 2 - s / 2, y - s / 2, s, s);
+    const hs = `${p.hp}`;
+    const ms = `/${p.maxHp}`;
+    text(ctx, hs, x + step + 4, y + 1, 15, low ? '#ff5a7a' : '#ffffff', 'left', 700);
+    const hw = ctx.measureText(hs).width;
+    const room = ctx.measureText(`${p.maxHp}`).width; // fixed width, so the shield doesn't hop as hull changes
+    text(ctx, ms, x + step + 4 + hw, y + 1, 11, 'rgba(255,255,255,0.55)', 'left', 700);
+    sx = x + step + 4 + room + ctx.measureText(ms).width + 6 + step / 2;
+  }
+  if (p.shield) {
+    ctx.drawImage(S.hudShield.img, sx - sz / 2, y - sz / 2, sz, sz);
+  } else if (p.st.shieldInterval) {
+    ctx.globalAlpha = 0.3 * a;
+    ctx.drawImage(S.hudShield.img, sx - sz / 2, y - sz / 2, sz, sz);
+    ctx.globalAlpha = a;
+    ctx.strokeStyle = '#3ff6ff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(sx, y, sz / 2 + 1, -Math.PI / 2, -Math.PI / 2 + TAU * (p.shieldT / p.st.shieldInterval));
+    ctx.stroke();
+  }
+}
+
 let hudA = 1; // overall HUD opacity (the finisher cam fades it out)
 
 // alpha: HUD opacity (banners always draw at full strength).
@@ -45,88 +92,91 @@ export function drawHud(ctx, alpha = 1) {
   ctx.textBaseline = 'middle';
   ctx.globalAlpha = alpha;
 
-  // Top scrim for legibility
-  const grd = ctx.createLinearGradient(0, 0, 0, y0 + 70);
-  grd.addColorStop(0, 'rgba(3,2,10,0.75)');
+  // Fixed zones, so nothing collides however big the hull, score or labels get:
+  //   left  [L0, L1]  hull · LV + XP
+  //   mid   [M0, M1]  score · chain
+  //   right [R0, R1]  sector · progress (the pause button sits right of R1)
+  //   row 3 [R0, W-12] wallet + clock, below the pause button
+  const L0 = 12, L1 = 150, M0 = 158, M1 = 292, R0 = 300, R1 = W - 56;
+  const boss = G.boss;
+  const hu = G.director.hunter;
+  const tall = (boss && !boss.dead) || (hu && !hu.dead);
+
+  // Top scrim (solid behind the readouts, so the world and its numbers never compete with them)
+  const sh = y0 + (tall ? 74 : 60);
+  const grd = ctx.createLinearGradient(0, 0, 0, sh);
+  grd.addColorStop(0, 'rgba(3,2,10,0.88)');
+  grd.addColorStop(0.62, 'rgba(3,2,10,0.7)');
   grd.addColorStop(1, 'rgba(3,2,10,0)');
   ctx.fillStyle = grd;
-  ctx.fillRect(0, 0, W, y0 + 70);
+  ctx.fillRect(0, 0, W, sh);
 
   // Hull
-  const hs = 20;
-  let hx = 18;
-  for (let i = 0; i < p.maxHp; i++) {
-    const full = i < p.hp;
-    const spr = full ? S.hudHeart : S.hudHeartEmpty;
-    let sz = 22;
-    if (full && p.hp === 1) sz *= 1 + Math.sin(G.realTime * 10) * 0.12;
-    ctx.drawImage(spr.img, hx - sz / 2, y0 + 10 - sz / 2, sz, sz);
-    hx += hs;
-  }
-  if (p.shield) {
-    ctx.drawImage(S.hudShield.img, hx - 11, y0 - 1, 22, 22);
-  } else if (p.st.shieldInterval) {
-    ctx.globalAlpha = 0.3 * hudA;
-    ctx.drawImage(S.hudShield.img, hx - 11, y0 - 1, 22, 22);
-    ctx.globalAlpha = hudA;
-    ctx.strokeStyle = '#3ff6ff';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(hx, y0 + 10, 12, -Math.PI / 2, -Math.PI / 2 + TAU * (p.shieldT / p.st.shieldInterval));
-    ctx.stroke();
-  }
+  drawHull(ctx, L0, y0 + 10, L1 - L0, p, hudA);
 
   // Level + XP
-  text(ctx, `LV ${p.level}`, 12, y0 + 33, 12, '#9ffcff', 'left', 700);
-  bar(ctx, 58, y0 + 30, 104, 5, p.xp / p.xpNeed, '#3ff6ff');
+  text(ctx, `LV ${p.level}`, L0, y0 + 31, 12, '#9ffcff', 'left', 700);
+  ctx.font = `700 12px ${FONT}`;
+  const xx = L0 + Math.max(46, ctx.measureText(`LV ${p.level}`).width + 8);
+  bar(ctx, xx, y0 + 28.5, L1 - xx, 5, p.xp / p.xpNeed, '#3ff6ff');
 
-  // Score (rolling)
+  // Score (rolling; shrinks to fit the middle zone)
   G.displayScore += (G.score - G.displayScore) * Math.min(1, 0.2);
   if (Math.abs(G.score - G.displayScore) < 1) G.displayScore = G.score;
   const sc = Math.floor(G.displayScore).toString().padStart(8, '0');
   ctx.shadowColor = 'transparent';
-  text(ctx, sc, W / 2, y0 + 11, 20, '#ffffff', 'center', 700);
+  text(ctx, sc, (M0 + M1) / 2, y0 + 11, fitSize(ctx, sc, M1 - M0, 20, 700), '#ffffff', 'center', 700);
 
   // Combo
   const mult = comboMult();
   if (G.combo > 0) {
     const col = mult >= 5 ? '#ff3df2' : mult >= 3 ? '#ffe14d' : '#9ffcff';
-    text(ctx, `x${mult}  ·  ${G.combo} CHAIN`, W / 2, y0 + 31, 11, col, 'center', 700);
-    bar(ctx, W / 2 - 40, y0 + 39, 80, 2, G.comboTimer / 2.6, col, 'rgba(255,255,255,0.08)');
+    const cs = `x${mult} · ${G.combo} CHAIN`;
+    text(ctx, cs, (M0 + M1) / 2, y0 + 30, fitSize(ctx, cs, M1 - M0, 11, 700), col, 'center', 700);
+    bar(ctx, (M0 + M1) / 2 - 40, y0 + 38, 80, 2, G.comboTimer / 2.6, col, 'rgba(255,255,255,0.08)');
   }
 
-  // Sector + progress (left of pause button)
-  const rx = W - 60;
+  // Sector + progress (left of the pause button)
   const d = G.director;
   const run = G.run;
   const hue = `hsl(${d.spec ? d.spec.hue : sectorInfo(G.sector).hue},100%,72%)`;
-  const label = run && run.mode === 'campaign' ? `${run.system.short} · ${run.row + 1}/${run.route.rows.length}` : `SECTOR ${G.sector}`;
-  text(ctx, label, rx, y0 + 9, 12, hue, 'right', 700);
+  const camp = run && run.mode === 'campaign';
+  const name = camp ? run.system.short : 'SECTOR';
+  const pos = camp ? `${run.row + 1}/${run.route.rows.length}` : `${G.sector}`;
+  const ps = fitSize(ctx, pos, 40, 12, 700);
+  ctx.font = `700 ${ps}px ${FONT}`;
+  const pw = ctx.measureText(pos).width;
+  text(ctx, pos, R1, y0 + 9, ps, hue, 'right', 700);
+  text(ctx, name, R0, y0 + 9, fitSize(ctx, name, R1 - R0 - pw - 6, 12, 700), hue, 'left', 700);
   const bossSector = !!(d.spec && d.spec.boss);
-  bar(ctx, rx - 84, y0 + 23, 84, 4, d.progress, hue);
+  const pbw = R1 - R0 - (bossSector ? 10 : 0);
+  bar(ctx, R0, y0 + 23, pbw, 4, d.progress, hue);
   if (d.zones > 1) {
     // Zone breaks on the progress bar.
     ctx.fillStyle = 'rgba(3,2,10,0.9)';
-    for (let i = 1; i < d.zones; i++) ctx.fillRect(rx - 84 + (84 * i) / d.zones - 1, y0 + 22, 2, 6);
+    for (let i = 1; i < d.zones; i++) ctx.fillRect(R0 + (pbw * i) / d.zones - 1, y0 + 22, 2, 6);
   }
   if (bossSector) {
     ctx.fillStyle = '#ff2e55';
     ctx.beginPath();
-    ctx.arc(rx + 1, y0 + 25, 4, 0, TAU);
+    ctx.arc(R1 - 4, y0 + 25, 4, 0, TAU);
     ctx.fill();
   }
-  // Credits wallet (under the sector bar, left of the clock)
+  // Credits wallet and the run clock (row 3, under the pause button)
+  const clock = `${Math.floor(G.runTime / 60)}:${Math.floor(G.runTime % 60).toString().padStart(2, '0')}`;
+  text(ctx, clock, W - 12, y0 + 44, 12, 'rgba(255,255,255,0.65)', 'right', 600, FONT2);
   if (run) {
     const flash = G.realTime - (run.flash || -9) < 0.25;
-    ctx.drawImage(S.credit.img, rx - 85, y0 + 31, 14, 14);
-    text(ctx, Math.floor(run.wallet || 0).toLocaleString(), rx - 69, y0 + 38.5, 11, flash ? '#fff' : '#ffd24a', 'left', 700);
+    const ws = Math.floor(run.wallet || 0).toLocaleString();
+    ctx.font = `600 12px ${FONT2}`;
+    const room = W - 12 - ctx.measureText(clock).width - 10 - (R0 + 18);
+    ctx.drawImage(S.credit.img, R0, y0 + 37, 14, 14);
+    text(ctx, ws, R0 + 18, y0 + 44.5, fitSize(ctx, ws, room, 11, 700), flash ? '#fff' : '#ffd24a', 'left', 700);
   }
-  text(ctx, `${Math.floor(G.runTime / 60)}:${Math.floor(G.runTime % 60).toString().padStart(2, '0')}`, rx, y0 + 38, 11, 'rgba(255,255,255,0.65)', 'right', 600, FONT2);
 
   // Boss bar
-  const boss = G.boss;
   if (boss && !boss.dead) {
-    const by = y0 + 58;
+    const by = y0 + 64;
     const bw = W - 32;
     const fill = boss.state === 'enter' ? easeOutCubic(boss.barFill) : boss.hp / boss.maxHp;
     text(ctx, boss.name, 16, by - 8, 12, boss.color, 'left', 900);
@@ -141,9 +191,8 @@ export function drawHud(ctx, alpha = 1) {
   }
 
   // Hunter (elite-node mini-boss): compact bar under the sector info
-  const hu = d.hunter;
-  if (hu && !hu.dead && !boss) {
-    const hy = y0 + 58;
+  if (hu && !hu.dead && !(boss && !boss.dead)) {
+    const hy = y0 + 64;
     const hw = Math.min(190, W - 120);
     const hx = (W - hw) / 2;
     const fill = clamp(hu.hp / hu.maxHp, 0, 1);

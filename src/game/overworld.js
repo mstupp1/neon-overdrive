@@ -30,7 +30,7 @@ import { sparks, explosion, floatText, flash } from './fx.js';
 import { gainXp, collectPickup } from './player.js';
 import { resetModules } from './modules.js';
 import { gainCredits } from './economy.js';
-import { drawGauges } from '../render/hud.js';
+import { drawGauges, drawHull } from '../render/hud.js';
 import { NODE_ICONS } from '../ui/meta.js';
 
 const FONT = 'Orbitron, "Segoe UI", sans-serif';
@@ -1475,19 +1475,23 @@ function drawHud(ctx, live) {
   const top = view.safeTop;
   ctx.textBaseline = 'middle';
 
-  // Hull
-  for (let i = 0; i < p.maxHp; i++) {
-    const spr = i < p.hp ? S.hudHeart : S.hudHeartEmpty;
-    ctx.drawImage(spr.img, 12 + i * 19, top + 10, 18, 18);
-  }
-  if (p.shield) ctx.drawImage(S.hudShield.img, 12 + p.maxHp * 19 + 2, top + 10, 18, 18);
-  // Level, XP and credits
+  // Top scrim, so bullets and the world don't run through the readouts
+  const grd = ctx.createLinearGradient(0, 0, 0, top + 72);
+  grd.addColorStop(0, 'rgba(3,2,10,0.85)');
+  grd.addColorStop(0.65, 'rgba(3,2,10,0.65)');
+  grd.addColorStop(1, 'rgba(3,2,10,0)');
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, W, top + 72);
+
+  // Left zone (x 12-140; the centre text starts past it): hull, then LV + XP, then credits
+  drawHull(ctx, 12, top + 19, 128, p, 1, 18, 17);
   text(ctx, `LV ${p.level}`, 14, top + 40, 11, '#3ff6ff');
   ctx.fillStyle = 'rgba(255,255,255,0.12)';
-  ctx.fillRect(56, top + 37, 70, 5);
+  ctx.fillRect(60, top + 37, 76, 5);
   ctx.fillStyle = '#3ff6ff';
-  ctx.fillRect(56, top + 37, 70 * clamp(p.xp / p.xpNeed, 0, 1), 5);
-  text(ctx, `${Math.floor(run.wallet || 0).toLocaleString()} CR`, 136, top + 40, 11, '#ffd24a');
+  ctx.fillRect(60, top + 37, 76 * clamp(p.xp / p.xpNeed, 0, 1), 5);
+  ctx.font = `700 11px ${FONT}`;
+  text(ctx, fitText(ctx, `${Math.floor(run.wallet || 0).toLocaleString()} CR`, 126), 14, top + 56, 11, '#ffd24a');
 
   // System, route position and exits found
   const total = run.route.rows.length;

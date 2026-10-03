@@ -155,6 +155,8 @@ export function updateTexts(dt) {
 }
 
 export function drawTexts(ctx) {
+  // In fights, numbers fade out as they rise into the top HUD band instead of drawing through it.
+  const band = field.ow ? -1e9 : view.safeTop + 40;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   let lastFont = '';
@@ -166,7 +168,9 @@ export function drawTexts(ctx) {
       ctx.font = font;
       lastFont = font;
     }
-    ctx.globalAlpha = Math.min(1, k * 2);
+    const a = Math.min(1, k * 2, (t.y - band) / 24);
+    if (a <= 0) continue;
+    ctx.globalAlpha = a;
     ctx.fillStyle = 'rgba(0,0,0,0.6)';
     ctx.fillText(t.text, t.x + 1, t.y + 1);
     ctx.fillStyle = t.color;
