@@ -3,7 +3,7 @@
 /* ---------------------------------------------------------------- Toasts */
 .notes {
     position: absolute;
-    top: calc(var(--safe-top) + 3.6em);
+    top: calc(var(--safe-top) + 4.1em);
     left: 50%;
     transform: translateX(-50%);
     display: flex;
