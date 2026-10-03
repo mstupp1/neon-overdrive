@@ -6,6 +6,7 @@ import { TAU, clamp, easeOutCubic } from '../core/math.js';
 import { comboMult } from '../game/player.js';
 import { CLASSES } from '../game/pilot.js';
 import { input } from '../core/input.js';
+import { sv } from '../game/stageview.js';
 
 const FONT = 'Orbitron, "Segoe UI", sans-serif';
 const FONT2 = 'Rajdhani, "Segoe UI", sans-serif';
@@ -207,8 +208,9 @@ export function drawHud(ctx, alpha = 1) {
 
   // Gauges (fade when the ship flies near them)
   const gy = view.H - view.safeBottom - 46;
-  drawGauge(ctx, 44, gy, p, 'od');
-  drawGauge(ctx, W - 44, gy, p, 'dash');
+  const sp = sv.active ? sv.toScreen(p.x, p.y) : p; // where the ship is on screen (other stage views map it)
+  drawGauge(ctx, 44, gy, p, 'od', sp.x, sp.y);
+  drawGauge(ctx, W - 44, gy, p, 'dash', sp.x, sp.y);
   ctx.globalAlpha = 1;
 
   drawBanner(ctx);

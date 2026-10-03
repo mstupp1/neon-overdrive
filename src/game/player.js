@@ -21,6 +21,7 @@ import { achEvent } from './achievements.js';
 import { CLASSES, activeClass, equippedPassives, passiveById, initPilot, castUlt, boosted, phasing, fortressOn, bloodrush, onEliteKilled, updatePilot, spawnEchoes } from './pilot.js';
 import { cine } from './cinematic.js';
 import { treeForRun, treeOnKill, treeOnDash } from './tree.js';
+import { sv } from './stageview.js';
 
 export const xpFor = (l) => Math.floor(5 + 4.5 * l + 0.9 * l * l);
 
@@ -95,7 +96,7 @@ function control() {
   if (G.scriptCtrl) return G.scriptCtrl(); // boot intro (intro.js)
   if (G.mode === 'attract' || G.autopilot) return botControl();
   readDirection();
-  return {
+  return sv.mapControl({
     mode: input.mode,
     dx: input.dx,
     dy: input.dy,
@@ -105,11 +106,12 @@ function control() {
     od: input.consume('od'),
     focus: input.down('focus'),
     shift: (dx, dy) => input.shiftTarget(dx, dy),
-  };
+  });
 }
 
 export function playfieldBounds() {
   if (field.ow) return { left: 30, right: field.W - 30, top: 30, bottom: field.H - 30 };
+  if (sv.active) return sv.bounds(); // side / chase stage (virtual frame)
   return {
     left: 14,
     right: view.W - 14,

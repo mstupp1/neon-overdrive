@@ -22,6 +22,7 @@ import { NODE_TYPES, REWARDS, reachableNodes, nodeLevel } from './campaign.js';
 import { MODIFIERS } from './modifiers.js';
 import { applyHeat } from './core.js';
 import { foesAt, zoneCount } from './director.js';
+import { viewName } from './stageview.js';
 import { bossById } from './bosses.js';
 import { step, renderWorld } from './world.js';
 import { spawnEnemy, spawnWeavers, setOverworldAI, relink, weaverBeam, snakeBody } from './enemies.js';
@@ -1588,9 +1589,13 @@ function drawCard(ctx, live) {
     lines.push(['HAZARD', mods.length ? mods.map((m) => `${MODIFIERS[m].name}: ${MODIFIERS[m].desc}`).join('  ') : 'None', mods.length ? MODIFIERS[mods[0]].color : 'rgba(255,255,255,0.6)']);
     const lvl = nodeLevel(G.run.system, n.row);
     const foes = foesAt(lvl).map((t) => FOE_NAMES[t]).filter(Boolean);
-    const shown = foes.slice(-4).reverse();
+    // A stage in another view (stageview.js) is named with the zones; fewer foe names make room for it.
+    const vi = n.views ? n.views.findIndex((v) => v !== 'top') : -1;
+    const shown = foes.slice(vi >= 0 || n.arenaView ? -3 : -4).reverse();
     const extra = foes.length - shown.length;
-    const zones = boss ? 'BOSS ARENA' : `${zoneCount({ row: n.row, elite: n.type === 'elite', boss: null })} ZONES`;
+    const zones = boss
+      ? 'BOSS ARENA' + (n.arenaView ? ` · ${viewName(n.arenaView)}` : '')
+      : `${zoneCount({ row: n.row, elite: n.type === 'elite', boss: null })} ZONES` + (vi >= 0 ? ` · ZONE ${vi + 1} ${viewName(n.views[vi])}` : '');
     lines.push(['HOSTILES', `${n.type === 'elite' ? 'HUNTER + ' : ''}${shown.join(' · ')}${extra > 0 ? ` +${extra}` : ''}  ·  ${zones}`, '#ff8aa0']);
   } else {
     lines.push(['STOP', STOP_DESC[n.type] || '', info.color]);

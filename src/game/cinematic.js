@@ -16,6 +16,7 @@ import { flash, addShake, ring, sparks } from './fx.js';
 import { bg } from '../render/background.js';
 import { sfx, music } from '../core/audio.js';
 import { input } from '../core/input.js';
+import { sv } from './stageview.js';
 
 // zoom: peak camera zoom. slow: world time scale while zoomed. hold: seconds at peak (boss tiers: after the target dies).
 // bars: letterbox height (fraction of the screen). lines: speed-line count. rank: a finisher only replaces a weaker one.
@@ -39,7 +40,7 @@ const cam = { z: 1, x: 0, y: 0, rot: 0, sy: 1, skew: 0, fx: 0, fy: 0, px: 0, py:
 // instead: screen = pivot (px, py) + rotate(rot) * [z, skew*z; 0, z*sy] * (world - focus (fx, fy)).
 
 const TRANSIT = 2.7; // real seconds
-const tr = { on: false, t: 0, kicker: '', name: '', boss: false, p0: { x: 0, y: 0 }, p1: { x: 0, y: 0 }, p2: { x: 0, y: 0 }, seed: 0 };
+const tr = { on: false, t: 0, kicker: '', name: '', boss: false, swap: false, p0: { x: 0, y: 0 }, p1: { x: 0, y: 0 }, p2: { x: 0, y: 0 }, seed: 0 };
 
 // Transit envelope: eases in over the first quarter, out over the last.
 function trAmount() {
@@ -63,13 +64,14 @@ export const cine = {
   },
 
   // Fly-through to the next area. boss: into the boss arena (a longer climb toward the top of the field).
-  transit(kicker, name, boss = false) {
+  // swap: the camera changes view at the midpoint (director.js calls stageview enter + retarget); no roll then.
+  transit(kicker, name, boss = false, swap = false) {
     const p = G.player;
     if (G.mode !== 'run' || !p || p.dead) return false;
     const W = view.W;
     const H = view.H;
     const right = p.x < W / 2;
-    Object.assign(tr, { on: true, t: 0, kicker, name, boss, seed: Math.random() * 1000 });
+    Object.assign(tr, { on: true, t: 0, kicker, name, boss, swap, seed: Math.random() * 1000 });
     tr.p0 = { x: p.x, y: p.y };
     tr.p1 = { x: right ? W * 1.1 : -W * 0.1, y: boss ? H * 0.3 : H * 0.42 }; // control point: the curve swings wide
     tr.p2 = { x: W / 2, y: H * 0.78 };
@@ -80,6 +82,18 @@ export const cine = {
   },
   get tier() {
     return fin.on ? fin.tier : null;
+  },
+  // 0..1 progress through the fly-through (0 when none).
+  get transitU() {
+    return tr.on ? tr.t / TRANSIT : 0;
+  },
+  // The view just changed under the fly-through: finish it from where the jet now is to its new home spot.
+  retarget(home) {
+    const p = G.player;
+    if (!tr.on || !p) return;
+    tr.p0 = { x: p.x, y: p.y };
+    tr.p1 = { x: home.x, y: home.y };
+    tr.p2 = { x: home.x, y: home.y };
   },
 
   // target: anything with x, y (a live enemy or boss; followed while it moves). color: tint for the lines and edge.
@@ -167,6 +181,16 @@ export const cine = {
     const W = view.W;
     const H = view.H;
     cam.rot = 0;
+    if (tr.on && !fin.on && (tr.swap || sv.active)) {
+      // A view change (or a fly-through inside another view): a straight push on the jet, no roll.
+      const a = trAmount();
+      const p = G.player;
+      const z = 1 + 0.26 * a;
+      cam.z = z;
+      cam.x = clamp(W / 2 - p.x * z, W - W * z, 0);
+      cam.y = clamp(H * 0.6 - p.y * z, H - H * z, 0);
+      return cam;
+    }
     if (tr.on && !fin.on) {
       const a = trAmount();
       const u = tr.t / TRANSIT;
@@ -235,8 +259,14 @@ export const cine = {
     let col = fin.color;
     if (a > 0) {
       const d = fin.def;
-      const px = fin.x * cam.z + cam.x;
-      const py = fin.y * cam.z + cam.y;
+      let px = fin.x * cam.z + cam.x;
+      let py = fin.y * cam.z + cam.y;
+      if (sv.active) {
+        // Another stage view: the camera maps the (zoomed) virtual point onto the screen.
+        const q = sv.toScreen(px, py);
+        px = q.x;
+        py = q.y;
+      }
       // Vignette: darken the field around the target.
       const vg = ctx.createRadialGradient(px, py, 40, px, py, Math.max(W, H) * 0.75);
       vg.addColorStop(0, 'rgba(3,2,10,0)');
@@ -283,7 +313,7 @@ export const cine = {
       const rnd = () => ((s = (s * 16807 + 11) % 2147483647) / 2147483647);
       ctx.save();
       ctx.translate(W / 2, H / 2);
-      ctx.rotate(-cam.rot * 0.6);
+      ctx.rotate(-cam.rot * 0.6 + (sv.mode === 'side' ? Math.PI / 2 : 0)); // side view: the rush runs right to left
       ctx.globalCompositeOperation = 'lighter';
       ctx.strokeStyle = 'rgba(200,240,255,1)';
       ctx.globalAlpha = 0.26 * ta;
@@ -299,8 +329,8 @@ export const cine = {
       ctx.stroke();
       ctx.restore();
       // Tunnel rush: streaks bursting outward from the vanishing point ahead of the jet, kept to the edges of the frame.
-      const vx = W / 2;
-      const vy = H * 0.18;
+      const vx = sv.mode === 'side' ? W * 0.85 : W / 2;
+      const vy = sv.mode === 'side' ? H * 0.5 : H * 0.18;
       const far = Math.hypot(W, H);
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';

@@ -15,6 +15,7 @@ import { rollRelicDrop } from './collectables.js';
 import { rollGearDrop } from './loot.js';
 import { sfx } from '../core/audio.js';
 import { addScore } from './player.js';
+import { sv } from './stageview.js';
 
 const BOSSES = [
   { id: 'warden', name: 'WARDEN', title: 'Siege Mech', hp: 2400, r: 40, color: '#ff7a18', homeY: 165 },
@@ -29,16 +30,29 @@ export const bossById = (id) => BOSSES.find((b) => b.id === id) || BOSSES[BOSSES
 // Music track index per boss (unknown ids fall back to the last).
 export const bossIndex = (id) => (BOSS_IDS.includes(id) ? BOSS_IDS.indexOf(id) : BOSSES.length - 1);
 
-export function spawnBoss(id, level, loop, hpMul = 1) {
+// View variants (stageview.js): a boss met in another view keeps its body and HP but changes its title, where it
+// holds (homeY in its virtual frame) and its attack rotation (ATTACKS[kind].views[view]).
+const VARIANTS = {
+  hydra: { side: { title: 'Abyssal Leviathan', homeY: 70 } },
+  omega: { chase: { title: 'Event Horizon', homeY: 300 } },
+};
+export function bossVariant(id, view) {
   const def = bossById(id);
+  const v = VARIANTS[def.id] && VARIANTS[def.id][view];
+  return v ? { ...def, title: v.title, variant: view } : def;
+}
+
+export function spawnBoss(id, level, loop, hpMul = 1) {
+  const def = bossVariant(id, sv.mode);
   const hp = def.hp * hpMul * Math.pow(3.2, loop) * (1 + 0.15 * loop);
   const e = {
     type: 'boss', boss: true, kind: def.id, name: def.name, title: def.title,
     x: view.W / 2, y: -160, vx: 0, vy: 0, r: def.r, hp, maxHp: hp, color: def.color,
     t: 0, flash: 0, rot: 0, dead: false, entered: true, invuln: true,
     state: 'enter', phase: 1, atk: null, gap: 1.2, cycle: 0, parts: [],
-    xp: 80, score: 30000, barFill: 0, anim: 0, homeY: def.homeY,
+    xp: 80, score: 30000, barFill: 0, anim: 0, homeY: def.homeY, view: def.variant || null,
   };
+  if (def.variant) e.homeY = VARIANTS[def.id][def.variant].homeY;
   if (def.id === 'eclipse') {
     e.alpha = 1;
     e.trail = [];
@@ -213,6 +227,9 @@ const ATTACKS = {
 
   hydra: {
     cycles: [['wobbleFan', 'flower', 'tips'], ['flower', 'brood', 'wobbleFan', 'tips'], ['rain', 'flower', 'tips', 'brood', 'wobbleFan']],
+    views: {
+      side: [['tide', 'wobbleFan', 'geyser', 'tips'], ['flower', 'tide', 'geyser', 'brood', 'tips'], ['geyser', 'tide', 'rain', 'flower', 'geyser', 'brood']],
+    },
     wobbleFan(e, a, dt, sp) {
       every(a, dt, 0.6 / sp, () => fan(e.x, e.y + 40, aimAt(e.x, e.y + 40), 7, 1.15, 130, 'wobble', { wob: 18, wobF: 5 }));
       return a.n >= 3;
@@ -253,6 +270,37 @@ const ATTACKS = {
       });
       return a.t2 > 2.6;
     },
+    // Side view (Abyssal Leviathan): a tide of orbs fills the whole height with one gap that drifts between waves.
+    tide(e, a, dt, sp) {
+      if (a.gx === undefined) a.gx = clamp(G.player.x, 160, view.W - 160);
+      every(a, dt, 0.95 / sp, () => {
+        a.gx = clamp(a.gx + rand(-150, 150), 140, view.W - 140);
+        const gap = 150 - e.phase * 10;
+        for (let x = 14; x < view.W; x += 34) {
+          if (Math.abs(x - a.gx) < gap / 2) continue;
+          shoot(x, e.y + 20, Math.PI / 2, 105, 'big');
+        }
+      });
+      return a.n >= 3 + e.phase;
+    },
+    // Side view: geysers erupt floor to ceiling around the jet (telegraphed columns, then a burst of light).
+    geyser(e, a, dt, sp) {
+      if (!a.cols) {
+        const p = G.player;
+        const n = 2 + e.phase;
+        a.cols = [];
+        for (let i = 0; i < n; i++) a.cols.push(clamp(p.y + (i - (n - 1) / 2) * 92 + rand(-16, 16), 60, view.H - 30));
+        a.t2 = 0;
+        sfx.warn();
+      }
+      a.t2 += dt;
+      every(a, dt, 0.24 / sp, (n) => {
+        if (n >= a.cols.length) return;
+        G.beams.push({ owner: 'enemy', boss: e, x: -20, y: a.cols[n], ang: 0, w: 14, tele: 0.9, life: 0.5, spin: 0, aimSpin: 0 });
+      });
+      if (a.t2 > 1.1) every(a.b || (a.b = { n: 0 }), dt, 0.5 / sp, () => fan(e.x, e.y + 30, aimAt(e.x, e.y + 30), 5, 0.7, 150, 'small'));
+      return a.t2 > 2.4;
+    },
     move(e, dt) {
       e.x = damp(e.x, view.W / 2 + Math.sin(e.t * 0.4) * view.W * 0.2, 2, dt);
       e.y = damp(e.y, e.homeY + view.safeTop + Math.sin(e.t * 0.8) * 24, 2, dt);
@@ -283,6 +331,37 @@ const ATTACKS = {
 
   omega: {
     cycles: [['doubleSpiral', 'laser', 'wall', 'burst'], ['laser', 'doubleSpiral', 'wall', 'burst'], ['chaos', 'laser', 'wall', 'doubleSpiral', 'burst']],
+    views: {
+      chase: [['gates', 'laser', 'lanes', 'burst'], ['lanes', 'gates', 'doubleSpiral', 'laser', 'burst'], ['chaos', 'gates', 'lanes', 'laser', 'gates']],
+    },
+    // Chase view (Event Horizon): laser gates launched down the lane at you, each gap a swing away from the last.
+    gates(e, a, dt, sp) {
+      if (a.gx === undefined) a.gx = G.player.x;
+      every(a, dt, 0.8 / sp, () => {
+        a.gx = clamp(a.gx + (Math.random() < 0.5 ? -1 : 1) * rand(90, 170), 90, view.W - 90);
+        sv.gate(a.gx, 140 - e.phase * 8, 320 + e.phase * 25);
+      });
+      return a.n >= 2 + e.phase;
+    },
+    // Chase view: lanes light up along the floor toward the camera, then fire (one always on the jet).
+    lanes(e, a, dt, sp) {
+      if (!a.xs) {
+        const p = G.player;
+        const n = e.phase + 1;
+        const xs = [clamp(p.x, 40, view.W - 40)];
+        for (let g = 0; xs.length < n && g < 60; g++) {
+          const x = rand(40, view.W - 40);
+          if (xs.every((q) => Math.abs(q - x) > 85)) xs.push(x);
+        }
+        a.xs = xs;
+        a.t2 = 0;
+        for (const x of xs) G.beams.push({ owner: 'enemy', boss: e, x, y: e.y + 30, ang: Math.PI / 2, w: 16, tele: 1.05, life: 0.55, spin: 0, aimSpin: 0 });
+        sfx.warn();
+      }
+      a.t2 += dt;
+      if (a.t2 > 1.2) every(a, dt, 0.35 / sp, () => ring(e.x, e.y, 14, 125, 'small', rand(0, TAU)));
+      return a.t2 > 2.3;
+    },
     doubleSpiral(e, a, dt, sp) {
       a.t2 = (a.t2 || 0) + dt;
       every(a, dt, 0.09 / sp, () => {
@@ -554,7 +633,7 @@ export function updateBoss(e, dt) {
     } else {
       e.gap -= dt;
       if (e.gap <= 0) {
-        const cyc = set.cycles[e.phase - 1];
+        const cyc = ((e.view && set.views && set.views[e.view]) || set.cycles)[e.phase - 1];
         e.atk = { name: cyc[e.cycle % cyc.length], n: 0 };
         e.cycle++;
       }
