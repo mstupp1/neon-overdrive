@@ -1,40 +1,56 @@
-// Overworld: each star system's route as open space you fly around in (campaign only).
-// The route graph (campaign.js generateRoute) is laid out bottom to top as beacons joined by lanes; flying into a lit
-// beacon (a node reachable next) and holding there, or pressing confirm, starts it through main.js pickRouteNode.
-// Between the rows sit enemy patrols (simple chase / shoot AI, paid in XP and credits) and one-shot sites: salvage,
-// data caches, a repair beacon and a distress signal that opens an anomaly event. The camera follows the ship
-// (top-down, zoomed out), and M / the MAP button lays the whole route over the screen while you keep flying.
-// State lives on G.run.ow and survives the screens a node opens; a new route (next system) builds a fresh overworld.
+// Overworld: between nodes the run flies through open space, one zone per leg of the route (campaign only).
+// A leg runs from the node just cleared (or the system's entry) to the next row. Its zone holds that row's reachable
+// nodes as exits, placed generally upward (up, up-left or up-right) and hidden until the ship comes close. Taking an
+// exit starts that node (main.js pickRouteNode), so picking one closes the others, and the next leg is a fresh zone.
+// The ship flies with its whole fight loadout: world.js step() runs with field.ow set (state.js), so the main gun,
+// modules, dash, ultimate and passives all work, aimed along the ship's facing. The facing follows the flight; Shift
+// (pad shoulder) holds it to strafe, and with a mouse it aims at the cursor. The right stick aims as well.
+// Packs of the levels' own enemy types sleep around the zone and wake when the ship comes near (owAI below drives
+// them instead of the fight behaviours), and stragglers roam in from off screen the longer a leg takes. Debris fields
+// block ships and shots. Sites: salvage, data caches, repair beacons, distress signals (an anomaly event) and guarded
+// caches. M / the MAP button lays a fogged map of the zone and the system route over the screen while you keep flying.
+// State lives on G.run.ow (the current leg); the leg's enemies live in G.enemies while the run is in it.
 
-import { G, view, sectorDifficulty } from './state.js';
+import { G, view, field, inField, sectorDifficulty } from './state.js';
 import { input, readDirection } from '../core/input.js';
 import { sfx } from '../core/audio.js';
 import { S, glow } from '../render/sprites.js';
-import { TAU, clamp, lerp, damp, dist2, turnToward, mulberry32, easeOutCubic } from '../core/math.js';
+import { TAU, clamp, lerp, damp, dist2, turnToward, mulberry32, easeOutCubic, rand } from '../core/math.js';
 import { NODE_TYPES, REWARDS, reachableNodes, nodeLevel } from './campaign.js';
 import { MODIFIERS } from './modifiers.js';
-import { heatScale } from './core.js';
-import { WEAPONS, weaponStreams } from './ships.js';
-import { particle, sparks, flash, updateParticles, drawParticles } from './fx.js';
-import { hurtPlayer, gainXp } from './player.js';
+import { applyHeat } from './core.js';
+import { foesAt, zoneCount } from './director.js';
+import { bossById } from './bosses.js';
+import { step, renderWorld } from './world.js';
+import { spawnEnemy, spawnWeavers, setOverworldAI, relink, weaverBeam, snakeBody } from './enemies.js';
+import { shoot, ring, fan, aimAt } from './bullets.js';
+import { dropCredit } from './pickups.js';
+import { sparks, explosion, floatText, flash } from './fx.js';
+import { gainXp, collectPickup } from './player.js';
+import { resetModules } from './modules.js';
 import { gainCredits } from './economy.js';
+import { drawGauges } from '../render/hud.js';
 import { NODE_ICONS } from '../ui/meta.js';
 
 const FONT = 'Orbitron, "Segoe UI", sans-serif';
 const FONT2 = 'Rajdhani, "Segoe UI", sans-serif';
+const UP = -Math.PI / 2;
 
-const WW = 1400; // world width
-const ROW_GAP = 470; // world distance between route rows
-const TOP = 380; // margin above the boss beacon
-const BOTTOM = 560; // margin below row 0 (the ship starts in it)
-const ZOOM = 0.8; // camera zoom (world units -> logical px)
-const ZOOM_IN = 1.45; // camera zoom at the start of the entry ease
+const ZONE_W = 2800; // zone size (world units); the boss approach is shorter
+const ZONE_H = 3600;
+const ZOOM = 0.72; // camera zoom (world units -> logical px)
+const ZOOM_IN = 1.35; // camera zoom at the start of the entry ease
 const EASE = 1.1; // seconds of entry ease
-const ENGAGE_R = 52; // beacon trigger radius
-const DWELL = 0.85; // seconds holding inside a beacon to engage it
-const AGGRO = 300; // patrol wakes when the ship is this close to its centre
-const LEASH = 820; // and gives up past this
-const SPEED = 300; // cruise speed at st.speed 1
+const ENGAGE_R = 58; // exit trigger radius
+const DWELL = 0.85; // seconds holding inside an exit to take it
+const SEE = 520; // exits and sites are found within this
+const AGGRO = 400; // a pack wakes when the ship is this close to its centre (or when it is shot)
+const LEASH = 1250; // and goes back to sleep past this
+const WAKE = 1500; // asleep enemies further than this are frozen
+const FOG = 160; // map fog cell
+const FOG_R = 560; // the ship uncovers the map this far around it
+const HP = 0.6; // overworld enemy HP vs. a fight at the same level
+const XP = 0.75; // and XP
 
 // Site kinds: one-shot pickups (touch) or engage sites (dwell, opens a screen).
 const SITES = {
@@ -42,18 +58,45 @@ const SITES = {
   repair: { name: 'REPAIR BEACON', sub: 'RESTORES 1 HULL', color: '#7dff6b', icon: 'dock' },
   wreck: { name: 'SALVAGE', sub: 'DRIFTING WRECK · CREDITS', color: '#ffd24a', icon: 'vault' },
   data: { name: 'DATA CACHE', sub: 'ENCRYPTED LOGS · XP', color: '#3ff6ff', icon: 'combat' },
+  cache: { name: 'GUARDED CACHE', sub: 'ELITE GUARDS · CREDITS AND XP', color: '#ff3df2', icon: 'elite' },
 };
 
-// Patrol enemies (sprites from sprites.js). hp is scaled by the patrol's route level like a fight.
-const FOES = {
-  dart: { hp: 3, r: 12, speed: 175, xp: 2, spr: 'dart' },
-  sniper: { hp: 11, r: 15, speed: 120, xp: 4, spr: 'sniper', range: 230, fire: 2.1 },
-  spinner: { hp: 24, r: 20, speed: 55, xp: 6, spr: 'spinner', fire: 3.1 },
+// What each stop is, for the exit card (fights list their reward, hazards and hostiles instead).
+const STOP_DESC = {
+  market: 'Black Market: spend credits on upgrades, repairs and gear.',
+  dock: 'Rest stop: repair, reinforce the hull or overclock an upgrade.',
+  anomaly: 'Unknown signal: an event with a choice. Risk for reward.',
+  vault: 'Vault: a free draft where each pick installs 2 levels, plus credits.',
+  rift: 'Chaos rift: dive in for 3 upgrade levels. Hazards follow you out.',
 };
 
-let ow = null; // current overworld (also G.run.ow)
+const FOE_NAMES = {
+  dart: 'DARTS', swarm: 'SWARMS', spinner: 'SPINNERS', dasher: 'DASHERS', snake: 'SERPENTS', sniper: 'SNIPERS', tank: 'TANKS',
+  splitter: 'SPLITTERS', mine: 'MINES', carrier: 'CARRIERS', shielder: 'SHIELDERS', weaver: 'WEAVERS', blinker: 'BLINKERS',
+};
+
+// Pack kinds: `need` must be in the level's roster (director foesAt). make(n) lists member types; n grows with level.
+const times = (t, n) => Array.from({ length: n }, () => t);
+const PACKS = [
+  { need: 'dart', w: 4, make: (n) => times('dart', 4 + n) },
+  { need: 'swarm', w: 3, make: (n) => times('swarm', 7 + 2 * n) },
+  { need: 'splitter', w: 2, make: (n) => [...times('splitter', 2 + (n >> 1)), 'dart', 'dart'] },
+  { need: 'spinner', w: 2, make: (n) => ['spinner', ...times('dart', 2 + (n >> 1))] },
+  { need: 'dasher', w: 2, make: (n) => times('dasher', 3 + (n >> 1)) },
+  { need: 'sniper', w: 1.6, make: (n) => [...times('sniper', 2 + (n >> 1)), 'dart'] },
+  { need: 'mine', w: 1.4, make: (n) => times('mine', 7 + n) },
+  { need: 'carrier', w: 1, make: () => ['carrier', 'dart', 'dart'] },
+  { need: 'tank', w: 1, make: () => ['tank', ...times('swarm', 4)] },
+  { need: 'shielder', w: 1.2, make: () => ['shielder', 'spinner', 'dart', 'dart', 'dart'] },
+  { need: 'snake', w: 1, make: () => ['snake'] },
+  { need: 'weaver', w: 1, make: () => ['weaver'] }, // spawns the linked pair
+  { need: 'blinker', w: 1, make: () => ['blinker', 'blinker'] },
+];
+
+let ow = null; // current leg (also G.run.ow)
 let hooks = { engage() {}, signal() {}, levelUp() {}, dead() {} };
 const icons = {}; // `${type}|${color}` -> Image
+const ctrl = { mode: 'dir', dx: 0, dy: 0, tx: 0, ty: 0, dash: false, od: false, focus: false, shift: null };
 
 function icon(type, color) {
   const key = type + '|' + color;
@@ -70,90 +113,195 @@ function icon(type, color) {
 const hue = () => (G.run && G.run.system ? G.run.system.hue : 200);
 const hsl = (h, l = 60, a = 1) => `hsla(${h},100%,${l}%,${a})`;
 
+function hashStr(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+  return h >>> 0;
+}
+
 // --- Build ------------------------------------------------------------------------------
 
 function build(run) {
   const route = run.route;
   const sys = run.system;
-  const rnd = mulberry32((route.seed ^ 0x5f3759df) >>> 0);
-  const rows = route.rows.length; // includes the boss row
-  const WH = TOP + (rows - 1) * ROW_GAP + BOTTOM;
-  const rowY = (r) => WH - BOTTOM - r * ROW_GAP;
-  const pos = {};
-  for (const n of route.nodes) {
-    pos[n.id] = n.type === 'boss'
-      ? { x: WW / 2, y: rowY(n.row) }
-      : { x: n.x * WW + (rnd() - 0.5) * 110, y: rowY(n.row) + (rnd() - 0.5) * 90 };
+  const from = run.nodeId || null;
+  const leg = from || 'start';
+  const rnd = mulberry32((route.seed ^ hashStr(leg) ^ 0x5f3759df) >>> 0);
+  const nodes = reachableNodes(route, from).slice().sort((a, b) => a.col - b.col);
+  const bossLeg = nodes.length === 1 && nodes[0].type === 'boss';
+  const W = bossLeg ? 2200 : ZONE_W;
+  const H = bossLeg ? 2600 : ZONE_H;
+  const row = nodes[0].row;
+  const level = Math.max(1, nodeLevel(sys, row) - 0.3);
+  const start = { x: W * (0.35 + rnd() * 0.3), y: H - 240 };
+
+  // Exits: the next row's nodes, left to right as on the route map, somewhere in the upper half.
+  const exits = [];
+  const n = nodes.length;
+  nodes.forEach((node, i) => {
+    let at = null;
+    for (let k = 0; k < 40 && !at; k++) {
+      const b0 = n === 1 ? 0.15 : i / n;
+      const b1 = n === 1 ? 0.85 : (i + 1) / n;
+      const x = bossLeg ? W * (0.3 + rnd() * 0.4) : 220 + (W - 440) * (b0 + rnd() * (b1 - b0));
+      const y = bossLeg ? 300 : 260 + rnd() * (H * 0.5 - 260);
+      if (k < 30 && exits.some((e) => dist2(x, y, e.x, e.y) < 760 * 760)) continue;
+      at = { x, y };
+    }
+    exits.push({ id: node.id, node, x: at.x, y: at.y, seen: false });
+  });
+  const keep = [start, ...exits]; // spots debris and packs stay clear of
+
+  // Debris: fields of rocks, plus a scatter of loose ones. Gaps of 70+ between rocks keep every path open.
+  const rocks = [];
+  const fits = (x, y, r) => x > r + 40 && x < W - r - 40 && y > r + 40 && y < H - r - 40
+    && keep.every((q) => dist2(x, y, q.x, q.y) > (r + 230) * (r + 230))
+    && rocks.every((o) => dist2(x, y, o.x, o.y) > (r + o.r + 70) * (r + o.r + 70));
+  const addRock = (x, y, r) => {
+    const pts = [];
+    const m = 9 + Math.floor(rnd() * 5);
+    for (let i = 0; i < m; i++) pts.push(0.82 + rnd() * 0.22);
+    rocks.push({ x, y, r, pts, rot: rnd() * TAU, spin: (rnd() - 0.5) * 0.15 });
+  };
+  const fields = Math.round((bossLeg ? 5 : 8) + rnd() * 4);
+  for (let f = 0; f < fields; f++) {
+    const cx = 200 + rnd() * (W - 400);
+    const cy = 200 + rnd() * (H - 400);
+    const k = 3 + Math.floor(rnd() * 6);
+    for (let i = 0; i < k; i++) {
+      const r = 28 + rnd() * rnd() * 115;
+      const a = rnd() * TAU;
+      const d = rnd() * 280;
+      const x = cx + Math.cos(a) * d;
+      const y = cy + Math.sin(a) * d;
+      if (fits(x, y, r)) addRock(x, y, r);
+    }
   }
-  const start = { x: WW / 2, y: WH - BOTTOM + 300 };
-  const taken = [start, ...Object.values(pos)];
-  const free = (x, y, d) => taken.every((q) => dist2(x, y, q.x, q.y) > d * d);
-  const place = (y0, y1, d) => {
-    for (let k = 0; k < 16; k++) {
-      const x = 170 + rnd() * (WW - 340);
-      const y = y0 + rnd() * (y1 - y0);
-      if (free(x, y, d)) return { x, y };
+  for (let i = 0; i < (bossLeg ? 8 : 16); i++) {
+    const r = 18 + rnd() * 30;
+    const x = rnd() * W;
+    const y = rnd() * H;
+    if (fits(x, y, r)) addRock(x, y, r);
+  }
+  const open = (x, y, m) => x > 120 && x < W - 120 && y > 120 && y < H - 120 && rocks.every((o) => dist2(x, y, o.x, o.y) > (o.r + m) * (o.r + m));
+  const place = (minStart, gap, taken) => {
+    for (let k = 0; k < 30; k++) {
+      const x = 140 + rnd() * (W - 280);
+      const y = 140 + rnd() * (H - 280);
+      if (!open(x, y, 90) || dist2(x, y, start.x, start.y) < minStart * minStart) continue;
+      if (exits.some((e) => dist2(x, y, e.x, e.y) < 260 * 260)) continue;
+      if (taken.some((q) => dist2(x, y, q.x, q.y) < gap * gap)) continue;
+      return { x, y };
     }
     return null;
   };
 
-  // Patrols: in the gaps between rows, more of them (and bigger) further up.
-  const clusters = [];
-  const foes = [];
-  for (let r = 0; r < rows - 2; r++) {
-    const n = (r === 0 ? 1 : rnd() < 0.7 ? 1 : 0) + (r >= 3 && rnd() < 0.4 ? 1 : 0);
-    for (let i = 0; i < n; i++) {
-      const at = place(rowY(r + 1) + 120, rowY(r) - 120, 190);
-      if (!at) continue;
-      taken.push(at);
-      const level = nodeLevel(sys, r) + 0.5;
-      const c = { id: clusters.length, x: at.x, y: at.y, level, aggro: false, cleared: false, size: 0 };
-      clusters.push(c);
-      const count = 3 + Math.floor(r / 3) + (rnd() < 0.5 ? 1 : 0);
-      for (let k = 0; k < count; k++) {
-        const w = [['dart', 5], ['sniper', r >= 1 ? 3 : 1], ['spinner', r >= 3 ? 2 : 0]];
-        let x = rnd() * w.reduce((a, b) => a + b[1], 0);
-        let type = 'dart';
-        for (const [t, q] of w) if ((x -= q) <= 0 && q > 0) { type = t; break; }
-        foes.push(makeFoe(type, c, k, count, rnd, run));
-        c.size++;
+  // Sites
+  const sites = [];
+  const kinds = ['wreck', 'data'];
+  if (rnd() < 0.55) kinds.push('wreck');
+  if (rnd() < 0.3) kinds.push('repair');
+  if (rnd() < 0.35 && !bossLeg) kinds.push('signal');
+  if (row >= 1 && !bossLeg) kinds.push('cache');
+  for (const kind of kinds) {
+    const at = place(500, 380, sites);
+    if (at) sites.push({ id: `ow-${kind}-${sites.length}`, kind, x: at.x, y: at.y, done: false, seen: false, t: rnd() * 10, guard: null });
+  }
+
+  // Packs: the level's roster, more and bigger further up the route. One guards each exit, one (elite) a cache.
+  const roster = foesAt(level);
+  const kindsOk = PACKS.filter((k) => roster.includes(k.need));
+  const pickKind = () => {
+    let x = rnd() * kindsOk.reduce((a, k) => a + k.w, 0);
+    for (const k of kindsOk) if ((x -= k.w) <= 0) return k;
+    return kindsOk[0];
+  };
+  const packs = [];
+  const sizeUp = Math.floor(level / 3);
+  const addPack = (x, y, elite = false) => {
+    const p = { id: packs.length, x, y, members: pickKind().make(sizeUp), elite, awake: false, cleared: false, alive: 0, lx: x, ly: y };
+    packs.push(p);
+    return p;
+  };
+  for (const e of exits) {
+    for (let k = 0; k < 12; k++) {
+      const a = Math.atan2(start.y - e.y, start.x - e.x) + (rnd() - 0.5) * 1.6;
+      const d = 270 + rnd() * 140;
+      const x = e.x + Math.cos(a) * d;
+      const y = e.y + Math.sin(a) * d;
+      if (open(x, y, 90)) {
+        addPack(x, y);
+        break;
       }
     }
   }
-
-  // Sites: one signal and one repair beacon per system, plus salvage and data caches.
-  const sites = [];
-  for (const kind of ['signal', 'repair', 'wreck', 'wreck', 'data', 'data']) {
-    const at = place(rowY(rows - 2) + 60, rowY(0) + 140, 170);
-    if (!at) continue;
-    taken.push(at);
-    sites.push({ id: `ow-${kind}-${sites.length}`, kind, x: at.x, y: at.y, done: false, t: rnd() * 10 });
+  const cache = sites.find((s) => s.kind === 'cache');
+  if (cache) cache.guard = addPack(cache.x + 40, cache.y + 40, true).id;
+  const count = Math.round(clamp(15 + level * 0.9 + rnd() * 4, 15, 30) * (bossLeg ? 0.65 : 1) * (row === 0 ? 0.8 : 1));
+  for (let i = packs.length; i < count; i++) {
+    const at = place(640, 300, [...packs, ...sites]);
+    if (at) addPack(at.x, at.y);
   }
 
-  // Background dressing: a few nebula glows in the system's hue.
   const nebulae = [];
-  for (let i = 0; i < 7; i++) nebulae.push({ x: rnd() * WW, y: rnd() * WH, s: 500 + rnd() * 600, h: hue() + (rnd() - 0.5) * 60, a: 0.07 + rnd() * 0.07 });
+  for (let i = 0; i < 14; i++) nebulae.push({ x: rnd() * W, y: rnd() * H, s: 600 + rnd() * 700, h: hue() + (rnd() - 0.5) * 60, a: 0.07 + rnd() * 0.07 });
+  const fc = Math.ceil(W / FOG);
+  const fr = Math.ceil(H / FOG);
 
   return {
-    seed: route.seed, W: WW, H: WH, pos, start, clusters, foes, sites, nebulae,
-    ship: { x: start.x, y: start.y, vx: 0, vy: 0, a: 0, boostT: 0, boostCd: 0, fireT: 0, trailT: 0 },
+    leg, seed: route.seed, from, row, level, W, H, start, exits, rocks, sites, packs, nebulae, bossLeg,
+    fog: new Uint8Array(fc * fr), fc, fr,
     cam: { x: start.x, y: start.y - 160 },
-    at: null, // the node the ship last returned from
+    spawned: false, // enemies are in G.enemies
     dest: null, // mouse destination (world)
-    dwell: 0, dwellId: null,
-    pb: [], eb: [], gems: [], texts: [],
-    map: false, mapA: 0, ease: 0, t: 0, busy: false, levelT: 0, hintT: 0,
+    dwell: 0, dwellId: null, card: null,
+    map: false, mapA: 0, ease: 0, t: 0, legT: 0, ambT: 9, packT: 0, busy: false, levelT: 0, hintT: 0, mouseWas: false,
   };
 }
 
-function makeFoe(type, c, k, count, rnd, run) {
-  const f = FOES[type];
-  const hp = f.hp * sectorDifficulty(c.level, 0).hp * heatScale(run.tier || 0, run.deep || 0).hp * 0.6;
-  const ph = (k / count) * TAU;
-  return {
-    type, c, hp, max: hp, r: f.r, x: c.x + Math.cos(ph) * 70, y: c.y + Math.sin(ph) * 70,
-    vx: 0, vy: 0, ph, orbit: 50 + rnd() * 50, fireT: (f.fire || 0) * (0.5 + rnd()), flash: 0, a: 0, dead: false,
+// The overworld's director stand-in: what spawnEnemy, kill rewards and credits read while flying.
+function setDirector(run) {
+  const d = G.director;
+  const sys = run.system;
+  const diff = sectorDifficulty(ow.level, 0);
+  diff.credits = 1;
+  diff.eliteBonus = 0;
+  applyHeat(diff, { tier: run.tier || 0, deep: run.deep || 0 });
+  diff.hp *= HP;
+  diff.xp *= XP;
+  d.diff = diff;
+  d.spec = {
+    index: G.sector, row: ow.row, level: ow.level, loop: 0, boss: null, elite: false, modifiers: [], hue: sys.hue, name: sys.name,
+    duration: 0, pay: sys.pay, reward: null, tier: run.tier || 0, deep: run.deep || 0, overworld: true,
   };
+  d.state = 'overworld';
+  d.queue.length = 0;
+  d.hunter = null;
+  d.zones = 1;
+  d.zone = null;
+  d.progress = 0;
+}
+
+function spawnPacks() {
+  for (const pk of ow.packs) {
+    if (pk.cleared) continue;
+    const list = pk.members;
+    list.forEach((type, i) => {
+      const a = (i / list.length) * TAU + Math.random() * 0.5;
+      const d = list.length > 1 ? 45 + Math.random() * 70 : 0;
+      const x = pk.x + Math.cos(a) * d;
+      const y = pk.y + Math.sin(a) * d;
+      const opts = { plain: true, elite: pk.elite && i === 0 };
+      const made = type === 'weaver' ? spawnWeavers(x, y, 200) : [spawnEnemy(type, x, y, opts)];
+      for (const e of made) {
+        e.pack = pk;
+        e.hx = e.x;
+        e.hy = e.y;
+        e.gap = 200;
+      }
+    });
+  }
+  ow.spawned = true;
 }
 
 // --- Helpers ----------------------------------------------------------------------------
@@ -165,29 +313,56 @@ function zoom() {
 const toScreen = (x, y, z = zoom()) => ({ x: (x - ow.cam.x) * z + view.W / 2, y: (y - ow.cam.y) * z + view.H / 2 });
 const toWorld = (sx, sy, z = zoom()) => ({ x: (sx - view.W / 2) / z + ow.cam.x, y: (sy - view.H / 2) / z + ow.cam.y });
 
-function say(x, y, text, color = '#fff', size = 12, life = 1.1) {
-  if (ow.texts.length > 24) ow.texts.shift();
-  ow.texts.push({ x, y, text, color, size, life, max: life });
+function syncField() {
+  const z = zoom();
+  field.ow = true;
+  field.z = ZOOM; // labels are sized for the settled zoom, not the entry ease
+  field.W = ow.W;
+  field.H = ow.H;
+  field.x0 = ow.cam.x - view.W / 2 / z;
+  field.x1 = ow.cam.x + view.W / 2 / z;
+  field.y0 = ow.cam.y - view.H / 2 / z;
+  field.y1 = ow.cam.y + view.H / 2 / z;
 }
 
-function burst(x, y, color, size = 1) {
-  particle('flash', x, y, 0, 0, 0.2, 46 * size, color, 0);
-  particle('ring', x, y, 0, 0, 0.4, 20 + 24 * size, color, 0);
-  const n = Math.round((7 + 8 * size) * view.quality);
-  for (let i = 0; i < n; i++) {
-    const a = Math.random() * TAU;
-    const s = (80 + Math.random() * 260) * (0.6 + size * 0.4);
-    particle('spark', x, y, Math.cos(a) * s, Math.sin(a) * s, 0.25 + Math.random() * 0.3, 1.2 + Math.random(), i % 3 ? color : '#ffffff', 4);
-  }
-}
-
-// Credit unit for the patrol's level (economy.js unit(), without a live sector).
+// Credit unit for the zone's level (economy.js unit(), without a live sector).
 function creditUnit(level) {
   return Math.max(0.8, 0.95 * level - 0.1) * ((G.run.system && G.run.system.pay) || 1);
 }
 
-function reach() {
-  return new Set(reachableNodes(G.run.route, G.run.nodeId).map((n) => n.id));
+// Clears the fight leftovers (or the last leg's) and puts the ship's gear back around it.
+function resetField(collect) {
+  const p = G.player;
+  if (collect) for (const pk of G.pickups) if (!pk.dead) collectPickup(pk);
+  G.enemies.length = 0;
+  G.pBullets.length = 0;
+  G.eBullets.length = 0;
+  G.pickups.length = 0;
+  G.beams.length = 0;
+  G.bolts.length = 0;
+  G.particles.length = 0;
+  G.texts.length = 0;
+  G.boss = null;
+  G.pulse = 0;
+  p.vx = 0;
+  p.vy = 0;
+  p.ghosts.length = 0;
+  const m = p.mod;
+  if (m) {
+    m.mines.length = 0;
+    m.saws.length = 0;
+    m.flaks.length = 0;
+    m.wells.length = 0;
+    m.prism.length = 0;
+  }
+  for (const d of p.drones) {
+    d.x = p.x;
+    d.y = p.y;
+  }
+}
+
+function aliveIn(pk) {
+  return pk.alive > 0;
 }
 
 // --- Public -----------------------------------------------------------------------------
@@ -202,63 +377,57 @@ export const overworld = {
 
   init(h) {
     hooks = { ...hooks, ...h };
+    setOverworldAI(owAI);
   },
 
-  // Show the overworld for the run's current route: builds it for a new route, else resumes. Coming back from a node
-  // puts the ship on that node's beacon and settles the patrols back at home.
+  // Show the overworld for the run's current place: a new leg (a node was just taken, or a new system) builds a fresh
+  // zone with the ship at its bottom; otherwise (back from a level-up draft, an event, pause) it resumes as it was.
   enter(run) {
-    let fresh = false;
-    if (!run.ow || run.ow.seed !== run.route.seed) {
-      run.ow = build(run);
-      fresh = true;
-    }
+    const leg = run.nodeId || 'start';
+    const fresh = !run.ow || run.ow.leg !== leg || run.ow.seed !== run.route.seed;
+    if (fresh) run.ow = build(run);
     ow = run.ow;
-    const back = run.nodeId && ow.at !== run.nodeId;
-    if (back) {
-      ow.at = run.nodeId;
-      const q = ow.pos[run.nodeId];
-      Object.assign(ow.ship, { x: q.x, y: q.y, vx: 0, vy: 0 });
-      for (const c of ow.clusters) c.aggro = false;
-      for (const f of ow.foes) if (!f.dead) {
-        f.x = f.c.x + Math.cos(f.ph) * f.orbit;
-        f.y = f.c.y + Math.sin(f.ph) * f.orbit;
-      }
-      ow.eb.length = 0;
-    }
-    if (fresh || back) {
+    const p = G.player;
+    if (fresh) {
+      p.x = ow.start.x;
+      p.y = ow.start.y;
+      p.aim = UP;
+      resetField(true);
+      ow.cam.x = p.x;
+      ow.cam.y = p.y - 120;
       ow.ease = 0;
       ow.hintT = 0;
-      ow.cam.x = ow.ship.x;
-      ow.cam.y = ow.ship.y - 120;
     }
+    setDirector(run);
+    syncField();
+    if (!ow.spawned) spawnPacks();
+    G.scriptCtrl = ctrlFn;
     ow.busy = false;
     ow.dwell = 0;
     ow.dest = null;
     ow.levelT = 0.35;
-    ow.pb.length = 0;
-    G.particles.length = 0;
-    G.texts.length = 0;
-    const p = G.player;
-    p.x = ow.ship.x;
-    p.y = ow.ship.y;
+    ow.mouseWas = input.mouseDown;
     input.ox = 0;
     input.oy = 0;
     input.holding = false;
   },
 
-  // Leaving for a fight: the ship goes back to its spot in the fight playfield.
+  // Leaving for a fight: the ship goes back to its spot in the fight playfield, facing up, with the field cleared.
   leave() {
     const p = G.player;
+    this.exit();
     p.x = view.W / 2;
     p.y = view.H * 0.78;
-    p.vx = 0;
-    p.vy = 0;
-    if (ow) {
-      ow.map = false;
-      ow.eb.length = 0;
-      ow.pb.length = 0;
-    }
-    G.particles.length = 0;
+    p.aim = UP;
+    resetField(true);
+    if (ow) ow.map = false;
+  },
+
+  // Out of the overworld (into a fight, or the run ended): the fight systems go back to the screen playfield.
+  exit() {
+    field.ow = false;
+    if (G.scriptCtrl === ctrlFn) G.scriptCtrl = null;
+    if (G.player) G.player.aim = UP;
   },
 
   toggleMap() {
@@ -269,14 +438,19 @@ export const overworld = {
 
   // The ship's screen position (touch steering anchors on it).
   anchor() {
-    return ow ? toScreen(ow.ship.x, ow.ship.y) : { x: view.W / 2, y: view.H / 2 };
+    return ow && G.player ? toScreen(G.player.x, G.player.y) : { x: view.W / 2, y: view.H / 2 };
   },
 
-  // Debug: put the ship at world x, y or on node id.
+  // Debug: put the ship at world x, y or on exit / node id.
   warp(x, y) {
     if (!ow) return;
-    if (typeof x === 'string') ({ x, y } = ow.pos[x]);
-    Object.assign(ow.ship, { x, y, vx: 0, vy: 0 });
+    if (typeof x === 'string') {
+      const e = ow.exits.find((q) => q.id === x);
+      if (!e) return;
+      ({ x, y } = e);
+    }
+    const p = G.player;
+    Object.assign(p, { x, y, vx: 0, vy: 0 });
     ow.cam.x = x;
     ow.cam.y = y;
   },
@@ -299,8 +473,22 @@ export const overworld = {
     ow.mapA = damp(ow.mapA, ow.map ? 1 : 0, 14, raw);
     if (input.consume('map')) this.toggleMap();
 
+    if (!p.dead) {
+      ow.legT += dt;
+      control(p, dt);
+    }
+    G.scriptCtrl = ctrlFn;
+    let left = dt;
+    while (left > 0) {
+      const s = Math.min(left, 1 / 60);
+      camera(s);
+      syncField();
+      step(s, true);
+      solids(p);
+      left -= s;
+    }
+    reveal(p);
     if (p.dead) {
-      updateParticles(dt);
       G.deathT -= raw;
       if (G.deathT <= 0 && !ow.busy) {
         ow.busy = true;
@@ -308,22 +496,9 @@ export const overworld = {
       }
       return;
     }
-    p.iframes = Math.max(0, p.iframes - dt);
-    p.hurtT = Math.max(0, (p.hurtT || 0) - dt);
-
-    steer(p, dt);
-    camera(dt);
-    fire(p, dt);
-    updateFoes(p, dt);
-    updateShots(p, dt);
-    updateGems(p, dt);
-    updateParticles(dt);
-    for (const t of ow.texts) {
-      t.life -= raw;
-      t.y -= 34 * raw;
-    }
-    ow.texts = ow.texts.filter((t) => t.life > 0);
-    if (p.dead || ow.busy) return;
+    packs(dt);
+    ambient(dt);
+    if (ow.busy) return;
     interact(p, dt);
     if (ow.busy) return;
     // Level-ups found out here open their draft straight away (back to the overworld after).
@@ -342,10 +517,12 @@ export const overworld = {
   },
 };
 
+const ctrlFn = () => ctrl;
+
 // --- Update -----------------------------------------------------------------------------
 
-function steer(p, dt) {
-  const s = ow.ship;
+// Reads the input into `ctrl` (player.js control() returns it through G.scriptCtrl) and turns the ship's facing.
+function control(p, dt) {
   readDirection();
   let dx = 0;
   let dy = 0;
@@ -357,7 +534,7 @@ function steer(p, dt) {
     ow.dest = null;
   } else if (input.device === 'touch') {
     if (input.touch) {
-      const a = toScreen(s.x, s.y);
+      const a = toScreen(p.x, p.y);
       const vx = input.tx - a.x;
       const vy = input.ty - a.y;
       const d = Math.hypot(vx, vy);
@@ -368,283 +545,233 @@ function steer(p, dt) {
       }
     }
   } else if (input.device === 'mouse') {
-    // Diablo style: click or hold the left button to fly to the cursor.
+    // Diablo style: click or hold the left button to fly to the cursor. The click itself is not a dash.
     if (input.mouseDown) ow.dest = toWorld(input.tx, input.ty);
+    if (input.mouseDown && !ow.mouseWas) input.consume('dash');
     if (ow.dest) {
-      const vx = ow.dest.x - s.x;
-      const vy = ow.dest.y - s.y;
+      const vx = ow.dest.x - p.x;
+      const vy = ow.dest.y - p.y;
       const d = Math.hypot(vx, vy);
-      if (d < 8) ow.dest = null;
+      if (d < 10) ow.dest = null;
       else {
         const m = Math.min(1, d / 70);
         dx = (vx / d) * m;
         dy = (vy / d) * m;
       }
     }
-    input.consume('dash'); // the click itself
-    input.consume('od');
   }
-  // Boost (the dash input): a short burst of speed with the dash's invulnerability.
-  s.boostCd -= dt;
-  s.boostT -= dt;
-  // Space is both dash and confirm: inside a beacon it jumps in (interact), anywhere else it boosts.
-  if (input.consume('dash') && s.boostCd <= 0 && !(conf && ow.dwellId)) {
-    s.boostT = 0.32;
-    s.boostCd = 0.9;
-    p.iframes = Math.max(p.iframes, 0.32);
-    sfx.dash();
-    if (!dx && !dy) {
-      dx = Math.sin(s.a);
-      dy = -Math.cos(s.a);
-    }
-  }
-  input.consume('od');
-  const max = SPEED * (p.st.speed || 1) * (s.boostT > 0 ? 2.4 : 1);
-  s.vx = damp(s.vx, dx * max, s.boostT > 0 ? 14 : 6, dt);
-  s.vy = damp(s.vy, dy * max, s.boostT > 0 ? 14 : 6, dt);
-  s.x = clamp(s.x + s.vx * dt, 40, ow.W - 40);
-  s.y = clamp(s.y + s.vy * dt, 40, ow.H - 40);
-  const sp = Math.hypot(s.vx, s.vy);
-  if (sp > 25) s.a = turnToward(s.a, Math.atan2(s.vx, -s.vy), 9 * dt);
-  p.x = s.x;
-  p.y = s.y;
-  // Engine trail.
-  if ((s.trailT -= dt) <= 0 && sp > 40) {
-    s.trailT = s.boostT > 0 ? 0.012 : 0.03;
-    const bx = s.x - Math.sin(s.a) * 14;
-    const by = s.y + Math.cos(s.a) * 14;
-    particle('dot', bx, by, -s.vx * 0.2 + (Math.random() - 0.5) * 30, -s.vy * 0.2 + (Math.random() - 0.5) * 30, 0.35, s.boostT > 0 ? 9 : 6, p.color, 3);
-  }
+  ow.mouseWas = input.mouseDown;
+  // Space / A is both dash and confirm: inside an exit it takes the exit instead of dashing.
+  const dash = input.consume('dash');
+  ctrl.mode = 'dir';
+  ctrl.dx = dx;
+  ctrl.dy = dy;
+  ctrl.dash = dash && !(conf && ow.dwellId);
+  ctrl.od = input.consume('od');
+  ctrl.focus = false; // Shift strafes out here instead of slowing the ship
+
+  // Facing: the right stick aims; Shift holds the facing (with a mouse it aims at the cursor); else it follows the flight.
+  const hold = input.down('focus');
+  ow.strafe = hold || !!(input.aimX || input.aimY);
+  let want = null;
+  if (input.aimX || input.aimY) want = Math.atan2(input.aimY, input.aimX);
+  else if (hold && input.device === 'mouse') {
+    const c = toWorld(input.tx, input.ty);
+    if (dist2(c.x, c.y, p.x, p.y) > 20 * 20) want = Math.atan2(c.y - p.y, c.x - p.x);
+  } else if (!hold && Math.hypot(dx, dy) > 0.15) want = Math.atan2(dy, dx);
+  if (want !== null) p.aim = turnToward(p.aim, want, (ow.strafe ? 16 : 9) * dt);
 }
 
 function camera(dt) {
-  const s = ow.ship;
+  const p = G.player;
   const z = zoom();
   const hw = view.W / 2 / z;
   const hh = view.H / 2 / z;
-  // Lead a little ahead of the ship, a touch more upward (the route climbs).
-  let tx = s.x + s.vx * 0.32;
-  let ty = s.y + s.vy * 0.32 - 70;
-  tx = ow.W > hw * 2 ? clamp(tx, hw - 60, ow.W - hw + 60) : ow.W / 2;
-  ty = clamp(ty, hh - 60, ow.H - hh + 60);
+  // Lead a little ahead of the ship and along its facing.
+  let tx = p.x + p.vx * 0.25 + Math.cos(p.aim) * 50;
+  let ty = p.y + p.vy * 0.25 + Math.sin(p.aim) * 50;
+  tx = clamp(tx, hw - 80, ow.W - hw + 80);
+  ty = clamp(ty, hh - 80, ow.H - hh + 80);
   ow.cam.x = damp(ow.cam.x, tx, 4.5, dt);
   ow.cam.y = damp(ow.cam.y, ty, 4.5, dt);
 }
 
-function nearestFoe(x, y, r) {
-  let best = null;
-  let bd = r * r;
-  for (const f of ow.foes) {
-    if (f.dead) continue;
-    const d = dist2(x, y, f.x, f.y);
-    if (d < bd) {
-      bd = d;
-      best = f;
-    }
-  }
-  return best;
+// Rocks near the camera (all collision work only looks at these).
+let near = [];
+function nearRocks(m) {
+  near = ow.rocks.filter((r) => inField(r.x, r.y, r.r + m));
+  return near;
 }
 
-// Auto-fire at the nearest patrol in range: the main gun's damage per second, in up to three bolts.
-function fire(p, dt) {
-  const s = ow.ship;
-  if ((s.fireT -= dt) > 0) return;
-  const f = nearestFoe(s.x, s.y, 340);
-  if (!f) return;
-  const w = WEAPONS[p.ship.weapon] || WEAPONS.pulse;
-  const streams = weaponStreams(p.ship.weapon, Math.min(8, p.st.mainLv || 1)).length || 1;
-  const interval = Math.max(0.09, w.interval / (p.st.rate || 1));
-  s.fireT = interval;
-  const total = w.dmg * streams * (p.st.dmg || 1);
-  const n = Math.min(3, streams);
-  const a0 = Math.atan2(f.y - s.y, f.x - s.x);
-  for (let i = 0; i < n; i++) {
-    const a = a0 + (i - (n - 1) / 2) * 0.07;
-    ow.pb.push({ x: s.x, y: s.y, vx: Math.cos(a) * 820, vy: Math.sin(a) * 820, a, life: 0.5, dmg: total / n, crit: Math.random() < (p.st.crit || 0) });
-  }
-  if (Math.random() < 0.5) sfx.shoot();
-}
-
-function updateFoes(p, dt) {
-  const s = ow.ship;
-  for (const c of ow.clusters) {
-    if (c.cleared) continue;
-    const d2 = dist2(s.x, s.y, c.x, c.y);
-    if (!c.aggro && d2 < AGGRO * AGGRO) {
-      c.aggro = true;
-      say(c.x, c.y - 90, 'PATROL ENGAGED', '#ff4d6d', 12, 1.3);
-      sfx.select();
-    } else if (c.aggro && d2 > LEASH * LEASH) c.aggro = false;
-  }
-  for (const f of ow.foes) {
-    if (f.dead) continue;
-    const def = FOES[f.type];
-    f.flash = Math.max(0, f.flash - dt);
-    let tx;
-    let ty;
-    let sp = def.speed;
-    const dx = s.x - f.x;
-    const dy = s.y - f.y;
-    const d = Math.hypot(dx, dy) || 1;
-    if (!f.c.aggro) {
-      // Idle: circle the patrol's centre.
-      const a = ow.t * 0.45 + f.ph;
-      tx = f.c.x + Math.cos(a) * f.orbit;
-      ty = f.c.y + Math.sin(a) * f.orbit;
-      sp = 70;
-      f.a = turnToward(f.a, Math.atan2(ty - f.y, tx - f.x), 3 * dt);
-    } else {
-      f.a = turnToward(f.a, Math.atan2(dy, dx), 5 * dt);
-      if (f.type === 'sniper') {
-        const k = d > def.range + 30 ? 1 : d < def.range - 40 ? -1 : 0;
-        tx = f.x + (dx / d) * 60 * k + (-dy / d) * 30;
-        ty = f.y + (dy / d) * 60 * k + (dx / d) * 30;
-      } else {
-        tx = s.x;
-        ty = s.y;
-      }
-      if (def.fire && (f.fireT -= dt) <= 0) {
-        f.fireT = def.fire * (0.85 + Math.random() * 0.3);
-        shoot(f, dx / d, dy / d);
-      } else if (def.fire && f.fireT < 0.35) f.flash = Math.sin(f.fireT * 50) > 0 ? 0.05 : 0;
-    }
-    const mx = tx - f.x;
-    const my = ty - f.y;
-    const md = Math.hypot(mx, my) || 1;
-    const v = Math.min(sp, md * 3);
-    f.vx = damp(f.vx, (mx / md) * v, 4, dt);
-    f.vy = damp(f.vy, (my / md) * v, 4, dt);
-    f.x += f.vx * dt;
-    f.y += f.vy * dt;
-    // Darts ram.
-    if (f.c.aggro && f.type === 'dart' && d < f.r + 9) {
-      hurt(p);
-      kill(f, false);
+function pushOut(o, r0) {
+  for (const k of near) {
+    const R = k.r * 0.92 + r0;
+    const dx = o.x - k.x;
+    const dy = o.y - k.y;
+    const d2 = dx * dx + dy * dy;
+    if (d2 >= R * R || d2 === 0) continue;
+    const d = Math.sqrt(d2);
+    const nx = dx / d;
+    const ny = dy / d;
+    o.x = k.x + nx * R;
+    o.y = k.y + ny * R;
+    const vn = (o.vx || 0) * nx + (o.vy || 0) * ny;
+    if (vn < 0 && o.vx !== undefined) {
+      o.vx -= vn * nx;
+      o.vy -= vn * ny;
     }
   }
 }
 
-function shoot(f, ux, uy) {
-  if (f.type === 'spinner') {
-    const n = 8;
-    const off = Math.random() * TAU;
-    for (let i = 0; i < n; i++) {
-      const a = off + (i / n) * TAU;
-      ow.eb.push({ x: f.x, y: f.y, vx: Math.cos(a) * 125, vy: Math.sin(a) * 125, life: 3.4, r: 5.2, spr: 'eb_orb' });
-    }
-  } else ow.eb.push({ x: f.x, y: f.y, vx: ux * 210, vy: uy * 210, life: 3, r: 5.2, spr: 'eb_small' });
-}
+const inRock = (x, y, m = 0) => near.some((k) => dist2(x, y, k.x, k.y) < (k.r * 0.92 + m) * (k.r * 0.92 + m));
 
-function hurt(p) {
-  const s = ow.ship;
-  p.x = s.x;
-  p.y = s.y;
-  hurtPlayer(p);
-  ow.eb = ow.eb.filter((b) => dist2(b.x, b.y, s.x, s.y) > 150 * 150);
-}
-
-function kill(f, reward = true) {
-  f.dead = true;
-  burst(f.x, f.y, '#ff4d6d', f.r > 18 ? 1.3 : 0.8);
-  sfx.explode(f.r > 18 ? 1 : 0.6);
-  G.kills++;
-  if (reward) {
-    const xp = FOES[f.type].xp * (1 + 0.12 * f.c.level);
-    for (let i = 0; i < 2; i++) ow.gems.push({ x: f.x, y: f.y, vx: (Math.random() - 0.5) * 160, vy: (Math.random() - 0.5) * 160, val: xp / 2, kind: 'xp', t: 0 });
+// Debris against the ship, enemies, shots and pickups; enemies also keep a little space between them.
+function solids(p) {
+  nearRocks(300);
+  if (!p.dead) pushOut(p, 10);
+  const awake = [];
+  for (const e of G.enemies) {
+    if (e.dead || e.boss || !inField(e.x, e.y, 300)) continue;
+    if (!e.parts) pushOut(e, e.r * 0.8);
+    if (e.ow && e.state !== 'dash') awake.push(e);
   }
-  const c = f.c;
-  if (ow.foes.every((o) => o.c !== c || o.dead)) {
-    c.cleared = true;
-    c.aggro = false;
-    const n = Math.round(creditUnit(c.level) * (3 + c.size * 0.6));
-    for (let i = 0; i < 5; i++) ow.gems.push({ x: f.x, y: f.y, vx: (Math.random() - 0.5) * 220, vy: (Math.random() - 0.5) * 220, val: n / 5, kind: 'cr', t: 0 });
-    say(c.x, c.y - 60, 'PATROL CLEARED', '#ffd24a', 13, 1.5);
+  for (let i = 0; i < awake.length; i++) {
+    const a = awake[i];
+    for (let j = i + 1; j < awake.length; j++) {
+      const b = awake[j];
+      const R = (a.r + b.r) * 0.8;
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const d2 = dx * dx + dy * dy;
+      if (d2 >= R * R || d2 === 0) continue;
+      const d = Math.sqrt(d2);
+      const push = (R - d) * 0.5;
+      a.x -= (dx / d) * push;
+      a.y -= (dy / d) * push;
+      b.x += (dx / d) * push;
+      b.y += (dy / d) * push;
+    }
+  }
+  if (!near.length) return;
+  for (const b of G.pBullets) {
+    if (!b.dead && inRock(b.x, b.y, b.r)) {
+      b.dead = true;
+      sparks(b.x, b.y, '#ffffff', 2, 120);
+    }
+  }
+  for (const b of G.eBullets) if (!b.dead && b.delay <= 0 && inRock(b.x, b.y, b.r)) b.dead = true;
+  for (const pk of G.pickups) if (!pk.dead) pushOut(pk, 6);
+}
+
+// Map fog: cells around the ship are uncovered.
+function reveal(p) {
+  const r = Math.ceil(FOG_R / FOG);
+  const cx = Math.floor(p.x / FOG);
+  const cy = Math.floor(p.y / FOG);
+  for (let y = Math.max(0, cy - r); y <= Math.min(ow.fr - 1, cy + r); y++) {
+    for (let x = Math.max(0, cx - r); x <= Math.min(ow.fc - 1, cx + r); x++) {
+      if (dist2((x + 0.5) * FOG, (y + 0.5) * FOG, p.x, p.y) < FOG_R * FOG_R) ow.fog[y * ow.fc + x] = 1;
+    }
+  }
+}
+const seenAt = (x, y) => !!ow.fog[clamp(Math.floor(y / FOG), 0, ow.fr - 1) * ow.fc + clamp(Math.floor(x / FOG), 0, ow.fc - 1)];
+
+// Packs: wake / leash, and a clear bonus when the last member falls.
+function packs(dt) {
+  const p = G.player;
+  for (const pk of ow.packs) {
+    if (pk.cleared) continue;
+    const d2 = dist2(p.x, p.y, pk.lx, pk.ly);
+    if (!pk.awake && d2 < AGGRO * AGGRO) wake(pk);
+    else if (pk.awake && d2 > LEASH * LEASH) pk.awake = false;
+  }
+  if ((ow.packT -= dt) > 0) return;
+  ow.packT = 0.2;
+  for (const pk of ow.packs) {
+    pk.alive = 0;
+    pk.sx = 0;
+    pk.sy = 0;
+  }
+  for (const e of G.enemies) {
+    const pk = e.pack;
+    if (!pk || e.dead) continue;
+    pk.alive++;
+    pk.sx += e.x;
+    pk.sy += e.y;
+  }
+  for (const pk of ow.packs) {
+    if (pk.cleared) continue;
+    if (aliveIn(pk)) {
+      pk.lx = pk.sx / pk.alive;
+      pk.ly = pk.sy / pk.alive;
+      continue;
+    }
+    pk.cleared = true;
+    pk.awake = false;
+    const n = Math.round(creditUnit(ow.level) * (2 + pk.members.length * 0.5) * (pk.elite ? 3 : 1));
+    for (let i = 0; i < 4; i++) dropCredit(pk.lx, pk.ly, n / 4);
+    floatText(pk.lx, pk.ly - 40, pk.elite ? 'GUARDS DOWN' : 'PACK CLEARED', pk.elite ? '#ff3df2' : '#ffd24a', 12, 1.4);
     sfx.levelUp();
   }
 }
 
-function updateShots(p, dt) {
-  const s = ow.ship;
-  for (const b of ow.pb) {
-    b.life -= dt;
-    b.x += b.vx * dt;
-    b.y += b.vy * dt;
-    for (const f of ow.foes) {
-      if (f.dead || dist2(b.x, b.y, f.x, f.y) > (f.r + 4) ** 2) continue;
-      const dmg = b.dmg * (b.crit ? p.st.critMul || 2.5 : 1);
-      f.hp -= dmg;
-      f.flash = 0.06;
-      f.c.aggro = true;
-      b.life = 0;
-      sparks(b.x, b.y, '#ffffff', 2, 160);
-      if (b.crit) say(f.x, f.y - 16, `${Math.round(dmg)}!`, '#ffe14d', 11, 0.5);
-      if (f.hp <= 0) kill(f);
-      break;
-    }
-  }
-  ow.pb = ow.pb.filter((b) => b.life > 0);
-  const hr = (p.r || 3.5) + 2;
-  for (const b of ow.eb) {
-    b.life -= dt;
-    b.x += b.vx * dt;
-    b.y += b.vy * dt;
-    if (b.life > 0 && dist2(b.x, b.y, s.x, s.y) < (hr + b.r * 0.75) ** 2) {
-      b.life = 0;
-      hurt(p);
-    }
-  }
-  ow.eb = ow.eb.filter((b) => b.life > 0);
+function wake(pk) {
+  if (pk.awake || pk.cleared) return;
+  pk.awake = true;
+  floatText(pk.lx, pk.ly - 60, pk.elite ? 'ELITE GUARDS' : 'HOSTILES', '#ff4d6d', 11, 1.1);
+  sfx.select();
 }
 
-function updateGems(p, dt) {
-  const s = ow.ship;
-  const mag = (p.st.magnet || 80) * 1.6;
-  let got = false;
-  for (const g of ow.gems) {
-    g.t += dt;
-    const dx = s.x - g.x;
-    const dy = s.y - g.y;
-    const d = Math.hypot(dx, dy) || 1;
-    if (d < mag && g.t > 0.25) {
-      const v = 260 + (1 - d / mag) * 500;
-      g.vx = damp(g.vx, (dx / d) * v, 8, dt);
-      g.vy = damp(g.vy, (dy / d) * v, 8, dt);
-    } else {
-      g.vx *= 1 - 3 * dt;
-      g.vy *= 1 - 3 * dt;
+// Stragglers: small groups roam in from off screen, more often the longer the leg takes.
+function ambient(dt) {
+  if ((ow.ambT -= dt) > 0) return;
+  ow.ambT = Math.max(3.5, 9 - ow.legT / 25) * (0.8 + Math.random() * 0.4);
+  let n = 0;
+  for (const e of G.enemies) if (!e.dead && e.ow && !e.pack) n++;
+  if (n > 10 + ow.level) return;
+  const p = G.player;
+  const roster = foesAt(ow.level);
+  const type = roster.includes('swarm') && Math.random() < 0.6 ? 'swarm' : 'dart';
+  const count = type === 'swarm' ? 5 + Math.floor(ow.level / 2) : 3 + Math.floor(ow.level / 4);
+  const R = Math.hypot(field.x1 - field.x0, field.y1 - field.y0) / 2 + 90;
+  for (let k = 0; k < 10; k++) {
+    const a = Math.random() * TAU;
+    const x = p.x + Math.cos(a) * R;
+    const y = p.y + Math.sin(a) * R;
+    if (x < 60 || x > ow.W - 60 || y < 60 || y > ow.H - 60) continue;
+    if (ow.rocks.some((r) => dist2(x, y, r.x, r.y) < (r.r + 60) * (r.r + 60))) continue;
+    for (let i = 0; i < count; i++) {
+      const e = spawnEnemy(type, x + rand(-50, 50), y + rand(-50, 50), { plain: true });
+      e.pack = null;
     }
-    g.x += g.vx * dt;
-    g.y += g.vy * dt;
-    if (d < 16 && g.t > 0.25) {
-      g.done = true;
-      if (g.kind === 'xp') gainXp(p, g.val);
-      else {
-        const n = gainCredits(g.val);
-        if (n) say(s.x, s.y - 30, `+${n}`, '#ffd24a', 11, 0.8);
-      }
-      got = true;
-    }
+    return;
   }
-  if (got) sfx.pickup();
-  ow.gems = ow.gems.filter((g) => !g.done);
 }
 
-// Beacons and sites under the ship.
+// Exits and sites: found when close, taken / collected when the ship is on them.
 function interact(p, dt) {
-  const s = ow.ship;
-  const can = reach();
   let target = null;
-  for (const n of G.run.route.nodes) {
-    if (!can.has(n.id)) continue;
-    const q = ow.pos[n.id];
-    if (dist2(s.x, s.y, q.x, q.y) < ENGAGE_R * ENGAGE_R) {
-      target = { id: n.id, node: n };
-      break;
+  let card = null;
+  let cd = 700 * 700;
+  for (const e of ow.exits) {
+    const d2 = dist2(p.x, p.y, e.x, e.y);
+    if (!e.seen && (d2 < SEE * SEE || inField(e.x, e.y, -30))) {
+      e.seen = true;
+      const info = NODE_TYPES[e.node.type];
+      floatText(e.x, e.y - 70, `EXIT FOUND · ${info.name}`, info.color, 12, 1.8);
+      sfx.select();
     }
+    if (e.seen && d2 < cd) {
+      cd = d2;
+      card = e;
+    }
+    if (d2 < ENGAGE_R * ENGAGE_R) target = { id: e.id, node: e.node };
   }
+  ow.card = card;
   for (const site of ow.sites) {
     if (site.done) continue;
-    const d2 = dist2(s.x, s.y, site.x, site.y);
+    const d2 = dist2(p.x, p.y, site.x, site.y);
+    if (!site.seen && (d2 < SEE * SEE || inField(site.x, site.y, -30))) site.seen = true;
     const def = SITES[site.kind];
     if (def.engage) {
       if (!target && d2 < ENGAGE_R * ENGAGE_R) target = { id: site.id, site };
@@ -668,38 +795,339 @@ function interact(p, dt) {
 }
 
 function collect(site, p) {
-  site.done = true;
   const def = SITES[site.kind];
-  burst(site.x, site.y, def.color, 1.1);
-  const lvl = nodeLevel(G.run.system, Math.max(0, G.run.row));
+  if (site.kind === 'cache') {
+    const g = ow.packs[site.guard];
+    if (g && !g.cleared) {
+      if ((site.warnT || 0) <= ow.t) {
+        site.warnT = ow.t + 2;
+        floatText(site.x, site.y - 34, 'CLEAR THE GUARDS FIRST', def.color, 12, 1.2);
+        if (g) wake(g);
+      }
+      return;
+    }
+  }
+  site.done = true;
+  explosion(site.x, site.y, def.color, 1.1);
+  const lvl = ow.level;
   if (site.kind === 'wreck') {
     const n = gainCredits(Math.round(creditUnit(lvl) * 8));
-    say(site.x, site.y - 30, `SALVAGE +${n}`, def.color, 13, 1.4);
+    floatText(site.x, site.y - 30, `SALVAGE +${n}`, def.color, 13, 1.4);
     sfx.coin();
   } else if (site.kind === 'data') {
     gainXp(p, p.xpNeed * 0.3);
-    say(site.x, site.y - 30, 'DATA DECRYPTED +XP', def.color, 13, 1.4);
+    floatText(site.x, site.y - 30, 'DATA DECRYPTED +XP', def.color, 13, 1.4);
     sfx.pickup();
+  } else if (site.kind === 'cache') {
+    const n = gainCredits(Math.round(creditUnit(lvl) * 18));
+    gainXp(p, p.xpNeed * 0.4);
+    floatText(site.x, site.y - 30, `CACHE +${n} · +XP`, def.color, 13, 1.6);
+    sfx.coin();
   } else if (site.kind === 'repair') {
     if (p.hp < p.maxHp) {
       p.hp++;
-      say(site.x, site.y - 30, '+1 HULL', def.color, 13, 1.4);
+      floatText(site.x, site.y - 30, '+1 HULL', def.color, 13, 1.4);
     } else {
       gainXp(p, p.xpNeed * 0.2);
-      say(site.x, site.y - 30, 'HULL FULL · +XP', def.color, 13, 1.4);
+      floatText(site.x, site.y - 30, 'HULL FULL · +XP', def.color, 13, 1.4);
     }
     sfx.heal();
   }
 }
 
-// --- Draw: world ------------------------------------------------------------------------
+// --- Enemy AI (overworld) ---------------------------------------------------------------
+// The levels' enemy types, re-cut for open space: they sleep near their pack's home until it wakes, then chase,
+// keep range, telegraph and shoot at the ship. Firing needs the enemy on camera (e.entered).
 
-function nodeState(n, can, visited) {
-  if (n.id === G.run.nodeId) return 'cur';
-  if (can.has(n.id)) return 'reach';
-  if (visited.has(n.id)) return 'done';
-  return 'lock';
+function seek(e, tx, ty, speed, dt, k = 4) {
+  const mx = tx - e.x;
+  const my = ty - e.y;
+  const md = Math.hypot(mx, my) || 1;
+  const v = Math.min(speed, md * 3);
+  e.vx = damp(e.vx, (mx / md) * v, k, dt);
+  e.vy = damp(e.vy, (my / md) * v, k, dt);
+  e.x += e.vx * dt;
+  e.y += e.vy * dt;
 }
+
+// Hold a distance band from the ship, circling it a little.
+function hover(e, d, dx, dy, lo, hi, speed, dt) {
+  const k = d > hi ? 1 : d < lo ? -1 : 0;
+  const s = e.ph > Math.PI ? 1 : -1;
+  seek(e, e.x + (dx / d) * 80 * k - (dy / d) * 40 * s, e.y + (dy / d) * 80 * k + (dx / d) * 40 * s, speed, dt, 3);
+}
+
+const faceMove = (e) => (e.rot = Math.atan2(e.vy, e.vx) - Math.PI / 2);
+
+function owAI(e, dt) {
+  const p = G.player;
+  const pk = e.pack;
+  const dx = p.x - e.x;
+  const dy = p.y - e.y;
+  const d2 = dx * dx + dy * dy;
+  const awake = pk ? pk.awake : true;
+  if (!pk && d2 > 1800 * 1800) {
+    e.dead = true; // a straggler left behind
+    return;
+  }
+  if (!awake && d2 > WAKE * WAKE) {
+    e.entered = false;
+    return;
+  }
+  e.entered = inField(e.x, e.y, 40);
+  if (pk && !awake && e.flash > 0) wake(pk); // shot while asleep
+  const d = Math.sqrt(d2) || 1;
+  const fr = G.director.diff.fireRate;
+  const fire = (cd) => {
+    e.fireT -= dt * fr;
+    if (e.fireT > 0 || !e.entered) return false;
+    e.fireT = cd;
+    return true;
+  };
+  e.x = clamp(e.x, 30, ow.W - 30);
+  e.y = clamp(e.y, 30, ow.H - 30);
+
+  if (!awake) {
+    // Asleep: drift around home.
+    if (e.type === 'blinker') e.alpha = 1;
+    if (e.type === 'mine' || e.type === 'weaver') {
+      e.rot += dt * 1.2;
+      if (e.type === 'weaver') weaverBeam(e);
+      return;
+    }
+    const a = e.t * 0.4 + e.ph;
+    seek(e, e.hx + Math.cos(a) * 30, e.hy + Math.sin(a) * 30, 40, dt, 2);
+    if (e.type === 'snake') snakeBody(e);
+    else if (e.type === 'dart' || e.type === 'swarm' || e.type === 'dasher') faceMove(e);
+    else e.rot += dt;
+    if (e.type === 'shielder' && (e.linkT = (e.linkT || 0) - dt) <= 0) {
+      e.linkT = 0.35;
+      relink(e);
+    }
+    return;
+  }
+
+  switch (e.type) {
+    case 'dart':
+      seek(e, p.x, p.y, 175, dt);
+      faceMove(e);
+      if (d < 460 && fire(2.6)) shoot(e.x, e.y, aimAt(e.x, e.y), 175, 'small');
+      break;
+    case 'swarm':
+      seek(e, p.x + Math.sin(e.t * 3 + e.ph) * 40, p.y + Math.cos(e.t * 3 + e.ph) * 40, 215, dt, 3);
+      faceMove(e);
+      break;
+    case 'splitter':
+      seek(e, p.x, p.y, 105, dt);
+      e.rot += dt * 2;
+      break;
+    case 'dasher':
+      if (e.state === 'tele') {
+        e.timer -= dt;
+        if (e.timer > 0.2) e.aim = Math.atan2(dy, dx);
+        e.rot = e.aim - Math.PI / 2;
+        e.vx *= 1 - 6 * dt;
+        e.vy *= 1 - 6 * dt;
+        if (e.timer <= 0) {
+          e.state = 'dash';
+          e.timer = 0.5;
+          e.vx = Math.cos(e.aim) * 640;
+          e.vy = Math.sin(e.aim) * 640;
+        }
+      } else if (e.state === 'dash') {
+        e.x += e.vx * dt;
+        e.y += e.vy * dt;
+        if (G.particles.length < 500 && Math.random() < 0.6) sparks(e.x, e.y, e.color, 1, 60);
+        if ((e.timer -= dt) <= 0) {
+          e.state = 'move';
+          e.cd = 1.1;
+          e.vx *= 0.2;
+          e.vy *= 0.2;
+        }
+      } else {
+        e.cd = (e.cd || 0) - dt;
+        hover(e, d, dx, dy, 200, 280, 160, dt);
+        e.rot = Math.atan2(dy, dx) - Math.PI / 2;
+        if (e.cd <= 0 && d < 330 && e.entered) {
+          e.state = 'tele';
+          e.timer = 0.75;
+          e.aim = Math.atan2(dy, dx);
+        }
+      }
+      break;
+    case 'sniper':
+      if (e.state === 'aim') {
+        e.timer -= dt;
+        e.vx *= 1 - 5 * dt;
+        e.vy *= 1 - 5 * dt;
+        e.x += e.vx * dt;
+        e.y += e.vy * dt;
+        if (e.timer > 0.28) e.aim = Math.atan2(dy, dx);
+        if (e.timer <= 0) {
+          shoot(e.x, e.y, e.aim, 300, 'needle', { acc: 500, maxSpeed: 620 });
+          if (e.elite) fan(e.x, e.y, e.aim, 3, 0.35, 280, 'needle', { acc: 400, maxSpeed: 560 });
+          sparks(e.x, e.y, e.color, 8, 200, e.aim, 0.7);
+          e.state = 'move';
+          e.fireT = 1.5;
+        }
+      } else {
+        hover(e, d, dx, dy, 300, 400, 125, dt);
+        if (fire(1.5)) {
+          e.state = 'aim';
+          e.timer = 1.15 / Math.sqrt(fr);
+          e.aim = Math.atan2(dy, dx);
+          e.fireT = 0;
+        }
+      }
+      e.rot += dt;
+      break;
+    case 'spinner':
+      hover(e, d, dx, dy, 200, 280, 60, dt);
+      e.rot += dt * 1.6;
+      if (fire(2.3)) {
+        ring(e.x, e.y, 8 + Math.min(6, Math.floor(ow.level / 2)) + (e.elite ? 4 : 0), 125, 'orb', e.t * 0.7);
+        sparks(e.x, e.y, e.color, 6, 160);
+      }
+      break;
+    case 'tank':
+      hover(e, d, dx, dy, 240, 320, 45, dt);
+      e.rot += dt * 0.4;
+      if (e.entered) {
+        e.fireT -= dt * fr;
+        if (e.fireT <= 0) {
+          e.fireT = 0.11;
+          e.burst = (e.burst || 0) + 1;
+          const a = e.t * 2.2;
+          const arms = e.elite ? 4 : 3;
+          for (let i = 0; i < arms; i++) shoot(e.x, e.y, a + (i / arms) * TAU, 120, 'orb');
+          if (e.burst >= 18) {
+            e.burst = 0;
+            e.fireT = 1.8;
+            fan(e.x, e.y, aimAt(e.x, e.y), 5, 0.7, 150, 'big');
+          }
+        }
+      }
+      break;
+    case 'carrier':
+      hover(e, d, dx, dy, 280, 380, 40, dt);
+      e.rot = Math.sin(e.t * 0.6) * 0.15;
+      if (e.entered) {
+        e.fireT -= dt * Math.sqrt(fr);
+        if (e.fireT < 0.5) e.flash = Math.sin(e.t * 45) > 0 ? 0.05 : 0; // bay-open warning
+        if (e.fireT <= 0) {
+          e.fireT = 3.8;
+          for (let i = -1; i <= 1; i++) {
+            const pod = spawnEnemy('swarm', e.x + i * 12, e.y + 18, { plain: true, vx: i * 120 + dx / d * 160, vy: dy / d * 160 });
+            pod.pack = null;
+          }
+          sparks(e.x, e.y, e.color, 10, 190);
+          sfx.zap();
+        }
+      }
+      break;
+    case 'shielder':
+      // Stays with its pack, a little behind it, and tethers shields to the nearest members.
+      seek(e, (pk ? pk.lx : e.x) - (dx / d) * 90, (pk ? pk.ly : e.y) - (dy / d) * 90, 90, dt, 2);
+      e.rot += dt * 1.1;
+      if ((e.linkT = (e.linkT || 0) - dt) <= 0) {
+        e.linkT = 0.35;
+        relink(e);
+      }
+      if (fire(3)) fan(e.x, e.y, aimAt(e.x, e.y), 3, 0.5, 125, 'small');
+      break;
+    case 'weaver': {
+      // The pair sweeps at the ship side by side, the tripwire strung between them.
+      const o = e.partner && !e.partner.dead ? e.partner : null;
+      const mx = o ? (e.x + o.x) / 2 : e.x;
+      const my = o ? (e.y + o.y) / 2 : e.y;
+      const ux = p.x - mx;
+      const uy = p.y - my;
+      const ud = Math.hypot(ux, uy) || 1;
+      const side = e.lead ? 1 : -1;
+      const gap = o ? e.gap / 2 : 0;
+      seek(e, mx + (ux / ud) * 60 - (uy / ud) * gap * side, my + (uy / ud) * 60 + (ux / ud) * gap * side, 75, dt, 2);
+      e.rot += dt * 2.4;
+      weaverBeam(e);
+      break;
+    }
+    case 'blinker':
+      blinker(e, p, dt);
+      break;
+    case 'snake':
+      seek(e, p.x + Math.sin(e.t * 1.5 + e.ph) * 90, p.y + Math.cos(e.t * 1.5 + e.ph) * 90, 95, dt, 2);
+      snakeBody(e);
+      if (fire(1.9)) fan(e.x, e.y, aimAt(e.x, e.y), 3, 0.5, 120, 'wobble', { wob: 22, wobF: 5 });
+      break;
+    case 'mine':
+      e.rot += dt * 2;
+      if (e.state === 'arm') {
+        e.timer -= dt;
+        e.flash = Math.sin(e.timer * 40) > 0 ? 0.05 : 0;
+        if (e.timer <= 0) {
+          ring(e.x, e.y, 10 + (e.elite ? 6 : 0), 140, 'small', Math.random() * TAU);
+          explosion(e.x, e.y, e.color, 0.8);
+          e.dead = true;
+        }
+      } else if (d < 130) {
+        e.state = 'arm';
+        e.timer = 0.75;
+      }
+      break;
+    default:
+      seek(e, p.x, p.y, 120, dt);
+  }
+}
+
+// Blinker: fade in, telegraph, ring burst, fade out and reappear near the ship; repeats while its pack is awake.
+function blinker(e, p, dt) {
+  e.rot += dt * 1.6;
+  if (e.state === 'idle') {
+    e.state = 'out';
+    e.alpha = 1;
+  }
+  if (e.state === 'in') {
+    e.alpha = Math.min(1, (e.alpha || 0) + dt * 4);
+    e.invuln = e.alpha < 0.7;
+    if (e.alpha >= 1) {
+      e.state = 'tele';
+      e.timer = 0.5;
+    }
+  } else if (e.state === 'tele') {
+    e.timer -= dt;
+    if (e.timer <= 0) {
+      ring(e.x, e.y, Math.min(14, 10 + Math.floor(ow.level / 3) + (e.elite ? 2 : 0)), 120, 'orb', Math.random() * TAU);
+      sparks(e.x, e.y, e.color, 8, 180);
+      sfx.zap();
+      e.state = 'rest';
+      e.timer = 0.9;
+    }
+  } else if (e.state === 'rest') {
+    e.timer -= dt;
+    if (e.timer <= 0) {
+      e.state = 'out';
+      sparks(e.x, e.y, e.color, 12, 200);
+    }
+  } else {
+    e.alpha = Math.max(0, e.alpha - dt * 5);
+    e.invuln = e.alpha < 0.7;
+    if (e.alpha <= 0) {
+      for (let i = 0; i < 12; i++) {
+        const a = Math.random() * TAU;
+        const r = 160 + Math.random() * 100;
+        const x = p.x + Math.cos(a) * r;
+        const y = p.y + Math.sin(a) * r;
+        if (x < 40 || x > ow.W - 40 || y < 40 || y > ow.H - 40 || inRock(x, y, 30)) continue;
+        e.x = x;
+        e.y = y;
+        break;
+      }
+      e.state = 'in';
+      sparks(e.x, e.y, e.color, 12, 200);
+    }
+  }
+}
+
+// --- Draw: world ------------------------------------------------------------------------
 
 function drawWorld(ctx, k) {
   const z = zoom();
@@ -711,14 +1139,14 @@ function drawWorld(ctx, k) {
   ctx.fillRect(0, 0, W, H);
   drawStars(ctx, z, h);
 
-  const ox = (W / 2 - ow.cam.x * z) * k + view.ox;
-  const oy = (H / 2 - ow.cam.y * z) * k + view.oy;
-  ctx.setTransform(k * z, 0, 0, k * z, ox, oy);
-  const vx0 = ow.cam.x - W / 2 / z - 60;
-  const vx1 = ow.cam.x + W / 2 / z + 60;
-  const vy0 = ow.cam.y - H / 2 / z - 60;
-  const vy1 = ow.cam.y + H / 2 / z + 60;
-  const vis = (x, y, m = 0) => x > vx0 - m && x < vx1 + m && y > vy0 - m && y < vy1 + m;
+  // World transform. view.ox / oy carry the screen shake; the fight renderer reads them for its own transforms.
+  const sx = view.ox;
+  const sy = view.oy;
+  const kz = k * z;
+  view.ox = (W / 2 - ow.cam.x * z) * k + sx;
+  view.oy = (H / 2 - ow.cam.y * z) * k + sy;
+  ctx.setTransform(kz, 0, 0, kz, view.ox, view.oy);
+  const vis = (x, y, m = 0) => inField(x, y, m + 60);
 
   // Nebulae
   ctx.globalCompositeOperation = 'lighter';
@@ -733,130 +1161,42 @@ function drawWorld(ctx, k) {
 
   // Grid: minor and major lines, only what's on screen.
   const G0 = 80;
+  const vx0 = field.x0 - 60;
+  const vx1 = field.x1 + 60;
+  const vy0 = field.y0 - 60;
+  const vy1 = field.y1 + 60;
   ctx.lineWidth = 1 / z;
   for (const major of [false, true]) {
-    const step = major ? G0 * 5 : G0;
+    const st = major ? G0 * 5 : G0;
     ctx.strokeStyle = hsl(h, 62, major ? 0.13 : 0.055);
     ctx.beginPath();
-    for (let x = Math.max(0, Math.ceil(vx0 / step) * step); x <= Math.min(ow.W, vx1); x += step) {
+    for (let x = Math.max(0, Math.ceil(vx0 / st) * st); x <= Math.min(ow.W, vx1); x += st) {
       ctx.moveTo(x, Math.max(0, vy0));
       ctx.lineTo(x, Math.min(ow.H, vy1));
     }
-    for (let y = Math.max(0, Math.ceil(vy0 / step) * step); y <= Math.min(ow.H, vy1); y += step) {
+    for (let y = Math.max(0, Math.ceil(vy0 / st) * st); y <= Math.min(ow.H, vy1); y += st) {
       ctx.moveTo(Math.max(0, vx0), y);
       ctx.lineTo(Math.min(ow.W, vx1), y);
     }
     ctx.stroke();
   }
-  // World edge
+  // Zone edge
   ctx.strokeStyle = hsl(h, 65, 0.45);
   ctx.lineWidth = 2 / z;
   ctx.strokeRect(0, 0, ow.W, ow.H);
 
-  const route = G.run.route;
-  const can = reach();
-  const visited = new Set(G.run.visited);
-
-  // Lanes
-  ctx.lineWidth = 3;
-  const lane = (a, b, style) => {
-    if (!vis(a.x, a.y, 600) && !vis(b.x, b.y, 600)) return;
-    ctx.strokeStyle = style.color;
-    ctx.globalAlpha = style.a;
-    ctx.setLineDash(style.dash || []);
-    ctx.lineDashOffset = style.dash ? -ow.t * 46 : 0;
-    ctx.beginPath();
-    ctx.moveTo(a.x, a.y);
-    ctx.lineTo(b.x, b.y);
-    ctx.stroke();
-  };
-  for (const n of route.nodes) {
-    for (const id of n.links) {
-      const t = route.nodes.find((m) => m.id === id);
-      const trav = visited.has(n.id) && visited.has(id);
-      const open = n.id === G.run.nodeId && can.has(id);
-      lane(ow.pos[n.id], ow.pos[id], trav ? { color: hsl(h, 70), a: 0.55 } : open ? { color: NODE_TYPES[t.type].color, a: 0.8, dash: [18, 14] } : { color: hsl(h, 60), a: 0.16, dash: [6, 16] });
-    }
-  }
-  if (!G.run.nodeId) for (const n of route.rows[0]) lane(ow.start, ow.pos[n.id], { color: NODE_TYPES[n.type].color, a: 0.8, dash: [18, 14] });
-  ctx.setLineDash([]);
-  ctx.globalAlpha = 1;
-
-  // Patrol zones (faint warning circles while they live)
-  for (const c of ow.clusters) {
-    if (c.cleared || !vis(c.x, c.y, 160)) continue;
-    ctx.strokeStyle = '#ff4d6d';
-    ctx.globalAlpha = c.aggro ? 0.22 : 0.12 + Math.sin(ow.t * 2 + c.id) * 0.04;
-    ctx.lineWidth = 2;
-    ctx.setLineDash([10, 12]);
-    ctx.lineDashOffset = ow.t * 12;
-    ctx.beginPath();
-    ctx.arc(c.x, c.y, 135, 0, TAU);
-    ctx.stroke();
-  }
-  ctx.setLineDash([]);
-  ctx.globalAlpha = 1;
-
+  drawRocks(ctx, vis, h);
+  drawStart(ctx, vis);
   drawSites(ctx, vis);
-  for (const n of route.nodes) {
-    const q = ow.pos[n.id];
-    if (vis(q.x, q.y, 120)) drawBeacon(ctx, n, q, nodeState(n, can, visited));
-  }
+  for (const e of ow.exits) if (vis(e.x, e.y, 160)) drawExit(ctx, e);
 
-  // Gems
-  for (const g of ow.gems) {
-    if (!vis(g.x, g.y)) continue;
-    const spr = g.kind === 'xp' ? S.gem2 : S.credit;
-    ctx.drawImage(spr.img, g.x - spr.half * 0.8, g.y - spr.half * 0.8, spr.size * 0.8, spr.size * 0.8);
-  }
+  // The fight renderer: pickups, enemies, beams, shots, modules, the ship, particles, labels.
+  renderWorld(ctx, kz);
 
-  // Patrols
-  for (const f of ow.foes) {
-    if (f.dead || !vis(f.x, f.y, 40)) continue;
-    const spr = S[FOES[f.type].spr];
-    ctx.save();
-    ctx.translate(f.x, f.y);
-    ctx.rotate(f.a - Math.PI / 2);
-    ctx.drawImage(f.flash > 0 && spr.flash ? spr.flash : spr.img, -spr.half, -spr.half, spr.size, spr.size);
-    ctx.restore();
-    if (f.hp < f.max) {
-      ctx.fillStyle = 'rgba(255,255,255,0.15)';
-      ctx.fillRect(f.x - 14, f.y - f.r - 9, 28, 3);
-      ctx.fillStyle = '#ff4d6d';
-      ctx.fillRect(f.x - 14, f.y - f.r - 9, 28 * clamp(f.hp / f.max, 0, 1), 3);
-    }
-  }
-
-  // Player bolts
-  const pspr = S['pb_' + G.player.ship.id] || S.pb_drone;
-  for (const b of ow.pb) {
-    ctx.save();
-    ctx.translate(b.x, b.y);
-    ctx.rotate(b.a + Math.PI / 2);
-    ctx.drawImage(pspr.img, -pspr.half, -pspr.half, pspr.size, pspr.size);
-    ctx.restore();
-  }
-
-  drawShip(ctx);
-  drawParticles(ctx);
-
-  for (const b of ow.eb) {
-    const spr = S[b.spr];
-    ctx.drawImage(spr.img, b.x - spr.half, b.y - spr.half, spr.size, spr.size);
-  }
-
-  // Floating labels
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  for (const t of ow.texts) {
-    ctx.globalAlpha = Math.min(1, (t.life / t.max) * 2);
-    ctx.font = `700 ${t.size / z}px ${FONT}`;
-    ctx.fillStyle = 'rgba(0,0,0,0.6)';
-    ctx.fillText(t.text, t.x + 1, t.y + 1);
-    ctx.fillStyle = t.color;
-    ctx.fillText(t.text, t.x, t.y);
-  }
+  view.ox = sx;
+  view.oy = sy;
   ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
 }
 
 // Parallax star layers in screen space (seeded tiles).
@@ -886,72 +1226,115 @@ function drawStars(ctx, z, h) {
   ctx.globalAlpha = 1;
 }
 
-function drawBeacon(ctx, n, q, state) {
+function rockPath(ctx, r) {
+  const n = r.pts.length;
+  const a0 = r.rot + ow.t * r.spin;
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) {
+    const a = a0 + (i / n) * TAU;
+    const rr = r.r * r.pts[i];
+    if (i) ctx.lineTo(r.x + Math.cos(a) * rr, r.y + Math.sin(a) * rr);
+    else ctx.moveTo(r.x + Math.cos(a) * rr, r.y + Math.sin(a) * rr);
+  }
+  ctx.closePath();
+}
+
+function drawRocks(ctx, vis, h) {
+  ctx.lineJoin = 'round';
+  for (const r of ow.rocks) {
+    if (!vis(r.x, r.y, r.r)) continue;
+    rockPath(ctx, r);
+    ctx.fillStyle = 'rgba(8,5,20,0.92)';
+    ctx.fill();
+    ctx.strokeStyle = hsl(h, 62, 0.55);
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.strokeStyle = hsl(h, 70, 0.14);
+    ctx.lineWidth = 7;
+    ctx.stroke();
+  }
+}
+
+// Where the ship came in: the node just cleared (or the system's entry).
+function drawStart(ctx, vis) {
+  const q = ow.start;
+  if (!vis(q.x, q.y, 80)) return;
+  const node = ow.from && G.run.route.nodes.find((n) => n.id === ow.from);
+  const col = node ? NODE_TYPES[node.type].color : hsl(hue(), 70);
+  ctx.globalAlpha = 0.4;
+  ctx.strokeStyle = col;
+  ctx.lineWidth = 2;
+  ctx.strokeRect(q.x - 22, q.y - 22, 44, 44);
+  const ic = icon(node ? 'check' : 'combat', node ? '#ffffff' : col);
+  if (ic.complete) ctx.drawImage(ic, q.x - 12, q.y - 12, 24, 24);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  ctx.font = `700 ${12 / ZOOM}px ${FONT2}`;
+  ctx.fillStyle = col;
+  ctx.fillText(node ? `${NODE_TYPES[node.type].name} · CLEARED` : 'SYSTEM ENTRY', q.x, q.y + 32);
+  ctx.globalAlpha = 1;
+}
+
+function drawExit(ctx, e) {
+  const n = e.node;
   const info = NODE_TYPES[n.type];
   const boss = n.type === 'boss';
   const col = info.color;
-  const reachN = state === 'reach';
-  const a = reachN ? 1 : state === 'cur' ? 0.75 : state === 'done' ? 0.4 : 0.32;
-  const pulse = reachN ? 0.5 + Math.sin(ow.t * 3 + q.x) * 0.5 : 0;
-  // Glow pool
+  const pulse = 0.5 + Math.sin(ow.t * 3 + e.x) * 0.5;
+  // Light column: a tall soft glow, so an exit reads from the edge of the screen.
   ctx.globalCompositeOperation = 'lighter';
   const g = glow(col, 64);
-  const gs = (boss ? 260 : 170) * (reachN ? 1 + pulse * 0.12 : 0.7);
-  ctx.globalAlpha = reachN ? 0.42 : 0.12;
-  ctx.drawImage(g.img, q.x - gs / 2, q.y - gs / 2, gs, gs);
+  const gs = (boss ? 300 : 210) * (1 + pulse * 0.12);
+  ctx.globalAlpha = 0.45;
+  ctx.drawImage(g.img, e.x - gs / 2, e.y - gs / 2, gs, gs);
+  ctx.globalAlpha = 0.18;
+  ctx.drawImage(g.img, e.x - gs * 0.25, e.y - gs * 1.6, gs * 0.5, gs * 1.6);
   ctx.globalCompositeOperation = 'source-over';
-  ctx.globalAlpha = a;
-  // Square frame
-  const half = boss ? 34 : 24;
-  ctx.fillStyle = 'rgba(5,3,13,0.7)';
-  ctx.fillRect(q.x - half, q.y - half, half * 2, half * 2);
+  ctx.globalAlpha = 1;
+  // Square frame, a breathing outer square and the engage ring (fills while you hold inside)
+  const half = boss ? 34 : 26;
+  ctx.fillStyle = 'rgba(5,3,13,0.75)';
+  ctx.fillRect(e.x - half, e.y - half, half * 2, half * 2);
   ctx.strokeStyle = col;
   ctx.lineWidth = 2.5;
-  ctx.strokeRect(q.x - half, q.y - half, half * 2, half * 2);
-  if (reachN) {
-    // Outer square that breathes, and the engage ring (fills while you hold inside)
-    const o = half + 8 + pulse * 5;
-    ctx.globalAlpha = 0.45;
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(q.x - o, q.y - o, o * 2, o * 2);
-    ctx.globalAlpha = 0.5;
-    ctx.setLineDash([8, 10]);
-    ctx.lineDashOffset = -ow.t * 20;
+  ctx.strokeRect(e.x - half, e.y - half, half * 2, half * 2);
+  const o = half + 8 + pulse * 5;
+  ctx.globalAlpha = 0.45;
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(e.x - o, e.y - o, o * 2, o * 2);
+  ctx.globalAlpha = 0.5;
+  ctx.setLineDash([8, 10]);
+  ctx.lineDashOffset = -ow.t * 20;
+  ctx.beginPath();
+  ctx.arc(e.x, e.y, ENGAGE_R + 6, 0, TAU);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  if (ow.dwellId === e.id && ow.dwell > 0) {
+    ctx.globalAlpha = 1;
+    ctx.lineWidth = 5;
     ctx.beginPath();
-    ctx.arc(q.x, q.y, ENGAGE_R + 6, 0, TAU);
+    ctx.arc(e.x, e.y, ENGAGE_R + 6, -Math.PI / 2, -Math.PI / 2 + TAU * clamp(ow.dwell / DWELL, 0, 1));
     ctx.stroke();
-    ctx.setLineDash([]);
-    if (ow.dwellId === n.id && ow.dwell > 0) {
-      ctx.globalAlpha = 1;
-      ctx.lineWidth = 5;
-      ctx.beginPath();
-      ctx.arc(q.x, q.y, ENGAGE_R + 6, -Math.PI / 2, -Math.PI / 2 + TAU * clamp(ow.dwell / DWELL, 0, 1));
-      ctx.stroke();
-    }
   }
-  const ic = icon(state === 'done' ? 'check' : n.type, state === 'done' ? '#ffffff' : col);
-  const is = boss ? 36 : 26;
-  ctx.globalAlpha = a;
-  if (ic.complete) ctx.drawImage(ic, q.x - is / 2, q.y - is / 2, is, is);
-  // Label
+  const ic = icon(n.type, col);
+  const is = boss ? 36 : 28;
+  ctx.globalAlpha = 1;
+  if (ic.complete) ctx.drawImage(ic, e.x - is / 2, e.y - is / 2, is, is);
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
-  ctx.font = `700 ${(boss ? 15 : 12.5) / ZOOM}px ${FONT}`;
+  ctx.font = `700 ${(boss ? 15 : 13) / ZOOM}px ${FONT}`;
   ctx.fillStyle = col;
-  const ly = q.y + half + 10;
-  ctx.fillText(boss ? `${info.name} · ${G.run.system.short}` : info.name, q.x, ly);
-  if (state !== 'done') {
-    const subs = [];
-    const rw = n.reward ? REWARDS[n.reward] : null;
-    if (rw) subs.push([rw.name, rw.color]);
-    for (const m of n.modifiers) if (MODIFIERS[m]) subs.push([MODIFIERS[m].name, MODIFIERS[m].color]);
-    ctx.font = `700 ${13 / ZOOM}px ${FONT2}`;
-    subs.forEach(([t, c], i) => {
-      ctx.fillStyle = c;
-      ctx.fillText(t, q.x, ly + 20 + i * 17);
-    });
-  }
-  ctx.globalAlpha = 1;
+  const ly = e.y + half + 12;
+  ctx.fillText(boss ? `${info.name} · ${bossById(G.run.system.boss).name}` : info.name, e.x, ly);
+  const rw = n.reward ? REWARDS[n.reward] : null;
+  const subs = [];
+  if (rw) subs.push([rw.name, rw.color]);
+  for (const m of n.modifiers) if (MODIFIERS[m]) subs.push([MODIFIERS[m].name, MODIFIERS[m].color]);
+  ctx.font = `700 ${13 / ZOOM}px ${FONT2}`;
+  subs.forEach(([t, c], i) => {
+    ctx.fillStyle = c;
+    ctx.fillText(t, e.x, ly + 22 + i * 18);
+  });
 }
 
 function drawSites(ctx, vis) {
@@ -1001,40 +1384,20 @@ function drawSites(ctx, vis) {
   }
 }
 
-function drawShip(ctx) {
-  const p = G.player;
-  if (!p || p.dead) return;
-  const s = ow.ship;
-  const spr = S['ship_' + p.ship.id];
-  ctx.globalCompositeOperation = 'lighter';
-  const gl = glow(p.color, 64);
-  ctx.globalAlpha = s.boostT > 0 ? 0.6 : 0.3;
-  const gs = s.boostT > 0 ? 70 : 46;
-  ctx.drawImage(gl.img, s.x - gs / 2, s.y - gs / 2, gs, gs);
-  ctx.globalCompositeOperation = 'source-over';
-  ctx.globalAlpha = p.iframes > 0 && s.boostT <= 0 && Math.floor(ow.t * 20) % 2 === 0 ? 0.35 : 1;
-  ctx.save();
-  ctx.translate(s.x, s.y);
-  ctx.rotate(s.a);
-  ctx.drawImage(spr.img, -spr.half, -spr.half, spr.size, spr.size);
-  ctx.restore();
-  ctx.globalAlpha = 1;
-  if (p.shield) {
-    ctx.strokeStyle = 'rgba(63,246,255,' + (0.45 + Math.sin(ow.t * 5) * 0.15) + ')';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(s.x, s.y, 25, 0, TAU);
-    ctx.stroke();
-  }
-}
-
-// --- Draw: HUD and map overlay ------------------------------------------------------------
+// --- Draw: HUD, exit card and map overlay -------------------------------------------------
 
 function text(ctx, str, x, y, size, color, align = 'left', weight = 700, font = FONT) {
   ctx.font = `${weight} ${size}px ${font}`;
   ctx.textAlign = align;
   ctx.fillStyle = color;
   ctx.fillText(str, x, y);
+}
+
+// Text cut to a width with an ellipsis (the card never grows or wraps).
+function fitText(ctx, str, w) {
+  if (ctx.measureText(str).width <= w) return str;
+  while (str.length > 1 && ctx.measureText(str + '…').width > w) str = str.slice(0, -1);
+  return str + '…';
 }
 
 function mapKey() {
@@ -1064,101 +1427,150 @@ function drawHud(ctx, live) {
   ctx.fillRect(56, top + 37, 70 * clamp(p.xp / p.xpNeed, 0, 1), 5);
   text(ctx, `${Math.floor(run.wallet || 0).toLocaleString()} CR`, 136, top + 40, 11, '#ffd24a');
 
-  // System and route position
+  // System, route position and exits found
   const total = run.route.rows.length;
-  const next = run.row + 1;
+  const next = ow.row;
   text(ctx, run.deep ? `DEEP ${run.deep} · ${run.system.short}` : run.system.name, W / 2, top + 20, 12, hsl(hue(), 72), 'center', 900);
   text(ctx, next >= total - 1 ? 'BOSS SECTOR NEXT' : `SECTOR ${next + 1} · ${total - 1 - next} TO THE BOSS`, W / 2, top + 37, 12, 'rgba(255,255,255,0.7)', 'center', 700, FONT2);
+  const found = ow.exits.filter((e) => e.seen).length;
+  text(ctx, `EXITS FOUND ${found} / ${ow.exits.length}`, W / 2, top + 54, 12, found ? '#ffffff' : 'rgba(255,255,255,0.55)', 'center', 700, FONT2);
 
   if (live) drawArrows(ctx);
 
-  // Lower third: what's under / near the ship.
-  const near = nearInfo();
-  const by = H - view.safeBottom - 64;
-  if (near && ow.mapA < 0.5) {
-    // Fixed size box (three lines, the detail line may be empty) so nothing shifts as the ship moves between beacons.
-    const bw = Math.min(W - 32, 380);
-    const bx = (W - bw) / 2;
-    const y0 = by - 34;
-    ctx.fillStyle = 'rgba(5,3,13,0.8)';
-    ctx.fillRect(bx, y0, bw, 66);
-    ctx.strokeStyle = near.color;
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(bx, y0, bw, 66);
-    text(ctx, near.title, W / 2, y0 + 15, 13, near.color, 'center', 900);
-    if (near.detail) text(ctx, near.detail, W / 2, y0 + 33, 12, 'rgba(255,255,255,0.85)', 'center', 700, FONT2);
-    text(ctx, near.sub, W / 2, y0 + 51, 12, near.subColor || 'rgba(255,255,255,0.6)', 'center', 700, FONT2);
-    if (near.engage) {
-      ctx.fillStyle = 'rgba(255,255,255,0.12)';
-      ctx.fillRect(bx, y0 + 63, bw, 3);
-      ctx.fillStyle = near.color;
-      ctx.fillRect(bx, y0 + 63, bw * clamp(ow.dwell / DWELL, 0, 1), 3);
-    }
-  } else if (ow.mapA < 0.5) {
-    const a = ow.hintT < 8 ? 0.85 : 0.45;
-    const go = input.device === 'touch' ? 'DRAG TO FLY' : input.device === 'mouse' ? 'CLICK TO FLY' : 'FLY';
-    text(ctx, `${go} TO A LIT BEACON  ·  ${mapKey()} MAP`, W / 2, by + 8, 12, `rgba(255,255,255,${a})`, 'center', 700, FONT2);
+  const sp = toScreen(p.x, p.y);
+  if (ow.mapA < 0.5) {
+    drawGauges(ctx, sp.x, sp.y);
+    drawCard(ctx, live);
   }
-
   if (ow.mapA > 0.01) drawMap(ctx, ow.mapA);
 }
 
-// The beacon or site the ship is at (or close to), for the lower third.
-function nearInfo() {
-  const s = ow.ship;
-  const can = reach();
-  const visited = new Set(G.run.visited);
-  let best = null;
-  let bd = 150 * 150;
-  for (const n of G.run.route.nodes) {
-    const q = ow.pos[n.id];
-    const d = dist2(s.x, s.y, q.x, q.y);
-    if (d < bd) {
-      bd = d;
-      best = { n };
-    }
-  }
-  for (const site of ow.sites) {
-    if (site.done) continue;
-    const d = dist2(s.x, s.y, site.x, site.y);
-    if (d < bd) {
-      bd = d;
-      best = { site };
-    }
-  }
-  if (!best) return null;
-  if (best.site) {
-    const def = SITES[best.site.kind];
-    const inside = ow.dwellId === best.site.id;
-    return { title: def.name, detail: def.sub, sub: def.engage ? (inside ? 'HOLD POSITION OR PRESS ENTER TO ANSWER' : 'FLY INTO THE SIGNAL TO ANSWER') : 'FLY THROUGH TO COLLECT', color: def.color, engage: def.engage && inside };
-  }
-  const n = best.n;
-  const info = NODE_TYPES[n.type];
-  const st = nodeState(n, can, visited);
-  const rw = n.reward && st !== 'done' ? REWARDS[n.reward] : null;
-  const mods = n.modifiers.map((m) => MODIFIERS[m] && MODIFIERS[m].name).filter(Boolean);
-  const detail = [rw ? `${rw.name}: ${rw.desc}` : '', ...mods].filter(Boolean).join('  ·  ');
-  const title = `${info.name}  ·  SECTOR ${n.row + 1}`;
-  if (st === 'reach') {
-    const inside = ow.dwellId === n.id;
-    const key = input.device === 'pad' ? 'A' : input.device === 'touch' ? '' : 'ENTER';
-    return { title, detail, sub: inside ? `HOLD POSITION${key ? ' OR PRESS ' + key : ''} TO JUMP IN` : 'FLY INTO THE BEACON TO JUMP IN', color: info.color, engage: inside };
-  }
-  if (st === 'cur') return { title, detail: '', sub: 'CLEARED · YOUR LAST JUMP', color: info.color };
-  if (st === 'done') return { title, detail: '', sub: 'VISITED', color: 'rgba(255,255,255,0.6)' };
-  return { title, detail, sub: 'NOT ON YOUR ROUTE FROM HERE', color: info.color, subColor: '#ff4d6d' };
+// Threat pips (1-5) for a node, from its level within the system (elites +1, the boss 5).
+function threat(n) {
+  if (n.type === 'boss') return 5;
+  const sys = G.run.system;
+  const t = (n.row / Math.max(1, sys.rows - 1)) * 3 + 1 + (n.type === 'elite' ? 1 : 0);
+  return clamp(Math.round(t), 1, 5);
 }
 
-// Edge chevrons toward reachable beacons that are off screen.
+// The exit card: what a node holds, shown for the nearest exit found (fixed size, so nothing shifts).
+function drawCard(ctx, live) {
+  const W = view.W;
+  const H = view.H;
+  const bw = W - 24;
+  const bx = 12;
+  const bh = 108;
+  const by = H - view.safeBottom - 84 - bh;
+  const e = ow.card;
+  const site = !e && nearSite();
+  if (!e && !site) {
+    const a = ow.hintT < 10 ? 0.85 : 0.5;
+    const go = input.device === 'touch' ? 'DRAG TO FLY' : input.device === 'mouse' ? 'CLICK TO FLY · SHIFT AIMS' : input.device === 'pad' ? 'RIGHT STICK OR SHOULDER AIMS' : 'SHIFT HOLDS AIM';
+    text(ctx, `FIND AN EXIT  ·  ${go}  ·  ${mapKey()} MAP`, W / 2, by + bh - 8, 12, `rgba(255,255,255,${a})`, 'center', 700, FONT2);
+    return;
+  }
+  ctx.fillStyle = 'rgba(5,3,13,0.84)';
+  ctx.fillRect(bx, by, bw, bh);
+  const lx = bx + 12;
+  const tw = bw - 24;
+  if (site) {
+    const def = SITES[site.kind];
+    ctx.strokeStyle = def.color;
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(bx, by, bw, bh);
+    text(ctx, def.name, lx, by + 16, 13, def.color, 'left', 900);
+    ctx.font = `700 12px ${FONT2}`;
+    text(ctx, fitText(ctx, def.sub, tw), lx, by + 38, 12, 'rgba(255,255,255,0.85)', 'left', 700, FONT2);
+    const g = site.kind === 'cache' && ow.packs[site.guard];
+    const how = def.engage ? (ow.dwellId === site.id ? 'HOLD POSITION OR PRESS ENTER TO ANSWER' : 'FLY INTO THE SIGNAL TO ANSWER') : g && !g.cleared ? 'CLEAR THE ELITE GUARDS, THEN FLY THROUGH' : 'FLY THROUGH TO COLLECT';
+    text(ctx, how, lx, by + bh - 16, 12, 'rgba(255,255,255,0.6)', 'left', 700, FONT2);
+    if (def.engage && ow.dwellId === site.id) {
+      ctx.fillStyle = def.color;
+      ctx.fillRect(bx, by + bh - 3, bw * clamp(ow.dwell / DWELL, 0, 1), 3);
+    }
+    return;
+  }
+  const n = e.node;
+  const info = NODE_TYPES[n.type];
+  const inside = ow.dwellId === e.id;
+  ctx.strokeStyle = info.color;
+  ctx.lineWidth = inside ? 2.5 : 1.5;
+  ctx.strokeRect(bx, by, bw, bh);
+  const boss = n.type === 'boss';
+  text(ctx, boss ? `BOSS · ${bossById(G.run.system.boss).name}` : `${info.name}  ·  SECTOR ${n.row + 1}`, lx, by + 16, 13, info.color, 'left', 900);
+  // Threat pips (square)
+  const pips = threat(n);
+  text(ctx, 'THREAT', bx + bw - 12 - 5 * 11 - 6, by + 16, 11, 'rgba(255,255,255,0.6)', 'right', 700, FONT2);
+  for (let i = 0; i < 5; i++) {
+    const x = bx + bw - 12 - (5 - i) * 11 + 2;
+    ctx.strokeStyle = i < pips ? '#ff4d6d' : 'rgba(255,255,255,0.25)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(x, by + 11, 8, 8);
+    if (i < pips) {
+      ctx.fillStyle = '#ff4d6d';
+      ctx.fillRect(x + 2, by + 13, 4, 4);
+    }
+  }
+  const fight = n.type === 'combat' || n.type === 'elite' || boss;
+  const lines = [];
+  if (fight) {
+    const rw = n.reward ? REWARDS[n.reward] : null;
+    lines.push(['REWARD', rw ? `${rw.name}: ${rw.desc}` : boss ? 'The system boss. Beat it to move on.' : 'Sector draft', rw ? rw.color : '#ffffff']);
+    const mods = n.modifiers.filter((m) => MODIFIERS[m]);
+    lines.push(['HAZARD', mods.length ? mods.map((m) => `${MODIFIERS[m].name}: ${MODIFIERS[m].desc}`).join('  ') : 'None', mods.length ? MODIFIERS[mods[0]].color : 'rgba(255,255,255,0.6)']);
+    const lvl = nodeLevel(G.run.system, n.row);
+    const foes = foesAt(lvl).map((t) => FOE_NAMES[t]).filter(Boolean);
+    const shown = foes.slice(-4).reverse();
+    const extra = foes.length - shown.length;
+    const zones = boss ? 'BOSS ARENA' : `${zoneCount({ row: n.row, elite: n.type === 'elite', boss: null })} ZONES`;
+    lines.push(['HOSTILES', `${n.type === 'elite' ? 'HUNTER + ' : ''}${shown.join(' · ')}${extra > 0 ? ` +${extra}` : ''}  ·  ${zones}`, '#ff8aa0']);
+  } else {
+    lines.push(['STOP', STOP_DESC[n.type] || '', info.color]);
+    lines.push(['HAZARD', 'None. No fighting at this stop.', 'rgba(255,255,255,0.6)']);
+    lines.push(['', '', '']);
+  }
+  lines.forEach(([label, body, col], i) => {
+    if (!label) return;
+    const y = by + 38 + i * 18;
+    text(ctx, label, lx, y, 11, 'rgba(255,255,255,0.55)', 'left', 700, FONT);
+    ctx.font = `700 12px ${FONT2}`;
+    text(ctx, fitText(ctx, body, tw - 74), lx + 74, y, 12, col, 'left', 700, FONT2);
+  });
+  const key = input.device === 'pad' ? 'A' : input.device === 'touch' ? '' : 'ENTER';
+  const how = inside ? `HOLD POSITION${key ? ' OR PRESS ' + key : ''} TO JUMP IN` : `FLY INTO THE BEACON TO JUMP IN${ow.exits.length > 1 ? ' · THE OTHER EXITS CLOSE' : ''}`;
+  text(ctx, how, lx, by + bh - 14, 12, inside ? '#ffffff' : 'rgba(255,255,255,0.6)', 'left', 700, FONT2);
+  if (inside) {
+    ctx.fillStyle = info.color;
+    ctx.fillRect(bx, by + bh - 3, bw * clamp(ow.dwell / DWELL, 0, 1), 3);
+  }
+}
+
+// A site the ship is close to (when no exit card is up).
+function nearSite() {
+  const p = G.player;
+  let best = null;
+  let bd = 170 * 170;
+  for (const s of ow.sites) {
+    if (s.done) continue;
+    const d = dist2(p.x, p.y, s.x, s.y);
+    if (d < bd) {
+      bd = d;
+      best = s;
+    }
+  }
+  return best;
+}
+
+// Edge chevrons toward exits found that are off screen.
 function drawArrows(ctx) {
   const z = zoom();
   const m = 26;
   const top = view.safeTop + 58;
-  const bottom = view.H - view.safeBottom - 104;
+  const bottom = view.H - view.safeBottom - 210;
   const labels = [];
-  for (const n of reachableNodes(G.run.route, G.run.nodeId)) {
-    const q = ow.pos[n.id];
-    const sp = toScreen(q.x, q.y, z);
+  for (const e of ow.exits) {
+    if (!e.seen) continue;
+    const sp = toScreen(e.x, e.y, z);
     if (sp.x > 0 && sp.x < view.W && sp.y > top && sp.y < bottom) continue;
     const cx = view.W / 2;
     const cy = (top + bottom) / 2;
@@ -1168,7 +1580,7 @@ function drawArrows(ctx) {
     const x = cx + dx * t;
     const y = cy + dy * t;
     const a = Math.atan2(dy, dx);
-    const col = NODE_TYPES[n.type].color;
+    const col = NODE_TYPES[e.node.type].color;
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(a);
@@ -1188,11 +1600,11 @@ function drawArrows(ctx) {
     if (labels.some((l) => Math.abs(l.x - lx) < 80 && Math.abs(l.y - ly) < 16)) continue;
     labels.push({ x: lx, y: ly });
     ctx.textBaseline = 'middle';
-    text(ctx, NODE_TYPES[n.type].name, lx, ly, 11, col, 'center', 700);
+    text(ctx, NODE_TYPES[e.node.type].name, lx, ly, 11, col, 'center', 700);
   }
 }
 
-// The route map over the screen (what the old route screen showed), with the ship's position. Flying continues.
+// The map: this zone (fogged until flown through) above the system route. Flying continues under it.
 function drawMap(ctx, a) {
   const W = view.W;
   const x0 = 16;
@@ -1200,100 +1612,80 @@ function drawMap(ctx, a) {
   const w = W - 32;
   const h = view.H - y0 - view.safeBottom - 100;
   const h0 = hue();
+  const run = G.run;
   ctx.globalAlpha = a;
-  ctx.fillStyle = 'rgba(5,3,13,0.86)';
+  ctx.fillStyle = '#05030d';
   ctx.fillRect(x0, y0, w, h);
   ctx.strokeStyle = hsl(h0, 65);
   ctx.lineWidth = 1.5;
   ctx.strokeRect(x0, y0, w, h);
   ctx.textBaseline = 'middle';
-  const run = G.run;
-  text(ctx, 'ROUTE MAP', x0 + 14, y0 + 18, 12, hsl(h0, 72), 'left', 900);
-  text(ctx, `${new Set(run.visited).size} / ${run.route.rows.length} NODES`, x0 + w - 14, y0 + 18, 12, 'rgba(255,255,255,0.7)', 'right', 700, FONT2);
-  // Map area
-  const mx0 = x0 + 26;
-  const mx1 = x0 + w - 26;
-  const my0 = y0 + 44;
-  const my1 = y0 + h - 34;
-  const mpX = (x) => mx0 + (x / ow.W) * (mx1 - mx0);
-  const mpY = (y) => my0 + (y / ow.H) * (my1 - my0);
-  const route = run.route;
-  const can = reach();
-  const visited = new Set(run.visited);
-  // Camera view
-  const z = zoom();
-  ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+  text(ctx, 'ZONE MAP', x0 + 14, y0 + 18, 12, hsl(h0, 72), 'left', 900);
+  text(ctx, `EXITS FOUND ${ow.exits.filter((e) => e.seen).length} / ${ow.exits.length}`, x0 + w - 14, y0 + 18, 12, 'rgba(255,255,255,0.7)', 'right', 700, FONT2);
+
+  // Zone area (aspect kept), above the route strip.
+  const routeH = 118;
+  const ax0 = x0 + 14;
+  const ay0 = y0 + 34;
+  const aw = w - 28;
+  const ah = h - 34 - routeH - 34;
+  const s = Math.min(aw / ow.W, ah / ow.H);
+  const zx = ax0 + (aw - ow.W * s) / 2;
+  const zy = ay0 + (ah - ow.H * s) / 2;
+  const mx = (x) => zx + x * s;
+  const my = (y) => zy + y * s;
+  ctx.fillStyle = 'rgba(255,255,255,0.03)';
+  ctx.fillRect(mx(0), my(0), ow.W * s, ow.H * s);
+  // Explored cells
+  ctx.fillStyle = hsl(h0, 60, 0.12);
+  const cs = FOG * s;
+  for (let y = 0; y < ow.fr; y++) {
+    for (let x = 0; x < ow.fc; x++) if (ow.fog[y * ow.fc + x]) ctx.fillRect(mx(x * FOG), my(y * FOG), cs + 0.5, cs + 0.5);
+  }
+  ctx.strokeStyle = hsl(h0, 65, 0.5);
   ctx.lineWidth = 1;
-  ctx.strokeRect(mpX(ow.cam.x - W / 2 / z), mpY(ow.cam.y - view.H / 2 / z), (W / z / ow.W) * (mx1 - mx0), (view.H / z / ow.H) * (my1 - my0));
-  // Links
-  ctx.lineWidth = 1.5;
-  for (const n of route.nodes) {
-    for (const id of n.links) {
-      const p0 = ow.pos[n.id];
-      const p1 = ow.pos[id];
-      const trav = visited.has(n.id) && visited.has(id);
-      const open = n.id === run.nodeId && can.has(id);
-      ctx.strokeStyle = trav ? hsl(h0, 70, 0.8) : open ? 'rgba(255,255,255,0.85)' : hsl(h0, 60, 0.22);
-      ctx.beginPath();
-      ctx.moveTo(mpX(p0.x), mpY(p0.y));
-      ctx.lineTo(mpX(p1.x), mpY(p1.y));
-      ctx.stroke();
-    }
+  ctx.strokeRect(mx(0), my(0), ow.W * s, ow.H * s);
+  // Rocks, packs and sites in explored space
+  ctx.fillStyle = hsl(h0, 50, 0.45);
+  for (const r of ow.rocks) {
+    if (!seenAt(r.x, r.y)) continue;
+    ctx.beginPath();
+    ctx.arc(mx(r.x), my(r.y), Math.max(1, r.r * s), 0, TAU);
+    ctx.fill();
   }
-  if (!run.nodeId) {
-    ctx.strokeStyle = 'rgba(255,255,255,0.85)';
-    for (const n of route.rows[0]) {
-      ctx.beginPath();
-      ctx.moveTo(mpX(ow.start.x), mpY(ow.start.y));
-      ctx.lineTo(mpX(ow.pos[n.id].x), mpY(ow.pos[n.id].y));
-      ctx.stroke();
-    }
+  ctx.fillStyle = '#ff4d6d';
+  for (const pk of ow.packs) {
+    if (pk.cleared || !seenAt(pk.lx, pk.ly)) continue;
+    const sz = pk.elite ? 6 : 4;
+    ctx.fillRect(mx(pk.lx) - sz / 2, my(pk.ly) - sz / 2, sz, sz);
   }
-  // Patrols and sites
-  for (const c of ow.clusters) {
-    if (c.cleared) continue;
-    ctx.fillStyle = '#ff4d6d';
-    ctx.globalAlpha = a * 0.8;
-    ctx.fillRect(mpX(c.x) - 3, mpY(c.y) - 3, 6, 6);
+  for (const st of ow.sites) {
+    if (st.done || !st.seen) continue;
+    ctx.strokeStyle = SITES[st.kind].color;
+    ctx.strokeRect(mx(st.x) - 3.5, my(st.y) - 3.5, 7, 7);
   }
-  for (const s of ow.sites) {
-    if (s.done) continue;
-    ctx.strokeStyle = SITES[s.kind].color;
-    ctx.globalAlpha = a * 0.9;
-    ctx.strokeRect(mpX(s.x) - 3.5, mpY(s.y) - 3.5, 7, 7);
-  }
-  ctx.globalAlpha = a;
-  // Nodes
-  for (const n of route.nodes) {
-    const q = ow.pos[n.id];
-    const x = mpX(q.x);
-    const y = mpY(q.y);
-    const st = nodeState(n, can, visited);
-    const col = NODE_TYPES[n.type].color;
-    const half = n.type === 'boss' ? 13 : 10;
-    ctx.globalAlpha = a * (st === 'reach' ? 1 : st === 'cur' ? 0.9 : st === 'done' ? 0.45 : 0.55);
+  // Entry and exits
+  ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+  ctx.strokeRect(mx(ow.start.x) - 4, my(ow.start.y) - 4, 8, 8);
+  for (const e of ow.exits) {
+    const col = NODE_TYPES[e.node.type].color;
+    const x = mx(e.x);
+    const y = my(e.y);
+    if (!e.seen) continue;
     ctx.fillStyle = '#05030d';
-    ctx.fillRect(x - half, y - half, half * 2, half * 2);
-    ctx.strokeStyle = st === 'cur' ? '#ffffff' : col;
-    ctx.lineWidth = st === 'reach' ? 2 : 1.2;
-    ctx.strokeRect(x - half, y - half, half * 2, half * 2);
-    if (st === 'reach') {
-      const o = half + 3 + Math.sin(ow.t * 4) * 1.5;
-      ctx.strokeRect(x - o, y - o, o * 2, o * 2);
-    }
-    const ic = icon(st === 'done' ? 'check' : n.type, st === 'done' ? '#ffffff' : col);
-    if (ic.complete) ctx.drawImage(ic, x - half * 0.75, y - half * 0.75, half * 1.5, half * 1.5);
-    if (st === 'reach' && n.reward) {
-      const rw = REWARDS[n.reward];
-      text(ctx, rw.name, x, y + half + 10, 12, rw.color, 'center', 700, FONT2);
-    }
+    ctx.fillRect(x - 9, y - 9, 18, 18);
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x - 9, y - 9, 18, 18);
+    const ic = icon(e.node.type, col);
+    if (ic.complete) ctx.drawImage(ic, x - 7, y - 7, 14, 14);
+    text(ctx, NODE_TYPES[e.node.type].name, x, y + 18, 11, col, 'center', 700, FONT2);
   }
   // Ship marker
-  const s = ow.ship;
-  ctx.globalAlpha = a;
+  const p = G.player;
   ctx.save();
-  ctx.translate(mpX(s.x), mpY(s.y));
-  ctx.rotate(s.a);
+  ctx.translate(mx(p.x), my(p.y));
+  ctx.rotate(p.aim + Math.PI / 2);
   ctx.fillStyle = '#ffffff';
   ctx.beginPath();
   ctx.moveTo(0, -8);
@@ -1303,11 +1695,13 @@ function drawMap(ctx, a) {
   ctx.closePath();
   ctx.fill();
   ctx.restore();
+
+  drawRoute(ctx, x0 + 14, y0 + h - routeH - 30, w - 28, routeH, a);
+
   // Legend
-  const ly = y0 + h - 16;
-  ctx.textBaseline = 'middle';
+  const ly = y0 + h - 14;
   let lx = x0 + 14;
-  for (const [label, col] of [['YOU', '#ffffff'], ['PATROL', '#ff4d6d'], ['SITE', '#b48bff'], ['NEXT JUMP', '#3ff6ff']]) {
+  for (const [label, col] of [['YOU', '#ffffff'], ['PACK', '#ff4d6d'], ['SITE', '#b48bff'], ['EXIT', '#3ff6ff']]) {
     ctx.fillStyle = col;
     ctx.fillRect(lx, ly - 3, 6, 6);
     text(ctx, label, lx + 10, ly, 12, 'rgba(255,255,255,0.7)', 'left', 700, FONT2);
@@ -1315,4 +1709,53 @@ function drawMap(ctx, a) {
   }
   text(ctx, `${mapKey()} CLOSE`, x0 + w - 14, ly, 12, 'rgba(255,255,255,0.7)', 'right', 700, FONT2);
   ctx.globalAlpha = 1;
+}
+
+// The system route as a strip, left (entry) to right (boss): where this leg sits and where its exits lead.
+function drawRoute(ctx, x0, y0, w, h, a) {
+  const run = G.run;
+  const route = run.route;
+  const h0 = hue();
+  const rows = route.rows.length;
+  ctx.strokeStyle = hsl(h0, 60, 0.35);
+  ctx.lineWidth = 1;
+  ctx.strokeRect(x0, y0, w, h);
+  text(ctx, 'ROUTE', x0 + 8, y0 + 12, 11, hsl(h0, 72), 'left', 900);
+  const px = (row) => x0 + 22 + (row / (rows - 1)) * (w - 44);
+  const py = (n) => (n.type === 'boss' ? y0 + h / 2 + 6 : y0 + 26 + n.x * (h - 36));
+  const visited = new Set(run.visited);
+  const next = new Set(ow.exits.map((e) => e.id));
+  ctx.lineWidth = 1.2;
+  for (const n of route.nodes) {
+    for (const id of n.links) {
+      const t = route.nodes.find((m) => m.id === id);
+      const trav = visited.has(n.id) && visited.has(id);
+      const open = n.id === run.nodeId && next.has(id);
+      ctx.strokeStyle = trav ? hsl(h0, 70, 0.8) : open ? 'rgba(255,255,255,0.85)' : hsl(h0, 60, 0.2);
+      ctx.beginPath();
+      ctx.moveTo(px(n.row), py(n));
+      ctx.lineTo(px(t.row), py(t));
+      ctx.stroke();
+    }
+  }
+  for (const n of route.nodes) {
+    const x = px(n.row);
+    const y = py(n);
+    const col = NODE_TYPES[n.type].color;
+    const cur = n.id === run.nodeId;
+    const nx = next.has(n.id);
+    const done = visited.has(n.id);
+    const half = n.type === 'boss' ? 7 : 5;
+    ctx.globalAlpha = a * (nx ? 1 : cur ? 1 : done ? 0.45 : 0.5);
+    ctx.fillStyle = done && !cur ? '#ffffff' : '#05030d';
+    ctx.fillRect(x - half, y - half, half * 2, half * 2);
+    ctx.strokeStyle = cur ? '#ffffff' : col;
+    ctx.lineWidth = nx ? 2 : 1.2;
+    ctx.strokeRect(x - half, y - half, half * 2, half * 2);
+    if (nx) {
+      const o = half + 3 + Math.sin(ow.t * 4) * 1.2;
+      ctx.strokeRect(x - o, y - o, o * 2, o * 2);
+    }
+  }
+  ctx.globalAlpha = a;
 }

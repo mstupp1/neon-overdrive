@@ -1,6 +1,6 @@
 // Simulation step, collision resolution and world rendering.
 
-import { G, view } from './state.js';
+import { G, view, field, inField } from './state.js';
 import { S, glow } from '../render/sprites.js';
 import { TAU, segDist2, dist2 } from '../core/math.js';
 import { bg } from '../render/background.js';
@@ -8,7 +8,7 @@ import { updateDirector } from './director.js';
 import { updatePlayer, drawPlayer, hurtPlayer, gainOverdrive, addScore } from './player.js';
 import { pilotTimeScale, domeErase, onGraze, phasing } from './pilot.js';
 import { treeOnGraze, forcedCrit } from './tree.js';
-import { updateModules, updateBeams, drawModules, drawBeams } from './modules.js';
+import { updateModules, updateBeams, drawModules, drawBeams, onBeam } from './modules.js';
 import { updateEnemies, damageEnemy } from './enemies.js';
 import { drawBoss } from './bosses.js';
 import { updatePlayerBullets, updateEnemyBullets, drawPlayerBullets, drawEnemyBullets, playerBullet } from './bullets.js';
@@ -16,11 +16,12 @@ import { updatePickups, drawPickups } from './pickups.js';
 import { updateParticles, drawParticles, updateTexts, drawTexts, sparks, explosion, ring } from './fx.js';
 import { sfx } from '../core/audio.js';
 
-export function step(dt) {
+// ow: an overworld step (overworld.js): no director, the zone's enemies run their own AI.
+export function step(dt, ow = false) {
   const p = G.player;
   G.time += dt;
   if (G.mode === 'run' && !p.dead) G.runTime += dt;
-  updateDirector(dt);
+  if (!ow) updateDirector(dt);
   updatePlayer(p, dt);
   updateModules(p, dt);
   const et = dt * pilotTimeScale(p, dt); // enemy time (Phase Shift slows it)
@@ -145,7 +146,7 @@ function collide(p) {
       if (e.dead || beam.hit.has(e) || !e.entered || e.state === 'dying') continue;
       const pts = e.parts || [e];
       for (const pt of pts) {
-        if (pt.y < p.y && Math.abs(pt.x - beam.x) < half + pt.r) {
+        if (beam.ang !== undefined ? onBeam(beam, pt.x, pt.y, half + pt.r) : pt.y < p.y && Math.abs(pt.x - beam.x) < half + pt.r) {
           beam.hit.add(e);
           damageEnemy(e, beam.dmg, pt.x, pt.y, false);
           sparks(pt.x, pt.y, '#9ffcff', 6, 240);
@@ -154,8 +155,8 @@ function collide(p) {
       }
     }
     for (const b of G.eBullets) {
-      if (b.dead || b.type === 'torpedo' || b.y > p.y) continue;
-      if (Math.abs(b.x - beam.x) < half + b.r) {
+      if (b.dead || b.type === 'torpedo') continue;
+      if (beam.ang !== undefined ? onBeam(beam, b.x, b.y, half + b.r) : b.y <= p.y && Math.abs(b.x - beam.x) < half + b.r) {
         b.dead = true;
         sparks(b.x, b.y, '#ff9ad5', 2, 120);
       }
@@ -310,7 +311,7 @@ function drawShieldLinks(ctx) {
 function drawEnemies(ctx, k) {
   const dark = !!(G.director && G.director.diff.blackout);
   for (const e of G.enemies) {
-    if (e.dead) continue;
+    if (e.dead || (field.ow && !inField(e.x, e.y, 120))) continue;
     if (e.boss) {
       drawBoss(ctx, e);
       continue;
@@ -363,7 +364,7 @@ function drawEnemies(ctx, k) {
 }
 
 export function renderWorld(ctx, k) {
-  bg.draw(ctx);
+  if (!field.ow) bg.draw(ctx); // the overworld draws its own space first
   drawPickups(ctx);
   drawTelegraphs(ctx);
   drawEnemies(ctx, k);
@@ -395,7 +396,8 @@ export function renderWorld(ctx, k) {
     const g = glow(G.player.ucol, 64);
     ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = 0.08 + Math.sin(G.time * 6) * 0.03;
-    ctx.drawImage(g.img, -view.W * 0.5, -view.H * 0.2, view.W * 2, view.H * 1.4);
+    if (field.ow) ctx.drawImage(g.img, field.x0 - (field.x1 - field.x0) * 0.5, field.y0 - (field.y1 - field.y0) * 0.2, (field.x1 - field.x0) * 2, (field.y1 - field.y0) * 1.4);
+    else ctx.drawImage(g.img, -view.W * 0.5, -view.H * 0.2, view.W * 2, view.H * 1.4);
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
   }

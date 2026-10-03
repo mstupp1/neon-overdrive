@@ -165,8 +165,20 @@ export function drawHud(ctx, alpha = 1) {
   drawBanner(ctx);
 }
 
-function drawGauge(ctx, x, y, p, kind) {
-  const near = Math.hypot(p.x - x, p.y - y) < 90;
+// Overworld HUD: the ult and dash gauges (the ship is at screen sx, sy; they fade when it flies near).
+export function drawGauges(ctx, sx, sy) {
+  const p = G.player;
+  if (!p) return;
+  hudA = 1;
+  ctx.textBaseline = 'middle';
+  const gy = view.H - view.safeBottom - 46;
+  drawGauge(ctx, 44, gy, p, 'od', sx, sy);
+  drawGauge(ctx, view.W - 44, gy, p, 'dash', sx, sy);
+  ctx.globalAlpha = 1;
+}
+
+function drawGauge(ctx, x, y, p, kind, sx = p.x, sy = p.y) {
+  const near = Math.hypot(sx - x, sy - y) < 90;
   ctx.globalAlpha = (near ? 0.25 : 0.9) * hudA;
   const r = 24;
   ctx.fillStyle = 'rgba(5,3,15,0.55)';

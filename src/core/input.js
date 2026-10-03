@@ -52,6 +52,8 @@ export const input = {
   mouseDown: false, // left mouse button held (overworld click-to-fly)
   padX: 0,
   padY: 0,
+  aimX: 0, // right stick (overworld aim)
+  aimY: 0,
   getAnchor: () => ({ x: view.W / 2, y: view.H * 0.8 }),
   onAnyGesture: null,
   onDeviceChange: null,
@@ -271,6 +273,8 @@ export function pollGamepads() {
   if (!pad) {
     input.padX = 0;
     input.padY = 0;
+    input.aimX = 0;
+    input.aimY = 0;
     return;
   }
 
@@ -314,6 +318,12 @@ export function pollGamepads() {
   }
   input.padX = ax;
   input.padY = ay;
+  // Right stick: free aim in the overworld (twin-stick).
+  const rx = pad.axes[2] || 0;
+  const ry = pad.axes[3] || 0;
+  const rm = Math.hypot(rx, ry) >= 0.35;
+  input.aimX = rm ? rx : 0;
+  input.aimY = rm ? ry : 0;
 }
 
 // Direction from keyboard + pad (only meaningful in 'dir' mode).

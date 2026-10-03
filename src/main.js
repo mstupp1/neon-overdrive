@@ -128,6 +128,7 @@ function newWorld(mode, shipDef, run = null) {
   sectorIntro.stop();
   introDone = null;
   owBack = false;
+  overworld.exit(); // the fight systems back on the screen playfield
   if (run) Object.assign(run, { wallet: 0, earned: 0, frac: 0, flux: 0, curse: null, ambush: false, riftLeft: 0, bonusXp: 0, events: [], loot: [], found: [] });
   G.time = 0;
   G.runTime = 0;
@@ -388,7 +389,7 @@ function resumeOverworld() {
   ui.hide();
   G.screen = 'overworld';
   pauseBtn.hidden = false;
-  touchUi.hidden = true;
+  touchUi.hidden = !input.isTouchDevice; // dash and ultimate work out here too
   input.clear();
   music.setDuck(0.85);
 }

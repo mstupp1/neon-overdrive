@@ -1,6 +1,6 @@
 // Particles, floating text, screen shake, flashes and banners.
 
-import { G, view } from './state.js';
+import { G, view, field } from './state.js';
 import { rand, TAU } from '../core/math.js';
 import { glow } from '../render/sprites.js';
 import { profile } from '../core/storage.js';
@@ -124,9 +124,12 @@ export function drawParticles(ctx) {
 
 export function floatText(x, y, text, color = '#fff', size = 12, life = 0.7) {
   if (G.texts.length > 70) G.texts.shift();
-  // Keep labels fully on screen.
-  const half = Math.min(view.W / 2, text.length * size * 0.42);
-  x = Math.max(half + 4, Math.min(view.W - half - 4, x));
+  // Keep labels fully on screen. The overworld camera is zoomed out, so its labels are drawn larger to read the same.
+  if (field.ow) size /= field.z;
+  const x0 = field.ow ? field.x0 : 0;
+  const x1 = field.ow ? field.x1 : view.W;
+  const half = Math.min((x1 - x0) / 2, text.length * size * 0.42);
+  x = Math.max(x0 + half + 4, Math.min(x1 - half - 4, x));
   G.texts.push({ x, y, text, color, size, life, max: life, vy: -50 });
 }
 
