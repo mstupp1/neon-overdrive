@@ -3,6 +3,7 @@
 import { view, G } from '../game/state.js';
 import { glow } from './sprites.js';
 import { rand, damp, wrapAngle, mulberry32, TAU } from '../core/math.js';
+import { beat } from '../core/beat.js';
 
 // --- Per-system themes (campaign) ---------------------------------------------------
 // Each theme bakes ONE offscreen silhouette layer the first time it is used (never again), drawn behind the grid with a
@@ -530,12 +531,14 @@ export const bg = {
     const bend = GR.bend || 0;
     const wave = GR.wave || 0;
     const live = field.energy > 0;
+    // Music beat: the near floor brightens a touch on each beat (cosmetic; 0 when the music is off).
+    const bp = beat.pulse;
     // Displacement fades out toward the horizon so the far grid stays calm.
     const fade = (y) => Math.min(1, Math.max(0, (y - horizon) / (depth * 0.35)));
     for (let i = 0; i < rows; i++) {
       const f = (i + phase) / rows;
       const y = horizon + depth * f * f;
-      const baseA = (0.04 + f * 0.14) * GR.a;
+      const baseA = (0.04 + f * 0.14 + bp * 0.07 * f) * GR.a;
       const wa = wave ? wave * (0.3 + f) * Math.sin(this.t * 0.8 + i * 0.7) : 0;
       ctx.beginPath();
       if (live) {
@@ -572,7 +575,7 @@ export const bg = {
       }
       ctx.stroke();
     }
-    ctx.globalAlpha = 0.09 * GR.a;
+    ctx.globalAlpha = (0.09 + bp * 0.035) * GR.a;
     ctx.beginPath();
     const cols = GR.cols;
     const colW = W / (cols / 2);
@@ -600,7 +603,7 @@ export const bg = {
 
     // Horizon glow line
     const hg = glow(`hsl(${Math.round(h / 10) * 10},100%,60%)`, 64);
-    ctx.globalAlpha = 0.25;
+    ctx.globalAlpha = 0.25 + bp * 0.12;
     ctx.drawImage(hg.img, -W * 0.2, horizon - 30, W * 1.4, 60);
 
     // Stars (streak when boosting). Tinted toward the sky and kept dim so they read as backdrop, not as pickups.

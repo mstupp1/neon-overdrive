@@ -8,6 +8,7 @@ import { unlockAudio, music, setSfxVolume, setSfxMuted, sfx } from './core/audio
 import { buildSprites, buildEnemySpritesV2 } from './render/sprites.js';
 import { bg } from './render/background.js';
 import { bloom } from './render/post.js';
+import { beat as musicBeat } from './core/beat.js';
 import { drawHud, updateBanner } from './render/hud.js';
 import { SHIPS, shipById, ownsShip, isUnlocked } from './game/ships.js';
 import { createPlayer } from './game/player.js';
@@ -1122,6 +1123,7 @@ function frame(now) {
   const intro = G.screen === 'sector-intro';
   bg.update(simulating() || intro ? raw * cine.bgScale() : raw * 0.25, intro ? sectorIntro.boost() : boost);
   music.update(raw);
+  musicBeat.update();
   render();
 }
 

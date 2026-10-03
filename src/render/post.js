@@ -4,6 +4,7 @@
 
 import { view } from '../game/state.js';
 import { profile } from '../core/storage.js';
+import { beat } from '../core/beat.js';
 
 const LEVELS = [
   { div: 4, a: 0.45 },
@@ -26,6 +27,7 @@ function fit(m, w, h) {
 
 export function bloom(ctx, strength = 1) {
   if (!profile.settings.bloom || view.quality < 0.5 || strength <= 0) return;
+  strength *= 1 + 0.12 * beat.pulse; // a faint glow swell on the music's beat
   const src = ctx.canvas;
   const W = src.width;
   const H = src.height;
