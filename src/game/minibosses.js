@@ -15,9 +15,9 @@ export const MINIS = [
   { id: 'razorwing', name: 'RAZORWING', title: 'Blade Interceptor', hp: 900, r: 24, color: '#ffb02e', homeY: 150 },
   { id: 'mauler', name: 'MAULER', title: 'Assault Frigate', hp: 1150, r: 28, color: '#ff4a3d', homeY: 140 },
   { id: 'broodmother', name: 'BROODMOTHER', title: 'Hive Carrier', hp: 1100, r: 30, color: '#ff4fd8', homeY: 150 },
-  { id: 'specter', name: 'SPECTER', title: 'Phase Stalker', hp: 850, r: 22, color: '#9b7bff', homeY: 170 },
+  { id: 'specter', name: 'SPECTER', title: 'Phase Stalker', hp: 750, r: 22, color: '#9b7bff', homeY: 170 },
   { id: 'arclight', name: 'ARCLIGHT', title: 'Tesla Pylon', hp: 1250, r: 24, color: '#4fd6ff', homeY: 165 },
-  { id: 'citadel', name: 'CITADEL', title: 'Bastion Turret', hp: 1300, r: 30, color: '#ffe14d', homeY: 150 },
+  { id: 'citadel', name: 'CITADEL', title: 'Bastion Turret', hp: 1100, r: 30, color: '#ffe14d', homeY: 150 },
 ];
 export const MINI_IDS = MINIS.map((m) => m.id);
 export const miniById = (id) => MINIS.find((m) => m.id === id) || null;
@@ -384,7 +384,7 @@ export const MINI_ATTACKS = {
     },
     move(e, dt) {
       if (e.shA === undefined) e.shA = Math.PI / 2;
-      e.shA += dt * (e.phase > 1 ? -1.05 : 0.85);
+      e.shA += dt * (e.phase > 1 ? -1.25 : 1.05);
       e.x = damp(e.x, view.W / 2 + Math.sin(e.t * 0.35) * view.W * 0.14, 2, dt);
       e.y = damp(e.y, e.homeY + top() + Math.sin(e.t * 0.7) * 10, 2, dt);
       if (e.state === 'fight') shieldBlock(e);
@@ -409,7 +409,7 @@ function nodes(e, rel = false) {
 
 // CITADEL's shield: SHIELD_SPAN of arc around e.shA, radius SHIELD_R0..R1. Player shots crossing it are absorbed
 // (beams pass: the rail lance is the hard counter).
-export const SHIELD_SPAN = 2.5;
+export const SHIELD_SPAN = 2.0;
 export const SHIELD_R = 52;
 function shieldBlock(e) {
   const r0 = 34;
