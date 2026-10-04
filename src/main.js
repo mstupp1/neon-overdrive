@@ -1262,7 +1262,7 @@ function frame(now) {
       G.slowmo -= raw;
       if (!cine.on) dt *= 0.3; // the finisher cam sets its own pace
     }
-    if (G.screen === 'play') dt *= draftTimeScale() * cine.timeScale();
+    if (G.screen === 'play') dt *= draftTimeScale() * cine.timeScale() * ((G.mode === 'run' && G.player && G.player.st.gameSpeed) || 1); // Hyperflow
     while (dt > 0) {
       const s = Math.min(dt, 1 / 60);
       step(s);

@@ -218,6 +218,39 @@ export const sfx = {
     if (!ready() || !gate('ui', 40)) return;
     tone({ type: 'sine', f0: 1200, dur: 0.035, vol: 0.04 });
   },
+  holdCharge(dur = 0.5) {
+    if (!ready()) return null;
+    try {
+      const osc = ac.createOscillator();
+      const g = ac.createGain();
+      const t = ac.currentTime;
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(300, t);
+      osc.frequency.exponentialRampToValueAtTime(700, t + dur);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(0.06, t + 0.04);
+      osc.connect(g);
+      g.connect(sfxBus);
+      osc.start(t);
+      osc.stop(t + dur + 0.06);
+      let stopped = false;
+      return {
+        stop() {
+          if (stopped) return;
+          stopped = true;
+          try {
+            const stopT = ac.currentTime;
+            g.gain.cancelScheduledValues(stopT);
+            g.gain.setValueAtTime(g.gain.value, stopT);
+            g.gain.linearRampToValueAtTime(0.0001, stopT + 0.03);
+            osc.stop(stopT + 0.04);
+          } catch (_) {}
+        }
+      };
+    } catch (_) {
+      return null;
+    }
+  },
   select() {
     if (!ready()) return;
     tone({ type: 'triangle', f0: 700, f1: 1400, dur: 0.12, vol: 0.09 });

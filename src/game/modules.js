@@ -5,6 +5,7 @@ import { S, glow, flareSpr } from '../render/sprites.js';
 import { TAU, damp, dist2, rand } from '../core/math.js';
 import { playerBullet, nearestEnemy, clearBullets } from './bullets.js';
 import { damageEnemy } from './enemies.js';
+import { applyStatus } from './status.js';
 import { ring, sparks, explosion } from './fx.js';
 import { sfx } from '../core/audio.js';
 import { boosted, fortressOn } from './pilot.js';
@@ -25,6 +26,7 @@ export function resetModules(p) {
   p.mod = {
     missT: 1, arcT: 1.2, novaT: 2, railT: 2, orbA: 0, droneT: 0.2, gravT: 2.5, reflT: 3, flakT: 0.6, wells: [], flaks: [], refl: 0, reflMax: 0,
     mineT: 0.8, mines: [], sawT: 1, saws: [], stasisT: 2, stasisFx: 0, prismT: 0, prism: [], starT: 1.5,
+    flame: null, flameT: 0, spikeT: 0.8, slagT: 1.0, slags: [], acidPools: [], interceptors: [],
   };
   p.drones = [];
 }
@@ -581,6 +583,230 @@ function updateNewModules(p, dt, rate, dm) {
       }
     }
   }
+
+  // --- Flamethrower ---
+  // A continuous sweeping flame cone reaching forward from the nose, applying stacking burn.
+  if (up.flamethrower) {
+    const lv = up.flamethrower;
+    const reach = lvl([150, 175, 205, 235, 270], lv);
+    const spread = lvl([0.22, 0.25, 0.29, 0.33, 0.37], lv);
+    const whip = Math.sin(G.time * 22) * 0.08 + (p.vx ? Math.sin(p.vx * 0.006) * 0.12 : 0);
+    const aim = p.aim + whip;
+    m.flame = { x: p.x, y: p.y, reach, spread, aim, lv };
+    m.flameT = (m.flameT || 0) - dt;
+    if (m.flameT <= 0) {
+      m.flameT = 0.065;
+      const dmg = lvl([1.8, 2.3, 2.9, 3.6, 4.4], lv) * dm * 0.65;
+      const c = Math.cos(aim);
+      const s = Math.sin(aim);
+      for (const e of G.enemies) {
+        if (e.dead || !e.entered || e.untargetable) continue;
+        const dx = e.x - p.x;
+        const dy = e.y - p.y;
+        const d2 = dx * dx + dy * dy;
+        if (d2 > (reach + e.r) * (reach + e.r)) continue;
+        const dot = (dx * c + dy * s) / Math.sqrt(Math.max(1, d2));
+        if (dot >= Math.cos(spread + Math.asin(Math.min(1, e.r / Math.max(1, Math.sqrt(d2)))))) {
+          damageEnemy(e, dmg, e.x, e.y, false);
+          applyStatus(e, 'burn', lv >= 4 ? 2 : 1);
+          if (Math.random() < 0.45) sparks(e.x, e.y, '#ff8a2b', 2, 140);
+        }
+      }
+    }
+  } else {
+    m.flame = null;
+  }
+
+  // --- Glacial Spike (cryo) ---
+  // Heavy piercing ice spikes that shatter into chilling fragments.
+  if (up.cryoSpike) {
+    const lv = up.cryoSpike;
+    m.spikeT = (m.spikeT || 0) - dt * rate;
+    if (m.spikeT <= 0 && G.pBullets.length < MAX_PBULLETS) {
+      m.spikeT = lvl([1.35, 1.2, 1.05, 0.9, 0.78], lv);
+      const n = lv >= 5 ? 3 : lv >= 3 ? 2 : 1;
+      const spread = 0.12;
+      for (let i = 0; i < n; i++) {
+        const a = p.aim + (n === 1 ? 0 : (i - (n - 1) / 2) * spread);
+        const [sx, sy] = local(p, (i - (n - 1) / 2) * 12, -4);
+        playerBullet(sx, sy, a, 860, lvl([15, 20, 26, 33, 42], lv) * dm, S.cryo_spike, {
+          pierce: lvl([2, 3, 3, 4, 5], lv),
+          life: 1.4,
+          r: 7,
+          scale: 1.3,
+          aoe: lvl([44, 50, 56, 64, 74], lv),
+          alpha: 1,
+          kind: 'spike',
+        });
+      }
+      sfx.shoot();
+    }
+  }
+
+  // --- Caustic Slag (corrosive) ---
+  // Lobs acid globs that detonate into lingering corrosive pools stripping armor.
+  m.slags ||= [];
+  m.acidPools ||= [];
+  if (up.causticSlag) {
+    const lv = up.causticSlag;
+    m.slagT = (m.slagT || 0) - dt * rate;
+    if (m.slagT <= 0 && m.slags.length < 8) {
+      m.slagT = lvl([1.6, 1.4, 1.25, 1.1, 0.95], lv);
+      const n = lv >= 5 ? 3 : lv >= 3 ? 2 : 1;
+      for (let i = 0; i < n; i++) {
+        const off = (i - (n - 1) / 2) * 24;
+        const targetD = lvl([180, 210, 230, 260, 290], lv) + rand(-25, 25);
+        const tx = p.x + off + Math.cos(p.aim) * targetD;
+        const ty = p.y + Math.sin(p.aim) * targetD;
+        const time = 0.45;
+        m.slags.push({
+          x: p.x + off * 0.5,
+          y: p.y - 10,
+          vx: (tx - p.x) / time,
+          vy: (ty - p.y) / time,
+          life: time,
+          maxLife: time,
+          lv,
+        });
+      }
+    }
+  }
+  // Slag projectile update & landing
+  if (m.slags.length) {
+    let w = 0;
+    for (const s of m.slags) {
+      s.life -= dt;
+      s.x += s.vx * dt;
+      s.y += s.vy * dt;
+      let hit = s.life <= 0;
+      if (!hit) {
+        for (const e of G.enemies) {
+          if (!e.dead && e.entered && dist2(s.x, s.y, e.x, e.y) < (e.r + 14) * (e.r + 14)) {
+            hit = true;
+            break;
+          }
+        }
+      }
+      if (hit) {
+        const r = lvl([38, 44, 50, 56, 64], s.lv);
+        const life = lvl([3.6, 4.2, 4.8, 5.4, 6.2], s.lv);
+        m.acidPools.push({ x: s.x, y: s.y, r, life, maxLife: life, tick: 0, lv: s.lv });
+        ring(s.x, s.y, r * 0.7, '#a6ff3d', 0.3);
+        sparks(s.x, s.y, '#a6ff3d', 10, 160);
+      } else {
+        if (Math.random() < 0.4) sparks(s.x, s.y, '#a6ff3d', 1, 50);
+        m.slags[w++] = s;
+      }
+    }
+    m.slags.length = w;
+  }
+  // Acid pools update
+  if (m.acidPools.length) {
+    let pw = 0;
+    for (const pool of m.acidPools) {
+      pool.life -= dt;
+      if (!field.ow) pool.y += 28 * dt;
+      pool.tick -= dt;
+      if (pool.tick <= 0) {
+        pool.tick = 0.16;
+        const dmg = lvl([2.2, 2.9, 3.6, 4.5, 5.5], pool.lv) * dm;
+        const R2 = pool.r * pool.r;
+        for (const e of G.enemies) {
+          if (e.dead || !e.entered) continue;
+          if (dist2(pool.x, pool.y, e.x, e.y) < R2) {
+            damageEnemy(e, dmg, e.x, e.y, false);
+            applyStatus(e, 'corrode', pool.lv >= 4 ? 2 : 1);
+            if (Math.random() < 0.35) sparks(e.x, e.y, '#a6ff3d', 1, 80);
+          }
+        }
+      }
+      if (pool.life > 0 && (field.ow || pool.y < view.H + 40)) m.acidPools[pw++] = pool;
+    }
+    m.acidPools.length = pw;
+  }
+
+  // --- Drone Swarm ---
+  // Autonomous interceptors: dock, launch, attack with micro-darts, return to recharge.
+  m.interceptors ||= [];
+  if (up.droneSwarm) {
+    const lv = up.droneSwarm;
+    const maxCount = lvl([3, 4, 5, 6, 7], lv);
+    while (m.interceptors.length < maxCount) {
+      const idx = m.interceptors.length;
+      m.interceptors.push({
+        x: p.x, y: p.y, vx: 0, vy: 0,
+        state: 'docked', energy: rand(0.3, 0.9),
+        target: null, t: 0, fireT: rand(0.1, 0.3),
+        slotIdx: idx,
+      });
+    }
+    const enemies = G.enemies.filter((e) => !e.dead && e.entered && !e.untargetable);
+    for (const ic of m.interceptors) {
+      ic.t += dt;
+      const dockedAng = (ic.slotIdx / maxCount) * TAU + G.time * 2.2;
+      const dockDist = 34;
+      const targetDockX = p.x + Math.cos(dockedAng) * dockDist;
+      const targetDockY = p.y + Math.sin(dockedAng) * dockDist;
+
+      if (ic.state === 'docked') {
+        ic.energy = Math.min(1, ic.energy + dt * lvl([0.65, 0.8, 1.0, 1.25, 1.5], lv));
+        ic.x = damp(ic.x, targetDockX, 14, dt);
+        ic.y = damp(ic.y, targetDockY, 14, dt);
+        ic.ang = p.aim;
+        if (ic.energy >= 1 && enemies.length) {
+          ic.state = 'launch';
+          ic.target = nearestEnemy(ic.x, ic.y, 450 * 450);
+        }
+      } else if (ic.state === 'launch') {
+        if (!ic.target || ic.target.dead) ic.target = nearestEnemy(ic.x, ic.y, 450 * 450);
+        if (!ic.target) { ic.state = 'return'; continue; }
+        const ang = Math.atan2(ic.target.y - ic.y, ic.target.x - ic.x);
+        ic.vx = damp(ic.vx, Math.cos(ang) * 440, 8, dt);
+        ic.vy = damp(ic.vy, Math.sin(ang) * 440, 8, dt);
+        ic.x += ic.vx * dt;
+        ic.y += ic.vy * dt;
+        ic.ang = Math.atan2(ic.vy, ic.vx) - Math.PI / 2;
+        if (dist2(ic.x, ic.y, ic.target.x, ic.target.y) < 140 * 140) {
+          ic.state = 'attack';
+        }
+      } else if (ic.state === 'attack') {
+        if (!ic.target || ic.target.dead) ic.target = nearestEnemy(ic.x, ic.y, 450 * 450);
+        if (!ic.target) { ic.state = 'return'; continue; }
+        ic.energy -= dt * 0.38;
+        const strafeA = ic.t * 3.5 + ic.slotIdx;
+        const wantX = ic.target.x + Math.cos(strafeA) * 90;
+        const wantY = ic.target.y + Math.sin(strafeA) * 75;
+        ic.vx = damp(ic.vx, (wantX - ic.x) * 6, 8, dt);
+        ic.vy = damp(ic.vy, (wantY - ic.y) * 6, 8, dt);
+        ic.x += ic.vx * dt;
+        ic.y += ic.vy * dt;
+        const aimEnemy = Math.atan2(ic.target.y - ic.y, ic.target.x - ic.x);
+        ic.ang = aimEnemy - Math.PI / 2;
+        ic.fireT -= dt * rate;
+        if (ic.fireT <= 0 && G.pBullets.length < MAX_PBULLETS) {
+          ic.fireT = lvl([0.28, 0.24, 0.20, 0.17, 0.14], lv);
+          const dartDmg = lvl([2.2, 2.8, 3.5, 4.4, 5.4], lv) * dm;
+          playerBullet(ic.x, ic.y, aimEnemy, 780, dartDmg, S.pb_interceptor, {
+            life: 0.65, r: 3.5, alpha: 0.95,
+          });
+        }
+        if (ic.energy <= 0) ic.state = 'return';
+      } else if (ic.state === 'return') {
+        const distSq = dist2(ic.x, ic.y, p.x, p.y);
+        ic.vx = damp(ic.vx, (targetDockX - ic.x) * 9, 10, dt);
+        ic.vy = damp(ic.vy, (targetDockY - ic.y) * 9, 10, dt);
+        ic.x += ic.vx * dt;
+        ic.y += ic.vy * dt;
+        ic.ang = Math.atan2(ic.vy, ic.vx) - Math.PI / 2;
+        if (distSq < 28 * 28) {
+          ic.state = 'docked';
+          ic.energy = 0;
+        }
+      }
+    }
+  } else {
+    m.interceptors.length = 0;
+  }
 }
 
 function slowBullet(b, k) {
@@ -746,6 +972,17 @@ export function drawModules(ctx, k) {
     const sn = Math.sin(a) * k;
     ctx.setTransform(c, sn, -sn, c, d.x * k + view.ox, d.y * k + view.oy);
     ctx.drawImage(s.img, -s.half, -s.half, s.size, s.size);
+  }
+  // Swarm Interceptors
+  if (p.mod.interceptors) {
+    for (const ic of p.mod.interceptors) {
+      const s = S.interceptor;
+      const a = (ic.ang ?? p.aim) + Math.PI / 2;
+      const c = Math.cos(a) * k;
+      const sn = Math.sin(a) * k;
+      ctx.setTransform(c, sn, -sn, c, ic.x * k + view.ox, ic.y * k + view.oy);
+      ctx.drawImage(s.img, -s.half, -s.half, s.size, s.size);
+    }
   }
   ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
 }
@@ -985,6 +1222,57 @@ function drawGearV2(ctx, k, p) {
     ctx.stroke();
     ctx.setLineDash([]);
   }
+
+  // Flamethrower whip cone
+  if (m.flame) {
+    const f = m.flame;
+    const count = 8;
+    for (let i = 0; i < count; i++) {
+      const t = (i + 1) / count;
+      const len = f.reach * t;
+      const w = Math.sin(t * Math.PI) * len * Math.tan(f.spread);
+      const sway = Math.sin(G.time * 24 + i * 0.75) * 8 * t;
+      const c = Math.cos(f.aim);
+      const s = Math.sin(f.aim);
+      const tipX = f.x + c * len - s * sway;
+      const tipY = f.y + s * len + c * sway;
+      ctx.globalAlpha = 0.22 + 0.18 * (1 - t);
+      ctx.fillStyle = i < 2 ? '#ffffff' : i < 4 ? '#ffe14d' : i < 6 ? '#ff8a2b' : '#ff471a';
+      ctx.beginPath();
+      ctx.arc(tipX, tipY, Math.max(7, w), 0, TAU);
+      ctx.fill();
+    }
+  }
+
+  // Caustic Slag: lobbed canisters & acid pools
+  for (const s of (m.slags || [])) {
+    const spr = S.acid_slag;
+    ctx.globalAlpha = 0.95;
+    ctx.drawImage(spr.img, s.x - spr.half, s.y - spr.half, spr.size, spr.size);
+  }
+  for (const pool of (m.acidPools || [])) {
+    const t = Math.min(1, pool.life / 0.5, (pool.maxLife - pool.life) / 0.2);
+    ctx.globalAlpha = t * 0.35;
+    ctx.fillStyle = '#a6ff3d';
+    ctx.beginPath();
+    ctx.arc(pool.x, pool.y, pool.r, 0, TAU);
+    ctx.fill();
+    ctx.globalAlpha = t * 0.75;
+    ctx.strokeStyle = '#a6ff3d';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    // Bubbles
+    const bPhase = G.time * 6 + pool.x;
+    for (let bi = 0; bi < 3; bi++) {
+      const bRad = 3 + Math.sin(bPhase + bi * 2) * 1.5;
+      const bx = pool.x + Math.cos(bPhase * 0.7 + bi * 2.1) * (pool.r * 0.55);
+      const by = pool.y + Math.sin(bPhase * 0.8 + bi * 1.9) * (pool.r * 0.55);
+      ctx.beginPath();
+      ctx.arc(bx, by, Math.max(1, bRad), 0, TAU);
+      ctx.stroke();
+    }
+  }
+
   ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = 'source-over';
 }
