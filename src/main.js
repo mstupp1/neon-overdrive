@@ -19,7 +19,7 @@ import { rollDraft, applyUpgrade, UPGRADES, discover, rollCard, applyCard } from
 import { runLuck, rankUpFinds, dropGear, dropAbility, addGear } from './game/loot.js';
 import { makeItem } from './game/parts.js';
 import { spawnEnemy, spawnWeavers } from './game/enemies.js';
-import { step, renderWorld } from './game/world.js';
+import { step, renderWorld, drawStandees } from './game/world.js';
 import { ui } from './ui/screens.js';
 import { comms } from './ui/comms.js';
 import { meta } from './ui/meta.js';
@@ -1226,7 +1226,7 @@ function render() {
   if (sv.active && G.mode === 'run') {
     // Side / chase stage (stageview.js): the world renders in its own frame and is mapped onto the screen; the camera
     // is read inside that frame. Floating numbers are drawn upright afterwards.
-    sv.render(ctx, k, renderWorld, () => (live ? cine.camera() : null));
+    sv.render(ctx, k, renderWorld, () => (live ? cine.camera() : null), drawStandees);
     ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
     drawTexts(ctx, (x, y, o) => sv.toScreen(x, y, o));
   } else if (cam && cam.rot) {

@@ -1595,7 +1595,7 @@ function drawCard(ctx, live) {
     const extra = foes.length - shown.length;
     const zones = boss
       ? 'BOSS ARENA' + (n.arenaView ? ` · ${viewName(n.arenaView)}` : '')
-      : `${zoneCount({ row: n.row, elite: n.type === 'elite', boss: null })} ZONES` + (vi >= 0 ? ` · ZONE ${vi + 1} ${viewName(n.views[vi])}` : '');
+      : `${zoneCount({ row: n.row, elite: n.type === 'elite', boss: null })} ZONES` + (vi >= 0 ? ` · ZONE ${vi + 1} ${viewName(n.views[vi])}` + (n.views.filter((v) => v !== 'top').length > 1 ? ' +1' : '') : '');
     lines.push(['HOSTILES', `${n.type === 'elite' ? 'HUNTER + ' : ''}${shown.join(' · ')}${extra > 0 ? ` +${extra}` : ''}  ·  ${zones}`, '#ff8aa0']);
   } else {
     lines.push(['STOP', STOP_DESC[n.type] || '', info.color]);
