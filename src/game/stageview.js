@@ -37,6 +37,11 @@ const CW = 450; // chase playfield width (virtual)
 const CH = 1100; // chase playfield depth (virtual)
 const CHASE_HOME = 150; // the jet's resting distance from the near edge (virtual)
 const FOG = 260; // chase: virtual depth over which things fade in from the far edge
+// Chase pace. The field is deeper than the top-down one (1100 vs ~800), so at normal enemy time threats took ~1.4x as
+// long to reach you; enemy time (movement, fire, shots, wave timer, gates) runs this much faster to make it urgent.
+const CHASE_PACE = 1.4;
+// And the floor rushes by near fly-through speed (the transit peaks at 12x the old cruise); see floorRun().
+const CHASE_RUSH = 5;
 // Chase depth cues: ships fly at this height over the floor (in virtual units; screen lift = HOVER * local scale),
 // so their lit shadows sit visibly below them and the floor reads as a ground plane rather than the play surface.
 const HOVER = 34;
@@ -183,6 +188,10 @@ export const sv = {
 
   get active() {
     return this.mode !== 'top';
+  },
+  // Enemy time multiplier for this view (world.js folds it into G.enemyTimeScale).
+  get pace() {
+    return this.mode === 'chase' ? CHASE_PACE : 1;
   },
 
   // Swap view.W / H (and the safe insets) to the virtual playfield. Returns true if it swapped.
@@ -786,6 +795,16 @@ function passGate(g, p) {
   hurtPlayer(p);
 }
 
+// Chase floor travel (virtual units), advanced once per frame from the backdrop clock: CHASE_RUSH x the old cruise
+// speed, and during fly-throughs / boosts no more than ~2x that again so the grid and pylons never strobe.
+const FLOOR = { run: 0, last: null };
+function floorRun() {
+  const ds = FLOOR.last === null ? 0 : bg.scroll - FLOOR.last;
+  FLOOR.last = bg.scroll;
+  if (ds > 0 && ds < 1) FLOOR.run += (ds * 260 * CHASE_RUSH * Math.min(bg.boost, 2)) / Math.max(1, bg.boost);
+  return FLOOR.run;
+}
+
 function drawChaseBack(ctx, r) {
   const W = r.W;
   const H = r.H;
@@ -825,7 +844,7 @@ function drawChaseBack(ctx, r) {
   ctx.lineWidth = 1;
   // Cross lines at fixed world depths sliding toward the camera
   const gap = 90;
-  const ph = (bg.scroll * 260) % gap;
+  const ph = floorRun() % gap;
   ctx.beginPath();
   for (let vy = -900 - gap; vy < CH + gap; vy += gap) {
     const y = vy + ph;
@@ -973,7 +992,7 @@ function drawPylons(ctx, r) {
   const h = Math.round(bg.hue);
   const col = `hsl(${(h + 30) % 360},100%,66%)`;
   const cap = glow(`hsl(${Math.round(((h + 30) % 360) / 10) * 10},100%,62%)`, 64);
-  const ph = (bg.scroll * 260) % PYLON_GAP;
+  const ph = FLOOR.run % PYLON_GAP;
   const P0 = chaseProj();
   const q = {};
   ctx.globalCompositeOperation = 'lighter';
