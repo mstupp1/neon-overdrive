@@ -36,7 +36,7 @@ import { setClass, setPassives, initPilotProfile, findClass, findPassive } from 
 import { buyShip, equipPart, unequipSlot, setPaint, selectShip, applyAllPaints, rollGear, sellGear, sellJunk, initGear } from './game/hangar.js';
 import { SYSTEMS, systemById, generateRoute, nodeSpec, reachableNodes, routeNode, REWARDS } from './game/campaign.js';
 import { rand, pick, lerp, easeInOut } from './core/math.js';
-import { ring, drawTexts } from './game/fx.js';
+import { ring, drawTexts, floatText } from './game/fx.js';
 import { sv } from './game/stageview.js';
 import { intro as bootIntro } from './game/intro.js';
 import { cine } from './game/cinematic.js';
@@ -403,7 +403,28 @@ function showRoute() {
   owBack = true;
   resumeOverworld();
   tip('overworld', true);
-  if (r.row >= r.system.rows >> 1) beat('mid:' + r.system.id, STORY.systems[r.system.id].mid, true);
+  if (r.row >= r.system.rows >> 1) {
+    beat('mid:' + r.system.id, STORY.systems[r.system.id].mid, true);
+    const lv = weaponStep(`mid:${r.sysIdx}:${r.deep || 0}`);
+    if (lv) {
+      const p = G.player;
+      floatText(p.x, p.y - 40, `MAIN CANNON LV ${lv}`, '#3ff6ff', 14, 2);
+      ring(p.x, p.y, 80, '#3ff6ff', 0.6);
+      sfx.levelUp();
+    }
+  }
+}
+
+// The Main Cannon is never drafted: it grows with the run, +1 at each system's halfway point and each boss
+// (7 steps: max at the Void's halfway point; Gunsmith starts it a step ahead). Returns the new level, or 0.
+function weaponStep(key) {
+  const r = G.run;
+  const p = G.player;
+  if (!r || (r.weaponSteps ||= []).includes(key)) return 0;
+  r.weaponSteps.push(key);
+  if ((p.up.main || 0) >= UPGRADES.find((u) => u.id === 'main').max) return 0;
+  applyUpgrade(p, 'main', G);
+  return p.st.mainLv;
 }
 
 // Back to flying in the overworld (after showRoute, or unpausing there).
@@ -631,7 +652,7 @@ function unpause() {
 
 // Owned, non-maxed, non-evolution upgrades (Rest Station overclock / BOOST reward).
 function boostChoices(p) {
-  return UPGRADES.filter((u) => u.cat !== 'evolution' && (p.up[u.id] || 0) > 0 && p.up[u.id] < u.max && pathRoom(p, u.id) > 0).map((u) => u.id);
+  return UPGRADES.filter((u) => u.cat !== 'evolution' && u.cat !== 'weapon' && (p.up[u.id] || 0) > 0 && p.up[u.id] < u.max && pathRoom(p, u.id) > 0).map((u) => u.id);
 }
 
 const DRAFT_ONLY = {
@@ -825,6 +846,10 @@ function onSectorClear() {
   }
   if (G.player.dead) return;
   if (G.screen !== 'play') return;
+  if (G.director.spec.boss) {
+    const lv = weaponStep(`boss:${G.run.mode === 'campaign' ? G.run.sysIdx : G.sector}:${G.run.deep || 0}`);
+    if (lv) draftNote = `Main Cannon upgraded to LV ${lv}`;
+  }
   if (G.run.mode === 'campaign' && G.director.spec.boss && G.run.sysIdx < SYSTEMS.length - 1) {
     // System boss: a reward draft, then on to the next system.
     afterDraft = 'next';
