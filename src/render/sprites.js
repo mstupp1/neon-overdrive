@@ -241,6 +241,25 @@ export function buildSprites(ships) {
     glowFill(g, '#3ff6ff', 0, p, 0.3);
     glowStroke(g, '#3ff6ff', 1.6, 6, p);
   });
+  S.interceptor = makeSprite(22, (g) => {
+    const p = poly([[0, -8], [5, 4], [0, 1], [-5, 4]]);
+    glowFill(g, '#ffd24a', 0, p, 0.4);
+    glowStroke(g, '#ffe14d', 1.5, 6, p);
+  });
+  S.pb_interceptor = moduleShot('#ffd24a', makeSprite, { size: 14, draw: (g) => {
+    g.fillStyle = '#fff4a0'; g.shadowColor = '#ffd24a'; g.shadowBlur = 6;
+    g.beginPath(); poly(regular(3, 3, -Math.PI / 2))(g); g.fill();
+  } }, 10, 3);
+  S.cryo_spike = moduleShot('#7fe9ff', makeSprite, { size: 24, draw: (g) => {
+    const p = poly([[0, -10], [3, -2], [2, 8], [-2, 8], [-3, -2]]);
+    glowFill(g, '#7fe9ff', 0, p, 0.5);
+    glowStroke(g, '#ffffff', 1.6, 8, p);
+  } }, 22, 6);
+  S.acid_slag = moduleShot('#a6ff3d', makeSprite, { size: 20, draw: (g) => {
+    const grd = g.createRadialGradient(0, 0, 0, 0, 0, 6);
+    grd.addColorStop(0, '#ffffff'); grd.addColorStop(0.4, '#a6ff3d'); grd.addColorStop(1, 'rgba(166,255,61,0)');
+    g.fillStyle = grd; g.beginPath(); g.arc(0, 0, 6, 0, TAU); g.fill();
+  } }, 18, 7);
 
   // Enemies: see enemyArt.js (baked in buildEnemySpritesV2).
   S.eliteRing = makeSprite(96, (g) => {

@@ -10,6 +10,7 @@ import { pilotTimeScale, domeErase, onGraze, phasing } from './pilot.js';
 import { treeOnGraze, forcedCrit } from './tree.js';
 import { updateModules, updateBeams, drawModules, drawBeams, onBeam } from './modules.js';
 import { updateEnemies, damageEnemy } from './enemies.js';
+import { applyStatus } from './status.js';
 import { drawBoss } from './bosses.js';
 import { updatePlayerBullets, updateEnemyBullets, drawPlayerBullets, drawEnemyBullets, playerBullet } from './bullets.js';
 import { updatePickups, drawPickups } from './pickups.js';
@@ -142,12 +143,19 @@ function collide(p) {
         const a = Math.atan2(b.vy, b.vx);
         for (const s of [-0.5, 0.5]) playerBullet(b.x, b.y, a + s, 520, b.dmg * 0.45, S.pb_frag, { life: 0.4, r: 4, alpha: 0.9 }).hits.push(e);
       }
+      if (b.kind === 'spike') {
+        applyStatus(e, 'freeze', 2);
+        sparks(b.x, b.y, '#7fe9ff', 4, 180);
+      }
       if (b.aoe) {
-        explosion(b.x, b.y, '#ff9e3d', 0.6);
+        explosion(b.x, b.y, b.kind === 'spike' ? '#7fe9ff' : '#ff9e3d', 0.6);
         const r2 = b.aoe * b.aoe;
         for (const o of enemies) {
           if (o === e || o.dead || !o.entered || o.boss) continue;
-          if (dist2(b.x, b.y, o.x, o.y) < r2) damageEnemy(o, b.dmg * 0.6 * (b.crit ? p.st.critMul : 1), o.x, o.y);
+          if (dist2(b.x, b.y, o.x, o.y) < r2) {
+            damageEnemy(o, b.dmg * 0.6 * (b.crit ? p.st.critMul : 1), o.x, o.y);
+            if (b.kind === 'spike') applyStatus(o, 'freeze', 1);
+          }
         }
       }
       if (b.pierce > 0 && !e.boss) {

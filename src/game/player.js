@@ -23,6 +23,7 @@ import { cine } from './cinematic.js';
 import { treeForRun, treeOnKill, treeOnDash } from './tree.js';
 import { sv } from './stageview.js';
 import { updateBoost, resetBoost, boostSpeed, boostScore, drawBoostShip, boostLen } from './boost.js';
+import { rollBurst, BURST_GAP } from './status.js';
 
 export const xpFor = (l) => Math.floor(5 + 4.5 * l + 0.9 * l * l);
 
@@ -74,6 +75,8 @@ export function createPlayer(ship, gear = true) {
     swUsed: 0, // Second Wind charges spent this run
     burstN: 0, // burst weapons: shots left in the current burst
     burstT: 0,
+    fxBurstN: 0, // Burst Fire (status.js): extra volleys left in the current burst
+    fxBurstT: 0,
   };
   const cls = gear ? activeClass() : CLASSES[0];
   initPilot(p, cls, gear ? equippedPassives(cls.id).map((x) => x.id) : []);
@@ -308,6 +311,21 @@ export function updatePlayer(p, dt) {
     }
     p.fireT += w.interval;
     if (st.echo && p.echoT <= 0 && Math.random() < st.echo) p.echoT = Math.min(0.07, w.interval * 0.5); // Echo Fire
+    if (!(p.fxBurstN > 0)) {
+      const extra = rollBurst(st); // Burst Fire: extra volleys right behind this one
+      if (extra) {
+        p.fxBurstN = extra;
+        p.fxBurstT = BURST_GAP;
+      }
+    }
+  }
+  if (p.fxBurstN > 0) {
+    p.fxBurstT -= dt;
+    if (p.fxBurstT <= 0) {
+      firePrimary(p, w);
+      p.fxBurstN--;
+      p.fxBurstT += BURST_GAP;
+    }
   }
   if (p.burstN > 0) {
     p.burstT -= dt * rate;
@@ -386,7 +404,7 @@ export function comboMult() {
 
 export function addScore(base) {
   const p = G.player;
-  G.score += base * comboMult() * (p && p.odT > 0 ? 2 : 1) * boostScore(p) * G.director.diff.score;
+  G.score += base * comboMult() * (p && p.odT > 0 ? 2 : 1) * boostScore(p) * G.director.diff.score * ((p && p.st.scoreMul) || 1);
 }
 
 export function gainOverdrive(amount) {
@@ -435,6 +453,17 @@ export function onEnemyKilled(e) {
 
 export function hurtPlayer(p) {
   if (p.dead || p.iframes > 0 || p.dashT > 0 || p.god || G.mode === 'attract' || phasing(p) || cine.on) return;
+  if (p.st.dodge && Math.random() < p.st.dodge) {
+    // Lucky Dodge: the shot misses. A brief grace so one bullet cluster can't roll it twice.
+    p.iframes = p.st.dodgePulse ? 1.0 : 0.35;
+    floatText(p.x, p.y - 30, 'DODGE', '#9dffb0', 11, 0.7);
+    ring(p.x, p.y, p.st.dodgePulse ? 90 : 34, '#9dffb0', 0.4);
+    if (p.st.dodgePulse) {
+      clearBullets(p.x, p.y, 130);
+      sparks(p.x, p.y, '#9dffb0', 14, 240);
+    }
+    return;
+  }
   if (p.shield) {
     p.shield = 0;
     p.shieldT = 0;

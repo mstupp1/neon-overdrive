@@ -126,6 +126,7 @@ Open **PILOT** on the campaign map to pick a class and equip **2 passives**. Ran
 - **Specialization.** Every upgrade level counts toward its build path. The first two paths to reach 5 levels lock in as your specializations, with a mastery bonus at 5, 10 and 15 levels; after that the other paths share 10 splash levels.
 - **Fortune.** SKIP a draft to bank Fortune (+1 for a level-up, +2 for a reward, max 6). The next reward draft spends it all: luckier rolls, and at 2 / 4 / 6 Fortune one card is at least Rare / Epic / Legendary. Rerolls: 3 per run, +1 every 5 levels and +1 per boss kill (more from Greed gear, the Prospector tree notable and the Flux Core). Lock a card (lock icon, `F`, or X on a pad) to keep it through a reroll.
 - **Build.** Main cannon, stats (damage, fire rate, crit, pierce, speed, magnet, capacitor), defenses (hull, regenerating Aegis shield, extra dashes) and up to **4 weapon modules** (5 with Engineer's Overflow).
+- **Status and effect cards.** Wide Rounds / Accelerator Coils (projectile size, speed), Hyperflow (faster battle for score and credits), Lucky Dodge, Armor Piercing, Burst Fire, Cryo / Incendiary / Corrosive Rounds (stacking chill, burn, armor loss; each has a potency follow-up that only appears once you own it), Resonance Rounds (every Nth hit detonates) and Sundering Rounds (% max hull per hit). Armored enemies (tanks, carriers, hunters, elites, bosses) take less damage until you pierce or corrode it.
 - **Combo.** Kills chain into a score multiplier (up to x8). Getting hit breaks the chain.
 - **Graze and ultimate.** Skimming bullets and killing fills the ult meter. Every ultimate doubles your score while it lasts.
 - **Only the white core of your ship is the hitbox.** Dashing makes you invulnerable.
@@ -150,6 +151,10 @@ Open **PILOT** on the campaign map to pick a class and equip **2 passives**. Ran
 | Stasis Pulse | Freezes nearby bullets to a crawl and shocks enemies (Cyclone) |
 | Prism Beam | A locked-on beam that burns up to three targets (Void) |
 | Starfall | Stars fall from the top of the screen onto enemies (Void) |
+| Flamethrower | Continuous sweeping flame cone that applies stacking burn (Crimson) |
+| Glacial Spike | Heavy piercing ice spikes that shatter into chilling blasts (Crimson) |
+| Drone Swarm | Autonomous interceptors that sortie from your hull, strafe, and recharge (Cyclone) |
+| Caustic Slag | Volatile acid canisters that detonate into lingering armor-shredding pools (Cyclone) |
 
 **Evolutions.** Max a module (level 5) while owning its partner stat and a gold **EVOLVE** card can appear in drafts: Swarm Missiles + Targeting AI = **Hellfire Swarm**, Razor Orbit + Thrusters = **Storm Halo**, Arc Coil + Capacitor = **Tesla Storm**, Pulse Nova + Plasma Core = **Supernova**, Wingmen + Overclock = **Phalanx**, Rail Lance + Phase Rounds = **Annihilator**, Reflector + Aegis Shield = **Mirror Storm**, Gravity Well + Tractor Field = **Event Horizon**. Evolutions take no module slot and are never sold in the Black Market.
 
@@ -196,6 +201,7 @@ src/game/pilot.js     classes, ultimates, passives, Phase Shift time scale
 src/game/tree.js      passive trees (per-class node wheels, points, refunds, keystones)
 src/game/modules.js   weapon modules, evolutions, beams
 src/game/enemies.js   enemy roster and AI, Hunter, damage / kill
+src/game/status.js    shared combat systems: enemy armor, freeze / burn / corrode stacks, hit-count detonation, % hull damage, burst fire
 src/game/bosses.js    WARDEN / HYDRA / OMEGA / ECLIPSE
 src/game/director.js  wave director (sector flow, patterns, boss warn)
 src/game/campaign.js  systems, route generation, node specs

@@ -4,7 +4,7 @@ import { G, view, field } from './state.js';
 import { S, ENEMY_COLORS } from '../render/sprites.js';
 import { rand, damp, TAU, clamp, chance, dist2 } from '../core/math.js';
 import { shoot, ring, fan, aimAt } from './bullets.js';
-import { explosion, sparks, damageNumber, addShake, floatText, hitstop } from './fx.js';
+import { explosion, sparks, damageNumber, addShake, floatText, hitstop, ring as fxRing } from './fx.js';
 import { dropXp, dropPickup } from './pickups.js';
 import { dropKillCredits } from './economy.js';
 import { rollRelicDrop } from './collectables.js';
@@ -14,6 +14,7 @@ import { onEnemyKilled } from './player.js';
 import { onKill as cineOnKill } from './cinematic.js';
 import { onEliteKilled } from './pilot.js';
 import { bossDamaged, updateBoss, every } from './bosses.js';
+import { armorOf, onPlayerHit, slowOf, updateStatus, applyStatus } from './status.js';
 
 export const TYPES = {
   dart: { hp: 3, r: 12, xp: 1, score: 100, spr: 'dart' },
@@ -620,13 +621,21 @@ export function updateEnemies(dt) {
   const arr = G.enemies;
   for (const e of arr) {
     if (e.dead) continue;
+    if (e.fx || e.frozenT > 0) {
+      updateStatus(e, dt, damageEnemy);
+      if (e.dead) continue;
+    }
+    const real = dt;
+    if (e.fx || e.frozenT > 0) dt = real * slowOf(e); // Freeze: slowed (or locked) behaviour clock
     e.t += dt;
-    if (e.flash > 0) e.flash -= dt;
+    if (e.flash > 0) e.flash -= real;
     if (e.boss) updateBoss(e, dt);
     else if (e.ow) {
       owAI(e, dt); // sets e.entered (on camera) and handles its own despawning
+      dt = real;
       continue;
     } else BEHAVIOR[e.type](e, dt);
+    dt = real;
     if (!e.entered && inBounds(e, -e.r * 0.5)) e.entered = true;
     // Despawn once they leave the play area (after having entered), or if stuck off-screen.
     if (!e.boss && !e.keep && ((e.entered && !inBounds(e, 70)) || e.t > 30 || (!e.entered && e.t > 9))) e.dead = true;
@@ -640,9 +649,11 @@ export function updateEnemies(dt) {
 
 // --- Damage & death -----------------------------------------------------------------
 
-export function damageEnemy(e, dmg, x, y, crit = false) {
+// `src` marks damage that comes from a shared system, not a direct hit: 'dot' (burn: ignores armor and shields, no procs),
+// 'pct' (% hull) and 'det' (detonation) take armor but never trigger procs themselves.
+export function damageEnemy(e, dmg, x, y, crit = false, src = '') {
   if (e.dead || e.invuln) return false;
-  if (e.shieldedBy) {
+  if (e.shieldedBy && src !== 'dot') {
     // Shielder link: -80% damage while the shielder lives.
     if (e.shieldedBy.dead) e.shieldedBy = null;
     else {
@@ -657,10 +668,13 @@ export function damageEnemy(e, dmg, x, y, crit = false) {
     if (st.redline) dmg *= 1 + st.redline * Math.max(0, pl.maxHp - pl.hp);
     if (st.bounty && (e.boss || e.elite || e.hunter)) dmg *= 1 + st.bounty;
     if (st.chainDmg) dmg *= 1 + st.chainDmg * Math.min(14, Math.floor(G.combo / 12)); // Chain Link: per x0.5 combo step
+    if (st.shatter && (e.frozenT > 0 || (e.fx && e.fx.freeze))) dmg *= 1 + st.shatter; // Cryostasis: +50% vs frozen
   }
+  if (pl && src !== 'dot') dmg *= 1 - armorOf(e, pl.st); // armor (Armor Piercing and Corrosive lower it)
   e.hp -= dmg;
   e.flash = 0.06;
   damageNumber(x ?? e.x, y ?? e.y, dmg, crit);
+  if (pl && !src) onPlayerHit(e, dmg, x ?? e.x, y ?? e.y, damageEnemy); // statuses, marks, % hull
   if (e.boss) {
     bossDamaged(e, dmg);
     return false;
@@ -712,6 +726,16 @@ export function killEnemy(e, silent = false) {
     for (let i = 0; i < 3; i++) {
       const a = -Math.PI / 2 + (i / 3) * TAU + rand(-0.2, 0.2);
       spawnEnemy('swarm', e.x, e.y, { mv: 'burst', vx: Math.cos(a) * 240, vy: Math.sin(a) * 240 }).entered = true;
+    }
+  }
+  if (G.player && G.player.st.cinder && e.fx && e.fx.burn) {
+    const stacks = Math.max(1, e.fx.burn.n);
+    fxRing(e.x, e.y, 80, '#ff8a2b', 0.35);
+    sparks(e.x, e.y, '#ff8a2b', 8, 160);
+    for (const o of G.enemies) {
+      if (o !== e && !o.dead && dist2(e.x, e.y, o.x, o.y) < 80 * 80) {
+        applyStatus(o, 'burn', stacks);
+      }
     }
   }
   onEnemyKilled(e);

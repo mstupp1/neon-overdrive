@@ -70,6 +70,24 @@ export const ICONS = {
   ramScoop: svg('<path d="M4 8c4 0 6 2 8 4s4 4 8 4"/><path d="M4 14h5M4 18h8"/><path d="M17 4l3 4-4 1"/>'),
   injector: svg('<path d="M9 3h6M12 3v4"/><rect x="8" y="7" width="8" height="9"/><path d="M12 16v5M10 19l2 2 2-2"/>'),
   overthrust: svg('<path d="M3 6l6 6-6 6M10 6l6 6-6 6M17 6l4 6-4 6"/>'),
+  projSize: svg('<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/><path d="M12 2v3M12 19v3"/>'),
+  projSpeed: svg('<path d="M3 8h8M3 12h12M3 16h8"/><path d="M15 6l6 6-6 6"/>'),
+  gameSpeed: svg('<circle cx="12" cy="13" r="8"/><path d="M12 13l4-4M9 2h6"/><path d="M12 7v1" stroke-dasharray="1 2"/>'),
+  dodge: svg('<path d="M14 4a3 3 0 100 6M9 21l2-7 4 3 2-6"/><path d="M3 10l3-2M3 15l4-1" stroke-dasharray="2 2"/>'),
+  armorPierce: svg('<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M4 12h16M15 8l5 4-5 4"/>'),
+  burstFire: svg('<path d="M7 3v10M12 3v14M17 3v10"/><path d="M5 20h14" stroke-dasharray="2 2"/>'),
+  cryo: svg('<path d="M12 2v20M4 7l16 10M20 7L4 17"/><path d="M9 4l3 2 3-2M9 20l3-2 3 2"/>'),
+  deepFreeze: svg('<path d="M12 2v20M4 7l16 10M20 7L4 17"/><circle cx="12" cy="12" r="9" stroke-dasharray="2 3"/>'),
+  incendiary: svg('<path d="M12 2c1 4 6 6 6 12a6 6 0 01-12 0c0-3 2-4 3-7 1 1 2 2 3-5z"/>'),
+  accelerant: svg('<path d="M12 2c1 4 6 6 6 12a6 6 0 01-12 0c0-3 2-4 3-7 1 1 2 2 3-5z"/><path d="M10 15l2 2 2-2"/>'),
+  corrosive: svg('<path d="M12 3c3 4 6 7 6 11a6 6 0 01-12 0c0-4 3-7 6-11z"/><path d="M9 15h6"/>'),
+  acidEtch: svg('<path d="M12 3c3 4 6 7 6 11a6 6 0 01-12 0c0-4 3-7 6-11z"/><path d="M9 13l6 4M15 13l-6 4"/>'),
+  resonance: svg('<circle cx="12" cy="12" r="2"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="10" stroke-dasharray="3 3"/>'),
+  sundering: svg('<path d="M12 2l3 7-3 3 3 3-3 7"/><path d="M5 8h4M15 16h4"/>'),
+  flamethrower: svg('<path d="M5 19l4-4M3 21l2-2"/><path d="M9 15c2-4 6-5 9-9-1 5 1 7 4 9-4 1-5 4-6 7-2-2-4-2-7-7z"/>'),
+  droneSwarm: svg('<path d="M4 10l3-4 3 4-3-1zM14 6l3-4 3 4-3-1zM9 18l3-4 3 4-3-1z"/><path d="M12 12v3M7 8l2 2M17 8l-2 2" stroke-dasharray="2 2"/>'),
+  cryoSpike: svg('<path d="M12 2l3 9-3 11-3-11z"/><path d="M7 6l2 6-2 7-2-7zM17 6l2 6-2 7-2-7z"/><path d="M3 12h18" stroke-dasharray="2 2"/>'),
+  causticSlag: svg('<path d="M9 3h6v4H9z"/><path d="M8 7h8l-1 8H9z"/><path d="M3 20c3-2 6 2 9 0s6 2 9 0"/><circle cx="12" cy="11" r="1.5"/>'),
   credits: svg('<circle cx="12" cy="12" r="9"/><path d="M15 8.5c-.8-1-2-1.5-3-1.5-1.7 0-3 1-3 2.5s1.3 2 3 2.5 3 1 3 2.5-1.3 2.5-3 2.5c-1 0-2.2-.5-3-1.5M12 5v2M12 17v2"/>'),
   repair: svg('<path d="M12 5v14M5 12h14"/>'),
 };
@@ -122,6 +140,8 @@ export const UPGRADES = [
   { id: 'rail', name: 'Rail Lance', cat: 'module', max: 5, weight: 0.9, tier: 1, desc: (lv) => (lv === 1 ? 'Fire a massive piercing beam forward.' : 'Wider beam, more damage, faster charge.') },
   { id: 'reflector', name: 'Reflector', cat: 'module', max: 5, weight: 0.85, tier: 1, desc: (lv) => (lv === 1 ? 'A pulsing shield bubble turns enemy bullets back on their owners.' : 'Wider bubble, more frequent, harder-hitting returns.') },
   { id: 'mines', name: 'Proximity Mines', cat: 'module', max: 5, weight: 0.85, tier: 1, desc: (lv) => (lv === 1 ? 'Drop mines in your wake that blow when enemies come close.' : 'More mines, bigger blasts.') },
+  { id: 'flamethrower', name: 'Flamethrower', cat: 'module', max: 5, weight: 0.85, tier: 1, desc: (lv) => (lv === 1 ? 'A continuous flame cone extends from your ship, scorching enemies with stacking burn.' : lv === 3 ? 'Wider whip cone, hotter flames and faster burn.' : 'Longer reach, wider cone and scorching burn.') },
+  { id: 'cryoSpike', name: 'Glacial Spike', cat: 'module', max: 5, weight: 0.85, tier: 1, desc: (lv) => (lv === 1 ? 'Launch heavy ice spikes that pierce enemies and shatter into chilling shrapnel.' : lv === 3 ? 'Twin spikes per salvo.' : 'Triple barrage of massive spikes that shatter into freezing blasts.') },
 
   // --- Cyclone tech ---
   { id: 'cull', name: 'Culling Edge', cat: 'stat', max: 3, weight: 0.6, tier: 2, desc: (lv) => `Enemies below ${4 + 4 * lv}% hull are destroyed outright. Not bosses.` },
@@ -131,12 +151,30 @@ export const UPGRADES = [
   { id: 'gravity', name: 'Gravity Well', cat: 'module', max: 5, weight: 0.85, tier: 2, desc: (lv) => (lv === 1 ? 'Drop a singularity that drags enemies and bullets in and crushes them.' : 'Bigger, stronger, more frequent wells.') },
   { id: 'saw', name: 'Buzzsaw', cat: 'module', max: 5, weight: 0.85, tier: 2, desc: (lv) => (lv === 1 ? 'Hurl a saw that carves through enemies and boomerangs back.' : lv === 3 ? 'Throw two saws at once.' : 'Bigger, faster, harder-hitting saws.') },
   { id: 'stasis', name: 'Stasis Pulse', cat: 'module', max: 5, weight: 0.8, tier: 2, desc: (lv) => (lv === 1 ? 'A pulse freezes nearby bullets to a crawl and shocks enemies.' : 'Wider, more frequent pulses.') },
+  { id: 'droneSwarm', name: 'Drone Swarm', cat: 'module', max: 5, weight: 0.85, tier: 2, desc: (lv) => (lv === 1 ? 'Autonomous interceptors launch from your hull, strafe enemies, and return to recharge.' : lv === 3 ? 'Interceptors fly faster and fire twin bursts.' : '+2 interceptors and faster recharges.') },
+  { id: 'causticSlag', name: 'Caustic Slag', cat: 'module', max: 5, weight: 0.85, tier: 2, desc: (lv) => (lv === 1 ? 'Lob volatile acid canisters that detonate into lingering corrosive pools.' : lv === 3 ? 'Lob two canisters per salvo with wider pools.' : 'Three canisters creating massive pools that dissolve enemy armor.') },
 
   // --- Void tech ---
   { id: 'perpetual', name: 'Perpetual Engine', cat: 'stat', max: 3, weight: 0.55, tier: 3, desc: () => 'Your ultimate meter slowly charges on its own.' },
   { id: 'nullField', name: 'Null Field', cat: 'defense', max: 3, weight: 0.55, tier: 3, desc: () => 'Enemy bullets that come close slow down. Wider each level.' },
   { id: 'prism', name: 'Prism Beam', cat: 'module', max: 5, weight: 0.8, tier: 3, desc: (lv) => (lv === 1 ? 'A locked-on beam burns the nearest enemy.' : lv === 3 || lv === 5 ? 'The beam splits to one more target.' : 'Hotter beam, longer reach.') },
   { id: 'starfall', name: 'Starfall', cat: 'module', max: 5, weight: 0.8, tier: 3, desc: (lv) => (lv === 1 ? 'Call down falling stars that blast enemies from above.' : 'More stars, bigger impacts.') },
+
+  // --- Shared-system cards (status.js). `req`: only offered once that card is owned. ---
+  { id: 'projSize', name: 'Wide Rounds', cat: 'stat', max: 4, weight: 0.7, tier: 0, desc: () => '+15% projectile size, for every weapon.' },
+  { id: 'projSpeed', name: 'Accelerator Coils', cat: 'stat', max: 4, weight: 0.7, tier: 0, desc: () => '+12% projectile speed, for every weapon.' },
+  { id: 'gameSpeed', name: 'Hyperflow', cat: 'stat', max: 3, weight: 0.5, tier: 0, desc: () => 'The whole battle runs 8% faster for good. +20% score, +10% credits.' },
+  { id: 'dodge', name: 'Lucky Dodge', cat: 'defense', max: 4, weight: 0.6, tier: 0, desc: () => '+6% chance to slip past a shot that would have hit you.' },
+  { id: 'armorPierce', name: 'Armor Piercing', cat: 'stat', max: 4, weight: 0.7, tier: 1, desc: () => 'Your shots ignore 8% of enemy armor.' },
+  { id: 'burstFire', name: 'Burst Fire', cat: 'stat', max: 4, weight: 0.7, tier: 1, desc: (lv) => (lv === 3 ? '+8% burst chance, and bursts fire one more extra volley.' : '+8% chance for a volley to burst. Scales with fire rate.') },
+  { id: 'cryo', name: 'Cryo Rounds', cat: 'stat', max: 3, weight: 0.6, tier: 1, desc: () => '+12% chance per hit to chill. Chill stacks slow enemies; a full stack freezes them.' },
+  { id: 'deepFreeze', name: 'Deep Freeze', cat: 'stat', max: 3, weight: 0.5, tier: 1, req: 'cryo', desc: () => '+25% slow from every chill stack.' },
+  { id: 'incendiary', name: 'Incendiary Rounds', cat: 'stat', max: 3, weight: 0.6, tier: 1, desc: () => '+12% chance per hit to ignite. Burn stacks deal damage over time and ignore armor.' },
+  { id: 'accelerant', name: 'Accelerant', cat: 'stat', max: 3, weight: 0.5, tier: 1, req: 'incendiary', desc: () => '+25% burn damage per stack.' },
+  { id: 'corrosive', name: 'Corrosive Rounds', cat: 'stat', max: 3, weight: 0.6, tier: 1, desc: () => '+12% chance per hit to corrode. Each stack strips enemy armor (and lowers it below zero).' },
+  { id: 'acidEtch', name: 'Acid Etch', cat: 'stat', max: 3, weight: 0.5, tier: 1, req: 'corrosive', desc: () => '+25% armor stripped per corrosion stack.' },
+  { id: 'resonance', name: 'Resonance Rounds', cat: 'stat', max: 3, weight: 0.6, tier: 2, desc: (lv) => `Every ${[0, 6, 5, 4][lv]}th hit on an enemy detonates for ${3 + lv}x damage, splashing neighbours.` },
+  { id: 'sundering', name: 'Sundering Rounds', cat: 'stat', max: 3, weight: 0.6, tier: 2, desc: () => "Hits deal +0.3% of the target's max hull. Bosses take a fraction." },
 
   // Evolutions: cat 'evolution', unlocked by a maxed module plus an owned partner stat (mod / stat). Never sold in the market.
   { id: 'hellfire', name: 'Hellfire Swarm', cat: 'evolution', max: 1, weight: 7, tier: 0, mod: 'missiles', stat: 'crit', desc: () => 'Missiles: double the salvo, bigger blasts, and missile hits always crit.' },
@@ -234,6 +272,28 @@ export function recomputeStats(p) {
   st.perpetual = 1.2 * lv('perpetual');
   st.nullR = lv('nullField') ? 55 + 15 * lv('nullField') : 0;
   st.find = 0; // rarity find (gear / ship traits, rarity.js luckFor)
+  // Shared combat systems (status.js): neutral until a card, gear modifier or passive raises them.
+  st.armorPierce = 0.08 * lv('armorPierce'); // armor fraction ignored on enemies
+  st.freezeChance = 0.12 * lv('cryo'); // chance per hit to add one stack
+  st.burnChance = 0.12 * lv('incendiary');
+  st.corrodeChance = 0.12 * lv('corrosive');
+  st.freezePot = 1 + 0.25 * lv('deepFreeze'); // status potency multipliers (slow / burn damage / armor shaved)
+  st.burnPot = 1 + 0.25 * lv('accelerant');
+  st.corrodePot = 1 + 0.25 * lv('acidEtch');
+  st.pctHp = 0.003 * lv('sundering'); // % of the target's max hull dealt as extra damage per hit (bosses take 15% of it)
+  st.detHits = [0, 6, 5, 4][lv('resonance')]; // every (detHits+1)th hit on an enemy detonates; 0 = off
+  st.detMul = lv('resonance') ? 3 + lv('resonance') : 4; // detonation damage as a multiple of the triggering hit
+  st.detR = 70; // detonation radius (neighbours take half)
+  st.burstChance = 0.08 * lv('burstFire'); // chance a volley is followed by extra volleys (scales with fire rate)
+  st.burstExtra = lv('burstFire') >= 3 ? 2 : 1; // how many extra volleys a burst adds
+  st.projSize = 1 + 0.15 * lv('projSize'); // player projectile size / speed (bullets.js playerBullet)
+  st.projSpeed = 1 + 0.12 * lv('projSpeed');
+  st.gameSpeed = 1 + 0.08 * lv('gameSpeed'); // battle clock (main.js); paid for with score and credits
+  st.scoreMul = 1 + 0.2 * lv('gameSpeed');
+  st.dodge = 0.06 * lv('dodge'); // chance to negate a hit (player.js hurtPlayer)
+  st.shatter = 0; // bonus damage against frozen enemies (Cryostasis legendary)
+  st.cinder = 0; // death burns spread to nearby enemies (Pyre Mantle legendary)
+  st.dodgePulse = false; // dodges emit an erase pulse and extend iframes (Phase Shroud legendary)
   st.modRate = 1; // module fire rate (gear modifiers; modules.js rateMul)
   st.hitIfr = 1; // invulnerability after a hit (gear modifiers, passive tree)
   st.rerolls = 0; // extra draft rerolls at the start of a run (gear, passive tree, Flux Core; main.js newWorld)
@@ -288,6 +348,7 @@ export function rollUpgradeIds(p, kind, n = 3, rng = Math.random, evo = false, o
     if (only && !only(u)) return false;
     const l = p.up[u.id] || 0;
     if (!l && !available(p, u, k)) return false;
+    if (u.req && !p.up[u.req]) return false;
     if (u.cat === 'evolution') return evo && evolutionReady(p, u);
     if (l >= u.max) return false;
     if (u.cat === 'module' && l === 0 && mods >= p.st.maxModules) return false;
@@ -329,11 +390,15 @@ export const UP_TAGS = {
   crit: 'crit', overload: 'crit', cull: 'crit', bounty: 'crit',
   missiles: 'modules', orbitals: 'modules', drones: 'modules', arc: 'modules', nova: 'modules', rail: 'modules', shrapnel: 'modules', flak: 'modules',
   gravity: 'modules', reflector: 'modules', mines: 'modules', saw: 'modules', stasis: 'modules', prism: 'modules', starfall: 'modules', static: 'modules',
+  flamethrower: 'modules', droneSwarm: 'modules', cryoSpike: 'modules', causticSlag: 'modules',
   thrusters: 'mobility', dashes: 'mobility', blink: 'mobility', dashNova: 'mobility',
   boostTank: 'mobility', ramScoop: 'mobility', injector: 'mobility', overthrust: 'mobility',
   capacitor: 'overdrive', grazer: 'overdrive', perpetual: 'overdrive', nullField: 'overdrive', chainlink: 'overdrive',
   hull: 'tank', aegis: 'tank', leech: 'tank', secondWind: 'tank',
   magnet: 'greed', salvage: 'greed', prospector: 'greed',
+  projSize: 'firepower', projSpeed: 'firepower', armorPierce: 'firepower', burstFire: 'firepower', resonance: 'firepower',
+  sundering: 'crit', gameSpeed: 'mobility', dodge: 'tank',
+  cryo: 'modules', deepFreeze: 'modules', incendiary: 'modules', accelerant: 'modules', corrosive: 'modules', acidEtch: 'modules',
 };
 export const synergy = (p, id) => (p.tags && UP_TAGS[id] ? p.tags[UP_TAGS[id]] || 0 : 0);
 export const SYNERGY_MIN = 2; // path weight at which a card shows its SYNERGY mark
@@ -522,6 +587,9 @@ const TUNE_ICONS = {
   dashCd: 'dashes', dashLen: 'blink', od: 'capacitor', odDur: 'capacitor', grazeR: 'grazer', grazeOd: 'grazer', shield: 'aegis',
   iframes: 'hull', magnet: 'magnet', xp: 'salvage', credits: 'prospector', find: 'prospector', boostCap: 'boostTank',
   boostRegen: 'ramScoop', boostEff: 'injector',
+  projSize: 'projSize', projSpeed: 'projSpeed', armorPierce: 'armorPierce', burst: 'burstFire', burstN: 'burstFire',
+  freeze: 'cryo', freezePot: 'deepFreeze', burn: 'incendiary', burnPot: 'accelerant', corrode: 'corrosive', corrodePot: 'acidEtch',
+  sunder: 'sundering', dodge: 'dodge',
 };
 const affixPath = (stat) => affixTag(stat);
 export const isTune = (id) => typeof id === 'string' && id.startsWith('tune:');

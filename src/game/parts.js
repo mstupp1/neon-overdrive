@@ -62,6 +62,22 @@ export const STATS = {
   boostEff: { apply: (st, v) => (st.boostEff *= 1 + v), text: (v) => `${sg(v)}${P(v)} boost burn time` },
   boostFlow: { apply: (st, v) => (st.boostFlow += v), text: (v) => `Boost rushes the stage +${P(v)} faster (more score)` },
   rerolls: { flat: true, apply: (st, v) => (st.rerolls += v), text: (v) => `+${v} reroll at the start of each run` },
+  // Shared combat systems (status.js).
+  armorPierce: { apply: (st, v) => (st.armorPierce += v), text: (v) => `Shots ignore ${P(v)} of enemy armor` },
+  freeze: { apply: (st, v) => (st.freezeChance += v), text: (v) => `${P(v)} chance per hit to chill (stacking slow)` },
+  freezePot: { apply: (st, v) => (st.freezePot += v), text: (v) => `+${P(v)} chill slow` },
+  burn: { apply: (st, v) => (st.burnChance += v), text: (v) => `${P(v)} chance per hit to ignite (stacking burn)` },
+  burnPot: { apply: (st, v) => (st.burnPot += v), text: (v) => `+${P(v)} burn damage` },
+  corrode: { apply: (st, v) => (st.corrodeChance += v), text: (v) => `${P(v)} chance per hit to corrode (stacking armor loss)` },
+  corrodePot: { apply: (st, v) => (st.corrodePot += v), text: (v) => `+${P(v)} armor shredded per stack` },
+  pctHp: { apply: (st, v) => (st.pctHp += v), text: (v) => `Hits deal +${(v * 100).toFixed(1)}% of target max hull` },
+  detHits: { flat: true, apply: (st, v) => (st.detHits = st.detHits ? Math.min(st.detHits, v) : v), text: (v) => `Every ${v + 1}th hit on an enemy detonates` },
+  burst: { apply: (st, v) => (st.burstChance += v), text: (v) => `+${P(v)} chance to fire in a burst` },
+  burstN: { flat: true, apply: (st, v) => (st.burstExtra += v), text: (v) => `Bursts fire +${v} extra volley` },
+  projSize: { apply: (st, v) => (st.projSize += v), text: (v) => `+${P(v)} projectile size` },
+  projSpeed: { apply: (st, v) => (st.projSpeed += v), text: (v) => `+${P(v)} projectile speed` },
+  dodge: { apply: (st, v) => (st.dodge = Math.min(0.5, st.dodge + v)), text: (v) => `+${P(v)} chance to dodge a hit` },
+  sunder: { apply: (st, v) => (st.pctHp += v * 0.1), text: (v) => `Hits deal +${+(v * 10).toFixed(1)}% of target max hull` }, // v is x10 of the real fraction (gear values round to 0.01)
 };
 
 // Random modifiers: [stat, tag, lo, hi, minRarity, weight]. Values grow with item level; rarer items roll higher.
@@ -76,6 +92,12 @@ export const AFFIXES = [
   ['magnet', 'greed', 0.15, 0.35], ['xp', 'greed', 0.04, 0.1], ['credits', 'greed', 0.06, 0.15], ['find', 'greed', 0.05, 0.15],
   ['rerolls', 'greed', 1, 1, 2, 0.35], ['grazeOd', 'overdrive', 0.1, 0.25],
   ['boostCap', 'mobility', 0.08, 0.2, 0, 0.7], ['boostRegen', 'mobility', 0.08, 0.2, 0, 0.7], ['boostEff', 'mobility', 0.06, 0.15, 0, 0.7],
+  // Shared combat systems (status.js).
+  ['projSize', 'firepower', 0.05, 0.12, 0, 0.7], ['projSpeed', 'firepower', 0.05, 0.12, 0, 0.7],
+  ['armorPierce', 'firepower', 0.03, 0.07, 1, 0.7], ['burst', 'firepower', 0.02, 0.05, 1, 0.6], ['burstN', 'firepower', 1, 1, 3, 0.25],
+  ['freeze', 'modules', 0.03, 0.07, 1, 0.6], ['burn', 'modules', 0.03, 0.07, 1, 0.6], ['corrode', 'modules', 0.03, 0.07, 1, 0.6],
+  ['freezePot', 'modules', 0.08, 0.18, 2, 0.45], ['burnPot', 'modules', 0.08, 0.18, 2, 0.45], ['corrodePot', 'modules', 0.08, 0.18, 2, 0.45],
+  ['sunder', 'crit', 0.01, 0.03, 2, 0.5], ['dodge', 'tank', 0.02, 0.05, 1, 0.7],
 ].map(([stat, tag, lo, hi, minR = 0, weight = 1]) => ({ id: stat, stat, tag, lo, hi, minR, weight }));
 const affixById = new Map(AFFIXES.map((a) => [a.id, a]));
 export const affixTag = (id) => (affixById.get(id) || {}).tag;
@@ -122,6 +144,14 @@ export const BASES = [
   { id: 'ramjet', slot: 'thrusters', name: 'Ramjet Tank', tag: 'mobility', fx: [['boostCap', 0.35], ['boostRegen', 0.15], ['speed', -0.04]], icon: svg('<circle cx="12" cy="10" r="6"/><path d="M12 10V6M9 16l-2 5M15 16l2 5M12 16v5"/>') },
   { id: 'nitro', slot: 'thrusters', name: 'Nitro Injector', tag: 'mobility', fx: [['boostFlow', 0.15], ['boostEff', 0.25], ['dashCd', -0.1]], icon: svg('<path d="M10 2h4M12 2v4"/><rect x="8" y="6" width="8" height="10"/><path d="M6 21l6-5 6 5"/>') },
   { id: 'coil', slot: 'thrusters', name: 'Magnet Coil', tag: 'greed', fx: [['magnet', 0.6], ['speed', -0.05]], icon: svg('<path d="M6 4v8a6 6 0 0012 0V4M6 8h4M14 8h4"/>') },
+  // --- Shared-system bases (status.js) ---
+  { id: 'cryocore', slot: 'core', name: 'Cryo Core', tag: 'modules', fx: [['freeze', 0.12], ['dmg', -0.05]], icon: svg('<path d="M12 2v20M4 7l16 10M20 7L4 17"/><path d="M9 4l3 2 3-2M9 20l3-2 3 2"/>') },
+  { id: 'embercore', slot: 'core', name: 'Ember Core', tag: 'modules', fx: [['burn', 0.12], ['rate', -0.05]], icon: svg('<path d="M12 2c1 4 6 6 6 12a6 6 0 01-12 0c0-3 2-4 3-7 1 1 2 2 3-5z"/>') },
+  { id: 'acidcore', slot: 'core', name: 'Acid Core', tag: 'modules', fx: [['corrode', 0.12], ['dmg', -0.05]], icon: svg('<path d="M12 3c3 4 6 7 6 11a6 6 0 01-12 0c0-4 3-7 6-11z"/><path d="M9 15h6"/>') },
+  { id: 'burstcoil', slot: 'core', name: 'Burst Coil', tag: 'firepower', fx: [['burst', 0.12], ['dmg', -0.08]], icon: svg('<path d="M7 3v10M12 3v14M17 3v10"/><path d="M5 20h14" stroke-dasharray="2 2"/>') },
+  { id: 'phasecloak', slot: 'plating', name: 'Phase Cloak', tag: 'tank', fx: [['dodge', 0.08], ['hull', -1]], icon: svg('<path d="M14 4a3 3 0 100 6M9 21l2-7 4 3 2-6"/><path d="M3 10l3-2M3 15l4-1" stroke-dasharray="2 2"/>') },
+  { id: 'breaker', slot: 'plating', name: 'Breaker Plating', tag: 'firepower', fx: [['armorPierce', 0.15], ['speed', -0.06]], icon: svg('<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M4 12h16M15 8l5 4-5 4"/>') },
+  { id: 'massdriver', slot: 'thrusters', name: 'Mass Driver', tag: 'firepower', fx: [['projSize', 0.2], ['speed', -0.05]], icon: svg('<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/><path d="M12 2v3M12 19v3"/>') },
 ];
 
 // Legendaries: fixed base effect + a unique passive (`unique` text, `apply`, optional `start` levels). They roll
@@ -200,6 +230,37 @@ export const LEGENDARIES = [
     unique: 'Your ultimate meter charges on its own.',
     apply(st) { st.perpetual += 2.4; },
     icon: svg('<path d="M7 8a4 4 0 100 8c3 0 7-8 10-8a4 4 0 110 8c-3 0-7-8-10-8z"/>'),
+  },
+  // --- Shared-system legendaries (status.js) ---
+  {
+    id: 'cryostasis', slot: 'core', name: 'Cryostasis Core', tag: 'modules', fx: [['freeze', 0.1]],
+    unique: 'Hits chill (+20% chance, +50% slow). Frozen enemies take 50% more damage.',
+    apply(st) { st.freezeChance += 0.2; st.freezePot += 0.5; st.shatter += 0.5; },
+    icon: svg('<path d="M12 2v20M4 7l16 10M20 7L4 17"/><circle cx="12" cy="12" r="9" stroke-dasharray="2 3"/>'),
+  },
+  {
+    id: 'fracture', slot: 'core', name: 'Fracture Engine', tag: 'firepower', fx: [['armorPierce', 0.1]],
+    unique: 'Shots ignore 20% more armor, and every 6th hit on an enemy detonates.',
+    apply(st) { st.armorPierce += 0.2; st.detHits = st.detHits ? Math.min(st.detHits, 5) : 5; },
+    icon: svg('<path d="M12 2l3 7-3 3 3 3-3 7"/><path d="M5 8h4M15 16h4"/><circle cx="12" cy="12" r="9" stroke-dasharray="2 3"/>'),
+  },
+  {
+    id: 'pyremantle', slot: 'plating', name: 'Pyre Mantle', tag: 'modules', fx: [['burn', 0.1]],
+    unique: 'Hits ignite (+20% chance). Burning enemies spread their fire to nearby enemies when they die.',
+    apply(st) { st.burnChance += 0.2; st.cinder += 1; },
+    icon: svg('<path d="M4 6l8-3 8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9z"/><path d="M12 8c1 2 3 3 3 5a3 3 0 01-6 0c0-1.5 1-2 1.5-3.5.7.5 1 1 1.5-1.5z"/>'),
+  },
+  {
+    id: 'phaseshroud', slot: 'plating', name: 'Phase Shroud', tag: 'tank', fx: [['dodge', 0.06]],
+    unique: '+12% dodge. Every dodge pulses, erasing nearby bullets, and grants a second of safety.',
+    apply(st) { st.dodge = Math.min(0.5, st.dodge + 0.12); st.dodgePulse = true; },
+    icon: svg('<path d="M14 4a3 3 0 100 6M9 21l2-7 4 3 2-6"/><circle cx="12" cy="12" r="10" stroke-dasharray="2 3"/>'),
+  },
+  {
+    id: 'tachyon', slot: 'thrusters', name: 'Tachyon Manifold', tag: 'firepower', fx: [['projSpeed', 0.1]],
+    unique: '+15% burst chance, and bursts fire one more extra volley.',
+    apply(st) { st.burstChance += 0.15; st.burstExtra += 1; },
+    icon: svg('<path d="M3 8h8M3 12h12M3 16h8"/><path d="M15 6l6 6-6 6"/><path d="M18 3v3M18 18v3"/>'),
   },
 ];
 
