@@ -7,7 +7,7 @@ import { profile, saveProfile } from '../core/storage.js';
 import { chance } from '../core/math.js';
 import { floatText } from './fx.js';
 import { dropCredit } from './pickups.js';
-import { ICONS, upgradeById, rollUpgradeIds, applyUpgrade, cardInfo, recomputeStats } from './upgrades.js';
+import { ICONS, upgradeById, rollUpgradeIds, applyUpgrade, cardInfo, recomputeStats, pathRoom } from './upgrades.js';
 
 const svg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 export const ECON_ICONS = {
@@ -193,6 +193,7 @@ export function buyOffer(offer, p = G.player) {
   if (wallet() < offer.price) return 'NEED CREDITS';
   if (offer.kind === 'upgrade') {
     if ((p.up[offer.up] || 0) >= upgradeById(offer.up).max) return 'MAXED';
+    if (pathRoom(p, offer.up) <= 0) return 'SPLASH FULL'; // another purchase used the last off-path level
     applyUpgrade(p, offer.up, G);
   } else if (offer.kind === 'repair') {
     p.hp = Math.min(p.maxHp, p.hp + offer.amount);
