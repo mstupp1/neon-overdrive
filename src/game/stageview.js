@@ -41,6 +41,25 @@ const FOG = 260; // chase: virtual depth over which things fade in from the far 
 // so their lit shadows sit visibly below them and the floor reads as a ground plane rather than the play surface.
 const HOVER = 34;
 
+// Chase cutouts: how far a ship tilts (radians, + = clockwise). The jet uses its own bank; enemies bank into their
+// sideways speed, read from how far they moved since the last frame (bosses only a little).
+const banks = new WeakMap();
+function tilt(o) {
+  if (o === G.player) return o.bank * 0.42;
+  let b = banks.get(o);
+  if (!b) {
+    banks.set(o, { x: o.x, t: G.time, v: 0 });
+    return 0;
+  }
+  const dt = G.time - b.t;
+  if (dt > 0) {
+    b.v += (clamp((o.x - b.x) / dt / 240, -1, 1) - b.v) * Math.min(1, dt * 7);
+    b.x = o.x;
+    b.t = G.time;
+  }
+  return b.v * (o.boss ? 0.12 : 0.4);
+}
+
 // The fly-through camera (cine.camera(), virtual units) for this frame: shadows and cutouts follow it like the frame.
 const CAM = { z: 1, x: 0, y: 0 };
 
@@ -65,7 +84,7 @@ function chaseProj() {
   if (P.H === r.H && P.top === r.top) return P;
   P.H = r.H;
   P.top = r.top;
-  P.hy = r.top + r.H * 0.25; // horizon
+  P.hy = r.top + r.H * 0.15; // horizon: high, so the far lane fills the top of the screen
   const yp = r.H * 0.8; // the jet's home row
   const sp = 0.95; // scale at the jet
   const rp = 0.85; // vertical squash at the jet
@@ -74,10 +93,34 @@ function chaseProj() {
   P.A = rp * dp * P.f;
   P.Yc = CH - CHASE_HOME + dp;
   P.yFar = P.hy + P.A / P.Yc;
-  // The air plane (where ships fly): the same projection lifted by HOVER * scale, i.e. y = hy + (A - HOVER f) / d.
-  P.Aair = P.A - HOVER * P.f;
-  P.yFarAir = P.hy + P.Aair / P.Yc;
+  // The air (where ships fly): HOVER above the floor around the jet, rising toward the far end so that the far edge
+  // of the field sits up under the HUD instead of down on the floor's far edge. Threats come down out of the sky as
+  // they close in, and the whole height of the screen is in play.
+  const yTop = r.top + r.H * 0.19;
+  P.climb = Math.max(0, ((P.yFar - yTop) * P.Yc) / P.f - HOVER);
+  P.yFarAir = airY(0);
   return P;
+}
+const CLIMB_END = CH * 0.6; // where the climb meets the hover height (the front of the jet's movement box)
+function altitude(v) {
+  const u = Math.max(0, 1 - v / CLIMB_END);
+  return HOVER + P.climb * u * u;
+}
+// Screen y of the air at virtual depth row v (chaseProj() current).
+function airY(v) {
+  const d = Math.max(30, P.Yc - v);
+  return P.hy + (P.A - altitude(v) * P.f) / d;
+}
+// Inverse of airY (it rises monotonically with v): bisection.
+function airV(y) {
+  let lo = -600;
+  let hi = P.Yc - 30;
+  for (let i = 0; i < 30; i++) {
+    const m = (lo + hi) / 2;
+    if (airY(m) < y) lo = m;
+    else hi = m;
+  }
+  return (lo + hi) / 2;
 }
 // A virtual point on the chase floor (shadows, gates, lane furniture) → screen.
 function floorPt(x, y, out = {}) {
@@ -255,7 +298,7 @@ export const sv = {
       const d = Math.max(30, Pp.Yc - y);
       const s = Pp.f / d;
       out.x = r.W / 2 + (x - CW / 2) * s;
-      out.y = Pp.hy + Pp.Aair / d; // where ships are drawn (the air plane, above their shadows)
+      out.y = airY(y); // where ships are drawn (in the air, above their shadows)
       out.s = s;
     } else {
       out.x = x;
@@ -273,9 +316,10 @@ export const sv = {
     } else if (this.mode === 'chase') {
       const r = real();
       const Pp = chaseProj();
-      const d = Pp.Aair / Math.max(4, y - Pp.hy);
+      const v = airV(y);
+      const d = Math.max(30, Pp.Yc - v);
       out.x = CW / 2 + ((x - r.W / 2) * d) / Pp.f;
-      out.y = Pp.Yc - d;
+      out.y = v;
     } else {
       out.x = x;
       out.y = y;
@@ -433,18 +477,36 @@ export const sv = {
       // Ships and pickups stand up off that plane like paper cutouts, each at its own depth and scale, far to near.
       this.push();
       const q = {};
-      drawStandees(ctx, (x, y) => {
-        const vx = x * CAM.z + CAM.x;
-        const vy = y * CAM.z + CAM.y;
-        const fog = clamp((vy + 20) / FOG, 0, 1);
-        if (fog < 0.02) return 0;
-        this.toScreen(vx, vy, q);
-        const ks = k * q.s * CAM.z * (0.4 + 0.6 * fog); // grow in out of the haze rather than pop
-        view.ox = q.x * k + shakeX - x * ks;
-        view.oy = q.y * k + shakeY - y * ks;
-        ctx.setTransform(ks, 0, 0, ks, view.ox, view.oy);
-        return ks;
-      });
+      // Ships bank into their sideways motion: every transform the draw code sets is turned about the cutout's anchor.
+      const base = ctx.setTransform;
+      const T = { c: 1, s: 0, ax: 0, ay: 0 };
+      ctx.setTransform = function (a, b, c, d, e, f) {
+        if (!T.s) return base.call(this, a, b, c, d, e, f);
+        const ex = e - T.ax;
+        const fy = f - T.ay;
+        return base.call(this, T.c * a - T.s * b, T.s * a + T.c * b, T.c * c - T.s * d, T.s * c + T.c * d, T.c * ex - T.s * fy + T.ax, T.s * ex + T.c * fy + T.ay);
+      };
+      try {
+        drawStandees(ctx, (x, y, o, ship) => {
+          const vx = x * CAM.z + CAM.x;
+          const vy = y * CAM.z + CAM.y;
+          const fog = clamp((vy + 20) / FOG, 0, 1);
+          if (fog < 0.02) return 0;
+          this.toScreen(vx, vy, q);
+          const ks = k * q.s * CAM.z * (0.4 + 0.6 * fog); // grow in out of the haze rather than pop
+          const a = ship ? tilt(o) : 0;
+          T.c = Math.cos(a);
+          T.s = Math.sin(a);
+          T.ax = q.x * k + shakeX;
+          T.ay = q.y * k + shakeY;
+          view.ox = T.ax - x * ks;
+          view.oy = T.ay - y * ks;
+          ctx.setTransform(ks, 0, 0, ks, view.ox, view.oy);
+          return ks;
+        });
+      } finally {
+        delete ctx.setTransform;
+      }
       view.ox = shakeX;
       view.oy = shakeY;
       this.pop();
@@ -807,22 +869,22 @@ function drawChaseBack(ctx, r) {
   }
 }
 
-// The virtual frame laid on the air plane (the floor projection lifted by HOVER), one thin screen row band at a
-// time (far to near).
+// The virtual frame laid along the air (airY), one thin screen row band at a time (far to near).
 function drawChaseFloor(ctx, k, kk, r, sx, sy) {
   const Pp = chaseProj();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const H = r.H;
   const step = 2;
-  const A = Pp.Aair;
-  let y = Math.max(Pp.yFarAir, Pp.hy + 1);
+  let y = Math.max(airY(-20), Pp.hy + 1);
   const srcW = CW * kk;
+  let vNext = airV(y);
   while (y < H) {
     const y1 = Math.min(H, y + step);
-    const d0 = A / (y - Pp.hy);
-    const d1 = A / (y1 - Pp.hy);
-    let v0 = Pp.Yc - d0;
-    const v1 = Pp.Yc - d1;
+    let v0 = vNext;
+    const v1 = airV(y1);
+    vNext = v1;
+    const d0 = Pp.Yc - v0;
+    const d1 = Pp.Yc - v1;
     if (v1 > 0) {
       v0 = Math.max(0, v0);
       const s = Pp.f / ((d0 + d1) / 2);
