@@ -432,7 +432,7 @@ export function renderWorld(ctx, k, layer) {
 
 // Chase view: every ship, snake segment and pickup drawn on its own, far to near, each as an upright cutout standing
 // at its spot on the flight plane. place(x, y) points the canvas transform (and view.ox / oy) at that anchor and
-// returns the scale to draw at, or 0 to skip it.
+// returns the scale to draw at, or 0 to skip it; it also gets the object and whether it is a ship (ships bank).
 const standees = [];
 export function drawStandees(ctx, place) {
   standees.length = 0;
@@ -448,7 +448,7 @@ export function drawStandees(ctx, place) {
   standees.sort((a, b) => a.y - b.y);
   const one = [null];
   for (const st of standees) {
-    const k = place(st.x, st.y);
+    const k = place(st.x, st.y, st.kind === 2 ? st.o.e : st.o, st.kind > 0);
     if (!k) continue;
     if (st.kind === 0) {
       one[0] = st.o;
