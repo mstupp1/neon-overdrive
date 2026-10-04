@@ -5,7 +5,7 @@ import { weightedPick } from '../core/math.js';
 import { WEAPONS } from './ships.js';
 import { applyParts } from './parts.js';
 import { applyPassives, resetPilotStats } from './pilot.js';
-import { STATS, rollMods, itemLevel } from './parts.js';
+import { STATS, rollMods, itemLevel, TAGS, PATH_KIN, affixTag } from './parts.js';
 import { RARITY, rollRarity } from './rarity.js';
 import { profile, saveProfile } from '../core/storage.js';
 import { applyTree } from './tree.js';
@@ -245,7 +245,8 @@ export function recomputeStats(p) {
   st.boostFlow = 1.6 + 0.15 * lv('overthrust');
   resetPilotStats(st);
   if (p.ship.trait) p.ship.trait.apply(st, p);
-  for (const [stat, v] of p.runMods || []) STATS[stat].apply(st, v); // bonus modifiers from rare level-up cards
+  for (const [stat, v] of p.runMods || []) STATS[stat].apply(st, v); // bonus modifiers from rare cards and level-up tunes
+  applyMastery(st, p);
   applyParts(st, p);
   applyPassives(st, p);
   applyTree(st, p);
@@ -267,6 +268,7 @@ export function applyUpgrade(p, id, G) {
   p.up[id] = (p.up[id] || 0) + 1;
   const u = byId.get(id);
   if (p.st.architect && u.cat === 'module' && p.up[id] === 1 && u.max > 1) p.up[id] = 2; // Architect: new modules start at 2
+  updateSpec(p);
   recomputeStats(p);
   if (id === 'hull') p.hp = Math.min(p.maxHp, p.hp + 1);
   if (id === 'aegis' && p.up.aegis === 1) p.shield = 1;
@@ -279,6 +281,8 @@ export function applyUpgrade(p, id, G) {
 export function rollUpgradeIds(p, kind, n = 3, rng = Math.random, evo = false, only = null) {
   const mods = moduleCount(p);
   const k = known();
+  const ranks = pathRanks(p);
+  const spec = p.spec || [];
   const pool = UPGRADES.filter((u) => {
     if (only && !only(u)) return false;
     const l = p.up[u.id] || 0;
@@ -286,6 +290,7 @@ export function rollUpgradeIds(p, kind, n = 3, rng = Math.random, evo = false, o
     if (u.cat === 'evolution') return evo && evolutionReady(p, u);
     if (l >= u.max) return false;
     if (u.cat === 'module' && l === 0 && mods >= p.st.maxModules) return false;
+    if (pathRoom(p, u.id, ranks) <= 0) return false; // specialization: off-path tech is capped once two paths are locked in
     return true;
   });
   const choices = [];
@@ -301,6 +306,9 @@ export function rollUpgradeIds(p, kind, n = 3, rng = Math.random, evo = false, o
     if (u.id === 'hull' && p.hp < p.maxHp) wgt *= 1.3;
     if (!k.has(u.id)) wgt *= 1.4; // undiscovered tech surfaces a little sooner
     wgt *= 1 + 0.15 * Math.min(4, synergy(p, u.id)); // equipped gear's build paths pull matching tech forward
+    if (spec.includes(pathOf(u.id))) wgt *= 1.6; // your specializations come up more often
+    else if (spec.length >= SPEC_MAX) wgt *= 0.6; // splash picks stay possible but rarer
+    if (kind === 'sector' && !l) wgt *= 1.3; // rewards are where new tech arrives
     return wgt;
   };
   const remaining = [...pool];
@@ -340,22 +348,27 @@ export const CARD_RARITY = [
   { levels: 3, mods: 2 },
 ];
 
-export function rollCard(p, id, luck = 0, rng = Math.random) {
+export function rollCard(p, id, luck = 0, rng = Math.random, floor = 0) {
   const u = byId.get(id);
   if (!u || u.cat === 'evolution') return null;
-  const r = rollRarity(luck, rng);
-  const il = itemLevel({ sys: Math.floor(luck) });
-  const room = u.max - (p.up[id] || 0);
+  const r = rollRarity(luck, rng, floor);
+  const il = itemLevel({ sys: Math.max(0, Math.floor(luck)) });
+  const room = Math.min(u.max - (p.up[id] || 0), pathRoom(p, id)); // splash room counts like the level cap
   const levels = Math.max(1, Math.min(CARD_RARITY[r].levels, room));
   const extra = CARD_RARITY[r].levels - levels; // levels past the cap turn into one more modifier each
   return { r, levels, mods: rollMods(r, il, CARD_RARITY[r].mods + extra, rng, 0.5, [], UP_TAGS[id] || null) };
 }
 
-// Installs a picked card: its levels, then its modifiers.
+// Installs a picked card: its levels, then its modifiers. A tune card is just its one modifier.
 export function applyCard(p, id, roll, G) {
+  if (isTune(id)) {
+    if (roll && roll.tune) (p.runMods ||= []).push(roll.tune);
+    recomputeStats(p);
+    return;
+  }
   applyUpgrade(p, id, G);
   if (!roll) return;
-  for (let i = 1; i < roll.levels; i++) if ((p.up[id] || 0) < byId.get(id).max) applyUpgrade(p, id, G);
+  for (let i = 1; i < roll.levels; i++) if ((p.up[id] || 0) < byId.get(id).max && pathRoom(p, id) > 0) applyUpgrade(p, id, G);
   if (roll.mods.length) {
     (p.runMods ||= []).push(...roll.mods);
     recomputeStats(p);
@@ -365,8 +378,9 @@ export function applyCard(p, id, roll, G) {
 export const modText = ([id, v]) => STATS[id].text(v);
 export { RARITY };
 
-// Build a draft of 3 choices. `kind` is 'level' or 'sector'.
+// Build a draft of 3 choices. `kind` is 'level' (micro: owned upgrades +1 and tunes) or 'sector' (macro: anything).
 export function rollDraft(p, kind, only = null) {
+  if (kind === 'level') return rollLevelDraft(p, only);
   const choices = rollUpgradeIds(p, kind, 3, Math.random, true, only);
   if (choices.length < 3 && p.hp < p.maxHp) choices.push('repair');
   while (choices.length < 3) choices.push('credits');
@@ -380,6 +394,14 @@ export function cardInfo(p, id, roll = null) {
   if (id === 'repair') {
     return { id, name: 'Field Repair', cat: 'bonus', icon: ICONS.repair, desc: 'Repair 2 hull.', lv: 0, max: 0 };
   }
+  if (isTune(id)) {
+    const [stat, v] = roll.tune;
+    const path = affixPath(stat);
+    return {
+      id, name: TUNE_NAMES[path] || 'Tuning', cat: 'tune', color: TAGS[path].color, icon: ICONS[TUNE_ICONS[stat]] || ICONS.rate,
+      desc: `${STATS[stat].text(v)} for the rest of the run.`, lv: 0, max: 0, tune: true, path, note: pathNote(p, null, 0, path),
+    };
+  }
   const u = byId.get(id);
   const lv = p.up[id] || 0;
   // fresh: never seen in any run before this draft (discover() has not run for it yet).
@@ -388,6 +410,145 @@ export function cardInfo(p, id, roll = null) {
   const levels = roll ? roll.levels : 1;
   return {
     id, name: u.name, cat: u.cat, icon: ICONS[id], desc: u.desc(lv + 1), lv, max: u.max, evo: u.cat === 'evolution', fresh: !isDiscovered(id),
-    r, levels, mods: roll ? roll.mods.map(modText) : [], syn,
+    r, levels, mods: roll ? roll.mods.map(modText) : [], syn, path: pathOf(id), note: u.cat === 'evolution' ? null : pathNote(p, id, levels),
   };
+}
+
+// --- Specialization ---------------------------------------------------------------------------
+// Every upgrade level counts toward its build path's rank. The first two paths to reach SPEC_AT become your
+// specializations (p.spec, in the order they locked in). From then on the other five paths share SPLASH_CAP levels
+// between them (levels taken before locking in count), and no off-path rank can reach SPEC_AT. Specializations earn a
+// mastery bonus at each MASTERY_AT rank, so going deep pays more than spreading out.
+export const SPEC_AT = 5;
+export const SPEC_MAX = 2;
+export const SPLASH_CAP = 6;
+export const MASTERY_AT = [5, 10, 15];
+export const MASTERY = {
+  firepower: ['dmg', 0.06],
+  crit: ['critMul', 0.3],
+  modules: ['mod', 0.08],
+  mobility: ['speed', 0.05],
+  overdrive: ['od', 0.1],
+  tank: ['hull', 1],
+  greed: ['find', 0.1],
+};
+const ROMAN = ['', 'I', 'II', 'III'];
+
+// Evolutions count toward the path of the module they evolve.
+export const pathOf = (id) => {
+  if (UP_TAGS[id]) return UP_TAGS[id];
+  const u = byId.get(id);
+  return u && u.cat === 'evolution' ? UP_TAGS[u.mod] : null;
+};
+
+export function pathRanks(p) {
+  const out = {};
+  for (const t of Object.keys(TAGS)) out[t] = 0;
+  for (const [id, l] of Object.entries(p.up || {})) {
+    const t = pathOf(id);
+    if (t) out[t] += l;
+  }
+  return out;
+}
+
+export const masteryTier = (rank) => MASTERY_AT.filter((r) => rank >= r).length;
+
+export function splashUsed(p, ranks = pathRanks(p)) {
+  const spec = p.spec || [];
+  let n = 0;
+  for (const [t, r] of Object.entries(ranks)) if (!spec.includes(t)) n += r;
+  return n;
+}
+
+// How many more levels the specialization rules allow for an option (Infinity while a spec slot is open).
+export function pathRoom(p, id, ranks = pathRanks(p)) {
+  const t = pathOf(id);
+  const spec = p.spec || [];
+  if (!t || spec.includes(t) || spec.length < SPEC_MAX) return Infinity;
+  return Math.max(0, Math.min(SPEC_AT - 1 - ranks[t], SPLASH_CAP - splashUsed(p, ranks)));
+}
+
+// Locks in any path that just reached SPEC_AT while a slot is open (highest rank first).
+export function updateSpec(p) {
+  p.spec ||= [];
+  if (p.spec.length >= SPEC_MAX) return;
+  const ranks = pathRanks(p);
+  const ready = Object.keys(ranks).filter((t) => ranks[t] >= SPEC_AT && !p.spec.includes(t)).sort((a, b) => ranks[b] - ranks[a]);
+  for (const t of ready) if (p.spec.length < SPEC_MAX) p.spec.push(t);
+}
+
+function applyMastery(st, p) {
+  if (!p.spec || !p.spec.length) return;
+  const ranks = pathRanks(p);
+  for (const t of p.spec) {
+    const [stat, v] = MASTERY[t];
+    for (let i = masteryTier(ranks[t]); i > 0; i--) STATS[stat].apply(st, v);
+  }
+}
+
+// The path line on a card: what picking it does to your specialization. kind: commit | mastery | spec | splash | syn | plain.
+export function pathNote(p, id, levels = 1, path = pathOf(id)) {
+  if (!path) return null;
+  const T = TAGS[path].name;
+  const spec = p.spec || [];
+  const ranks = pathRanks(p);
+  if (id === null) return { path, kind: spec.includes(path) ? 'spec' : 'plain', text: T }; // tunes never move ranks
+  const after = ranks[path] + levels;
+  if (!spec.includes(path) && spec.length < SPEC_MAX && after >= SPEC_AT) return { path, kind: 'commit', text: `SPECIALIZE ${T}` };
+  if (spec.includes(path)) {
+    const tier = masteryTier(after);
+    if (tier > masteryTier(ranks[path])) return { path, kind: 'mastery', text: `${T} MASTERY ${ROMAN[tier]}` };
+    return { path, kind: 'spec', text: `${T} ${ranks[path]}` };
+  }
+  if (spec.length >= SPEC_MAX) return { path, kind: 'splash', text: `SPLASH ${Math.min(SPLASH_CAP, splashUsed(p, ranks) + levels)}/${SPLASH_CAP}` };
+  if (synergy(p, id) >= SYNERGY_MIN) return { path, kind: 'syn', text: `${T} SYNERGY` };
+  return { path, kind: 'plain', text: `${T} ${ranks[path]}` };
+}
+
+// --- Level-up drafts (micro) -------------------------------------------------------------------
+// Levels strengthen what you already fly: +1 to an upgrade you own (never rarer, never new tech, never an evolution),
+// or a tune: one small run modifier from your paths. New tech, rarity and evolutions come from rewards (sector clears,
+// bosses, vaults). Tunes never run out, so long runs keep a pick at every level without maxing every stat.
+export const TUNE_SCALE = 0.55; // x a gear modifier's value (rarity Common)
+const TUNE_NAMES = {
+  firepower: 'Gun Tuning', crit: 'Optics Tuning', modules: 'Module Tuning', mobility: 'Engine Tuning',
+  overdrive: 'Core Tuning', tank: 'Hull Tuning', greed: 'Scanner Tuning',
+};
+const TUNE_ICONS = {
+  dmg: 'power', rate: 'rate', bounty: 'bounty', crit: 'crit', critMul: 'crit', mod: 'drones', modRate: 'arc', speed: 'thrusters',
+  dashCd: 'dashes', dashLen: 'blink', od: 'capacitor', odDur: 'capacitor', grazeR: 'grazer', grazeOd: 'grazer', shield: 'aegis',
+  iframes: 'hull', magnet: 'magnet', xp: 'salvage', credits: 'prospector', find: 'prospector', boostCap: 'boostTank',
+  boostRegen: 'ramScoop', boostEff: 'injector',
+};
+const affixPath = (stat) => affixTag(stat);
+export const isTune = (id) => typeof id === 'string' && id.startsWith('tune:');
+
+// The path a tune comes from: one of your specializations (by rank), sometimes its kin; before you lock in, any
+// path you have levels in (or the ship's own path), weighted by rank.
+function tunePath(p, rng) {
+  const ranks = pathRanks(p);
+  const spec = p.spec || [];
+  if (spec.length) {
+    const t = weightedPick(spec, (x) => 1 + ranks[x], rng);
+    return rng() < 0.25 ? PATH_KIN[t] : t;
+  }
+  const opts = Object.keys(ranks).filter((t) => ranks[t] > 0 || (p.ship && p.ship.path === t));
+  if (!opts.length) return weightedPick(Object.keys(ranks), () => 1, rng);
+  return weightedPick(opts, (x) => 1 + ranks[x], rng);
+}
+
+export function rollTune(p, il = 1, avoid = [], rng = Math.random) {
+  const path = tunePath(p, rng);
+  const [mod] = rollMods(0, il, 1, rng, TUNE_SCALE, avoid, path);
+  if (!mod) return null;
+  return { tune: mod };
+}
+
+let tuneSeq = 0;
+function rollLevelDraft(p, keep = null) {
+  const owned = (u) => u.cat !== 'evolution' && ((p.up[u.id] || 0) > 0 || u.id === 'main') && (!keep || keep(u)); // you always fly a main cannon
+  const ids = rollUpgradeIds(p, 'level', 2, Math.random, false, owned);
+  while (ids.length < 3) ids.push(`tune:${tuneSeq++}`); // unique ids, so a locked tune survives a reroll
+  if (p.hp < p.maxHp && p.hp <= p.maxHp / 2) ids[ids.length - 1] = 'repair'; // badly hurt: a patch-up is on offer
+  return ids;
 }

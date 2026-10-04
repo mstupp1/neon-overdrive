@@ -3,7 +3,7 @@
 import { input } from '../core/input.js';
 import { profile, saveProfile } from '../core/storage.js';
 import { sfx } from '../core/audio.js';
-import { cardInfo, CAT_COLORS, UPGRADES, ICONS, RARITY } from '../game/upgrades.js';
+import { cardInfo, CAT_COLORS, UPGRADES, ICONS, RARITY, pathRanks, splashUsed, SPEC_AT, SPEC_MAX, SPLASH_CAP } from '../game/upgrades.js';
 import { TAGS } from '../game/parts.js';
 import { formatScore, formatTime } from '../core/math.js';
 import { SYSTEMS } from '../game/campaign.js';
@@ -171,29 +171,32 @@ export const ui = {
   // --- Draft --------------------------------------------------------------------
   // note: an extra line for the subtitle (campaign fight reward, vault haul).
   // locks: indices of locked cards (kept through a reroll); onLock(i) toggles one and returns whether it changed.
-  renderDraft(player, choices, kind, rerolls, onPick, left = 0, note = '', rolls = {}, locks = new Set(), onLock = null) {
+  // fx: Fortune state {fortune, max, spent, floor, base, skip (Fortune a skip adds, -1 = no skip here), next, nextGain, boss}.
+  renderDraft(player, choices, kind, rerolls, onPick, left = 0, note = '', rolls = {}, locks = new Set(), onLock = null, fx = {}) {
     const T = {
-      sector: ['SECTOR CLEAR', '#7dff6b', 'Claim a reward for the next sector'],
-      supply: ['SUPPLY DROP', '#ffd24a', `Salvaged tech for this system — ${left} to claim`],
+      sector: fx.boss ? ['SYSTEM CLEAR', '#ffb300', 'Boss reward: every card Uncommon or better'] : ['SECTOR CLEAR', '#7dff6b', 'Claim new tech for the road ahead'],
+      supply: ['SUPPLY DROP', '#ffd24a', `Pick the tech you launch with — ${left} to claim`],
       vault: ['TREASURE VAULT', '#ffb300', 'Pick one'],
       boost: ['OVERCLOCK', '#7dff6b', '+1 level to an upgrade you own'],
-      level: ['LEVEL UP', '#fff', `Level ${player.level} — choose an upgrade`],
+      level: ['LEVEL UP', '#fff', `Level ${player.level} — tune what you fly`],
     }[kind] || ['LEVEL UP', '#fff', ''];
     $('#draft-title').textContent = T[0];
     $('#draft-title').style.color = T[1];
     $('#draft-sub').textContent = note ? `${T[2]} · ${note}` : T[2];
+    renderPaths($('#draft-paths'), player, fx);
     const wrap = $('#draft-cards');
     wrap.innerHTML = '';
     wrap.classList.toggle('no-keys', input.device === 'touch');
+    wrap.classList.toggle('micro', kind === 'level');
     choices.forEach((id, i) => {
       const info = cardInfo(player, id, rolls[id]);
-      const c = CAT_COLORS[info.cat];
+      const c = info.color || CAT_COLORS[info.cat];
       const b = document.createElement('button');
       // Two "new" levels, each with its own flag on the card's top edge: never seen in any run (DISCOVERY, white,
       // outlined card) vs. seen before but not owned this run (NEW THIS RUN, category colour).
       const fresh = info.max > 0 && info.fresh;
       const runNew = info.max > 0 && !fresh && !info.evo && info.cat !== 'weapon' && info.lv === 0; // you always fly a main cannon
-      b.className = 'card' + (info.evo ? ' evo' : '') + (fresh ? ' fresh' : '') + (info.r != null ? ` rar r${info.r}` : '') + (locks.has(i) ? ' locked-card' : '');
+      b.className = 'card' + (info.evo ? ' evo' : '') + (fresh ? ' fresh' : '') + (info.r != null ? ` rar r${info.r}` : '') + (info.tune ? ' tune' : '') + (locks.has(i) ? ' locked-card' : '');
       b.dataset.i = i;
       b.style.setProperty('--c', c);
       if (info.r != null) b.style.setProperty('--rc', RARITY[info.r].color);
@@ -201,11 +204,14 @@ export const ui = {
       if (info.max && !info.evo) {
         for (let k = 0; k < info.max; k++) pips += `<i class="${k < info.lv ? 'on' : k < info.lv + info.levels ? 'next' : ''}"></i>`;
       }
-      const tag = info.evo ? 'EVOLVE' : info.max ? (info.levels > 1 ? `LV ${info.lv + 1}-${info.lv + info.levels}` : `LV ${info.lv + 1}`) : 'BONUS';
-      // Rarity line (always present on regular cards so rerolls never change the card height): rarity, bonus levels, modifiers, build-path synergy.
+      const tag = info.evo ? 'EVOLVE' : info.tune ? 'TUNE' : info.max ? (info.levels > 1 ? `LV ${info.lv + 1}-${info.lv + info.levels}` : `LV ${info.lv + 1}`) : 'BONUS';
+      // Path line: what the pick does to your specialization (locks a path in, reaches a mastery tier, uses splash).
+      const pn = info.note ? `<span class="pnote ${info.note.kind}" style="--t:${TAGS[info.note.path].color}">${info.note.text}</span>` : '';
+      // Reward cards: rarity, bonus levels and a reserved two-line modifier block (rerolls never change the card height).
+      // Level-up cards are plain and compact: just the path line.
       const rar = info.r != null
-        ? `<div class="card-rar"><b>${RARITY[info.r].name}</b>${info.levels > 1 ? `<span>+${info.levels} LEVELS</span>` : ''}${info.syn ? `<span class="syn" style="--t:${TAGS[info.syn].color}">${TAGS[info.syn].name} SYNERGY</span>` : ''}</div><div class="card-mods">${info.mods.map((m) => `<i>${m}</i>`).join('')}</div>`
-        : '';
+        ? `<div class="card-rar"><b>${RARITY[info.r].name}</b>${info.levels > 1 ? `<span>+${info.levels} LEVELS</span>` : ''}${pn}</div><div class="card-mods">${info.mods.map((m) => `<i>${m}</i>`).join('')}</div>`
+        : pn ? `<div class="card-rar plain">${pn}</div>` : '';
       const flag = fresh ? `<span class="card-flag disc">${STAR}NEW DISCOVERY</span>` : runNew ? '<span class="card-flag run">NEW THIS RUN</span>' : '';
       b.innerHTML = `${flag}<div class="card-icon">${info.icon}</div><div><div class="card-top"><span class="card-name">${info.name}</span><span class="card-tag">${tag}</span></div><div class="card-desc">${info.desc}</div>${rar}${pips ? `<div class="pips">${pips}</div>` : ''}</div>${input.device === 'touch' ? '' : `<kbd>${i + 1}</kbd>`}<span class="card-lock" title="Lock: keep this card through a reroll">${LOCK_SVG}</span>`;
       b.querySelector('.card-lock').addEventListener('click', (e) => {
@@ -221,6 +227,11 @@ export const ui = {
     });
     draftLock = onLock;
     syncLocks(locks, rerolls);
+    const sk = $('#skip-btn');
+    sk.style.visibility = fx.skip < 0 ? 'hidden' : '';
+    sk.disabled = !(fx.skip > 0);
+    sk.textContent = fx.skip > 0 ? `SKIP · +${fx.skip} FORTUNE` : 'FORTUNE FULL';
+    sk.title = 'Take nothing now; your next reward draft rolls rarer';
     renderBuild($('#draft-build'), player);
   },
 
@@ -311,6 +322,33 @@ const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentCol
 
 export function stat(label, value) {
   return `<div>${label}<b>${value}</b></div>`;
+}
+
+// The draft's build-path and Fortune lines (two fixed lines, so they never shift the cards).
+const RNAME = ['', 'UNCOMMON+', 'RARE+', 'EPIC+', 'LEGENDARY'];
+function renderPaths(el, p, fx) {
+  const ranks = pathRanks(p);
+  const spec = p.spec || [];
+  const chip = (t, txt, cls = '') => `<span class="pchip ${cls}" style="--t:${TAGS[t].color}">${txt}</span>`;
+  let line = '';
+  if (spec.length) {
+    line += spec.map((t) => chip(t, `◆ ${TAGS[t].name} ${ranks[t]}`, 'spec')).join('');
+    line += spec.length < SPEC_MAX
+      ? `<span class="pdim">a second path locks in at ${SPEC_AT}</span>`
+      : `<span class="pdim">SPLASH ${Math.min(SPLASH_CAP, splashUsed(p, ranks))}/${SPLASH_CAP}</span>`;
+  } else {
+    const top = Object.keys(ranks).filter((t) => ranks[t] > 0).sort((a, b) => ranks[b] - ranks[a]).slice(0, 3);
+    line += top.map((t) => chip(t, `${TAGS[t].name} ${ranks[t]}`)).join('');
+    line += `<span class="pdim">${top.length ? '' : 'BUILD PATHS · '}${SPEC_MAX} lock in at ${SPEC_AT}</span>`;
+  }
+  const pips = Array.from({ length: fx.max || 6 }, (_, i) => `<i class="${i < (fx.fortune || 0) ? 'on' : ''}"></i>`).join('');
+  let f = `<span class="fortune">FORTUNE <span class="fpips">${pips}</span></span>`;
+  if (fx.spent) f = `<span class="fortune spent">FORTUNE ×${fx.spent} SPENT</span><span class="pdim">${fx.floor > fx.base ? `one card ${RNAME[fx.floor]} · ` : ''}luckier rolls</span>`;
+  else if (fx.boss) f += '<span class="pdim">boss reward</span>';
+  else if (fx.next) f += `<span class="pdim">next reward: one card ${RNAME[fx.next]}</span>`;
+  else if (fx.skip > 0 && fx.nextGain) f += `<span class="pdim">skip → next reward: one card ${RNAME[fx.nextGain]}</span>`;
+  else f += '<span class="pdim">skip a draft to roll rarer rewards</span>';
+  el.innerHTML = `<div>${line}</div><div>${f}</div>`;
 }
 
 export function renderBuild(el, p) {

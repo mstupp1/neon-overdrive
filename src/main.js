@@ -15,8 +15,8 @@ import { SHIPS, shipById, ownsShip, isUnlocked } from './game/ships.js';
 import { createPlayer } from './game/player.js';
 import { drawBoostFx } from './game/boost.js';
 import { createDirector, startSector, nextSector, endlessSpec } from './game/director.js';
-import { rollDraft, applyUpgrade, UPGRADES, discover, rollCard, applyCard } from './game/upgrades.js';
-import { runLuck, rankUpFinds, dropGear, dropAbility, addGear } from './game/loot.js';
+import { rollDraft, applyUpgrade, UPGRADES, discover, rollCard, applyCard, rollTune, isTune, pathRoom } from './game/upgrades.js';
+import { runLuck, runItemLevel, rankUpFinds, dropGear, dropAbility, addGear } from './game/loot.js';
 import { makeItem } from './game/parts.js';
 import { spawnEnemy, spawnWeavers } from './game/enemies.js';
 import { step, renderWorld } from './game/world.js';
@@ -78,6 +78,20 @@ let curNote = ''; // the open draft's note (kept for rerolls)
 const START_REROLLS = 3; // draft rerolls at the start of a run (+1 every 5 levels and per boss)
 let draftLocks = new Set(); // ids of locked draft cards: a reroll keeps them and replaces the rest
 let afterDraft = null; // 'route' | 'extract' | 'next': where to go once the sector reward / level drafts are done
+// Reward rarity. Level-ups are micro picks with no rarity (upgrades.js rollLevelDraft); every other draft is a reward
+// and rolls rarity. Cards run CARD_LUCK behind gear luck (rarer than gear), elites and vaults roll a bit luckier and
+// bosses much luckier with an Uncommon floor.
+const CARD_LUCK = -0.75;
+const REWARD_LUCK = { node: 0, elite: 0.5, vault: 0.5, boss: 1.5 };
+let rewardTier = 'node'; // the next reward draft's tier (set by onSectorClear / applyFightReward)
+// Fortune: skipping a draft banks Fortune (+1 for a level-up, +2 for a reward), spent in full on the next reward draft:
+// +FORTUNE_LUCK luck per point, and one card is guaranteed at least FORTUNE_FLOOR[fortune] rarity.
+const FORTUNE_MAX = 6;
+const FORTUNE_LUCK = 0.4;
+const FORTUNE_FLOOR = [0, 0, 2, 2, 3, 3, 4];
+let draftFloor = 0; // the open reward draft's guaranteed rarity for one card (kept through rerolls)
+let draftBase = 0; // the open reward draft's rarity floor for every card (bosses: Uncommon)
+let draftLuck = 0; // the open reward draft's luck
 // Level-up pacing: the world slows into the draft and eases back out of it instead of hard cuts.
 const LEVEL_INTRO = 0.5; // real seconds of slow-down before the level-up draft opens
 const RESUME_EASE = 0.45; // real seconds to ramp back to full speed after a draft
@@ -155,6 +169,7 @@ function newWorld(mode, shipDef, run = null) {
   G.bossKills = 0;
   G.pendingLevels = 0;
   G.supplyLeft = 0;
+  G.fortune = 0;
   afterDraft = null;
   levelIntro = -1;
   resumeEase = 0;
@@ -213,7 +228,7 @@ function enterSystem(idx) {
   Object.assign(r, { sysIdx: idx, system: sys, route: generateRoute(sys, Math.floor(Math.random() * 2147483647)), row: -1, nodeId: null, visited: [] });
   G.player.techTier = Math.max(G.player.techTier || 0, idx); // this system's tech joins the upgrade pool (upgrades.js tiers); Deep Grid cycles keep it all
   noteProgress();
-  playSectorIntro(sys, idx, () => blockingStory('intro:' + sys.id, STORY.systems[sys.id].intro, {}, () => startSupply(sys.supply || 0)));
+  playSectorIntro(sys, idx, () => blockingStory('intro:' + sys.id, STORY.systems[sys.id].intro, {}, () => startSupply(r.deep ? 0 : sys.supply || 0))); // Deep Grid cycles skip it
 }
 
 // Entering a star system: the warp-in title animation (render/sectorIntro.js), then `done` (dialogue, supply, route).
@@ -299,6 +314,7 @@ function markCleared(sys) {
 // Optional supply drop at system start (SYSTEMS[].supply; 0 everywhere now that the build carries over).
 function startSupply(n) {
   G.supplyLeft = n;
+  rewardTier = 'node';
   afterDraft = 'route';
   if (n > 0) openDraft('supply');
   else showRoute();
@@ -615,7 +631,7 @@ function unpause() {
 
 // Owned, non-maxed, non-evolution upgrades (Rest Station overclock / BOOST reward).
 function boostChoices(p) {
-  return UPGRADES.filter((u) => u.cat !== 'evolution' && (p.up[u.id] || 0) > 0 && p.up[u.id] < u.max).map((u) => u.id);
+  return UPGRADES.filter((u) => u.cat !== 'evolution' && (p.up[u.id] || 0) > 0 && p.up[u.id] < u.max && pathRoom(p, u.id) > 0).map((u) => u.id);
 }
 
 const DRAFT_ONLY = {
@@ -659,6 +675,18 @@ function openDraft(kind, quiet = false) {
   if (G.run.mode !== 'campaign') G.player.techTier = Math.min(3, Math.floor((G.sector - 1) / 3)); // debug sandbox
   draftChoices = rollFor(kind);
   draftLocks = new Set();
+  draftFloor = 0;
+  draftBase = 0;
+  draftLuck = 0;
+  curFortune = 0;
+  if (isReward(kind)) {
+    const f = G.fortune || 0;
+    draftLuck = runLuck() + CARD_LUCK + (REWARD_LUCK[kind === 'vault' ? 'vault' : rewardTier] || 0) + FORTUNE_LUCK * f;
+    draftBase = rewardTier === 'boss' && kind === 'sector' ? 1 : 0;
+    draftFloor = Math.max(FORTUNE_FLOOR[f], draftBase);
+    curFortune = f;
+    G.fortune = 0;
+  }
   rollRarities(kind);
   G.screen = 'draft';
   curNote = draftNote;
@@ -673,14 +701,36 @@ function openDraft(kind, quiet = false) {
   if (kind === 'level' || kind === 'sector') tip('draft');
 }
 
-// Card rarities for the open draft (Rest Station boosts stay plain).
-// keep: ids whose roll stays (locked cards through a reroll).
+const isReward = (kind) => kind === 'sector' || kind === 'vault' || kind === 'supply';
+let curFortune = 0; // Fortune spent on the open draft (shown in its subtitle)
+
+// Card rolls for the open draft. Rewards roll rarity (one card floored at draftFloor); level-ups roll their tunes;
+// Rest Station boosts stay plain. keep: ids whose roll stays (locked cards through a reroll).
 function rollRarities(kind, keep = null) {
   const old = draftRolls;
   draftRolls = {};
   if (kind === 'boost') return;
-  const luck = runLuck();
-  for (const id of draftChoices) draftRolls[id] = keep && keep.has(id) ? old[id] : rollCard(G.player, id, luck);
+  const p = G.player;
+  if (kind === 'level') {
+    const used = [];
+    for (const id of draftChoices) if (keep && keep.has(id) && old[id] && old[id].tune) used.push(old[id].tune[0]);
+    for (const id of draftChoices) {
+      if (keep && keep.has(id)) draftRolls[id] = old[id];
+      else if (isTune(id)) {
+        draftRolls[id] = rollTune(p, runItemLevel(), used);
+        if (draftRolls[id]) used.push(draftRolls[id].tune[0]);
+      }
+    }
+    return;
+  }
+  for (const id of draftChoices) draftRolls[id] = keep && keep.has(id) ? old[id] : rollCard(p, id, draftLuck, Math.random, draftBase);
+  // Fortune floor: if no card reaches it, one unlocked card is re-rolled at that floor.
+  const cards = draftChoices.filter((id) => draftRolls[id]);
+  if (draftFloor > 0 && cards.length && !cards.some((id) => draftRolls[id].r >= draftFloor)) {
+    const open = cards.filter((id) => !(keep && keep.has(id)));
+    const id = (open.length ? open : cards)[Math.floor(Math.random() * (open.length || cards.length))];
+    draftRolls[id] = rollCard(p, id, draftLuck, Math.random, draftFloor);
+  }
 }
 
 // Locked cards survive a reroll; at least one card must stay unlocked to reroll.
@@ -694,7 +744,10 @@ function toggleLock(i) {
 
 // Renders the draft (cards flag never-seen tech), then records those options as discovered. Returns the new ids.
 function showDraftCards(kind) {
-  ui.renderDraft(G.player, draftChoices, kind, G.rerolls, pickUpgrade, G.supplyLeft, curNote, draftRolls, draftLocks, toggleLock);
+  ui.renderDraft(G.player, draftChoices, kind, G.rerolls, pickUpgrade, G.supplyLeft, curNote, draftRolls, draftLocks, toggleLock, {
+    fortune: G.fortune || 0, max: FORTUNE_MAX, spent: curFortune, floor: draftFloor, base: draftBase, skip: canSkip(kind) ? skipGain(kind) : -1,
+    next: FORTUNE_FLOOR[G.fortune || 0], nextGain: FORTUNE_FLOOR[Math.min(FORTUNE_MAX, (G.fortune || 0) + (canSkip(kind) ? skipGain(kind) : 0))], boss: draftBase > 0,
+  });
   const fresh = discover(draftChoices);
   if (fresh.length) sfx.achieve(true);
   return fresh;
@@ -723,6 +776,23 @@ function pickUpgrade(id) {
   draftRolls = {};
   // Treasure Vault: each pick is worth two levels (where the upgrade has room).
   if (draftKind === 'vault' && p.up[id] && p.up[id] < (UPGRADES.find((u) => u.id === id) || {}).max) applyUpgrade(p, id, G);
+  draftDone();
+}
+
+// Skips the open draft for Fortune (+1 on a level-up, +2 on a reward), spent on the next reward draft.
+const canSkip = (kind) => kind === 'level' || isReward(kind);
+const skipGain = (kind) => Math.min(kind === 'level' ? 1 : 2, FORTUNE_MAX - (G.fortune || 0));
+function skipDraft() {
+  if (G.screen !== 'draft' || !canSkip(draftKind) || skipGain(draftKind) <= 0) return;
+  G.fortune = (G.fortune || 0) + skipGain(draftKind);
+  draftRolls = {};
+  sfx.ui();
+  draftDone();
+}
+
+// Where a finished draft goes next (the next owed draft, the route, the next system or back into the fight).
+function draftDone() {
+  const p = G.player;
   if (draftKind === 'level') G.pendingLevels = Math.max(0, G.pendingLevels - 1);
   if (draftKind === 'supply' && --G.supplyLeft > 0) return openDraft('supply');
   p.iframes = Math.max(p.iframes, 0.5);
@@ -758,16 +828,19 @@ function onSectorClear() {
   if (G.run.mode === 'campaign' && G.director.spec.boss && G.run.sysIdx < SYSTEMS.length - 1) {
     // System boss: a reward draft, then on to the next system.
     afterDraft = 'next';
+    rewardTier = 'boss';
     openDraft('sector');
     return;
   }
   if (G.run.mode === 'campaign' && G.director.spec.boss) {
     // THE VOID's boss: a reward draft, then the run dives into the next Deep Grid cycle.
     afterDraft = 'deep';
+    rewardTier = 'boss';
     openDraft('sector');
     return;
   }
   if (G.run.mode === 'campaign') applyFightReward(G.director.spec.reward);
+  rewardTier = G.director.spec.boss ? 'boss' : G.director.spec.elite ? 'elite' : 'node';
   openDraft('sector');
 }
 
@@ -968,6 +1041,7 @@ ui.init({
   retry: () => (G.run.mode === 'campaign' ? launchRun() : startRun(curShip())),
   title: () => toTitle(),
   intro: () => settingsReturn !== 'pause' && playIntro(),
+  skip: () => skipDraft(),
   reroll() {
     if (G.rerolls <= 0 || draftLocks.size >= draftChoices.length) return;
     G.rerolls--;
@@ -1169,7 +1243,7 @@ function afterStep(raw) {
     // The demo pilot is immortal; keep it tidy and auto-pick upgrades.
     while (G.pendingLevels > 0) {
       G.pendingLevels--;
-      applyUpgrade(p, pick(rollDraft(p, 'level')), G);
+      applyUpgrade(p, pick(rollDraft(p, 'sector')), G);
     }
     return;
   }
@@ -1386,6 +1460,7 @@ window.NEON = {
   findClass, findPassive,
   dropAbility: (luck = 2) => dropAbility(G.player ? G.player.x : 0, 300, luck),
   rolls: () => draftRolls,
+  skip: () => skipDraft(),
   openDraft: (kind = 'level') => openDraft(kind),
   // Menus (debug / screenshots): open the Hangar, Fabricator or Pilot screen over the campaign map.
   openHangar: () => (showCampaign(), openHangar()),
@@ -1409,7 +1484,11 @@ window.NEON = {
     for (let t = 0; t < seconds; t += dt) {
       if (G.screen === 'sector-intro') finishSectorIntro(); // nor does the sector intro
       if (comms.blocking) comms.skipAll(); // dialogue never blocks the simulator
-      if (G.screen === 'draft') pickUpgrade(pickFn(draftChoices));
+      if (G.screen === 'draft') {
+        const id = pickFn(draftChoices, draftKind);
+        if (id === 'skip' && canSkip(draftKind) && skipGain(draftKind) > 0) skipDraft();
+        else pickUpgrade(id === 'skip' ? draftChoices[0] : id);
+      }
       for (let guard = 0; guard < 6 && (G.screen === 'route' || G.screen === 'overworld' || G.screen === 'event' || G.screen === 'market' || G.screen === 'dock'); guard++) {
         if (G.screen === 'event') {
           // Default: the first choice that can be taken. opts.eventPick(event, session) → index.

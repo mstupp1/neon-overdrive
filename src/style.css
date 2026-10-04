@@ -4050,3 +4050,90 @@ input[type='range']::-moz-range-thumb {
     gap: 0.5em;
     min-width: 0;
 }
+
+/* --- Build paths and Fortune (draft) ---------------------------------------------------------------------------
+   Two fixed lines under the subtitle: specializations / splash, then Fortune. Cards carry a path note. */
+.draft-paths {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25em;
+    margin-top: 0.45em;
+    min-height: 2.9em;
+    font-family: Orbitron, sans-serif;
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+}
+
+.draft-paths > div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.2em 0.8em;
+    min-height: 1.3em;
+}
+
+.pchip {
+    color: var(--t);
+    opacity: 0.75;
+}
+
+.pchip.spec {
+    opacity: 1;
+    text-shadow: 0 0 0.6em color-mix(in srgb, var(--t) 60%, transparent);
+}
+
+.pdim {
+    color: rgba(233, 244, 255, 0.55);
+}
+
+.fortune {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    color: #ffd24a;
+}
+
+.fortune.spent {
+    text-shadow: 0 0 0.6em rgba(255, 210, 74, 0.6);
+}
+
+.fpips {
+    display: inline-flex;
+    gap: 0.25em;
+}
+
+.fpips i {
+    width: 0.7em;
+    height: 0.7em;
+    border: 1px solid rgba(255, 210, 74, 0.5);
+}
+
+.fpips i.on {
+    background: #ffd24a;
+    box-shadow: 0 0 0.5em #ffd24a;
+}
+
+.card-rar .pnote {
+    color: var(--t);
+    opacity: 0.8;
+}
+
+.card-rar .pnote.commit,
+.card-rar .pnote.mastery {
+    opacity: 1;
+    padding: 0 0.4em;
+    border: 1px solid var(--t);
+    text-shadow: 0 0 0.6em var(--t);
+}
+
+.card-rar .pnote.splash {
+    color: rgba(233, 244, 255, 0.55);
+}
+
+/* Level-up (micro) cards: no rarity, no modifier block; a tune card wears its path colour. */
+.card-rar.plain {
+    color: rgba(233, 244, 255, 0.7);
+}
