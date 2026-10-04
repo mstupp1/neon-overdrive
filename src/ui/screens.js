@@ -38,6 +38,65 @@ function syncLocks(locks, rerolls) {
   rr.disabled = rerolls <= 0 || n <= 0;
 }
 
+// Draft hold-to-select: upgrade cards must be held (500 ms) via mouse, touch, [Enter/Space/Pad A] or [1-3].
+const DRAFT_HOLD_MS = 500;
+let draftHold = null;
+
+function updateHoldVisual(card, progress, isHolding) {
+  if (!card) return;
+  card.style.setProperty('--hold', progress);
+  const pill = card.querySelector('.card-hold-pill');
+  if (pill) {
+    pill.textContent = isHolding ? (progress >= 1 ? 'CONFIRMED' : 'HOLDING...') : 'HOLD TO SELECT';
+  }
+}
+
+function startDraftHold(card, id, onPick, source, pointerId = null) {
+  if (!card || !id || !onPick || card.dataset.picked === 'true') return;
+  if (draftHold) {
+    if (draftHold.card === card && draftHold.source === source) return;
+    cancelDraftHold();
+  }
+  if (performance.now() < lockUntil || guarded) return;
+
+  draftHold = {
+    card,
+    id,
+    onPick,
+    source,
+    pointerId,
+    startTime: performance.now(),
+    sound: sfx.holdCharge ? sfx.holdCharge(DRAFT_HOLD_MS / 1000) : null,
+    completed: false,
+  };
+  card.classList.add('holding');
+  updateHoldVisual(card, 0, true);
+}
+
+function cancelDraftHold() {
+  if (!draftHold) return;
+  if (!draftHold.completed) {
+    if (draftHold.sound) draftHold.sound.stop();
+    draftHold.card.classList.remove('holding');
+    updateHoldVisual(draftHold.card, 0, false);
+  }
+  draftHold = null;
+}
+
+function completeDraftHold() {
+  if (!draftHold || draftHold.completed) return;
+  draftHold.completed = true;
+  if (draftHold.sound) draftHold.sound.stop();
+  const { card, id, onPick } = draftHold;
+  card.dataset.picked = 'true';
+  card.classList.remove('holding');
+  card.classList.add('hold-complete');
+  updateHoldVisual(card, 1, false);
+  sfx.select();
+  draftHold = null;
+  onPick(id);
+}
+
 export const ui = {
   get current() {
     return current;
@@ -67,11 +126,21 @@ export const ui = {
         }
       });
     });
+    window.addEventListener('pointerup', () => {
+      if (draftHold && draftHold.source === 'pointer') cancelDraftHold();
+    });
+    window.addEventListener('pointercancel', () => {
+      if (draftHold && draftHold.source === 'pointer') cancelDraftHold();
+    });
+    window.addEventListener('blur', () => {
+      cancelDraftHold();
+    });
     this.initSettings();
     initTips();
   },
 
   show(name, { lock = 0, focus = 0, guard = false } = {}) {
+    cancelDraftHold();
     const same = !!name && name === current; // re-render of the open screen (carousel, purchase, result...)
     for (const [k, el] of Object.entries(screens)) el.classList.toggle('active', k === name);
     current = name || null;
@@ -89,6 +158,7 @@ export const ui = {
   },
 
   hide() {
+    cancelDraftHold();
     this.show(null);
   },
 
@@ -136,7 +206,13 @@ export const ui = {
     }
     if (input.consume('confirm') && performance.now() >= lockUntil) {
       const target = items[focusIdx];
-      if (target && !range) target.click();
+      if (target && !range) {
+        if (current === 'draft' && target.classList.contains('card')) {
+          // Draft cards require hold-to-select; do not click immediately.
+        } else {
+          target.click();
+        }
+      }
     }
     if (input.consume('back')) {
       const act = screens[current].dataset.back;
@@ -146,17 +222,63 @@ export const ui = {
       }
     }
     if (current === 'draft') {
-      ['one', 'two', 'three'].forEach((k, i) => {
-        if (input.consume(k) && performance.now() >= lockUntil) {
-          const card = screens.draft.querySelectorAll('.card')[i];
-          if (card) card.click();
-        }
-      });
+      ['one', 'two', 'three'].forEach((k) => input.consume(k));
       if (input.consume('reroll')) $('#reroll-btn').click();
       if (input.consume('lock')) {
         const card = screens.draft.querySelector('.card.focus');
         if (card && draftLock && draftLock(+card.dataset.i)) syncLocks(lastLocks, lastRerolls);
       }
+
+      if (performance.now() >= lockUntil && !guarded) {
+        if (draftHold) {
+          if (draftHold.source === 'pointer') {
+            if (!draftHold.card.isConnected) cancelDraftHold();
+          } else if (draftHold.source === 'confirm') {
+            const cur = items[focusIdx];
+            if (!input.down('confirm') || cur !== draftHold.card) cancelDraftHold();
+          } else if (['one', 'two', 'three'].includes(draftHold.source)) {
+            if (!input.down(draftHold.source)) cancelDraftHold();
+          }
+        }
+
+        if (!draftHold) {
+          const cards = screens.draft.querySelectorAll('#draft-cards .card');
+          const numKeys = ['one', 'two', 'three'];
+          let keyStarted = false;
+          for (let i = 0; i < cards.length && i < 3; i++) {
+            if (input.down(numKeys[i])) {
+              const c = cards[i];
+              if (c && c.dataset.id && c._onPick && c.dataset.picked !== 'true') {
+                const idx = items.indexOf(c);
+                if (idx >= 0 && idx !== focusIdx) {
+                  focusIdx = idx;
+                  applyFocus();
+                }
+                startDraftHold(c, c.dataset.id, c._onPick, numKeys[i]);
+                keyStarted = true;
+                break;
+              }
+            }
+          }
+          if (!keyStarted && input.down('confirm')) {
+            const cur = items[focusIdx];
+            if (cur && cur.classList.contains('card') && cur.dataset.id && cur._onPick && cur.dataset.picked !== 'true') {
+              startDraftHold(cur, cur.dataset.id, cur._onPick, 'confirm');
+            }
+          }
+        }
+
+        if (draftHold && !draftHold.completed) {
+          const elapsed = performance.now() - draftHold.startTime;
+          const progress = Math.min(1, Math.max(0, elapsed / DRAFT_HOLD_MS));
+          updateHoldVisual(draftHold.card, progress, true);
+          if (progress >= 1) completeDraftHold();
+        }
+      } else if (draftHold) {
+        cancelDraftHold();
+      }
+    } else if (draftHold) {
+      cancelDraftHold();
     }
     if (current === 'over' && input.consume('reroll') && performance.now() >= lockUntil) handlers.retry();
   },
@@ -186,6 +308,7 @@ export const ui = {
     $('#draft-title').style.color = T[1];
     $('#draft-sub').textContent = note ? `${T[2]} · ${note}` : T[2];
     renderPaths($('#draft-paths'), player, fx);
+    cancelDraftHold();
     const wrap = $('#draft-cards');
     wrap.innerHTML = '';
     wrap.classList.toggle('no-keys', input.device === 'touch');
@@ -200,6 +323,8 @@ export const ui = {
       const runNew = info.max > 0 && !fresh && !info.evo && info.cat !== 'weapon' && info.lv === 0; // you always fly a main cannon
       b.className = 'card' + (info.evo ? ' evo' : '') + (fresh ? ' fresh' : '') + (info.r != null ? ` rar r${info.r}` : '') + (info.tune ? ' tune' : '') + (locks.has(i) ? ' locked-card' : '');
       b.dataset.i = i;
+      b.dataset.id = id;
+      b._onPick = onPick;
       b.style.setProperty('--c', c);
       if (info.r != null) b.style.setProperty('--rc', RARITY[info.r].color);
       let pips = '';
@@ -215,15 +340,28 @@ export const ui = {
         ? `<div class="card-rar"><b>${RARITY[info.r].name}</b>${info.levels > 1 ? `<span>+${info.levels} LEVELS</span>` : ''}${pn}</div><div class="card-mods">${info.mods.map((m) => `<i>${m}</i>`).join('')}</div>`
         : pn ? `<div class="card-rar plain">${pn}</div>` : '';
       const flag = fresh ? `<span class="card-flag disc">${STAR}NEW DISCOVERY</span>` : runNew ? '<span class="card-flag run">NEW THIS RUN</span>' : '';
-      b.innerHTML = `${flag}<div class="card-icon">${info.icon}</div><div><div class="card-top"><span class="card-name">${info.name}</span><span class="card-tag">${tag}</span></div><div class="card-desc">${info.desc}</div>${rar}${pips ? `<div class="pips">${pips}</div>` : ''}</div>${input.device === 'touch' ? '' : `<kbd>${i + 1}</kbd>`}<span class="card-lock" title="Lock: keep this card through a reroll">${LOCK_SVG}</span><span class="card-sel"></span>`;
+      b.innerHTML = `${flag}<div class="card-hold-wash"></div><div class="card-icon">${info.icon}</div><div><div class="card-top"><span class="card-name">${info.name}</span><span class="card-tag">${tag}</span><span class="card-hold-pill">HOLD TO SELECT</span></div><div class="card-desc">${info.desc}</div>${rar}${pips ? `<div class="pips">${pips}</div>` : ''}</div>${input.device === 'touch' ? '' : `<kbd>${i + 1}</kbd>`}<span class="card-lock" title="Lock: keep this card through a reroll">${LOCK_SVG}</span><span class="card-sel"></span><div class="card-hold-track"><div class="card-hold-bar"></div></div>`;
       b.querySelector('.card-lock').addEventListener('click', (e) => {
         e.stopPropagation();
         if (onLock && onLock(i)) syncLocks(locks, rerolls);
       });
-      b.addEventListener('click', () => {
-        if (performance.now() < lockUntil) return;
-        sfx.select();
-        onPick(id);
+      b.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0 && e.pointerType !== 'touch') return;
+        if (e.target.closest('.card-lock')) return;
+        if (performance.now() < lockUntil || guarded) return;
+        startDraftHold(b, id, onPick, 'pointer', e.pointerId);
+      });
+      b.addEventListener('pointerup', (e) => {
+        if (draftHold && draftHold.source === 'pointer' && draftHold.card === b) cancelDraftHold();
+      });
+      b.addEventListener('pointercancel', (e) => {
+        if (draftHold && draftHold.source === 'pointer' && draftHold.card === b) cancelDraftHold();
+      });
+      b.addEventListener('pointerleave', (e) => {
+        if (draftHold && draftHold.source === 'pointer' && draftHold.card === b) cancelDraftHold();
+      });
+      b.addEventListener('click', (e) => {
+        e.preventDefault();
       });
       wrap.appendChild(b);
     });

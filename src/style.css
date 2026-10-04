@@ -4115,6 +4115,161 @@ input[type='range']::-moz-range-thumb {
     opacity: 1;
 }
 
+/* --- Draft Hold-to-Select -------------------------------------------------------------------------------------- */
+#draft-cards .card {
+    --hold: 0;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#draft-cards:not(.no-keys) .card-top {
+    padding-right: 1.8em;
+}
+
+#draft-cards .card > div:not(.card-hold-wash):not(.card-hold-track),
+#draft-cards .card > .card-icon {
+    position: relative;
+    z-index: 1;
+}
+
+#draft-cards .card > kbd,
+#draft-cards .card > .card-lock {
+    z-index: 2;
+}
+
+.card-hold-wash {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg,
+        color-mix(in srgb, var(--rc, var(--c)) 12%, transparent) 0%,
+        color-mix(in srgb, var(--rc, var(--c)) 28%, transparent) 65%,
+        color-mix(in srgb, var(--rc, var(--c)) 50%, transparent) 100%);
+    pointer-events: none;
+    transform-origin: left;
+    transform: scaleX(var(--hold, 0));
+    opacity: 0;
+    transition: opacity 0.12s;
+    z-index: 0;
+}
+
+#draft-cards .card.holding .card-hold-wash {
+    opacity: 1;
+}
+
+.card-hold-track {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.12);
+    pointer-events: none;
+    overflow: hidden;
+    border-radius: 0 0 2px 2px;
+    z-index: 3;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+#draft-cards .card.focus .card-hold-track,
+#draft-cards .card:hover .card-hold-track,
+#draft-cards.no-keys .card .card-hold-track,
+#draft-cards .card.holding .card-hold-track {
+    opacity: 1;
+}
+
+.card-hold-bar {
+    height: 100%;
+    width: 100%;
+    transform-origin: left;
+    transform: scaleX(var(--hold, 0));
+    background: var(--rc, var(--c, var(--cyan)));
+    box-shadow: 0 0 0.6em var(--rc, var(--c, var(--cyan))), 0 0 1.2em var(--rc, var(--c, var(--cyan)));
+}
+
+.card-hold-pill {
+    margin-left: auto;
+    font-family: Orbitron, sans-serif;
+    font-size: 0.62em;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 0.15em 0.55em;
+    border-radius: 1em;
+    color: rgba(233, 244, 255, 0.45);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(2px);
+    transition: opacity 0.15s, transform 0.15s, color 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
+    white-space: nowrap;
+}
+
+#draft-cards .card.focus .card-hold-pill,
+#draft-cards .card:hover .card-hold-pill,
+#draft-cards.no-keys .card .card-hold-pill {
+    opacity: 0.85;
+    transform: translateY(0);
+}
+
+#draft-cards .card.focus .card-hold-pill {
+    color: var(--cyan);
+    background: rgba(63, 246, 255, 0.12);
+    border-color: rgba(63, 246, 255, 0.45);
+    box-shadow: 0 0 0.5em rgba(63, 246, 255, 0.2);
+}
+
+#draft-cards .card.holding .card-hold-pill {
+    opacity: 1;
+    color: #05030d;
+    background: var(--rc, var(--c, var(--cyan)));
+    border-color: var(--rc, var(--c, var(--cyan)));
+    box-shadow: 0 0 0.9em var(--rc, var(--c, var(--cyan)));
+    transform: scale(1.05);
+}
+
+#draft-cards .card.holding {
+    transform: scale(1.025);
+    border-color: var(--rc, var(--c, var(--cyan)));
+    box-shadow: 0 0 1.6em color-mix(in srgb, var(--rc, var(--c, var(--cyan))) 60%, transparent),
+                inset 0 0 1.2em color-mix(in srgb, var(--rc, var(--c, var(--cyan))) 25%, transparent);
+}
+
+#draft-cards .card.holding::after {
+    opacity: 1;
+    border-color: var(--rc, var(--c, var(--cyan)));
+    box-shadow: 0 0 1.2em var(--rc, var(--c, var(--cyan))), inset 0 0 0.8em var(--rc, var(--c, var(--cyan)));
+}
+
+#draft-cards .card.holding kbd {
+    color: #05030d;
+    background: var(--rc, var(--c, var(--cyan)));
+    border-color: var(--rc, var(--c, var(--cyan)));
+    box-shadow: 0 0 0.8em var(--rc, var(--c, var(--cyan)));
+}
+
+#draft-cards .card.hold-complete {
+    animation: card-hold-flash 0.25s ease-out;
+}
+
+@keyframes card-hold-flash {
+    0% {
+        filter: brightness(2.2) contrast(1.2);
+        transform: scale(1.04);
+    }
+    100% {
+        filter: brightness(1);
+        transform: scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #draft-cards .card.hold-complete {
+        animation: none;
+    }
+}
+
 /* Flux Core: a two-column grid of compact nodes (icon | name, text, cost) so every node fits without scrolling. */
 #core-list {
     display: grid;
