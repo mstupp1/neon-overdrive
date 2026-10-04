@@ -65,6 +65,7 @@ NEON.simulate(600); // → { screen, sector, hp, level, score, time }
 - `G.player`: `x, y, hp, maxHp, shield, charges, od (0–100), odT, level, xp, up {id: level}, st {derived stats}`
 - `G.enemies` (`type, x, y, r, hp, elite, parts?`; bosses have `boss: true, phase, state`), `G.boss`
 - `G.eBullets` (`x, y, vx, vy, r, type`), `G.pBullets`, `G.pickups`, `G.beams`
+- Pickups (`src/game/pickups.js`) are missable: in fights they fall at `DRIFT` (115 px/s per 800 of field depth, so every view crosses in the same time; relics at half speed) and expire after `LIFE` (XP 7 s, credits 8, power-ups 9, relics 14), blinking faster and flaring brighter over the last `WARN` 2.5 s. In the overworld they don't drift but still expire. Once pickup range (`st.magnet`) or a vacuum pulls one it never expires.
 - `G.director`: `state (intro|waves|clearing|warn|boss|bossDown|clear|await)`, `progress`, `diff`
 - `G.sector`, `G.loop`, `G.score`, `G.displayScore`, `G.combo`, `G.comboTimer`, `G.maxCombo`, `G.kills`, `G.grazes`, `G.bossKills`, `G.runTime` (run seconds), `G.time` (sim seconds), `G.rerolls`, `G.pendingLevels`, `G.supplyLeft` (supply-drop drafts left), `G.deathT`, `G.vacuum`, `G.autopilot`, `G.enemyTimeScale`, `G.slowmo`, `G.hitstop`, `G.banner`, `G.pulse*`
 - `G.run` (null in attract): `{mode: 'campaign'|'endless', sysIdx, system, route, row, nodeId, sectors, victory, visited[]}` (`endless` = the debug sandbox from `startRun`; `visited` is per system) plus fields reset in `newWorld`: `wallet, earned, frac, curse, ambush, bonusXp, events[]`.

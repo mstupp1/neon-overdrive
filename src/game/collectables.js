@@ -183,7 +183,6 @@ export function rollRelicDrop(e, force = false) {
   if (!force && !chance(p)) return;
   relicSprite();
   const pk = dropPickup(e.x, e.y, 'relic');
-  pk.life = 20;
   pk.theme = fieldTheme().id;
 }
 

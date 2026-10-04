@@ -1,11 +1,22 @@
 // XP gems and power-up pickups with magnet behaviour.
+//
+// Drops are meant to be missable: in a fight they fall back past the ship with the scroll, and every drop expires.
+// Over its last WARN seconds a drop blinks, faster and faster, flashing brighter and bigger on each blink, then winks
+// out. Once the magnet (pickup range) catches a drop it is yours: it no longer falls or expires.
 
 import { G, view, field } from './state.js';
 import { S, glow } from '../render/sprites.js';
 import { rand, TAU, dist2 } from '../core/math.js';
 import { collectPickup } from './player.js';
+import { sparks } from './fx.js';
 
 const free = [];
+
+const DRIFT = 115; // fall speed (px/s) in an 800-deep field; deeper fields (chase view) scale it to cross in the same time
+const WARN = 2.5; // seconds of blinking before a drop expires
+const LIFE = { xp: 7, credit: 8, relic: 14 }; // seconds; power-ups (heart, magnet, cell) get LIFE_POWER
+const LIFE_POWER = 9;
+const SLOW = { relic: 0.5 }; // relic caches fall at half speed so a rare find is not gone in a blink
 
 function make(type, x, y, val) {
   const p = free.pop() || {};
@@ -20,7 +31,7 @@ function make(type, x, y, val) {
   p.t = 0;
   p.pull = false;
   p.dead = false;
-  p.life = type === 'xp' ? 14 : 12;
+  p.life = LIFE[type] || LIFE_POWER;
   if (type === 'xp') p.spr = val >= 20 ? S.gem4 : val >= 8 ? S.gem3 : val >= 3 ? S.gem2 : S.gem1;
   else p.spr = S[type];
   G.pickups.push(p);
@@ -45,9 +56,7 @@ export function dropXp(x, y, amount) {
 // Gold credit chip; `val` is the raw amount (multipliers apply on collection).
 export function dropCredit(x, y, val) {
   if (G.pickups.length > 300) return;
-  const p = make('credit', x + rand(-6, 6), y + rand(-6, 6), val);
-  p.life = 16;
-  return p;
+  return make('credit', x + rand(-6, 6), y + rand(-6, 6), val);
 }
 
 export function dropPickup(x, y, type) {
@@ -66,6 +75,7 @@ export function updatePickups(dt) {
   const arr = G.pickups;
   const magR2 = pl.st.magnet * pl.st.magnet;
   const allPull = pl.odT > 0 || G.vacuum;
+  const fall = DRIFT * (view.H / 800);
   let w = 0;
   for (const p of arr) {
     p.t += dt;
@@ -81,9 +91,12 @@ export function updatePickups(dt) {
       } else {
         p.vx *= 1 - 2.5 * dt;
         if (field.ow) p.vy *= 1 - 2.5 * dt; // open space: no scroll to drift with
-        else p.vy += (35 - p.vy) * 2 * dt; // gentle downward drift
+        else p.vy += (fall * (SLOW[p.type] || 1) - p.vy) * 2 * dt; // falls back with the scroll
         p.life -= dt;
-        if (p.life <= 0) p.dead = true;
+        if (p.life <= 0) {
+          p.dead = true;
+          sparks(p.x, p.y, p.type === 'xp' ? '#9ffcff' : '#ffffff', 3, 90); // winks out
+        }
       }
       p.x += p.vx * dt;
       p.y += p.vy * dt;
@@ -112,10 +125,26 @@ export function drawPickups(ctx, list = G.pickups) {
   for (const p of list) {
     const s = p.spr;
     let a = 1;
-    if (!p.pull && p.life < 3) a = Math.sin(p.life * 18) > 0 ? 0.9 : 0.25;
-    ctx.globalAlpha = a;
     let sz = s.size;
+    let hot = 0; // expiry flash, 0..1
+    if (!p.pull && p.life < WARN) {
+      // Blink faster as it runs out (about 3 to 9 blinks a second); each blink flares bright and a little bigger.
+      const u = 1 - p.life / WARN;
+      const on = Math.sin(p.t * (18 + 40 * u)) > 0;
+      a = on ? 1 : 0.22;
+      hot = on ? 0.55 + 0.45 * u : 0;
+      sz *= 1 + hot * 0.3;
+      if (p.life < 0.25) sz *= p.life / 0.25; // shrink away at the very end
+    }
+    ctx.globalAlpha = a;
     if (p.type !== 'xp' && p.type !== 'credit') sz *= 1 + Math.sin(time * 6) * 0.08;
+    if (hot > 0) {
+      const g = glow('#ffffff', 48);
+      const gs = sz * 1.7;
+      ctx.globalAlpha = hot * 0.32;
+      ctx.drawImage(g.img, p.x - gs / 2, p.y - gs / 2, gs, gs);
+      ctx.globalAlpha = a;
+    }
     if (p.type === 'relic') {
       // Relic cache: a slow golden beacon so it reads as loot, not a gem.
       const g = glow('#ffd24a', 64);
@@ -124,6 +153,11 @@ export function drawPickups(ctx, list = G.pickups) {
       ctx.globalAlpha = a;
     }
     ctx.drawImage(s.img, p.x - sz / 2, p.y - sz / 2, sz, sz);
+    if (hot > 0) {
+      // A second additive pass makes the blink read brighter, not just bigger.
+      ctx.globalAlpha = hot * 0.8;
+      ctx.drawImage(s.img, p.x - sz / 2, p.y - sz / 2, sz, sz);
+    }
   }
   ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = 'source-over';
