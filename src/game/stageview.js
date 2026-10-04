@@ -39,7 +39,10 @@ const CHASE_HOME = 150; // the jet's resting distance from the near edge (virtua
 const FOG = 260; // chase: virtual depth over which things fade in from the far edge
 // Chase depth cues: ships fly at this height over the floor (in virtual units; screen lift = HOVER * local scale),
 // so their lit shadows sit visibly below them and the floor reads as a ground plane rather than the play surface.
-const HOVER = 24;
+const HOVER = 34;
+
+// The fly-through camera (cine.camera(), virtual units) for this frame: shadows and cutouts follow it like the frame.
+const CAM = { z: 1, x: 0, y: 0 };
 
 // Real (screen) metrics, saved while the view is swapped.
 const R = { W: 450, H: 800, top: 0, bottom: 0 };
@@ -380,14 +383,14 @@ export const sv = {
 
   // Draw the world for this view. main.js passes renderWorld and the shake offset; cam is cine.camera() read inside
   // the virtual frame by the caller (getCam).
-  render(ctx, k, renderWorld, getCam) {
+  render(ctx, k, renderWorld, getCam, drawStandees) {
     const r = real();
+    const chase = this.mode === 'chase';
     ctx.setTransform(k, 0, 0, k, 0, 0);
     if (this.mode === 'side') {
       drawSideBack(ctx, r);
       drawSideGlow(ctx, r);
-    }
-    else drawChaseBack(ctx, r);
+    } else drawChaseBack(ctx, r);
     const shakeX = view.ox || 0;
     const shakeY = view.oy || 0;
     this.push();
@@ -398,31 +401,60 @@ export const sv = {
     if (off.width !== w || off.height !== h) {
       off.width = w;
       off.height = h;
-    } else {
+    }
+    CAM.z = cam ? cam.z : 1;
+    CAM.x = cam ? cam.x : 0;
+    CAM.y = cam ? cam.y : 0;
+    // The virtual frame into the offscreen canvas: all of it for the side view; for the chase view only what lies in
+    // the flight plane under the ships (the rest follows the cutouts, below).
+    const frame = (layer) => {
       octx.setTransform(1, 0, 0, 1, 0, 0);
       octx.clearRect(0, 0, w, h);
-    }
-    const z = cam ? cam.z : 1;
-    view.ox = cam ? cam.x * kk : 0;
-    view.oy = cam ? cam.y * kk : 0;
-    octx.setTransform(kk * z, 0, 0, kk * z, view.ox, view.oy);
-    renderWorld(octx, kk * z);
-    view.ox = shakeX;
-    view.oy = shakeY;
+      view.ox = CAM.x * kk;
+      view.oy = CAM.y * kk;
+      octx.setTransform(kk * CAM.z, 0, 0, kk * CAM.z, view.ox, view.oy);
+      renderWorld(octx, kk * CAM.z, layer);
+      view.ox = shakeX;
+      view.oy = shakeY;
+    };
+    frame(chase ? 'under' : undefined);
     this.pop();
-    if (this.mode === 'side') {
+    if (!chase) {
       // Quarter turn: virtual (u, v) device px → screen (W*k - v + shake, u + shake).
       ctx.setTransform(0, 1, -1, 0, r.W * k + shakeX, shakeY);
       ctx.drawImage(off, 0, 0);
     } else {
-      // Depth cues before the ships: lane pylons standing up off the floor, then each ship's shadow and the light it
-      // casts on the floor. The world itself is laid on the air plane, lifted above those shadows.
+      // Depth cues first: lane pylons standing up off the floor, then each ship's shadow and the light it casts on
+      // the floor. The flight plane (shots, beams, telegraphs) is laid on the air plane, lifted above those shadows.
       ctx.setTransform(k, 0, 0, k, shakeX, shakeY);
       drawPylons(ctx, r);
       drawShadows(ctx);
       drawChaseFloor(ctx, k, kk, r, shakeX, shakeY);
+      // Ships and pickups stand up off that plane like paper cutouts, each at its own depth and scale, far to near.
+      this.push();
+      const q = {};
+      drawStandees(ctx, (x, y) => {
+        const vx = x * CAM.z + CAM.x;
+        const vy = y * CAM.z + CAM.y;
+        const fog = clamp((vy + 20) / FOG, 0, 1);
+        if (fog < 0.02) return 0;
+        this.toScreen(vx, vy, q);
+        const ks = k * q.s * CAM.z * (0.4 + 0.6 * fog); // grow in out of the haze rather than pop
+        view.ox = q.x * k + shakeX - x * ks;
+        view.oy = q.y * k + shakeY - y * ks;
+        ctx.setTransform(ks, 0, 0, ks, view.ox, view.oy);
+        return ks;
+      });
+      view.ox = shakeX;
+      view.oy = shakeY;
+      this.pop();
       ctx.setTransform(k, 0, 0, k, shakeX, shakeY);
       drawHaze(ctx, r);
+      // Then what stays on top of the ships: enemy shots, particles, ult effects.
+      this.push();
+      frame('over');
+      this.pop();
+      drawChaseFloor(ctx, k, kk, r, shakeX, shakeY);
     }
     ctx.setTransform(k, 0, 0, k, shakeX, shakeY);
     if (this.mode === 'chase') drawGates(ctx, r);
@@ -924,9 +956,9 @@ function drawShadows(ctx) {
     if (y < -40) return;
     const fog = clamp((y + 20) / FOG, 0, 1);
     if (fog < 0.02) return;
-    floorPt(x, y, q);
+    floorPt(x * CAM.z + CAM.x, y * CAM.z + CAM.y, q);
     const s = q.s;
-    const rx = rad * s * 1.15;
+    const rx = rad * s * CAM.z * 1.15;
     const ry = rx * 0.42;
     ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = 0.3 * fog * w;

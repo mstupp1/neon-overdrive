@@ -168,20 +168,24 @@ export function generateRoute(system, seed) {
 
 // Stage views (stageview.js): which zones of a fighting node fly another view ([view per zone]) or null. Seeded per
 // route node so the exit card can show it before you pick. Never the first zone (views change on a fly-through).
+// Most fights past the first row get one; a three-zone node sometimes flies both of its later zones in other views.
 function rollNodeViews(seed, node, zones) {
-  if (node.row < 1 || zones < 2) return null;
+  if (zones < 2) return null;
   const rnd = mulberry32(((seed ^ 0x5eedf00d) >>> 0) + node.row * 977 + node.col * 131);
-  if (rnd() >= (node.type === 'elite' ? 0.45 : 0.3)) return null;
+  const odds = node.row < 1 ? 0.35 : node.type === 'elite' ? 0.8 : 0.6;
+  if (rnd() >= odds) return null;
   const views = new Array(zones).fill('top');
-  views[1 + Math.floor(rnd() * (zones - 1))] = rnd() < 0.5 ? 'side' : 'chase';
+  const pick = () => (rnd() < 0.5 ? 'side' : 'chase');
+  const at = 1 + Math.floor(rnd() * (zones - 1));
+  views[at] = pick();
+  if (zones > 2 && rnd() < 0.35) views[at === 1 ? 2 : 1] = pick();
   return views;
 }
-// Bosses with a view variant (bosses.js VARIANTS); their arena flies that view half the time.
 export const BOSS_VIEWS = { hydra: 'side', omega: 'chase' };
 function rollArenaView(seed, boss) {
   const v = BOSS_VIEWS[boss];
   if (!v) return null;
-  return mulberry32(((seed ^ 0xb055) >>> 0) + 7)() < 0.5 ? v : null;
+  return mulberry32(((seed ^ 0xb055) >>> 0) + 7)() < 0.65 ? v : null;
 }
 
 export const routeNode = (route, id) => route.nodes.find((n) => n.id === id);

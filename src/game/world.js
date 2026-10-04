@@ -323,16 +323,17 @@ function drawShieldLinks(ctx) {
   }
 }
 
-function drawEnemies(ctx, k) {
+// solo: one enemy drawn as a chase-view cutout (drawStandees); its snake tail and shield tethers are drawn elsewhere.
+function drawEnemies(ctx, k, list = G.enemies, solo = false) {
   const dark = !!(G.director && G.director.diff.blackout);
-  for (const e of G.enemies) {
+  for (const e of list) {
     if (e.dead || (field.ow && !inField(e.x, e.y, 120))) continue;
     if (e.boss) {
       drawBoss(ctx, e);
       continue;
     }
     const scale = e.elite ? 1.2 : 1;
-    if (e.type === 'snake') {
+    if (e.type === 'snake' && !solo) {
       const seg = S.snakeSeg;
       for (let i = e.parts.length - 1; i >= 1; i--) {
         const pt = e.parts[i];
@@ -364,10 +365,10 @@ function drawEnemies(ctx, k) {
     if (e.alpha !== undefined) ctx.globalAlpha = 1;
   }
   ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
-  drawShieldLinks(ctx);
+  if (!solo) drawShieldLinks(ctx);
 
   // Health bars on tough enemies once damaged
-  for (const e of G.enemies) {
+  for (const e of list) {
     if (e.dead || e.boss || e.hp >= e.maxHp || (e.maxHp < 40 && !e.elite)) continue;
     const w = e.r * 1.6;
     const y = e.y + e.r + 8;
@@ -378,16 +379,26 @@ function drawEnemies(ctx, k) {
   }
 }
 
-export function renderWorld(ctx, k) {
-  if (!field.ow && !sv.active) bg.draw(ctx); // the overworld and the other stage views draw their own backdrop
-  sv.drawWorld(ctx);
-  drawPickups(ctx);
-  drawTelegraphs(ctx);
-  drawEnemies(ctx, k);
-  drawBeams(ctx);
-  drawPlayerBullets(ctx, k);
-  drawModules(ctx, k);
-  drawPlayer(ctx, k);
+// layer: omitted draws everything. The chase view (stageview.js) splits it: 'under' is what lies in the flight plane
+// below the ships (telegraphs, beams, player shots), 'over' what stays on top of them (particles, enemy shots, ult
+// effects), and the ships and pickups themselves stand up as cutouts between the two (drawStandees).
+export function renderWorld(ctx, k, layer) {
+  const ents = !layer;
+  if (layer !== 'over') {
+    if (!field.ow && !sv.active) bg.draw(ctx); // the overworld and the other stage views draw their own backdrop
+    sv.drawWorld(ctx);
+    if (ents) drawPickups(ctx);
+    drawTelegraphs(ctx);
+    if (ents) drawEnemies(ctx, k);
+    else drawShieldLinks(ctx);
+    drawBeams(ctx);
+    drawPlayerBullets(ctx, k);
+    if (ents) {
+      drawModules(ctx, k);
+      drawPlayer(ctx, k);
+    }
+    if (layer) return;
+  }
   drawParticles(ctx);
   drawEnemyBullets(ctx, k);
   if (!sv.active) drawTexts(ctx); // other views draw them upright after the camera mapping (stageview.js)
@@ -417,4 +428,44 @@ export function renderWorld(ctx, k) {
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
   }
+}
+
+// Chase view: every ship, snake segment and pickup drawn on its own, far to near, each as an upright cutout standing
+// at its spot on the flight plane. place(x, y) points the canvas transform (and view.ox / oy) at that anchor and
+// returns the scale to draw at, or 0 to skip it.
+const standees = [];
+export function drawStandees(ctx, place) {
+  standees.length = 0;
+  const add = (x, y, kind, o) => standees.push({ x, y, kind, o });
+  for (const pk of G.pickups) add(pk.x, pk.y, 0, pk);
+  for (const e of G.enemies) {
+    if (e.dead) continue;
+    add(e.x, e.y, 1, e);
+    if (e.type === 'snake' && !e.boss) for (let i = 1; i < e.parts.length; i++) add(e.parts[i].x, e.parts[i].y, 2, { e, i });
+  }
+  const p = G.player;
+  if (p && !p.dead) add(p.x, p.y, 3, p);
+  standees.sort((a, b) => a.y - b.y);
+  const one = [null];
+  for (const st of standees) {
+    const k = place(st.x, st.y);
+    if (!k) continue;
+    if (st.kind === 0) {
+      one[0] = st.o;
+      drawPickups(ctx, one);
+    } else if (st.kind === 1) {
+      one[0] = st.o;
+      drawEnemies(ctx, k, one, true);
+    } else if (st.kind === 2) {
+      const { e, i } = st.o;
+      const seg = S.snakeSeg;
+      const sz = seg.size * (1 - i * 0.04) * (e.elite ? 1.2 : 1);
+      ctx.drawImage(e.flash > 0 ? seg.flash : seg.img, e.parts[i].x - sz / 2, e.parts[i].y - sz / 2, sz, sz);
+    } else {
+      drawModules(ctx, k);
+      drawPlayer(ctx, k);
+    }
+  }
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
 }

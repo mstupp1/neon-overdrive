@@ -106,10 +106,10 @@ export function updatePickups(dt) {
   arr.length = w;
 }
 
-export function drawPickups(ctx) {
+export function drawPickups(ctx, list = G.pickups) {
   ctx.globalCompositeOperation = 'lighter';
   const time = G.time;
-  for (const p of G.pickups) {
+  for (const p of list) {
     const s = p.spr;
     let a = 1;
     if (!p.pull && p.life < 3) a = Math.sin(p.life * 18) > 0 ? 0.9 : 0.25;
