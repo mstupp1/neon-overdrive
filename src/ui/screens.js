@@ -125,15 +125,14 @@ export const ui = {
     const isRow = el && el.classList.contains('set-row') && el.querySelector('input[type=range]');
     const range = isRange ? el : isRow ? el.querySelector('input') : null;
 
-    if (input.consume('up')) move(-1);
-    if (input.consume('down')) move(1);
-    if (input.consume('left')) {
-      if (range) nudge(range, -1);
-      else move(-1);
-    }
-    if (input.consume('right')) {
-      if (range) nudge(range, 1);
-      else move(1);
+    // Console-style: arrows / d-pad move to the nearest item on screen in that direction (see moveDir).
+    if (input.consume('up')) moveDir(0, -1);
+    if (input.consume('down')) moveDir(0, 1);
+    // Left / right on a slider nudges it; on a settings toggle with nothing beside it, flips it (‹ ON ›).
+    for (const [k, d] of [['left', -1], ['right', 1]]) {
+      if (!input.consume(k)) continue;
+      if (range) nudge(range, d);
+      else if (!moveDir(d, 0) && el.classList.contains('toggle') && performance.now() >= lockUntil) el.click();
     }
     if (input.consume('confirm') && performance.now() >= lockUntil) {
       const target = items[focusIdx];
@@ -447,10 +446,64 @@ function applyFocus() {
   items[focusIdx].scrollIntoView({ block: 'nearest' });
 }
 
-function move(d) {
-  focusIdx += d;
+// Directional focus: the nearest item past the focused one in that direction, preferring items that line up with
+// it (same column for up / down, same row for left / right). With nothing that way it wraps to the far end of the
+// same column / row, else stays put. A run of moves along one axis keeps its column (or row) through wide items,
+// so down-down-up from a narrow button over a wide one lands back where it started.
+let navAnchor = null; // {axis, v, el}: the line held by consecutive moves along one axis
+function moveDir(dx, dy) {
+  const items = focusables();
+  const cur = items[focusIdx];
+  if (!cur) return false;
+  const vert = dy !== 0;
+  const dir = vert ? dy : dx;
+  const box = (el) => {
+    const r = el.getBoundingClientRect();
+    // a / b: span along the move axis; lo / hi: span across it
+    return vert ? { a: r.top, b: r.bottom, lo: r.left, hi: r.right } : { a: r.left, b: r.right, lo: r.top, hi: r.bottom };
+  };
+  const r = box(cur);
+  const axis = vert ? 'y' : 'x';
+  const held = navAnchor && navAnchor.axis === axis && navAnchor.el === cur;
+  const line = held ? navAnchor.v : (r.lo + r.hi) / 2;
+  const off = (o) => (line < o.lo ? o.lo - line : line > o.hi ? line - o.hi : 0); // anchor line to the item's span
+  let best = null;
+  let bs = Infinity;
+  const boxes = items.map((el) => (el === cur ? null : box(el)));
+  boxes.forEach((o, i) => {
+    if (!o) return;
+    // Past the focused item: beyond half the shorter one's depth, so same-row items of other sizes never count.
+    const half = Math.min(r.b - r.a, o.b - o.a) / 2;
+    const ahead = dir > 0 ? o.a >= r.b - half : o.b <= r.a + half;
+    if (!ahead) return;
+    const gap = Math.max(0, dir > 0 ? o.a - r.b : r.a - o.b);
+    const across = Math.max(0, o.lo - r.hi, r.lo - o.hi); // 0 when the spans overlap (same column / row)
+    const score = gap + across * 3 + off(o) * 0.6;
+    if (score < bs) {
+      bs = score;
+      best = i;
+    }
+  });
+  if (best === null) {
+    // Wrap: the farthest item the other way that shares the column / row.
+    let far = Infinity;
+    boxes.forEach((o, i) => {
+      if (!o || o.hi <= r.lo || o.lo >= r.hi) return;
+      const edge = dir > 0 ? o.a : -o.b;
+      const score = edge + off(o) * 0.01;
+      if (score < far && (dir > 0 ? o.a < r.a : o.b > r.b)) {
+        far = score;
+        best = i;
+      }
+    });
+  }
+  if (best === null) return false;
+  focusIdx = best;
   applyFocus();
+  const o = boxes[best];
+  navAnchor = { axis, v: Math.min(Math.max(line, o.lo), o.hi), el: items[best] };
   sfx.ui();
+  return true;
 }
 
 function nudge(range, dir) {
