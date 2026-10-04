@@ -284,6 +284,7 @@ export function rollUpgradeIds(p, kind, n = 3, rng = Math.random, evo = false, o
   const ranks = pathRanks(p);
   const spec = p.spec || [];
   const pool = UPGRADES.filter((u) => {
+    if (u.cat === 'weapon') return false; // the Main Cannon grows with the run (main.js weaponStep), never from a card
     if (only && !only(u)) return false;
     const l = p.up[u.id] || 0;
     if (!l && !available(p, u, k)) return false;
@@ -302,7 +303,6 @@ export function rollUpgradeIds(p, kind, n = 3, rng = Math.random, evo = false, o
       else if (kind === 'sector') wgt *= 1.6;
       if (mods === 0 && p.level >= 2) wgt *= 1.6; // first module comes early
     }
-    if (u.id === 'main' && l < 3) wgt *= 1.5;
     if (u.id === 'hull' && p.hp < p.maxHp) wgt *= 1.3;
     if (!k.has(u.id)) wgt *= 1.4; // undiscovered tech surfaces a little sooner
     wgt *= 1 + 0.15 * Math.min(4, synergy(p, u.id)); // equipped gear's build paths pull matching tech forward
@@ -445,6 +445,7 @@ export function pathRanks(p) {
   const out = {};
   for (const t of Object.keys(TAGS)) out[t] = 0;
   for (const [id, l] of Object.entries(p.up || {})) {
+    if (id === 'main') continue; // run milestones level it for everyone, so it never pushes a path
     const t = pathOf(id);
     if (t) out[t] += l;
   }
@@ -506,7 +507,7 @@ export function pathNote(p, id, levels = 1, path = pathOf(id)) {
 }
 
 // --- Level-up drafts (micro) -------------------------------------------------------------------
-// Levels strengthen what you already fly: +1 to an upgrade you own (never rarer, never new tech, never an evolution),
+// Levels strengthen what you already fly: +1 to a stat or defense you own (never a module, never rarer, never new tech),
 // or a tune: one small run modifier from your paths. New tech, rarity and evolutions come from rewards (sector clears,
 // bosses, vaults). Tunes never run out, so long runs keep a pick at every level without maxing every stat.
 export const TUNE_SCALE = 0.55; // x a gear modifier's value (rarity Common)
@@ -546,7 +547,8 @@ export function rollTune(p, il = 1, avoid = [], rng = Math.random) {
 
 let tuneSeq = 0;
 function rollLevelDraft(p, keep = null) {
-  const owned = (u) => u.cat !== 'evolution' && ((p.up[u.id] || 0) > 0 || u.id === 'main') && (!keep || keep(u)); // you always fly a main cannon
+  // Weapons (modules) level only from rewards; level-ups raise owned stats and defenses.
+  const owned = (u) => (u.cat === 'stat' || u.cat === 'defense') && (p.up[u.id] || 0) > 0 && (!keep || keep(u));
   const ids = rollUpgradeIds(p, 'level', 2, Math.random, false, owned);
   while (ids.length < 3) ids.push(`tune:${tuneSeq++}`); // unique ids, so a locked tune survives a reroll
   if (p.hp < p.maxHp && p.hp <= p.maxHp / 2) ids[ids.length - 1] = 'repair'; // badly hurt: a patch-up is on offer

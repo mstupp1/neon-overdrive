@@ -138,7 +138,7 @@ export const STORY = {
       L('MAG', 'Pick one exit and the others close. Your guns find the nearest awake hostile; hold Shift to lock on and strafe. Run past what you can\'t fight. M pulls up the map.'),
     ],
     draft: [
-      L('MAG', 'Level-ups tune what you already fly. New tech comes from clearing sectors, and bosses pay rarer. Max a module with its partner stat and it can EVOLVE.'),
+      L('MAG', 'Level-ups tune what you already fly, and your main cannon grows with the run. New tech comes from clearing sectors, and bosses pay rarer. Max a module with its partner stat and it can EVOLVE.'),
       L('MAG', 'The first two build paths you raise to 5 lock in your specialty. Feeling strong? Skip a pick to bank Fortune for a rarer reward.'),
     ],
     discovery: [L('MAG', 'NEW DISCOVERY means tech you\'ve never seen. From now on it can turn up from Genesis on.')],
