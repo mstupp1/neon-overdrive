@@ -4007,6 +4007,114 @@ input[type='range']::-moz-range-thumb {
     box-shadow: 0 0 0.8em rgba(255, 210, 74, 0.6);
 }
 
+/* Draft selection: the card Enter / pad / F act on gets its own marker that no other card state uses (rarity
+   stripe, discovery frame, gold lock): a thick cyan ring outside the card, a pointing arrow on its left, a lit key
+   badge, and the other cards dim. Hover alone never lights a card (the pointer moves the focus instead), so only
+   one card ever reads as selected. Touch has no selection (a tap picks), so it only shows the ring while pressed. */
+#draft-cards .card::after {
+    content: '';
+    position: absolute;
+    inset: -0.42em;
+    border: 2px solid var(--cyan);
+    box-shadow: 0 0 0.9em rgba(63, 246, 255, 0.75), inset 0 0 0.6em rgba(63, 246, 255, 0.35);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.12s;
+}
+
+#draft-cards .card-sel {
+    position: absolute;
+    left: -1.6em;
+    top: 50%;
+    width: 0.7em;
+    height: 1em;
+    background: var(--cyan);
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    filter: drop-shadow(0 0 0.3em var(--cyan));
+    opacity: 0;
+    transform: translate(-0.4em, -50%);
+    transition: opacity 0.12s, transform 0.12s;
+    pointer-events: none;
+}
+
+#draft-cards .card {
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s, filter 0.15s;
+}
+
+#draft-cards .card:hover:not(.focus) {
+    border-color: color-mix(in srgb, var(--c) 35%, transparent);
+    box-shadow: none;
+    transform: none;
+}
+
+#draft-cards .card.locked-card:hover:not(.focus) {
+    border-color: #ffd24a;
+    box-shadow: 0 0 0 1px #ffd24a inset, 0 0 1em rgba(255, 210, 74, 0.25);
+}
+
+#draft-cards .card.focus::after,
+#draft-cards .card.focus .card-sel {
+    opacity: 1;
+}
+
+#draft-cards .card.focus .card-sel {
+    transform: translate(0, -50%);
+    animation: nudge 0.9s ease-in-out infinite;
+}
+
+#draft-cards .card.focus kbd {
+    color: #05030d;
+    background: var(--cyan);
+    border-color: var(--cyan);
+}
+
+#draft-cards:has(.card.focus) .card:not(.focus) {
+    filter: brightness(0.62) saturate(0.75);
+}
+
+/* Keys still held from flying: the selection shows, but softer until they're released. */
+.screen.guarded #draft-cards .card.focus::after,
+.screen.guarded #draft-cards .card.focus .card-sel {
+    opacity: 0.45;
+}
+
+.screen.guarded #draft-cards:has(.card.focus) .card:not(.focus) {
+    filter: none;
+}
+
+#draft-cards.no-keys .card.focus::after,
+#draft-cards.no-keys .card.focus .card-sel,
+#draft-cards.no-keys .card-sel {
+    display: none;
+}
+
+#draft-cards.no-keys .card.focus,
+#draft-cards.no-keys .card:hover {
+    border-color: color-mix(in srgb, var(--c) 35%, transparent);
+    box-shadow: none;
+    transform: none;
+}
+
+#draft-cards.no-keys .card.locked-card.focus,
+#draft-cards.no-keys .card.locked-card:hover {
+    border-color: #ffd24a;
+    box-shadow: 0 0 0 1px #ffd24a inset, 0 0 1em rgba(255, 210, 74, 0.25);
+}
+
+#draft-cards.no-keys .card.fresh.focus,
+#draft-cards.no-keys .card.fresh:hover {
+    outline-color: rgba(255, 255, 255, 0.4);
+}
+
+#draft-cards.no-keys:has(.card.focus) .card:not(.focus) {
+    filter: none;
+}
+
+#draft-cards.no-keys .card:active::after {
+    display: block;
+    opacity: 1;
+}
+
 /* Flux Core: a two-column grid of compact nodes (icon | name, text, cost) so every node fits without scrolling. */
 #core-list {
     display: grid;
