@@ -16,6 +16,8 @@ import { rollGearDrop } from './loot.js';
 import { sfx } from '../core/audio.js';
 import { addScore } from './player.js';
 import { sv } from './stageview.js';
+import { MINI_ATTACKS, miniById, resetMini, miniBurst } from './minibosses.js';
+import { drawMini } from '../render/miniArt.js';
 
 const BOSSES = [
   { id: 'warden', name: 'WARDEN', title: 'Siege Mech', hp: 2400, r: 40, color: '#ff7a18', homeY: 165 },
@@ -43,7 +45,8 @@ export function bossVariant(id, view) {
 }
 
 export function spawnBoss(id, level, loop, hpMul = 1) {
-  const def = bossVariant(id, sv.mode);
+  const mini = miniById(id);
+  const def = mini || bossVariant(id, sv.mode);
   const hp = def.hp * hpMul * Math.pow(3.2, loop) * (1 + 0.15 * loop);
   const e = {
     type: 'boss', boss: true, kind: def.id, name: def.name, title: def.title,
@@ -52,6 +55,13 @@ export function spawnBoss(id, level, loop, hpMul = 1) {
     state: 'enter', phase: 1, atk: null, gap: 1.2, cycle: 0, parts: [],
     xp: 80, score: 30000, barFill: 0, anim: 0, homeY: def.homeY, view: def.variant || null,
   };
+  if (mini) {
+    // Mini boss (minibosses.js): two phases, a quicker entrance, smaller payouts.
+    e.mini = true;
+    e.xp = 40;
+    e.score = 12000;
+    e.alpha = 1;
+  }
   if (def.variant) e.homeY = VARIANTS[def.id][def.variant].homeY;
   if (def.id === 'eclipse') {
     e.alpha = 1;
@@ -64,7 +74,8 @@ export function spawnBoss(id, level, loop, hpMul = 1) {
   return e;
 }
 
-const speedFor = (e) => (e.kind === 'eclipse' ? [1.08, 1.25, 1.45] : [1, 1.15, 1.32])[e.phase - 1] * (1 + G.loop * 0.12);
+const speedFor = (e) => (e.mini ? [1, 1.2] : e.kind === 'eclipse' ? [1.08, 1.25, 1.45] : [1, 1.15, 1.32])[e.phase - 1] * (1 + G.loop * 0.12);
+const setOf = (e) => ATTACKS[e.kind] || MINI_ATTACKS[e.kind];
 
 export function every(a, dt, interval, fn) {
   a.acc = (a.acc ?? 0) - dt;
@@ -577,7 +588,7 @@ const ATTACKS = {
 };
 
 function computeParts(e) {
-  const def = ATTACKS[e.kind].parts(e);
+  const def = setOf(e).parts(e);
   e.parts.length = def.length;
   for (let i = 0; i < def.length; i++) {
     const p = e.parts[i] || (e.parts[i] = {});
@@ -609,10 +620,10 @@ function eclipseTick(e, dt) {
 }
 
 export function updateBoss(e, dt) {
-  const set = ATTACKS[e.kind];
+  const set = setOf(e);
   if (e.state === 'enter') {
-    e.y = damp(e.y, e.homeY + view.safeTop, 1.4, dt);
-    e.barFill = Math.min(1, e.barFill + dt * 0.6);
+    e.y = damp(e.y, e.homeY + view.safeTop, e.mini ? 2.2 : 1.4, dt);
+    e.barFill = Math.min(1, e.barFill + dt * (e.mini ? 0.9 : 0.6));
     if (e.kind === 'omega') e.anim += dt;
     if (e.y > e.homeY - 12 + view.safeTop && e.barFill >= 1) {
       e.state = 'fight';
@@ -628,7 +639,7 @@ export function updateBoss(e, dt) {
     } else if (e.atk) {
       if (set[e.atk.name](e, e.atk, dt, speedFor(e))) {
         e.atk = null;
-        e.gap = (e.kind === 'eclipse' ? 0.6 : 0.85) / speedFor(e);
+        e.gap = (e.kind === 'eclipse' ? 0.6 : e.mini ? 0.7 : 0.85) / speedFor(e);
       }
     } else {
       e.gap -= dt;
@@ -659,7 +670,7 @@ export function bossDamaged(e, dmg) {
   addScore(dmg * 1.5);
   if (e.state !== 'fight') return;
   const f = e.hp / e.maxHp;
-  if ((e.phase === 1 && f < 0.66) || (e.phase === 2 && f < 0.33)) {
+  if (e.mini ? e.phase === 1 && f < 0.5 : (e.phase === 1 && f < 0.66) || (e.phase === 2 && f < 0.33)) {
     if (e.hp > 0) {
       phaseShift(e);
       return;
@@ -675,6 +686,7 @@ function removeBossBeams(e) {
 
 // Drop any transient attack state (ECLIPSE lanes / dash / dome / warp) on a phase shift or death.
 function resetAttackState(e) {
+  if (e.mini) return resetMini(e);
   if (e.kind !== 'eclipse') return;
   e.lanes = null;
   e.dashX = undefined;
@@ -704,14 +716,14 @@ function phaseShift(e) {
   addShake(0.6);
   hitstop(0.1);
   sfx.explode(3);
-  floatText(e.x, e.y + 80, e.phase === 3 ? 'FINAL PHASE' : 'PHASE ' + e.phase, e.color, 16, 1.4);
+  floatText(e.x, e.y + 80, e.mini ? 'ENRAGED' : e.phase === 3 ? 'FINAL PHASE' : 'PHASE ' + e.phase, e.color, 16, 1.4);
 }
 
 function startDeath(e) {
   e.hp = 0;
   e.state = 'dying';
   e.invuln = true;
-  e.dieT = 2.4;
+  e.dieT = e.mini ? 1.4 : 2.4;
   e.atk = null;
   resetAttackState(e);
   removeBossBeams(e);
@@ -722,12 +734,13 @@ function startDeath(e) {
   sfx.bossDie();
   // Finisher cam: holds on the boss through its death throes (ECLIPSE, the last boss, gets the biggest shot).
   // The throes are shortened so the slow-motion hold stays around 2.5 real seconds.
-  if (cine.finisher(e, e.kind === 'eclipse' ? 'final' : 'boss', e.color)) e.dieT = 1.3;
+  if (cine.finisher(e, e.kind === 'eclipse' ? 'final' : 'boss', e.color)) e.dieT = e.mini ? 0.9 : 1.3;
 }
 
 function finishBoss(e) {
   e.dead = true;
   G.boss = null;
+  if (e.mini) return finishMini(e);
   G.bossKills++;
   G.rerolls++;
   explosion(e.x, e.y, e.color, 4);
@@ -747,6 +760,22 @@ function finishBoss(e) {
   if (bp) floatText(e.x, e.y + 24, `+${bp} CREDITS`, '#ffd24a', 12, 2);
 }
 
+// A mini boss pays like a big Hunter (XP, a heart, a relic / gear chance); the Vault it guards is the real prize.
+function finishMini(e) {
+  G.miniKills = (G.miniKills || 0) + 1;
+  miniBurst(e);
+  flash('255,255,255', 0.6);
+  addShake(0.7);
+  sfx.explode(2.5);
+  addScore(e.score * (1 + G.loop));
+  dropXp(e.x, e.y, Math.round(e.xp * G.director.diff.xp));
+  dropPickup(e.x, e.y, 'heart');
+  const loot = { x: e.x, y: e.y, hunter: true };
+  rollRelicDrop(loot);
+  rollGearDrop(loot);
+  floatText(e.x, e.y, `${e.name} DOWN`, '#ffe14d', 17, 2);
+}
+
 // --- Drawing ------------------------------------------------------------------------
 
 function neon(ctx, color, lw, alphaGlow = 0.28) {
@@ -764,12 +793,14 @@ function neon(ctx, color, lw, alphaGlow = 0.28) {
 export function drawBoss(ctx, e) {
   const g = glow(e.color, 64);
   ctx.globalCompositeOperation = 'lighter';
-  ctx.globalAlpha = 0.35 + Math.sin(G.time * 3) * 0.08;
-  ctx.drawImage(g.img, e.x - 130, e.y - 130, 260, 260);
+  ctx.globalAlpha = (0.35 + Math.sin(G.time * 3) * 0.08) * (e.alpha ?? 1);
+  const gs = e.mini ? 170 : 260;
+  ctx.drawImage(g.img, e.x - gs / 2, e.y - gs / 2, gs, gs);
   ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = 'source-over';
   const hot = e.flash > 0;
-  if (e.kind === 'warden') drawWarden(ctx, e, hot);
+  if (e.mini) drawMini(ctx, e, hot);
+  else if (e.kind === 'warden') drawWarden(ctx, e, hot);
   else if (e.kind === 'hydra') drawHydra(ctx, e, hot);
   else if (e.kind === 'eclipse') drawEclipse(ctx, e, hot);
   else drawOmega(ctx, e, hot);

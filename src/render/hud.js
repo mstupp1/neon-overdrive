@@ -152,7 +152,7 @@ export function drawHud(ctx, alpha = 1) {
   const pw = ctx.measureText(pos).width;
   text(ctx, pos, R1, y0 + 9, ps, hue, 'right', 700);
   text(ctx, name, R0, y0 + 9, fitSize(ctx, name, R1 - R0 - pw - 6, 12, 700), hue, 'left', 700);
-  const bossSector = !!(d.spec && d.spec.boss);
+  const bossSector = !!(d.spec && (d.spec.boss || d.spec.mini));
   const pbw = R1 - R0 - (bossSector ? 10 : 0);
   bar(ctx, R0, y0 + 23, pbw, 4, d.progress, hue);
   if (d.zones > 1) {
@@ -184,14 +184,18 @@ export function drawHud(ctx, alpha = 1) {
     const bw = W - 32;
     const fill = boss.state === 'enter' ? easeOutCubic(boss.barFill) : boss.hp / boss.maxHp;
     text(ctx, boss.name, 16, by - 8, 12, boss.color, 'left', 900);
-    text(ctx, boss.phase === 3 ? 'FINAL PHASE' : `PHASE ${boss.phase}`, W - 16, by - 8, 10, 'rgba(255,255,255,0.8)', 'right', 700);
+    const ph = boss.mini ? (boss.phase > 1 ? 'MINI BOSS · ENRAGED' : 'MINI BOSS') : boss.phase === 3 ? 'FINAL PHASE' : `PHASE ${boss.phase}`;
+    text(ctx, ph, W - 16, by - 8, 10, 'rgba(255,255,255,0.8)', 'right', 700);
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
     ctx.fillRect(16, by, bw, 6);
     ctx.fillStyle = boss.flash > 0 ? '#ffffff' : boss.color;
     ctx.fillRect(16, by, bw * clamp(fill, 0, 1), 6);
     ctx.fillStyle = 'rgba(0,0,0,0.6)';
-    ctx.fillRect(16 + bw * 0.66, by, 2, 6);
-    ctx.fillRect(16 + bw * 0.33, by, 2, 6);
+    if (boss.mini) ctx.fillRect(16 + bw * 0.5, by, 2, 6);
+    else {
+      ctx.fillRect(16 + bw * 0.66, by, 2, 6);
+      ctx.fillRect(16 + bw * 0.33, by, 2, 6);
+    }
   }
 
   // Hunter (elite-node mini-boss): compact bar under the sector info

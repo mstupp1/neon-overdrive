@@ -9,24 +9,29 @@ import { heatScale } from './core.js';
 // supply = free reward drafts at system start (Genesis: 1, the opening pick of new tech, since level-ups only raise what you own;
 // Deep Grid cycles skip it);
 // warm = level eased off per row short of row 2 (default WARM).
+// minis = the mini bosses that may guard the halfway Vault (one per route, seeded); miniHp multiplies their base HP.
 // One run flies all four systems with one build, so levels form one continuous climb: Genesis opens like the old endless
 // sector 1 and each system starts where the previous boss row left off, never above the old standalone levels. Boss HP stays
 // at most as hard as when each system was flown alone (OMEGA x0.5, ECLIPSE x0.22 as before).
 export const SYSTEMS = [
   {
     id: 'genesis', name: 'NEON GENESIS', short: 'GENESIS', act: 1, hue: 215, level: 1, step: 0.56, warm: 0, rows: 8, dur: 42, bossHp: 1.3, supply: 1, pay: 0.8, boss: 'warden',
+    minis: ['razorwing', 'mauler'], miniHp: 0.8,
     blurb: 'The Grid\'s outer lattice. A siege mech guards the gate.',
   },
   {
     id: 'crimson', name: 'CRIMSON TIDE', short: 'CRIMSON', act: 2, hue: 345, level: 5.8, step: 0.375, warm: 0, rows: 8, dur: 42, bossHp: 1, supply: 0, pay: 0.64, boss: 'hydra',
+    minis: ['broodmother', 'specter'], miniHp: 2.2,
     blurb: 'Bio-corrupted sectors. Something huge is breeding in the dark.',
   },
   {
     id: 'cyclone', name: 'CYAN CYCLONE', short: 'CYCLONE', act: 3, hue: 185, level: 9.2, step: 0.45, warm: 0, rows: 8, dur: 42, bossHp: 0.5, supply: 0, pay: 0.68, boss: 'omega',
+    minis: ['arclight', 'citadel'], miniHp: 2.8,
     blurb: 'Storm-lit data winds. The core intelligence waits at the eye.',
   },
   {
     id: 'void', name: 'THE VOID', short: 'VOID', act: 4, hue: 275, level: 10.2, step: 0.825, warm: 0, rows: 8, dur: 42, bossHp: 0.22, supply: 0, pay: 0.82, boss: 'eclipse',
+    minis: ['razorwing', 'mauler', 'broodmother', 'specter', 'arclight', 'citadel'], miniHp: 2.3,
     blurb: 'Beyond the Grid. The Signal\'s source. No one has returned.',
   },
 ];
@@ -164,6 +169,13 @@ export function generateRoute(system, seed) {
       if (v) nd.arenaView = v;
     }
   }
+  // The halfway Vaults are guarded by one mini boss (minibosses.js), on its own seed like the views. Beating it is how
+  // the run earns this system's Main Cannon +1 (main.js), then the Vault opens.
+  const minis = system.minis || [];
+  if (minis.length) {
+    const mini = minis[Math.floor(mulberry32(((seed ^ 0x3171b055) >>> 0) + 11)() * minis.length)];
+    for (const nd of rows[mid]) if (nd.type === 'vault') nd.mini = mini;
+  }
   return { system: system.id, seed, rows, nodes };
 }
 
@@ -191,6 +203,9 @@ function rollArenaView(seed, boss) {
 
 export const routeNode = (route, id) => route.nodes.find((n) => n.id === id);
 
+// Nodes you fight at: combat, elite, boss and a mini-boss-guarded Vault.
+export const isFight = (node) => node.type === 'combat' || node.type === 'elite' || node.type === 'boss' || (node.type === 'vault' && !!node.mini);
+
 // Nodes the player may pick next: row 0 at the start, else the current node's links.
 export function reachableNodes(route, nodeId) {
   if (!nodeId) return route.rows[0];
@@ -201,11 +216,21 @@ export function reachableNodes(route, nodeId) {
 // full-strength waves at row 0.
 export const nodeLevel = (system, row) => system.level + row * system.step - Math.max(0, 2 - row) * (system.warm ?? WARM);
 
+const MINI_LEAD = 14; // seconds of waves before a Vault's mini boss shows up
+
 // Director spec for a fighting node. sectorIndex is 1-based (sectors fought so far + 1). tier / deep: endgame heat (core.js).
 export function nodeSpec(system, node, sectorIndex, tier = 0, deep = 0) {
   const level = nodeLevel(system, node.row);
   const boss = node.type === 'boss' ? system.boss : null;
   const base = system.dur;
+  if (node.mini) {
+    // Guarded Vault: one short zone of waves, then the mini boss.
+    return {
+      index: sectorIndex, row: node.row, level, loop: 0, boss: null, mini: node.mini, elite: false, modifiers: node.modifiers.slice(),
+      hue: system.hue, name: deep ? `DEEP GRID ${deep} · ${system.name}` : system.name, duration: MINI_LEAD,
+      miniHp: (system.miniHp || 1) * heatScale(tier, deep).hp, pay: system.pay, reward: null, tier, deep, views: null, arenaView: null,
+    };
+  }
   return {
     index: sectorIndex, row: node.row, level, loop: 0, boss, elite: node.type === 'elite', modifiers: node.modifiers.slice(),
     hue: system.hue, name: deep ? `DEEP GRID ${deep} · ${system.name}` : system.name, duration: boss ? base * 0.7 : base,

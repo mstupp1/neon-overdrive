@@ -6,6 +6,7 @@ import { applyHeat } from './core.js';
 import { rand, chance, weightedPick, randInt } from '../core/math.js';
 import { spawnEnemy, spawnWeavers, blinkSpot, killEnemy } from './enemies.js';
 import { spawnBoss, bossVariant, bossIndex, BOSS_IDS } from './bosses.js';
+import { miniById } from './minibosses.js';
 import { banner, floatText, flash, addShake } from './fx.js';
 import { vacuumAll } from './pickups.js';
 import { sectorPayout } from './economy.js';
@@ -240,7 +241,7 @@ const ZONES = {
 const HUE_SHIFT = [0, 16, -14];
 
 export function zoneCount(spec) {
-  if (!(G.mode === 'run' && G.run && G.run.mode === 'campaign' && spec.row != null) || spec.boss) return 1;
+  if (!(G.mode === 'run' && G.run && G.run.mode === 'campaign' && spec.row != null) || spec.boss || spec.mini) return 1;
   if (spec.zones) return spec.zones; // a node type may set its own count
   return spec.elite || spec.row >= 2 ? 3 : 2;
 }
@@ -319,12 +320,13 @@ export function startSector(spec) {
     if (camp) {
       // Node opening: the camera settles in, and the card names the node (route row), its type and its modifiers.
       const rows = G.run.route ? G.run.route.rows.length : 0;
-      const type = spec.boss ? 'BOSS NODE' : spec.elite ? 'ELITE NODE' : 'COMBAT';
+      const type = spec.boss ? 'BOSS NODE' : spec.mini ? 'GUARDED VAULT' : spec.elite ? 'ELITE NODE' : 'COMBAT';
       const mods = spec.modifiers.map((id) => MODIFIERS[id] && MODIFIERS[id].name).filter(Boolean).join('  ·  ');
-      const col = spec.boss ? '#ff2e55' : spec.elite ? '#ff3df2' : `hsl(${spec.hue},100%,70%)`;
+      const col = spec.boss ? '#ff2e55' : spec.mini ? '#ffb300' : spec.elite ? '#ff3df2' : `hsl(${spec.hue},100%,70%)`;
       const where = d.zone ? `ZONE 1 / ${d.zones}  ·  ${d.zone.name}` : '';
       const debris = d.obst ? FIELD_NAME : '';
-      banner(`NODE ${spec.row + 1}${rows ? ' / ' + rows : ''}`, [where, debris, mods].filter(Boolean).join('  ·  ') || 'HOSTILES INBOUND', col, 2.4, 'start', `${G.run.system.short}  ·  ${type}`);
+      const guard = spec.mini ? `GUARDED BY ${miniById(spec.mini).name}` : '';
+      banner(`NODE ${spec.row + 1}${rows ? ' / ' + rows : ''}`, [guard, where, debris, mods].filter(Boolean).join('  ·  ') || 'HOSTILES INBOUND', col, 2.4, 'start', `${G.run.system.short}  ·  ${type}`);
       cine.nodeStart();
     } else {
       banner(`SECTOR ${spec.index}`, spec.name + (spec.loop ? `  ·  LOOP ${spec.loop + 1}` : ''), `hsl(${spec.hue},100%,70%)`, 2.6);
@@ -439,7 +441,7 @@ export function updateDirector(dt) {
       d.progress = 1;
       if (cine.busy) break; // the finisher shot plays out before the clear
       // The Hunter never times out: the sector only clears once it is dead.
-      if ((aliveEnemies() === 0 && !d.queue.length) || (d.t > 7 && !(d.hunter && !d.hunter.dead))) {
+      if ((aliveEnemies() === 0 && !d.queue.length) || (d.t > (spec.mini ? 3.5 : 7) && !(d.hunter && !d.hunter.dead))) {
         if (lateFinisher()) break;
         // Boss node (campaign): fly into the arena first.
         if (spec.boss && !d.arena && G.mode === 'run' && G.run && G.run.mode === 'campaign') {
@@ -467,14 +469,30 @@ export function updateDirector(dt) {
             sfx.warn();
             music.bossTrack(bossIndex(spec.boss));
           }
+        } else if (spec.mini) {
+          // Guarded Vault: its mini boss drops in (no arena fly-through, no boss track). Stragglers burn out.
+          d.state = 'warn';
+          d.queue.length = 0;
+          for (const e of G.enemies) if (!e.dead && !e.boss) killEnemy(e, true);
+          clearObstacles(true);
+          G.vacuum = true;
+          vacuumAll();
+          if (G.mode === 'run') {
+            const m = miniById(spec.mini);
+            banner('WARNING', `MINI BOSS  ·  ${m.name}`, m.color, 2.4);
+            if (d.onWarn) d.onWarn(m, spec);
+            sfx.warn();
+          }
         } else {
           sectorClear();
         }
       }
       break;
     case 'warn':
-      if (d.t > 3) {
-        spawnBoss(spec.boss, spec.level, spec.loop, spec.bossHp || 1);
+      if (d.t > (spec.mini ? 2.2 : 3)) {
+        G.vacuum = false;
+        if (spec.mini) spawnBoss(spec.mini, spec.level, spec.loop, spec.miniHp || 1);
+        else spawnBoss(spec.boss, spec.level, spec.loop, spec.bossHp || 1);
         d.state = 'boss';
         d.t = 0;
       }
@@ -487,7 +505,7 @@ export function updateDirector(dt) {
       break;
     case 'bossDown':
       if (d.t > 1.4 && !cine.busy) {
-        if (G.mode === 'run') music.setSet(local >= 6 ? 'late' : 'normal');
+        if (G.mode === 'run' && spec.boss) music.setSet(local >= 6 ? 'late' : 'normal');
         sectorClear();
       }
       break;
@@ -539,7 +557,8 @@ function sectorClear() {
       // System boss down: the end of the whole sector gets its own, bigger beat.
       const i = run.system.act;
       banner('SECTOR SECURED', sub, `hsl(${d.spec.hue},100%,72%)`, 2.4, 'secured', `SECTOR ${String(i).padStart(2, '0')}  ·  ${run.system.name}`);
-    } else if (run) banner('NODE CLEAR', sub, '#7dff6b', 2.2, 'clear', `${run.system.short}  ·  NODE ${(d.spec.row ?? 0) + 1}`);
+    } else if (run && d.spec.mini) banner('VAULT UNLOCKED', sub, '#ffb300', 2.2, 'clear', `${run.system.short}  ·  NODE ${(d.spec.row ?? 0) + 1}`);
+    else if (run) banner('NODE CLEAR', sub, '#7dff6b', 2.2, 'clear', `${run.system.short}  ·  NODE ${(d.spec.row ?? 0) + 1}`);
     else banner('SECTOR CLEAR', sub, '#7dff6b', 2.2);
     G.score += 1000 * G.sector * (1 + G.loop);
     sfx.sector();

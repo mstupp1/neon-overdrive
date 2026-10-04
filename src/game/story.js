@@ -138,13 +138,14 @@ export const STORY = {
       L('MAG', 'Pick one exit and the others close. Your guns find the nearest awake hostile; hold Shift to lock on and strafe. Run past what you can\'t fight. M pulls up the map.'),
     ],
     draft: [
-      L('MAG', 'Level-ups tune what you already fly, and your main cannon grows with the run. New tech comes from clearing sectors, and bosses pay rarer. Max a module with its partner stat and it can EVOLVE.'),
+      L('MAG', 'Level-ups tune what you already fly, and your main cannon grows when you drop a mini boss or a boss. New tech comes from clearing sectors, and bosses pay rarer. Max a module with its partner stat and it can EVOLVE.'),
       L('MAG', 'The first two build paths you raise to 5 lock in your specialty. Feeling strong? Skip a pick to bank Fortune for a rarer reward.'),
     ],
     discovery: [L('MAG', 'NEW DISCOVERY means tech you\'ve never seen. From now on it can turn up from Genesis on.')],
     market: [L('MAG', 'Black Market. Spend here: a dead pilot only banks half their credits, a finished run banks it all.')],
     dock: [L('MAG', 'Rest Station. Patch the hull, plate on more, or overclock something you already run. One per stop.')],
     vault: [L('MAG', 'A Treasure Vault. Whatever you take from this one installs two levels at once.')],
+    mini: [L('MAG', 'Halfway Vault, and something is guarding it. Drop the MINI BOSS: your main cannon gets an upgrade, then the Vault opens.')],
     anomaly: [L('MAG', 'Anomaly. Could be salvage, could be bait. RISKY choices pay more and bite back.')],
     rift: [
       L('ECHO', 'MAG, why is it humming?'),

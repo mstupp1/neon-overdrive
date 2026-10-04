@@ -7,6 +7,7 @@ import { input, bindPointer, pollGamepads } from './core/input.js';
 import { unlockAudio, music, setSfxVolume, setSfxMuted, sfx } from './core/audio.js';
 import { buildSprites, buildEnemySpritesV2 } from './render/sprites.js';
 import { prewarmBossArt } from './render/bossArt.js';
+import { prewarmMiniArt } from './render/miniArt.js';
 import { bg } from './render/background.js';
 import { bloom } from './render/post.js';
 import { beat as musicBeat } from './core/beat.js';
@@ -35,7 +36,7 @@ import { achInit, achTick } from './game/achievements.js';
 import { rollRelicDrop } from './game/collectables.js';
 import { setClass, setPassives, initPilotProfile, findClass, findPassive } from './game/pilot.js';
 import { buyShip, equipPart, unequipSlot, setPaint, selectShip, applyAllPaints, rollGear, sellGear, sellJunk, initGear } from './game/hangar.js';
-import { SYSTEMS, systemById, generateRoute, nodeSpec, reachableNodes, routeNode, REWARDS } from './game/campaign.js';
+import { SYSTEMS, systemById, generateRoute, nodeSpec, reachableNodes, routeNode, REWARDS, isFight } from './game/campaign.js';
 import { rand, pick, lerp, easeInOut } from './core/math.js';
 import { ring, drawTexts, floatText } from './game/fx.js';
 import { sv } from './game/stageview.js';
@@ -169,6 +170,7 @@ function newWorld(mode, shipDef, run = null) {
   G.kills = 0;
   G.grazes = 0;
   G.bossKills = 0;
+  G.miniKills = 0;
   G.pendingLevels = 0;
   G.supplyLeft = 0;
   G.fortune = 0;
@@ -366,18 +368,19 @@ function beat(key, lines, live = false) {
 const tip = (id, live = false) => beat('tip:' + id, STORY.tips[id], live);
 
 // Director hook (WARNING phase): boss title card + a short non-blocking exchange.
-function onBossWarn(boss) {
+function onBossWarn(boss, spec) {
   const r = G.run;
   const camp = r && r.mode === 'campaign';
-  const kick = camp ? `ACT ${r.system.act} · ${r.system.name}` : `ENDLESS GRID · SECTOR ${G.sector}`;
+  const mini = !!(spec && spec.mini);
+  const kick = mini ? `MINI BOSS · VAULT GUARD` : camp ? `ACT ${r.system.act} · ${r.system.name}` : `ENDLESS GRID · SECTOR ${G.sector}`;
   bossCard.style.setProperty('--c', boss.color);
   bossCard.innerHTML = `<div class="bc-kicker">${kick}</div><div class="bc-name" data-text="${boss.name}">${boss.name}</div><div class="bc-title">${boss.title}</div>`;
   bossCard.classList.remove('show');
   void bossCard.offsetWidth;
   bossCard.classList.add('show');
   clearTimeout(bossCardT);
-  bossCardT = setTimeout(() => bossCard.classList.remove('show'), 3500);
-  if (camp) {
+  bossCardT = setTimeout(() => bossCard.classList.remove('show'), mini ? 2600 : 3500);
+  if (camp && !mini) {
     const ls = storyLines('pre:' + r.system.id, STORY.systems[r.system.id].preBoss, { once: false, short: 'first' });
     if (ls) comms.play(ls, { blocking: false });
   }
@@ -405,20 +408,11 @@ function showRoute() {
   owBack = true;
   resumeOverworld();
   tip('overworld', true);
-  if (r.row >= r.system.rows >> 1) {
-    beat('mid:' + r.system.id, STORY.systems[r.system.id].mid, true);
-    const lv = weaponStep(`mid:${r.sysIdx}:${r.deep || 0}`);
-    if (lv) {
-      const p = G.player;
-      floatText(p.x, p.y - 40, `MAIN CANNON LV ${lv}`, '#3ff6ff', 14, 2);
-      ring(p.x, p.y, 80, '#3ff6ff', 0.6);
-      sfx.levelUp();
-    }
-  }
+  if (r.row >= r.system.rows >> 1) beat('mid:' + r.system.id, STORY.systems[r.system.id].mid, true);
 }
 
-// The Main Cannon is never drafted: it grows with the run, +1 at each system's halfway point and each boss
-// (7 steps: max at the Void's halfway point; Gunsmith starts it a step ahead). Returns the new level, or 0.
+// The Main Cannon is never drafted: it grows with the run, +1 for beating each system's halfway mini boss (the Vault
+// guard) and each boss (7 steps: max at the Void's mini boss; Gunsmith starts it a step ahead). Returns the new level, or 0.
 function weaponStep(key) {
   const r = G.run;
   const p = G.player;
@@ -472,25 +466,26 @@ function routeZoom(dir, nodeEl) {
 function pickRouteNode(node) {
   const r = G.run;
   pauseBtn.hidden = true;
-  if (node.type === 'combat' || node.type === 'elite' || node.type === 'boss') overworld.leave();
+  if (isFight(node)) overworld.leave();
   r.nodeId = node.id;
   r.row = node.row;
   r.visited.push(node.id);
   noteProgress();
-  if (node.type === 'combat' || node.type === 'elite' || node.type === 'boss') {
+  if (isFight(node)) {
     const spec = nodeSpec(r.system, node, r.sectors + 1, r.tier, r.deep);
     if (r.curse) spec.modifiers.push(r.curse); // Contraband / event drawback
     r.curse = null;
-    if (r.ambush && !spec.boss) spec.elite = true; // Glitched Cache ambush
-    r.ambush = false;
-    if (r.riftLeft > 0 && !spec.boss) {
+    if (r.ambush && !spec.boss && !spec.mini) spec.elite = true; // Glitched Cache ambush
+    if (!spec.mini) r.ambush = false;
+    if (r.riftLeft > 0 && !spec.boss && !spec.mini) {
       spec.modifiers.push(riftHazard()); // Chaos Rift aftermath
       r.riftLeft--;
     }
     startSector(spec);
     r.sectors++;
     enterPlay();
-    if (spec.elite) tip('elite', true);
+    if (spec.mini) tip('mini', true);
+    else if (spec.elite) tip('elite', true);
     else if (spec.modifiers.length) tip('hazard', true);
     else tip('boost', true);
   } else visitNode(node);
@@ -848,6 +843,22 @@ function onSectorClear() {
   }
   if (G.player.dead) return;
   if (G.screen !== 'play') return;
+  if (G.director.spec.mini && G.run.mode === 'campaign') {
+    // Guarded Vault: the mini boss is down. The Main Cannon steps up, then the Vault opens.
+    const r = G.run;
+    const lv = weaponStep(`mid:${r.sysIdx}:${r.deep || 0}`);
+    const p = G.player;
+    if (lv) {
+      floatText(p.x, p.y - 40, `MAIN CANNON LV ${lv}`, '#3ff6ff', 14, 2);
+      ring(p.x, p.y, 80, '#3ff6ff', 0.6);
+      sfx.levelUp();
+    }
+    const cr = cachePayout();
+    draftNote = [lv ? `Main Cannon upgraded to LV ${lv}` : '', cr ? `+${cr} credits in the vault` : '', 'each pick installs 2 levels'].filter(Boolean).join(' · ');
+    afterDraft = 'route';
+    openDraft('vault', true);
+    return;
+  }
   if (G.director.spec.boss) {
     const lv = weaponStep(`boss:${G.run.mode === 'campaign' ? G.run.sysIdx : G.sector}:${G.run.deep || 0}`);
     if (lv) draftNote = `Main Cannon upgraded to LV ${lv}`;
@@ -1396,6 +1407,7 @@ function boot() {
   buildSprites(SHIPS);
   buildEnemySpritesV2();
   prewarmBossArt();
+  prewarmMiniArt();
   applyAllPaints();
   initGear(); // legacy parts → items
   initPilotProfile(); // legacy saves: classes / abilities their rank had unlocked
