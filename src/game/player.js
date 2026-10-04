@@ -86,6 +86,7 @@ export function createPlayer(ship, gear = true) {
   if (ship.path) p.tags[ship.path] = (p.tags[ship.path] || 0) + 1;
   p.runMods = []; // bonus modifiers from rare level-up cards
   recomputeStats(p);
+  p.st0 = { ...p.st }; // stats at launch (run details shows the change since)
   p.hp = p.maxHp;
   p.charges = p.maxCharges;
   resetBoost(p);
