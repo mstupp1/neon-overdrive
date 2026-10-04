@@ -7,6 +7,7 @@ import { profile } from '../core/storage.js';
 import { formatScore, formatTime } from '../core/math.js';
 import { $, stat, renderBuild } from './screens.js';
 import { SYSTEMS, NODE_TYPES, REWARDS, reachableNodes, routeNode } from '../game/campaign.js';
+import { miniById } from '../game/minibosses.js';
 import { MODIFIERS } from '../game/modifiers.js';
 import { heatScale } from '../game/core.js';
 import { bossById } from '../game/bosses.js';
@@ -111,7 +112,7 @@ export const meta = {
       const state = n.id === run.nodeId ? ' cur' : visited.has(n.id) ? ' done' : can ? ' reach' : '';
       const mod = n.modifiers[0] ? MODIFIERS[n.modifiers[0]] : null;
       const rw = n.reward && !visited.has(n.id) ? REWARDS[n.reward] : null;
-      btns += `<button class="rnode t-${n.type}${state}" data-act="node" data-id="${n.id}" ${can ? '' : 'disabled'} style="--c:${info.color};left:${px(n)}%;top:${py(n)}%" aria-label="${info.name}"><span class="rn-ico">${visited.has(n.id) && n.id !== run.nodeId ? NODE_ICONS.check : NODE_ICONS[n.type]}</span>${rw ? `<span class="rn-rw" style="--r:${rw.color}"></span>` : ''}<span class="rn-lab">${info.name}${rw ? `<em style="--c:${rw.color}">${rw.name}</em>` : ''}${mod ? `<em style="--c:${mod.color}">${mod.name}</em>` : ''}</span></button>`;
+      btns += `<button class="rnode t-${n.type}${state}" data-act="node" data-id="${n.id}" ${can ? '' : 'disabled'} style="--c:${info.color};left:${px(n)}%;top:${py(n)}%" aria-label="${info.name}"><span class="rn-ico">${visited.has(n.id) && n.id !== run.nodeId ? NODE_ICONS.check : NODE_ICONS[n.type]}</span>${rw ? `<span class="rn-rw" style="--r:${rw.color}"></span>` : ''}<span class="rn-lab">${info.name}${rw ? `<em style="--c:${rw.color}">${rw.name}</em>` : ''}${mod ? `<em style="--c:${mod.color}">${mod.name}</em>` : ''}${n.mini && !visited.has(n.id) ? `<em style="--c:${miniById(n.mini).color}">${miniById(n.mini).name}</em>` : ''}</span></button>`;
     }
     $('#route-map').innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none">${lines}</svg>${btns}`;
     const nextRow = run.row + 1;

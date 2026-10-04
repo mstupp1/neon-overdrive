@@ -19,6 +19,7 @@ import { beat } from '../core/beat.js';
 import { S, glow } from '../render/sprites.js';
 import { TAU, clamp, lerp, damp, dist2, turnToward, mulberry32, easeOutCubic, rand } from '../core/math.js';
 import { NODE_TYPES, REWARDS, reachableNodes, nodeLevel } from './campaign.js';
+import { miniById } from './minibosses.js';
 import { MODIFIERS } from './modifiers.js';
 import { applyHeat } from './core.js';
 import { foesAt, zoneCount } from './director.js';
@@ -71,7 +72,7 @@ const STOP_DESC = {
   market: 'Black Market: spend credits on upgrades, repairs and gear.',
   dock: 'Rest stop: repair, reinforce the hull or overclock an upgrade.',
   anomaly: 'Unknown signal: an event with a choice. Risk for reward.',
-  vault: 'Vault: a free draft where each pick installs 2 levels, plus credits.',
+  vault: 'Vault: a free draft where each pick installs 2 levels, plus credits.', // unguarded (mini-boss vaults show a fight card)
   rift: 'Chaos rift: dive in for 3 upgrade levels. Hazards follow you out.',
 };
 
@@ -1391,7 +1392,7 @@ function drawExit(ctx, e) {
   ctx.font = `700 ${(boss ? 15 : 13) / ZOOM}px ${FONT}`;
   ctx.fillStyle = col;
   const ly = e.y + half + 12;
-  ctx.fillText(boss ? `${info.name} · ${bossById(G.run.system.boss).name}` : info.name, e.x, ly);
+  ctx.fillText(boss ? `${info.name} · ${bossById(G.run.system.boss).name}` : n.mini ? `${info.name} · ${miniById(n.mini).name}` : info.name, e.x, ly);
   const rw = n.reward ? REWARDS[n.reward] : null;
   const subs = [];
   if (rw) subs.push([rw.name, rw.color]);
@@ -1519,7 +1520,7 @@ function drawHud(ctx, live) {
 function threat(n) {
   if (n.type === 'boss') return 5;
   const sys = G.run.system;
-  const t = (n.row / Math.max(1, sys.rows - 1)) * 3 + 1 + (n.type === 'elite' ? 1 : 0);
+  const t = (n.row / Math.max(1, sys.rows - 1)) * 3 + 1 + (n.type === 'elite' || n.mini ? 1 : 0);
   return clamp(Math.round(t), 1, 5);
 }
 
@@ -1567,7 +1568,7 @@ function drawCard(ctx, live) {
   ctx.lineWidth = inside ? 2.5 : 1.5;
   ctx.strokeRect(bx, by, bw, bh);
   const boss = n.type === 'boss';
-  text(ctx, boss ? `BOSS · ${bossById(G.run.system.boss).name}` : `${info.name}  ·  SECTOR ${n.row + 1}`, lx, by + 16, 13, info.color, 'left', 900);
+  text(ctx, boss ? `BOSS · ${bossById(G.run.system.boss).name}` : `${n.mini ? 'GUARDED VAULT' : info.name}  ·  SECTOR ${n.row + 1}`, lx, by + 16, 13, info.color, 'left', 900);
   // Threat pips (square)
   const pips = threat(n);
   text(ctx, 'THREAT', bx + bw - 12 - 5 * 11 - 6, by + 16, 11, 'rgba(255,255,255,0.6)', 'right', 700, FONT2);
@@ -1583,7 +1584,12 @@ function drawCard(ctx, live) {
   }
   const fight = n.type === 'combat' || n.type === 'elite' || boss;
   const lines = [];
-  if (fight) {
+  if (n.mini) {
+    const m = miniById(n.mini);
+    lines.push(['REWARD', 'MAIN CANNON +1, then a Vault draft: 2 levels a pick', '#3ff6ff']);
+    lines.push(['HAZARD', 'None', 'rgba(255,255,255,0.6)']);
+    lines.push(['HOSTILES', `MINI BOSS ${m.name}: ${m.title}  ·  1 ZONE`, m.color]);
+  } else if (fight) {
     const rw = n.reward ? REWARDS[n.reward] : null;
     lines.push(['REWARD', rw ? `${rw.name}: ${rw.desc}` : boss ? 'The system boss. Beat it to move on.' : 'Sector draft', rw ? rw.color : '#ffffff']);
     const mods = n.modifiers.filter((m) => MODIFIERS[m]);

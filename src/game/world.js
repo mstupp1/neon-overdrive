@@ -344,6 +344,7 @@ function drawEnemies(ctx, k, list = G.enemies, solo = false) {
   for (const e of list) {
     if (e.dead || (field.ow && !inField(e.x, e.y, 120))) continue;
     if (e.boss) {
+      ctx.setTransform(k, 0, 0, k, view.ox, view.oy); // drawRot leaves the last enemy's rotation set
       drawBoss(ctx, e);
       continue;
     }

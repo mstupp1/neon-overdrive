@@ -122,7 +122,8 @@ Open **PILOT** on the campaign map to pick a class and equip **2 passives**. Ran
 ## In a run
 
 - **Level ups vs rewards.** Enemies drop XP shards. Each level offers a small draft that tunes what you already fly: +1 to a stat or defense (owned or new), or a **Tune** (one small run modifier from your build paths). New tech, module levels, rarity and evolutions come from **reward** drafts: clearing a sector (elites a bit luckier), a boss (every card Uncommon or better, rarer rolls), a vault, and the Supply Drop that opens Genesis.
-- **Main Cannon.** Never drafted: it gains a level at each system's halfway point and at each boss, reaching its max at the Void's halfway point.
+- **Main Cannon.** Never drafted: it gains a level for each system's halfway mini boss and each boss, reaching its max at the Void's mini boss.
+- **Mini bosses.** Each system's halfway Vault is guarded by one of six mini bosses (Razorwing, Mauler, Broodmother, Specter, Arclight, Citadel). Beat it for the Main Cannon level, then the Vault opens.
 - **Specialization.** Every upgrade level counts toward its build path. The first two paths to reach 5 levels lock in as your specializations, with a mastery bonus at 5, 10 and 15 levels; after that the other paths share 10 splash levels.
 - **Fortune.** SKIP a draft to bank Fortune (+1 for a level-up, +2 for a reward, max 6). The next reward draft spends it all: luckier rolls, and at 2 / 4 / 6 Fortune one card is at least Rare / Epic / Legendary. Rerolls: 3 per run, +1 every 5 levels and +1 per boss kill (more from Greed gear, the Prospector tree notable and the Flux Core). Lock a card (lock icon, `F`, or X on a pad) to keep it through a reroll.
 - **Build.** Main cannon, stats (damage, fire rate, crit, pierce, speed, magnet, capacitor), defenses (hull, regenerating Aegis shield, extra dashes) and up to **4 weapon modules** (5 with Engineer's Overflow).
