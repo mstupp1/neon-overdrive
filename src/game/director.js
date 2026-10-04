@@ -14,11 +14,12 @@ import { bg } from '../render/background.js';
 import { cine, lateFinisher } from './cinematic.js';
 import { sfx, music } from '../core/audio.js';
 import { sv, viewName } from './stageview.js';
+import { rollField, spawnFormation, clearObstacles } from './obstacles.js';
 
 export function createDirector() {
   return {
     state: 'intro', t: 0, sectorT: 0, duration: 40, spawnT: 0, queue: [],
-    diff: sectorDifficulty(1, 0), spec: null, last: null, progress: 0, onClear: null, onWarn: null,
+    diff: sectorDifficulty(1, 0), spec: null, last: null, progress: 0, onClear: null, onWarn: null, fields: [], obst: null, obstT: 0,
   };
 }
 
@@ -252,7 +253,22 @@ function setZone(d, i) {
   while (focus.length < 2 && pool.length) focus.push(pool.splice(randInt(0, pool.length - 1), 1)[0]);
   // The last name of each list is the boss arena; ordinary zones draw from the rest.
   d.zone = { i, name: names[(d.zoneBase + i) % (names.length - 1)], focus, hue: spec.hue + HUE_SHIFT[i % HUE_SHIFT.length] };
+  d.obst = d.fields[i] || null;
+  d.obstT = 2.5;
   bg.setHue(d.zone.hue);
+}
+
+// Obstacle fields (obstacles.js), rolled per zone up front so the cards can name them. Top-down zones only.
+const FIELD_NAME = 'DEBRIS FIELD';
+// spec.obstacles (debug): true makes every top-down zone a field, false none.
+function rollFields(d, spec) {
+  const force = spec.obstacles;
+  const lvl = force ? Math.max(2, spec.level + spec.loop * 9) : spec.level + spec.loop * 9;
+  d.fields = [];
+  for (let i = 0; i < d.zones; i++) {
+    const v = spec.view || (d.views && d.views[i]) || 'top';
+    d.fields.push(v === 'top' && force !== false ? rollField(lvl, force ? () => 0 : Math.random) : null);
+  }
 }
 
 const zoneMul = (d, id) => (d.zone && d.zone.focus.includes(id) ? 2.5 : 1);
@@ -291,6 +307,10 @@ export function startSector(spec) {
   sv.reset();
   if (spec.view && spec.view !== 'top') sv.enter(spec.view);
   bg.setHue(spec.hue);
+  clearObstacles();
+  rollFields(d, spec);
+  d.obst = d.fields[0] || null;
+  d.obstT = 2.5;
   if (d.zones > 1) setZone(d, 0);
   bg.setTheme(G.run && G.run.mode === 'campaign' ? G.run.system.id : null);
   G.vacuum = false;
@@ -303,7 +323,8 @@ export function startSector(spec) {
       const mods = spec.modifiers.map((id) => MODIFIERS[id] && MODIFIERS[id].name).filter(Boolean).join('  ·  ');
       const col = spec.boss ? '#ff2e55' : spec.elite ? '#ff3df2' : `hsl(${spec.hue},100%,70%)`;
       const where = d.zone ? `ZONE 1 / ${d.zones}  ·  ${d.zone.name}` : '';
-      banner(`NODE ${spec.row + 1}${rows ? ' / ' + rows : ''}`, [where, mods].filter(Boolean).join('  ·  ') || 'HOSTILES INBOUND', col, 2.4, 'start', `${G.run.system.short}  ·  ${type}`);
+      const debris = d.obst ? FIELD_NAME : '';
+      banner(`NODE ${spec.row + 1}${rows ? ' / ' + rows : ''}`, [where, debris, mods].filter(Boolean).join('  ·  ') || 'HOSTILES INBOUND', col, 2.4, 'start', `${G.run.system.short}  ·  ${type}`);
       cine.nodeStart();
     } else {
       banner(`SECTOR ${spec.index}`, spec.name + (spec.loop ? `  ·  LOOP ${spec.loop + 1}` : ''), `hsl(${spec.hue},100%,70%)`, 2.6);
@@ -368,6 +389,13 @@ export function updateDirector(dt) {
         pat.run();
         d.spawnT = pat.cost * 1.35 * d.diff.spawn + rand(0, 0.5);
       }
+      if (d.obst && !sv.active) {
+        d.obstT -= dt;
+        if (d.obstT <= 0) {
+          spawnFormation(d.obst);
+          d.obstT = d.obst.every * rand(0.85, 1.2);
+        }
+      }
       if (d.zone && d.zone.i < d.zones - 1 && d.sectorT >= (d.duration * (d.zone.i + 1)) / d.zones) {
         d.state = 'break'; // zone done: no new spawns, finish what's left, then fly on
         d.t = 0;
@@ -383,6 +411,7 @@ export function updateDirector(dt) {
       if ((aliveEnemies() === 0 && !d.queue.length) || (d.t > 3.5 && !(d.hunter && !d.hunter.dead))) {
         d.queue.length = 0;
         for (const e of G.enemies) if (!e.dead && !e.boss && !e.hunter) killEnemy(e, true);
+        clearObstacles(true);
         G.vacuum = true;
         vacuumAll();
         const next = d.zone.i + 1;
@@ -390,7 +419,7 @@ export function updateDirector(dt) {
         const nextName = names[(d.zoneBase + next) % (names.length - 1)];
         const nv = (d.views && d.views[next]) || 'top';
         const swap = nv !== sv.mode ? nv : null;
-        const kicker = `ZONE ${next + 1} / ${d.zones}` + (swap && nv !== 'top' ? `  ·  ${viewName(nv)}` : '');
+        const kicker = `ZONE ${next + 1} / ${d.zones}` + (swap && nv !== 'top' ? `  ·  ${viewName(nv)}` : '') + (d.fields[next] ? `  ·  ${FIELD_NAME}` : '');
         if (cine.transit(kicker, nextName, false, !!swap)) {
           d.state = 'transit';
           d.swapTo = swap;
@@ -418,6 +447,7 @@ export function updateDirector(dt) {
           const names = ZONES[G.run.system.id] || ZONES.genesis;
           G.vacuum = true;
           vacuumAll();
+          clearObstacles(true);
           const av = spec.arenaView || 'top';
           const swap = av !== sv.mode ? av : null;
           if (cine.transit('BOSS ARENA' + (swap && av !== 'top' ? `  ·  ${viewName(av)}` : ''), names[names.length - 1], true, !!swap)) {
@@ -475,6 +505,7 @@ export function updateDirector(dt) {
 // Switch the camera to d.swapTo (stageview.js): the jet is moved to the new view's home spot and the fly-through
 // finishes there.
 function changeView(d) {
+  clearObstacles();
   sv.enter(d.swapTo);
   d.swapTo = null;
   cine.retarget(sv.home());

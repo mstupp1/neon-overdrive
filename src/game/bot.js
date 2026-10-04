@@ -4,6 +4,7 @@
 import { G, view } from './state.js';
 import { clamp, segDist2 } from '../core/math.js';
 import { sv } from './stageview.js';
+import { obstacleSteer } from './obstacles.js';
 
 export function botControl() {
   const p = G.player;
@@ -51,6 +52,11 @@ export function botControl() {
     fy += dy * w;
     danger += w;
     if (bm.tele <= 0 && d < bm.w * 0.8 + p.r + 6) dash = true;
+  }
+  if (!sv.active) {
+    const o = obstacleSteer(p);
+    fx += o.fx;
+    fy += o.fy;
   }
   let target = null;
   let best = Infinity;

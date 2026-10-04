@@ -159,6 +159,7 @@ function newWorld(mode, shipDef, run = null) {
   G.texts.length = 0;
   G.beams.length = 0;
   G.bolts.length = 0;
+  G.obstacles.length = 0;
   G.boss = null;
   G.score = 0;
   G.displayScore = 0;

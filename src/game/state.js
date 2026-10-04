@@ -29,6 +29,7 @@ export const G = {
   texts: [],
   beams: [], // transient damaging beams (rail, boss lasers)
   bolts: [], // lightning visuals
+  obstacles: [], // top-down obstacle fields (obstacles.js)
   boss: null,
 
   sector: 1,
