@@ -323,9 +323,29 @@
             <div class="build big" id="pause-build"></div>
             <nav class="menu">
                 <button class="btn primary" data-act="resume">RESUME</button>
+                <button class="btn" data-act="runDetails" id="pause-details">RUN DETAILS</button>
                 <button class="btn" data-act="settings">SETTINGS</button>
                 <button class="btn" data-act="restart">RESTART</button>
                 <button class="btn ghost" id="pause-quit" data-act="quit">QUIT TO TITLE</button>
+            </nav>
+        </section>
+
+        <!-- RUN DETAILS (from pause): three tabs stacked in one cell, so switching never moves anything -->
+        <section class="screen" id="scr-run" data-back="runBack">
+            <h2 class="screen-title">RUN DETAILS</h2>
+            <p class="screen-sub" id="run-sub"></p>
+            <div class="help-tabs run-tabs">
+                <button class="btn small on" data-act="runTab" data-tab="tech">TECH</button>
+                <button class="btn small" data-act="runTab" data-tab="stats">STATS</button>
+                <button class="btn small" data-act="runTab" data-tab="loadout">LOADOUT</button>
+            </div>
+            <div class="rd-panel">
+                <div class="rd-tab" id="run-tab-tech" data-tab="tech"></div>
+                <div class="rd-tab tab-off" id="run-tab-stats" data-tab="stats"></div>
+                <div class="rd-tab tab-off" id="run-tab-loadout" data-tab="loadout"></div>
+            </div>
+            <nav class="menu">
+                <button class="btn ghost" data-act="runBack" id="run-back">BACK</button>
             </nav>
         </section>
 

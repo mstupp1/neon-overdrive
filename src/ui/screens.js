@@ -3,10 +3,11 @@
 import { input } from '../core/input.js';
 import { profile, saveProfile } from '../core/storage.js';
 import { sfx } from '../core/audio.js';
-import { cardInfo, CAT_COLORS, UPGRADES, ICONS, RARITY, pathRanks, splashUsed, SPEC_AT, SPEC_MAX, SPLASH_CAP } from '../game/upgrades.js';
+import { cardInfo, CAT_COLORS, UPGRADES, ICONS, RARITY, pathRanks, splashUsed, SPEC_AT, SPEC_MAX, SPLASH_CAP, MASTERY, MASTERY_AT, masteryTier, modText } from '../game/upgrades.js';
 import { TAGS } from '../game/parts.js';
 import { formatScore, formatTime } from '../core/math.js';
 import { SYSTEMS } from '../game/campaign.js';
+import { tip, initTips, hideTip } from './tips.js';
 
 export const $ = (sel) => document.querySelector(sel);
 
@@ -67,6 +68,7 @@ export const ui = {
       });
     });
     this.initSettings();
+    initTips();
   },
 
   show(name, { lock = 0, focus = 0, guard = false } = {}) {
@@ -79,6 +81,7 @@ export const ui = {
     guardUntil = performance.now() + 180;
     if (name) screens[name].classList.toggle('guarded', guard);
     input.clear();
+    hideTip();
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     if (focus instanceof Element) focusIdx = Math.max(0, focusables().indexOf(focus)); // focus a given element
     if (name) fit(screens[name], same);
@@ -239,7 +242,7 @@ export const ui = {
   renderPause(G) {
     const p = G.player;
     $('#pause-stats').innerHTML = stat('SECTOR', G.sector) + stat('LEVEL', p.level) + stat('TIME', formatTime(G.runTime));
-    renderBuild($('#pause-build'), p);
+    renderBuild($('#pause-build'), p, true);
     $('#pause-quit').textContent = G.run && G.run.mode === 'campaign' ? (G.run.victory ? 'EXTRACT · BANK ALL' : 'ABANDON RUN') : 'QUIT TO TITLE';
   },
 
@@ -324,12 +327,27 @@ export function stat(label, value) {
   return `<div>${label}<b>${value}</b></div>`;
 }
 
+// Tooltip lines for a build-path chip: rank, what specializing / mastery gives.
+export function pathTip(p, t, ranks) {
+  const spec = p.spec || [];
+  const [stat, v] = MASTERY[t];
+  const lines = [`Rank ${ranks[t]}: every upgrade level on this path adds 1.`];
+  if (spec.includes(t)) {
+    const tier = masteryTier(ranks[t]);
+    const next = MASTERY_AT.find((r) => r > ranks[t]);
+    lines.push(tier ? `Mastery ${['', 'I', 'II', 'III'][tier]}: ${modText([stat, v * tier])}.` : `Mastery tiers at ${MASTERY_AT.join(' / ')}: ${modText([stat, v])} each.`);
+    if (next) lines.push(`Next tier at rank ${next}.`);
+  } else if (spec.length < SPEC_MAX) lines.push(`Reach ${SPEC_AT} to specialize: mastery gives ${modText([stat, v])} per tier.`);
+  else lines.push(`Off-path: shares ${SPLASH_CAP} splash levels with the other off-paths.`);
+  return lines;
+}
+
 // The draft's build-path and Fortune lines (two fixed lines, so they never shift the cards).
 const RNAME = ['', 'UNCOMMON+', 'RARE+', 'EPIC+', 'LEGENDARY'];
 function renderPaths(el, p, fx) {
   const ranks = pathRanks(p);
   const spec = p.spec || [];
-  const chip = (t, txt, cls = '') => `<span class="pchip ${cls}" style="--t:${TAGS[t].color}">${txt}</span>`;
+  const chip = (t, txt, cls = '') => `<span class="pchip ${cls}" style="--t:${TAGS[t].color}"${tip(TAGS[t].name, pathTip(p, t, ranks), TAGS[t].color)}>${txt}</span>`;
   let line = '';
   if (spec.length) {
     line += spec.map((t) => chip(t, `◆ ${TAGS[t].name} ${ranks[t]}`, 'spec')).join('');
@@ -342,7 +360,8 @@ function renderPaths(el, p, fx) {
     line += `<span class="pdim">${top.length ? '' : 'BUILD PATHS · '}${SPEC_MAX} lock in at ${SPEC_AT}</span>`;
   }
   const pips = Array.from({ length: fx.max || 6 }, (_, i) => `<i class="${i < (fx.fortune || 0) ? 'on' : ''}"></i>`).join('');
-  let f = `<span class="fortune">FORTUNE <span class="fpips">${pips}</span></span>`;
+  const ft = tip('FORTUNE', ['Skip a draft to bank Fortune: +1 on a level-up, +2 on a reward (max 6).', 'Your next reward draft spends it all: luckier rolls, and one card at least Rare at 2, Epic at 4, Legendary at 6.'], '#ffd24a');
+  let f = `<span class="fortune"${ft}>FORTUNE <span class="fpips">${pips}</span></span>`;
   if (fx.spent) f = `<span class="fortune spent">FORTUNE ×${fx.spent} SPENT</span><span class="pdim">${fx.floor > fx.base ? `one card ${RNAME[fx.floor]} · ` : ''}luckier rolls</span>`;
   else if (fx.boss) f += '<span class="pdim">boss reward</span>';
   else if (fx.next) f += `<span class="pdim">next reward: one card ${RNAME[fx.next]}</span>`;
@@ -351,16 +370,21 @@ function renderPaths(el, p, fx) {
   el.innerHTML = `<div>${line}</div><div>${f}</div>`;
 }
 
-export function renderBuild(el, p) {
+// Owned upgrades as icon chips with tooltips. focusable: buttons the menu focus can land on (pause), else tip-only
+// (hover / tap) so they stay out of the screen's key navigation (draft, game over).
+export function renderBuild(el, p, focusable = false) {
   if (!p) {
     el.innerHTML = '';
     return;
   }
+  const tagName = focusable ? 'button' : 'div';
   let html = '';
   for (const u of UPGRADES) {
     const lv = p.up[u.id] || 0;
     if (!lv) continue;
-    html += `<div class="${u.cat === 'evolution' ? 'chip evo' : 'chip'}" style="--c:${CAT_COLORS[u.cat]}" title="${u.name}">${ICONS[u.id]}${u.cat === 'evolution' ? '' : `<b>${lv}</b>`}</div>`;
+    const evo = u.cat === 'evolution';
+    const t = tip(u.name, [u.desc(u.cat === 'module' ? 1 : lv), evo ? 'Evolution' : `Level ${lv} of ${u.max}${lv >= u.max ? ' (max)' : ''}`], CAT_COLORS[u.cat]);
+    html += `<${tagName} class="${evo ? 'chip evo' : 'chip'}" style="--c:${CAT_COLORS[u.cat]}"${t}>${ICONS[u.id]}${evo ? '' : `<b>${lv}</b>`}</${tagName}>`;
   }
   el.innerHTML = html;
 }
@@ -408,7 +432,8 @@ function pin(el) {
 function focusables() {
   if (!current) return [];
   const root = screens[current];
-  return [...root.querySelectorAll('button:not([disabled]), .set-row')].filter((el) => el.offsetParent !== null);
+  // .tab-off: an inactive tab kept in the layout (visibility only), so its items are skipped.
+  return [...root.querySelectorAll('button:not([disabled]), .set-row')].filter((el) => el.offsetParent !== null && !el.closest('.tab-off'));
 }
 
 function applyFocus() {

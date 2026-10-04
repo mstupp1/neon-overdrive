@@ -21,6 +21,7 @@ import { makeItem } from './game/parts.js';
 import { spawnEnemy, spawnWeavers } from './game/enemies.js';
 import { step, renderWorld, drawStandees } from './game/world.js';
 import { ui } from './ui/screens.js';
+import { renderRunDetails, setRunTab } from './ui/rundetails.js';
 import { comms } from './ui/comms.js';
 import { meta } from './ui/meta.js';
 import { hangarActs, openHangar, openFab, initHangarUi } from './ui/hangar.js';
@@ -640,7 +641,7 @@ function pause() {
   pauseFrom = G.screen;
   G.screen = 'pause';
   ui.renderPause(G);
-  ui.show('pause', { lock: 150 });
+  ui.show('pause', { lock: 150, focus: document.querySelector('#scr-pause [data-act=resume]') });
   pauseBtn.hidden = true;
   music.setDuck(0.45);
 }
@@ -991,7 +992,7 @@ ui.init({
       if (settingsReturn === 'pause') {
         G.screen = 'pause';
         ui.renderPause(G);
-        ui.show('pause', { focus: 1 });
+        ui.show('pause', { focus: document.querySelector('#scr-pause [data-act=settings]') });
       } else if (settingsReturn === 'campaign') {
         settingsReturn = 'title';
         showCampaign();
@@ -1061,6 +1062,21 @@ ui.init({
   dock: dockChoose,
   abandon: leaveRun,
   resume: () => unpause(),
+  // Run details: a pause submenu with everything this run has picked up (src/ui/rundetails.js).
+  runDetails() {
+    if (G.screen !== 'pause') return;
+    G.screen = 'pause-run';
+    renderRunDetails(G);
+    ui.show('run', { focus: document.querySelector('#scr-run [data-tab].on') });
+  },
+  runTab(btn) {
+    setRunTab(btn.dataset.tab);
+  },
+  runBack() {
+    G.screen = 'pause';
+    ui.renderPause(G);
+    ui.show('pause', { focus: document.getElementById('pause-details') });
+  },
   restart: () => (G.run.mode === 'campaign' ? launchRun() : startRun(curShip())),
   quit: () => (G.run.mode === 'campaign' ? leaveRun() : toTitle()),
   retry: () => (G.run.mode === 'campaign' ? launchRun() : startRun(curShip())),
@@ -1249,7 +1265,7 @@ function frame(now) {
   updateBanner(raw);
   mapBtn.hidden = G.screen !== 'overworld';
   const boost = Math.max(cine.boost(), G.player && (G.player.odT > 0 || G.player.dashT > 0) ? 3 : G.director && G.director.state === 'clear' ? 4 : 1, G.player && G.player.boostV ? 1 + 3.2 * G.player.boostV : 1);
-  const dk = !!(G.mode === 'run' && (G.screen === 'play' || G.screen === 'pause' || G.screen === 'pause-settings') && G.director.diff.blackout && G.director.state !== 'clear' && G.director.state !== 'await'); // not on result screens
+  const dk = !!(G.mode === 'run' && (G.screen === 'play' || G.screen === 'pause' || G.screen === 'pause-settings' || G.screen === 'pause-run') && G.director.diff.blackout && G.director.state !== 'clear' && G.director.state !== 'await'); // not on result screens
   bg.setDark(dk);
   vignette.classList.toggle('dark', dk);
   const intro = G.screen === 'sector-intro';
@@ -1320,7 +1336,7 @@ function render() {
     return;
   }
   // Finisher / node-start camera: zoom about a world point (screen = world * z + cam offset).
-  const live = G.mode === 'run' && (G.screen === 'play' || G.screen === 'pause' || G.screen === 'pause-settings');
+  const live = G.mode === 'run' && (G.screen === 'play' || G.screen === 'pause' || G.screen === 'pause-settings' || G.screen === 'pause-run');
   const cam = live && !sv.active ? cine.camera() : null;
   if (sv.active && G.mode === 'run') {
     // Side / chase stage (stageview.js): the world renders in its own frame and is mapped onto the screen; the camera
@@ -1359,13 +1375,13 @@ function render() {
   ctx.setTransform(k, 0, 0, k, 0, 0);
   if (live) drawBoostFx(ctx);
   if (live) cine.overlay(ctx);
-  if (G.mode === 'run' && (G.screen === 'play' || G.screen === 'pause' || G.screen === 'draft' || G.screen === 'pause-settings')) drawHud(ctx, live ? cine.hudAlpha() : 1);
+  if (G.mode === 'run' && (G.screen === 'play' || G.screen === 'pause' || G.screen === 'draft' || G.screen === 'pause-settings' || G.screen === 'pause-run')) drawHud(ctx, live ? cine.hudAlpha() : 1);
   if (G.flash > 0.01) {
     ctx.fillStyle = `rgba(${G.flashColor},${Math.min(0.8, G.flash)})`;
     ctx.fillRect(0, 0, view.W, view.H);
   }
   // Menu dim; fades in over the level-up slow-down so the draft doesn't hard-cut.
-  const dim = G.screen === 'pause' || G.screen === 'draft' || G.screen === 'pause-settings' ? 0.35 : levelIntro >= 0 && G.screen === 'play' ? 0.35 * (1 - levelIntro / LEVEL_INTRO) : 0;
+  const dim = G.screen === 'pause' || G.screen === 'draft' || G.screen === 'pause-settings' || G.screen === 'pause-run' ? 0.35 : levelIntro >= 0 && G.screen === 'play' ? 0.35 * (1 - levelIntro / LEVEL_INTRO) : 0;
   if (dim > 0) {
     ctx.fillStyle = `rgba(5,3,13,${dim})`;
     ctx.fillRect(0, 0, view.W, view.H);

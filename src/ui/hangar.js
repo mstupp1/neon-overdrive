@@ -2,6 +2,7 @@
 // (8-tile grid + a fixed detail panel); and the Fabricator (roll new gear). Rendering + handlers; the rules live in
 // game/hangar.js (rolls, equip, sell), game/parts.js (items) and game/rarity.js (odds).
 
+import { tip } from './tips.js';
 import { G } from '../game/state.js';
 import { profile, saveProfile } from '../core/storage.js';
 import { sfx } from '../core/audio.js';
@@ -75,7 +76,7 @@ function renderStats(ship, owned) {
   if (ship.path) tags[ship.path] = (tags[ship.path] || 0) + 1;
   const list = Object.entries(tags).sort((a, b) => b[1] - a[1]);
   $('#hs-paths').innerHTML = list.length
-    ? list.map(([t, n]) => `<span style="--t:${TAGS[t].color}">${TAGS[t].name}<b>${n}</b></span>`).join('')
+    ? list.map(([t, n]) => `<span style="--t:${TAGS[t].color}"${tip(TAGS[t].name, [`Weight ${n} from this ship and its gear.`, 'Drafts lean toward your heaviest paths, and tunes roll from them.'], TAGS[t].color)}>${TAGS[t].name}<b>${n}</b></span>`).join('')
     : '<em>Equip gear to set your build paths</em>';
 }
 

@@ -175,6 +175,8 @@ Title PLAY → `scr-campaign` (progress track of the 4 systems, LAUNCH / HANGAR 
 - Menus never jump: `fit` centres a screen once when it opens, then pins its top (fixed `padding-top`, `justify-content: flex-start`); re-showing the open screen keeps the pin. Lines that appear later (comms continue hint, hangar NEED / unlock lines, class text, passive and draft descriptions) have reserved `min-height`s, so add one for any new conditional line.
 - Look: square (2px) corners and thin neon borders; the focused item brightens its border and glow, and buttons add a sliding arrow. No corner brackets on containers and no `clip-path` cut corners (Myles rejected both).
 - How to Play is tabbed (`data-act="helpTab"`, blocks with matching `data-tab`).
+- Tooltips (`src/ui/tips.js`): put `tip(title, lines, color)` (attribute string) on any element. One floating `.tip` box (outside the screens, so it never moves layout) shows on mouse hover, on keyboard / pad focus (`menufocus`), and on a touch tap of a tip-only element (no `data-act`; a tap on an action button acts instead). Used on build chips (pause: focusable buttons; draft / game over: tip-only), draft path chips and Fortune, hangar build paths, and every run-details entry.
+- Run details (`src/ui/rundetails.js`, `#scr-run`, `G.screen = 'pause-run'`): pause → RUN DETAILS. Tabs TECH (owned upgrades + path ranks / mastery), STATS (now vs launch, from `p.st0` snapshotted in `createPlayer`), LOADOUT (ship, pilot, gear, tree, summed `runMods` + mastery, Fortune / rerolls / wallet). All three tabs share one grid cell and inactive ones are `visibility: hidden` + `.tab-off` (skipped by `focusables`), so switching tabs never moves anything.
 
 ## Story, events and system themes (step 7a)
 
