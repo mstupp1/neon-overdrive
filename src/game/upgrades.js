@@ -299,15 +299,16 @@ export function rollUpgradeIds(p, kind, n = 3, rng = Math.random, evo = false, o
     const l = p.up[u.id] || 0;
     let wgt = u.weight;
     if (u.cat === 'module') {
-      if (l > 0) wgt *= 1.5; // encourage building up what you own
+      if (l > 0) wgt *= 1.25; // lean toward building up what you own
       else if (kind === 'sector') wgt *= 1.6;
       if (mods === 0 && p.level >= 2) wgt *= 1.6; // first module comes early
     }
     if (u.id === 'hull' && p.hp < p.maxHp) wgt *= 1.3;
     if (!k.has(u.id)) wgt *= 1.4; // undiscovered tech surfaces a little sooner
     wgt *= 1 + 0.15 * Math.min(4, synergy(p, u.id)); // equipped gear's build paths pull matching tech forward
-    if (spec.includes(pathOf(u.id))) wgt *= 1.6; // your specializations come up more often
-    else if (spec.length >= SPEC_MAX) wgt *= 0.6; // splash picks stay possible but rarer
+    if (spec.includes(pathOf(u.id))) wgt *= 1.25; // your specializations come up a little more often
+    else if (spec.length >= SPEC_MAX) wgt *= 0.85; // splash picks stay common
+    if ((p.recent || []).includes(u.id)) wgt *= 0.3; // shown in the last two drafts: let something else through
     if (kind === 'sector' && !l) wgt *= 1.3; // rewards are where new tech arrives
     return wgt;
   };
@@ -382,6 +383,7 @@ export { RARITY };
 export function rollDraft(p, kind, only = null) {
   if (kind === 'level') return rollLevelDraft(p, only);
   const choices = rollUpgradeIds(p, kind, 3, Math.random, true, only);
+  remember(p, choices);
   if (choices.length < 3 && p.hp < p.maxHp) choices.push('repair');
   while (choices.length < 3) choices.push('credits');
   return choices;
@@ -421,7 +423,7 @@ export function cardInfo(p, id, roll = null) {
 // mastery bonus at each MASTERY_AT rank, so going deep pays more than spreading out.
 export const SPEC_AT = 5;
 export const SPEC_MAX = 2;
-export const SPLASH_CAP = 6;
+export const SPLASH_CAP = 10;
 export const MASTERY_AT = [5, 10, 15];
 export const MASTERY = {
   firepower: ['dmg', 0.06],
@@ -524,14 +526,17 @@ const TUNE_ICONS = {
 const affixPath = (stat) => affixTag(stat);
 export const isTune = (id) => typeof id === 'string' && id.startsWith('tune:');
 
-// The path a tune comes from: one of your specializations (by rank), sometimes its kin; before you lock in, any
+// The path a tune comes from: one of your specializations (by rank), 25% its kin, 20% any path; before you lock in, any
 // path you have levels in (or the ship's own path), weighted by rank.
 function tunePath(p, rng) {
   const ranks = pathRanks(p);
   const spec = p.spec || [];
   if (spec.length) {
     const t = weightedPick(spec, (x) => 1 + ranks[x], rng);
-    return rng() < 0.25 ? PATH_KIN[t] : t;
+    const r = rng();
+    if (r < 0.25) return PATH_KIN[t];
+    if (r < 0.45) return weightedPick(Object.keys(ranks), () => 1, rng); // any path, now and then
+    return t;
   }
   const opts = Object.keys(ranks).filter((t) => ranks[t] > 0 || (p.ship && p.ship.path === t));
   if (!opts.length) return weightedPick(Object.keys(ranks), () => 1, rng);
@@ -540,16 +545,24 @@ function tunePath(p, rng) {
 
 export function rollTune(p, il = 1, avoid = [], rng = Math.random) {
   const path = tunePath(p, rng);
-  const [mod] = rollMods(0, il, 1, rng, TUNE_SCALE, avoid, path);
+  const [mod] = rollMods(0, il, 1, rng, TUNE_SCALE, [...avoid, ...(p.recentTunes || [])], path); // no repeat of the last few tunes
   if (!mod) return null;
+  p.recentTunes = [mod[0], ...(p.recentTunes || [])].slice(0, 4);
   return { tune: mod };
+}
+
+// Recently shown options (the last two drafts) weigh less, so the same cards stop popping up back to back.
+function remember(p, ids) {
+  p.recentDrafts = [ids.filter((id) => byId.has(id)), ...(p.recentDrafts || [])].slice(0, 2);
+  p.recent = p.recentDrafts.flat();
 }
 
 let tuneSeq = 0;
 function rollLevelDraft(p, keep = null) {
-  // Weapons (modules) level only from rewards; level-ups raise owned stats and defenses.
-  const owned = (u) => (u.cat === 'stat' || u.cat === 'defense') && (p.up[u.id] || 0) > 0 && (!keep || keep(u));
+  // Weapons (modules) level only from rewards; level-ups raise stats and defenses (owned ones, or a new one).
+  const owned = (u) => (u.cat === 'stat' || u.cat === 'defense') && (!keep || keep(u));
   const ids = rollUpgradeIds(p, 'level', 2, Math.random, false, owned);
+  remember(p, ids);
   while (ids.length < 3) ids.push(`tune:${tuneSeq++}`); // unique ids, so a locked tune survives a reroll
   if (p.hp < p.maxHp && p.hp <= p.maxHp / 2) ids[ids.length - 1] = 'repair'; // badly hurt: a patch-up is on offer
   return ids;
