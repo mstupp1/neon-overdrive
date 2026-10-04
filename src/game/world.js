@@ -16,6 +16,7 @@ import { updatePickups, drawPickups } from './pickups.js';
 import { updateParticles, drawParticles, updateTexts, drawTexts, sparks, explosion, ring, impact } from './fx.js';
 import { sfx } from '../core/audio.js';
 import { sv } from './stageview.js';
+import { updateObstacles, collideObstacles, drawObstacles } from './obstacles.js';
 
 // ow: an overworld step (overworld.js): no director, the zone's enemies run their own AI.
 export function step(dt, ow = false) {
@@ -41,6 +42,7 @@ function stepWorld(dt, ow) {
   if (!ow) G.enemyTimeScale *= sv.pace; // the chase view runs its threats hotter (stageview.js)
   const et = dt * G.enemyTimeScale; // enemy time (Phase Shift slows it)
   updateEnemies(et);
+  if (!ow) updateObstacles(dt);
   updatePlayerBullets(dt);
   updateEnemyBullets(et);
   updateBeams(dt);
@@ -91,6 +93,9 @@ function overloadBlast(p, hit, x, y, dmg) {
 function collide(p) {
   const enemies = G.enemies;
   const crit = forcedCrit(p) ? 1 : p.st.crit; // Shadow Strike (tree keystone)
+
+  // Obstacle fields (top-down only): they soak shots from both sides and shove the ship.
+  if (!field.ow && !sv.active) collideObstacles(p);
 
   // Player bullets → torpedoes (destroyable enemy shots)
   for (const t of G.eBullets) {
@@ -389,6 +394,7 @@ export function renderWorld(ctx, k, layer) {
   if (layer !== 'over') {
     if (!field.ow && !sv.active) bg.draw(ctx); // the overworld and the other stage views draw their own backdrop
     sv.drawWorld(ctx);
+    if (!field.ow && !sv.active) drawObstacles(ctx);
     if (ents) drawPickups(ctx);
     drawTelegraphs(ctx);
     if (ents) drawEnemies(ctx, k);

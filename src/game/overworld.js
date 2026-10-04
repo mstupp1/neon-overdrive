@@ -345,6 +345,7 @@ function resetField(collect) {
   G.pickups.length = 0;
   G.beams.length = 0;
   G.bolts.length = 0;
+  G.obstacles.length = 0;
   G.particles.length = 0;
   G.texts.length = 0;
   G.boss = null;
