@@ -12,7 +12,7 @@
 // caches. M / the MAP button lays a fogged map of the zone and the system route over the screen while you keep flying.
 // State lives on G.run.ow (the current leg); the leg's enemies live in G.enemies while the run is in it.
 
-import { G, view, field, inField, sectorDifficulty } from './state.js';
+import { G, view, field, inField, sectorDifficulty, enemyHit } from './state.js';
 import { input, readDirection } from '../core/input.js';
 import { sfx } from '../core/audio.js';
 import { beat } from '../core/beat.js';
@@ -32,7 +32,7 @@ import { dropCredit } from './pickups.js';
 import { sparks, explosion, floatText, flash } from './fx.js';
 import { gainXp, collectPickup } from './player.js';
 import { resetModules } from './modules.js';
-import { gainCredits } from './economy.js';
+import { gainCredits, payUnit } from './economy.js';
 import { drawGauges, drawHull } from '../render/hud.js';
 import { NODE_ICONS } from '../ui/meta.js';
 
@@ -333,7 +333,7 @@ function syncField() {
 
 // Credit unit for the zone's level (economy.js unit(), without a live sector).
 function creditUnit(level) {
-  return Math.max(0.8, 0.95 * level - 0.1) * ((G.run.system && G.run.system.pay) || 1);
+  return payUnit(level, (G.run.system && G.run.system.pay) || 1);
 }
 
 // Clears the fight leftovers (or the last leg's) and puts the ship's gear back around it.
@@ -1572,6 +1572,12 @@ function drawCard(ctx, live) {
   // Threat pips (square)
   const pips = threat(n);
   text(ctx, 'THREAT', bx + bw - 12 - 5 * 11 - 6, by + 16, 11, 'rgba(255,255,255,0.6)', 'right', 700, FONT2);
+  const hit = n.type === 'combat' || n.type === 'elite' || boss || n.mini ? enemyHit(nodeLevel(G.run.system, n.row), 0, (G.run.tier || 0) + (G.run.deep || 0)) : 1;
+  if (hit > 1) {
+    // Heavy hits: hull per hit, left of the threat label
+    ctx.font = `700 11px ${FONT2}`;
+    text(ctx, `${hit} HULL / HIT`, bx + bw - 12 - 5 * 11 - 14 - ctx.measureText('THREAT').width, by + 16, 11, '#ff4d6d', 'right', 700, FONT2);
+  }
   for (let i = 0; i < 5; i++) {
     const x = bx + bw - 12 - (5 - i) * 11 + 2;
     ctx.strokeStyle = i < pips ? '#ff4d6d' : 'rgba(255,255,255,0.25)';

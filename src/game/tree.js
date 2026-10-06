@@ -78,7 +78,7 @@ export const TREES = {
     { theme: 'fire', key: K('Overclock', '+25% fire rate. -1 max hull.', { rate: 25, hull: -1 }) },
     { theme: 'crit', key: K('Precision Tooling', '+8% crit chance. Crits deal 0.5x less.', { crit: 8, critMul: -0.5 }) },
     { theme: 'greed', big: true, key: K('Salvage Master', '+40% credits and +60% pickup range. -10% damage.', { credits: 40, magnet: 60, dmg: -10 }) },
-    { theme: 'tank', big: true, key: K('Bastion', 'A shield recharges every 12s. -10% fire rate.', { shieldBase: 12, rate: -10 }) },
+    { theme: 'tank', big: true, key: K('Bastion', 'A shield recharges every 18s. -10% fire rate.', { shieldBase: 18, rate: -10 }) },
     { theme: 'od', key: K('Field Generator', 'Fortress Protocol lasts 3s longer. The meter charges 15% slower.', { odDur: 3, odGain: -15 }) },
   ],
   ghost: [

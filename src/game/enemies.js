@@ -673,7 +673,7 @@ export function damageEnemy(e, dmg, x, y, crit = false, src = '') {
   if (pl && src !== 'dot') dmg *= 1 - armorOf(e, pl.st); // armor (Armor Piercing and Corrosive lower it)
   e.hp -= dmg;
   e.flash = 0.06;
-  damageNumber(x ?? e.x, y ?? e.y, dmg, crit);
+  damageNumber(x ?? e.x, y ?? e.y, dmg, crit, e);
   if (pl && !src) onPlayerHit(e, dmg, x ?? e.x, y ?? e.y, damageEnemy); // statuses, marks, % hull
   if (e.boss) {
     bossDamaged(e, dmg);

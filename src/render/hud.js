@@ -8,7 +8,7 @@ import { CLASSES } from '../game/pilot.js';
 import { input } from '../core/input.js';
 import { sv } from '../game/stageview.js';
 import { profile } from '../core/storage.js';
-import { BOOST, boostAllowed, boostCap, boostScore } from '../game/boost.js';
+import { BOOST, boostAllowed, boostCap, boostScore, freeBoost } from '../game/boost.js';
 
 const FONT = 'Orbitron, "Segoe UI", sans-serif';
 const FONT2 = 'Rajdhani, "Segoe UI", sans-serif';
@@ -262,7 +262,8 @@ function drawBoostGauge(ctx, x, y, p, sx, sy) {
   const cap = boostCap(p);
   const t = clamp((p.boost ?? cap) / cap, 0, 1);
   const on = p.boosting;
-  const low = !on && (p.boostLock || (p.boost ?? cap) < BOOST.min);
+  const free = freeBoost(p); // transitions: boost cruises for free
+  const low = !on && !free && (p.boostLock || (p.boost ?? cap) < BOOST.min);
   const col = low ? '#ff4d6d' : '#ffb13d';
   ctx.fillStyle = on ? 'rgba(40,18,4,0.7)' : 'rgba(5,3,15,0.55)';
   ctx.beginPath();
@@ -292,7 +293,7 @@ function drawBoostGauge(ctx, x, y, p, sx, sy) {
   ctx.stroke();
   ctx.shadowBlur = 0;
   const hint = keyHint('boost');
-  const label = on ? `x${boostScore(p).toFixed(1)}` : hint || 'HOLD';
+  const label = free ? (on ? 'SKIP' : hint || 'HOLD') : on ? `x${boostScore(p).toFixed(1)}` : hint || 'HOLD';
   text(ctx, label, x, y - 1, fitSize(ctx, label, r * 1.6, 11, 700), on ? '#ffffff' : withAlpha(col, 0.9), 'center', 700);
   text(ctx, 'BOOST', x, y + r + 13, 9, col, 'center', 700);
   ctx.globalAlpha = hudA;

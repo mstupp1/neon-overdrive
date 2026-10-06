@@ -134,7 +134,7 @@ export const cine = {
 
   update(dt) {
     if (start.t >= 0) {
-      start.t += dt;
+      start.t += dt * ((G.player && G.player.boosting && G.player.flow) || 1);
       if (start.t >= START_DUR) start.t = -1;
     }
     if (tr.on) updateTransit(dt);
@@ -401,8 +401,8 @@ function coverField(W, H) {
 }
 
 function updateTransit(dt) {
-  tr.t += dt;
   const p = G.player;
+  tr.t += dt * ((p && p.boosting && p.flow) || 1); // boost cruises through the fly-through (boost.js)
   if (!p || p.dead) {
     tr.on = false;
     if (p) p.auto = null;

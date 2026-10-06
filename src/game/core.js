@@ -1,6 +1,7 @@
 // Endgame: Overdrive tiers (difficulty picked before launch), the Deep Grid (the run loops on after THE VOID) and the
 // Flux Core (permanent, uncapped stat levels bought with Flux, the endgame currency).
 // Heat = tier + deep cycle. It scales enemies (applyHeat) and the rewards; Flux only drops while heat > 0.
+import { HIT_MAX } from './state.js';
 
 export const TIER_CAP = 10;
 
@@ -24,6 +25,7 @@ export function applyHeat(diff, spec) {
   diff.bulletSpeed *= k.bullet;
   diff.fireRate *= k.fire;
   diff.spawn *= k.spawn;
+  diff.hit = Math.min(HIT_MAX, (diff.hit || 1) + Math.floor(((spec.tier || 0) + (spec.deep || 0)) / 3)); // heavier hits every 3 heat
   diff.credits = (diff.credits || 1) * k.reward;
   diff.xp *= k.reward;
   return diff;

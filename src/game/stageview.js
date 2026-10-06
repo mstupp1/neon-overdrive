@@ -19,7 +19,7 @@ import { glow } from '../render/sprites.js';
 import { bg } from '../render/background.js';
 import { beat } from '../core/beat.js';
 import { input } from '../core/input.js';
-import { hurtPlayer, gainOverdrive, addScore } from './player.js';
+import { hurtPlayer, hitDamage, gainOverdrive, addScore } from './player.js';
 import { phasing } from './pilot.js';
 import { sparks, floatText, flash, addShake, ring } from './fx.js';
 import { sfx } from '../core/audio.js';
@@ -788,11 +788,13 @@ function passGate(g, p) {
     return;
   }
   g.hit = true;
-  if (p.iframes > 0 || p.dashT > 0 || phasing(p)) return;
+  // Gates are solid: a dash's i-frames don't carry you through them (only a hit's grace or a Ghost phase does).
+  if (p.iframes > 0 || phasing(p)) return;
   sparks(p.x, p.y, '#ff3d7a', 14, 300);
   flash('255,61,122', 0.25);
   addShake(0.3);
-  hurtPlayer(p);
+  if (p.dashT > 0) floatText(p.x, p.y - 44, 'GATES ARE SOLID', '#ff3d7a', 12, 1.1);
+  hurtPlayer(p, hitDamage(), true);
 }
 
 // Chase floor travel (virtual units), advanced once per frame from the backdrop clock: CHASE_RUSH x the old cruise
@@ -941,22 +943,26 @@ function drawGates(ctx, r) {
     const passed = g.done ? clamp(1 - (g.y - G.player.y) / 120, 0, 1) : 1;
     const a = fog * passed;
     if (a <= 0.01) continue;
-    // Translucent wall panels either side of the gap
-    ctx.globalAlpha = 0.22 * a;
+    // Solid wall panels either side of the gap, hatched like a hazard barrier (a dash doesn't pass them)
+    ctx.globalAlpha = 0.36 * a;
     ctx.fillStyle = col;
     ctx.fillRect(xl, base - hh, ga - xl, hh);
     ctx.fillRect(gb, base - hh, xr - gb, hh);
-    // Scan bars
     ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = 0.5 * a;
     ctx.strokeStyle = col;
     ctx.lineWidth = Math.max(1, 1.5 * s);
     ctx.beginPath();
-    for (const f of [0.33, 0.66]) {
-      ctx.moveTo(xl, base - hh * f);
-      ctx.lineTo(ga, base - hh * f);
-      ctx.moveTo(gb, base - hh * f);
-      ctx.lineTo(xr, base - hh * f);
+    const hs = Math.max(6, 22 * s);
+    for (const [x0, x1] of [[xl, ga], [gb, xr]]) {
+      for (let x = x0 - hh; x < x1; x += hs) {
+        // Diagonal stripe clipped to the panel [x0, x1]
+        const ax = Math.max(x0, x);
+        const bx = Math.min(x1, x + hh);
+        if (bx <= ax) continue;
+        ctx.moveTo(ax, base - (ax - x));
+        ctx.lineTo(bx, base - (bx - x));
+      }
     }
     ctx.stroke();
     // Bright top and base rails, and the gate posts
