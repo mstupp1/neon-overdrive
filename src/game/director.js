@@ -16,6 +16,7 @@ import { cine, lateFinisher } from './cinematic.js';
 import { sfx, music } from '../core/audio.js';
 import { sv, viewName } from './stageview.js';
 import { rollField, spawnFormation, clearObstacles } from './obstacles.js';
+import { cruising } from './boost.js';
 
 export function createDirector() {
   return {
@@ -326,7 +327,8 @@ export function startSector(spec) {
       const where = d.zone ? `ZONE 1 / ${d.zones}  ·  ${d.zone.name}` : '';
       const debris = d.obst ? FIELD_NAME : '';
       const guard = spec.mini ? `GUARDED BY ${miniById(spec.mini).name}` : '';
-      banner(`NODE ${spec.row + 1}${rows ? ' / ' + rows : ''}`, [guard, where, debris, mods].filter(Boolean).join('  ·  ') || 'HOSTILES INBOUND', col, 2.4, 'start', `${G.run.system.short}  ·  ${type}`);
+      const heavy = d.diff.hit > 1 ? `HITS COST ${d.diff.hit} HULL` : '';
+      banner(`NODE ${spec.row + 1}${rows ? ' / ' + rows : ''}`, [heavy, guard, where, debris, mods].filter(Boolean).join('  ·  ') || 'HOSTILES INBOUND', col, 2.4, 'start', `${G.run.system.short}  ·  ${type}`);
       cine.nodeStart();
     } else {
       banner(`SECTOR ${spec.index}`, spec.name + (spec.loop ? `  ·  LOOP ${spec.loop + 1}` : ''), `hsl(${spec.hue},100%,70%)`, 2.6);
@@ -354,7 +356,7 @@ function spawnHunter() {
 
 export function updateDirector(dt) {
   const d = G.director;
-  d.t += dt;
+  d.t += dt * (cruising() ? G.player.flow : 1); // boost cruises through transitions (boost.js)
 
   // Run delayed spawns.
   if (d.queue.length) {

@@ -114,7 +114,7 @@ export const UPGRADES = [
   { id: 'grazer', name: 'Graze Field', cat: 'stat', max: 3, weight: 0.6, tier: 0, desc: () => '+30% graze radius, +35% Overdrive from grazes.' },
   { id: 'prospector', name: 'Prospector', cat: 'stat', max: 3, weight: 0.5, tier: 0, desc: () => '+20% credits from kills and drops.' },
   { id: 'hull', name: 'Reinforced Hull', cat: 'defense', max: 4, weight: 0.9, tier: 0, desc: () => '+1 max hull and repair 1.' },
-  { id: 'aegis', name: 'Aegis Shield', cat: 'defense', max: 4, weight: 0.8, tier: 0, desc: (lv) => `Regenerating shield absorbs a hit. Recharge ${16 - 3 * lv}s.` },
+  { id: 'aegis', name: 'Aegis Shield', cat: 'defense', max: 4, weight: 0.8, tier: 0, desc: (lv) => `Regenerating shield absorbs a hit. Recharge ${aegisTime(lv)}s.` },
   { id: 'dashes', name: 'Afterburner', cat: 'defense', max: 2, weight: 0.6, tier: 0, desc: () => '+1 dash charge.' },
   { id: 'boostTank', name: 'Boost Tank', cat: 'stat', max: 3, weight: 0.7, tier: 0, desc: (lv) => `+25% boost capacity (${pct(0.25 * lv)}).` },
   { id: 'ramScoop', name: 'Ram Scoop', cat: 'stat', max: 3, weight: 0.7, tier: 0, desc: (lv) => `Boost refills 30% faster (${pct(0.3 * lv)}).` },
@@ -232,6 +232,10 @@ function moduleCount(p) {
   return n;
 }
 
+// Aegis Shield recharge (s) by level, and the floor every other recharge bonus (gear, tree, Flux Core) stops at.
+const aegisTime = (lv) => 22 - 3 * lv;
+export const SHIELD_MIN = 9;
+
 export function recomputeStats(p) {
   const up = p.up;
   const lv = (id) => up[id] || 0;
@@ -248,7 +252,7 @@ export function recomputeStats(p) {
   st.odGain = 1 + 0.25 * lv('capacitor');
   st.odDur = 6 + lv('capacitor');
   st.maxHp = Math.max(1, p.ship.hp + lv('hull') + (p.hullMod || 0)); // hullMod: dock reinforcement (+) / contraband (-)
-  st.shieldInterval = lv('aegis') ? 16 - 3 * lv('aegis') : 0;
+  st.shieldInterval = lv('aegis') ? aegisTime(lv('aegis')) : 0;
   st.maxCharges = p.ship.dashes + lv('dashes');
   // Neutral defaults for fields only parts / pilots touch (attract mode and later steps rely on these).
   st.xpMul = 1 + 0.15 * lv('salvage');
@@ -311,6 +315,7 @@ export function recomputeStats(p) {
   applyPassives(st, p);
   applyTree(st, p);
   st.maxHp = Math.max(1, st.maxHp);
+  if (st.shieldInterval) st.shieldInterval = Math.max(SHIELD_MIN, st.shieldInterval); // stacked recharge cuts bottom out
   p.maxHp = st.maxHp;
   p.maxCharges = st.maxCharges;
 }

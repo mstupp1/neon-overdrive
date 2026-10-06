@@ -53,17 +53,27 @@ function spendCredits(n) {
   return true;
 }
 
+// Credit value scale for a difficulty level (pay: per-system credit scale). Grows with level, but slower than the
+// enemy count does, so late systems no longer flood the wallet.
+export const payUnit = (lvl, pay = 1) => Math.max(0.8, 0.7 * lvl + 0.5) * pay;
+// Kill chips: kill income already grows with how many enemies a level throws at you, so each chip's value shrinks with
+// level (x1 up to level 3, x0.5 at 7, x0.33 at 11, x0.25 at 15).
+export const killScale = (lvl) => 1 / (1 + 0.25 * Math.max(0, lvl - 3));
+
+const level = () => {
+  const sp = G.director && G.director.spec;
+  return sp ? sp.level + sp.loop * 9 : 1;
+};
 // Credit value scale for the current sector (campaign level, endless local level + loops).
 function unit() {
   const sp = G.director && G.director.spec;
-  const lvl = sp ? sp.level + sp.loop * 9 : 1;
-  return Math.max(0.8, 0.95 * lvl - 0.1) * ((sp && sp.pay) || 1); // pay: per-system credit scale (campaign)
+  return payUnit(level(), (sp && sp.pay) || 1);
 }
 
 // Called from killEnemy: small chance of a chip from normal kills, a guaranteed haul from elites.
 export function dropKillCredits(e) {
   if (!G.run || G.mode !== 'run') return;
-  const u = unit();
+  const u = unit() * killScale(level());
   if (e.elite || e.hunter) {
     if (e.hunter) gainFlux(3, e);
     const n = (e.hunter ? 9 : 3) * (G.director.diff.eliteCredits || 1); // the Hunter pays out three elites
@@ -152,17 +162,20 @@ export function settleRun(victory) {
 // --- Black Market ----------------------------------------------------------------------
 
 const act = (system) => (system && system.act) || 1;
-const price = (base, system) => Math.round((base * (1 + 0.5 * (act(system) - 1))) / 5) * 5;
+const round5 = (n) => Math.round(n / 5) * 5;
+const price = (base, system) => round5(base * (1 + 0.6 * (act(system) - 1)));
+// Every purchase marks up what is left in that market (so one visit can't strip it).
+export const MARKUP = 0.25;
 
 // Offer: { id, kind: 'upgrade'|'repair'|'reroll'|'contraband', name, desc, icon, cat, tag, price, up?, amount?, sold, note? }
-// kinds are applied by buyOffer(). Prices: ~40-230 in system 1, ×(1+0.5*(act-1)).
+// kinds are applied by buyOffer(). Prices: ~55-260 in system 1, ×(1+0.6*(act-1)), +25% on the rest per purchase.
 export function rollMarket(p, system, rng = Math.random) {
   const offers = [];
   for (const id of rollUpgradeIds(p, 'sector', 2, rng)) {
     const info = cardInfo(p, id);
     offers.push({
       id: 'up-' + id, kind: 'upgrade', up: id, name: info.name, desc: info.desc, icon: info.icon, cat: info.cat,
-      tag: info.fresh ? 'DISCOVERY' : info.lv === 0 ? 'NEW' : `LV ${info.lv + 1}`, fresh: info.fresh, price: price(50 + 30 * info.lv, system), sold: false,
+      tag: info.fresh ? 'DISCOVERY' : info.lv === 0 ? 'NEW' : `LV ${info.lv + 1}`, fresh: info.fresh, price: price(65 + 40 * info.lv, system), sold: false,
     });
   }
   const missing = p.maxHp - p.hp;
@@ -170,24 +183,25 @@ export function rollMarket(p, system, rng = Math.random) {
   offers.push({
     id: 'repair', kind: 'repair', amount: full ? missing : 1, name: full ? 'Full Repair' : 'Field Repair', cat: 'defense',
     desc: full ? `Restore all ${missing} missing hull.` : 'Repair 1 hull.', icon: full ? ECON_ICONS.repairFull : ICONS.repair, tag: 'REPAIR',
-    price: price(full ? 45 + 25 * (missing - 1) : 45, system), sold: false, blocked: missing <= 0 ? 'HULL FULL' : '',
+    price: price(full ? 60 + 40 * (missing - 1) : 60, system), sold: false, blocked: missing <= 0 ? 'HULL FULL' : '',
   });
   offers.push({
     id: 'reroll', kind: 'reroll', name: 'Reroll Token', cat: 'stat', desc: '+1 reroll for upgrade drafts.', icon: ECON_ICONS.reroll,
-    tag: 'UTILITY', price: price(45, system), sold: false,
+    tag: 'UTILITY', price: price(55, system), sold: false,
   });
   // Contraband: two random upgrade levels, with a drawback (−1 max hull; at ≤2 hull, the next fight is OVERCLOCKED).
   const hullDrawback = p.maxHp >= 3;
   offers.push({
     id: 'contraband', kind: 'contraband', name: 'Contraband', cat: 'module',
     desc: `+2 random upgrade levels. ${hullDrawback ? '−1 max hull.' : 'Next fight is OVERCLOCKED.'}`, icon: ECON_ICONS.contraband,
-    tag: 'RISKY', price: price(110, system), hullDrawback, sold: false,
+    tag: 'RISKY', price: price(160, system), hullDrawback, sold: false,
   });
   return offers;
 }
 
-// Returns '' on success or a reason string. Mutates player/wallet; marks the offer sold.
-export function buyOffer(offer, p = G.player) {
+// Returns '' on success or a reason string. Mutates player/wallet; marks the offer sold and marks up the rest of
+// `offers` (the market's stock).
+export function buyOffer(offer, p = G.player, offers = null) {
   if (offer.sold) return 'SOLD';
   if (offer.blocked) return offer.blocked;
   if (wallet() < offer.price) return 'NEED CREDITS';
@@ -209,6 +223,7 @@ export function buyOffer(offer, p = G.player) {
   }
   spendCredits(offer.price);
   offer.sold = true;
+  if (offers) for (const o of offers) if (!o.sold) o.price = round5(o.price * (1 + MARKUP));
   return '';
 }
 

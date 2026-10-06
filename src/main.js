@@ -484,6 +484,7 @@ function pickRouteNode(node) {
     startSector(spec);
     r.sectors++;
     enterPlay();
+    if (G.director.diff.hit > 1) tip('heavy', true); // first node where hits cost more than 1 hull (the others wait)
     if (spec.mini) tip('mini', true);
     else if (spec.elite) tip('elite', true);
     else if (spec.modifiers.length) tip('hazard', true);
@@ -546,7 +547,7 @@ function eventPick(btn) {
 
 function buy(btn) {
   const o = marketOffers[+btn.dataset.i];
-  if (!o || buyOffer(o)) return;
+  if (!o || buyOffer(o, G.player, marketOffers)) return;
   sfx.coin();
   sfx.levelUp();
   const cards = () => [...document.querySelectorAll('#market-cards .card')];
@@ -1560,7 +1561,7 @@ window.NEON = {
             const ok = marketOffers.map((o, k) => k).filter((k) => marketOffers[k].kind === 'upgrade' && marketOffers[k].price <= w);
             if (ok.length) i = ok.reduce((a, b) => (marketOffers[b].price < marketOffers[a].price ? b : a));
           }
-          if (i >= 0) buyOffer(marketOffers[i]);
+          if (i >= 0) buyOffer(marketOffers[i], G.player, marketOffers);
           nodeContinue();
         } else if (G.screen === 'dock') {
           const p = G.player;

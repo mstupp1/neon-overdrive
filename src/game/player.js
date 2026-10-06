@@ -451,8 +451,12 @@ export function onEnemyKilled(e) {
   }
 }
 
-export function hurtPlayer(p) {
-  if (p.dead || p.iframes > 0 || p.dashT > 0 || p.god || G.mode === 'attract' || phasing(p) || cine.on) return;
+// Hull lost per enemy hit right now (state.js enemyHit, folded into the director difficulty).
+export const hitDamage = () => (G.director && G.director.diff && G.director.diff.hit) || 1;
+
+// dmg: hull a hit takes (default: the sector's hitDamage). solid: dashing doesn't pass through it (pursuit gates).
+export function hurtPlayer(p, dmg = hitDamage(), solid = false) {
+  if (p.dead || p.iframes > 0 || (p.dashT > 0 && !solid) || p.god || G.mode === 'attract' || phasing(p) || cine.on) return;
   if (p.st.dodge && Math.random() < p.st.dodge) {
     // Lucky Dodge: the shot misses. A brief grace so one bullet cluster can't roll it twice.
     p.iframes = p.st.dodgePulse ? 1.0 : 0.35;
@@ -478,7 +482,7 @@ export function hurtPlayer(p) {
     floatText(p.x, p.y - 30, 'SHIELD BROKEN', '#3ff6ff', 11, 0.9);
     return;
   }
-  if (p.hp <= 1 && p.swUsed < p.st.secondWind) {
+  if (p.hp <= dmg && p.swUsed < p.st.secondWind) {
     // Second Wind: the killing blow is shrugged off.
     p.swUsed++;
     p.hp = 1;
@@ -494,8 +498,9 @@ export function hurtPlayer(p) {
     floatText(p.x, p.y - 34, 'SECOND WIND', '#ff4d6d', 14, 1.3);
     return;
   }
-  p.hp--;
+  p.hp = Math.max(0, p.hp - dmg);
   p.hurtT = 0.4;
+  if (dmg > 1) floatText(p.x, p.y - 30, `-${dmg} HULL`, '#ff3b5c', 15, 1.1); // heavy hits read at a glance
   if (G.combo >= 12) floatText(p.x, p.y - 42, 'COMBO LOST', '#ff4d6d', 11, 0.9);
   G.combo = 0;
   G.comboTimer = 0;

@@ -151,6 +151,7 @@ export const STORY = {
       L('ECHO', 'MAG, why is it humming?'),
       L('MAG', 'Because it\'s hungry. The power is real, and so is whatever follows you into the next fights.'),
     ],
+    heavy: [L('MAG', 'Hostiles out here hit harder, ECHO. Every hit now costs more than one hull. The node card and exit beacons show how much.')],
     elite: [L('MAG', 'Elite signature. A HUNTER will come for you late in this fight. Drop it and the payout is big.')],
     hazard: [L('MAG', 'Hazard on this sector. It\'s on the map label; some just hurt, some pay extra.')],
     boost: [L('MAG', 'Hold BOOST (Shift) and the whole fight rushes at you. Clear it sooner and score more, if you can take the heat. The meter refills once you let go.')],
@@ -158,7 +159,7 @@ export const STORY = {
     death: [L('MAG', 'Link recovered. I always keep a backup of you, ECHO. Half your credits made it home too.')],
     tree: [L('MAG', 'Your passive tree. Every rank adds 2 points: start at the core and work outward. Refunds are free, so try builds.')],
     view_side: [L('MAG', 'Side run. You\'re flying flat out to the right now: up and down steer. Don\'t scrape the walls, they take hull.')],
-    view_chase: [L('MAG', 'Pursuit. I\'m behind you, and everything comes out of the distance. Fly the gaps in the laser gates; threading one charges your ult.')],
+    view_chase: [L('MAG', 'Pursuit. I\'m behind you, and everything comes out of the distance. Fly the gaps in the laser gates. They\'re solid: a dash won\'t get you through, so line up early. Threading one charges your ult.')],
     tier: [L('MAG', 'OVERDRIVE tiers are open. Launch at a higher tier for a meaner Signal, better pay and FLUX.')],
   },
 };

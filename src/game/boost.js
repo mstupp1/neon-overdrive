@@ -3,7 +3,9 @@
 // node timer, the wave timer, enemies, their bullets and beams, the side terrain and the chase gates all run
 // `p.flow` times faster (folded into G.enemyTimeScale by pilot.js pilotTimeScale). The player keeps real time (and gets
 // a little extra top speed), so a boost clears a node sooner and scores more (scoreMul) at the price of everything
-// arriving faster. Boost only works while the director is in `waves` (not in boss fights, breaks, fly-throughs).
+// arriving faster. In fights it works while the director is in `waves` (never in boss fights). Between the fighting
+// (node opening, zone breaks, fly-throughs, the clear beat) it is a free "cruise": no meter cost, no score bonus, and
+// the transition's clocks (director d.t, the fly-through) run at `CRUISE` speed, so holding it skips the waiting.
 // Meter: p.boost (0..cap). It drains while boosting, refills after a short pause, and needs `MIN` to ignite; burning it
 // empty locks it until the button is released.
 // Stats (recomputeStats defaults, then gear / tree / Flux Core / level-ups): st.boostCap (x capacity),
@@ -24,18 +26,29 @@ export const BOOST = {
   flow: 1.6, // base stage-flow multiplier (st.boostFlow)
   speed: 0.2, // player top speed bonus per unit of extra flow
   score: 0.8, // score bonus per unit of extra flow (x1.48 at flow 1.6)
+  cruise: 2.2, // flow while cruising through transitions (free)
 };
 
+// Director states between the fighting where boost cruises (free) through the transition.
+const CRUISE = new Set(['intro', 'break', 'transit', 'clearing', 'bossDown', 'clear']);
+export function cruising(p = G.player) {
+  const d = G.director;
+  return !!(p && p.boosting && d && CRUISE.has(d.state));
+}
+
 export const boostCap = (p) => BOOST.cap * (p.st.boostCap || 1);
-export const boostScore = (p) => (p && p.boosting ? 1 + BOOST.score * ((p.st.boostFlow || BOOST.flow) - 1) : 1);
+export const boostScore = (p) => (p && p.boosting && !cruising(p) ? 1 + BOOST.score * ((p.st.boostFlow || BOOST.flow) - 1) : 1);
 export const boostSpeed = (p) => 1 + BOOST.speed * Math.max(0, (p.flow || 1) - 1);
 
 // Can a boost run right now? (Fights only, while waves are flowing.)
 export function boostAllowed(p) {
-  if (field.ow || p.dead || p.auto || G.mode !== 'run') return false;
+  if (field.ow || p.dead || G.mode !== 'run') return false;
   const d = G.director;
-  return !!(d && d.state === 'waves');
+  return !!(d && (d.state === 'waves' ? !p.auto : CRUISE.has(d.state)));
 }
+
+// Is boost free right now (a transition between fights)?
+export const freeBoost = (p) => boostAllowed(p) && CRUISE.has(G.director.state);
 
 export function resetBoost(p) {
   p.boost = boostCap(p);
@@ -54,12 +67,14 @@ export function updateBoost(p, dt, want) {
   const st = p.st;
   const cap = boostCap(p);
   const ok = boostAllowed(p);
+  const free = freeBoost(p); // a transition: no meter needed
   if (!want) p.boostLock = false;
   if (p.boosting) {
-    if (!want || !ok || p.boost <= 0) stop(p, p.boost <= 0 && want && ok);
-  } else if (want && ok && !p.boostLock && p.boost >= BOOST.min) start(p);
+    if (!want || !ok || (p.boost <= 0 && !free)) stop(p, p.boost <= 0 && want && ok);
+  } else if (want && ok && (free || (!p.boostLock && p.boost >= BOOST.min))) start(p);
 
-  if (p.boosting) {
+  const cruise = cruising(p);
+  if (p.boosting && !cruise) {
     p.boost = Math.max(0, p.boost - (BOOST.drain / (st.boostEff || 1)) * dt);
     p.boostIdle = 0;
   } else {
@@ -67,7 +82,7 @@ export function updateBoost(p, dt, want) {
     if (p.boostIdle > BOOST.delay) p.boost = Math.min(cap, p.boost + BOOST.regen * (st.boostRegen || 1) * dt);
   }
   p.boost = Math.min(p.boost, cap);
-  const target = p.boosting ? st.boostFlow || BOOST.flow : 1;
+  const target = p.boosting ? (cruise ? Math.max(BOOST.cruise, st.boostFlow || BOOST.flow) : st.boostFlow || BOOST.flow) : 1;
   p.flow = damp(p.flow, target, target > p.flow ? 7 : 3.5, dt);
   if (Math.abs(p.flow - target) < 0.005) p.flow = target;
   p.boostV = damp(p.boostV, p.boosting ? 1 : 0, p.boosting ? 9 : 3, dt);

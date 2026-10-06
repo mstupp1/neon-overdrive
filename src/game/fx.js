@@ -1,7 +1,7 @@
 // Particles, floating text, screen shake, flashes and banners.
 
 import { G, view, field } from './state.js';
-import { rand, TAU } from '../core/math.js';
+import { rand, clamp, TAU } from '../core/math.js';
 import { glow, shockSpr, flareSpr, glintSpr } from '../render/sprites.js';
 import { profile } from '../core/storage.js';
 import { bg } from '../render/background.js';
@@ -248,15 +248,39 @@ export function floatText(x, y, text, color = '#fff', size = 12, life = 0.7) {
   const x1 = field.ow ? field.x1 : view.W;
   const half = Math.min((x1 - x0) / 2, text.length * size * 0.42);
   x = Math.max(x0 + half + 4, Math.min(x1 - half - 4, x));
-  G.texts.push({ x, y, text, color, size, life, max: life, vy: -50 });
+  const t = { x, y, text, color, size, life, max: life, vy: -50 };
+  G.texts.push(t);
+  return t;
 }
 
-export function damageNumber(x, y, amount, crit) {
-  if (!profile.settings.damageNumbers || G.mode === 'attract') return;
-  // Only meaningful hits get a number, so the screen stays readable.
-  if (!crit && amount < 4) return;
-  const v = amount >= 10 ? Math.round(amount) : Math.round(amount * 10) / 10;
-  floatText(x + rand(-6, 6), y - 6, crit ? `${v}!` : `${v}`, crit ? '#ffe14d' : 'rgba(255,255,255,0.8)', crit ? 13 : 9, 0.45);
+// Damage numbers (Settings → Damage numbers). Every hit on one enemy within NUM_MERGE s of its last adds into one
+// rising number (the running total, for up to NUM_SPAN s, then a fresh one starts), so a stream of small hits reads at
+// its real size. The number grows with the amount, and turns gold with a "!" once a crit lands in it.
+const NUM_MERGE = 0.32;
+const NUM_SPAN = 1.1;
+const fmtDmg = (v) => (v >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : v >= 1e4 ? `${Math.round(v / 1e3)}K` : v >= 1e3 ? `${(v / 1e3).toFixed(1)}K` : v >= 10 ? `${Math.round(v)}` : `${Math.round(v * 10) / 10}`);
+const dmgSize = (v) => clamp(9 + 2.4 * Math.log10(Math.max(1, v)), 9, 19);
+
+export function damageNumber(x, y, amount, crit, target = null) {
+  if (!profile.settings.damageNumbers || G.mode === 'attract' || !(amount > 0)) return;
+  const z = field.ow ? field.z : 1;
+  let t = target && target.dmgNum;
+  if (t && t.life > 0 && G.time - t.hitAt < NUM_MERGE && G.time - t.bornAt < NUM_SPAN && G.texts.includes(t)) {
+    t.sum += amount;
+    t.crit = t.crit || crit;
+    t.life = t.max; // stays up while the hits keep coming
+  } else {
+    t = floatText(x + rand(-8, 8), y - 8, '', '#ffffff', 9, 0.6);
+    t.sum = amount;
+    t.crit = crit;
+    t.vy = -38;
+    t.bornAt = G.time;
+    if (target) target.dmgNum = t;
+  }
+  t.hitAt = G.time;
+  t.text = fmtDmg(t.sum) + (t.crit ? '!' : '');
+  t.color = t.crit ? '#ffe14d' : '#ffffff';
+  t.size = dmgSize(t.sum) / z;
 }
 
 export function updateTexts(dt) {

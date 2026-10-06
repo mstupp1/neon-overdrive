@@ -64,6 +64,14 @@ export const G = {
   deathT: 0, // delay before the game-over screen
 };
 
+// Hull lost per enemy hit (bullets, bodies, beams, walls, gates) at a difficulty level: 1 through Genesis and Crimson,
+// 2 from Cyclone (level 9), 3 deep in the Void (level 15); endless loops and heat (core.js applyHeat) add more.
+export const HIT_MAX = 4;
+export function enemyHit(level, loop = 0, heat = 0) {
+  const base = level >= 15 ? 3 : level >= 9 ? 2 : 1;
+  return Math.min(HIT_MAX, base + loop + Math.floor(heat / 3));
+}
+
 export function sectorDifficulty(sector, loop) {
   const s = sector - 1;
   const loopMul = Math.pow(3, loop);
@@ -74,6 +82,7 @@ export function sectorDifficulty(sector, loop) {
     spawn: Math.max(0.4, 1 - 0.065 * s - loop * 0.1),
     xp: 1 + 0.22 * s + loop * 1.5,
     score: 1 + 0.25 * s + loop * 2,
+    hit: enemyHit(sector, loop),
   };
 }
 

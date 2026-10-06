@@ -171,7 +171,7 @@ export const meta = {
   renderMarket(G, offers, first) {
     const w = G.run.wallet || 0;
     $('#market-wallet').innerHTML = `${coin}<b>${fmt(w)}</b>`;
-    $('#market-hint').textContent = `${G.player.hp}/${G.player.maxHp} HULL · ${G.rerolls} REROLL${G.rerolls === 1 ? '' : 'S'}`;
+    $('#market-hint').textContent = `${G.player.hp}/${G.player.maxHp} HULL · ${G.rerolls} REROLL${G.rerolls === 1 ? '' : 'S'} · EACH BUY +25% ON THE REST`;
     const wrap = $('#market-cards');
     wrap.classList.toggle('still', !first);
     wrap.innerHTML = '';
