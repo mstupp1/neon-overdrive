@@ -18,3 +18,7 @@ Top-down floor detail follows each grid period; side scenery moves horizontally 
 Eleven renderer tests pass with `node --test tools/test_background_layers.mjs`, including complete-set loading, independent failure fallback, fractional wraps, canvas-state restoration, camera geometry, and preview storage isolation. The skill validator and JS syntax/diff checks pass. Live review covers all twelve system/camera combinations, dense fire in the new top-down themes, boost, and Eclipse pursuit combat in portrait/wider layouts.
 
 Local top-down Canvas submission added 0.100 ms (Crimson), 0.075 ms (Cyclone), and 0.100 ms (Void). Frozen-frame median pacing remained 8.30 ms in each comparison. Reports are preserved in each theme's `references/performance.txt`. These are local CPU submission and refresh-limited measurements; side/pursuit GPU cost and whole-game FPS were not measured.
+
+Pursuit atmosphere uses a faint additive horizon haze that fades across the full floor. It adds depth without darkening the grid or leaving a visible mid-screen rectangular cutoff.
+
+Pursuit grid rows fade in over a short 28–64 logical-pixel distance after entering the far plane. Converging lines also fade near the vanishing point; foreground grid contrast remains unchanged.

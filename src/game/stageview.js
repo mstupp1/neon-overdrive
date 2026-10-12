@@ -857,6 +857,16 @@ function drawChaseBack(ctx, r) {
   // Cross lines at fixed world depths sliding toward the camera
   const gap = 90;
   const ph = travel % gap;
+  // New rows enter at this fixed far depth. Bring them up gently as they move
+  // toward the camera instead of introducing a full-bright row at the cutoff.
+  const farGridY = hy + Pp.A / (Pp.Yc + 900 + gap);
+  const gridFadeEnd = farGridY + clamp((H - hy) * 0.1, 28, 64);
+  const gridColor = `hsla(${h},100%,62%,`;
+  const rowFade = ctx.createLinearGradient(0, farGridY, 0, gridFadeEnd);
+  rowFade.addColorStop(0, `${gridColor}0)`);
+  rowFade.addColorStop(0.5, `${gridColor}0.35)`);
+  rowFade.addColorStop(1, `${gridColor}1)`);
+  ctx.strokeStyle = rowFade;
   ctx.beginPath();
   for (let vy = -900 - gap; vy < CH + gap; vy += gap) {
     const y = vy + ph;
@@ -870,6 +880,11 @@ function drawChaseBack(ctx, r) {
   ctx.globalAlpha = 0.16 + beat.pulse * 0.06;
   ctx.stroke();
   // Long lines converging on the vanishing point
+  const rayFade = ctx.createLinearGradient(0, hy, 0, gridFadeEnd);
+  rayFade.addColorStop(0, `${gridColor}0)`);
+  rayFade.addColorStop(0.55, `${gridColor}0.4)`);
+  rayFade.addColorStop(1, `${gridColor}1)`);
+  ctx.strokeStyle = rayFade;
   ctx.beginPath();
   for (let vx = -CW * 2; vx <= CW * 3; vx += 56) {
     const near = floorPt(vx, CH + 200);
@@ -1088,14 +1103,21 @@ function drawShadows(ctx) {
   ctx.globalAlpha = 1;
 }
 
-// Aerial perspective: a horizon-coloured haze over the far rows, so distant ships sink into the glow.
+// Aerial perspective adds distant light instead of covering the grid with a dark
+// rectangle. Fade across the whole floor so there is no mid-screen cutoff.
 function drawHaze(ctx, r) {
   const P0 = chaseProj();
   const h = Math.round(bg.hue);
-  const y1 = P0.hy + (r.H * 0.8 - P0.hy) * 0.42;
-  const grd = ctx.createLinearGradient(0, P0.hy, 0, y1);
-  grd.addColorStop(0, `hsla(${(h + 30) % 360},70%,12%,0.55)`);
-  grd.addColorStop(1, `hsla(${(h + 30) % 360},70%,12%,0)`);
+  const grd = ctx.createLinearGradient(0, P0.hy, 0, r.H);
+  const hue = (h + 30) % 360;
+  grd.addColorStop(0, `hsla(${hue},60%,28%,0.12)`);
+  grd.addColorStop(0.2, `hsla(${hue},60%,28%,0.045)`);
+  grd.addColorStop(0.5, `hsla(${hue},60%,28%,0.008)`);
+  grd.addColorStop(1, `hsla(${hue},60%,28%,0)`);
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.globalAlpha = 1;
   ctx.fillStyle = grd;
-  ctx.fillRect(-20, P0.hy, r.W + 40, y1 - P0.hy);
+  ctx.fillRect(-20, P0.hy, r.W + 40, r.H - P0.hy);
+  ctx.restore();
 }
