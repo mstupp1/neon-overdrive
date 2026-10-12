@@ -127,5 +127,16 @@
       "alpha": 0.58,
       "repeats": 2
     }
+  },
+  "views": [
+    "top",
+    "side",
+    "chase"
+  ],
+  "cameraExtension": {
+    "rendererTests": 11,
+    "skillValidator": "passed",
+    "sideCapture": "references/generated-side.png",
+    "pursuitCapture": "references/generated-chase.png"
   }
 }

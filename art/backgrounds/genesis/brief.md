@@ -27,3 +27,8 @@ The second renderer pass projects the same source art onto the visual grid inste
 After projection, local background CPU submission medians were approximately 0.050 ms procedural and 0.150 ms generated. Frozen-scene frame pacing was unchanged at 8.30 ms median and 9.10 ms p95. These measurements are refresh-limited and do not establish GPU cost, performance on phones, or full-combat FPS. The preview benchmark uses small draw batches to keep this more detailed renderer's workload bounded.
 
 This pilot covers Genesis top-down backgrounds. The other systems, side/chase cameras, overworld scenery, obstacle skins, and making pixel mode permanent remain separate work. Use `$neon-background-assets` for subsequent background tasks, preserve original sources, and revise individual layers with the existing screenshots and gate as references.
+
+
+## Camera extension
+
+The selected Genesis source art now also serves side-scroll and pursuit backgrounds. Side bands scroll horizontally with `bg.scroll`; pursuit floor detail shares the camera's reciprocal projection and `floorRun` phase. The pursuit horizon is scaled to its shallow sky and clipped above the floor. The current preview includes all four systems and all three cameras; the original pilot validation above remains historical.

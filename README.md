@@ -234,6 +234,14 @@ src/audio/music/      soundtrack
 src/fonts/            Orbitron + Rajdhani (SIL OFL)
 ```
 
+## Background art workflow
+
+All four systems have generated horizon and floor layers for top-down, side-scroll, and pursuit views. Runtime PNGs live in `src/assets/backgrounds/`; originals, prompts, hashes, and review captures live in `art/backgrounds/`. Each theme falls back to procedural scenery until its complete image set has decoded.
+
+Use the repository skill at `.agents/skills/neon-background-assets/SKILL.md` for new or revised art. Serve this directory locally and open `/tools/background-preview.html` to compare themes, cameras, dense waves, bosses, and boost without changing the real save. The preview also accepts `?theme=void&view=chase`.
+
+Run `node --test tools/test_background_layers.mjs` for renderer checks. `tools/background_assets.py` validates PNG alpha and tile edges and exports with nearest-neighbor scaling; it does not generate or retouch art.
+
 ## Performance notes
 
 - All glow is baked into offscreen sprites once; nothing uses `shadowBlur` per frame.

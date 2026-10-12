@@ -1,0 +1,259 @@
+{
+  "version": 2,
+  "theme": "void",
+  "generator": "built-in imagegen",
+  "date": "2026-10-12",
+  "views": [
+    "top",
+    "side",
+    "chase"
+  ],
+  "reference": "references/baseline-top.png",
+  "assets": [
+    {
+      "id": "gate",
+      "source": "sources/gate-v1.png",
+      "runtime": "../../../src/assets/backgrounds/void/gate-v1.png",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a1325a-d733-72f2-b960-c9633a16e22a/exec-d965dfb6-0888-4f98-84eb-135e45a15b3e.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster game background layer for NEON OVERDRIVE VOID, gate. Subject: isolated black hole, opaque near-black circular core with thin dim violet and muted amber accretion disc and a lensed arc above, whole silhouette visible with generous margins. Fine crisp pixel art with deliberate clusters at about 360 virtual pixels across, no chunky blocks, not photorealistic. Palette: near-black violet and indigo glass, subdued purple rims with very sparse dull amber seams. Almost black material, restrained thin colored edges; much darker than arcade ships and projectiles. Landscape 1536x1024. Landmark fills central 75 percent, preserve all silhouette within frame. No skyline. Genuine alpha background outside structures, NOT opaque black, NOT painted checkerboard. No sky, stars, grid, floor plane, UI, text, logo, watermarks, ships, characters, targets, bullets, pickups, bright white or green/lime lights. No bright scattered dots or wide bloom.",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "exportSize": [
+        720,
+        480
+      ],
+      "sourceSha256": "66b12121fad31d5906b52e0e2dce14b1d0c99620e3eebce85ee0833313d70206",
+      "runtimeSha256": "5ce9cfaf097e338c81e3d2dc530f8f27380b5eb863473e9b39dc8be441b91fff",
+      "runtimeBytes": 486211,
+      "alpha": {
+        "path": "src/assets/backgrounds/void/gate-v1.png",
+        "format": "PNG",
+        "width": 720,
+        "height": 480,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          254
+        ],
+        "transparent_percent": 55.107,
+        "partial_alpha_percent": 44.893,
+        "visible_bbox": [
+          0,
+          8,
+          713,
+          475
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 81470
+      }
+    },
+    {
+      "id": "skyline-far",
+      "source": "sources/skyline-far-v1.png",
+      "runtime": "../../../src/assets/backgrounds/void/skyline-far-v1.png",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a1325a-d733-72f2-b960-c9633a16e22a/exec-9dff0021-4ca3-4dc2-83c2-2ba2e9f1bdb9.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster game background layer for NEON OVERDRIVE VOID, skyline-far. Subject: distant fractured obsidian monoliths and derelict alien spires, asymmetrical heights. Fine crisp pixel art with deliberate clusters at about 360 virtual pixels across, no chunky blocks, not photorealistic. Palette: near-black violet and indigo glass, subdued purple rims with very sparse dull amber seams. Almost black material, restrained thin colored edges; much darker than arcade ships and projectiles. Landscape 1536x1024. Bottom-aligned shallow skyline band: baseline at very bottom, silhouettes occupy bottom 55 percent only, clear transparent sky above. Skyline extends across width with low structures at both edges, no giant center landmark or floor strip. No perspective convergence. Genuine alpha background outside structures, NOT opaque black, NOT painted checkerboard. No sky, stars, grid, floor plane, UI, text, logo, watermarks, ships, characters, targets, bullets, pickups, bright white or green/lime lights. No bright scattered dots or wide bloom.",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "exportSize": [
+        720,
+        480
+      ],
+      "sourceSha256": "fc8deda20a3067b6a82c294634e5925ec58de17910aaf7c7a07cd1f391630fe4",
+      "runtimeSha256": "1fd86aef9bff447e4f40296ec2b34ed89ae1edc90c28cbe0042479b60fee5b2f",
+      "runtimeBytes": 393798,
+      "alpha": {
+        "path": "src/assets/backgrounds/void/skyline-far-v1.png",
+        "format": "PNG",
+        "width": 720,
+        "height": 480,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          254
+        ],
+        "transparent_percent": 71.041,
+        "partial_alpha_percent": 28.959,
+        "visible_bbox": [
+          0,
+          13,
+          720,
+          474
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 48005
+      }
+    },
+    {
+      "id": "skyline-near",
+      "source": "sources/skyline-near-v1.png",
+      "runtime": "../../../src/assets/backgrounds/void/skyline-near-v1.png",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a1325a-d733-72f2-b960-c9633a16e22a/exec-ca2546c9-f936-4b7d-b7ef-e5adc0d63f9a.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster game background layer for NEON OVERDRIVE VOID, skyline-near. Subject: lower broken dark violet machine terraces, disconnected arches and shattered stepped hulls. Fine crisp pixel art with deliberate clusters at about 360 virtual pixels across, no chunky blocks, not photorealistic. Palette: near-black violet and indigo glass, subdued purple rims with very sparse dull amber seams. Almost black material, restrained thin colored edges; much darker than arcade ships and projectiles. Landscape 1536x1024. Bottom-aligned shallow skyline band: baseline at very bottom, silhouettes occupy bottom 55 percent only, clear transparent sky above. Skyline extends across width with low structures at both edges, no giant center landmark or floor strip. No perspective convergence. Genuine alpha background outside structures, NOT opaque black, NOT painted checkerboard. No sky, stars, grid, floor plane, UI, text, logo, watermarks, ships, characters, targets, bullets, pickups, bright white or green/lime lights. No bright scattered dots or wide bloom.",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "exportSize": [
+        720,
+        480
+      ],
+      "sourceSha256": "4697bdeafda3e4be5bf6983c120172cbd67d5844a75b92a89caacf36039d116a",
+      "runtimeSha256": "a727a932bcff4062e54be27fb98e6ccf652bffec4f02c3e326219c77052fb471",
+      "runtimeBytes": 429479,
+      "alpha": {
+        "path": "src/assets/backgrounds/void/skyline-near-v1.png",
+        "format": "PNG",
+        "width": 720,
+        "height": 480,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          254
+        ],
+        "transparent_percent": 63.002,
+        "partial_alpha_percent": 36.998,
+        "visible_bbox": [
+          0,
+          17,
+          720,
+          470
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 46244
+      }
+    },
+    {
+      "id": "deck-far",
+      "source": "sources/deck-far-v1.png",
+      "runtime": "../../../src/assets/backgrounds/void/deck-far-v1.png",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a1325a-d733-72f2-b960-c9633a16e22a/exec-ffceea9a-c0e2-4952-ac1c-0b0bf2a43167.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster game background layer for NEON OVERDRIVE VOID, deck-far. Subject: two broad quiet architectural deck footprints only along outer left/right 18 percent, recessed channels and large abstract dark panels. Fine crisp pixel art with deliberate clusters at about 360 virtual pixels across, no chunky blocks, not photorealistic. Palette: near-black violet and indigo glass, subdued purple rims with very sparse dull amber seams. Almost black material, restrained thin colored edges; much darker than arcade ships and projectiles. Square 1024x1024. Strict orthographic overhead view; no perspective or horizon. Decorative scenery far below ship. Central 60 percent completely transparent, empty for combat. All FOUR outermost 10 percent margins entirely transparent, ALL structures/glow stop well before edges. Sparse separated shapes, under 25 percent coverage. This repeats vertically and horizontally; transparent gaps hide repeats. Genuine alpha background outside structures, NOT opaque black, NOT painted checkerboard. No sky, stars, grid, floor plane, UI, text, logo, watermarks, ships, characters, targets, bullets, pickups, bright white or green/lime lights. No bright scattered dots or wide bloom.",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "exportSize": [
+        360,
+        360
+      ],
+      "sourceSha256": "1f6641bdafaec6df84d740021ea62e509edbab47ebe94ad14e81a16cde5be512",
+      "runtimeSha256": "7b60925d978657d956400ef94b88f5c309ee7dd5e2e2b331efdbeae9aa0dcfcc",
+      "runtimeBytes": 78523,
+      "alpha": {
+        "path": "src/assets/backgrounds/void/deck-far-v1.png",
+        "format": "PNG",
+        "width": 360,
+        "height": 360,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 76.656,
+        "partial_alpha_percent": 23.291,
+        "visible_bbox": [
+          4,
+          5,
+          357,
+          353
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 13423
+      }
+    },
+    {
+      "id": "deck-near",
+      "source": "sources/deck-near-v1.png",
+      "runtime": "../../../src/assets/backgrounds/void/deck-near-v1.png",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a1325a-d733-72f2-b960-c9633a16e22a/exec-6b981eb0-fdc9-4d0d-b572-be30cd6175d2.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster game background layer for NEON OVERDRIVE VOID, deck-near. Subject: thin broken conduits and utility gantries only along outer left/right 12 percent, asymmetric distribution. Fine crisp pixel art with deliberate clusters at about 360 virtual pixels across, no chunky blocks, not photorealistic. Palette: near-black violet and indigo glass, subdued purple rims with very sparse dull amber seams. Almost black material, restrained thin colored edges; much darker than arcade ships and projectiles. Square 1024x1024. Strict orthographic overhead view; no perspective or horizon. Decorative scenery far below ship. Central 60 percent completely transparent, empty for combat. All FOUR outermost 10 percent margins entirely transparent, ALL structures/glow stop well before edges. Sparse separated shapes, under 25 percent coverage. This repeats vertically and horizontally; transparent gaps hide repeats. Genuine alpha background outside structures, NOT opaque black, NOT painted checkerboard. No sky, stars, grid, floor plane, UI, text, logo, watermarks, ships, characters, targets, bullets, pickups, bright white or green/lime lights. No bright scattered dots or wide bloom.",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "exportSize": [
+        360,
+        360
+      ],
+      "sourceSha256": "7d9832cb5f8278b78b8fb997bf28b31f1582d73623795cd9ec319dadd6d8ec47",
+      "runtimeSha256": "8b0ed64527cecf5c866f43090a9781b2c3437a60a5fe55d13945f3b26280133e",
+      "runtimeBytes": 49169,
+      "alpha": {
+        "path": "src/assets/backgrounds/void/deck-near-v1.png",
+        "format": "PNG",
+        "width": 360,
+        "height": 360,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 86.569,
+        "partial_alpha_percent": 13.428,
+        "visible_bbox": [
+          9,
+          11,
+          342,
+          355
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 10931
+      }
+    }
+  ],
+  "runtimeTotalBytes": 1437180,
+  "validation": {
+    "alpha": "passed",
+    "deckClearVerticalEdges": "passed",
+    "rendererTests": 11,
+    "skillValidator": "passed",
+    "liveReview": "passed: top-down dense fire; side/pursuit motion and composition; boost; procedural/generated comparison",
+    "performanceReport": "references/performance.txt",
+    "performanceLimit": "Local top-down Canvas submission and refresh-limited frozen-frame pacing only; no GPU, side/pursuit cost, or whole-game FPS measurements.",
+    "runtimeAlphaFiles": 5,
+    "clearDeckTiles": 2,
+    "additionalReview": "Eclipse pursuit arena; portrait 800x1000 and wide 1280x720 preview layouts",
+    "screenshots": [
+      "references/generated-chase.png",
+      "references/generated-portrait-boss.png",
+      "references/generated-side.png",
+      "references/generated-top.png",
+      "references/generated-wide.png"
+    ]
+  },
+  "topDownLandmarkMask": {
+    "clip": "skyline horizon",
+    "sceneryDrawnAfter": true,
+    "capture": "references/masked-top.png"
+  }
+}

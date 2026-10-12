@@ -29,14 +29,18 @@ function context() {
   return {
     globalAlpha: 1,
     imageSmoothingEnabled: true,
+    globalCompositeOperation: 'source-over',
     calls: [],
     alphaAtDraw: [],
     stack: [],
-    save() { this.stack.push([this.globalAlpha, this.imageSmoothingEnabled]); },
-    restore() { [this.globalAlpha, this.imageSmoothingEnabled] = this.stack.pop(); },
+    clipCalls: [],
+    save() { this.stack.push([this.globalAlpha, this.imageSmoothingEnabled, this.globalCompositeOperation, this.clipRect, this.clipped]); },
+    restore() { [this.globalAlpha, this.imageSmoothingEnabled, this.globalCompositeOperation, this.clipRect, this.clipped] = this.stack.pop(); },
     beginPath() {},
+    translate() {},
+    rotate() {},
     rect(...args) { this.clipRect = args; },
-    clip() { this.clipped = true; },
+    clip() { this.clipped = true; this.clipCalls.push(this.clipRect); },
     drawImage(...args) { this.calls.push(args); this.alphaAtDraw.push(this.globalAlpha); },
   };
 }
@@ -69,8 +73,9 @@ test('Genesis deck projects with shared grid phase, bounded source strips, and r
   ctx.calls.length = 0;
   ctx.globalAlpha = 0.7;
   assert.equal(layers.drawGenesisDeck(ctx, 450, 896, 96, 0), true);
-  assert.equal(ctx.clipped, true);
-  assert.deepEqual(ctx.clipRect, [0, 96, 450, 800]);
+  assert.deepEqual(ctx.clipCalls.at(-1), [0, 96, 450, 800], 'deck applies its playfield clip');
+  assert.equal(ctx.clipped, undefined, 'deck restores the caller clip state');
+  assert.equal(ctx.clipRect, undefined);
   assert.equal(ctx.globalAlpha, 0.7, 'deck drawing restores caller canvas alpha');
   assert.equal(ctx.imageSmoothingEnabled, true, 'deck drawing restores source smoothing');
   assert.ok(ctx.calls.length > 300 && ctx.calls.length <= 325, '160 strips per layer plus at most five wrap splits');
@@ -170,6 +175,219 @@ test('fractional grid phases never stall the projected deck loop', { timeout: 50
       const [, sx, sy, sw, sh, dx, dy, dw, dh] = call;
       assert.ok([sx, sy, sw, sh, dx, dy, dw, dh].every(Number.isFinite), `phase ${i} has finite draw coordinates`);
       assert.ok(sh > 0 && sy >= 0 && sy + sh <= 360 + 1e-6, `phase ${i} stays within source texture bounds`);
+    }
+  }
+});
+
+test('all four theme sets load atomically and independently', async () => {
+  globalThis.Image = MockImage;
+  MockImage.instances = [];
+  const layers = await import(`${moduleUrl.href}?four-theme-atomic`);
+  const themes = ['genesis', 'crimson', 'cyclone', 'void'];
+  const pending = themes.map((theme) => layers.loadThemeLayers(theme));
+  assert.equal(MockImage.instances.length, 20, 'each theme loads its own five images');
+  assert.deepEqual(MockImage.instances.map((image) => new URL(image.src).pathname.split('/').slice(-3, -1).join('/')),
+    themes.flatMap((theme) => Array(5).fill(`backgrounds/${theme}`)));
+
+  MockImage.instances.slice(0, 4).forEach((image) => image.succeed());
+  await Promise.resolve();
+  assert.equal(layers.themeLayersReady('genesis'), false, 'a partial theme is never published');
+  assert.equal(layers.themeLayerImages('genesis'), null, 'chase renderer cannot observe a partial set');
+  assert.equal(layers.themeLayersReady('crimson'), false, 'other themes remain independently pending');
+  MockImage.instances.slice(4).forEach((image) => image.succeed());
+  const loaded = await Promise.all(pending);
+  for (let i = 0; i < themes.length; i++) {
+    assert.equal(Object.keys(loaded[i]).length, 5);
+    assert.equal(layers.themeLayersReady(themes[i]), true);
+    assert.equal(layers.themeLayerImages(themes[i]), loaded[i], 'chase renderer receives the complete selected set');
+    assert.equal(Object.values(loaded[i]).every((image) => MockImage.instances.includes(image)), true);
+  }
+});
+
+test('failed theme falls back without poisoning other themes or retaining stale imagery', async () => {
+  globalThis.Image = MockImage;
+  MockImage.instances = [];
+  const layers = await import(`${moduleUrl.href}?theme-failure-switch`);
+  const failed = layers.loadThemeLayers('crimson');
+  const healthy = layers.loadThemeLayers('void');
+  MockImage.instances[2].fail();
+  MockImage.instances.slice(5).forEach((image) => image.succeed());
+  assert.equal(await failed, null);
+  const voidImages = await healthy;
+  assert.equal(layers.themeLayersReady('crimson'), false);
+  assert.equal(layers.themeLayersReady('void'), true);
+
+  const ctx = context();
+  ctx.globalAlpha = 0.37;
+  assert.equal(layers.drawThemeHorizon(ctx, 'crimson', 450, 96, 3), false);
+  assert.equal(ctx.calls.length, 0, 'failed set leaves the procedural fallback available');
+  assert.equal(layers.drawThemeHorizon(ctx, 'void', 450, 96, 3), true);
+  assert.ok(ctx.calls.length > 0);
+  assert.ok(ctx.calls.every((call) => Object.values(voidImages).includes(call[0])), 'switch draws only the selected theme assets');
+  assert.equal(ctx.globalAlpha, 0.37, 'horizon restores caller alpha');
+  ctx.calls.length = 0;
+  assert.equal(layers.drawThemeHorizon(ctx, 'crimson', 450, 96, 3), false);
+  assert.equal(ctx.calls.length, 0, 'switching back cannot reuse the previously drawn theme');
+});
+
+test('side and top-down layer draws restore canvas state and bound fractional wrap work', async () => {
+  globalThis.Image = MockImage;
+  MockImage.instances = [];
+  const layers = await import(`${moduleUrl.href}?side-fractional`);
+  const pending = layers.loadThemeLayers('cyclone');
+  MockImage.instances.forEach((image) => image.succeed());
+  const images = await pending;
+  const ctx = context();
+
+  for (let i = 0; i < 500; i++) {
+    const t = i * 0.037 + i * 0.78;
+    for (const draw of [
+      () => layers.drawThemeHorizon(ctx, 'cyclone', 450, 96, t),
+      () => layers.drawThemeDeck(ctx, 'cyclone', 450, 896, 96, t),
+      () => layers.drawThemeSideHorizon(ctx, 'cyclone', 450, 896, 100, t),
+      () => layers.drawThemeSideDeck(ctx, 'cyclone', 450, 896, 100, t),
+    ]) {
+      ctx.calls.length = 0;
+      ctx.globalAlpha = 0.41;
+      ctx.imageSmoothingEnabled = true;
+      assert.equal(draw(), true);
+      assert.equal(ctx.globalAlpha, 0.41, `phase ${i} restores alpha`);
+      assert.equal(ctx.imageSmoothingEnabled, true, `phase ${i} restores smoothing`);
+      assert.equal(ctx.stack.length, 0, `phase ${i} balances save/restore`);
+      assert.ok(ctx.calls.length <= 400, `phase ${i} stays within a bounded draw-call budget (${ctx.calls.length})`);
+      for (const call of ctx.calls) {
+        assert.ok(Object.values(images).includes(call[0]), `phase ${i} draws only the selected theme`);
+        assert.ok(call.slice(1).every(Number.isFinite), `phase ${i} has finite draw coordinates`);
+      }
+    }
+  }
+});
+
+test('theme decks use each system grid period and horizon layers restore composite mode', async () => {
+  globalThis.Image = MockImage;
+  MockImage.instances = [];
+  const layers = await import(`${moduleUrl.href}?theme-grid-periods`);
+  const themes = ['genesis', 'crimson', 'cyclone', 'void'];
+  const pending = themes.map((theme) => layers.loadThemeLayers(theme));
+  MockImage.instances.forEach((image) => image.succeed());
+  await Promise.all(pending);
+
+  const phases = {};
+  for (const theme of themes) {
+    const ctx = context();
+    ctx.globalCompositeOperation = 'lighter';
+    assert.equal(layers.drawThemeDeck(ctx, theme, 450, 896, 96, 3.25), true);
+    assert.equal(ctx.globalCompositeOperation, 'lighter', `${theme} deck restores composite mode`);
+    assert.equal(ctx.imageSmoothingEnabled, true, `${theme} deck restores smoothing`);
+    phases[theme] = ctx.calls.find((call) => call[0] === layers.themeLayerImages(theme).deckFar)?.[2];
+
+    ctx.calls.length = 0;
+    ctx.globalCompositeOperation = 'lighter';
+    assert.equal(layers.drawThemeHorizon(ctx, theme, 450, 96, 2), true);
+    assert.equal(ctx.globalCompositeOperation, 'lighter', `${theme} horizon restores composite mode`);
+  }
+  assert.notEqual(phases.genesis, phases.crimson, 'Crimson follows its 14-row grid period');
+  assert.notEqual(phases.genesis, phases.void, 'Void follows its 9-row grid period');
+  assert.notEqual(phases.crimson, phases.void, 'distinct grid periods produce distinct source phases');
+});
+
+test('chase deck projects reciprocal strips, wraps fractional travel safely, and restores canvas state', async () => {
+  globalThis.Image = MockImage;
+  MockImage.instances = [];
+  const layers = await import(`${moduleUrl.href}?chase-projection`);
+  const image = new MockImage();
+  const projection = { hy: 120, A: 180000, Yc: 1500, f: 700, CW: 450, CH: 1100 };
+  const W = 450;
+  const H = 800;
+  const ctx = context();
+
+  for (let i = 0; i < 600; i++) {
+    const travel = i * 0.37 + i * 3.19;
+    ctx.calls.length = 0;
+    ctx.alphaAtDraw.length = 0;
+    ctx.globalAlpha = 0.39;
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.imageSmoothingEnabled = true;
+    assert.equal(layers.drawChaseDeckLayer(ctx, image, W, H, projection, travel, { alpha: 0.3, repeats: 2 }), true);
+    assert.ok(ctx.calls.length > 0 && ctx.calls.length <= 160, `phase ${i} has bounded strip count (${ctx.calls.length})`);
+    assert.equal(ctx.globalAlpha, 0.39, `phase ${i} restores alpha`);
+    assert.equal(ctx.globalCompositeOperation, 'lighter', `phase ${i} restores composite mode`);
+    assert.equal(ctx.imageSmoothingEnabled, true, `phase ${i} restores smoothing`);
+    assert.equal(ctx.stack.length, 0, `phase ${i} balances save/restore`);
+
+    for (const call of ctx.calls) {
+      const [, sx, sy, sw, sh, dx, dy, dw, dh] = call;
+      assert.deepEqual([sx, sw], [0, image.width]);
+      assert.ok([sy, sh, dx, dy, dw, dh].every(Number.isFinite), `phase ${i} coordinates stay finite`);
+      assert.ok(sy >= 0 && sh > 0 && sy + sh <= image.height + 1e-6, `phase ${i} source crop stays in tile bounds`);
+      assert.ok(dy >= projection.hy && dh > 0 && dy + dh <= H + 1, `phase ${i} draw stays on the visible floor`);
+      assert.ok(dh <= (H - projection.hy - 1) / 128 + 0.41 + 1e-6, `phase ${i} uses bounded screen-space bands`);
+      assert.ok(dx < W / 2 && dx + dw > W / 2, 'each projected floor strip remains centered on the lane');
+
+      const v0 = projection.Yc - projection.A / (dy - projection.hy);
+      const v1 = projection.Yc - projection.A / (dy + dh - 0.4 - projection.hy);
+      const vm = (v0 + v1) * 0.5;
+      const expectedWidth = projection.CW * projection.f / (projection.Yc - vm);
+      assert.ok(Math.abs(dw - expectedWidth) < 2, 'strip width follows reciprocal depth projection');
+    }
+  }
+
+  ctx.calls.length = 0;
+  assert.equal(layers.drawChaseDeckLayer(ctx, image, W, H, projection, 9.25, { maxStrips: 7 }), true);
+  assert.ok(ctx.calls.length <= 7, 'caller can lower the strip budget');
+  const phaseA = ctx.calls[0][2];
+  ctx.calls.length = 0;
+  layers.drawChaseDeckLayer(ctx, image, W, H, projection, 10.75, { maxStrips: 7 });
+  assert.notEqual(ctx.calls[0][2], phaseA, 'fractional travel advances the texture source phase');
+  assert.equal(layers.drawChaseDeckLayer(ctx, image, W, H, { ...projection, A: 0 }, 1), false, 'degenerate projection is rejected');
+
+  for (const travel of [-1e-7, 0, 1e-7, 549.9999999, 550, 550.0000001]) {
+    ctx.calls.length = 0;
+    assert.equal(layers.drawChaseDeckLayer(ctx, image, W, H, projection, travel, { repeats: 2 }), true);
+    assert.ok(ctx.calls.length > 0 && ctx.calls.length <= 160, `seam travel ${travel} remains bounded`);
+    for (const [, , sy, sw, sh, , dy, , dh] of ctx.calls) {
+      assert.ok(sh > 1e-4, `seam travel ${travel} avoids near-zero source slices`);
+      assert.ok(sy >= 0 && sy + sh <= image.height + 1e-6);
+      assert.ok(dh <= (H - projection.hy - 1) / 128 + 0.41 + 1e-6, `seam travel ${travel} remains in screen-space bands`);
+    }
+  }
+});
+
+test('chase horizon keeps every landmark above the horizon and restores clip and canvas state', async () => {
+  globalThis.Image = MockImage;
+  MockImage.instances = [];
+  const layers = await import(`${moduleUrl.href}?chase-horizon`);
+  const pending = layers.loadThemeLayers('void');
+  MockImage.instances.forEach((image) => image.succeed());
+  const images = await pending;
+  const ctx = context();
+  const previousClip = [3, 4, 5, 6];
+  ctx.globalAlpha = 0.27;
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.imageSmoothingEnabled = true;
+  ctx.clipRect = previousClip;
+  ctx.clipped = true;
+
+  const W = 450;
+  const horizon = 145;
+  assert.equal(layers.drawThemeChaseHorizon(ctx, 'void', W, horizon, 8.5), true);
+  assert.ok(ctx.calls.length > 3);
+  assert.deepEqual(ctx.clipCalls, [[0, 0, W, horizon]], 'chase horizon art is clipped above the floor');
+  assert.equal(ctx.globalAlpha, 0.27);
+  assert.equal(ctx.globalCompositeOperation, 'lighter');
+  assert.equal(ctx.imageSmoothingEnabled, true);
+  assert.deepEqual(ctx.clipRect, previousClip, 'caller clip rectangle is restored');
+  assert.equal(ctx.clipped, true, 'caller clip state is restored');
+  assert.equal(ctx.stack.length, 0);
+
+  for (let i = 0; i < ctx.calls.length; i++) {
+    const [image, x, y, width, height] = ctx.calls[i];
+    assert.ok(Object.values(images).includes(image), 'draw uses the selected theme only');
+    assert.ok([x, y, width, height].every(Number.isFinite));
+    assert.ok(y >= -1e-6 && y + height <= horizon + 1e-6, 'no horizon artwork extends into the floor');
+    if (i === 0) {
+      assert.ok(Math.abs(y + height - horizon) < 1e-6, 'gate bottom is aligned to the horizon');
+      assert.ok(Math.abs(width / height - image.width / image.height) < 1e-6, 'gate source aspect ratio is preserved');
     }
   }
 });

@@ -2,27 +2,32 @@
 <html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Genesis background preview</title>
+<title>Campaign background preview</title>
 <style>
   *{box-sizing:border-box}body{margin:0;background:#090b17;color:#b6cedb;font:14px system-ui;display:flex;height:100vh}
-  aside{width:230px;padding:20px;flex-shrink:0}h1{font-size:19px;color:#5ddbe3}p{line-height:1.5}button{display:block;width:100%;margin:10px 0;padding:10px;background:#172238;color:#b9e8ee;border:1px solid #375270;cursor:pointer}button:disabled{opacity:.4}iframe{border:0;flex:1;height:100vh;min-width:0}output{display:block;white-space:pre-wrap;font:12px monospace;line-height:1.6}
+  aside{width:250px;padding:18px;flex-shrink:0;overflow:auto}h1{font-size:19px;color:#5ddbe3}p{line-height:1.5}label{display:block;margin:12px 0 4px;color:#83a5bb;font-size:12px;text-transform:uppercase;letter-spacing:.08em}select,button{display:block;width:100%;margin:6px 0 10px;padding:10px;background:#172238;color:#b9e8ee;border:1px solid #375270}button{cursor:pointer}button:disabled{opacity:.4}iframe{border:0;flex:1;height:100vh;min-width:0}output{display:block;white-space:pre-wrap;font:12px monospace;line-height:1.6;margin-top:12px}
 </style>
 <aside>
-  <h1>Genesis backgrounds</h1>
+  <h1>Campaign backgrounds</h1>
   <p>Live, invulnerable test run. Uses the game's existing debug hook. These controls never save the test loadout.</p>
+  <label for="theme">System theme</label><select id="theme" disabled><option value="genesis">Genesis</option><option value="crimson">Crimson</option><option value="cyclone">Cyclone</option><option value="void">Void</option></select>
+  <label for="view">Stage view</label><select id="view" disabled><option value="top">Top-down</option><option value="side">Side-scroll</option><option value="chase">Pursuit</option></select>
   <button data-action="baseline" disabled>Procedural baseline</button>
   <button data-action="generated" disabled>Generated layers</button>
   <button data-action="waves" disabled>Wave fight</button>
   <button data-action="dense" disabled>Dense fire</button>
-  <button data-action="boss" disabled>Warden boss</button>
+  <button data-action="boss" disabled>System boss</button>
   <button data-action="boost" disabled>Toggle boost</button>
   <button data-action="freeze" disabled>Freeze / resume</button>
   <button data-action="benchmark" disabled>Compare rendering cost</button>
   <output id="status">Loading game…</output>
 </aside>
-<iframe title="Genesis live game"></iframe>
+<iframe title="Campaign background live game"></iframe>
 <script>
 const frame = document.querySelector('iframe');
+const params = new URLSearchParams(location.search);
+if(['genesis','crimson','cyclone','void'].includes(params.get('theme'))) document.querySelector('#theme').value=params.get('theme');
+if(['top','side','chase'].includes(params.get('view'))) document.querySelector('#view').value=params.get('view');
 frame.addEventListener('load', () => {
   if(!frame.contentDocument.querySelector('#game')) return;
   const script = frame.contentDocument.createElement('script');
@@ -40,10 +45,13 @@ fetch('../index.html').then(response=>response.text()).then(html=>{
 window.addEventListener('message', ({source, data}) => {
   if(source !== frame.contentWindow || data?.kind !== 'background-preview') return;
   document.querySelector('#status').textContent = data.status;
-  if(data.ready) document.querySelectorAll('button').forEach(button => button.disabled=false);
+  if(data.ready) {
+    document.querySelectorAll('button,select').forEach(control => control.disabled=false);
+  }
 });
 document.querySelectorAll('button').forEach(button => button.addEventListener('click', () => {
-  frame.contentWindow.postMessage({kind:'background-preview-action',action:button.dataset.action},location.origin);
+  frame.contentWindow.postMessage({kind:'background-preview-action',action:button.dataset.action,theme:document.querySelector('#theme').value,view:document.querySelector('#view').value},location.origin);
 }));
+for(const select of document.querySelectorAll('select')) select.addEventListener('change',()=>frame.contentWindow.postMessage({kind:'background-preview-action',action:'configure',theme:document.querySelector('#theme').value,view:document.querySelector('#view').value},location.origin));
 </script>
 </html>

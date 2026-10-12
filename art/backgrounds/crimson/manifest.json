@@ -1,0 +1,278 @@
+{
+  "version": 2,
+  "theme": "crimson",
+  "generator": "built-in imagegen",
+  "date": "2026-10-12",
+  "views": [
+    "top",
+    "side",
+    "chase"
+  ],
+  "reference": "references/baseline-top.png",
+  "assets": [
+    {
+      "id": "gate",
+      "source": "sources/gate-v1.png",
+      "runtime": "../../../src/assets/backgrounds/crimson/gate-v1.png",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a1325a-d733-72f2-b960-c9633a16e22a/exec-fc271791-10ef-4124-bb85-a9ba4c6dfb2e.png",
+      "prompt": "Use case: stylized-concept. Production game background asset for NEON OVERDRIVE, CRIMSON TIDE. Create one isolated immense dark red ringed planet and its tiny dim moon, wide landscape 1536x1024 framing with generous transparent margins all around. Main planet upper right-of-center; rings tilted slightly. Fine crisp pixel-art clusters as at 360 virtual pixels wide, layered dark burgundy/navy material, subdued crimson and dull rose thin rim, sparse dim rust red cloud bands. Match almost-black synthwave arcade backgrounds; scenery must be much darker than luminous ships/bullets. Planet and rings wholly visible, occupying central 75 percent; lower portion can be partly obscured by separately rendered skyline. Genuine transparency outside the planet, rings and moon. No sky, stars, floor, grid, fog, text, logos, UI, ships, bullets, pickups, bright white lights, green or lime. This is a dim distant landmark, not a bright illustration.",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "exportSize": [
+        720,
+        480
+      ],
+      "sourceSha256": "a62763b4787b98808e8fc8120cd0dd65729bfd887402192a718a0134f80ecc9e",
+      "runtimeSha256": "db51b5ee3600f73785b40af9b7da41e4493c33d34fb7e0394d4c73f28c5d7fb5",
+      "runtimeBytes": 474912,
+      "alpha": {
+        "path": "src/assets/backgrounds/crimson/gate-v1.png",
+        "format": "PNG",
+        "width": 720,
+        "height": 480,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          254
+        ],
+        "transparent_percent": 56.233,
+        "partial_alpha_percent": 43.767,
+        "visible_bbox": [
+          19,
+          22,
+          712,
+          469
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 63740
+      }
+    },
+    {
+      "id": "skyline-near",
+      "source": "sources/skyline-near-v1.png",
+      "runtime": "../../../src/assets/backgrounds/crimson/skyline-near-v1.png",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a1325a-d733-72f2-b960-c9633a16e22a/exec-601124ca-02d5-4230-baf3-7b0f15ede5ae.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster game background layer for NEON OVERDRIVE CRIMSON, skyline-near. Subject: low heavy industrial refineries and pipeworks, stepped roofs. Fine crisp pixel art with deliberate clusters at about 360 virtual pixels across, no chunky blocks, not photorealistic. Palette: near-black burgundy and navy, dull crimson/rose rims and sparse rust-red seams. Almost black material, restrained thin colored edges; much darker than arcade ships and projectiles. Landscape 1536x1024. Bottom-aligned shallow skyline band: baseline at very bottom, silhouettes occupy bottom 55 percent only, clear transparent sky above. Skyline extends across width with low structures at both edges, no giant center landmark or floor strip. No perspective convergence. Genuine alpha background outside structures, NOT opaque black, NOT painted checkerboard. No sky, stars, grid, floor plane, UI, text, logo, watermarks, ships, characters, targets, bullets, pickups, bright white or green/lime lights. No bright scattered dots or wide bloom.",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "exportSize": [
+        720,
+        480
+      ],
+      "sourceSha256": "2fdfd1221f0ebb8bb3109190c212c585b7d13cc27c8ecace9ce59867b833814b",
+      "runtimeSha256": "fbd64fc7804a2ab12d3c2eaf6e2aa1ff3bd1aa9d073b138de86b103649cf352f",
+      "runtimeBytes": 340855,
+      "alpha": {
+        "path": "src/assets/backgrounds/crimson/skyline-near-v1.png",
+        "format": "PNG",
+        "width": 720,
+        "height": 480,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          254
+        ],
+        "transparent_percent": 71.826,
+        "partial_alpha_percent": 28.174,
+        "visible_bbox": [
+          0,
+          93,
+          720,
+          472
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 40598
+      }
+    },
+    {
+      "id": "deck-near",
+      "source": "sources/deck-near-v3.png",
+      "runtime": "../../../src/assets/backgrounds/crimson/deck-near-v1.png",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a1325a-d733-72f2-b960-c9633a16e22a/exec-6260f753-2370-4b31-8be0-aebca8c1ffce.png",
+      "prompt": "Edit ONLY the small glaring white blob on the upper-left conduit cluster (around x=165 y=450 on the 1254 square canvas). Replace that white region with near-black burgundy metal paneling and a tiny dull red seam matching surrounding pipes. Remove any white light, white pixels or bright flare anywhere. Keep exact positions and geometry of all structures, dark palette, broad transparent margins, clear top and bottom rows, transparent center and true alpha. No other change.",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "exportSize": [
+        360,
+        360
+      ],
+      "sourceSha256": "c5e05fef9f6543e8c3582ae5100f31da459cb16b1eba74291bae863b39429e59",
+      "runtimeSha256": "7714c234e6f85affe2acfc61bf49c19ba3c8ca94daccd3213360e4d5e5913ba2",
+      "runtimeBytes": 33848,
+      "alpha": {
+        "path": "src/assets/backgrounds/crimson/deck-near-v1.png",
+        "format": "PNG",
+        "width": 360,
+        "height": 360,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 91.416,
+        "partial_alpha_percent": 8.551,
+        "visible_bbox": [
+          9,
+          41,
+          354,
+          316
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 8106
+      },
+      "revisions": [
+        {
+          "version": 1,
+          "source": "sources/deck-near-v1.png",
+          "prompt": "Use case: stylized-concept. ONE production transparent raster game background layer for NEON OVERDRIVE CRIMSON, deck-near. Subject: thin broken conduits and utility gantries only along outer left/right 12 percent, asymmetric distribution. Fine crisp pixel art with deliberate clusters at about 360 virtual pixels across, no chunky blocks, not photorealistic. Palette: near-black burgundy and navy, dull crimson/rose rims and sparse rust-red seams. Almost black material, restrained thin colored edges; much darker than arcade ships and projectiles. Square 1024x1024. Strict orthographic overhead view; no perspective or horizon. Decorative scenery far below ship. Central 60 percent completely transparent, empty for combat. All FOUR outermost 10 percent margins entirely transparent, ALL structures/glow stop well before edges. Sparse separated shapes, under 25 percent coverage. This repeats vertically and horizontally; transparent gaps hide repeats. Genuine alpha background outside structures, NOT opaque black, NOT painted checkerboard. No sky, stars, grid, floor plane, UI, text, logo, watermarks, ships, characters, targets, bullets, pickups, bright white or green/lime lights. No bright scattered dots or wide bloom.",
+          "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a1325a-d733-72f2-b960-c9633a16e22a/exec-f6a263fa-0025-4ae5-b2a7-bedda428a186.png"
+        },
+        {
+          "id": "deck-near",
+          "theme": "crimson",
+          "version": 2,
+          "prompt": "Edit this game background texture. Keep the dark burgundy/navy pixel-art material, thin dull red seams, central empty transparent 60 percent, strict overhead orthographic view. Change ONLY framing/structure terminations: shorten and separate ALL left and right conduits so they are isolated small clusters that occupy middle 60 percent of image HEIGHT. Both top 20 percent and bottom 20 percent must be COMPLETELY transparent blank pixels, with zero structure, pipe, glow, or shadow. Leave left and right outermost 8 percent transparent as well. Nothing touches any canvas edge. Terminate pipes visibly with end caps, no long continuous rails. Same square canvas, same genuinely transparent background, no additions of sky, floor, text, UI, lights, projectiles. This will tile vertically; visible edge-touching pipes are forbidden.",
+          "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a1325a-d733-72f2-b960-c9633a16e22a/exec-46412250-d3d1-495f-a712-880a1f490349.png"
+        },
+        {
+          "id": "deck-near",
+          "theme": "crimson",
+          "version": 3,
+          "prompt": "Edit ONLY the small glaring white blob on the upper-left conduit cluster (around x=165 y=450 on the 1254 square canvas). Replace that white region with near-black burgundy metal paneling and a tiny dull red seam matching surrounding pipes. Remove any white light, white pixels or bright flare anywhere. Keep exact positions and geometry of all structures, dark palette, broad transparent margins, clear top and bottom rows, transparent center and true alpha. No other change.",
+          "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a1325a-d733-72f2-b960-c9633a16e22a/exec-6260f753-2370-4b31-8be0-aebca8c1ffce.png"
+        }
+      ]
+    },
+    {
+      "id": "skyline-far",
+      "source": "sources/skyline-far-v1.png",
+      "runtime": "../../../src/assets/backgrounds/crimson/skyline-far-v1.png",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a1325a-d733-72f2-b960-c9633a16e22a/exec-4581209e-f981-48cf-ad97-44ca89359379.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster game background layer for NEON OVERDRIVE CRIMSON, skyline-far. Subject: distant refinery spires and orbital docks, thin transmission masts. Fine crisp pixel art with deliberate clusters at about 360 virtual pixels across, no chunky blocks, not photorealistic. Palette: near-black burgundy and navy, dull crimson/rose rims and sparse rust-red seams. Almost black material, restrained thin colored edges; much darker than arcade ships and projectiles. Landscape 1536x1024. Bottom-aligned shallow skyline band: baseline at very bottom, silhouettes occupy bottom 55 percent only, clear transparent sky above. Skyline extends across width with low structures at both edges, no giant center landmark or floor strip. No perspective convergence. Genuine alpha background outside structures, NOT opaque black, NOT painted checkerboard. No sky, stars, grid, floor plane, UI, text, logo, watermarks, ships, characters, targets, bullets, pickups, bright white or green/lime lights. No bright scattered dots or wide bloom.",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "exportSize": [
+        720,
+        480
+      ],
+      "sourceSha256": "312c208a45b8508db3b1b28915ef23f4425d6d63d99919240f69d8346eaf0f82",
+      "runtimeSha256": "d8b9779ff2e6dbf0dc03ea8b39aada693d14295db3412eba603a6e7592f65663",
+      "runtimeBytes": 362424,
+      "alpha": {
+        "path": "src/assets/backgrounds/crimson/skyline-far-v1.png",
+        "format": "PNG",
+        "width": 720,
+        "height": 480,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          254
+        ],
+        "transparent_percent": 74.072,
+        "partial_alpha_percent": 25.928,
+        "visible_bbox": [
+          0,
+          15,
+          720,
+          473
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 52730
+      }
+    },
+    {
+      "id": "deck-far",
+      "source": "sources/deck-far-v1.png",
+      "runtime": "../../../src/assets/backgrounds/crimson/deck-far-v1.png",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a1325a-d733-72f2-b960-c9633a16e22a/exec-f22e2553-6c9f-431e-b914-d74b1ae921c4.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster game background layer for NEON OVERDRIVE CRIMSON, deck-far. Subject: two broad quiet architectural deck footprints only along outer left/right 18 percent, recessed channels and large abstract dark panels. Fine crisp pixel art with deliberate clusters at about 360 virtual pixels across, no chunky blocks, not photorealistic. Palette: near-black burgundy and navy, dull crimson/rose rims and sparse rust-red seams. Almost black material, restrained thin colored edges; much darker than arcade ships and projectiles. Square 1024x1024. Strict orthographic overhead view; no perspective or horizon. Decorative scenery far below ship. Central 60 percent completely transparent, empty for combat. All FOUR outermost 10 percent margins entirely transparent, ALL structures/glow stop well before edges. Sparse separated shapes, under 25 percent coverage. This repeats vertically and horizontally; transparent gaps hide repeats. Genuine alpha background outside structures, NOT opaque black, NOT painted checkerboard. No sky, stars, grid, floor plane, UI, text, logo, watermarks, ships, characters, targets, bullets, pickups, bright white or green/lime lights. No bright scattered dots or wide bloom.",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "exportSize": [
+        360,
+        360
+      ],
+      "sourceSha256": "ffa31c6dd1e715056d85c92d90fab0856ecd8aff08fb4d486efa3229556f51d6",
+      "runtimeSha256": "cdeb7afa1f531da20ebaea215946e93a258a810ec43486133da2ea3fe1c77a2a",
+      "runtimeBytes": 69458,
+      "alpha": {
+        "path": "src/assets/backgrounds/crimson/deck-far-v1.png",
+        "format": "PNG",
+        "width": 360,
+        "height": 360,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 79.116,
+        "partial_alpha_percent": 20.843,
+        "visible_bbox": [
+          15,
+          6,
+          344,
+          357
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 16086
+      }
+    }
+  ],
+  "runtimeTotalBytes": 1281497,
+  "validation": {
+    "alpha": "passed",
+    "deckClearVerticalEdges": "passed",
+    "rendererTests": 11,
+    "skillValidator": "passed",
+    "liveReview": "passed: top-down dense fire; side/pursuit motion and composition; boost; procedural/generated comparison",
+    "performanceReport": "references/performance.txt",
+    "performanceLimit": "Local top-down Canvas submission and refresh-limited frozen-frame pacing only; no GPU, side/pursuit cost, or whole-game FPS measurements.",
+    "runtimeAlphaFiles": 5,
+    "clearDeckTiles": 2,
+    "screenshots": [
+      "references/generated-chase.png",
+      "references/generated-side.png",
+      "references/generated-top.png"
+    ]
+  },
+  "topDownLandmarkMask": {
+    "clip": "skyline horizon",
+    "sceneryDrawnAfter": true,
+    "capture": "references/masked-top.png"
+  }
+}
