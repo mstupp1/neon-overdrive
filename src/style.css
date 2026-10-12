@@ -120,8 +120,9 @@ body {
     display: none;
 }
 
-/* Tube glass over everything, menus included: rounded black corners matching the shader, a soft glare and a slow
-   roll bar. Transform-only animation, so it stays on the compositor. */
+/* Tube glass over everything, menus included: one scanline per virtual pixel row (--crt-row / --crt-scan are set by
+   crt.js), rounded black corners matching the shader, a soft glare and a slow roll bar. Transform-only animation,
+   so it stays on the compositor. */
 .crt-glass {
     position: absolute;
     inset: 0;
@@ -129,9 +130,16 @@ body {
     z-index: 60;
     overflow: hidden;
     display: none;
-    border-radius: calc(var(--u) * 20px);
-    box-shadow: 0 0 0 calc(var(--u) * 40px) #000, inset 0 0 calc(var(--u) * 24px) rgba(0, 0, 0, 0.75), inset 0 0 calc(var(--u) * 3px) rgba(63, 246, 255, 0.18);
-    background: radial-gradient(ellipse 70% 45% at 28% 12%, rgba(200, 240, 255, 0.05), transparent 70%);
+    border-radius: calc(var(--u) * 13px);
+    box-shadow: 0 0 0 calc(var(--u) * 40px) #000, inset 0 0 calc(var(--u) * 18px) rgba(0, 0, 0, 0.6), inset 0 0 calc(var(--u) * 3px) rgba(63, 246, 255, 0.14);
+    background: radial-gradient(ellipse 70% 45% at 28% 12%, rgba(200, 240, 255, 0.04), transparent 70%);
+}
+
+.crt-glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(180deg, transparent 0, transparent calc(var(--crt-row, 3px) * 0.6), rgba(0, 0, 0, var(--crt-scan, 0.3)) calc(var(--crt-row, 3px) * 0.8), transparent var(--crt-row, 3px));
 }
 
 .retro-crt .crt-glass {
@@ -144,18 +152,13 @@ body {
     right: 0;
     top: -20%;
     height: 14%;
-    background: linear-gradient(180deg, transparent, rgba(180, 230, 255, 0.035) 45%, rgba(180, 230, 255, 0.05) 55%, transparent);
+    background: linear-gradient(180deg, transparent, rgba(180, 230, 255, 0.03) 45%, rgba(180, 230, 255, 0.04) 55%, transparent);
     animation: crt-roll 11s linear infinite;
 }
 
 @keyframes crt-roll {
     from { transform: translateY(0); }
     to { transform: translateY(850%); }
-}
-
-/* Menu text picks up the tube's RGB fringe. */
-.retro-crt .screen {
-    text-shadow: calc(var(--u) * 0.6px) 0 rgba(255, 40, 90, 0.35), calc(var(--u) * -0.6px) 0 rgba(40, 200, 255, 0.35);
 }
 
 @media (prefers-reduced-motion: reduce) {
