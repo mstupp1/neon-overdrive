@@ -10,6 +10,7 @@ import { prewarmBossArt } from './render/bossArt.js';
 import { prewarmMiniArt } from './render/miniArt.js';
 import { bg } from './render/background.js';
 import { bloom } from './render/post.js';
+import { crt, PIXEL_W } from './render/crt.js';
 import { beat as musicBeat } from './core/beat.js';
 import { drawHud, updateBanner, buttonSide } from './render/hud.js';
 import { SHIPS, shipById, ownsShip, isUnlocked } from './game/ships.js';
@@ -119,6 +120,9 @@ function layout() {
   view.scale = w / view.W;
   view.H = h / view.scale;
   view.dpr = Math.min(window.devicePixelRatio || 1, dprCap);
+  // Retro look shrinks the frame to PIXEL_W anyway: ~2.5 source pixels per virtual pixel is plenty for its filter.
+  if (crt.mode !== 'off') view.dpr = Math.max(1, Math.min(view.dpr, (PIXEL_W * 2.5) / w));
+  crt.resize(w, h, Math.min(window.devicePixelRatio || 1, dprCap + 1)); // the tube keeps full device sharpness until quality drops
   canvas.width = Math.round(w * view.dpr);
   canvas.height = Math.round(h * view.dpr);
   app.style.setProperty('--u', view.scale.toFixed(4));
@@ -1106,6 +1110,12 @@ ui.init({
     showDraftCards(draftKind);
     ui.show('draft', { lock: 200 });
   },
+  retro() {
+    const order = ['crt', 'pixel', 'off'];
+    profile.settings.retro = order[(order.indexOf(profile.settings.retro) + 1) % order.length];
+    saveProfile();
+    ui.syncSettings?.();
+  },
   touchSide() {
     profile.settings.touchSide = buttonSide() === 'right' ? 'left' : 'right';
     saveProfile();
@@ -1322,6 +1332,11 @@ function afterStep(raw) {
 }
 
 function render() {
+  drawFrame();
+  if (crt.present(canvas, G.realTime)) layout();
+}
+
+function drawFrame() {
   const k = view.scale * view.dpr;
   const sh = G.shake * G.shake;
   view.ox = sh > 0.001 ? rand(-1, 1) * sh * 12 * k : 0;
@@ -1404,6 +1419,8 @@ function render() {
 // --- Boot -----------------------------------------------------------------------------
 
 function boot() {
+  crt.init(app, canvas);
+  view.warp = (x, y) => crt.warp(x, y);
   layout();
   buildSprites(SHIPS);
   buildEnemySpritesV2();
