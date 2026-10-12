@@ -60,8 +60,16 @@ const bossCard = document.getElementById('boss-card');
 const vignette = document.querySelector('.fx-vignette');
 const off = document.createElement('canvas'); // fly-through camera: flat world frame, drawn rolled
 const octx = off.getContext('2d', { alpha: false });
+// Pixel look: HUD, floating numbers, flashes and dims draw here at full resolution, above the pixelated world, so text
+// stays crisp (render/pixel.js). Off: everything draws straight on the game canvas as before.
+const hudCanvas = document.createElement('canvas');
+hudCanvas.id = 'hud-cv';
+hudCanvas.setAttribute('aria-hidden', 'true');
+const hudCtx = hudCanvas.getContext('2d');
+let hctx = ctx; // where the overlay layer draws this frame
 
 let dprCap = 2;
+let hudDpr = 1;
 // The ship flown by Endless / campaign launches: the hangar's selection (profile.lastShip), if still owned.
 const curShip = () => {
   const s = shipById(profile.lastShip);
@@ -122,9 +130,12 @@ function layout() {
   view.dpr = Math.min(window.devicePixelRatio || 1, dprCap);
   // The pixel look shrinks the frame to PIXEL_W anyway: ~2.5 source pixels per virtual pixel is plenty for its filter.
   if (pixel.mode !== 'off') view.dpr = Math.max(1, Math.min(view.dpr, (PIXEL_W * 2.5) / w));
-  pixel.resize(w, h, Math.min(window.devicePixelRatio || 1, dprCap + 1)); // crisp pixel edges at full device sharpness until quality drops
+  pixel.resize(w, h, window.devicePixelRatio || 1); // exact device pixels: whole-number pixel scaling stays crisp
   canvas.width = Math.round(w * view.dpr);
   canvas.height = Math.round(h * view.dpr);
+  hudDpr = Math.min(window.devicePixelRatio || 1, dprCap + 1);
+  hudCanvas.width = pixel.mode !== 'off' ? Math.round(w * hudDpr) : 1;
+  hudCanvas.height = pixel.mode !== 'off' ? Math.round(h * hudDpr) : 1;
   app.style.setProperty('--u', view.scale.toFixed(4));
   view.rect = app.getBoundingClientRect();
   const cs = getComputedStyle(probe);
@@ -1337,6 +1348,15 @@ function render() {
 
 function drawFrame() {
   const k = view.scale * view.dpr;
+  // Overlay layer (HUD, numbers, flashes, dims): its own crisp canvas in the pixel look, at its own scale.
+  const split = pixel.mode !== 'off';
+  hctx = split ? hudCtx : ctx;
+  const hk = split ? view.scale * hudDpr : k;
+  if (split) {
+    hudCtx.setTransform(1, 0, 0, 1, 0, 0);
+    hudCtx.clearRect(0, 0, hudCanvas.width, hudCanvas.height);
+  }
+  view.textLayer = split; // renderWorld leaves the floating numbers to the overlay
   const sh = G.shake * G.shake;
   view.ox = sh > 0.001 ? rand(-1, 1) * sh * 12 * k : 0;
   view.oy = sh > 0.001 ? rand(-1, 1) * sh * 12 * k : 0;
@@ -1350,15 +1370,15 @@ function drawFrame() {
     // Overworld (and the menus a beacon opens over it).
     overworld.drawWorld(ctx, k);
     bloom(ctx);
-    ctx.setTransform(k, 0, 0, k, 0, 0);
-    overworld.drawHud(ctx, G.screen === 'overworld');
+    hctx.setTransform(hk, 0, 0, hk, 0, 0);
+    overworld.drawHud(hctx, G.screen === 'overworld');
     if (G.flash > 0.01) {
-      ctx.fillStyle = `rgba(${G.flashColor},${Math.min(0.8, G.flash)})`;
-      ctx.fillRect(0, 0, view.W, view.H);
+      hctx.fillStyle = `rgba(${G.flashColor},${Math.min(0.8, G.flash)})`;
+      hctx.fillRect(0, 0, view.W, view.H);
     }
     if (G.screen !== 'overworld' && G.screen !== 'gameover') {
-      ctx.fillStyle = 'rgba(5,3,13,0.45)';
-      ctx.fillRect(0, 0, view.W, view.H);
+      hctx.fillStyle = 'rgba(5,3,13,0.45)';
+      hctx.fillRect(0, 0, view.W, view.H);
     }
     return;
   }
@@ -1369,8 +1389,8 @@ function drawFrame() {
     // Side / chase stage (stageview.js): the world renders in its own frame and is mapped onto the screen; the camera
     // is read inside that frame. Floating numbers are drawn upright afterwards.
     sv.render(ctx, k, renderWorld, () => (live ? cine.camera() : null), drawStandees);
-    ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
-    drawTexts(ctx, (x, y, o) => sv.toScreen(x, y, o));
+    hctx.setTransform(hk, 0, 0, hk, (view.ox * hk) / k, (view.oy * hk) / k);
+    drawTexts(hctx, (x, y, o) => sv.toScreen(x, y, o));
   } else if (cam && cam.rot) {
     // Rolled fly-through camera: sprites set axis-aligned transforms of their own, so the world is drawn flat into an
     // offscreen copy and that is blitted rolled, zoomed and skewed (one extra full-frame drawImage, transit only).
@@ -1379,6 +1399,7 @@ function drawFrame() {
       off.height = canvas.height;
     }
     octx.setTransform(k, 0, 0, k, view.ox, view.oy);
+    view.textLayer = false; // rolled transit: the numbers roll with the world
     renderWorld(octx, k);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = '#05030d';
@@ -1396,22 +1417,28 @@ function drawFrame() {
     }
     ctx.setTransform(kz, 0, 0, kz, view.ox, view.oy);
     renderWorld(ctx, kz);
+    if (split) {
+      const s = hk / k;
+      hctx.setTransform(kz * s, 0, 0, kz * s, view.ox * s, view.oy * s);
+      drawTexts(hctx);
+    }
   }
   if (G.screen === 'intro') bootIntro.draw(ctx, k);
   bloom(ctx, live ? 1 + 0.25 * cine.amount() + 0.3 * ((G.player && G.player.boostV) || 0) : 1);
   ctx.setTransform(k, 0, 0, k, 0, 0);
   if (live) drawBoostFx(ctx);
   if (live) cine.overlay(ctx);
-  if (G.mode === 'run' && (G.screen === 'play' || G.screen === 'pause' || G.screen === 'draft' || G.screen === 'pause-settings' || G.screen === 'pause-run')) drawHud(ctx, live ? cine.hudAlpha() : 1);
+  hctx.setTransform(hk, 0, 0, hk, 0, 0);
+  if (G.mode === 'run' && (G.screen === 'play' || G.screen === 'pause' || G.screen === 'draft' || G.screen === 'pause-settings' || G.screen === 'pause-run')) drawHud(hctx, live ? cine.hudAlpha() : 1);
   if (G.flash > 0.01) {
-    ctx.fillStyle = `rgba(${G.flashColor},${Math.min(0.8, G.flash)})`;
-    ctx.fillRect(0, 0, view.W, view.H);
+    hctx.fillStyle = `rgba(${G.flashColor},${Math.min(0.8, G.flash)})`;
+    hctx.fillRect(0, 0, view.W, view.H);
   }
   // Menu dim; fades in over the level-up slow-down so the draft doesn't hard-cut.
   const dim = G.screen === 'pause' || G.screen === 'draft' || G.screen === 'pause-settings' || G.screen === 'pause-run' ? 0.35 : levelIntro >= 0 && G.screen === 'play' ? 0.35 * (1 - levelIntro / LEVEL_INTRO) : 0;
   if (dim > 0) {
-    ctx.fillStyle = `rgba(5,3,13,${dim})`;
-    ctx.fillRect(0, 0, view.W, view.H);
+    hctx.fillStyle = `rgba(5,3,13,${dim})`;
+    hctx.fillRect(0, 0, view.W, view.H);
   }
 }
 
@@ -1419,6 +1446,7 @@ function drawFrame() {
 
 function boot() {
   pixel.init(canvas);
+  pixel.canvas.after(hudCanvas);
   pixel.onFonts = () => ui.refit();
   layout();
   buildSprites(SHIPS);

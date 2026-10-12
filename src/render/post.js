@@ -29,7 +29,7 @@ function fit(m, w, h) {
 export function bloom(ctx, strength = 1) {
   if (!profile.settings.bloom || view.quality < 0.5 || strength <= 0) return;
   strength *= 1 + 0.3 * beat.pulse; // a glow swell on the music's beat
-  if (pixel.mode !== 'off') strength *= 0.55; // a wide glow turns to haze once the frame is pixelated
+  if (pixel.mode !== 'off') strength *= 0.35; // a wide glow turns to haze once the frame is pixelated
   const src = ctx.canvas;
   const W = src.width;
   const H = src.height;

@@ -99,7 +99,8 @@ body {
 }
 
 /* Pixel look (render/pixel.js): the WebGL copy draws over the 2D canvas, which stays underneath (invisible) for input. */
-#pixel-cv {
+#pixel-cv,
+#hud-cv {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -108,7 +109,8 @@ body {
     pointer-events: none;
 }
 
-.retro-pixel #pixel-cv {
+.retro-pixel #pixel-cv,
+.retro-pixel #hud-cv {
     display: block;
 }
 

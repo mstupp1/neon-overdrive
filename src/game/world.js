@@ -418,7 +418,7 @@ export function renderWorld(ctx, k, layer) {
   }
   drawParticles(ctx);
   drawEnemyBullets(ctx, k);
-  if (!sv.active) drawTexts(ctx); // other views draw them upright after the camera mapping (stageview.js)
+  if (!sv.active && !view.textLayer) drawTexts(ctx); // other views (and the pixel look's crisp overlay) draw them after the camera mapping
 
   // Overdrive shockwave
   if (G.pulse > 0 && G.player) {
