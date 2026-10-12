@@ -1,48 +1,57 @@
-// Pixel look (Settings → Retro look). The finished 2D frame is uploaded to a WebGL canvas laid over it and redrawn
+// Pixel look (Settings → Pixel look). The finished 2D frame is uploaded to a WebGL canvas laid over it and redrawn
 // in two passes:
-//   1. shrink to a fixed virtual resolution (PIXEL_W wide) with a 4-tap filter that keeps most of the brightest tap,
-//      so 1px neon lines survive as solid pixels instead of greying out;
-//   2. upscale with sharp-bilinear: crisp square pixels at any screen scale, nothing else on top.
+//   1. shrink to the virtual resolution with a 4-tap filter that keeps most of the brightest tap, so 1px neon lines
+//      survive as solid pixels instead of greying out;
+//   2. blow it back up by a whole number of device pixels per virtual pixel (nearest neighbour), so every pixel is the
+//      same size with hard edges. Fractional scales were what made the picture read as fuzzy.
+// The virtual width is whatever whole-number pixel size lands closest to PIXEL_W across the screen.
+// The HUD and floating numbers draw on a crisp canvas above this one (main.js), so in-game text stays legible.
 // retroFonts() swaps the menu fonts for pixel faces to match. The 2D canvas stays underneath at opacity 0 so it keeps
 // receiving pointer input. No WebGL → the setting is a no-op.
 
 import { profile } from '../core/storage.js';
 
-export const PIXEL_W = 360; // virtual pixels across (the playfield is 450 units wide: 1 pixel = 1.25 units: a modern, readable density)
+export const PIXEL_W = 360; // target virtual pixels across (the playfield is 450 units wide: ~1.25 units per pixel)
 
 const VS = `attribute vec2 p; varying vec2 uv; void main() { uv = p * 0.5 + 0.5; gl_Position = vec4(p, 0.0, 1.0); }`;
 
-const PIXEL_FS = `precision mediump float;
-varying vec2 uv;
+// Pass 1, drawn into the lowW × lowH target: one fragment per virtual pixel, sampled from the cell of the frame it covers
+// (rows counted from the top, so any leftover device pixels fall off the bottom/right edge, never the HUD side).
+const PRECISION = '#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif\n'; // device-pixel coordinates top 2048 on tall phones
+
+const PIXEL_FS = PRECISION + `
 uniform sampler2D src;
-uniform vec2 cell; // one virtual pixel in source uv
+uniform vec2 low;   // virtual resolution
+uniform vec2 dev;   // screen size in device pixels
+uniform float size; // device pixels per virtual pixel
 void main() {
-  vec2 d = cell * 0.25;
+  vec2 cr = vec2(floor(gl_FragCoord.x), low.y - 1.0 - floor(gl_FragCoord.y)); // column, row from the top
+  vec2 c = (cr + 0.5) * size / dev;
+  vec2 uv = vec2(c.x, 1.0 - c.y);
+  vec2 d = vec2(size, -size) * 0.25 / dev;
   vec3 a = texture2D(src, uv + vec2(-d.x, -d.y)).rgb;
   vec3 b = texture2D(src, uv + vec2( d.x, -d.y)).rgb;
-  vec3 c = texture2D(src, uv + vec2(-d.x,  d.y)).rgb;
-  vec3 e = texture2D(src, uv + vec2( d.x,  d.y)).rgb;
-  vec3 avg = (a + b + c + e) * 0.25;
-  vec3 mx = max(max(a, b), max(c, e));
-  vec3 col = mix(avg, mx, 0.7);
-  // Cleaner pixels: the faintest glow haze around lines is eased back a little, and colour gets a touch more punch.
+  vec3 e = texture2D(src, uv + vec2(-d.x,  d.y)).rgb;
+  vec3 f = texture2D(src, uv + vec2( d.x,  d.y)).rgb;
+  vec3 avg = (a + b + e + f) * 0.25;
+  vec3 mx = max(max(a, b), max(e, f));
+  vec3 col = mix(avg, mx, 0.85); // mostly the brightest tap: solid lines, fewer in-between edge shades
+  // Cleaner pixels: the faintest glow haze around lines is eased back, and colour gets a touch more punch.
   float l = dot(col, vec3(0.299, 0.587, 0.114));
-  col *= mix(0.82, 1.0, smoothstep(0.03, 0.16, l));
+  col *= mix(0.75, 1.0, smoothstep(0.03, 0.18, l));
   col = mix(vec3(dot(col, vec3(0.299, 0.587, 0.114))), col, 1.12);
   gl_FragColor = vec4(col, 1.0);
 }`;
 
-const SCREEN_FS = `precision mediump float;
-varying vec2 uv;
+// Pass 2: each device pixel shows the virtual pixel it falls in (nearest neighbour at a whole-number scale).
+const SCREEN_FS = PRECISION + `
 uniform sampler2D img;
-uniform vec2 res;   // virtual resolution
-uniform vec2 outPx; // output size in device pixels
-// Sharp bilinear: hard pixel edges with a one-device-pixel blend, so non-integer scales don't shimmer.
+uniform vec2 low;
+uniform vec2 dev;
+uniform float size;
 void main() {
-  vec2 p = uv * res;
-  vec2 i = floor(p);
-  vec2 f = clamp((p - i - 0.5) * (outPx / res) + 0.5, 0.0, 1.0);
-  gl_FragColor = vec4(texture2D(img, (i + f) / res).rgb, 1.0);
+  vec2 cr = floor(vec2(gl_FragCoord.x, dev.y - gl_FragCoord.y) / size);
+  gl_FragColor = vec4(texture2D(img, vec2((cr.x + 0.5) / low.x, 1.0 - (cr.y + 0.5) / low.y)).rgb, 1.0);
 }`;
 
 function makeProgram(gl, fs) {
@@ -106,6 +115,7 @@ let gl = null;
 let progPixel, progScreen, srcTex, lowTex, fbo;
 let lowW = 0;
 let lowH = 0;
+let size = 1; // device pixels per virtual pixel
 let ready = false;
 let lost = false;
 
@@ -127,7 +137,7 @@ function setup() {
   gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
   srcTex = makeTex(gl, gl.LINEAR);
-  lowTex = makeTex(gl, gl.LINEAR);
+  lowTex = makeTex(gl, gl.NEAREST);
   fbo = gl.createFramebuffer();
   lowW = lowH = 0;
   return true;
@@ -138,6 +148,11 @@ export const pixel = {
   mode: 'off',
   /** Called once the menu fonts have swapped (main.js re-fits the open menu). */
   onFonts: null,
+
+  /** The GL canvas (main.js stacks the crisp overlay canvas right above it). */
+  get canvas() {
+    return cv;
+  },
 
   init(game) {
     cv = document.createElement('canvas');
@@ -161,16 +176,18 @@ export const pixel = {
     return ready && !lost && profile.settings.retro !== 'off' ? 'pixel' : 'off';
   },
 
-  /** Size the GL canvas to the app box (CSS px) at the given device pixel ratio. */
+  /** Size the GL canvas to the app box (CSS px) at the screen's device pixel ratio, and pick the whole-number pixel
+   *  size that lands closest to PIXEL_W virtual pixels across. */
   resize(w, h, dpr) {
     if (!cv) return;
-    const d = Math.min(dpr, 3); // full device resolution: resampling the GL canvas would blur the pixel edges
-    cv.width = Math.round(w * d);
-    cv.height = Math.round(h * d);
-    const vh = Math.round((PIXEL_W * h) / w);
-    if (ready && (vh !== lowH || lowW !== PIXEL_W)) {
-      lowW = PIXEL_W;
-      lowH = vh;
+    cv.width = Math.round(w * dpr);
+    cv.height = Math.round(h * dpr);
+    size = Math.max(1, Math.round(cv.width / PIXEL_W));
+    const lw = Math.ceil(cv.width / size);
+    const lh = Math.ceil(cv.height / size);
+    if (ready && (lw !== lowW || lh !== lowH)) {
+      lowW = lw;
+      lowH = lh;
       gl.bindTexture(gl.TEXTURE_2D, lowTex);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, lowW, lowH, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
       gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
@@ -199,7 +216,9 @@ export const pixel = {
     gl.viewport(0, 0, lowW, lowH);
     gl.useProgram(progPixel.p);
     gl.uniform1i(progPixel.u.src, 0);
-    gl.uniform2f(progPixel.u.cell, 1 / lowW, 1 / lowH);
+    gl.uniform2f(progPixel.u.low, lowW, lowH);
+    gl.uniform2f(progPixel.u.dev, cv.width, cv.height);
+    gl.uniform1f(progPixel.u.size, size);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -207,8 +226,9 @@ export const pixel = {
     gl.bindTexture(gl.TEXTURE_2D, lowTex);
     gl.useProgram(progScreen.p);
     gl.uniform1i(progScreen.u.img, 0);
-    gl.uniform2f(progScreen.u.res, lowW, lowH);
-    gl.uniform2f(progScreen.u.outPx, cv.width, cv.height);
+    gl.uniform2f(progScreen.u.low, lowW, lowH);
+    gl.uniform2f(progScreen.u.dev, cv.width, cv.height);
+    gl.uniform1f(progScreen.u.size, size);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     return changed;
   },
