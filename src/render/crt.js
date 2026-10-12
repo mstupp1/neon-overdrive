@@ -2,17 +2,19 @@
 // redrawn in two passes:
 //   1. pixel: shrink to a fixed virtual resolution (PIXEL_W wide) with a 4-tap filter that keeps the brightest of
 //      the taps partly, so 1px neon lines survive as solid pixels instead of greying out;
-//   2. screen: upscale with sharp-bilinear (crisp square pixels at any scale), then, in CRT mode, tube curvature,
-//      per-row scanlines, a faint shadow mask, RGB fringing, line warble with a slow rolling tracking band, flicker
-//      and a vignette. PIXEL mode runs pass 2 flat.
+//   2. screen: upscale with sharp-bilinear (crisp square pixels at any scale), then, in CRT mode, a gentle tube
+//      bend, a faint shadow mask, slight RGB fringing at the edges, line warble with a slow rolling tracking band and
+//      a vignette. PIXEL mode runs pass 2 flat.
+// Scanlines, tube corners, glare and the roll bar live in the CSS glass layer (style.css .crt-glass) above everything,
+// so the HTML menus sit on the same tube as the game; retroFonts() swaps the menu fonts for pixel faces to match.
 // The 2D canvas stays underneath at opacity 0 so it keeps receiving pointer input; warp() maps a screen point to the
 // spot the tube shows there, for the mouse/touch mapping in input.js. No WebGL → the setting is a no-op.
 
 import { profile } from '../core/storage.js';
 
 export const PIXEL_W = 320; // virtual pixels across (the playfield is 450 units wide: 1 pixel ≈ 1.4 units: a modern indie density)
-const CURVE = 0.045; // barrel bend at the edges
-const CORNER = 0.045; // tube corner radius (fraction of the short side)
+const CURVE = 0.015; // barrel bend at the edges (kept gentle: the HTML menus on top can't bend)
+const CORNER = 0.03; // tube corner radius (fraction of the short side)
 
 const VS = `attribute vec2 p; varying vec2 uv; void main() { uv = p * 0.5 + 0.5; gl_Position = vec4(p, 0.0, 1.0); }`;
 
@@ -59,8 +61,6 @@ vec3 tap(vec2 q) {
   return texture2D(img, (i + f) / res).rgb;
 }
 
-float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
-
 void main() {
   vec2 q = bend(uv);
   // Rounded tube edge: outside the glass is the black bezel.
@@ -75,12 +75,12 @@ void main() {
   float row = floor(q.y * res.y);
   float band = fract(q.y * 0.9 + time * 0.045);
   float bandK = smoothstep(0.0, 0.06, band) * (1.0 - smoothstep(0.06, 0.13, band));
-  float wob = sin(row * 0.61 + time * 7.3) * 0.18 + sin(q.y * 9.0 - time * 1.7) * 0.22;
-  wob += bandK * roll * (1.2 + 0.8 * sin(row * 2.3 + time * 31.0));
+  float wob = sin(row * 0.61 + time * 7.3) * 0.08 + sin(q.y * 9.0 - time * 1.7) * 0.1;
+  wob += bandK * roll * (0.6 + 0.4 * sin(row * 2.3 + time * 31.0));
   q.x += warble * wob / res.x;
 
   // RGB fringing, growing toward the edges.
-  float ca = chroma * (0.35 + 0.65 * abs(uv.x * 2.0 - 1.0)) / res.x;
+  float ca = chroma * abs(uv.x * 2.0 - 1.0) / res.x; // none in the middle, a hint at the edges
   vec3 col;
   col.r = tap(q + vec2(ca, 0.0)).r;
   col.g = tap(q).g;
@@ -100,9 +100,8 @@ void main() {
   vec3 tri = vec3(m < 1.0 ? 1.0 : 0.82, (m >= 1.0 && m < 2.0) ? 1.0 : 0.82, m >= 2.0 ? 1.0 : 0.82);
   col *= mix(vec3(1.0), tri * 1.12, mask);
 
-  col *= 1.0 + bandK * roll * 0.08;
-  col += (hash(gl_FragCoord.xy + time) - 0.5) * 0.025 * flick; // grain
-  col *= 1.0 - flick * 0.012 * sin(time * 113.0);
+  col *= 1.0 + bandK * roll * 0.05;
+  col *= 1.0 - flick * 0.008 * sin(time * 113.0);
   vec2 c = uv * 2.0 - 1.0;
   col *= 1.0 - vig * pow(dot(c * vec2(0.85, 0.7), c * vec2(0.85, 0.7)), 1.6);
   gl_FragColor = vec4(col * inside, 1.0);
@@ -143,6 +142,29 @@ function makeTex(gl, filter) {
   return t;
 }
 
+// Pixel faces registered under the game's own family names, so every menu, button and HUD label switches without
+// touching the stylesheet: a FontFace added later wins over the @font-face rules with the same descriptors.
+// Silkscreen stands in for Orbitron (titles, buttons, numbers), Pixelify Sans for Rajdhani (body text).
+let pixelFaces = null;
+function retroFonts(on) {
+  if (!document.fonts || typeof FontFace === 'undefined') return;
+  if (!pixelFaces) {
+    const url = (f) => `url(${new URL(`../fonts/${f}`, import.meta.url)}) format('woff2')`;
+    pixelFaces = [
+      new FontFace('Orbitron', url('silkscreen-400.woff2'), { weight: '100 599', sizeAdjust: '88%' }),
+      new FontFace('Orbitron', url('silkscreen-700.woff2'), { weight: '600 1000', sizeAdjust: '88%' }),
+      new FontFace('Rajdhani', url('pixelify-sans.woff2'), { weight: '100 1000', sizeAdjust: '92%' }),
+    ];
+  }
+  for (const f of pixelFaces) {
+    if (on) document.fonts.add(f);
+    else document.fonts.delete(f);
+  }
+  Promise.all(on ? pixelFaces.map((f) => f.load().catch(() => {})) : [])
+    .then(() => crt.onFonts && crt.onFonts())
+    .catch(() => {});
+}
+
 let cv = null;
 let gl = null;
 let glass = null; // DOM overlay above the menus: tube corners, glare and the roll bar (style.css .crt-glass)
@@ -179,6 +201,8 @@ function setup() {
 export const crt = {
   /** 'crt' | 'pixel' | 'off' as drawn this frame ('off' when unsupported). */
   mode: 'off',
+  /** Called once the menu fonts have swapped (main.js re-fits the open menu). */
+  onFonts: null,
 
   init(app, game) {
     cv = document.createElement('canvas');
@@ -214,6 +238,12 @@ export const crt = {
     cv.width = Math.round(w * d);
     cv.height = Math.round(h * d);
     const vh = Math.round((PIXEL_W * h) / w);
+    // Scanline rows for the CSS glass: one per virtual pixel row. Rows only a couple of device pixels tall (1x desktop
+    // screens) would beat into moire, so they get lighter lines.
+    if (glass) {
+      glass.style.setProperty('--crt-row', `${h / vh}px`);
+      glass.style.setProperty('--crt-scan', (0.3 * Math.min(1, Math.max(0.35, ((h / vh) * dpr - 1.2) / 2))).toFixed(3));
+    }
     if (ready && (vh !== lowH || lowW !== PIXEL_W)) {
       lowW = PIXEL_W;
       lowH = vh;
@@ -235,6 +265,7 @@ export const crt = {
       changed = true;
       document.body.classList.toggle('retro-crt', mode === 'crt');
       document.body.classList.toggle('retro-pixel', mode !== 'off');
+      retroFonts(mode !== 'off');
     }
     if (mode === 'off' || !lowH) return changed;
     const crtOn = mode === 'crt';
@@ -261,12 +292,12 @@ export const crt = {
     gl.uniform1f(u.time, t % 1000);
     gl.uniform1f(u.curve, crtOn ? CURVE : 0);
     gl.uniform1f(u.corner, crtOn ? CORNER : 0);
-    gl.uniform1f(u.scan, crtOn ? 0.5 : 0);
+    gl.uniform1f(u.scan, 0); // CSS glass draws the scanlines over menus and game alike
     gl.uniform1f(u.warble, crtOn && !still ? 1 : 0);
     gl.uniform1f(u.roll, crtOn && !still ? 1 : 0);
-    gl.uniform1f(u.chroma, crtOn ? 0.25 : 0);
-    gl.uniform1f(u.mask, crtOn ? 0.35 : 0);
-    gl.uniform1f(u.vig, crtOn ? 0.35 : 0);
+    gl.uniform1f(u.chroma, crtOn ? 0.4 : 0);
+    gl.uniform1f(u.mask, crtOn ? 0.12 : 0);
+    gl.uniform1f(u.vig, crtOn ? 0.25 : 0);
     gl.uniform1f(u.flick, crtOn && !still ? 1 : 0);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     return changed;

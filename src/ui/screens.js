@@ -162,6 +162,11 @@ export const ui = {
     this.show(null);
   },
 
+  /** Re-fit the open menu from full size (fonts swapped, e.g. the retro pixel faces). */
+  refit() {
+    if (current) fit(screens[current]);
+  },
+
   // Called every frame while a menu is open.
   update() {
     if (!current) return;

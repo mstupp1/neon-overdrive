@@ -1421,6 +1421,7 @@ function drawFrame() {
 function boot() {
   crt.init(app, canvas);
   view.warp = (x, y) => crt.warp(x, y);
+  crt.onFonts = () => ui.refit();
   layout();
   buildSprites(SHIPS);
   buildEnemySpritesV2();
