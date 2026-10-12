@@ -3,8 +3,7 @@
 //   1. pixel: shrink to a fixed virtual resolution (PIXEL_W wide) with a 4-tap filter that keeps the brightest of
 //      the taps partly, so 1px neon lines survive as solid pixels instead of greying out;
 //   2. screen: upscale with sharp-bilinear (crisp square pixels at any scale), then, in CRT mode, a gentle tube
-//      bend, a faint shadow mask, slight RGB fringing at the edges, line warble with a slow rolling tracking band and
-//      a vignette. PIXEL mode runs pass 2 flat.
+//      bend, a faint shadow mask, a slow rolling tracking band that kicks rows sideways and a vignette. PIXEL mode runs pass 2 flat.
 // Scanlines, tube corners, glare and the roll bar live in the CSS glass layer (style.css .crt-glass) above everything,
 // so the HTML menus sit on the same tube as the game; retroFonts() swaps the menu fonts for pixel faces to match.
 // The 2D canvas stays underneath at opacity 0 so it keeps receiving pointer input; warp() maps a screen point to the
@@ -12,7 +11,7 @@
 
 import { profile } from '../core/storage.js';
 
-export const PIXEL_W = 320; // virtual pixels across (the playfield is 450 units wide: 1 pixel ≈ 1.4 units: a modern indie density)
+export const PIXEL_W = 360; // virtual pixels across (the playfield is 450 units wide: 1 pixel = 1.25 units: a modern, readable density)
 const CURVE = 0.015; // barrel bend at the edges (kept gentle: the HTML menus on top can't bend)
 const CORNER = 0.03; // tube corner radius (fraction of the short side)
 
@@ -30,10 +29,11 @@ void main() {
   vec3 e = texture2D(src, uv + vec2( d.x,  d.y)).rgb;
   vec3 avg = (a + b + c + e) * 0.25;
   vec3 mx = max(max(a, b), max(c, e));
-  vec3 col = mix(avg, mx, 0.55);
-  // A touch of contrast and saturation so the reduced image stays punchy.
+  vec3 col = mix(avg, mx, 0.7);
+  // Cleaner pixels: the faintest glow haze around lines is eased back a little, and colour gets a touch more punch.
   float l = dot(col, vec3(0.299, 0.587, 0.114));
-  col = mix(vec3(l), col, 1.12);
+  col *= mix(0.82, 1.0, smoothstep(0.03, 0.16, l));
+  col = mix(vec3(dot(col, vec3(0.299, 0.587, 0.114))), col, 1.12);
   gl_FragColor = vec4(col, 1.0);
 }`;
 
@@ -71,12 +71,12 @@ void main() {
   float inside = corner > 0.0 ? smoothstep(0.0, 1.5 / min(outPx.x, outPx.y), edge) * step(0.0, min(e.x, e.y)) : 1.0;
   if (inside <= 0.0) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return; }
 
-  // Warble: each scan row drifts sideways a little; a slow tracking band rolls down the tube and kinks harder.
+  // Warble: a slow tracking band rolls down the tube and kicks the rows it crosses sideways by whole pixels, so the
+  // picture stays crisp everywhere else (sub-pixel wobble on every row read as blur).
   float row = floor(q.y * res.y);
   float band = fract(q.y * 0.9 + time * 0.045);
-  float bandK = smoothstep(0.0, 0.06, band) * (1.0 - smoothstep(0.06, 0.13, band));
-  float wob = sin(row * 0.61 + time * 7.3) * 0.08 + sin(q.y * 9.0 - time * 1.7) * 0.1;
-  wob += bandK * roll * (0.6 + 0.4 * sin(row * 2.3 + time * 31.0));
+  float bandK = step(0.0, band) * (1.0 - step(0.035, band)); // a thin band, ~3% of the screen
+  float wob = bandK * roll * sign(sin(row * 2.3 + time * 31.0)); // ±1 pixel
   q.x += warble * wob / res.x;
 
   // RGB fringing, growing toward the edges.
@@ -242,7 +242,7 @@ export const crt = {
     // screens) would beat into moire, so they get lighter lines.
     if (glass) {
       glass.style.setProperty('--crt-row', `${h / vh}px`);
-      glass.style.setProperty('--crt-scan', (0.3 * Math.min(1, Math.max(0.35, ((h / vh) * dpr - 1.2) / 2))).toFixed(3));
+      glass.style.setProperty('--crt-scan', (0.2 * Math.min(1, Math.max(0.35, ((h / vh) * dpr - 1.2) / 2))).toFixed(3));
     }
     if (ready && (vh !== lowH || lowW !== PIXEL_W)) {
       lowW = PIXEL_W;
@@ -295,9 +295,9 @@ export const crt = {
     gl.uniform1f(u.scan, 0); // CSS glass draws the scanlines over menus and game alike
     gl.uniform1f(u.warble, crtOn && !still ? 1 : 0);
     gl.uniform1f(u.roll, crtOn && !still ? 1 : 0);
-    gl.uniform1f(u.chroma, crtOn ? 0.4 : 0);
-    gl.uniform1f(u.mask, crtOn ? 0.12 : 0);
-    gl.uniform1f(u.vig, crtOn ? 0.25 : 0);
+    gl.uniform1f(u.chroma, 0); // fringing read as blur
+    gl.uniform1f(u.mask, crtOn ? 0.1 : 0);
+    gl.uniform1f(u.vig, crtOn ? 0.2 : 0);
     gl.uniform1f(u.flick, crtOn && !still ? 1 : 0);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     return changed;
