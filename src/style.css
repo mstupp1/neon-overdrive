@@ -98,8 +98,8 @@ body {
     opacity: 0.6;
 }
 
-/* Retro look (render/crt.js): the WebGL tube draws over the 2D canvas, which stays underneath (invisible) for input. */
-#crt {
+/* Pixel look (render/pixel.js): the WebGL copy draws over the 2D canvas, which stays underneath (invisible) for input. */
+#pixel-cv {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -108,7 +108,7 @@ body {
     pointer-events: none;
 }
 
-.retro-pixel #crt {
+.retro-pixel #pixel-cv {
     display: block;
 }
 
@@ -116,56 +116,8 @@ body {
     opacity: 0;
 }
 
-.retro-crt .fx-scan {
-    display: none;
-}
-
-/* Tube glass over everything, menus included: one scanline per virtual pixel row (--crt-row / --crt-scan are set by
-   crt.js), rounded black corners matching the shader, a soft glare and a slow roll bar. Transform-only animation,
-   so it stays on the compositor. */
-.crt-glass {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 60;
-    overflow: hidden;
-    display: none;
-    border-radius: calc(var(--u) * 13px);
-    box-shadow: 0 0 0 calc(var(--u) * 40px) #000, inset 0 0 calc(var(--u) * 18px) rgba(0, 0, 0, 0.6), inset 0 0 calc(var(--u) * 3px) rgba(63, 246, 255, 0.14);
-    background: radial-gradient(ellipse 70% 45% at 28% 12%, rgba(200, 240, 255, 0.04), transparent 70%);
-}
-
-.crt-glass::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(180deg, transparent 0, transparent calc(var(--crt-row, 3px) * 0.6), rgba(0, 0, 0, var(--crt-scan, 0.3)) calc(var(--crt-row, 3px) * 0.8), transparent var(--crt-row, 3px));
-}
-
-.retro-crt .crt-glass {
-    display: block;
-}
-
-.crt-roll {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: -20%;
-    height: 14%;
-    background: linear-gradient(180deg, transparent, rgba(180, 230, 255, 0.03) 45%, rgba(180, 230, 255, 0.04) 55%, transparent);
-    animation: crt-roll 11s linear infinite;
-}
-
-@keyframes crt-roll {
-    from { transform: translateY(0); }
-    to { transform: translateY(850%); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .crt-roll {
-        animation: none;
-        display: none;
-    }
+.retro-pixel .fx-scan {
+    display: none; /* clean pixels: no scanline overlay */
 }
 
 .fx-danger {

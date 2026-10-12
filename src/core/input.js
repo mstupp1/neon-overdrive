@@ -151,9 +151,6 @@ window.addEventListener('blur', () => {
 
 function toLogical(clientX, clientY) {
   const r = view.rect;
-  // The CRT tube bends the picture: aim at what is drawn under the pointer, not the flat frame point.
-  const w = view.warp && r.width ? view.warp((clientX - r.left) / r.width, (clientY - r.top) / r.height) : null;
-  if (w) return { x: (w.x * r.width) / view.scale, y: (w.y * r.height) / view.scale };
   return { x: (clientX - r.left) / view.scale, y: (clientY - r.top) / view.scale };
 }
 
