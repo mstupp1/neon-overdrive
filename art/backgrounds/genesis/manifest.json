@@ -1,0 +1,142 @@
+{
+  "version": 1,
+  "theme": "genesis",
+  "generator": "built-in imagegen",
+  "date": "2026-10-12",
+  "reference": "references/baseline-combat.jpg",
+  "assets": [
+    {
+      "id": "gate",
+      "source": "sources/gate-v1.png",
+      "runtime": "../../../src/assets/backgrounds/genesis/gate-v1.png",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a131a9-71c9-79b0-828c-97dcfa8e0e73/exec-1fe86ff5-a72a-44b8-a730-3fbc8ff6439d.png",
+      "prompt": "Use case: stylized-concept. Create ONE production raster game asset, an isolated distant megastructure gate for the Genesis horizon of NEON OVERDRIVE. Input reference is a gameplay screenshot for STYLE ONLY: match the actual upper skyline's almost-black navy glass silhouettes and restrained thin cyan / deep blue neon rims. Do not copy screenshot UI, ships, bullets, grid, or the sidebar.\nOutput a wide landscape 1536x1024 transparent PNG. One enormous centered circular arch portal, half-sunken into the bottom edge, its feet meeting the bottom baseline. Entire gate arch visible with a small margin above it. Strong iconic circular silhouette, stepped architectural ribs, layered geometric dark metal, sparse blue edge pixels, minimal magenta status lights. No buildings; separate skyline layers will be composited in code. Sparse pixel art with deliberate clusters and crisp rectilinear step edges, a fine virtual pixel grid approximately 360 pixels across the artwork, not thick 8-bit blocks. Nearly black material, low-contrast edge lighting, cinematic structure but identical arcade pixel look to the reference. Keep inside the arch and surrounding area truly transparent; NOT a checkerboard painted into the image. No sky, fog, stars, floor, ground strip, lettering, HUD, ships, enemies, projectiles, white lights, lime lights, logos, watermarks. Background asset must stay visually dim relative to combat. Composition bottom-aligned to be placed behind a skyline at 12% screen height.",
+      "exportSize": [
+        720,
+        480
+      ],
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "sourceSha256": "aca9963bbd868bae4f321026435e9461b9d9cc28332d639203e33e65d94b74ba",
+      "runtimeSha256": "3845c4a9b0582e7aaad8cb22643f1ded1175766f52c31f1a846c7f846ffc68cf",
+      "runtimeBytes": 403919
+    },
+    {
+      "id": "skyline-far",
+      "source": "sources/skyline-far-v1.png",
+      "runtime": "../../../src/assets/backgrounds/genesis/skyline-far-v1.png",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a131a9-71c9-79b0-828c-97dcfa8e0e73/exec-db365ceb-f7f0-49eb-950f-2b412e73813d.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster layer for NEON OVERDRIVE's Genesis skyline. Reference 1 is actual gameplay, STYLE ONLY: match dark navy silhouettes with deep blue/cyan neon rims and sparse magenta pixel lights; ignore every UI, ship, shot, grid and sidebar. Reference 2 is our selected isolated gate, STYLE AND PALETTE ONLY; do not include any gate in this asset. Output landscape 1536x1024 transparent PNG. Deliberate fine pixel-art clusters as if at 360 virtual pixels across, no chunky 8-bit blocks or photorealistic rendering. Structural detail must survive use at only 65-90 logical pixels high across a 450-unit-wide game. An unbroken bottom-aligned industrial skyline fills the frame width. Baseline at the very bottom of the image. Transparent sky above. No foreground ground strip or floor. Keep materials dark near-black navy, outlines thin, blue lights subdued, magenta very rare. No text, logos, checkerboard, sky, stars, ships, characters, bullets, pickups, targets, green lights or white lights. FAR skyline: distant dense rectilinear towers, transmission masts, narrow building silhouettes at varying heights, maximum tallest height about 65% of canvas; much dimmer blue edges than the gate. No exaggerated perspective. No buildings as tall as the entire image.",
+      "exportSize": [
+        720,
+        480
+      ],
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "sourceSha256": "0e46f090b134773383216230636edd2308ca7b5f17f9616ad20ecea919c103b4",
+      "runtimeSha256": "acbc6ee1c5f4eeb0b8f0a865ef3fd838747d513a0156d6a15645f43b37f88d06",
+      "runtimeBytes": 328887
+    },
+    {
+      "id": "skyline-near",
+      "source": "sources/skyline-near-v1.png",
+      "runtime": "../../../src/assets/backgrounds/genesis/skyline-near-v1.png",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a131a9-71c9-79b0-828c-97dcfa8e0e73/exec-a09070ef-e847-486d-a6bc-10910fcae43e.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster layer for NEON OVERDRIVE's Genesis skyline. Reference 1 is actual gameplay, STYLE ONLY: match dark navy silhouettes with deep blue/cyan neon rims and sparse magenta pixel lights; ignore every UI, ship, shot, grid and sidebar. Reference 2 is our selected isolated gate, STYLE AND PALETTE ONLY; do not include any gate in this asset. Output landscape 1536x1024 transparent PNG. Deliberate fine pixel-art clusters as if at 360 virtual pixels across, no chunky 8-bit blocks or photorealistic rendering. Structural detail must survive use at only 65-90 logical pixels high across a 450-unit-wide game. An unbroken bottom-aligned industrial skyline fills the frame width. Baseline at the very bottom of the image. Transparent sky above. No foreground ground strip or floor. Keep materials dark near-black navy, outlines thin, blue lights subdued, magenta very rare. No text, logos, checkerboard, sky, stars, ships, characters, bullets, pickups, targets, green lights or white lights. NEAR skyline: lower wider industrial buildings, roofs, antenna groups, stepped rooflines, chunky dark glass panels, restrained blue-cyan rims; heights between 20% and 55% of canvas. A readable silhouette with sparse neon window clusters, modestly brighter edges than distant skyline but still a dim background. No giant center landmark.",
+      "exportSize": [
+        720,
+        480
+      ],
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "sourceSha256": "0940876fc181fb54b31409d1d1056ea35285b9e0c9d92487a63055e43d3c2f5e",
+      "runtimeSha256": "055bed5b853c77328fed90e63f0f9ba75cf9d377a92cce6c76a273c5f3c8f4e0",
+      "runtimeBytes": 298875
+    },
+    {
+      "id": "deck-far",
+      "source": "sources/deck-far-v1.png",
+      "runtime": "../../../src/assets/backgrounds/genesis/deck-far-v1.png",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a131a9-71c9-79b0-828c-97dcfa8e0e73/exec-de9617a9-f8aa-4bd8-8376-6d9ed149f2c6.png",
+      "prompt": "Use case: stylized-concept. ONE transparent square 1024x1024 production background texture for the top-down playfield in NEON OVERDRIVE, Genesis. Reference 1 is actual gameplay STYLE ONLY, ignore UI ships shots grid sidebar. Reference 2 is selected gate STYLE AND MATERIAL PALETTE ONLY, do not put a gate in this asset. Fine pixel art, deliberate clusters at virtual 360 pixels across, dark navy glass and metal, subdued deep blue structural edges, very rare dim cyan accent lines. No white, bright neon, magenta dots, lime, lights resembling pickups, targets, text or logos. Purely decorative scenery hundreds of meters below the player's ship. Orthographic top-down aerial view, no skyline, no vertical facade view, no horizon, no perspective convergence. Sparse industrial structures/conduits sit along both sides, central middle 55% of canvas almost entirely genuinely transparent and visually empty for combat. No sky, ground plane or backdrop; preserve transparency between isolated structures. No large obvious obstacle silhouettes in flight space. This tile will repeat vertically forever moving down screen at 12-24 logical pixels/sec. Make the top and bottom 10% of image completely transparent, with ALL structures and glow terminating before those edges so repetitions have a clean unnoticeable transparent gap. Sparse soft detail, subtle values, silhouette readability. Actual alpha, not painted checkerboard. FAR layer: two broad dark industrial deck footprints at left and right edges, large quiet navy panels with broken stepped edges, recessed channels and sparse dull blue seams, at most 25% image coverage. Large abstract architectural shadows, no small objects. Leave a transparent margin at left/right too.",
+      "exportSize": [
+        360,
+        360
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceSha256": "6d4b5c8319ce71e1aa997b1cbc2e597e4e11d3ec64f1c61142efb98c61f778e6",
+      "runtimeSha256": "c3430d9ccc20493d29d67ed535fd3d4e6e8a529beb64f2c025b82c3e239b5f19",
+      "runtimeBytes": 78822
+    },
+    {
+      "id": "deck-near",
+      "source": "sources/deck-near-v1.png",
+      "runtime": "../../../src/assets/backgrounds/genesis/deck-near-v1.png",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a131a9-71c9-79b0-828c-97dcfa8e0e73/exec-d1a1d0f9-580f-4178-9df5-dd80d1e3d971.png",
+      "prompt": "Use case: stylized-concept. ONE transparent square 1024x1024 production background texture for the top-down playfield in NEON OVERDRIVE, Genesis. Reference 1 is actual gameplay STYLE ONLY, ignore UI ships shots grid sidebar. Reference 2 is selected gate STYLE AND MATERIAL PALETTE ONLY, do not put a gate in this asset. Fine pixel art, deliberate clusters at virtual 360 pixels across, dark navy glass and metal, subdued deep blue structural edges, very rare dim cyan accent lines. No white, bright neon, magenta dots, lime, lights resembling pickups, targets, text or logos. Purely decorative scenery hundreds of meters below the player's ship. Orthographic top-down aerial view, no skyline, no vertical facade view, no horizon, no perspective convergence. Sparse industrial structures/conduits sit along both sides, central middle 55% of canvas almost entirely genuinely transparent and visually empty for combat. No sky, ground plane or backdrop; preserve transparency between isolated structures. No large obvious obstacle silhouettes in flight space. This tile will repeat vertically forever moving down screen at 12-24 logical pixels/sec. Make the top and bottom 10% of image completely transparent, with ALL structures and glow terminating before those edges so repetitions have a clean unnoticeable transparent gap. Sparse soft detail, subtle values, silhouette readability. Actual alpha, not painted checkerboard. NEAR layer: thinner broken utility gantries and cable conduits clustered only in the far outer 15% along left and right, dark metal with a few dim cyan-blue seams. At most 15% overall coverage, shapes are irregularly distributed in height to avoid looking like a symmetrical border. Do not make a rectangular frame. No structures across the middle.",
+      "exportSize": [
+        360,
+        360
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceSha256": "ab3d1a428acd43877e819efdc8f16055a3eea0761b27f6ec42d5b7caeef5f15b",
+      "runtimeSha256": "240ca4d015735c3c3c13ffe65723131e54939c26880cfd53c7740d19961ed6f6",
+      "runtimeBytes": 52493
+    }
+  ],
+  "runtimeTotalBytes": 1162996,
+  "preview": "../../../tools/background-preview.html",
+  "validation": {
+    "automatedTests": 5,
+    "skillValidator": "passed",
+    "renderSubmissionMs": {
+      "procedural": 0.05,
+      "generated": 0.15
+    },
+    "frozenFramePacingMs": {
+      "proceduralMedian": 8.3,
+      "generatedMedian": 8.3,
+      "proceduralP95": 9.1,
+      "generatedP95": 9.1
+    },
+    "performanceLimit": "Local CPU submission and refresh-limited frozen-scene pacing; no GPU or whole-combat FPS measurement."
+  },
+  "rendererRevision": 2,
+  "deckProjection": {
+    "depthCurve": "f squared",
+    "widthAtHorizon": 0.06,
+    "travel": "bg.scroll / 16",
+    "maxStripsPerLayer": 160,
+    "far": {
+      "alpha": 0.42,
+      "repeats": 3
+    },
+    "near": {
+      "alpha": 0.58,
+      "repeats": 2
+    }
+  },
+  "views": [
+    "top",
+    "side",
+    "chase"
+  ],
+  "cameraExtension": {
+    "rendererTests": 11,
+    "skillValidator": "passed",
+    "sideCapture": "references/generated-side.png",
+    "pursuitCapture": "references/generated-chase.png"
+  }
+}

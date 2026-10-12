@@ -1,0 +1,132 @@
+[
+  {
+    "path": "/Users/mylesstupp/.codex/worktrees/35b4/neon-overdrive/src/assets/backgrounds/genesis/gate-v1.png",
+    "format": "PNG",
+    "width": 720,
+    "height": 480,
+    "mode": "RGBA",
+    "has_alpha": true,
+    "alpha_extrema": [
+      0,
+      254
+    ],
+    "transparent_percent": 70.705,
+    "partial_alpha_percent": 29.295,
+    "visible_bbox": [
+      0,
+      15,
+      720,
+      467
+    ],
+    "edge_alpha_max": {
+      "top": 0,
+      "bottom": 0
+    },
+    "clear_vertical_edges": true,
+    "unique_colors": 39306
+  },
+  {
+    "path": "/Users/mylesstupp/.codex/worktrees/35b4/neon-overdrive/src/assets/backgrounds/genesis/skyline-far-v1.png",
+    "format": "PNG",
+    "width": 720,
+    "height": 480,
+    "mode": "RGBA",
+    "has_alpha": true,
+    "alpha_extrema": [
+      0,
+      254
+    ],
+    "transparent_percent": 70.192,
+    "partial_alpha_percent": 29.808,
+    "visible_bbox": [
+      0,
+      45,
+      720,
+      444
+    ],
+    "edge_alpha_max": {
+      "top": 0,
+      "bottom": 0
+    },
+    "clear_vertical_edges": true,
+    "unique_colors": 41383
+  },
+  {
+    "path": "/Users/mylesstupp/.codex/worktrees/35b4/neon-overdrive/src/assets/backgrounds/genesis/skyline-near-v1.png",
+    "format": "PNG",
+    "width": 720,
+    "height": 480,
+    "mode": "RGBA",
+    "has_alpha": true,
+    "alpha_extrema": [
+      0,
+      254
+    ],
+    "transparent_percent": 70.421,
+    "partial_alpha_percent": 29.579,
+    "visible_bbox": [
+      0,
+      16,
+      720,
+      473
+    ],
+    "edge_alpha_max": {
+      "top": 0,
+      "bottom": 0
+    },
+    "clear_vertical_edges": true,
+    "unique_colors": 32817
+  },
+  {
+    "path": "/Users/mylesstupp/.codex/worktrees/35b4/neon-overdrive/src/assets/backgrounds/genesis/deck-far-v1.png",
+    "format": "PNG",
+    "width": 360,
+    "height": 360,
+    "mode": "RGBA",
+    "has_alpha": true,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_percent": 70.384,
+    "partial_alpha_percent": 29.522,
+    "visible_bbox": [
+      0,
+      16,
+      360,
+      353
+    ],
+    "edge_alpha_max": {
+      "top": 0,
+      "bottom": 0
+    },
+    "clear_vertical_edges": true,
+    "unique_colors": 9840
+  },
+  {
+    "path": "/Users/mylesstupp/.codex/worktrees/35b4/neon-overdrive/src/assets/backgrounds/genesis/deck-near-v1.png",
+    "format": "PNG",
+    "width": 360,
+    "height": 360,
+    "mode": "RGBA",
+    "has_alpha": true,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_percent": 84.096,
+    "partial_alpha_percent": 15.801,
+    "visible_bbox": [
+      0,
+      9,
+      360,
+      354
+    ],
+    "edge_alpha_max": {
+      "top": 0,
+      "bottom": 0
+    },
+    "clear_vertical_edges": true,
+    "unique_colors": 10336
+  }
+]

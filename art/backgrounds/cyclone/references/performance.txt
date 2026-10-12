@@ -1,0 +1,10 @@
+cyclone top-down background draw median
+Procedural 0.025 ms
+Layered 0.100 ms
+Added 0.075 ms
+Canvas submission only.
+
+Frozen-scene frame pacing
+Procedural median 8.30 ms / p95 9.20 ms
+Layered median 8.30 ms / p95 9.20 ms
+Refresh-limited; this measures the selected theme's top-down background only, not combat FPS or GPU time.

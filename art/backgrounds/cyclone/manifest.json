@@ -1,0 +1,267 @@
+{
+  "version": 2,
+  "theme": "cyclone",
+  "generator": "built-in imagegen",
+  "date": "2026-10-12",
+  "views": [
+    "top",
+    "side",
+    "chase"
+  ],
+  "reference": "references/baseline-top.png",
+  "assets": [
+    {
+      "id": "skyline-far",
+      "source": "sources/skyline-far-v1.png",
+      "runtime": "../../../src/assets/backgrounds/cyclone/skyline-far-v1.png",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a1325a-d733-72f2-b960-c9633a16e22a/exec-bc45e016-00b6-42f9-96d5-b88c6e11d895.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster game background layer for NEON OVERDRIVE CYCLONE, skyline-far. Subject: distant floating atmospheric stations and storm-harvesting towers, thin antenna spires. Fine crisp pixel art with deliberate clusters at about 360 virtual pixels across, no chunky blocks, not photorealistic. Palette: near-black navy and teal glass, subdued cyan/deep teal rims. Almost black material, restrained thin colored edges; much darker than arcade ships and projectiles. Landscape 1536x1024. Bottom-aligned shallow skyline band: baseline at very bottom, silhouettes occupy bottom 55 percent only, clear transparent sky above. Skyline extends across width with low structures at both edges, no giant center landmark or floor strip. No perspective convergence. Genuine alpha background outside structures, NOT opaque black, NOT painted checkerboard. No sky, stars, grid, floor plane, UI, text, logo, watermarks, ships, characters, targets, bullets, pickups, bright white or green/lime lights. No bright scattered dots or wide bloom.",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "exportSize": [
+        720,
+        480
+      ],
+      "sourceSha256": "ad08d9f2586291d0dc0df375607741a86a6806b18f3d1df485db4adf1f68a11e",
+      "runtimeSha256": "d66caf65fd494928c57f3394e9add7d9e014310314dfdda230071d3a7c68e077",
+      "runtimeBytes": 372287,
+      "alpha": {
+        "path": "src/assets/backgrounds/cyclone/skyline-far-v1.png",
+        "format": "PNG",
+        "width": 720,
+        "height": 480,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          254
+        ],
+        "transparent_percent": 69.6,
+        "partial_alpha_percent": 30.4,
+        "visible_bbox": [
+          0,
+          31,
+          720,
+          480
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 253
+        },
+        "clear_vertical_edges": false,
+        "unique_colors": 43976
+      }
+    },
+    {
+      "id": "gate",
+      "source": "sources/gate-v1.png",
+      "runtime": "../../../src/assets/backgrounds/cyclone/gate-v1.png",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a1325a-d733-72f2-b960-c9633a16e22a/exec-695f960c-9641-4af8-a4e9-9dbfbf5c7ac8.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster game background layer for NEON OVERDRIVE CYCLONE, gate. Subject: isolated storm-eye megastructure, circular segmented dark teal ring with five dim spiral cloud ribbons around an empty transparent eye, whole structure fully visible with margins. Fine crisp pixel art with deliberate clusters at about 360 virtual pixels across, no chunky blocks, not photorealistic. Palette: near-black navy and teal glass, subdued cyan/deep teal rims. Almost black material, restrained thin colored edges; much darker than arcade ships and projectiles. Landscape 1536x1024. Landmark fills central 75 percent, preserve all silhouette within frame. No skyline. Genuine alpha background outside structures, NOT opaque black, NOT painted checkerboard. No sky, stars, grid, floor plane, UI, text, logo, watermarks, ships, characters, targets, bullets, pickups, bright white or green/lime lights. No bright scattered dots or wide bloom.",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "exportSize": [
+        720,
+        480
+      ],
+      "sourceSha256": "3b3e2aadd33ba36bd22f5af0e8084deb046f7769b070cb52d4494b611cf54099",
+      "runtimeSha256": "089c1972770f60307145393142ebd068cdae6748be06450fbb4c56ef38cc7622",
+      "runtimeBytes": 595348,
+      "alpha": {
+        "path": "src/assets/backgrounds/cyclone/gate-v1.png",
+        "format": "PNG",
+        "width": 720,
+        "height": 480,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          254
+        ],
+        "transparent_percent": 50.3,
+        "partial_alpha_percent": 49.7,
+        "visible_bbox": [
+          16,
+          0,
+          709,
+          472
+        ],
+        "edge_alpha_max": {
+          "top": 1,
+          "bottom": 0
+        },
+        "clear_vertical_edges": false,
+        "unique_colors": 65358
+      }
+    },
+    {
+      "id": "skyline-near",
+      "source": "sources/skyline-near-v1.png",
+      "runtime": "../../../src/assets/backgrounds/cyclone/skyline-near-v1.png",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a1325a-d733-72f2-b960-c9633a16e22a/exec-26307b14-5919-4862-93ae-c1003e2436e5.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster game background layer for NEON OVERDRIVE CYCLONE, skyline-near. Subject: low angular storm collector platforms, broken ring segments, stepped dark teal hulls. Fine crisp pixel art with deliberate clusters at about 360 virtual pixels across, no chunky blocks, not photorealistic. Palette: near-black navy and teal glass, subdued cyan/deep teal rims. Almost black material, restrained thin colored edges; much darker than arcade ships and projectiles. Landscape 1536x1024. Bottom-aligned shallow skyline band: baseline at very bottom, silhouettes occupy bottom 55 percent only, clear transparent sky above. Skyline extends across width with low structures at both edges, no giant center landmark or floor strip. No perspective convergence. Genuine alpha background outside structures, NOT opaque black, NOT painted checkerboard. No sky, stars, grid, floor plane, UI, text, logo, watermarks, ships, characters, targets, bullets, pickups, bright white or green/lime lights. No bright scattered dots or wide bloom.",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "exportSize": [
+        720,
+        480
+      ],
+      "sourceSha256": "7876eef7626dce31257a872c0db07d55438c3c655e0d893605843e6525cc1a34",
+      "runtimeSha256": "76dda22b66e7f7727217608e18c4cb30e62d013ae8cd7b77097c149a5be9f5b5",
+      "runtimeBytes": 329390,
+      "alpha": {
+        "path": "src/assets/backgrounds/cyclone/skyline-near-v1.png",
+        "format": "PNG",
+        "width": 720,
+        "height": 480,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          254
+        ],
+        "transparent_percent": 70.636,
+        "partial_alpha_percent": 29.364,
+        "visible_bbox": [
+          0,
+          24,
+          720,
+          480
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 254
+        },
+        "clear_vertical_edges": false,
+        "unique_colors": 33870
+      }
+    },
+    {
+      "id": "deck-near",
+      "source": "sources/deck-near-v1.png",
+      "runtime": "../../../src/assets/backgrounds/cyclone/deck-near-v1.png",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a1325a-d733-72f2-b960-c9633a16e22a/exec-452f832b-6521-4627-9765-df5211232799.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster game background layer for NEON OVERDRIVE CYCLONE, deck-near. Subject: thin broken conduits and utility gantries only along outer left/right 12 percent, asymmetric distribution. Fine crisp pixel art with deliberate clusters at about 360 virtual pixels across, no chunky blocks, not photorealistic. Palette: near-black navy and teal glass, subdued cyan/deep teal rims. Almost black material, restrained thin colored edges; much darker than arcade ships and projectiles. Square 1024x1024. Strict orthographic overhead view; no perspective or horizon. Decorative scenery far below ship. Central 60 percent completely transparent, empty for combat. All FOUR outermost 10 percent margins entirely transparent, ALL structures/glow stop well before edges. Sparse separated shapes, under 25 percent coverage. This repeats vertically and horizontally; transparent gaps hide repeats. Genuine alpha background outside structures, NOT opaque black, NOT painted checkerboard. No sky, stars, grid, floor plane, UI, text, logo, watermarks, ships, characters, targets, bullets, pickups, bright white or green/lime lights. No bright scattered dots or wide bloom.",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "exportSize": [
+        360,
+        360
+      ],
+      "sourceSha256": "40721716dc2328205d126bfe066e3da419d08a018746d0df8e2400bc3be96d29",
+      "runtimeSha256": "6d7222eaa240982106d2edb4f00067b2333923a5de715b0539474bf64d25b05d",
+      "runtimeBytes": 45154,
+      "alpha": {
+        "path": "src/assets/backgrounds/cyclone/deck-near-v1.png",
+        "format": "PNG",
+        "width": 360,
+        "height": 360,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 87.833,
+        "partial_alpha_percent": 12.139,
+        "visible_bbox": [
+          15,
+          12,
+          344,
+          347
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 10298
+      }
+    },
+    {
+      "id": "deck-far",
+      "source": "sources/deck-far-v1.png",
+      "runtime": "../../../src/assets/backgrounds/cyclone/deck-far-v1.png",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a1325a-d733-72f2-b960-c9633a16e22a/exec-e98da0c2-63d8-4255-87e2-f7f7045f8f7b.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster game background layer for NEON OVERDRIVE CYCLONE, deck-far. Subject: two broad quiet architectural deck footprints only along outer left/right 18 percent, recessed channels and large abstract dark panels. Fine crisp pixel art with deliberate clusters at about 360 virtual pixels across, no chunky blocks, not photorealistic. Palette: near-black navy and teal glass, subdued cyan/deep teal rims. Almost black material, restrained thin colored edges; much darker than arcade ships and projectiles. Square 1024x1024. Strict orthographic overhead view; no perspective or horizon. Decorative scenery far below ship. Central 60 percent completely transparent, empty for combat. All FOUR outermost 10 percent margins entirely transparent, ALL structures/glow stop well before edges. Sparse separated shapes, under 25 percent coverage. This repeats vertically and horizontally; transparent gaps hide repeats. Genuine alpha background outside structures, NOT opaque black, NOT painted checkerboard. No sky, stars, grid, floor plane, UI, text, logo, watermarks, ships, characters, targets, bullets, pickups, bright white or green/lime lights. No bright scattered dots or wide bloom.",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "exportSize": [
+        360,
+        360
+      ],
+      "sourceSha256": "79af8f6d848e9e1591ab6fe1a9ccb88bbba1e59c766536cc791e5e173feb16a9",
+      "runtimeSha256": "b0c0924cba23bc1700a12acf5a3921a9dcc241452494c0a5dcf312a817599ef5",
+      "runtimeBytes": 65248,
+      "alpha": {
+        "path": "src/assets/backgrounds/cyclone/deck-far-v1.png",
+        "format": "PNG",
+        "width": 360,
+        "height": 360,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 79.692,
+        "partial_alpha_percent": 20.178,
+        "visible_bbox": [
+          0,
+          7,
+          360,
+          353
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 12670
+      }
+    }
+  ],
+  "runtimeTotalBytes": 1407427,
+  "validation": {
+    "alpha": "passed",
+    "deckClearVerticalEdges": "passed",
+    "rendererTests": 11,
+    "skillValidator": "passed",
+    "liveReview": "passed: top-down dense fire; side/pursuit motion and composition; boost; procedural/generated comparison",
+    "performanceReport": "references/performance.txt",
+    "performanceLimit": "Local top-down Canvas submission and refresh-limited frozen-frame pacing only; no GPU, side/pursuit cost, or whole-game FPS measurements.",
+    "runtimeAlphaFiles": 5,
+    "clearDeckTiles": 2,
+    "screenshots": [
+      "references/generated-chase.png",
+      "references/generated-side.png",
+      "references/generated-top.png"
+    ]
+  },
+  "topDownLandmarkMask": {
+    "clip": "skyline horizon",
+    "sceneryDrawnAfter": true,
+    "capture": "references/masked-top.png"
+  },
+  "landmarkRotation": {
+    "radiansPerSecond": 0.025,
+    "pivot": "landmark center",
+    "clock": "bg.t",
+    "mask": "screen-space skyline horizon",
+    "views": [
+      "top",
+      "side",
+      "chase"
+    ]
+  }
+}

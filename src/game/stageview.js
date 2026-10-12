@@ -17,6 +17,7 @@ import { G, view } from './state.js';
 import { clamp, rand } from '../core/math.js';
 import { glow } from '../render/sprites.js';
 import { bg } from '../render/background.js';
+import { drawThemeSideHorizon, drawThemeSideDeck, drawThemeChaseHorizon, themeLayerImages, drawChaseDeckLayer } from '../render/backgroundLayers.js';
 import { beat } from '../core/beat.js';
 import { input } from '../core/input.js';
 import { hurtPlayer, hitDamage, gainOverdrive, addScore } from './player.js';
@@ -692,21 +693,25 @@ function drawSideBack(ctx, r) {
     const len = s.size + streak * (s.speed / 110);
     ctx.fillRect((1 - s.y) * W, s.x * H, len, s.size);
   }
-  // Far skyline (two parallax ridges)
   const hor = H * 0.7;
-  for (const [k, amp, a, sp] of [[0.004, 70, 0.22, 0.12], [0.009, 40, 0.35, 0.3]]) {
-    ctx.beginPath();
-    for (let x = -10; x <= W + 10; x += 10) {
-      const u = x + sc * sp;
-      const y = hor - amp * (0.5 + 0.3 * Math.sin(u * k) + 0.2 * Math.sin(u * k * 2.7 + 1.3));
-      if (x === -10) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
+  const art = bg.theme && drawThemeSideHorizon(ctx, bg.theme, W, H, hor, sc, bg.t);
+  if (!art) {
+    // Far skyline (two procedural parallax ridges)
+    for (const [k, amp, a, sp] of [[0.004, 70, 0.22, 0.12], [0.009, 40, 0.35, 0.3]]) {
+      ctx.beginPath();
+      for (let x = -10; x <= W + 10; x += 10) {
+        const u = x + sc * sp;
+        const y = hor - amp * (0.5 + 0.3 * Math.sin(u * k) + 0.2 * Math.sin(u * k * 2.7 + 1.3));
+        if (x === -10) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = `hsl(${(h + 15) % 360},100%,60%)`;
+      ctx.globalAlpha = a;
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
     }
-    ctx.strokeStyle = `hsl(${(h + 15) % 360},100%,60%)`;
-    ctx.globalAlpha = a;
-    ctx.lineWidth = 1.2;
-    ctx.stroke();
   }
+  if (art) drawThemeSideDeck(ctx, bg.theme, W, H, hor, sc);
   // Horizon glow and a floor grid below it (lines run into depth and slide left)
   const hg = glow(`hsl(${Math.round(h / 10) * 10},100%,60%)`, 64);
   ctx.globalAlpha = 0.22 + beat.pulse * 0.1;
@@ -825,6 +830,9 @@ function drawChaseBack(ctx, r) {
   fl.addColorStop(1, `hsl(${(h + 40) % 360},60%,5%)`);
   ctx.fillStyle = fl;
   ctx.fillRect(-20, hy, W + 40, H - hy + 20);
+  const art = bg.theme && drawThemeChaseHorizon(ctx, bg.theme, W, hy, bg.t);
+  const travel = floorRun();
+  if (art) drawChaseDeckArt(ctx, bg.theme, W, H, Pp, travel);
   ctx.globalCompositeOperation = 'lighter';
   // Stars above the horizon drifting outward from the vanishing point
   ctx.fillStyle = `hsl(${(h + 20) % 360},60%,82%)`;
@@ -836,9 +844,11 @@ function drawChaseBack(ctx, r) {
     ctx.fillRect(x, y, s.size, s.size);
   }
   // A core glow sitting on the horizon, the floor grid running into it
-  const sun = glow(`hsl(${Math.round(((h + 330) % 360) / 10) * 10},100%,60%)`, 128);
-  ctx.globalAlpha = 0.45 + beat.pulse * 0.15;
-  ctx.drawImage(sun.img, W / 2 - 150, hy - 120, 300, 200);
+  if (!art) {
+    const sun = glow(`hsl(${Math.round(((h + 330) % 360) / 10) * 10},100%,60%)`, 128);
+    ctx.globalAlpha = 0.45 + beat.pulse * 0.15;
+    ctx.drawImage(sun.img, W / 2 - 150, hy - 120, 300, 200);
+  }
   const hg = glow(`hsl(${Math.round(h / 10) * 10},100%,60%)`, 64);
   ctx.globalAlpha = 0.35 + beat.pulse * 0.12;
   ctx.drawImage(hg.img, -W * 0.3, hy - 24, W * 1.6, 48);
@@ -846,7 +856,7 @@ function drawChaseBack(ctx, r) {
   ctx.lineWidth = 1;
   // Cross lines at fixed world depths sliding toward the camera
   const gap = 90;
-  const ph = floorRun() % gap;
+  const ph = travel % gap;
   ctx.beginPath();
   for (let vy = -900 - gap; vy < CH + gap; vy += gap) {
     const y = vy + ph;
@@ -887,6 +897,17 @@ function drawChaseBack(ctx, r) {
     ctx.fillStyle = '#000';
     ctx.fillRect(-20, -20, W + 40, H + 40);
     ctx.globalAlpha = 1;
+  }
+}
+
+// Decorative strips use the same virtual-depth projection and floorRun phase as
+// chase grid rows, so the texture visibly converges at the grid's vanishing point.
+function drawChaseDeckArt(ctx, theme, W, H, projection, travel) {
+  const images = themeLayerImages(theme);
+  if (!images) return;
+  const descriptor = { hy: projection.hy, A: projection.A, Yc: projection.Yc, f: projection.f, CW, CH };
+  for (const [key, alpha, repeats] of [['deckFar', 0.42, 3], ['deckNear', 0.58, 2]]) {
+    drawChaseDeckLayer(ctx, images[key], W, H, descriptor, travel, { alpha, repeats });
   }
 }
 
