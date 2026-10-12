@@ -1,19 +1,14 @@
-// Retro screen pass (Settings → Retro look). The finished 2D frame is uploaded to a WebGL canvas laid over it and
-// redrawn in two passes:
-//   1. pixel: shrink to a fixed virtual resolution (PIXEL_W wide) with a 4-tap filter that keeps the brightest of
-//      the taps partly, so 1px neon lines survive as solid pixels instead of greying out;
-//   2. screen: upscale with sharp-bilinear (crisp square pixels at any scale), then, in CRT mode, a gentle tube
-//      bend, a faint shadow mask, a slow rolling tracking band that kicks rows sideways and a vignette. PIXEL mode runs pass 2 flat.
-// Scanlines, tube corners, glare and the roll bar live in the CSS glass layer (style.css .crt-glass) above everything,
-// so the HTML menus sit on the same tube as the game; retroFonts() swaps the menu fonts for pixel faces to match.
-// The 2D canvas stays underneath at opacity 0 so it keeps receiving pointer input; warp() maps a screen point to the
-// spot the tube shows there, for the mouse/touch mapping in input.js. No WebGL → the setting is a no-op.
+// Pixel look (Settings → Retro look). The finished 2D frame is uploaded to a WebGL canvas laid over it and redrawn
+// in two passes:
+//   1. shrink to a fixed virtual resolution (PIXEL_W wide) with a 4-tap filter that keeps most of the brightest tap,
+//      so 1px neon lines survive as solid pixels instead of greying out;
+//   2. upscale with sharp-bilinear: crisp square pixels at any screen scale, nothing else on top.
+// retroFonts() swaps the menu fonts for pixel faces to match. The 2D canvas stays underneath at opacity 0 so it keeps
+// receiving pointer input. No WebGL → the setting is a no-op.
 
 import { profile } from '../core/storage.js';
 
 export const PIXEL_W = 360; // virtual pixels across (the playfield is 450 units wide: 1 pixel = 1.25 units: a modern, readable density)
-const CURVE = 0.015; // barrel bend at the edges (kept gentle: the HTML menus on top can't bend)
-const CORNER = 0.03; // tube corner radius (fraction of the short side)
 
 const VS = `attribute vec2 p; varying vec2 uv; void main() { uv = p * 0.5 + 0.5; gl_Position = vec4(p, 0.0, 1.0); }`;
 
@@ -42,72 +37,13 @@ varying vec2 uv;
 uniform sampler2D img;
 uniform vec2 res;   // virtual resolution
 uniform vec2 outPx; // output size in device pixels
-uniform float time;
-uniform float curve, corner, scan, warble, roll, chroma, mask, vig, flick;
-
-vec2 bend(vec2 q) {
-  vec2 c = q * 2.0 - 1.0;
-  c *= 1.0 + curve * (c.yx * c.yx);
-  return c * 0.5 + 0.5;
-}
-
 // Sharp bilinear: hard pixel edges with a one-device-pixel blend, so non-integer scales don't shimmer.
-vec3 tap(vec2 q) {
-  vec2 p = q * res;
-  vec2 i = floor(p);
-  vec2 f = p - i;
-  vec2 s = outPx / res;
-  f = clamp((f - 0.5) * s + 0.5, 0.0, 1.0);
-  return texture2D(img, (i + f) / res).rgb;
-}
-
 void main() {
-  vec2 q = bend(uv);
-  // Rounded tube edge: outside the glass is the black bezel.
-  vec2 e = min(q, 1.0 - q);
-  vec2 aspect = vec2(outPx.x / min(outPx.x, outPx.y), outPx.y / min(outPx.x, outPx.y));
-  vec2 k = max(vec2(corner) - e * aspect, 0.0);
-  float edge = corner - length(k);
-  float inside = corner > 0.0 ? smoothstep(0.0, 1.5 / min(outPx.x, outPx.y), edge) * step(0.0, min(e.x, e.y)) : 1.0;
-  if (inside <= 0.0) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return; }
-
-  // Warble: a slow tracking band rolls down the tube and kicks the rows it crosses sideways by whole pixels, so the
-  // picture stays crisp everywhere else (sub-pixel wobble on every row read as blur).
-  float row = floor(q.y * res.y);
-  float band = fract(q.y * 0.9 + time * 0.045);
-  float bandK = step(0.0, band) * (1.0 - step(0.035, band)); // a thin band, ~3% of the screen
-  float wob = bandK * roll * sign(sin(row * 2.3 + time * 31.0)); // ±1 pixel
-  q.x += warble * wob / res.x;
-
-  // RGB fringing, growing toward the edges.
-  float ca = chroma * abs(uv.x * 2.0 - 1.0) / res.x; // none in the middle, a hint at the edges
-  vec3 col;
-  col.r = tap(q + vec2(ca, 0.0)).r;
-  col.g = tap(q).g;
-  col.b = tap(q - vec2(ca, 0.0)).b;
-
-  // Scanlines: the beam is a soft bar across each virtual row; bright rows widen it (classic bloom on the tube).
-  float fy = fract(q.y * res.y) - 0.5;
-  float lum = dot(col, vec3(0.299, 0.587, 0.114));
-  float w = mix(0.17, 0.4, clamp(lum, 0.0, 1.0));
-  float beam = exp(-fy * fy / (w * w * 0.5));
-  // Rows only a couple of device pixels tall (1x desktop screens) would beat into moire arcs, so they get a lighter beam.
-  float sk = scan * clamp((outPx.y / res.y - 1.2) / 2.0, 0.3, 1.0);
-  col *= mix(1.0, beam * 1.45, sk);
-
-  // Shadow mask: faint RGB triads on device pixels.
-  float m = mod(gl_FragCoord.x, 3.0);
-  vec3 tri = vec3(m < 1.0 ? 1.0 : 0.82, (m >= 1.0 && m < 2.0) ? 1.0 : 0.82, m >= 2.0 ? 1.0 : 0.82);
-  col *= mix(vec3(1.0), tri * 1.12, mask);
-
-  col *= 1.0 + bandK * roll * 0.05;
-  col *= 1.0 - flick * 0.008 * sin(time * 113.0);
-  vec2 c = uv * 2.0 - 1.0;
-  col *= 1.0 - vig * pow(dot(c * vec2(0.85, 0.7), c * vec2(0.85, 0.7)), 1.6);
-  gl_FragColor = vec4(col * inside, 1.0);
+  vec2 p = uv * res;
+  vec2 i = floor(p);
+  vec2 f = clamp((p - i - 0.5) * (outPx / res) + 0.5, 0.0, 1.0);
+  gl_FragColor = vec4(texture2D(img, (i + f) / res).rgb, 1.0);
 }`;
-
-const reduceMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
 
 function makeProgram(gl, fs) {
   const sh = (type, src) => {
@@ -161,13 +97,12 @@ function retroFonts(on) {
     else document.fonts.delete(f);
   }
   Promise.all(on ? pixelFaces.map((f) => f.load().catch(() => {})) : [])
-    .then(() => crt.onFonts && crt.onFonts())
+    .then(() => pixel.onFonts && pixel.onFonts())
     .catch(() => {});
 }
 
 let cv = null;
 let gl = null;
-let glass = null; // DOM overlay above the menus: tube corners, glare and the roll bar (style.css .crt-glass)
 let progPixel, progScreen, srcTex, lowTex, fbo;
 let lowW = 0;
 let lowH = 0;
@@ -182,7 +117,7 @@ function setup() {
     progPixel = makeProgram(gl, PIXEL_FS);
     progScreen = makeProgram(gl, SCREEN_FS);
   } catch (err) {
-    console.warn('retro screen disabled:', err);
+    console.warn('pixel look disabled:', err);
     return false;
   }
   const buf = gl.createBuffer();
@@ -198,21 +133,17 @@ function setup() {
   return true;
 }
 
-export const crt = {
-  /** 'crt' | 'pixel' | 'off' as drawn this frame ('off' when unsupported). */
+export const pixel = {
+  /** 'pixel' | 'off' as drawn this frame ('off' when unsupported). */
   mode: 'off',
   /** Called once the menu fonts have swapped (main.js re-fits the open menu). */
   onFonts: null,
 
-  init(app, game) {
+  init(game) {
     cv = document.createElement('canvas');
-    cv.id = 'crt';
+    cv.id = 'pixel-cv';
     cv.setAttribute('aria-hidden', 'true');
     game.after(cv);
-    glass = document.createElement('div');
-    glass.className = 'crt-glass';
-    glass.innerHTML = '<i class="crt-roll"></i>';
-    app.appendChild(glass);
     cv.addEventListener('webglcontextlost', (e) => {
       e.preventDefault();
       lost = true;
@@ -225,25 +156,18 @@ export const crt = {
     ready = setup();
   },
 
-  /** Setting the player picked, or 'off' when WebGL is missing. */
+  /** Setting the player picked ('crt' from older saves counts as pixel), or 'off' when WebGL is missing. */
   wanted() {
-    const s = profile.settings.retro;
-    return ready && !lost && (s === 'crt' || s === 'pixel') ? s : 'off';
+    return ready && !lost && profile.settings.retro !== 'off' ? 'pixel' : 'off';
   },
 
   /** Size the GL canvas to the app box (CSS px) at the given device pixel ratio. */
   resize(w, h, dpr) {
     if (!cv) return;
-    const d = Math.min(dpr, 3); // full device resolution: a resampled tube blurs the pixel edges
+    const d = Math.min(dpr, 3); // full device resolution: resampling the GL canvas would blur the pixel edges
     cv.width = Math.round(w * d);
     cv.height = Math.round(h * d);
     const vh = Math.round((PIXEL_W * h) / w);
-    // Scanline rows for the CSS glass: one per virtual pixel row. Rows only a couple of device pixels tall (1x desktop
-    // screens) would beat into moire, so they get lighter lines.
-    if (glass) {
-      glass.style.setProperty('--crt-row', `${h / vh}px`);
-      glass.style.setProperty('--crt-scan', (0.2 * Math.min(1, Math.max(0.35, ((h / vh) * dpr - 1.2) / 2))).toFixed(3));
-    }
     if (ready && (vh !== lowH || lowW !== PIXEL_W)) {
       lowW = PIXEL_W;
       lowH = vh;
@@ -257,19 +181,16 @@ export const crt = {
 
   /** Draw the finished 2D frame through the filter (or hide the GL layer when off). Returns true when the mode
    *  changed this frame (main.js re-runs layout so the 2D canvas resolution follows). */
-  present(src, t) {
+  present(src) {
     const mode = this.wanted();
     let changed = false;
     if (mode !== this.mode) {
       this.mode = mode;
       changed = true;
-      document.body.classList.toggle('retro-crt', mode === 'crt');
       document.body.classList.toggle('retro-pixel', mode !== 'off');
       retroFonts(mode !== 'off');
     }
     if (mode === 'off' || !lowH) return changed;
-    const crtOn = mode === 'crt';
-    const still = reduceMotion && reduceMotion.matches;
 
     gl.bindTexture(gl.TEXTURE_2D, srcTex);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src);
@@ -284,32 +205,11 @@ export const crt = {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, cv.width, cv.height);
     gl.bindTexture(gl.TEXTURE_2D, lowTex);
-    const u = progScreen.u;
     gl.useProgram(progScreen.p);
-    gl.uniform1i(u.img, 0);
-    gl.uniform2f(u.res, lowW, lowH);
-    gl.uniform2f(u.outPx, cv.width, cv.height);
-    gl.uniform1f(u.time, t % 1000);
-    gl.uniform1f(u.curve, crtOn ? CURVE : 0);
-    gl.uniform1f(u.corner, crtOn ? CORNER : 0);
-    gl.uniform1f(u.scan, 0); // CSS glass draws the scanlines over menus and game alike
-    gl.uniform1f(u.warble, crtOn && !still ? 1 : 0);
-    gl.uniform1f(u.roll, crtOn && !still ? 1 : 0);
-    gl.uniform1f(u.chroma, 0); // fringing read as blur
-    gl.uniform1f(u.mask, crtOn ? 0.1 : 0);
-    gl.uniform1f(u.vig, crtOn ? 0.2 : 0);
-    gl.uniform1f(u.flick, crtOn && !still ? 1 : 0);
+    gl.uniform1i(progScreen.u.img, 0);
+    gl.uniform2f(progScreen.u.res, lowW, lowH);
+    gl.uniform2f(progScreen.u.outPx, cv.width, cv.height);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     return changed;
-  },
-
-  /** Screen point (0..1 across the app box) → the point of the frame the tube shows there. */
-  warp(x, y) {
-    if (this.mode !== 'crt') return null;
-    let cx = x * 2 - 1;
-    let cy = y * 2 - 1;
-    const bx = cx * (1 + CURVE * cy * cy);
-    const by = cy * (1 + CURVE * cx * cx);
-    return { x: bx * 0.5 + 0.5, y: by * 0.5 + 0.5 };
   },
 };
