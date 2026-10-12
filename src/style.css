@@ -98,6 +98,73 @@ body {
     opacity: 0.6;
 }
 
+/* Retro look (render/crt.js): the WebGL tube draws over the 2D canvas, which stays underneath (invisible) for input. */
+#crt {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    pointer-events: none;
+}
+
+.retro-pixel #crt {
+    display: block;
+}
+
+.retro-pixel #game {
+    opacity: 0;
+}
+
+.retro-crt .fx-scan {
+    display: none;
+}
+
+/* Tube glass over everything, menus included: rounded black corners matching the shader, a soft glare and a slow
+   roll bar. Transform-only animation, so it stays on the compositor. */
+.crt-glass {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 60;
+    overflow: hidden;
+    display: none;
+    border-radius: calc(var(--u) * 20px);
+    box-shadow: 0 0 0 calc(var(--u) * 40px) #000, inset 0 0 calc(var(--u) * 24px) rgba(0, 0, 0, 0.75), inset 0 0 calc(var(--u) * 3px) rgba(63, 246, 255, 0.18);
+    background: radial-gradient(ellipse 70% 45% at 28% 12%, rgba(200, 240, 255, 0.05), transparent 70%);
+}
+
+.retro-crt .crt-glass {
+    display: block;
+}
+
+.crt-roll {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -20%;
+    height: 14%;
+    background: linear-gradient(180deg, transparent, rgba(180, 230, 255, 0.035) 45%, rgba(180, 230, 255, 0.05) 55%, transparent);
+    animation: crt-roll 11s linear infinite;
+}
+
+@keyframes crt-roll {
+    from { transform: translateY(0); }
+    to { transform: translateY(850%); }
+}
+
+/* Menu text picks up the tube's RGB fringe. */
+.retro-crt .screen {
+    text-shadow: calc(var(--u) * 0.6px) 0 rgba(255, 40, 90, 0.35), calc(var(--u) * -0.6px) 0 rgba(40, 200, 255, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .crt-roll {
+        animation: none;
+        display: none;
+    }
+}
+
 .fx-danger {
     opacity: 0;
     transition: opacity 0.3s;
@@ -902,7 +969,7 @@ kbd {
 .settings {
     display: flex;
     flex-direction: column;
-    gap: 0.45em;
+    gap: 0.4em;
     width: 100%;
     max-width: 20em;
 }
@@ -912,7 +979,7 @@ kbd {
     grid-template-columns: 1fr auto auto;
     align-items: center;
     gap: 0.8em;
-    padding: 0.75em 1em;
+    padding: 0.68em 1em;
     background: var(--panel);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 2px;

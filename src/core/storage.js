@@ -13,6 +13,7 @@ const DEFAULTS = {
     shake: true,
     flashes: true,
     bloom: true,
+    retro: 'crt', // retro screen filter: crt (pixels + tube) | pixel | off (render/crt.js)
     beat: true, // cosmetic visuals that pulse with the music
     damageNumbers: true,
     story: true,
