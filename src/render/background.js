@@ -4,6 +4,7 @@ import { view, G } from '../game/state.js';
 import { glow } from './sprites.js';
 import { rand, damp, wrapAngle, mulberry32, TAU } from '../core/math.js';
 import { beat } from '../core/beat.js';
+import { loadGenesisLayers, drawGenesisHorizon, drawGenesisDeck } from './backgroundLayers.js';
 
 // --- Per-system themes (campaign) ---------------------------------------------------
 // Each theme bakes ONE offscreen silhouette layer the first time it is used (never again), drawn behind the grid with a
@@ -412,6 +413,7 @@ export const bg = {
     this.theme = THEMES[id] ? id : null;
     const T = THEMES[this.theme];
     if (T && !baked[this.theme]) baked[this.theme] = bake(T.h, (g) => T.bake(g, T.h));
+    if (this.theme === 'genesis') loadGenesisLayers();
   },
 
   // Blackout modifier: darken the sky and grid (enemies and bullets are drawn afterwards, so they stay bright).
@@ -495,7 +497,9 @@ export const bg = {
 
     // Themed silhouette layer (one drawImage), slow parallax
     const horizon = H * 0.12;
-    if (T) {
+    if (this.theme === 'genesis') ctx.globalCompositeOperation = 'source-over';
+    const genesisArt = this.theme === 'genesis' && drawGenesisHorizon(ctx, W, horizon, this.t);
+    if (T && !genesisArt) {
       const img = baked[this.theme];
       ctx.globalCompositeOperation = 'source-over';
       ctx.globalAlpha = T.alpha;
@@ -509,6 +513,10 @@ export const bg = {
         ctx.drawImage(img, -225, -225, BAKE_W, T.h);
         ctx.restore();
       } else ctx.drawImage(img, x, yy, BAKE_W, T.h);
+      ctx.globalCompositeOperation = 'lighter';
+    }
+    if (genesisArt) {
+      drawGenesisDeck(ctx, W, H, horizon, this.scroll);
       ctx.globalCompositeOperation = 'lighter';
     }
 
