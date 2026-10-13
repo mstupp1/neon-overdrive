@@ -42,6 +42,7 @@ import { rand, pick, lerp, easeInOut } from './core/math.js';
 import { ring, drawTexts, floatText } from './game/fx.js';
 import { sv } from './game/stageview.js';
 import { intro as bootIntro } from './game/intro.js';
+import { pressStart } from './ui/press.js';
 import { cine } from './game/cinematic.js';
 import { sectorIntro } from './render/sectorIntro.js';
 import { overworld } from './game/overworld.js';
@@ -155,7 +156,10 @@ function hideBossCard() {
 }
 
 function newWorld(mode, shipDef, run = null) {
-  if (mode === 'run') bootIntro.abort(); // its scripted ship control would otherwise fly the run
+  if (mode === 'run') {
+    bootIntro.abort(); // its scripted ship control would otherwise fly the run
+    pressStart.stop();
+  }
   G.mode = mode;
   G.run = run;
   comms.clear();
@@ -962,11 +966,11 @@ function titleMenu(focus) {
   ui.show('title', { focus: document.querySelector('#scr-title ' + focus) });
 }
 
-function toTitle(slam = false) {
+function toTitle(slam = false, demo = true) {
   G.screen = 'title';
   pauseBtn.hidden = true;
   touchUi.hidden = true;
-  startAttract();
+  if (demo) startAttract();
   ui.renderTitle();
   ui.show('title');
   music.setSet('normal');
@@ -990,9 +994,22 @@ function playIntro() {
     done: () => {
       profile.seenIntro = true;
       saveProfile();
-      toTitle(true);
+      showPressStart(true);
     },
   });
+}
+
+// Title sequence + PRESS START (src/ui/press.js) over a fresh title demo; the press opens the title menu.
+// instant: the boot intro already ended on the logo, so land straight on PRESS START.
+function showPressStart(instant = false) {
+  ui.hide();
+  pauseBtn.hidden = true;
+  touchUi.hidden = true;
+  startAttract();
+  G.screen = 'press';
+  music.setSet('normal');
+  music.setDuck(1);
+  pressStart.start({ instant, done: () => toTitle(true, false) });
 }
 
 // --- UI handlers ---------------------------------------------------------------------
@@ -1218,7 +1235,7 @@ app.addEventListener('pointerdown', () => {
 });
 
 music.onTrack = (name) => {
-  if (G.mode === 'run' || G.screen === 'title') ui.toast(name);
+  if (G.mode === 'run' || G.screen === 'title' || G.screen === 'press') ui.toast(name);
 };
 
 document.addEventListener('visibilitychange', () => {
@@ -1239,7 +1256,7 @@ let slowFrames = 0;
 
 function simulating() {
   const s = G.screen;
-  return s === 'play' || s === 'intro' || s === 'gameover' || s === 'title' || s === 'campaign' || s === 'hangar' || s === 'parts' || s === 'fab' || s === 'pilot' || s === 'settings' || s === 'help' || s === 'gallery' || s === 'achievements' || s === 'core' || s === 'tree';
+  return s === 'play' || s === 'intro' || s === 'press' || s === 'gameover' || s === 'title' || s === 'campaign' || s === 'hangar' || s === 'parts' || s === 'fab' || s === 'pilot' || s === 'settings' || s === 'help' || s === 'gallery' || s === 'achievements' || s === 'core' || s === 'tree';
 }
 
 function frame(now) {
@@ -1263,6 +1280,7 @@ function frame(now) {
   achTick(raw);
   comms.update(raw, G.screen === 'play' || G.screen === 'overworld');
   if (G.screen === 'intro') bootIntro.update(raw);
+  else if (G.screen === 'press') pressStart.update(raw);
   else if (G.screen === 'sector-intro') {
     if (input.consume('confirm') || input.consume('back') || input.consume('dash')) sectorIntro.skip();
     if (sectorIntro.update(raw)) finishSectorIntro();
@@ -1467,7 +1485,7 @@ function boot() {
   initPilotUi();
   const past = achInit(); // achievements older saves already earned
   if (past) setTimeout(() => notifyBacklog(past), 1200);
-  if (profile.seenIntro) toTitle();
+  if (profile.seenIntro) showPressStart();
   else playIntro();
   requestAnimationFrame((t) => {
     last = t;
