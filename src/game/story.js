@@ -135,7 +135,7 @@ export const STORY = {
     ],
     overworld: [
       L('MAG', 'Open space between the jumps, and you bring every gun you have. The exits are up ahead somewhere. Find one, fly in and hold.'),
-      L('MAG', 'Pick one exit and the others close. Your guns find the nearest awake hostile; hold Shift to lock on and strafe. Run past what you can\'t fight. M pulls up the map.'),
+      L('MAG', 'Pick one exit and the others close. Your guns find the nearest awake hostile; hold Shift to boost through open space. Run past what you can\'t fight. M pulls up the map.'),
     ],
     draft: [
       L('MAG', 'Level-ups tune what you already fly, and your main cannon grows when you drop a mini boss or a boss. New tech comes from clearing sectors, and bosses pay rarer. Max a module with its partner stat and it can EVOLVE.'),

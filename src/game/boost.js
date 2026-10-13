@@ -1,4 +1,4 @@
-// Boost (fights only: top-down, side and chase; the overworld keeps Shift as strafe / lock-on).
+// Boost works in fights (top-down, side and chase) and overworld free flight.
 // Holding Shift / a pad shoulder / the touch BOOST button burns the boost meter and speeds up the stage flow: the
 // node timer, the wave timer, enemies, their bullets and beams, the side terrain and the chase gates all run
 // `p.flow` times faster (folded into G.enemyTimeScale by pilot.js pilotTimeScale). The player keeps real time (and gets
@@ -6,6 +6,7 @@
 // arriving faster. In fights it works while the director is in `waves` (never in boss fights). Between the fighting
 // (node opening, zone breaks, fly-throughs, the clear beat) it is a free "cruise": no meter cost, no score bonus, and
 // the transition's clocks (director d.t, the fly-through) run at `CRUISE` speed, so holding it skips the waiting.
+// In the overworld, flow increases travel speed directly; the same meter and enemy pace apply.
 // Meter: p.boost (0..cap). It drains while boosting, refills after a short pause, and needs `MIN` to ignite; burning it
 // empty locks it until the button is released.
 // Stats (recomputeStats defaults, then gear / tree / Flux Core / level-ups): st.boostCap (x capacity),
@@ -33,22 +34,23 @@ export const BOOST = {
 const CRUISE = new Set(['intro', 'break', 'transit', 'clearing', 'bossDown', 'clear']);
 export function cruising(p = G.player) {
   const d = G.director;
-  return !!(p && p.boosting && d && CRUISE.has(d.state));
+  return !!(!field.ow && p && p.boosting && d && CRUISE.has(d.state));
 }
 
 export const boostCap = (p) => BOOST.cap * (p.st.boostCap || 1);
 export const boostScore = (p) => (p && p.boosting && !cruising(p) ? 1 + BOOST.score * ((p.st.boostFlow || BOOST.flow) - 1) : 1);
-export const boostSpeed = (p) => 1 + BOOST.speed * Math.max(0, (p.flow || 1) - 1);
+export const boostSpeed = (p) => field.ow ? (p.flow || 1) : 1 + BOOST.speed * Math.max(0, (p.flow || 1) - 1);
 
-// Can a boost run right now? (Fights only, while waves are flowing.)
+// Can a boost run right now? Free flight, fight waves and fight transitions.
 export function boostAllowed(p) {
-  if (field.ow || p.dead || G.mode !== 'run') return false;
+  if (p.dead || G.mode !== 'run') return false;
+  if (field.ow) return true;
   const d = G.director;
   return !!(d && (d.state === 'waves' ? !p.auto : CRUISE.has(d.state)));
 }
 
 // Is boost free right now (a transition between fights)?
-export const freeBoost = (p) => boostAllowed(p) && CRUISE.has(G.director.state);
+export const freeBoost = (p) => !field.ow && boostAllowed(p) && CRUISE.has(G.director.state);
 
 export function resetBoost(p) {
   p.boost = boostCap(p);
@@ -227,11 +229,16 @@ export function drawBoostFx(ctx) {
   ctx.restore();
 }
 
-// Ship-side boost visuals (drawPlayer, in the fight frame): a shock cone ahead of the nose.
+// Ship-side boost visuals (drawPlayer): a shock cone ahead of the nose.
 export function drawBoostShip(ctx, p) {
   const V = p.boostV;
   if (!V) return;
   ctx.save();
+  if (field.ow) {
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.aim + Math.PI / 2);
+    ctx.translate(-p.x, -p.y);
+  }
   ctx.globalCompositeOperation = 'lighter';
   const fl = 0.8 + 0.2 * Math.sin(G.time * 40);
   for (let i = 0; i < 3; i++) {

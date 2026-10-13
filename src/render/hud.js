@@ -221,13 +221,13 @@ export function drawHud(ctx, alpha = 1) {
   drawBanner(ctx);
 }
 
-// Overworld HUD: the ult and dash gauges (the ship is at screen sx, sy; they fade when it flies near).
+// Overworld HUD: the boost, ult and dash gauges (the ship is at screen sx, sy; they fade when it flies near).
 export function drawGauges(ctx, sx, sy) {
   const p = G.player;
   if (!p) return;
   hudA = 1;
   ctx.textBaseline = 'middle';
-  drawBothGauges(ctx, p, sx, sy);
+  drawBothGauges(ctx, p, sx, sy, true);
   ctx.globalAlpha = 1;
 }
 
@@ -244,7 +244,7 @@ export function gaugeSpots() {
   return { dash: { x: at(44), y }, od: { x: at(120), y }, boost: { x: at(44), y: y - 74 } };
 }
 
-// boost: fights only (the overworld keeps Shift as lock-on, so it has no boost gauge).
+// Shared boost, dash and ultimate gauges for fights and free flight.
 function drawBothGauges(ctx, p, sx, sy, boost = false) {
   const g = gaugeSpots();
   drawGauge(ctx, g.od.x, g.od.y, p, 'od', sx, sy);

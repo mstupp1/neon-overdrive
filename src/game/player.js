@@ -110,7 +110,7 @@ function control() {
     ty: input.ty,
     dash: input.consume('dash'),
     od: input.consume('od'),
-    focus: false, // Shift is Boost in fights (the autopilot still uses focus to slow down)
+    focus: false, // Shift is Boost (the autopilot still uses focus to slow down)
     boost: input.down('focus'),
     shift: (dx, dy) => input.shiftTarget(dx, dy),
   });
@@ -240,7 +240,7 @@ export function updatePlayer(p, dt) {
 
   for (const g of p.ghosts) {
     g.life -= dt;
-    if (g.boost) g.y += 720 * dt; // boost trail streams back like the stage
+    if (g.boost && !field.ow) g.y += 720 * dt; // boost trail streams back like the stage
   }
   while (p.ghosts.length && p.ghosts[0].life <= 0) p.ghosts.shift();
 
