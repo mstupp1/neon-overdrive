@@ -1,0 +1,221 @@
+{
+  "assets": [
+    {
+      "id": "die",
+      "name": "Pixel Die",
+      "source": "art/icons/items/sources/die.png",
+      "runtime": "src/assets/icons/items/die.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Pixel Die, depicted as a dark glass six-sided arcade die with exactly one pip on its visible face. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with blue internal light and restrained cyan, magenta, gold rim glints, Genesis theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "floppy",
+      "name": "Floppy Disk",
+      "source": "art/icons/items/sources/floppy.png",
+      "runtime": "src/assets/icons/items/floppy.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Floppy Disk, depicted as a compact retro magnetic floppy disk with a glass label window and metal shutter. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with blue internal light and restrained cyan, magenta, gold rim glints, Genesis theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "shard",
+      "name": "Lattice Shard",
+      "source": "art/icons/items/sources/shard.png",
+      "runtime": "src/assets/icons/items/shard.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Lattice Shard, depicted as a sharp crystalline shard of a luminous digital lattice with geometric facets. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with blue internal light and restrained cyan, magenta, gold rim glints, Genesis theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "token",
+      "name": "Arcade Token",
+      "source": "art/icons/items/sources/token.png",
+      "runtime": "src/assets/icons/items/token.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Arcade Token, depicted as a grooved arcade coin with a tiny star cut into its center. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with blue internal light and restrained cyan, magenta, gold rim glints, Genesis theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "bolt",
+      "name": "Warden's Bolt",
+      "source": "art/icons/items/sources/bolt.png",
+      "runtime": "src/assets/icons/items/bolt.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Warden's Bolt, depicted as an armored siege-mech bolt with a hexagonal head and glowing core. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with blue internal light and restrained cyan, magenta, gold rim glints, Genesis theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "firstlight",
+      "name": "First Light",
+      "source": "art/icons/items/sources/firstlight.png",
+      "runtime": "src/assets/icons/items/firstlight.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: First Light, depicted as a radiant first photon represented as a small sun crystal with fine rays. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with blue internal light and restrained cyan, magenta, gold rim glints, Genesis theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "spores",
+      "name": "Spore Jar",
+      "source": "art/icons/items/sources/spores.png",
+      "runtime": "src/assets/icons/items/spores.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Spore Jar, depicted as a sealed transparent specimen jar holding several tiny glowing spores. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with red internal light and restrained cyan, magenta, gold rim glints, Crimson theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "fang",
+      "name": "Crimson Fang",
+      "source": "art/icons/items/sources/fang.png",
+      "runtime": "src/assets/icons/items/fang.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Crimson Fang, depicted as a curved polished alien fang with a crimson luminous vein. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with red internal light and restrained cyan, magenta, gold rim glints, Crimson theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "petri",
+      "name": "Petri Dish",
+      "source": "art/icons/items/sources/petri.png",
+      "runtime": "src/assets/icons/items/petri.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Petri Dish, depicted as a shallow glass culture dish with several glowing organic colonies. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with red internal light and restrained cyan, magenta, gold rim glints, Crimson theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "scale",
+      "name": "Hydra Scale",
+      "source": "art/icons/items/sources/scale.png",
+      "runtime": "src/assets/icons/items/scale.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Hydra Scale, depicted as an iridescent armored dragon scale with a smaller nested scale pattern. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with red internal light and restrained cyan, magenta, gold rim glints, Crimson theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "heartjar",
+      "name": "Heart in a Jar",
+      "source": "art/icons/items/sources/heartjar.png",
+      "runtime": "src/assets/icons/items/heartjar.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Heart in a Jar, depicted as a sealed glass jar containing a small beating luminous mechanical heart. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with red internal light and restrained cyan, magenta, gold rim glints, Crimson theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "egg",
+      "name": "Hydra Egg",
+      "source": "art/icons/items/sources/egg.png",
+      "runtime": "src/assets/icons/items/egg.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Hydra Egg, depicted as a mysterious faceted organic egg with a faint crack and inner glow. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with red internal light and restrained cyan, magenta, gold rim glints, Crimson theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "stormcell",
+      "name": "Storm Cell",
+      "source": "art/icons/items/sources/stormcell.png",
+      "runtime": "src/assets/icons/items/stormcell.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Storm Cell, depicted as a sealed glass energy vial containing a branching lightning bolt. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with teal internal light and restrained cyan, magenta, gold rim glints, Cyclone theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "packet",
+      "name": "Lost Packet",
+      "source": "art/icons/items/sources/packet.png",
+      "runtime": "src/assets/icons/items/packet.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Lost Packet, depicted as a compact data envelope packet with a luminous pulse traveling through it. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with teal internal light and restrained cyan, magenta, gold rim glints, Cyclone theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "glitch",
+      "name": "Glitch Cube",
+      "source": "art/icons/items/sources/glitch.png",
+      "runtime": "src/assets/icons/items/glitch.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Glitch Cube, depicted as a beveled geometric cube with offset digital facets and a subtle glitch split. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with teal internal light and restrained cyan, magenta, gold rim glints, Cyclone theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "omegaeye",
+      "name": "Omega Lens",
+      "source": "art/icons/items/sources/omegaeye.png",
+      "runtime": "src/assets/icons/items/omegaeye.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Omega Lens, depicted as a mechanical eye lens with a concentric iris and sharp glass reflections. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with teal internal light and restrained cyan, magenta, gold rim glints, Cyclone theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "compass",
+      "name": "Storm Compass",
+      "source": "art/icons/items/sources/compass.png",
+      "runtime": "src/assets/icons/items/compass.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Storm Compass, depicted as a circular armored compass with a floating storm needle. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with teal internal light and restrained cyan, magenta, gold rim glints, Cyclone theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "eye",
+      "name": "Eye of the Storm",
+      "source": "art/icons/items/sources/eye.png",
+      "runtime": "src/assets/icons/items/eye.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Eye of the Storm, depicted as a serene circular storm eye surrounded by a tight spiral of energy. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with teal internal light and restrained cyan, magenta, gold rim glints, Cyclone theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "candle",
+      "name": "Black Candle",
+      "source": "art/icons/items/sources/candle.png",
+      "runtime": "src/assets/icons/items/candle.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Black Candle, depicted as a compact black-glass candle with a small impossible violet flame. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with violet internal light and restrained cyan, magenta, gold rim glints, Void theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "mask",
+      "name": "Hollow Mask",
+      "source": "art/icons/items/sources/mask.png",
+      "runtime": "src/assets/icons/items/mask.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Hollow Mask, depicted as an eerie smooth ceremonial mask with empty eye sockets and subtle smile. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with violet internal light and restrained cyan, magenta, gold rim glints, Void theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "pearl",
+      "name": "Void Pearl",
+      "source": "art/icons/items/sources/pearl.png",
+      "runtime": "src/assets/icons/items/pearl.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Void Pearl, depicted as a polished dark pearl with a luminous inner ring and glossy highlight. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with violet internal light and restrained cyan, magenta, gold rim glints, Void theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "signal",
+      "name": "Signal Fragment",
+      "source": "art/icons/items/sources/signal.png",
+      "runtime": "src/assets/icons/items/signal.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Signal Fragment, depicted as a broken communications crystal emitting concentric signal arcs. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with violet internal light and restrained cyan, magenta, gold rim glints, Void theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "eclipse",
+      "name": "Eclipse Shard",
+      "source": "art/icons/items/sources/eclipse.png",
+      "runtime": "src/assets/icons/items/eclipse.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Eclipse Shard, depicted as a dark solar eclipse crystal with a thin bright corona. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with violet internal light and restrained cyan, magenta, gold rim glints, Void theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "crown",
+      "name": "Dark Matter Crown",
+      "source": "art/icons/items/sources/crown.png",
+      "runtime": "src/assets/icons/items/crown.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Dark Matter Crown, depicted as a small angular crown built from dark matter shards with gold-violet edges. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with violet internal light and restrained cyan, magenta, gold rim glints, Void theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "duck",
+      "name": "Rubber Duck",
+      "source": "art/icons/items/sources/duck.png",
+      "runtime": "src/assets/icons/items/duck.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Rubber Duck, depicted as a tiny stylized rubber duck toy with a glossy yellow glass body. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with gold internal light and restrained cyan, magenta, gold rim glints, Grid Junk theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "sock",
+      "name": "Lucky Sock",
+      "source": "art/icons/items/sources/sock.png",
+      "runtime": "src/assets/icons/items/sock.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Lucky Sock, depicted as a folded lucky space sock with tiny stitched stars and one bright seam. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with gold internal light and restrained cyan, magenta, gold rim glints, Grid Junk theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "noodles",
+      "name": "Cup Noodles",
+      "source": "art/icons/items/sources/noodles.png",
+      "runtime": "src/assets/icons/items/noodles.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Cup Noodles, depicted as a compact instant noodle cup with rising steam wisps and a luminous lid. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with gold internal light and restrained cyan, magenta, gold rim glints, Grid Junk theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "trophy",
+      "name": "Hi-Score Trophy",
+      "source": "art/icons/items/sources/trophy.png",
+      "runtime": "src/assets/icons/items/trophy.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Hi-Score Trophy, depicted as a tiny arcade high-score trophy cup with beveled handles. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with gold internal light and restrained cyan, magenta, gold rim glints, Grid Junk theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "holocat",
+      "name": "Holo Cat",
+      "source": "art/icons/items/sources/holocat.png",
+      "runtime": "src/assets/icons/items/holocat.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Holo Cat, depicted as a cute angular holographic cat bust with prismatic glass ears. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with gold internal light and restrained cyan, magenta, gold rim glints, Grid Junk theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "joystick",
+      "name": "Golden Joystick",
+      "source": "art/icons/items/sources/joystick.png",
+      "runtime": "src/assets/icons/items/joystick.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Golden Joystick, depicted as a compact golden arcade joystick with a dark base and bright ball top. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with gold internal light and restrained cyan, magenta, gold rim glints, Grid Junk theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    },
+    {
+      "id": "capsule",
+      "name": "Data Capsule",
+      "source": "art/icons/items/sources/capsule.png",
+      "runtime": "src/assets/icons/items/capsule.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE collectible icon, square game UI. Primary request: Data Capsule, depicted as a futuristic sealed capsule canister split into two glass halves with a glowing data core. Style: dark glass sci-fi machinery, sharply beveled 3D illustrated object, crisp finish. Composition: single isolated centered object with generous fully transparent padding, silhouette readable at 32px. Lighting and palette: near-black navy metal with cyan internal light and restrained cyan, magenta, gold rim glints, utility theme. Materials: polished glass, machined seams, subtle rivets, luminous inset channels. True transparent background with clean alpha. No checkerboard, text, labels, frame, shadows outside silhouette, or watermark."
+    }
+  ]
+}

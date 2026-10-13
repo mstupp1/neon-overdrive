@@ -1,0 +1,133 @@
+{
+  "group": "choices",
+  "generator": "built-in imagegen",
+  "complete": true,
+  "assets": [
+    {
+      "id": "combat",
+      "source": "art/icons/choices/sources/combat.png",
+      "runtime": "src/assets/icons/choices/combat.png",
+      "prompt": "Use case: stylized-concept. Asset type: single isolated transparent UI game item illustration for NEON OVERDRIVE. Subject: a combat targeting computer, a compact dark glass circular sci-fi gun sight with four mechanical prongs, luminous cyan targeting reticle and a small magenta power cell. Square centered composition with ample transparent margin, crisp industrial silhouette, dark navy metal, layered panel seams, restrained cyan neon rim and warm tiny highlights. Consistent polished arcade sci-fi inventory art, readable at 32 to 64 pixels. No text, letters, logos, background, frame, broad haze, checkerboard. Create this single combat route icon asset.",
+      "sha256": "d4e98a35c9c8e5c639b4de2080534310324a3d5c230388eee0c6fbcdd40ff2c1",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "elite",
+      "source": "art/icons/choices/sources/elite.png",
+      "runtime": "src/assets/icons/choices/elite.png",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent inventory/choice icon for NEON OVERDRIVE. Subject: a gold and magenta armored hunter insignia with a luminous star core and sharpened angular mechanical wings. Style: polished arcade sci-fi object art, dark navy glass and metal, layered bevels and panel seams, restrained cyan magenta gold luminous rims. Centered square composition, object fills 75% of square, strong distinct silhouette readable at 32-64 pixels, ample transparent margin. No text, letters, watermark, scenery, frame or broad haze. Exactly one isolated asset.",
+      "sha256": "7e5b1168d08ba83be75d463c435d75167c2cb3fa62e68e73501d014138df590b",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "market",
+      "source": "art/icons/choices/sources/market.png",
+      "runtime": "src/assets/icons/choices/market.png",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent inventory/choice icon for NEON OVERDRIVE. Subject: a compact open sci-fi trade case with neatly organized cyan energy cells and gold credit chips. Style: polished arcade sci-fi object art, dark navy glass and metal, layered bevels and panel seams, restrained cyan magenta gold luminous rims. Centered square composition, object fills 75% of square, strong distinct silhouette readable at 32-64 pixels, ample transparent margin. No text, letters, watermark, scenery, frame or broad haze. Exactly one isolated asset.",
+      "sha256": "13809bc475346ef7ea32025e6c56f8a109f037d5cdcd60a13541b2c55b54037e",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "dock",
+      "source": "art/icons/choices/sources/dock.png",
+      "runtime": "src/assets/icons/choices/dock.png",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent inventory/choice icon for NEON OVERDRIVE. Subject: a compact orbital repair station docking collar with cyan landing lights and a glowing green medical cross. Style: polished arcade sci-fi object art, dark navy glass and metal, layered bevels and panel seams, restrained cyan magenta gold luminous rims. Centered square composition, object fills 75% of square, strong distinct silhouette readable at 32-64 pixels, ample transparent margin. No text, letters, watermark, scenery, frame or broad haze. Exactly one isolated asset.",
+      "sha256": "c698814311b84d26e7f7e12e828274ee0c056ce6dcbd704db0c1c03bb387f306",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "anomaly",
+      "source": "art/icons/choices/sources/anomaly.png",
+      "runtime": "src/assets/icons/choices/anomaly.png",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent inventory/choice icon for NEON OVERDRIVE. Subject: a mysterious violet crystalline anomaly levitating inside a broken dark metal scanner ring. Style: polished arcade sci-fi object art, dark navy glass and metal, layered bevels and panel seams, restrained cyan magenta gold luminous rims. Centered square composition, object fills 75% of square, strong distinct silhouette readable at 32-64 pixels, ample transparent margin. No text, letters, watermark, scenery, frame or broad haze. Exactly one isolated asset.",
+      "sha256": "abd1bc02f30a9fbf5df353b2e737372cb3ce8bef3cfdf36ef5fcc0d8f9ee9ace",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "vault",
+      "source": "art/icons/choices/sources/vault.png",
+      "runtime": "src/assets/icons/choices/vault.png",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent inventory/choice icon for NEON OVERDRIVE. Subject: a reinforced dark glass treasure vault chest, heavy metal clasps, gold seams, cyan interior light. Style: polished arcade sci-fi object art, dark navy glass and metal, layered bevels and panel seams, restrained cyan magenta gold luminous rims. Centered square composition, object fills 75% of square, strong distinct silhouette readable at 32-64 pixels, ample transparent margin. No text, letters, watermark, scenery, frame or broad haze. Exactly one isolated asset.",
+      "sha256": "9e39faea74321df574a365b65f15559614d8a356ff2d8fe498091efc8cdf4788",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "rift",
+      "source": "art/icons/choices/sources/rift.png",
+      "runtime": "src/assets/icons/choices/rift.png",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent inventory/choice icon for NEON OVERDRIVE. Subject: an upright jagged violet spacetime tear framed by two fractured dark glass stabilizer prongs. Style: polished arcade sci-fi object art, dark navy glass and metal, layered bevels and panel seams, restrained cyan magenta gold luminous rims. Centered square composition, object fills 75% of square, strong distinct silhouette readable at 32-64 pixels, ample transparent margin. No text, letters, watermark, scenery, frame or broad haze. Exactly one isolated asset.",
+      "sha256": "defe3f3474177725357f3ee81214d13e40a93dbf57fecb4af6d5478f02fa6c35",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "boss",
+      "source": "art/icons/choices/sources/boss.png",
+      "runtime": "src/assets/icons/choices/boss.png",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent inventory/choice icon for NEON OVERDRIVE. Subject: a fearsome black armored mech faceplate with glowing red eyes, cyan rim highlights, angular crown plating. Style: polished arcade sci-fi object art, dark navy glass and metal, layered bevels and panel seams, restrained cyan magenta gold luminous rims. Centered square composition, object fills 75% of square, strong distinct silhouette readable at 32-64 pixels, ample transparent margin. No text, letters, watermark, scenery, frame or broad haze. Exactly one isolated asset.",
+      "sha256": "883e31ed33af50aa04138fc25b8cdccd7cdf7777bc3076e915e6492997026013",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "reroll",
+      "source": "art/icons/choices/sources/reroll.png",
+      "runtime": "src/assets/icons/choices/reroll.png",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent inventory/choice icon for NEON OVERDRIVE. Subject: a pair of dark metal probability dice with cyan luminous pips encircled by two magenta curved recycling arrows. Style: polished arcade sci-fi object art, dark navy glass and metal, layered bevels and panel seams, restrained cyan magenta gold luminous rims. Centered square composition, object fills 75% of square, strong distinct silhouette readable at 32-64 pixels, ample transparent margin. No text, letters, watermark, scenery, frame or broad haze. Exactly one isolated asset.",
+      "sha256": "c3639284ebea0101a47e2923cfe66e1f182a9d3c3606650feb610f2ecc41749c",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "contraband",
+      "source": "art/icons/choices/sources/contraband.png",
+      "runtime": "src/assets/icons/choices/contraband.png",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent inventory/choice icon for NEON OVERDRIVE. Subject: a sealed angular smuggler cargo canister with magenta warning light and amber hazard triangles. Style: polished arcade sci-fi object art, dark navy glass and metal, layered bevels and panel seams, restrained cyan magenta gold luminous rims. Centered square composition, object fills 75% of square, strong distinct silhouette readable at 32-64 pixels, ample transparent margin. No text, letters, watermark, scenery, frame or broad haze. Exactly one isolated asset.",
+      "sha256": "88267cbc789a15597b31a7d091399141e1fb9431b208bea13934f6d5b299db0c",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "reinforce",
+      "source": "art/icons/choices/sources/reinforce.png",
+      "runtime": "src/assets/icons/choices/reinforce.png",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent inventory/choice icon for NEON OVERDRIVE. Subject: a thick navy mechanical shield plate with a green luminous reinforced central cross. Style: polished arcade sci-fi object art, dark navy glass and metal, layered bevels and panel seams, restrained cyan magenta gold luminous rims. Centered square composition, object fills 75% of square, strong distinct silhouette readable at 32-64 pixels, ample transparent margin. No text, letters, watermark, scenery, frame or broad haze. Exactly one isolated asset.",
+      "sha256": "588292972db58c54a86f66ba9defe01db43c4d88f9d8bc4cc58c2d9c416fe569",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "repairFull",
+      "source": "art/icons/choices/sources/repairFull.png",
+      "runtime": "src/assets/icons/choices/repairFull.png",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent inventory/choice icon for NEON OVERDRIVE. Subject: a compact sci-fi medical hull repair kit, translucent green chamber, cyan rails and green cross. Style: polished arcade sci-fi object art, dark navy glass and metal, layered bevels and panel seams, restrained cyan magenta gold luminous rims. Centered square composition, object fills 75% of square, strong distinct silhouette readable at 32-64 pixels, ample transparent margin. No text, letters, watermark, scenery, frame or broad haze. Exactly one isolated asset.",
+      "sha256": "2b56aa76c615fab5fffee9d7af34bcfe72351c9f953c6a9e8786f34916654eac",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "xp",
+      "source": "art/icons/choices/sources/xp.png",
+      "runtime": "src/assets/icons/choices/xp.png",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent game item icon for NEON OVERDRIVE. Subject: Neural Uplink, a compact dark glass neural data processor with three cyan glowing circuit arms meeting a violet crystal memory core. Polished arcade sci-fi industrial machinery, crisp layered bevels, navy metal, cyan/magenta restrained luminous rim, gold tiny connectors. Centered square isolated object occupying 75% image, large clear silhouette readable32-64px. Genuine transparent background, no checkerboard, no text, no frame, no backdrop, no haze.",
+      "sha256": "36113d30747cfaee3aff7956d1f7ddee70238f60f0e475c0c57799c38c5a50a5",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "expand",
+      "source": "art/icons/choices/sources/expand.png",
+      "runtime": "src/assets/icons/choices/expand.png",
+      "prompt": "Use case: stylized-concept. Asset type: one isolated game inventory icon, NEON OVERDRIVE Neural Expansion. Subject: a dark glass neural hub with a central violet crystal and six cyan circuit branches reaching small lit hexagonal node terminals, suggesting a growing passive skill tree. A clear symmetrical radial silhouette with broad mechanical branches, navy metal bevels, gold tiny connectors and cyan magenta luminous rims. Centered square isolated item with generous transparent margins, 75% canvas occupancy, readable at32-64px. Genuine transparent background, no checkerboard, no text, no frame, no scene or broad haze.",
+      "sha256": "0fc798ad68146fc56a3e6a853dddbc4cf7640bd6b9341ca415629a72532fc8f5",
+      "width": 256,
+      "height": 256
+    }
+  ]
+}

@@ -17,6 +17,7 @@ import { vacuumAll } from './pickups.js';
 import { comboMult, addScore, playfieldBounds } from './player.js';
 import { ring, sparks, floatText } from './fx.js';
 import { sfx } from '../core/audio.js';
+import { assetIcon } from '../ui/asset-icons.js';
 
 const svg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 
@@ -27,43 +28,43 @@ export const CLASSES = [
   {
     id: 'striker', name: 'STRIKER', role: 'Assault', color: '#ff3df2', rgb: '255,61,242',
     desc: 'Raw firepower. Chain kills, then burst everything down.',
-    icon: svg('<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>'),
+    icon: assetIcon('pilot', 'striker', svg('<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>')),
     ult: { id: 'overdrive', name: 'OVERDRIVE', short: 'OVERDRIVE', desc: 'Erase every bullet, blast all enemies, and double fire, damage and score.' },
     passives: [
-      { id: 'killstreak', name: 'Killstreak', r: 0, desc: '+2% damage per 10 combo, up to +20%.', icon: svg('<path d="M4 20V10M10 20V6M16 20V12M22 20V3"/>'), apply(st) { st.killstreak = true; } },
-      { id: 'hairtrigger', name: 'Hair Trigger', r: 1, desc: 'Critical hits deal +0.75x more.', icon: svg('<circle cx="12" cy="12" r="6"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/>'), apply(st) { st.critMul += 0.75; } },
-      { id: 'executioner', name: 'Executioner', r: 2, desc: '+40% damage to enemies under 30% hull. Bosses take +10%.', icon: svg('<path d="M5 4l14 16M19 4L5 20"/><circle cx="12" cy="12" r="3"/>'), apply(st) { st.exec = true; } },
-      { id: 'bloodrush', name: 'Bloodrush', r: 3, desc: 'Kills during Overdrive extend it by 0.15s (max +4s).', icon: svg('<path d="M12 3s6 6 6 11a6 6 0 01-12 0c0-5 6-11 6-11z"/>'), apply(st) { st.bloodrush = true; } },
-      { id: 'gunsmith', name: 'Gunsmith', r: 1, desc: 'Start every run with Main Cannon +1.', start: { main: 1 }, icon: svg('<path d="M12 3v14M7 7v10M17 7v10M5 21h14"/>') },
-      { id: 'warlord', name: 'Warlord', r: 4, desc: '+20% damage, and your ultimate lasts 2s longer.', icon: svg('<path d="M4 20l4-12 4 6 4-6 4 12z"/><path d="M4 20h16"/>'), apply(st) { st.dmg *= 1.2; st.odDur += 2; } },
+      { id: 'killstreak', name: 'Killstreak', r: 0, desc: '+2% damage per 10 combo, up to +20%.', icon: assetIcon('pilot', 'killstreak', svg('<path d="M4 20V10M10 20V6M16 20V12M22 20V3"/>')), apply(st) { st.killstreak = true; } },
+      { id: 'hairtrigger', name: 'Hair Trigger', r: 1, desc: 'Critical hits deal +0.75x more.', icon: assetIcon('pilot', 'hairtrigger', svg('<circle cx="12" cy="12" r="6"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/>')), apply(st) { st.critMul += 0.75; } },
+      { id: 'executioner', name: 'Executioner', r: 2, desc: '+40% damage to enemies under 30% hull. Bosses take +10%.', icon: assetIcon('pilot', 'executioner', svg('<path d="M5 4l14 16M19 4L5 20"/><circle cx="12" cy="12" r="3"/>')), apply(st) { st.exec = true; } },
+      { id: 'bloodrush', name: 'Bloodrush', r: 3, desc: 'Kills during Overdrive extend it by 0.15s (max +4s).', icon: assetIcon('pilot', 'bloodrush', svg('<path d="M12 3s6 6 6 11a6 6 0 01-12 0c0-5 6-11 6-11z"/>')), apply(st) { st.bloodrush = true; } },
+      { id: 'gunsmith', name: 'Gunsmith', r: 1, desc: 'Start every run with Main Cannon +1.', start: { main: 1 }, icon: assetIcon('pilot', 'gunsmith', svg('<path d="M12 3v14M7 7v10M17 7v10M5 21h14"/>')) },
+      { id: 'warlord', name: 'Warlord', r: 4, desc: '+20% damage, and your ultimate lasts 2s longer.', icon: assetIcon('pilot', 'warlord', svg('<path d="M4 20l4-12 4 6 4-6 4 12z"/><path d="M4 20h16"/>')), apply(st) { st.dmg *= 1.2; st.odDur += 2; } },
     ],
   },
   {
     id: 'engineer', name: 'ENGINEER', role: 'Support', color: '#ffb02e', rgb: '255,176,46',
     desc: 'Fortifies the battlefield. Domes, drones and a deep module bay.',
-    icon: svg('<path d="M4 20v-5a8 8 0 0116 0v5z"/><path d="M12 7v4M9 20v-3h6v3"/>'),
+    icon: assetIcon('pilot', 'engineer', svg('<path d="M4 20v-5a8 8 0 0116 0v5z"/><path d="M12 7v4M9 20v-3h6v3"/>')),
     ult: { id: 'fortress', name: 'FORTRESS PROTOCOL', short: 'FORTRESS', desc: 'A dome erases enemy bullets and two extra wingmen fire. Opens with a blast.' },
     passives: [
-      { id: 'salvager', name: 'Salvager', r: 0, desc: '+25% credits from everything.', icon: svg('<circle cx="12" cy="12" r="9"/><path d="M15 8.5c-.8-1-2-1.5-3-1.5-1.7 0-3 1-3 2.5s1.3 2 3 2.5 3 1 3 2.5-1.3 2.5-3 2.5c-1 0-2.2-.5-3-1.5"/>'), apply(st) { st.creditMul *= 1.25; } },
-      { id: 'overflow', name: 'Overflow', r: 2, desc: '+1 weapon module slot.', icon: svg('<rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><path d="M16.5 14v6M13.5 17h6"/>'), apply(st) { st.maxModules += 1; } },
-      { id: 'dronelink', name: 'Drone Link', r: 1, desc: '+25% damage from weapon modules.', icon: svg('<path d="M6 10l3-6 3 6-3-1.5zM12 20l3-6 3 6-3-1.5z"/><path d="M9 14v3M15 5v4"/>'), apply(st) { st.modDmg *= 1.25; } },
-      { id: 'nanorepair', name: 'Nanorepair', r: 3, desc: 'Repair 1 hull after a sector with an elite kill, and after bosses.', icon: svg('<path d="M12 5v14M5 12h14"/><circle cx="12" cy="12" r="9"/>'), apply(st) { st.nanorepair = true; } },
-      { id: 'fieldkit', name: 'Field Kit', r: 1, desc: 'Start every run with Wingmen 1.', start: { drones: 1 }, icon: svg('<path d="M4 8h16v12H4z"/><path d="M9 8V5h6v3M12 11v6M9 14h6"/>') },
-      { id: 'architect', name: 'Architect', r: 4, desc: 'Every new module installs at level 2.', icon: svg('<path d="M3 21h18M5 21V10l7-6 7 6v11"/><path d="M9 21v-6h6v6"/>'), apply(st) { st.architect = true; } },
+      { id: 'salvager', name: 'Salvager', r: 0, desc: '+25% credits from everything.', icon: assetIcon('pilot', 'salvager', svg('<circle cx="12" cy="12" r="9"/><path d="M15 8.5c-.8-1-2-1.5-3-1.5-1.7 0-3 1-3 2.5s1.3 2 3 2.5 3 1 3 2.5-1.3 2.5-3 2.5c-1 0-2.2-.5-3-1.5"/>')), apply(st) { st.creditMul *= 1.25; } },
+      { id: 'overflow', name: 'Overflow', r: 2, desc: '+1 weapon module slot.', icon: assetIcon('pilot', 'overflow', svg('<rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><path d="M16.5 14v6M13.5 17h6"/>')), apply(st) { st.maxModules += 1; } },
+      { id: 'dronelink', name: 'Drone Link', r: 1, desc: '+25% damage from weapon modules.', icon: assetIcon('pilot', 'dronelink', svg('<path d="M6 10l3-6 3 6-3-1.5zM12 20l3-6 3 6-3-1.5z"/><path d="M9 14v3M15 5v4"/>')), apply(st) { st.modDmg *= 1.25; } },
+      { id: 'nanorepair', name: 'Nanorepair', r: 3, desc: 'Repair 1 hull after a sector with an elite kill, and after bosses.', icon: assetIcon('pilot', 'nanorepair', svg('<path d="M12 5v14M5 12h14"/><circle cx="12" cy="12" r="9"/>')), apply(st) { st.nanorepair = true; } },
+      { id: 'fieldkit', name: 'Field Kit', r: 1, desc: 'Start every run with Wingmen 1.', start: { drones: 1 }, icon: assetIcon('pilot', 'fieldkit', svg('<path d="M4 8h16v12H4z"/><path d="M9 8V5h6v3M12 11v6M9 14h6"/>')) },
+      { id: 'architect', name: 'Architect', r: 4, desc: 'Every new module installs at level 2.', icon: assetIcon('pilot', 'architect', svg('<path d="M3 21h18M5 21V10l7-6 7 6v11"/><path d="M9 21v-6h6v6"/>')), apply(st) { st.architect = true; } },
     ],
   },
   {
     id: 'ghost', name: 'GHOST', role: 'Evasion', color: '#9d7bff', rgb: '157,123,255',
     desc: 'Lives on the edge of the bullet curtain. Graze, dash, strike.',
-    icon: svg('<path d="M5 21V10a7 7 0 0114 0v11l-3-2-2 2-2-2-2 2-2-2z"/><circle cx="10" cy="11" r="1"/><circle cx="14" cy="11" r="1"/>'),
+    icon: assetIcon('pilot', 'ghost', svg('<path d="M5 21V10a7 7 0 0114 0v11l-3-2-2 2-2-2-2 2-2-2z"/><circle cx="10" cy="11" r="1"/><circle cx="14" cy="11" r="1"/>')),
     ult: { id: 'phase', name: 'PHASE SHIFT', short: 'PHASE SHIFT', desc: 'Enemies and bullets slow to 40%. You are intangible, and grazes strike back.' },
     passives: [
-      { id: 'widegraze', name: 'Wide Graze', r: 0, desc: '+50% graze radius.', icon: svg('<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/>'), apply(st) { st.grazeR *= 1.5; } },
-      { id: 'slipstream', name: 'Slipstream', r: 1, desc: '+15% move speed for 1.5s after a graze.', icon: svg('<path d="M3 8h12M3 12h18M3 16h12"/>'), apply(st) { st.slipstream = true; } },
-      { id: 'riposte', name: 'Riposte', r: 2, desc: 'Grazing mid-dash refunds half a dash charge (1s cooldown).', icon: svg('<path d="M20 12a8 8 0 11-3-6.2M20 4v5h-5"/>'), apply(st) { st.riposte = true; } },
-      { id: 'afterimage', name: 'Afterimage', r: 3, desc: 'Dashes leave 3 echoes that detonate after 0.3s.', icon: svg('<path d="M4 18l5-6-5-6M11 18l5-6-5-6M18 18l3-6-3-6"/>'), apply(st) { st.afterimage = true; } },
-      { id: 'shade', name: 'Shade', r: 1, desc: '+20% dash length, +10% move speed.', icon: svg('<path d="M5 21V10a7 7 0 0114 0v11"/><path d="M9 14h6" stroke-dasharray="2 2"/>'), apply(st) { st.dashDur *= 1.2; st.speed *= 1.1; } },
-      { id: 'wraithborn', name: 'Wraithborn', r: 4, desc: 'Dashes recharge 30% faster, grazes charge your ultimate 50% more.', icon: svg('<path d="M12 2l3 7h7l-6 4 2 8-6-5-6 5 2-8-6-4h7z"/>'), apply(st) { st.dashRecharge *= 0.7; st.grazeOd *= 1.5; } },
+      { id: 'widegraze', name: 'Wide Graze', r: 0, desc: '+50% graze radius.', icon: assetIcon('pilot', 'widegraze', svg('<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/>')), apply(st) { st.grazeR *= 1.5; } },
+      { id: 'slipstream', name: 'Slipstream', r: 1, desc: '+15% move speed for 1.5s after a graze.', icon: assetIcon('pilot', 'slipstream', svg('<path d="M3 8h12M3 12h18M3 16h12"/>')), apply(st) { st.slipstream = true; } },
+      { id: 'riposte', name: 'Riposte', r: 2, desc: 'Grazing mid-dash refunds half a dash charge (1s cooldown).', icon: assetIcon('pilot', 'riposte', svg('<path d="M20 12a8 8 0 11-3-6.2M20 4v5h-5"/>')), apply(st) { st.riposte = true; } },
+      { id: 'afterimage', name: 'Afterimage', r: 3, desc: 'Dashes leave 3 echoes that detonate after 0.3s.', icon: assetIcon('pilot', 'afterimage', svg('<path d="M4 18l5-6-5-6M11 18l5-6-5-6M18 18l3-6-3-6"/>')), apply(st) { st.afterimage = true; } },
+      { id: 'shade', name: 'Shade', r: 1, desc: '+20% dash length, +10% move speed.', icon: assetIcon('pilot', 'shade', svg('<path d="M5 21V10a7 7 0 0114 0v11"/><path d="M9 14h6" stroke-dasharray="2 2"/>')), apply(st) { st.dashDur *= 1.2; st.speed *= 1.1; } },
+      { id: 'wraithborn', name: 'Wraithborn', r: 4, desc: 'Dashes recharge 30% faster, grazes charge your ultimate 50% more.', icon: assetIcon('pilot', 'wraithborn', svg('<path d="M12 2l3 7h7l-6 4 2 8-6-5-6 5 2-8-6-4h7z"/>')), apply(st) { st.dashRecharge *= 0.7; st.grazeOd *= 1.5; } },
     ],
   },
 ];

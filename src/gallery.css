@@ -47,7 +47,7 @@
     animation: note-pop 0.6s 0.15s cubic-bezier(.3, 1.8, .5, 1) both;
 }
 
-.note-ico svg {
+.note-ico > :is(svg, .asset-icon) {
     width: 100%;
     height: 100%;
     filter: drop-shadow(0 0 0.25em var(--c));
@@ -299,7 +299,7 @@
     transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
 }
 
-.gl-tile svg {
+.gl-tile > :is(svg, .asset-icon) {
     width: 2.6em;
     height: 2.6em;
     opacity: 0.22;
@@ -318,7 +318,7 @@
     border-color: color-mix(in srgb, var(--c) 40%, transparent);
 }
 
-.gl-tile.own svg {
+.gl-tile.own > :is(svg, .asset-icon) {
     opacity: 1;
     filter: drop-shadow(0 0 0.35em var(--c));
 }
@@ -335,7 +335,7 @@
     box-shadow: inset 0 0 1.2em rgba(255, 210, 74, 0.18);
 }
 
-.gl-tile.legend.own svg {
+.gl-tile.legend.own > :is(svg, .asset-icon) {
     filter: drop-shadow(0 0 0.45em #ffd24a);
     animation: legend-bob 2.4s ease-in-out infinite;
 }
@@ -352,7 +352,7 @@
     transform: translateY(-0.1em);
 }
 
-.gl-tile.pop svg {
+.gl-tile.pop > :is(svg, .asset-icon) {
     animation: relic-pop 0.7s cubic-bezier(.3, 1.8, .5, 1) both;
 }
 
@@ -427,7 +427,7 @@
     border: 1px dashed rgba(255, 255, 255, 0.15);
 }
 
-.gl-big svg {
+.gl-big > :is(svg, .asset-icon) {
     width: 100%;
     height: 100%;
     opacity: 0.25;
@@ -446,7 +446,7 @@
     background: color-mix(in srgb, var(--c) 12%, transparent);
 }
 
-.gl-big.own svg {
+.gl-big.own > :is(svg, .asset-icon) {
     opacity: 1;
     filter: drop-shadow(0 0 0.4em var(--c));
 }
@@ -549,7 +549,7 @@
     background: rgba(255, 255, 255, 0.04);
 }
 
-.ach-ico svg {
+.ach-ico > :is(svg, .asset-icon) {
     width: 100%;
     height: 100%;
 }
@@ -626,8 +626,8 @@
     .note-ico,
     .note-ico::after,
     .note.shine::after,
-    .gl-tile.legend.own svg,
-    .gl-tile.pop svg,
+    .gl-tile.legend.own > :is(svg, .asset-icon),
+    .gl-tile.pop > :is(svg, .asset-icon),
     .gl-tile.pop::after {
         animation: none !important;
     }

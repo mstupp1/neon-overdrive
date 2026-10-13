@@ -1,3 +1,4 @@
+import { assetIcon } from './asset-icons.js';
 // Notification toasts (achievements, relic finds, set completions, gear / pilot finds): small pills that drop in at the
 // top, at most three at a time; the rest wait their turn.
 
@@ -8,8 +9,8 @@ import { RARITY as GEAR_RARITY } from '../game/rarity.js';
 import { onLoot } from '../game/loot.js';
 import { gearDef, itemName, SLOT_INFO } from '../game/parts.js';
 
-const STAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.3 6.8 19.1l1-5.8L3.5 9.2l5.9-.8z"/></svg>';
-const SET = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l8.2 4.75v9.5L12 21.5l-8.2-4.75v-9.5z"/><path d="M8 12.2l2.8 2.8L16.2 9.6"/></svg>';
+const STAR = assetIcon('items', 'trophy', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.3 6.8 19.1l1-5.8L3.5 9.2l5.9-.8z"/></svg>');
+const SET = assetIcon('choices', 'vault', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l8.2 4.75v9.5L12 21.5l-8.2-4.75v-9.5z"/><path d="M8 12.2l2.8 2.8L16.2 9.6"/></svg>');
 const MAX = 3;
 const LIFE = 3600;
 

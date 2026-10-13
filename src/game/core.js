@@ -1,3 +1,4 @@
+import { assetIcon } from '../ui/asset-icons.js';
 // Endgame: Overdrive tiers (difficulty picked before launch), the Deep Grid (the run loops on after THE VOID) and the
 // Flux Core (permanent, uncapped stat levels bought with Flux, the endgame currency).
 // Heat = tier + deep cycle. It scales enemies (applyHeat) and the rewards; Flux only drops while heat > 0.
@@ -46,6 +47,13 @@ export const CORE = [
   { id: 'reroll', name: 'Probability Engine', base: 15, growth: 1.9, color: '#5dff6a', icon: svg('<path d="M4 12a8 8 0 0114-5.3L20 9M20 4v5h-5M20 12a8 8 0 01-14 5.3L4 15M4 20v-5h5"/>'), desc: (lv) => `+1 starting reroll per level (now +${lv}).`, apply: (st, lv) => (st.rerolls += lv) },
   { id: 'expand', name: 'Neural Expansion', base: 30, growth: 1.45, color: '#3ff6ff', icon: svg('<circle cx="12" cy="12" r="2.5"/><circle cx="12" cy="4" r="1.6"/><circle cx="19" cy="16" r="1.6"/><circle cx="5" cy="16" r="1.6"/><path d="M12 9.5V5.6M14.2 13.3l3.4 1.9M9.8 13.3l-3.4 1.9"/>'), desc: (lv) => `+1 passive tree point per level (now +${lv}).`, apply: () => {} }, // read by tree.js treePoints
 ];
+
+const CORE_ART = { dmg: 'power', rate: 'rate', crit: 'crit', hull: 'hull', od: 'capacitor', credits: 'credits', boost: 'boostTank' };
+for (const node of CORE) {
+  const group = ['reroll', 'xp', 'expand'].includes(node.id) ? 'choices' : 'upgrades';
+  const artId = CORE_ART[node.id] || node.id;
+  node.icon = assetIcon(group, artId, node.icon);
+}
 
 export const coreCost = (node, lv) => Math.round(node.base * Math.pow(node.growth, lv));
 

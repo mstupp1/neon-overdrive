@@ -13,6 +13,7 @@
 // State lives on G.run.ow (the current leg); the leg's enemies live in G.enemies while the run is in it.
 
 import { G, view, field, inField, sectorDifficulty, enemyHit } from './state.js';
+import { iconImage } from '../ui/asset-icons.js';
 import { input, readDirection } from '../core/input.js';
 import { sfx } from '../core/audio.js';
 import { beat } from '../core/beat.js';
@@ -108,9 +109,7 @@ function icon(type, color) {
   const key = type + '|' + color;
   let img = icons[key];
   if (!img) {
-    img = new Image();
-    const src = NODE_ICONS[type].replace('<svg ', `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" `).replace('currentColor', color);
-    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(src);
+    img = iconImage(NODE_ICONS[type], color);
     icons[key] = img;
   }
   return img;
@@ -1333,7 +1332,7 @@ function drawStart(ctx, vis) {
   ctx.lineWidth = 2;
   ctx.strokeRect(q.x - 22, q.y - 22, 44, 44);
   const ic = icon(node ? 'check' : 'combat', node ? '#ffffff' : col);
-  if (ic.complete) ctx.drawImage(ic, q.x - 12, q.y - 12, 24, 24);
+  if (ic.complete && ic.naturalWidth > 0) ctx.drawImage(ic, q.x - 12, q.y - 12, 24, 24);
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
   ctx.font = `700 ${12 / ZOOM}px ${FONT2}`;
@@ -1386,7 +1385,7 @@ function drawExit(ctx, e) {
   const ic = icon(n.type, col);
   const is = boss ? 36 : 28;
   ctx.globalAlpha = 1;
-  if (ic.complete) ctx.drawImage(ic, e.x - is / 2, e.y - is / 2, is, is);
+  if (ic.complete && ic.naturalWidth > 0) ctx.drawImage(ic, e.x - is / 2, e.y - is / 2, is, is);
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
   ctx.font = `700 ${(boss ? 15 : 13) / ZOOM}px ${FONT}`;
@@ -1441,7 +1440,7 @@ function drawSites(ctx, vis) {
     ctx.fillRect(site.x - half, by - half, half * 2, half * 2);
     ctx.strokeRect(site.x - half, by - half, half * 2, half * 2);
     const ic = icon(def.icon, def.color);
-    if (ic.complete) ctx.drawImage(ic, site.x - 10, by - 10, 20, 20);
+    if (ic.complete && ic.naturalWidth > 0) ctx.drawImage(ic, site.x - 10, by - 10, 20, 20);
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
     ctx.font = `700 ${11.5 / ZOOM}px ${FONT}`;
@@ -1764,7 +1763,7 @@ function drawMap(ctx, a) {
     ctx.lineWidth = 2;
     ctx.strokeRect(x - 9, y - 9, 18, 18);
     const ic = icon(e.node.type, col);
-    if (ic.complete) ctx.drawImage(ic, x - 7, y - 7, 14, 14);
+    if (ic.complete && ic.naturalWidth > 0) ctx.drawImage(ic, x - 7, y - 7, 14, 14);
     text(ctx, NODE_TYPES[e.node.type].name, x, y + 18, 11, col, 'center', 700, FONT2);
   }
   // Ship marker

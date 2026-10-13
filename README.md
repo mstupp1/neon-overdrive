@@ -242,6 +242,14 @@ Use the repository skill at `.agents/skills/neon-background-assets/SKILL.md` for
 
 Run `node --test tools/test_background_layers.mjs` for renderer checks. `tools/background_assets.py` validates PNG alpha and tile edges and exports with nearest-neighbor scaling; it does not generate or retouch art.
 
+## Item artwork workflow
+
+Generated gameplay icons live in `src/assets/icons/` (upgrades, pilots, items and choices). Source masters and prompts are preserved in the matching `art/icons/` directories. The shared `src/ui/asset-icons.js` renderer supports both menu markup and overworld Canvas icons, retaining the original SVG as an image-load fallback.
+
+Serve the repository and open `/tools/icon-preview.html` to inspect exported artwork at several sizes, or `/tools/icon-ui-preview.html` to check the actual game definitions in production card styles and compare original glyphs. `/tools/icon-live-preview.html` opens real drafts, pilots, gear and the overworld map. Both game previews use in-memory storage.
+
+Use the imagegen skill for individual transparent assets, following `art/icons/brief.md`. Export 256px RGBA runtime PNGs; keep labels and rarity frames in the UI. Run `node --test tools/test_icon_images.mjs` for Canvas loading and fallback checks.
+
 ## Performance notes
 
 - All glow is baked into offscreen sprites once; nothing uses `shadowBlur` per frame.
