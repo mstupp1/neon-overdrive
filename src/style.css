@@ -692,7 +692,7 @@ body {
     filter: drop-shadow(0 0 0.3em var(--c));
 }
 
-.card-icon svg {
+.card-icon > :is(svg, .asset-icon) {
     width: 100%;
     height: 100%;
     display: block;
@@ -797,7 +797,7 @@ kbd {
     height: 2.3em;
 }
 
-.build .chip svg {
+.build .chip > :is(svg, .asset-icon) {
     width: 100%;
     height: 100%;
     display: block;
@@ -1097,8 +1097,8 @@ input[type='range']::-moz-range-thumb {
     max-height: 24em;
 }
 
-.sysmap svg,
-.routemap svg {
+.sysmap > :is(svg, .asset-icon),
+.routemap > :is(svg, .asset-icon) {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -1154,7 +1154,7 @@ input[type='range']::-moz-range-thumb {
     box-shadow: 0 0 0.9em color-mix(in srgb, var(--c) 70%, transparent);
 }
 
-.sys-orb svg {
+.sys-orb > :is(svg, .asset-icon) {
     width: 62%;
     height: 62%;
 }
@@ -1184,7 +1184,7 @@ input[type='range']::-moz-range-thumb {
     box-shadow: 0 0 1.2em color-mix(in srgb, var(--c) 50%, transparent), inset 0 0 1.4em color-mix(in srgb, var(--c) 14%, transparent);
 }
 
-.sys.done .sys-orb svg {
+.sys.done .sys-orb > :is(svg, .asset-icon) {
     width: 70%;
     height: 70%;
 }
@@ -1362,7 +1362,7 @@ input[type='range']::-moz-range-thumb {
     margin: auto;
 }
 
-.rn-ico svg {
+.rn-ico > :is(svg, .asset-icon) {
     width: 100%;
     height: 100%;
     display: block;
@@ -1477,7 +1477,7 @@ input[type='range']::-moz-range-thumb {
     box-shadow: 0 0 1.4em color-mix(in srgb, var(--c) 50%, transparent);
 }
 
-.node-icon svg {
+.node-icon > :is(svg, .asset-icon) {
     width: 100%;
     height: 100%;
     display: block;
@@ -1951,7 +1951,7 @@ input[type='range']::-moz-range-thumb {
     filter: drop-shadow(0 0 0.25em var(--c));
 }
 
-.slot-ico svg {
+.slot-ico > :is(svg, .asset-icon) {
     width: 100%;
     height: 100%;
 }
@@ -2239,7 +2239,7 @@ input[type='range']::-moz-range-thumb {
     filter: drop-shadow(0 0 0.25em var(--c));
 }
 
-.cls-ico svg {
+.cls-ico > :is(svg, .asset-icon) {
     width: 100%;
     height: 100%;
     display: block;
@@ -2380,7 +2380,7 @@ input[type='range']::-moz-range-thumb {
     white-space: nowrap;
 }
 
-.card-flag svg {
+.card-flag > :is(svg, .asset-icon) {
     width: 1em;
     height: 1em;
 }
@@ -2975,7 +2975,7 @@ input[type='range']::-moz-range-thumb {
     filter: drop-shadow(0 0 0.3em var(--rc));
 }
 
-.gd-ico svg {
+.gd-ico > :is(svg, .asset-icon) {
     display: block;
     width: 100%;
     height: 100%;
@@ -3136,7 +3136,7 @@ input[type='range']::-moz-range-thumb {
     transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
 }
 
-.inv-tile svg {
+.inv-tile > :is(svg, .asset-icon) {
     display: block;
     width: 100%;
     height: 100%;
@@ -3413,7 +3413,7 @@ input[type='range']::-moz-range-thumb {
     filter: drop-shadow(0 0 0.3em var(--c));
 }
 
-.ab-icon svg {
+.ab-icon > :is(svg, .asset-icon) {
     display: block;
     width: 100%;
     height: 100%;
@@ -3444,7 +3444,7 @@ input[type='range']::-moz-range-thumb {
     color: var(--dim);
 }
 
-.ab-mark.lk svg {
+.ab-mark.lk > :is(svg, .asset-icon) {
     display: block;
     width: 100%;
     height: 100%;
@@ -4008,7 +4008,7 @@ input[type='range']::-moz-range-thumb {
     transition: color 0.12s, border-color 0.12s, box-shadow 0.12s;
 }
 
-.card-lock svg {
+.card-lock > :is(svg, .asset-icon) {
     display: block;
     width: 100%;
     height: 100%;
@@ -4576,7 +4576,7 @@ input[type='range']::-moz-range-thumb {
     color: var(--c);
 }
 
-.rd-ico svg {
+.rd-ico > :is(svg, .asset-icon) {
     width: 100%;
     height: 100%;
     display: block;
@@ -4689,7 +4689,7 @@ input[type='range']::-moz-range-thumb {
     cursor: default;
 }
 
-.rd-chips .chip svg {
+.rd-chips .chip > :is(svg, .asset-icon) {
     width: 100%;
     height: 100%;
     display: block;
@@ -4747,3 +4747,20 @@ input[type='range']::-moz-range-thumb {
 .rd-run {
     max-width: none;
 }
+.asset-icon {
+    display: inline-grid;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+    vertical-align: middle;
+}
+.asset-icon > img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.asset-icon-fallback { display: none; }
+.asset-icon-fallback > svg { display: block; width: 100%; height: 100%; }
+.asset-icon-missing > img { display: none; }
+.asset-icon-missing > .asset-icon-fallback { display: contents; }

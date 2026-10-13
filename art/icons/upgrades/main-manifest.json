@@ -1,0 +1,566 @@
+{
+  "group": "upgrades",
+  "style": "dark-glass sci-fi machinery with restrained cyan, magenta, and gold neon rims",
+  "generated": 62,
+  "registryCount": 75,
+  "assets": [
+    {
+      "id": "main",
+      "runtime": "src/assets/icons/upgrades/main.png",
+      "source": "art/icons/upgrades/sources/main.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id main. Subject: a compact sci-fi game illustration representing main. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "power",
+      "runtime": "src/assets/icons/upgrades/power.png",
+      "source": "art/icons/upgrades/sources/power.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id power. Subject: a compact sci-fi game illustration representing power. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "rate",
+      "runtime": "src/assets/icons/upgrades/rate.png",
+      "source": "art/icons/upgrades/sources/rate.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id rate. Subject: a compact sci-fi game illustration representing rate. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "thrusters",
+      "runtime": "src/assets/icons/upgrades/thrusters.png",
+      "source": "art/icons/upgrades/sources/thrusters.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id thrusters. Subject: a compact sci-fi game illustration representing thrusters. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "hull",
+      "runtime": "src/assets/icons/upgrades/hull.png",
+      "source": "art/icons/upgrades/sources/hull.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id hull. Subject: a compact sci-fi game illustration representing hull. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "magnet",
+      "runtime": "src/assets/icons/upgrades/magnet.png",
+      "source": "art/icons/upgrades/sources/magnet.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id magnet. Subject: a compact sci-fi game illustration representing magnet. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "crit",
+      "runtime": "src/assets/icons/upgrades/crit.png",
+      "source": "art/icons/upgrades/sources/crit.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id crit. Subject: a compact sci-fi game illustration representing crit. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "pierce",
+      "runtime": "src/assets/icons/upgrades/pierce.png",
+      "source": "art/icons/upgrades/sources/pierce.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id pierce. Subject: a compact sci-fi game illustration representing pierce. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "capacitor",
+      "runtime": "src/assets/icons/upgrades/capacitor.png",
+      "source": "art/icons/upgrades/sources/capacitor.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id capacitor. Subject: a compact sci-fi game illustration representing capacitor. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "aegis",
+      "runtime": "src/assets/icons/upgrades/aegis.png",
+      "source": "art/icons/upgrades/sources/aegis.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id aegis. Subject: a compact sci-fi game illustration representing aegis. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "dashes",
+      "runtime": "src/assets/icons/upgrades/dashes.png",
+      "source": "art/icons/upgrades/sources/dashes.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id dashes. Subject: a compact sci-fi game illustration representing dashes. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "missiles",
+      "runtime": "src/assets/icons/upgrades/missiles.png",
+      "source": "art/icons/upgrades/sources/missiles.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id missiles. Subject: a compact sci-fi game illustration representing missiles. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "orbitals",
+      "runtime": "src/assets/icons/upgrades/orbitals.png",
+      "source": "art/icons/upgrades/sources/orbitals.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id orbitals. Subject: a compact sci-fi game illustration representing orbitals. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "drones",
+      "runtime": "src/assets/icons/upgrades/drones.png",
+      "source": "art/icons/upgrades/sources/drones.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id drones. Subject: a compact sci-fi game illustration representing drones. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "arc",
+      "runtime": "src/assets/icons/upgrades/arc.png",
+      "source": "art/icons/upgrades/sources/arc.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id arc. Subject: a compact sci-fi game illustration representing arc. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "nova",
+      "runtime": "src/assets/icons/upgrades/nova.png",
+      "source": "art/icons/upgrades/sources/nova.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id nova. Subject: a compact sci-fi game illustration representing nova. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "rail",
+      "runtime": "src/assets/icons/upgrades/rail.png",
+      "source": "art/icons/upgrades/sources/rail.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id rail. Subject: a compact sci-fi game illustration representing rail. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "shrapnel",
+      "runtime": "src/assets/icons/upgrades/shrapnel.png",
+      "source": "art/icons/upgrades/sources/shrapnel.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id shrapnel. Subject: a compact sci-fi game illustration representing shrapnel. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "dashNova",
+      "runtime": "src/assets/icons/upgrades/dashNova.png",
+      "source": "art/icons/upgrades/sources/dashNova.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id dashNova. Subject: a compact sci-fi game illustration representing dash Nova. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "gravity",
+      "runtime": "src/assets/icons/upgrades/gravity.png",
+      "source": "art/icons/upgrades/sources/gravity.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id gravity. Subject: a compact sci-fi game illustration representing gravity. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "reflector",
+      "runtime": "src/assets/icons/upgrades/reflector.png",
+      "source": "art/icons/upgrades/sources/reflector.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id reflector. Subject: a compact sci-fi game illustration representing reflector. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "flak",
+      "runtime": "src/assets/icons/upgrades/flak.png",
+      "source": "art/icons/upgrades/sources/flak.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id flak. Subject: a compact sci-fi game illustration representing flak. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "hellfire",
+      "runtime": "src/assets/icons/upgrades/hellfire.png",
+      "source": "art/icons/upgrades/sources/hellfire.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id hellfire. Subject: a compact sci-fi game illustration representing hellfire. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "stormhalo",
+      "runtime": "src/assets/icons/upgrades/stormhalo.png",
+      "source": "art/icons/upgrades/sources/stormhalo.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id stormhalo. Subject: a compact sci-fi game illustration representing stormhalo. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "teslastorm",
+      "runtime": "src/assets/icons/upgrades/teslastorm.png",
+      "source": "art/icons/upgrades/sources/teslastorm.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id teslastorm. Subject: a compact sci-fi game illustration representing teslastorm. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "annihilator",
+      "runtime": "src/assets/icons/upgrades/annihilator.png",
+      "source": "art/icons/upgrades/sources/annihilator.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id annihilator. Subject: a compact sci-fi game illustration representing annihilator. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "salvage",
+      "runtime": "src/assets/icons/upgrades/salvage.png",
+      "source": "art/icons/upgrades/sources/salvage.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id salvage. Subject: a compact sci-fi game illustration representing salvage. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "chainlink",
+      "runtime": "src/assets/icons/upgrades/chainlink.png",
+      "source": "art/icons/upgrades/sources/chainlink.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id chainlink. Subject: a compact sci-fi game illustration representing chainlink. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "grazer",
+      "runtime": "src/assets/icons/upgrades/grazer.png",
+      "source": "art/icons/upgrades/sources/grazer.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id grazer. Subject: a compact sci-fi game illustration representing grazer. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "prospector",
+      "runtime": "src/assets/icons/upgrades/prospector.png",
+      "source": "art/icons/upgrades/sources/prospector.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id prospector. Subject: a compact sci-fi game illustration representing prospector. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "overload",
+      "runtime": "src/assets/icons/upgrades/overload.png",
+      "source": "art/icons/upgrades/sources/overload.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id overload. Subject: a compact sci-fi game illustration representing overload. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "splinter",
+      "runtime": "src/assets/icons/upgrades/splinter.png",
+      "source": "art/icons/upgrades/sources/splinter.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id splinter. Subject: a compact sci-fi game illustration representing splinter. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "redline",
+      "runtime": "src/assets/icons/upgrades/redline.png",
+      "source": "art/icons/upgrades/sources/redline.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id redline. Subject: a compact sci-fi game illustration representing redline. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "blink",
+      "runtime": "src/assets/icons/upgrades/blink.png",
+      "source": "art/icons/upgrades/sources/blink.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id blink. Subject: a compact sci-fi game illustration representing blink. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "leech",
+      "runtime": "src/assets/icons/upgrades/leech.png",
+      "source": "art/icons/upgrades/sources/leech.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id leech. Subject: a compact sci-fi game illustration representing leech. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "bounty",
+      "runtime": "src/assets/icons/upgrades/bounty.png",
+      "source": "art/icons/upgrades/sources/bounty.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id bounty. Subject: a compact sci-fi game illustration representing bounty. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "mines",
+      "runtime": "src/assets/icons/upgrades/mines.png",
+      "source": "art/icons/upgrades/sources/mines.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id mines. Subject: a compact sci-fi game illustration representing mines. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "secondWind",
+      "runtime": "src/assets/icons/upgrades/secondWind.png",
+      "source": "art/icons/upgrades/sources/secondWind.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id secondWind. Subject: a compact sci-fi game illustration representing second Wind. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "cull",
+      "runtime": "src/assets/icons/upgrades/cull.png",
+      "source": "art/icons/upgrades/sources/cull.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id cull. Subject: a compact sci-fi game illustration representing cull. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "echoFire",
+      "runtime": "src/assets/icons/upgrades/echoFire.png",
+      "source": "art/icons/upgrades/sources/echoFire.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id echoFire. Subject: a compact sci-fi game illustration representing echoFire. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "static",
+      "runtime": "src/assets/icons/upgrades/static.png",
+      "source": "art/icons/upgrades/sources/static.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id static. Subject: a compact sci-fi game illustration representing static. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "saw",
+      "runtime": "src/assets/icons/upgrades/saw.png",
+      "source": "art/icons/upgrades/sources/saw.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id saw. Subject: a compact sci-fi game illustration representing saw. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "stasis",
+      "runtime": "src/assets/icons/upgrades/stasis.png",
+      "source": "art/icons/upgrades/sources/stasis.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id stasis. Subject: a compact sci-fi game illustration representing stasis. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "perpetual",
+      "runtime": "src/assets/icons/upgrades/perpetual.png",
+      "source": "art/icons/upgrades/sources/perpetual.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id perpetual. Subject: a compact sci-fi game illustration representing perpetual. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "prism",
+      "runtime": "src/assets/icons/upgrades/prism.png",
+      "source": "art/icons/upgrades/sources/prism.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id prism. Subject: a compact sci-fi game illustration representing prism. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "starfall",
+      "runtime": "src/assets/icons/upgrades/starfall.png",
+      "source": "art/icons/upgrades/sources/starfall.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id starfall. Subject: a compact sci-fi game illustration representing starfall. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "nullField",
+      "runtime": "src/assets/icons/upgrades/nullField.png",
+      "source": "art/icons/upgrades/sources/nullField.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id nullField. Subject: a compact sci-fi game illustration representing null Field. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "supernova",
+      "runtime": "src/assets/icons/upgrades/supernova.png",
+      "source": "art/icons/upgrades/sources/supernova.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id supernova. Subject: a compact sci-fi game illustration representing supernova. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "phalanx",
+      "runtime": "src/assets/icons/upgrades/phalanx.png",
+      "source": "art/icons/upgrades/sources/phalanx.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id phalanx. Subject: a compact sci-fi game illustration representing phalanx. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "eventHorizon",
+      "runtime": "src/assets/icons/upgrades/eventHorizon.png",
+      "source": "art/icons/upgrades/sources/eventHorizon.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id eventHorizon. Subject: a compact sci-fi game illustration representing eventHorizon. Style: premium dark-glass machinery, crisp compact 3D illustration, restrained cyan/magenta/gold neon rim, high contrast readable at 32\u201364px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "mirrorstorm",
+      "runtime": "src/assets/icons/upgrades/mirrorstorm.png",
+      "source": "art/icons/upgrades/sources/mirrorstorm.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id mirrorstorm. Subject: cyan reflective shield arc scattering three red energy bolts. Style: premium dark-glass sci-fi machinery; crisp compact 3D illustration, restrained cyan/magenta/gold neon rim; high contrast readable at 32-64px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "boostTank",
+      "runtime": "src/assets/icons/upgrades/boostTank.png",
+      "source": "art/icons/upgrades/sources/boostTank.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id boostTank. Subject: compact gold charge tank with a bright energized core. Style: premium dark-glass sci-fi machinery; crisp compact 3D illustration, restrained cyan/magenta/gold neon rim; high contrast readable at 32-64px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "ramScoop",
+      "runtime": "src/assets/icons/upgrades/ramScoop.png",
+      "source": "art/icons/upgrades/sources/ramScoop.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id ramScoop. Subject: wide magnetic scoop collecting metal debris into a cyan stream. Style: premium dark-glass sci-fi machinery; crisp compact 3D illustration, restrained cyan/magenta/gold neon rim; high contrast readable at 32-64px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "injector",
+      "runtime": "src/assets/icons/upgrades/injector.png",
+      "source": "art/icons/upgrades/sources/injector.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id injector. Subject: dark-glass energy injector canister with a cyan plunger and glow. Style: premium dark-glass sci-fi machinery; crisp compact 3D illustration, restrained cyan/magenta/gold neon rim; high contrast readable at 32-64px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "overthrust",
+      "runtime": "src/assets/icons/upgrades/overthrust.png",
+      "source": "art/icons/upgrades/sources/overthrust.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id overthrust. Subject: three compact thruster nozzles firing with vivid cyan exhaust. Style: premium dark-glass sci-fi machinery; crisp compact 3D illustration, restrained cyan/magenta/gold neon rim; high contrast readable at 32-64px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "projSize",
+      "runtime": "src/assets/icons/upgrades/projSize.png",
+      "source": "art/icons/upgrades/sources/projSize.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id projSize. Subject: large glowing cyan projectile with an expanded ring. Style: premium dark-glass sci-fi machinery; crisp compact 3D illustration, restrained cyan/magenta/gold neon rim; high contrast readable at 32-64px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "projSpeed",
+      "runtime": "src/assets/icons/upgrades/projSpeed.png",
+      "source": "art/icons/upgrades/sources/projSpeed.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id projSpeed. Subject: fast cyan projectile passing through concentric accelerator coils. Style: premium dark-glass sci-fi machinery; crisp compact 3D illustration, restrained cyan/magenta/gold neon rim; high contrast readable at 32-64px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "gameSpeed",
+      "runtime": "src/assets/icons/upgrades/gameSpeed.png",
+      "source": "art/icons/upgrades/sources/gameSpeed.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id gameSpeed. Subject: precision time dial with a bright fast-moving blue hand. Style: premium dark-glass sci-fi machinery; crisp compact 3D illustration, restrained cyan/magenta/gold neon rim; high contrast readable at 32-64px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "dodge",
+      "runtime": "src/assets/icons/upgrades/dodge.png",
+      "source": "art/icons/upgrades/sources/dodge.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id dodge. Subject: small agile cyan ship twisting past a close red projectile. Style: premium dark-glass sci-fi machinery; crisp compact 3D illustration, restrained cyan/magenta/gold neon rim; high contrast readable at 32-64px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "armorPierce",
+      "runtime": "src/assets/icons/upgrades/armorPierce.png",
+      "source": "art/icons/upgrades/sources/armorPierce.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id armorPierce. Subject: gold tipped projectile punching through a heavy armor plate. Style: premium dark-glass sci-fi machinery; crisp compact 3D illustration, restrained cyan/magenta/gold neon rim; high contrast readable at 32-64px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "burstFire",
+      "runtime": "src/assets/icons/upgrades/burstFire.png",
+      "source": "art/icons/upgrades/sources/burstFire.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id burstFire. Subject: three bright cyan cannon rounds firing in rapid succession. Style: premium dark-glass sci-fi machinery; crisp compact 3D illustration, restrained cyan/magenta/gold neon rim; high contrast readable at 32-64px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    },
+    {
+      "id": "cryo",
+      "runtime": "src/assets/icons/upgrades/cryo.png",
+      "source": "art/icons/upgrades/sources/cryo.png",
+      "prompt": "Use case: game asset. Asset type: isolated transparent NEON OVERDRIVE upgrade icon, id cryo. Subject: cyan frozen projectile with a sharp snowflake crystal shell. Style: premium dark-glass sci-fi machinery; crisp compact 3D illustration, restrained cyan/magenta/gold neon rim; high contrast readable at 32-64px. One centered object with clear transparent margin; no badge, no card, text, letters, or watermark. True transparent background.",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256
+    }
+  ]
+}

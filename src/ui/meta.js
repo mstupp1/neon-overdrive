@@ -1,3 +1,4 @@
+import { assetIcon } from './asset-icons.js';
 // Campaign-layer screens: campaign map, in-run route, anomaly event, market, dock, extraction.
 // Render-only; flow/handlers live in main.js. Shared helpers come from screens.js.
 
@@ -32,6 +33,10 @@ export const NODE_ICONS = {
   lock: svg('<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>'),
   check: svg('<path d="M5 12.5l4.5 4.5L19 7"/>'),
 };
+for (const id of ['combat', 'elite', 'market', 'dock', 'anomaly', 'vault', 'rift', 'boss']) {
+  NODE_ICONS[id] = assetIcon('choices', id, NODE_ICONS[id]);
+}
+
 
 const coin = '<svg class="coin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5l3.5 4.5-3.5 4.5-3.5-4.5z"/></svg>';
 const fmt = (n) => Math.floor(n).toLocaleString();

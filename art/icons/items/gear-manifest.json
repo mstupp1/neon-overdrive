@@ -1,0 +1,381 @@
+{
+  "assets": [
+    {
+      "id": "glass",
+      "source": "art/icons/items/sources/glass.png",
+      "runtime": "src/assets/icons/items/glass.png",
+      "prompt": "art/icons/items/prompts/glass.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "cycler",
+      "source": "art/icons/items/sources/cycler.png",
+      "runtime": "src/assets/icons/items/cycler.png",
+      "prompt": "art/icons/items/prompts/cycler.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true,
+      "revision": "replaced opaque-edge source; runtime alpha verified min=0 at 256x256"
+    },
+    {
+      "id": "breach",
+      "source": "art/icons/items/sources/breach.png",
+      "runtime": "src/assets/icons/items/breach.png",
+      "prompt": "art/icons/items/prompts/breach.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "optics",
+      "source": "art/icons/items/sources/optics.png",
+      "runtime": "src/assets/icons/items/optics.png",
+      "prompt": "art/icons/items/prompts/optics.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "swarmcpu",
+      "source": "art/icons/items/sources/swarmcpu.png",
+      "runtime": "src/assets/icons/items/swarmcpu.png",
+      "prompt": "art/icons/items/prompts/swarmcpu.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "fluxcap",
+      "source": "art/icons/items/sources/fluxcap.png",
+      "runtime": "src/assets/icons/items/fluxcap.png",
+      "prompt": "art/icons/items/prompts/fluxcap.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "siphon",
+      "source": "art/icons/items/sources/siphon.png",
+      "runtime": "src/assets/icons/items/siphon.png",
+      "prompt": "art/icons/items/prompts/siphon.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "reactive",
+      "source": "art/icons/items/sources/reactive.png",
+      "runtime": "src/assets/icons/items/reactive.png",
+      "prompt": "art/icons/items/prompts/reactive.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "aegisPlate",
+      "source": "art/icons/items/sources/aegisPlate.png",
+      "runtime": "src/assets/icons/items/aegisPlate.png",
+      "prompt": "art/icons/items/prompts/aegisPlate.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "ablative",
+      "source": "art/icons/items/sources/ablative.png",
+      "runtime": "src/assets/icons/items/ablative.png",
+      "prompt": "art/icons/items/prompts/ablative.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "huntplate",
+      "source": "art/icons/items/sources/huntplate.png",
+      "runtime": "src/assets/icons/items/huntplate.png",
+      "prompt": "art/icons/items/prompts/huntplate.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "baymount",
+      "source": "art/icons/items/sources/baymount.png",
+      "runtime": "src/assets/icons/items/baymount.png",
+      "prompt": "art/icons/items/prompts/baymount.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "graze",
+      "source": "art/icons/items/sources/graze.png",
+      "runtime": "src/assets/icons/items/graze.png",
+      "prompt": "art/icons/items/prompts/graze.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "salvage",
+      "source": "art/icons/items/sources/salvage.png",
+      "runtime": "src/assets/icons/items/salvage.png",
+      "prompt": "art/icons/items/prompts/salvage.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "afterburner",
+      "source": "art/icons/items/sources/afterburner.png",
+      "runtime": "src/assets/icons/items/afterburner.png",
+      "prompt": "art/icons/items/prompts/afterburner.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "fins",
+      "source": "art/icons/items/sources/fins.png",
+      "runtime": "src/assets/icons/items/fins.png",
+      "prompt": "art/icons/items/prompts/fins.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "phase",
+      "source": "art/icons/items/sources/phase.png",
+      "runtime": "src/assets/icons/items/phase.png",
+      "prompt": "art/icons/items/prompts/phase.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "iontrail",
+      "source": "art/icons/items/sources/iontrail.png",
+      "runtime": "src/assets/icons/items/iontrail.png",
+      "prompt": "art/icons/items/prompts/iontrail.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "surge",
+      "source": "art/icons/items/sources/surge.png",
+      "runtime": "src/assets/icons/items/surge.png",
+      "prompt": "art/icons/items/prompts/surge.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "tether",
+      "source": "art/icons/items/sources/tether.png",
+      "runtime": "src/assets/icons/items/tether.png",
+      "prompt": "art/icons/items/prompts/tether.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "ramjet",
+      "source": "art/icons/items/sources/ramjet.png",
+      "runtime": "src/assets/icons/items/ramjet.png",
+      "prompt": "art/icons/items/prompts/ramjet.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "nitro",
+      "source": "art/icons/items/sources/nitro.png",
+      "runtime": "src/assets/icons/items/nitro.png",
+      "prompt": "art/icons/items/prompts/nitro.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "coil",
+      "source": "art/icons/items/sources/coil.png",
+      "runtime": "src/assets/icons/items/coil.png",
+      "prompt": "art/icons/items/prompts/coil.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "cryocore",
+      "source": "art/icons/items/sources/cryocore.png",
+      "runtime": "src/assets/icons/items/cryocore.png",
+      "prompt": "art/icons/items/prompts/cryocore.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "embercore",
+      "source": "art/icons/items/sources/embercore.png",
+      "runtime": "src/assets/icons/items/embercore.png",
+      "prompt": "art/icons/items/prompts/embercore.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "acidcore",
+      "source": "art/icons/items/sources/acidcore.png",
+      "runtime": "src/assets/icons/items/acidcore.png",
+      "prompt": "art/icons/items/prompts/acidcore.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "burstcoil",
+      "source": "art/icons/items/sources/burstcoil.png",
+      "runtime": "src/assets/icons/items/burstcoil.png",
+      "prompt": "art/icons/items/prompts/burstcoil.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "phasecloak",
+      "source": "art/icons/items/sources/phasecloak.png",
+      "runtime": "src/assets/icons/items/phasecloak.png",
+      "prompt": "art/icons/items/prompts/phasecloak.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "breaker",
+      "source": "art/icons/items/sources/breaker.png",
+      "runtime": "src/assets/icons/items/breaker.png",
+      "prompt": "art/icons/items/prompts/breaker.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "massdriver",
+      "source": "art/icons/items/sources/massdriver.png",
+      "runtime": "src/assets/icons/items/massdriver.png",
+      "prompt": "art/icons/items/prompts/massdriver.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "hellheart",
+      "source": "art/icons/items/sources/hellheart.png",
+      "runtime": "src/assets/icons/items/hellheart.png",
+      "prompt": "art/icons/items/prompts/hellheart.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "hydra",
+      "source": "art/icons/items/sources/hydra.png",
+      "runtime": "src/assets/icons/items/hydra.png",
+      "prompt": "art/icons/items/prompts/hydra.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "conductor",
+      "source": "art/icons/items/sources/conductor.png",
+      "runtime": "src/assets/icons/items/conductor.png",
+      "prompt": "art/icons/items/prompts/conductor.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "bloodreactor",
+      "source": "art/icons/items/sources/bloodreactor.png",
+      "runtime": "src/assets/icons/items/bloodreactor.png",
+      "prompt": "art/icons/items/prompts/bloodreactor.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "phoenix",
+      "source": "art/icons/items/sources/phoenix.png",
+      "runtime": "src/assets/icons/items/phoenix.png",
+      "prompt": "art/icons/items/prompts/phoenix.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "aegisprime",
+      "source": "art/icons/items/sources/aegisprime.png",
+      "runtime": "src/assets/icons/items/aegisprime.png",
+      "prompt": "art/icons/items/prompts/aegisprime.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "nullmantle",
+      "source": "art/icons/items/sources/nullmantle.png",
+      "runtime": "src/assets/icons/items/nullmantle.png",
+      "prompt": "art/icons/items/prompts/nullmantle.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "midas",
+      "source": "art/icons/items/sources/midas.png",
+      "runtime": "src/assets/icons/items/midas.png",
+      "prompt": "art/icons/items/prompts/midas.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "riftwalker",
+      "source": "art/icons/items/sources/riftwalker.png",
+      "runtime": "src/assets/icons/items/riftwalker.png",
+      "prompt": "art/icons/items/prompts/riftwalker.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "echodrive",
+      "source": "art/icons/items/sources/echodrive.png",
+      "runtime": "src/assets/icons/items/echodrive.png",
+      "prompt": "art/icons/items/prompts/echodrive.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "slipvanes",
+      "source": "art/icons/items/sources/slipvanes.png",
+      "runtime": "src/assets/icons/items/slipvanes.png",
+      "prompt": "art/icons/items/prompts/slipvanes.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "turbine",
+      "source": "art/icons/items/sources/turbine.png",
+      "runtime": "src/assets/icons/items/turbine.png",
+      "prompt": "art/icons/items/prompts/turbine.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "cryostasis",
+      "source": "art/icons/items/sources/cryostasis.png",
+      "runtime": "src/assets/icons/items/cryostasis.png",
+      "prompt": "art/icons/items/prompts/cryostasis.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "fracture",
+      "source": "art/icons/items/sources/fracture.png",
+      "runtime": "src/assets/icons/items/fracture.png",
+      "prompt": "art/icons/items/prompts/fracture.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "pyremantle",
+      "source": "art/icons/items/sources/pyremantle.png",
+      "runtime": "src/assets/icons/items/pyremantle.png",
+      "prompt": "art/icons/items/prompts/pyremantle.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "phaseshroud",
+      "source": "art/icons/items/sources/phaseshroud.png",
+      "runtime": "src/assets/icons/items/phaseshroud.png",
+      "prompt": "art/icons/items/prompts/phaseshroud.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    },
+    {
+      "id": "tachyon",
+      "source": "art/icons/items/sources/tachyon.png",
+      "runtime": "src/assets/icons/items/tachyon.png",
+      "prompt": "art/icons/items/prompts/tachyon.txt",
+      "generator": "built-in imagegen",
+      "transparentBackground": true
+    }
+  ]
+}

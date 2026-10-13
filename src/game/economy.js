@@ -1,3 +1,4 @@
+import { assetIcon } from '../ui/asset-icons.js';
 // Credits (run wallet + profile bank), Pilot Rank and the Black Market.
 // Wallet: G.run.wallet is spendable mid-run; G.run.earned is the run total. Multipliers hook into
 // gainCredits: diff.credits (modifiers), p.st.creditMul (later steps), endless ×0.5.
@@ -16,6 +17,8 @@ export const ECON_ICONS = {
   reinforce: svg('<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M12 8v7M8.5 11.5h7"/>'),
   repairFull: svg('<path d="M12 20s-7-4.5-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.5-7 10-7 10z"/><path d="M12 9v5M9.5 11.5h5"/>'),
 };
+for (const id of Object.keys(ECON_ICONS)) ECON_ICONS[id] = assetIcon('choices', id, ECON_ICONS[id]);
+
 
 // --- Wallet ------------------------------------------------------------------------
 

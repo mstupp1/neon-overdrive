@@ -1,0 +1,95 @@
+{
+  "assets": [
+    {
+      "id": "deepFreeze",
+      "name": "Deep Freeze",
+      "source": "art/icons/upgrades/sources/deepFreeze.png",
+      "runtime": "src/assets/icons/upgrades/deepFreeze.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE upgrade icon, square game UI. Primary request: Deep Freeze: Frost ring and crystalline snowflake medallion showing stronger chill. The upgrade effect is status rounds slow enemies; this strengthens each chill stack. Style: dark glass sci-fi machinery, sharply beveled illustrated 3D object, crisp finish. Composition: single centered emblem with a strong readable silhouette and broad fully transparent padding, visible at 32px. Lighting and palette: near-black navy metal, icy cyan luminous core, restrained cyan, magenta and gold rim glints. Materials: polished dark glass, machined seams, subtle rivets, luminous inset channels. Genuine transparent background and clean alpha. No checkerboard, readable text, label, frame, or watermark."
+    },
+    {
+      "id": "incendiary",
+      "name": "Incendiary Rounds",
+      "source": "art/icons/upgrades/sources/incendiary.png",
+      "runtime": "src/assets/icons/upgrades/incendiary.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE upgrade icon, square game UI. Primary request: Incendiary Rounds: Armored projectile round with an ignited core and a thin flame halo. The upgrade effect is each hit can ignite enemies with armor-piercing burn. Style: dark glass sci-fi machinery, sharply beveled illustrated 3D object, crisp finish. Composition: single centered emblem with a strong readable silhouette and broad fully transparent padding, visible at 32px. Lighting and palette: near-black navy metal, hot orange-red luminous core, restrained cyan, magenta and gold rim glints. Materials: polished dark glass, machined seams, subtle rivets, luminous inset channels. Genuine transparent background and clean alpha. No checkerboard, readable text, label, frame, or watermark."
+    },
+    {
+      "id": "accelerant",
+      "name": "Accelerant",
+      "source": "art/icons/upgrades/sources/accelerant.png",
+      "runtime": "src/assets/icons/upgrades/accelerant.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE upgrade icon, square game UI. Primary request: Accelerant: A burning projectile wrapped by fast forward streaks and a hotter flame core. The upgrade effect is burn stacks deal more damage. Style: dark glass sci-fi machinery, sharply beveled illustrated 3D object, crisp finish. Composition: single centered emblem with a strong readable silhouette and broad fully transparent padding, visible at 32px. Lighting and palette: near-black navy metal, orange-gold luminous core, restrained cyan, magenta and gold rim glints. Materials: polished dark glass, machined seams, subtle rivets, luminous inset channels. Genuine transparent background and clean alpha. No checkerboard, readable text, label, frame, or watermark."
+    },
+    {
+      "id": "corrosive",
+      "name": "Corrosive Rounds",
+      "source": "art/icons/upgrades/sources/corrosive.png",
+      "runtime": "src/assets/icons/upgrades/corrosive.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE upgrade icon, square game UI. Primary request: Corrosive Rounds: Armored projectile round with a vivid acid-green glass core and corrosive droplets. The upgrade effect is each hit can corrode and strip enemy armor. Style: dark glass sci-fi machinery, sharply beveled illustrated 3D object, crisp finish. Composition: single centered emblem with a strong readable silhouette and broad fully transparent padding, visible at 32px. Lighting and palette: near-black navy metal, acid green luminous core, restrained cyan, magenta and gold rim glints. Materials: polished dark glass, machined seams, subtle rivets, luminous inset channels. Genuine transparent background and clean alpha. No checkerboard, readable text, label, frame, or watermark."
+    },
+    {
+      "id": "acidEtch",
+      "name": "Acid Etch",
+      "source": "art/icons/upgrades/sources/acidEtch.png",
+      "runtime": "src/assets/icons/upgrades/acidEtch.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE upgrade icon, square game UI. Primary request: Acid Etch: Acid droplet etching a metal armor plate with a bright branching mark. The upgrade effect is corrosion stacks strip substantially more armor. Style: dark glass sci-fi machinery, sharply beveled illustrated 3D object, crisp finish. Composition: single centered emblem with a strong readable silhouette and broad fully transparent padding, visible at 32px. Lighting and palette: near-black navy metal, acid green luminous core, restrained cyan, magenta and gold rim glints. Materials: polished dark glass, machined seams, subtle rivets, luminous inset channels. Genuine transparent background and clean alpha. No checkerboard, readable text, label, frame, or watermark."
+    },
+    {
+      "id": "resonance",
+      "name": "Resonance Rounds",
+      "source": "art/icons/upgrades/sources/resonance.png",
+      "runtime": "src/assets/icons/upgrades/resonance.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE upgrade icon, square game UI. Primary request: Resonance Rounds: Bright round at the center of expanding concentric impact rings. The upgrade effect is every few hits detonates for heavy splash damage. Style: dark glass sci-fi machinery, sharply beveled illustrated 3D object, crisp finish. Composition: single centered emblem with a strong readable silhouette and broad fully transparent padding, visible at 32px. Lighting and palette: near-black navy metal, electric cyan luminous core, restrained cyan, magenta and gold rim glints. Materials: polished dark glass, machined seams, subtle rivets, luminous inset channels. Genuine transparent background and clean alpha. No checkerboard, readable text, label, frame, or watermark."
+    },
+    {
+      "id": "sundering",
+      "name": "Sundering Rounds",
+      "source": "art/icons/upgrades/sources/sundering.png",
+      "runtime": "src/assets/icons/upgrades/sundering.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE upgrade icon, square game UI. Primary request: Sundering Rounds: Armor-piercing projectile cleaving through a split steel plate. The upgrade effect is hits deal a fraction of the target's maximum hull. Style: dark glass sci-fi machinery, sharply beveled illustrated 3D object, crisp finish. Composition: single centered emblem with a strong readable silhouette and broad fully transparent padding, visible at 32px. Lighting and palette: near-black navy metal, warm gold luminous core, restrained cyan, magenta and gold rim glints. Materials: polished dark glass, machined seams, subtle rivets, luminous inset channels. Genuine transparent background and clean alpha. No checkerboard, readable text, label, frame, or watermark."
+    },
+    {
+      "id": "flamethrower",
+      "name": "Flamethrower",
+      "source": "art/icons/upgrades/sources/flamethrower.png",
+      "runtime": "src/assets/icons/upgrades/flamethrower.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE upgrade icon, square game UI. Primary request: Flamethrower: Compact ship-mounted nozzle projecting a short sculpted cone of hot flame. The upgrade effect is continuous flame cone applies stacking burn. Style: dark glass sci-fi machinery, sharply beveled illustrated 3D object, crisp finish. Composition: single centered emblem with a strong readable silhouette and broad fully transparent padding, visible at 32px. Lighting and palette: near-black navy metal, orange-red luminous core, restrained cyan, magenta and gold rim glints. Materials: polished dark glass, machined seams, subtle rivets, luminous inset channels. Genuine transparent background and clean alpha. No checkerboard, readable text, label, frame, or watermark."
+    },
+    {
+      "id": "droneSwarm",
+      "name": "Drone Swarm",
+      "source": "art/icons/upgrades/sources/droneSwarm.png",
+      "runtime": "src/assets/icons/upgrades/droneSwarm.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE upgrade icon, square game UI. Primary request: Drone Swarm: Three compact autonomous interceptor drones in a tight triangular formation. The upgrade effect is drones strafe targets and return to recharge. Style: dark glass sci-fi machinery, sharply beveled illustrated 3D object, crisp finish. Composition: single centered emblem with a strong readable silhouette and broad fully transparent padding, visible at 32px. Lighting and palette: near-black navy metal, cyan and gold luminous core, restrained cyan, magenta and gold rim glints. Materials: polished dark glass, machined seams, subtle rivets, luminous inset channels. Genuine transparent background and clean alpha. No checkerboard, readable text, label, frame, or watermark."
+    },
+    {
+      "id": "cryoSpike",
+      "name": "Glacial Spike",
+      "source": "art/icons/upgrades/sources/cryoSpike.png",
+      "runtime": "src/assets/icons/upgrades/cryoSpike.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE upgrade icon, square game UI. Primary request: Glacial Spike: A massive faceted ice spike with two smaller icy shards. The upgrade effect is piercing ice spikes shatter into chilling shrapnel. Style: dark glass sci-fi machinery, sharply beveled illustrated 3D object, crisp finish. Composition: single centered emblem with a strong readable silhouette and broad fully transparent padding, visible at 32px. Lighting and palette: near-black navy metal, icy cyan luminous core, restrained cyan, magenta and gold rim glints. Materials: polished dark glass, machined seams, subtle rivets, luminous inset channels. Genuine transparent background and clean alpha. No checkerboard, readable text, label, frame, or watermark."
+    },
+    {
+      "id": "causticSlag",
+      "name": "Caustic Slag",
+      "source": "art/icons/upgrades/sources/causticSlag.png",
+      "runtime": "src/assets/icons/upgrades/causticSlag.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE upgrade icon, square game UI. Primary request: Caustic Slag: Small sealed acid canister above a bubbling luminous corrosive pool. The upgrade effect is volatile canisters create lingering corrosive pools. Style: dark glass sci-fi machinery, sharply beveled illustrated 3D object, crisp finish. Composition: single centered emblem with a strong readable silhouette and broad fully transparent padding, visible at 32px. Lighting and palette: near-black navy metal, acid green luminous core, restrained cyan, magenta and gold rim glints. Materials: polished dark glass, machined seams, subtle rivets, luminous inset channels. Genuine transparent background and clean alpha. No checkerboard, readable text, label, frame, or watermark."
+    },
+    {
+      "id": "credits",
+      "name": "Data Cache",
+      "source": "art/icons/upgrades/sources/credits.png",
+      "runtime": "src/assets/icons/upgrades/credits.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE upgrade icon, square game UI. Primary request: Data Cache: Stack of two glowing data-credit coins with a clean central notch. The upgrade effect is bonus score and overdrive charge. Style: dark glass sci-fi machinery, sharply beveled illustrated 3D object, crisp finish. Composition: single centered emblem with a strong readable silhouette and broad fully transparent padding, visible at 32px. Lighting and palette: near-black navy metal, gold luminous core, restrained cyan, magenta and gold rim glints. Materials: polished dark glass, machined seams, subtle rivets, luminous inset channels. Genuine transparent background and clean alpha. No checkerboard, readable text, label, frame, or watermark."
+    },
+    {
+      "id": "repair",
+      "name": "Field Repair",
+      "source": "art/icons/upgrades/sources/repair.png",
+      "runtime": "src/assets/icons/upgrades/repair.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE upgrade icon, square game UI. Primary request: Field Repair: Armored repair cross with a tiny medical nanite cluster. The upgrade effect is restores two hull. Style: dark glass sci-fi machinery, sharply beveled illustrated 3D object, crisp finish. Composition: single centered emblem with a strong readable silhouette and broad fully transparent padding, visible at 32px. Lighting and palette: near-black navy metal, lime-cyan luminous core, restrained cyan, magenta and gold rim glints. Materials: polished dark glass, machined seams, subtle rivets, luminous inset channels. Genuine transparent background and clean alpha. No checkerboard, readable text, label, frame, or watermark."
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "assets": 188,
+  "transparentRgba": 188,
+  "runtimeMaxEdge": 256,
+  "sizes": {
+    "(256, 196)": 1,
+    "(256, 250)": 1,
+    "(256, 234)": 8,
+    "(256, 213)": 4,
+    "(256, 239)": 2,
+    "(256, 246)": 3,
+    "(256, 252)": 1,
+    "(256, 235)": 1,
+    "(256, 227)": 1,
+    "(256, 171)": 4,
+    "(256, 223)": 1,
+    "(256, 244)": 1,
+    "(256, 256)": 150,
+    "(256, 229)": 1,
+    "(256, 205)": 1,
+    "(256, 253)": 2,
+    "(256, 226)": 1,
+    "(256, 251)": 1,
+    "(256, 217)": 1,
+    "(256, 199)": 1,
+    "(256, 243)": 1,
+    "(256, 249)": 1
+  },
+  "sourceAndPromptPairs": 188,
+  "caseSensitiveFilenames": true,
+  "groups": {
+    "upgrades": 75,
+    "items": 78,
+    "pilot": 21,
+    "choices": 14
+  },
+  "uniqueArtworkPixels": 188,
+  "catalogReferences": {
+    "loaded": 196,
+    "total": 196
+  },
+  "integrationTests": {
+    "passed": 4,
+    "total": 4
+  },
+  "liveViewsChecked": [
+    "pilot",
+    "gear-inventory",
+    "gear-detail",
+    "upgrade-draft",
+    "overworld-map"
+  ]
+}

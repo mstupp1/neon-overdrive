@@ -6,6 +6,7 @@
 
 import { applyCore } from './core.js';
 import { RARITY, LEGENDARY } from './rarity.js';
+import { assetIcon } from '../ui/asset-icons.js';
 
 const svg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 
@@ -263,6 +264,8 @@ export const LEGENDARIES = [
     icon: svg('<path d="M3 8h8M3 12h12M3 16h8"/><path d="M15 6l6 6-6 6"/><path d="M18 3v3M18 18v3"/>'),
   },
 ];
+
+for (const def of [...BASES, ...LEGENDARIES]) def.icon = assetIcon('items', def.id, def.icon);
 
 const defById = new Map([...BASES, ...LEGENDARIES].map((d) => [d.id, d]));
 export const gearDef = (id) => defById.get(id);

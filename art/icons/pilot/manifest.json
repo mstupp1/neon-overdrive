@@ -1,0 +1,196 @@
+{
+  "group": "pilot",
+  "generator": "built-in imagegen",
+  "complete": true,
+  "assets": [
+    {
+      "id": "striker",
+      "source": "art/icons/pilot/striker-source.png",
+      "runtime": "src/assets/icons/pilot/striker.png",
+      "prompt": "Square isolated centered NEON OVERDRIVE pilot UI icon: angular lightning bolt assault insignia. Dark navy glass sci-fi machinery, vivid cyan, magenta and gold internal rim lights, beveled plates, crisp silhouette readable at 32px, transparent background, no text, frame or watermark.",
+      "sha256": "d0fe7af17328abe52d1585e77d9ed90ccac5b0c84380a3d4a691e25f2d0beda2",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "engineer",
+      "source": "art/icons/pilot/engineer-source.png",
+      "runtime": "src/assets/icons/pilot/engineer.png",
+      "prompt": "Square isolated centered NEON OVERDRIVE pilot UI icon: compact armored dome and twin drone arrangement. Dark navy glass sci-fi machinery, vivid cyan, magenta and gold internal rim lights, beveled plates, crisp silhouette readable at 32px, transparent background, no text, frame or watermark.",
+      "sha256": "4cf69412f9e002f33b2119aea6c6a59f8c8013b67d5ae2add7bbb4fbddc414c6",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "ghost",
+      "source": "art/icons/pilot/ghost-source.png",
+      "runtime": "src/assets/icons/pilot/ghost.png",
+      "prompt": "Square isolated centered NEON OVERDRIVE pilot UI icon: spectral angular mask and helmet emblem. Dark navy glass sci-fi machinery, vivid cyan, magenta and gold internal rim lights, beveled plates, crisp silhouette readable at 32px, transparent background, no text, frame or watermark.",
+      "sha256": "0f35034db1e22596ae31446b726d197140ea87227f31f1d129531226f336beba",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "killstreak",
+      "source": "art/icons/pilot/killstreak-source.png",
+      "runtime": "src/assets/icons/pilot/killstreak.png",
+      "prompt": "Square isolated centered NEON OVERDRIVE pilot UI icon: stacking kill tally bars. Dark navy glass sci-fi machinery, vivid cyan, magenta and gold internal rim lights, beveled plates, crisp silhouette readable at 32px, transparent background, no text, frame or watermark.",
+      "sha256": "7cad1a98c24d618103d6bcd108c6c9137b97075576372dc0ea34b9bde1c0105a",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "hairtrigger",
+      "source": "art/icons/pilot/hairtrigger-source.png",
+      "runtime": "src/assets/icons/pilot/hairtrigger.png",
+      "prompt": "Square isolated centered NEON OVERDRIVE pilot UI icon: precision reticle with a bright central trigger point. Dark navy glass sci-fi machinery, vivid cyan, magenta and gold internal rim lights, beveled plates, crisp silhouette readable at 32px, transparent background, no text, frame or watermark.",
+      "sha256": "ace2b5055766b6095586cf78942437fd70fc1155ffd405e208568f8f9155b856",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "executioner",
+      "source": "art/icons/pilot/executioner-source.png",
+      "runtime": "src/assets/icons/pilot/executioner.png",
+      "prompt": "Square isolated centered NEON OVERDRIVE pilot UI icon: crossed execution blades over a target core. Dark navy glass sci-fi machinery, vivid cyan, magenta and gold internal rim lights, beveled plates, crisp silhouette readable at 32px, transparent background, no text, frame or watermark.",
+      "sha256": "5d715bf43803f1f9821f8c6353e08a9765239fa4c8abbb585bb1bcb082432e7f",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "bloodrush",
+      "source": "art/icons/pilot/bloodrush-source.png",
+      "runtime": "src/assets/icons/pilot/bloodrush.png",
+      "prompt": "Square isolated centered NEON OVERDRIVE pilot UI icon: surging energy droplet encircled by flowing current. Dark navy glass sci-fi machinery, vivid cyan, magenta and gold internal rim lights, beveled plates, crisp silhouette readable at 32px, transparent background, no text, frame or watermark.",
+      "sha256": "bc1dba6f2ffa6983dbe125bbeeac7dce9343fca3b4671173b10a9ae462daf5bd",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "gunsmith",
+      "source": "art/icons/pilot/gunsmith-source.png",
+      "runtime": "src/assets/icons/pilot/gunsmith.png",
+      "prompt": "Square isolated centered NEON OVERDRIVE pilot UI icon: triple cannon barrels over a calibrated weapon mount. Dark navy glass sci-fi machinery, vivid cyan, magenta and gold internal rim lights, beveled plates, crisp silhouette readable at 32px, transparent background, no text, frame or watermark.",
+      "sha256": "a3b7e168097b1a7b3670652c5952f846b07f33c843d0b8f687d1057d2c839e15",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "warlord",
+      "source": "art/icons/pilot/warlord-source.png",
+      "runtime": "src/assets/icons/pilot/warlord.png",
+      "prompt": "Square isolated centered NEON OVERDRIVE pilot UI icon: command crown formed from armored prongs. Dark navy glass sci-fi machinery, vivid cyan, magenta and gold internal rim lights, beveled plates, crisp silhouette readable at 32px, transparent background, no text, frame or watermark.",
+      "sha256": "f1f535b199c5bc7466972e33174e76b156ee98873903e26ed6930571be24009f",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "salvager",
+      "source": "art/icons/pilot/salvager-source.png",
+      "runtime": "src/assets/icons/pilot/salvager.png",
+      "prompt": "Square isolated centered NEON OVERDRIVE pilot UI icon: recovered credit coin with a salvage cutout. Dark navy glass sci-fi machinery, vivid cyan, magenta and gold internal rim lights, beveled plates, crisp silhouette readable at 32px, transparent background, no text, frame or watermark.",
+      "sha256": "e1e7547772dd69638f992fa80b59c89f88b6a39c8ccaa6bfb7868503316793e7",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "overflow",
+      "source": "art/icons/pilot/overflow-source.png",
+      "runtime": "src/assets/icons/pilot/overflow.png",
+      "prompt": "Square isolated centered NEON OVERDRIVE pilot UI icon: four module bays with one expanding into a fifth slot. Dark navy glass sci-fi machinery, vivid cyan, magenta and gold internal rim lights, beveled plates, crisp silhouette readable at 32px, transparent background, no text, frame or watermark.",
+      "sha256": "a479196337186a0e83579a8730ec441f6ab280a54a69b5064a1e6aa3377bca46",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "dronelink",
+      "source": "art/icons/pilot/dronelink-source.png",
+      "runtime": "src/assets/icons/pilot/dronelink.png",
+      "prompt": "Square isolated centered NEON OVERDRIVE pilot UI icon: paired linked micro drones with a signal bridge. Dark navy glass sci-fi machinery, vivid cyan, magenta and gold internal rim lights, beveled plates, crisp silhouette readable at 32px, transparent background, no text, frame or watermark.",
+      "sha256": "a11ff4b64ba87274194d7e10466ebba8ce6eb6424278e339ffa2ca44c3aefb31",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "nanorepair",
+      "source": "art/icons/pilot/nanorepair-source.png",
+      "runtime": "src/assets/icons/pilot/nanorepair.png",
+      "prompt": "Square isolated centered NEON OVERDRIVE pilot UI icon: nano repair cross inside an armored circular field. Dark navy glass sci-fi machinery, vivid cyan, magenta and gold internal rim lights, beveled plates, crisp silhouette readable at 32px, transparent background, no text, frame or watermark.",
+      "sha256": "2c49ccea84457625d3e22fee8e1eb91460a85996ca12e98cd349d86e808184ab",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "fieldkit",
+      "source": "art/icons/pilot/fieldkit-source.png",
+      "runtime": "src/assets/icons/pilot/fieldkit.png",
+      "prompt": "Square isolated centered NEON OVERDRIVE pilot UI icon: compact field medical and equipment case. Dark navy glass sci-fi machinery, vivid cyan, magenta and gold internal rim lights, beveled plates, crisp silhouette readable at 32px, transparent background, no text, frame or watermark.",
+      "sha256": "cf6ad7a5c6f3f3734e17ca182b9bc42955e546bf4975d1709c2a885cf56d7baa",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "architect",
+      "source": "art/icons/pilot/architect-source.png",
+      "runtime": "src/assets/icons/pilot/architect.png",
+      "prompt": "Square isolated centered NEON OVERDRIVE pilot UI icon: fortified hangar facade with a central doorway. Dark navy glass sci-fi machinery, vivid cyan, magenta and gold internal rim lights, beveled plates, crisp silhouette readable at 32px, transparent background, no text, frame or watermark.",
+      "sha256": "bdbeb051fd439db53bdf5f3c4e982a83b996df9ce1771514980020ae97b7a9ec",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "widegraze",
+      "source": "art/icons/pilot/widegraze-source.png",
+      "runtime": "src/assets/icons/pilot/widegraze.png",
+      "prompt": "Square isolated centered NEON OVERDRIVE pilot UI icon: projectile surrounded by broad dashed graze rings. Dark navy glass sci-fi machinery, vivid cyan, magenta and gold internal rim lights, beveled plates, crisp silhouette readable at 32px, transparent background, no text, frame or watermark.",
+      "sha256": "f0f5b15cd158d9226b6d1079ba7c42a3c71c857bd308d02fc969d8277344bca2",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "slipstream",
+      "source": "art/icons/pilot/slipstream-source.png",
+      "runtime": "src/assets/icons/pilot/slipstream.png",
+      "prompt": "Square isolated centered NEON OVERDRIVE pilot UI icon: three horizontal speed streams with a central wake. Dark navy glass sci-fi machinery, vivid cyan, magenta and gold internal rim lights, beveled plates, crisp silhouette readable at 32px, transparent background, no text, frame or watermark.",
+      "sha256": "233aeb0f82535559d1cef4cf2185834c06b9f4b8e54e13f88d88e60e1b6a9aef",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "riposte",
+      "source": "art/icons/pilot/riposte-source.png",
+      "runtime": "src/assets/icons/pilot/riposte.png",
+      "prompt": "Square isolated centered NEON OVERDRIVE pilot UI icon: returning curved blade and counterstrike arrow. Dark navy glass sci-fi machinery, vivid cyan, magenta and gold internal rim lights, beveled plates, crisp silhouette readable at 32px, transparent background, no text, frame or watermark.",
+      "sha256": "2ff3a77556485750b089c6c5786c1cda17290981175e555c171e382a184ca995",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "afterimage",
+      "source": "art/icons/pilot/afterimage-source.png",
+      "runtime": "src/assets/icons/pilot/afterimage.png",
+      "prompt": "Square isolated centered NEON OVERDRIVE pilot UI icon: three staggered dash echoes. Dark navy glass sci-fi machinery, vivid cyan, magenta and gold internal rim lights, beveled plates, crisp silhouette readable at 32px, transparent background, no text, frame or watermark.",
+      "sha256": "400f10e3687fdda3d89321988a7cd47ab9e45cdccb255c257c2164e4936db609",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "shade",
+      "source": "art/icons/pilot/shade-source.png",
+      "runtime": "src/assets/icons/pilot/shade.png",
+      "prompt": "Square isolated centered NEON OVERDRIVE pilot UI icon: shadow helmet with a dotted stealth visor. Dark navy glass sci-fi machinery, vivid cyan, magenta and gold internal rim lights, beveled plates, crisp silhouette readable at 32px, transparent background, no text, frame or watermark.",
+      "sha256": "b3ab4fe91714cfc72637a9bb030c7d45ef83358c22f937af804389f7cb06ae2c",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "wraithborn",
+      "source": "art/icons/pilot/wraithborn-source.png",
+      "runtime": "src/assets/icons/pilot/wraithborn.png",
+      "prompt": "Square isolated centered NEON OVERDRIVE pilot UI icon: spectral star crest over a wraith silhouette. Dark navy glass sci-fi machinery, vivid cyan, magenta and gold internal rim lights, beveled plates, crisp silhouette readable at 32px, transparent background, no text, frame or watermark.",
+      "sha256": "1c05ef689509bef78ac48f64f48f283ccced748ece2c727c0f99366627bd6d2e",
+      "width": 256,
+      "height": 256
+    }
+  ]
+}
