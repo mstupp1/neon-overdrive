@@ -6,6 +6,7 @@ import { G } from './state.js';
 import { mulberry32 } from '../core/math.js';
 import { rollUpgradeIds, applyUpgrade, cardInfo, recomputeStats, discover } from './upgrades.js';
 import { nodeLevel } from './campaign.js';
+import { addUltMeter } from './pilot.js';
 
 // color: ECHO uses the active class colour (resolved in ui/comms.js).
 export const SPEAKERS = {
@@ -155,7 +156,7 @@ export const STORY = {
     elite: [L('MAG', 'Elite signature. A HUNTER will come for you late in this fight. Drop it and the payout is big.')],
     hazard: [L('MAG', 'Hazard on this sector. It\'s on the map label; some just hurt, some pay extra.')],
     boost: [L('MAG', 'Hold BOOST (Shift) and the whole fight rushes at you. Clear it sooner and score more, if you can take the heat. The meter refills once you let go.')],
-    ult: [L('MAG', 'OVERDRIVE is charged. Save it for when the screen fills up.')],
+    ult: [L('MAG', 'Your ultimate banked a cell. Fire now for a quick level 1, or hold out: every cell you fill makes it stronger, up to level 3.')],
     death: [L('MAG', 'Link recovered. I always keep a backup of you, ECHO. Half your credits made it home too.')],
     tree: [L('MAG', 'Your passive tree. Every rank adds 2 points: start at the core and work outward. Refunds are free, so try builds.')],
     view_side: [L('MAG', 'Side run. You\'re flying flat out to the right now: up and down steer. Don\'t scrape the walls, they take hull.')],
@@ -256,7 +257,7 @@ export const EVENTS = [
       {
         label: 'Jam the signal', tag: 'SAFE', desc: 'Fully charge your ultimate.',
         effect(c) {
-          c.p.od = 100;
+          addUltMeter(c.p, Infinity);
           return 'Static. Your ultimate meter is fully charged.';
         },
       },
@@ -341,7 +342,7 @@ export const EVENTS = [
         label: 'Carry their last words', tag: 'HEAL', desc: 'Repair 1 hull and +25% ultimate.',
         effect(c) {
           const n = heal(c.p, 1);
-          c.p.od = Math.min(100, c.p.od + 25);
+          addUltMeter(c.p, 25);
           return `You promise to finish it. ${n ? '+1 hull, ' : ''}+25% ultimate.`;
         },
       },
@@ -407,7 +408,7 @@ export const EVENTS = [
         label: 'Tactical data', tag: 'SAFE', desc: '+1 reroll and +25% ultimate.',
         effect(c) {
           G.rerolls++;
-          c.p.od = Math.min(100, c.p.od + 25);
+          addUltMeter(c.p, 25);
           return '+1 reroll, +25% ultimate.';
         },
       },

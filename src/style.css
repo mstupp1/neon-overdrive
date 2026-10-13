@@ -2355,6 +2355,12 @@ input[type='range']::-moz-range-thumb {
     line-height: 1.25;
 }
 
+.ci-ult .ci-lv {
+    font-size: 0.8em;
+    letter-spacing: 0.04em;
+    color: color-mix(in srgb, var(--c) 75%, #fff);
+}
+
 .cls-info.locked .ci-ult b {
     color: var(--dim);
     text-shadow: none;

@@ -8,7 +8,7 @@ import { damageEnemy } from './enemies.js';
 import { applyStatus } from './status.js';
 import { ring, sparks, explosion } from './fx.js';
 import { sfx } from '../core/audio.js';
-import { boosted, fortressOn } from './pilot.js';
+import { fortressOn, ultDmg, ultModRate, ultWingmen } from './pilot.js';
 
 const lvl = (arr, lv) => arr[Math.min(arr.length, lv) - 1];
 const UP = -Math.PI / 2;
@@ -20,7 +20,8 @@ function local(p, x, y) {
   const s = Math.sin(p.aim + Math.PI / 2);
   return [p.x + x * c - y * s, p.y + x * s + y * c];
 }
-const TEMP_SLOTS = [[-62, 30], [62, 30]];
+// Fortress Protocol's temporary wingmen, by how many there are.
+const TEMP_SLOTS = { 2: [[-62, 30], [62, 30]], 3: [[-62, 30], [62, 30], [0, 56]], 4: [[-62, 30], [62, 30], [-34, 54], [34, 54]] };
 
 export function resetModules(p) {
   p.mod = {
@@ -40,11 +41,11 @@ const orbitBlades = (p) => p.up.orbitals + 1 + (evo(p, 'stormhalo') ? 3 : 0);
 const orbitRadius = (p) => 50 + p.up.orbitals * 3 + (evo(p, 'stormhalo') ? 12 + 14 * Math.sin(G.time * 2.6) : 0);
 
 function dmgMul(p) {
-  return p.st.dmg * p.pdm * p.st.modDmg * (boosted(p) ? 1.5 : 1);
+  return p.st.dmg * p.pdm * p.st.modDmg * ultDmg(p);
 }
 
 function rateMul(p) {
-  return p.st.rate * (p.st.modRate || 1) * (boosted(p) ? 1.4 : 1);
+  return p.st.rate * (p.st.modRate || 1) * ultModRate(p);
 }
 
 export function updateModules(p, dt) {
@@ -108,18 +109,18 @@ export function updateModules(p, dt) {
     }
   }
 
-  // Wingmen. Fortress Protocol adds 2 temporary drones (aimed like level-3 wingmen when you own no module).
+  // Wingmen. Fortress Protocol adds 2-4 temporary drones by level (aimed like level-3 wingmen when you own no module).
   const fort = fortressOn(p);
   if (up.drones || fort) {
     const lv = up.drones || 3;
     const phx = evo(p, 'phalanx'); // Phalanx: five drones, faster fire
     const nPerm = up.drones ? (phx ? 5 : lv >= 5 ? 3 : 2) : 0;
-    const n = nPerm + (fort ? 2 : 0);
+    const n = nPerm + ultWingmen(p);
     while (p.drones.length < n) p.drones.push({ x: p.x, y: p.y + 20, ang: p.aim });
     p.drones.length = n;
     const slots = nPerm === 5 ? [[-36, 14], [36, 14], [0, 34], [-60, 32], [60, 32]] : nPerm === 3 ? [[-36, 14], [36, 14], [0, 34]] : [[-34, 12], [34, 12]];
     p.drones.forEach((d, i) => {
-      const sl = i < nPerm ? slots[i] : TEMP_SLOTS[i - nPerm];
+      const sl = i < nPerm ? slots[i] : TEMP_SLOTS[n - nPerm][i - nPerm];
       const [sx, sy] = local(p, sl[0], sl[1]);
       d.x = damp(d.x, sx, 9, dt);
       d.y = damp(d.y, sy, 9, dt);

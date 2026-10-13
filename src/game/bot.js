@@ -5,6 +5,7 @@ import { G, view } from './state.js';
 import { clamp, segDist2 } from '../core/math.js';
 import { sv } from './stageview.js';
 import { obstacleSteer } from './obstacles.js';
+import { ultCells } from './pilot.js';
 
 export function botControl() {
   const p = G.player;
@@ -119,7 +120,7 @@ export function botControl() {
     tx: 0,
     ty: 0,
     dash,
-    od: p.od >= 100 && (busy || danger > 3),
+    od: (ultCells(p) >= 3 && (busy || danger > 3)) || (ultCells(p) >= 1 && danger > 6), // level 3, or a panic cast
     focus: danger > 2.5,
   };
 }

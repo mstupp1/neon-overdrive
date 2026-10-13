@@ -43,7 +43,7 @@ export const THEMES = {
   od: {
     name: 'OVERDRIVE', color: '#ff3df2',
     small: [{ odGain: 6 }, { odDur: 0.4 }],
-    notables: [{ name: 'Surge Capacitor', mods: { odGain: 20 } }, { name: 'Sustained Burn', mods: { odDur: 1.5 } }],
+    notables: [{ name: 'Surge Capacitor', mods: { odGain: 20, ultSave: 10 } }, { name: 'Sustained Burn', mods: { odDur: 1.5 } }],
   },
   graze: {
     name: 'GRAZE', color: '#9d7bff',
@@ -196,6 +196,7 @@ const MODS = {
   odDurPct: (v) => `${pct(v)} ultimate duration`,
   grazeR: (v) => `${pct(v)} graze radius`,
   grazeOd: (v) => `${pct(v)} ultimate per graze`,
+  ultSave: (v) => `${pct(v)} chance a spent ultimate cell is saved`,
   hull: (v) => (v === 0.5 ? '+½ max hull (2 = +1)' : `${num(v)} max hull`),
   hitIfr: (v) => `${pct(v)} invulnerability after a hit`,
   shield: (v) => `A shield recharges every ${v}s (20% faster if you already have one)`,
@@ -340,6 +341,7 @@ export function applyTree(st, p) {
   st.odDur = Math.max(1, (st.odDur + (m.odDur || 0)) * inc('odDurPct'));
   st.grazeR *= inc('grazeR');
   st.grazeOd *= inc('grazeOd');
+  st.ultSave += (m.ultSave || 0) / 100;
   st.maxHp += Math.trunc(m.hull || 0);
   st.hitIfr *= inc('hitIfr');
   if (m.shieldBase) st.shieldInterval = st.shieldInterval ? Math.min(st.shieldInterval, m.shieldBase) : m.shieldBase;
