@@ -215,6 +215,11 @@ function newWorld(mode, shipDef, run = null) {
 
 function startAttract() {
   newWorld('attract', pick(SHIPS.filter((s) => ownsShip(profile, s))));
+  // The title demo previews only systems the player has reached, up to the four campaign themes.
+  const reached = Math.max(1, Math.min(SYSTEMS.length, profile.bestSector || 1));
+  const theme = pick(SYSTEMS.slice(0, reached));
+  bg.setTheme(theme.id);
+  bg.setHue(theme.hue);
   // Give the demo ship some toys so the menus look alive.
   const p = G.player;
   for (const id of ['main', 'main', 'main', pick(['missiles', 'orbitals', 'drones', 'arc'])]) applyUpgrade(p, id, G);

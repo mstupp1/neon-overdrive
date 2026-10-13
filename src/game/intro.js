@@ -131,6 +131,7 @@ function start({ setup, done }) {
   G.director.spawnT = 0.5;
   G.director.diff.spawn *= 0.55;
   bg.setTheme('genesis');
+  bg.setHue(215);
   el.hidden = false;
   el.classList.remove('out');
   parts.skip.classList.remove('armed');
