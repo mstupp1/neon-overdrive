@@ -451,7 +451,7 @@ function drawLowerThird(ctx, W, H, col) {
   ctx.restore();
 }
 
-// Debug: tier table (agents.md).
+// Debug: exported finisher tier table.
 export const CINE_TIERS = TIERS;
 
 const lastKill = { x: 0, y: 0, color: '#ffffff', t: -9, dead: true };

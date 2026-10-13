@@ -256,6 +256,6 @@ Use the imagegen skill for individual transparent assets, following `art/icons/b
 - Capped pools for enemy bullets (650), player bullets, pickups and particles (900, scaled by quality).
 - Variable-rate simulation sub-stepped at <= 1/60 s, so it is smooth on 60/120/144 Hz displays.
 - Adaptive quality: sustained slow frames lower render resolution and particle count automatically.
-- The headless autopilot simulates a full campaign system in a couple of seconds (see `agents.md`).
+- The headless autopilot simulates a full campaign system in a couple of seconds (see [AGENTS.md](AGENTS.md#validation-and-debugging)).
 
-See [agents.md](agents.md) for the debug / automation hook (`window.NEON`) and state reference.
+See [AGENTS.md](AGENTS.md) for agent onboarding, working constraints, and a debug simulation example. The full `window.NEON` hook is defined in `src/main.js`.

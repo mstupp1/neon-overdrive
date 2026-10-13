@@ -57,7 +57,7 @@ export const G = {
   pulseColor: '#ff3df2',
   enemyTimeScale: 1, // Phase Shift: scales enemies, bosses, enemy bullets and enemy beams (not the player)
 
-  run: null, // campaign / endless run record (see agents.md); null in attract
+  run: null, // campaign / endless run record; null in attract
   autopilot: false, // debug: the bot flies the player
   scriptCtrl: null, // () => control: scripted ship control (boot intro)
   vacuum: false, // sector clear: pickups fly to the player

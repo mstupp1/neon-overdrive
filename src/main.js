@@ -1474,7 +1474,7 @@ function boot() {
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
 }
 
-// Debug / agent hook (see agents.md). `simulate` fast-forwards the game
+// Debug / agent hook (see AGENTS.md for a simulation example). `simulate` fast-forwards the game
 // headlessly, auto-picking drafts, for balance testing.
 window.NEON = {
   G, view, profile, input, toTitle,
