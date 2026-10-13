@@ -183,6 +183,11 @@ export const pixel = {
     cv.width = Math.round(w * dpr);
     cv.height = Math.round(h * dpr);
     size = Math.max(1, Math.round(cv.width / PIXEL_W));
+    // Menus snap to the same grid (style.css .px-snap): --vpx is one virtual pixel in CSS px, --dpx one device pixel.
+    const root = document.documentElement.style;
+    root.setProperty('--vpx', `${size / dpr}px`);
+    root.setProperty('--dpx', `${1 / dpr}px`);
+    document.body.classList.toggle('px-hidpi', dpr >= 2);
     const lw = Math.ceil(cv.width / size);
     const lh = Math.ceil(cv.height / size);
     if (ready && (lw !== lowW || lh !== lowH)) {

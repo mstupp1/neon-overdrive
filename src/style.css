@@ -4808,3 +4808,107 @@ input[type='range']::-moz-range-thumb {
     :is(.card-icon, .cls-ico, .ab-icon) > .asset-icon { transition: none; }
     :is(.card, .cls-tab, .ab-tile):is(:hover, .focus) :is(.card-icon, .cls-ico, .ab-icon) > .asset-icon { transform: none; }
 }
+
+/* Pixel-snapped menus (Pixel look on; .px-snap screens). pixel.js sets --vpx = one virtual pixel of the game's pixel
+   grid and --dpx = one device pixel, both in CSS px. Lines are whole virtual pixels thick, glows are hard rings instead
+   of blur, and on high-DPI screens the pixel fonts round to sizes where every font pixel is a whole device pixel
+   (Silkscreen: 8 font pixels per em at 88% size-adjust; Pixelify Sans: ~11 at 92%). 1x screens keep their sizes: the
+   nearest whole size there is a third too big or too small. */
+.retro-pixel .px-snap {
+    --ring: 0 0 0 var(--vpx) rgba(63, 246, 255, 0.3), 0 0 0 calc(var(--vpx) * 2) rgba(63, 246, 255, 0.1);
+    --ring-dim: 0 0 0 var(--vpx) rgba(63, 246, 255, 0.14);
+    --ob: calc(var(--dpx) * 9.0909); /* Silkscreen size per device pixel per font pixel */
+    --rj: calc(var(--dpx) * 12); /* Pixelify Sans, near enough */
+}
+
+.retro-pixel .px-snap .screen-title {
+    text-shadow: var(--vpx) 0 0 rgba(63, 246, 255, 0.45), calc(var(--vpx) * -1) 0 0 rgba(63, 246, 255, 0.45),
+        0 var(--vpx) 0 rgba(63, 246, 255, 0.45), 0 calc(var(--vpx) * -1) 0 rgba(63, 246, 255, 0.45);
+    background-size: 80% var(--vpx);
+}
+
+.retro-pixel .px-snap .btn,
+.retro-pixel .px-snap .set-row,
+.retro-pixel .px-snap .run-stats div {
+    border-width: var(--vpx);
+    border-radius: 0;
+    text-shadow: none;
+    transition: none;
+}
+
+.retro-pixel .px-snap .btn {
+    box-shadow: none;
+}
+
+.retro-pixel .px-snap .btn.primary {
+    box-shadow: var(--ring-dim);
+}
+
+.retro-pixel .px-snap .btn:focus-visible,
+.retro-pixel .px-snap .btn.focus,
+.retro-pixel .px-snap .btn:hover,
+.retro-pixel .px-snap .set-row:focus-within,
+.retro-pixel .px-snap .set-row.focus,
+.retro-pixel .px-snap .set-row:hover {
+    box-shadow: var(--ring);
+    text-shadow: none;
+}
+
+.retro-pixel .px-snap .btn:active {
+    transform: translateY(var(--vpx)); /* a one-pixel press instead of a blurry shrink */
+}
+
+.retro-pixel .px-snap .btn:not(.small):focus-visible::after,
+.retro-pixel .px-snap .btn:not(.small).focus::after,
+.retro-pixel .px-snap .btn:not(.small):hover::after {
+    animation: px-nudge 0.9s steps(1) infinite;
+}
+
+@keyframes px-nudge {
+    50% {
+        transform: translate(calc(var(--vpx) * 2), -50%);
+    }
+}
+
+.retro-pixel .px-snap input[type='range'] {
+    height: calc(var(--vpx) * 2);
+    border-radius: 0;
+}
+
+.retro-pixel .px-snap input[type='range']::-webkit-slider-thumb {
+    width: round(nearest, 0.9em, var(--vpx));
+    height: round(nearest, 0.9em, var(--vpx));
+    border-radius: 0;
+    box-shadow: var(--ring-dim);
+}
+
+.retro-pixel .px-snap input[type='range']::-moz-range-thumb {
+    width: round(nearest, 0.9em, var(--vpx));
+    height: round(nearest, 0.9em, var(--vpx));
+    border-radius: 0;
+    box-shadow: var(--ring-dim);
+}
+
+.px-hidpi.retro-pixel .px-snap .screen-title {
+    font-size: round(nearest, 1.9em, var(--ob));
+}
+
+.px-hidpi.retro-pixel .px-snap .btn {
+    font-size: round(nearest, 1em, var(--ob));
+}
+
+.px-hidpi.retro-pixel .px-snap .set-row {
+    font-size: round(nearest, 1.1em, var(--rj));
+}
+
+.px-hidpi.retro-pixel .px-snap .set-row b {
+    font-size: max(var(--ob), round(nearest, 0.85em, var(--ob)));
+}
+
+.px-hidpi.retro-pixel .px-snap .run-stats div {
+    font-size: round(nearest, 0.8em, var(--rj));
+}
+
+.px-hidpi.retro-pixel .px-snap .run-stats b {
+    font-size: round(nearest, 1.4em, var(--ob));
+}
