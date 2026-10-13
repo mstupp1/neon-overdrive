@@ -255,6 +255,13 @@ export const sfx = {
     if (!ready()) return;
     tone({ type: 'triangle', f0: 700, f1: 1400, dur: 0.12, vol: 0.09 });
   },
+  // PRESS START: plays over the muted title demo, and on the press that unlocks audio (scheduled while it resumes).
+  start() {
+    if (!ac || profile.settings.sfx <= 0.001) return;
+    tone({ type: 'square', f0: 523, dur: 0.09, vol: 0.05, filter: 2400 });
+    tone({ type: 'square', f0: 784, dur: 0.09, vol: 0.05, delay: 0.08, filter: 2400 });
+    tone({ type: 'triangle', f0: 1047, f1: 2093, dur: 0.32, vol: 0.08, delay: 0.16 });
+  },
   // Notification chimes: play on menus too (attract mode mutes the rest).
   achieve(gold = false) {
     if (!ac || ac.state !== 'running' || profile.settings.sfx <= 0.001) return;
