@@ -25,9 +25,9 @@ import { sv } from './stageview.js';
 import { updateBoost, resetBoost, boostSpeed, boostScore, drawBoostShip, boostLen } from './boost.js';
 import { rollBurst, BURST_GAP } from './status.js';
 
-// A higher opening cost spaces out the first drafts; quadratic growth slows
-// upgrade accumulation as enemy XP rewards increase deeper into a run.
-export const xpFor = (l) => Math.floor(14 + 7 * l + 1.4 * l * l);
+// The opening cost makes the first few drafts earned milestones. Its relative
+// impact fades at higher levels, where quadratic growth controls progression.
+export const xpFor = (l) => Math.floor(44 + 7 * l + 1.4 * l * l);
 
 // gear=false (attract mode): no hangar parts. The paint is cosmetic and always applies.
 export function createPlayer(ship, gear = true) {
