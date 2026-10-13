@@ -45,6 +45,7 @@ import { intro as bootIntro } from './game/intro.js';
 import { cine } from './game/cinematic.js';
 import { sectorIntro } from './render/sectorIntro.js';
 import { overworld } from './game/overworld.js';
+import { setMenuBeat } from './ui/beat.js';
 import { STORY, eventFor, eventById, startEvent, resolveChoice, choiceBlocked, RIFT, riftHazard } from './game/story.js';
 import { rollMarket, buyOffer, dockRepair, dockReinforce, settleRun, rankFor, cachePayout } from './game/economy.js';
 
@@ -1216,8 +1217,6 @@ app.addEventListener('pointerdown', () => {
   if (G.screen === 'sector-intro') sectorIntro.skip();
 });
 
-let beatCss = -1;
-
 music.onTrack = (name) => {
   if (G.mode === 'run' || G.screen === 'title') ui.toast(name);
 };
@@ -1310,9 +1309,8 @@ function frame(now) {
   bg.update(simulating() || intro ? raw * cine.bgScale() : raw * 0.25, intro ? sectorIntro.boost() : boost);
   music.update(raw);
   musicBeat.update();
-  // Menu titles glow with the beat too (CSS --beat; only written when it moves, so idle frames cost nothing).
-  const bv = Math.round(musicBeat.pulse * 50) / 50;
-  if (bv !== beatCss) document.body.style.setProperty('--beat', (beatCss = bv));
+  // Menu titles glow with the beat too (an opacity-only layer per title: see ui/beat.js).
+  setMenuBeat(ui.current ? document.getElementById('scr-' + ui.current) : null, musicBeat.pulse);
   render();
 }
 

@@ -366,8 +366,45 @@ body {
     font-size: 1.9em;
     letter-spacing: 0.08em;
     color: #fff;
-    text-shadow: 0 0 0.35em var(--cyan), 0 0 1.2em rgba(63, 246, 255, calc(0.5 + var(--beat, 0) * 0.45));
+    text-shadow: 0 0 0.35em var(--cyan), 0 0 1.2em rgba(63, 246, 255, 0.5);
     text-align: center;
+    position: relative;
+}
+
+/* Beat glow (ui/beat.js): a copy of the title's text that draws only its shadow, on its own layer, faded by opacity
+   with the music. Never animate the titles' own text-shadow: re-rastering those blurs every frame stutters the demo. */
+.beat-glow {
+    position: absolute;
+    inset: 0;
+    font: inherit;
+    letter-spacing: inherit;
+    text-align: inherit;
+    color: transparent;
+    pointer-events: none;
+    user-select: none;
+    opacity: 0;
+    will-change: opacity;
+}
+
+.screen-title .beat-glow {
+    text-shadow: 0 0 1.2em rgba(63, 246, 255, 0.45);
+}
+
+.logo-top .beat-glow {
+    text-shadow: 0 0 1.4em rgba(63, 246, 255, 0.8);
+}
+
+.logo-bottom .beat-glow {
+    text-shadow: 0 0 1.3em rgba(255, 61, 242, 0.8);
+}
+
+/* Titles with their own glow (system / part colours, results, the pixel look) never pulsed: keep them still. */
+.screen-title[style*='text-shadow'] .beat-glow,
+#scr-extract .screen-title .beat-glow,
+#scr-event .screen-title .beat-glow,
+.screen-title.glitch .beat-glow,
+.retro-pixel .px-snap .screen-title .beat-glow {
+    display: none;
 }
 
 .screen-sub {
@@ -402,14 +439,14 @@ body {
     font-size: 4.4em;
     letter-spacing: 0.06em;
     color: #fff;
-    text-shadow: 0 0 0.12em #fff, 0 0 0.3em var(--cyan), 0 0 0.8em var(--cyan), 0 0 1.4em rgba(63, 246, 255, calc(var(--beat, 0) * 0.8));
+    text-shadow: 0 0 0.12em #fff, 0 0 0.3em var(--cyan), 0 0 0.8em var(--cyan);
 }
 
 .logo-bottom {
     font-size: 2.3em;
     letter-spacing: 0.18em;
     color: var(--pink);
-    text-shadow: 0 0 0.2em var(--pink), 0 0 0.7em rgba(255, 61, 242, 0.7), 0 0 1.3em rgba(255, 61, 242, calc(var(--beat, 0) * 0.8));
+    text-shadow: 0 0 0.2em var(--pink), 0 0 0.7em rgba(255, 61, 242, 0.7);
     margin-top: 0.15em;
 }
 
