@@ -51,6 +51,7 @@ export const STATS = {
   odDur: { apply: (st, v) => (st.odDur += v), text: (v) => `+${v.toFixed(1)}s ultimate duration` },
   grazeR: { apply: (st, v) => (st.grazeR *= 1 + v), text: (v) => `+${P(v)} graze radius` },
   grazeOd: { apply: (st, v) => (st.grazeOd *= 1 + v), text: (v) => `+${P(v)} ultimate charge from grazes` },
+  ultSave: { apply: (st, v) => (st.ultSave += v), text: (v) => `+${P(v)} chance a spent ultimate tick is kept` },
   hull: { flat: true, apply: (st, v) => (st.maxHp += v), text: (v) => `${sg(v)}${Math.abs(v)} max hull` },
   iframes: { apply: (st, v) => (st.hitIfr *= 1 + v), text: (v) => `+${P(v)} invulnerability after a hit` },
   shield: { apply: (st, v) => (st.shieldInterval *= 1 - v), text: (v) => `Aegis Shield recharges ${P(v)} faster` },
@@ -91,7 +92,7 @@ export const AFFIXES = [
   ['od', 'overdrive', 0.06, 0.14], ['grazeR', 'overdrive', 0.1, 0.22], ['odDur', 'overdrive', 0.4, 1],
   ['hull', 'tank', 1, 1, 2, 0.5], ['shield', 'tank', 0.08, 0.18], ['iframes', 'tank', 0.1, 0.25],
   ['magnet', 'greed', 0.15, 0.35], ['xp', 'greed', 0.04, 0.1], ['credits', 'greed', 0.06, 0.15], ['find', 'greed', 0.05, 0.15],
-  ['rerolls', 'greed', 1, 1, 2, 0.35], ['grazeOd', 'overdrive', 0.1, 0.25],
+  ['rerolls', 'greed', 1, 1, 2, 0.35], ['grazeOd', 'overdrive', 0.1, 0.25], ['ultSave', 'overdrive', 0.04, 0.09, 1, 0.6],
   ['boostCap', 'mobility', 0.08, 0.2, 0, 0.7], ['boostRegen', 'mobility', 0.08, 0.2, 0, 0.7], ['boostEff', 'mobility', 0.06, 0.15, 0, 0.7],
   // Shared combat systems (status.js).
   ['projSize', 'firepower', 0.05, 0.12, 0, 0.7], ['projSpeed', 'firepower', 0.05, 0.12, 0, 0.7],

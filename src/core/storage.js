@@ -41,7 +41,7 @@ const DEFAULTS = {
   equip: {}, // shipId → { core, plating, thrusters } item uids
   paint: {}, // shipId → palette index
   paintsOwned: {}, // shipId → [owned palette indices] (0 = stock, always owned)
-  pilot: { cls: 'striker', passives: {}, classes: ['striker'], found: ['killstreak'], pity: 0 }, // passives: cls → [ids]; classes / found: discovered classes and abilities (pilot.js)
+  pilot: { cls: 'striker', passives: {}, classes: ['striker'], found: ['killstreak'], pity: 0, dflt: 0 }, // passives: cls → [ids]; classes / found: discovered classes and abilities; dflt: default abilities granted (pilot.js)
   tree: {}, // passive tree (game/tree.js): cls → [allocated node ids]
   relics: [], // owned relic ids (collectables.js)
   relicNew: [], // owned but not yet seen in the gallery
@@ -107,6 +107,7 @@ function sanitize(p) {
   p.pilot.classes = [...new Set(['striker', ...strs(p.pilot.classes)])];
   p.pilot.found = [...new Set(strs(p.pilot.found))];
   p.pilot.pity = num(p.pilot.pity);
+  p.pilot.dflt = num(p.pilot.dflt);
   p.campaign.cleared = strs(p.campaign.cleared);
   if (!isObj(p.campaign.seenStory)) p.campaign.seenStory = {};
   for (const k of ['bestSys', 'bestRow']) if (!Number.isInteger(p.campaign[k]) || p.campaign[k] < -1) p.campaign[k] = -1;

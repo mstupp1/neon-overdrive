@@ -49,7 +49,7 @@ function render() {
   const info = $('#pl-info');
   info.style.setProperty('--c', view.color);
   info.classList.toggle('locked', !owned);
-  info.innerHTML = `<div class="ci-top"><span class="role">${view.role.toUpperCase()}${owned ? '' : ' · NOT FOUND · DROPS FROM BOSSES'}</span></div><p>${view.desc}</p><div class="ci-ult"><em>ULTIMATE</em><b>${view.ult.name}</b><span>${view.ult.desc}</span></div>`;
+  info.innerHTML = `<div class="ci-top"><span class="role">${view.role.toUpperCase()}${owned ? '' : ' · NOT FOUND · DROPS FROM BOSSES'}</span></div><p>${view.desc}</p><div class="ci-ult"><em>ULTIMATE</em><b>${view.ult.name}</b><span>${view.ult.desc}</span><span class="ci-lv">${view.ult.levels}</span></div>`;
 
   $('#pl-tree').textContent = treeLabel(view.id);
 

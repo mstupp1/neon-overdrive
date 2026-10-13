@@ -4,7 +4,7 @@
 import { weightedPick } from '../core/math.js';
 import { WEAPONS } from './ships.js';
 import { applyParts } from './parts.js';
-import { applyPassives, resetPilotStats } from './pilot.js';
+import { applyPassives, resetPilotStats, addUltMeter, ULT_LEVELS, ULT_TICKS_MAX } from './pilot.js';
 import { STATS, rollMods, itemLevel, TAGS, PATH_KIN, affixTag } from './parts.js';
 import { RARITY, rollRarity } from './rarity.js';
 import { profile, saveProfile } from '../core/storage.js';
@@ -59,6 +59,8 @@ export const ICONS = {
   static: assetIcon('upgrades', 'static', svg('<path d="M4 12l4-4 4 4 4-4 4 4"/><path d="M4 18l4-4 4 4 4-4 4 4"/><circle cx="12" cy="5" r="1.5"/>')),
   saw: assetIcon('upgrades', 'saw', svg('<circle cx="12" cy="12" r="3"/><path d="M12 2l2 4h-4zM22 12l-4 2v-4zM12 22l-2-4h4zM2 12l4-2v4z"/><circle cx="12" cy="12" r="7"/>')),
   stasis: assetIcon('upgrades', 'stasis', svg('<path d="M7 3h10M7 21h10M8 3c0 5 8 5 8 9s-8 4-8 9M16 3c0 5-8 5-8 9"/>')),
+  reserveCell: assetIcon('upgrades', 'reserveCell', svg('<rect x="3" y="8" width="7" height="12"/><rect x="14" y="4" width="7" height="12"/><path d="M6.5 5v3M17.5 1v3"/>')),
+  recycler: assetIcon('upgrades', 'recycler', svg('<path d="M20 12a8 8 0 11-3-6.2M20 4v5h-5"/><path d="M12 9v6M9 12h6"/>')),
   perpetual: assetIcon('upgrades', 'perpetual', svg('<path d="M7 8a4 4 0 100 8c3 0 7-8 10-8a4 4 0 110 8c-3 0-7-8-10-8z"/>')),
   prism: assetIcon('upgrades', 'prism', svg('<path d="M12 3l8 15H4z"/><path d="M2 11h7M15 10l7-3M15 13l7 0M15 16l7 3"/>')),
   starfall: assetIcon('upgrades', 'starfall', svg('<path d="M12 2l1.8 4.2L18 8l-4.2 1.8L12 14l-1.8-4.2L6 8l4.2-1.8z"/><path d="M5 22l3-5M12 22v-5M19 22l-3-5"/>')),
@@ -112,6 +114,8 @@ export const UPGRADES = [
   { id: 'capacitor', name: 'Capacitor', cat: 'stat', max: 4, weight: 0.8, tier: 0, desc: () => '+25% Overdrive charge, +1s duration.' },
   { id: 'salvage', name: 'Salvage Protocol', cat: 'stat', max: 3, weight: 0.6, tier: 0, desc: () => '+15% XP from data shards.' },
   { id: 'chainlink', name: 'Chain Link', cat: 'stat', max: 3, weight: 0.6, tier: 0, desc: () => 'Combo lasts 0.8s longer. +1% damage per combo multiplier step.' },
+  { id: 'reserveCell', name: 'Reserve Cell', cat: 'stat', max: 2, weight: 0.5, tier: 0, desc: () => 'Bank 1 more ultimate tick. A cast still spends up to 3, so the spare fuels a quick follow-up.' },
+  { id: 'recycler', name: 'Tick Recycler', cat: 'stat', max: 3, weight: 0.5, tier: 0, desc: (lv) => `+12% chance each ultimate tick you spend is kept (${pct(0.12 * lv)}).` },
   { id: 'grazer', name: 'Graze Field', cat: 'stat', max: 3, weight: 0.6, tier: 0, desc: () => '+30% graze radius, +35% Overdrive from grazes.' },
   { id: 'prospector', name: 'Prospector', cat: 'stat', max: 3, weight: 0.5, tier: 0, desc: () => '+20% credits from kills and drops.' },
   { id: 'hull', name: 'Reinforced Hull', cat: 'defense', max: 4, weight: 0.9, tier: 0, desc: () => '+1 max hull and repair 1.' },
@@ -303,6 +307,8 @@ export function recomputeStats(p) {
   st.hitIfr = 1; // invulnerability after a hit (gear modifiers, passive tree)
   st.rerolls = 0; // extra draft rerolls at the start of a run (gear, passive tree, Flux Core; main.js newWorld)
   st.aegisOd = 0; // ultimate meter per shield break (Aegis Prime)
+  st.ultTicks = ULT_LEVELS + lv('reserveCell'); // ult ticks the meter can bank (pilot.js)
+  st.ultSave = 0.12 * lv('recycler'); // chance each spent ult tick is kept
   // Boost (boost.js): capacity, refill rate, burn time (drain ÷ eff) and stage-flow speed.
   st.boostCap = 1 + 0.25 * lv('boostTank');
   st.boostRegen = 1 + 0.3 * lv('ramScoop');
@@ -316,6 +322,8 @@ export function recomputeStats(p) {
   applyPassives(st, p);
   applyTree(st, p);
   st.maxHp = Math.max(1, st.maxHp);
+  st.ultTicks = Math.min(ULT_TICKS_MAX, Math.max(ULT_LEVELS, Math.round(st.ultTicks)));
+  st.ultSave = Math.min(0.5, st.ultSave);
   if (st.shieldInterval) st.shieldInterval = Math.max(SHIELD_MIN, st.shieldInterval); // stacked recharge cuts bottom out
   p.maxHp = st.maxHp;
   p.maxCharges = st.maxCharges;
@@ -324,7 +332,7 @@ export function recomputeStats(p) {
 export function applyUpgrade(p, id, G) {
   if (id === 'credits') {
     G.score += 2500 * (G.sector + G.loop * 9);
-    p.od = Math.min(100, p.od + 25);
+    addUltMeter(p, 25);
     return;
   }
   if (id === 'repair') {
@@ -399,7 +407,7 @@ export const UP_TAGS = {
   flamethrower: 'modules', droneSwarm: 'modules', cryoSpike: 'modules', causticSlag: 'modules',
   thrusters: 'mobility', dashes: 'mobility', blink: 'mobility', dashNova: 'mobility',
   boostTank: 'mobility', ramScoop: 'mobility', injector: 'mobility', overthrust: 'mobility',
-  capacitor: 'overdrive', grazer: 'overdrive', perpetual: 'overdrive', nullField: 'overdrive', chainlink: 'overdrive',
+  capacitor: 'overdrive', grazer: 'overdrive', perpetual: 'overdrive', reserveCell: 'overdrive', recycler: 'overdrive', nullField: 'overdrive', chainlink: 'overdrive',
   hull: 'tank', aegis: 'tank', leech: 'tank', secondWind: 'tank',
   magnet: 'greed', salvage: 'greed', prospector: 'greed',
   projSize: 'firepower', projSpeed: 'firepower', armorPierce: 'firepower', burstFire: 'firepower', resonance: 'firepower',
@@ -590,7 +598,7 @@ const TUNE_NAMES = {
 };
 const TUNE_ICONS = {
   dmg: 'power', rate: 'rate', bounty: 'bounty', crit: 'crit', critMul: 'crit', mod: 'drones', modRate: 'arc', speed: 'thrusters',
-  dashCd: 'dashes', dashLen: 'blink', od: 'capacitor', odDur: 'capacitor', grazeR: 'grazer', grazeOd: 'grazer', shield: 'aegis',
+  dashCd: 'dashes', dashLen: 'blink', od: 'capacitor', odDur: 'capacitor', ultSave: 'recycler', grazeR: 'grazer', grazeOd: 'grazer', shield: 'aegis',
   iframes: 'hull', magnet: 'magnet', xp: 'salvage', credits: 'prospector', find: 'prospector', boostCap: 'boostTank',
   boostRegen: 'ramScoop', boostEff: 'injector',
   projSize: 'projSize', projSpeed: 'projSpeed', armorPierce: 'armorPierce', burst: 'burstFire', burstN: 'burstFire',

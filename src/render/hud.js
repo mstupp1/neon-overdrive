@@ -4,7 +4,7 @@ import { G, view, sectorInfo } from '../game/state.js';
 import { S, withAlpha } from './sprites.js';
 import { TAU, clamp, easeOutCubic } from '../core/math.js';
 import { comboMult } from '../game/player.js';
-import { CLASSES } from '../game/pilot.js';
+import { CLASSES, ULT_TICK, ULT_LEVELS, ultTicks } from '../game/pilot.js';
 import { input } from '../core/input.js';
 import { sv } from '../game/stageview.js';
 import { profile } from '../core/storage.js';
@@ -308,23 +308,44 @@ function drawGauge(ctx, x, y, p, kind, sx = p.x, sy = p.y) {
   ctx.arc(x, y, r + 4, 0, TAU);
   ctx.fill();
   if (kind === 'od') {
+    // Banked ticks: one ring segment per tick the meter can hold (3 levels, plus reserve ticks in white). A cast spends up
+    // to 3 and fires at that level; while it runs, an inner ring drains with its time.
     const active = p.odT > 0;
-    const t = clamp(active ? p.odT / p.st.odDur : p.od / 100, 0, 1);
-    const ready = p.od >= 100 && !active;
+    const n = (p.st && p.st.ultTicks) || ULT_LEVELS;
+    const ticks = ultTicks(p);
+    const lv = Math.min(ULT_LEVELS, ticks);
     const cls = CLASSES.find((c) => c.id === p.cls) || CLASSES[0];
     const col = cls.color;
-    ctx.strokeStyle = withAlpha(col, 0.2);
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, TAU);
-    ctx.stroke();
-    ctx.strokeStyle = active || ready ? col : withAlpha(col, 0.7);
-    ctx.lineWidth = ready ? 5 + Math.sin(G.realTime * 8) * 1.5 : 4;
-    ctx.beginPath();
-    ctx.arc(x, y, r, -Math.PI / 2, -Math.PI / 2 + TAU * t);
-    ctx.stroke();
-    const label = active ? 'ON' : ready ? keyHint('od') || 'TAP' : `${Math.floor(p.od)}%`;
-    text(ctx, label, x, y - 1, ready || active ? 11 : 10, ready || active ? '#ffffff' : withAlpha(col, 0.85), 'center', 700);
+    const gap = n > 3 ? 0.1 : 0.12;
+    for (let i = 0; i < n; i++) {
+      const a0 = -Math.PI / 2 + (i / n) * TAU + gap;
+      const a1 = -Math.PI / 2 + ((i + 1) / n) * TAU - gap;
+      const c = i < ULT_LEVELS ? col : '#ffffff';
+      ctx.strokeStyle = withAlpha(c, 0.18);
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(x, y, r, a0, a1);
+      ctx.stroke();
+      const fill = i < ticks ? 1 : i === ticks ? clamp((p.od - ticks * ULT_TICK) / ULT_TICK, 0, 1) : 0;
+      if (fill <= 0) continue;
+      ctx.strokeStyle = fill >= 1 ? c : withAlpha(c, active ? 0.3 : 0.5);
+      ctx.lineWidth = fill >= 1 && !active && lv === ULT_LEVELS ? 5 + Math.sin(G.realTime * 8) * 1.2 : 4;
+      ctx.beginPath();
+      ctx.arc(x, y, r, a0, a0 + (a1 - a0) * fill);
+      ctx.stroke();
+    }
+    if (active) {
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(x, y, r - 7, -Math.PI / 2, -Math.PI / 2 + TAU * clamp(p.odT / (p.odDurMax || p.st.odDur), 0, 1));
+      ctx.stroke();
+      text(ctx, `LV${p.ultLv || ULT_LEVELS}`, x, y - 1, 11, '#ffffff', 'center', 700);
+    } else if (lv) {
+      const hint = keyHint('od') || 'TAP';
+      text(ctx, `LV${lv}`, x, y - 5, 11, '#ffffff', 'center', 700);
+      text(ctx, hint, x, y + 7, fitSize(ctx, hint, r * 1.2, 8, 700), withAlpha(col, 0.9), 'center', 700);
+    } else text(ctx, `${Math.floor((100 * p.od) / ULT_TICK)}%`, x, y - 1, 10, withAlpha(col, 0.85), 'center', 700);
     text(ctx, cls.ult.short, x, y + r + 13, 9, col, 'center', 700);
   } else {
     const n = p.maxCharges;

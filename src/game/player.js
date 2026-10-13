@@ -18,7 +18,7 @@ import { vacuumAll } from './pickups.js';
 import { dashNova, resetModules, staticDischarge } from './modules.js';
 import { collectRelic } from './collectables.js';
 import { achEvent } from './achievements.js';
-import { CLASSES, activeClass, equippedPassives, passiveById, initPilot, castUlt, boosted, phasing, fortressOn, bloodrush, onEliteKilled, updatePilot, spawnEchoes } from './pilot.js';
+import { CLASSES, activeClass, equippedPassives, passiveById, initPilot, castUlt, endUlt, boosted, phasing, fortressOn, bloodrush, onEliteKilled, updatePilot, spawnEchoes, ULT_TICK, ULT_LEVELS, ULT_LV, ultCap, ultTicks, ultCastLevel, ultDmg, ultRate, ultScore, ultSpeed, ultDodge, intangible, domeR } from './pilot.js';
 import { cine } from './cinematic.js';
 import { treeForRun, treeOnKill, treeOnDash } from './tree.js';
 import { sv } from './stageview.js';
@@ -58,9 +58,11 @@ export function createPlayer(ship, gear = true) {
     level: 1,
     xp: 0,
     xpNeed: xpFor(1),
-    od: 0,
+    od: 0, // ult meter: ULT_TICK per banked tick (pilot.js)
     odT: 0,
-    odReady: false,
+    odDurMax: 0, // full duration of the running ult (HUD)
+    odReady: false, // at least one tick banked
+    odSeen: 0, // banked ticks already announced
     up: {},
     st: {},
     ghosts: [],
@@ -137,7 +139,7 @@ export function updatePlayer(p, dt) {
   updateBoost(p, dt, !!c.boost);
 
   // --- Movement ---
-  const maxSpeed = 340 * st.speed * (c.focus ? 0.45 : 1) * (boosted(p) ? 1.1 : 1) * (p.slipT > 0 ? 1.15 : 1) * boostSpeed(p);
+  const maxSpeed = 340 * st.speed * (c.focus ? 0.45 : 1) * ultSpeed(p) * (p.slipT > 0 ? 1.15 : 1) * boostSpeed(p);
   let tvx;
   let tvy;
   let mvx = 0;
@@ -266,15 +268,21 @@ export function updatePlayer(p, dt) {
     if (p.odT <= 0) {
       p.odT = 0;
       floatText(p.x, p.y - 30, `${CLASSES.find((x) => x.id === p.cls).ult.short} END`, p.ucol, 10, 0.8);
+      endUlt(p);
     }
-  } else if (c.od && p.od >= 100) {
+  } else if (c.od && ultTicks(p) >= 1) {
     activateOverdrive(p);
   }
-  if (p.od >= 100 && !p.odReady) {
-    p.odReady = true;
+  // Each newly banked tick is announced: the level a cast would now fire at, or a reserve tick past level 3.
+  const ticks = ultTicks(p);
+  p.odReady = ticks >= 1;
+  if (ticks > p.odSeen && p.odT <= 0) {
+    G.texts = G.texts.filter((t) => !t.text.endsWith(' READY') && !t.text.startsWith('ULT LV'));
     sfx.odReady();
-    floatText(p.x, p.y - 34, `${ultOf(p).short} READY`, p.ucol, 11, 1.1);
+    const lv = Math.min(ULT_LEVELS, ticks);
+    floatText(p.x, p.y - 34, ticks > ULT_LEVELS ? `ULT LV${lv} +${ticks - ULT_LEVELS} BANKED` : lv === 1 ? `${ultOf(p).short} READY` : `ULT LV${lv}`, p.ucol, lv === ULT_LEVELS ? 12 : 11, 1.1);
   }
+  p.odSeen = ticks;
 
   updatePilot(p, dt);
 
@@ -302,7 +310,7 @@ export function updatePlayer(p, dt) {
 
   // --- Primary fire ---
   const w = WEAPONS[p.ship.weapon];
-  const rate = st.rate * (boosted(p) ? 1.6 : 1);
+  const rate = st.rate * ultRate(p);
   p.fireT -= dt * rate;
   if (p.fireT < -w.interval) p.fireT = 0;
   while (p.fireT <= 0) {
@@ -348,7 +356,7 @@ function firePrimary(p, w) {
   const lv = p.st.mainLv;
   const streams = weaponStreams(p.ship.weapon, lv);
   const od = boosted(p);
-  const dmg = w.dmg * p.st.dmg * p.pdm * weaponDamageScale(lv) * (od ? 1.5 : 1);
+  const dmg = w.dmg * p.st.dmg * p.pdm * weaponDamageScale(lv) * ultDmg(p);
   const spr = od ? S.pb_od : S['pb_' + p.ship.id];
   const charge = p.ship.weapon === 'charge';
   const grow = charge ? 1 + (lv - 1) * 0.1 : 1; // charge orbs swell with weapon level
@@ -383,21 +391,29 @@ function firePrimary(p, w) {
 
 const ultOf = (p) => CLASSES.find((x) => x.id === p.cls).ult;
 
-// Shared Overdrive meter logic; the class-specific effect lives in pilot.js (castUlt).
+// Shared ult meter logic; the class-specific effect lives in pilot.js (castUlt). A cast spends up to ULT_LEVELS banked
+// ticks and fires at that level; each spent tick may be kept (st.ultSave). Partial progress toward the next tick stays.
 export function activateOverdrive(p) {
-  p.odT = p.st.odDur;
-  p.od = 0;
-  G.texts = G.texts.filter((t) => !t.text.endsWith(' READY'));
-  p.odReady = false;
-  p.iframes = Math.max(p.iframes, p.cls === 'ghost' ? 0.5 : 1);
+  const lv = ultCastLevel(p);
+  if (lv < 1) return;
+  let kept = 0;
+  for (let i = 0; i < lv; i++) if (p.st.ultSave && Math.random() < p.st.ultSave) kept++;
+  p.od = Math.max(0, p.od - (lv - kept) * ULT_TICK);
+  p.odSeen = ultTicks(p);
+  p.ultLv = lv;
+  p.odT = p.odDurMax = p.st.odDur * ULT_LV[p.cls in ULT_LV ? p.cls : 'striker'][lv].dur;
+  G.texts = G.texts.filter((t) => !t.text.endsWith(' READY') && !t.text.startsWith('ULT LV'));
+  p.odReady = p.odSeen >= 1;
+  p.iframes = Math.max(p.iframes, p.cls === 'ghost' ? 0.5 : lv === 1 ? 0.6 : 1);
   const cls = CLASSES.find((x) => x.id === p.cls);
   G.pulseColor = cls.color;
   castUlt(p);
   sfx.overdrive();
-  flash(cls.rgb, 0.55);
-  addShake(0.6);
-  hitstop(0.08);
-  floatText(p.x, p.y - 40, `${cls.ult.short}!`, cls.color, 18, 1.2);
+  flash(cls.rgb, 0.25 + 0.1 * lv);
+  addShake(0.2 + 0.13 * lv);
+  hitstop(lv === ULT_LEVELS ? 0.08 : 0.04);
+  floatText(p.x, p.y - 40, `${cls.ult.short} LV${lv}!`, cls.color, 12 + 2 * lv, 1.2);
+  if (kept) floatText(p.x, p.y - 58, kept > 1 ? `${kept} TICKS KEPT` : 'TICK KEPT', '#ffffff', 10, 1);
 }
 
 export function comboMult() {
@@ -406,13 +422,13 @@ export function comboMult() {
 
 export function addScore(base) {
   const p = G.player;
-  G.score += base * comboMult() * (p && p.odT > 0 ? 2 : 1) * boostScore(p) * G.director.diff.score * ((p && p.st.scoreMul) || 1);
+  G.score += base * comboMult() * ultScore(p) * boostScore(p) * G.director.diff.score * ((p && p.st.scoreMul) || 1);
 }
 
 export function gainOverdrive(amount) {
   const p = G.player;
   if (!p || p.odT > 0 || p.dead) return;
-  p.od = Math.min(100, p.od + amount * p.st.odGain);
+  p.od = Math.min(ultCap(p), p.od + amount * p.st.odGain);
 }
 
 export function onEnemyKilled(e) {
@@ -458,12 +474,15 @@ export const hitDamage = () => (G.director && G.director.diff && G.director.diff
 
 // dmg: hull a hit takes (default: the sector's hitDamage). solid: dashing doesn't pass through it (pursuit gates).
 export function hurtPlayer(p, dmg = hitDamage(), solid = false) {
-  if (p.dead || p.iframes > 0 || (p.dashT > 0 && !solid) || p.god || G.mode === 'attract' || phasing(p) || cine.on) return;
-  if (p.st.dodge && Math.random() < p.st.dodge) {
+  if (p.dead || p.iframes > 0 || (p.dashT > 0 && !solid) || p.god || G.mode === 'attract' || intangible(p) || cine.on) return;
+  const ud = ultDodge(p); // Phase Shift levels 1-2
+  const dodge = 1 - (1 - (p.st.dodge || 0)) * (1 - ud);
+  if (dodge > 0 && Math.random() < dodge) {
     // Lucky Dodge: the shot misses. A brief grace so one bullet cluster can't roll it twice.
     p.iframes = p.st.dodgePulse ? 1.0 : 0.35;
-    floatText(p.x, p.y - 30, 'DODGE', '#9dffb0', 11, 0.7);
-    ring(p.x, p.y, p.st.dodgePulse ? 90 : 34, '#9dffb0', 0.4);
+    const col = ud ? '#d4c4ff' : '#9dffb0';
+    floatText(p.x, p.y - 30, ud ? 'PHASED' : 'DODGE', col, 11, 0.7);
+    ring(p.x, p.y, p.st.dodgePulse ? 90 : 34, col, 0.4);
     if (p.st.dodgePulse) {
       clearBullets(p.x, p.y, 130);
       sparks(p.x, p.y, '#9dffb0', 14, 240);
@@ -680,7 +699,7 @@ export function drawPlayer(ctx, k) {
     const blink = left < 1 && Math.floor(G.time * 12) % 2 === 0 ? 0.4 : 1;
     const pulse = 1 + Math.sin(G.time * 5) * 0.015 + (p.domeFlare > 0 ? 0.04 : 0);
     const d = S.dome;
-    const sz = d.size * pulse;
+    const sz = d.size * pulse * (domeR(p) / 85); // the sprite is baked at the level-3 radius
     ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = (0.75 + (p.domeFlare > 0 ? 0.25 : 0)) * blink;
     ctx.drawImage(d.img, p.x - sz / 2, p.y - sz / 2, sz, sz);

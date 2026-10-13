@@ -35,7 +35,9 @@ const STAT_ROWS = [
   ['Max hull', (s) => s.maxHp, (v) => `${v}`, 'n', 'Reinforced Hull, Rest Stations, Tank gear'],
   ['Shield', (s) => s.shieldInterval, (v) => (v ? `${v.toFixed(1)}s` : 'OFF'), 's', 'Aegis Shield: recharge time (lower is better)', true],
   ['Ult charge', (s) => s.odGain, pc, 'pct', 'Capacitor, Overdrive gear and tunes'],
-  ['Ult duration', (s) => s.odDur, (v) => `${v.toFixed(1)}s`, 's', 'Capacitor, Overdrive gear'],
+  ['Ult duration', (s) => s.odDur, (v) => `${v.toFixed(1)}s`, 's', 'Capacitor, Overdrive gear (level 3; level 2 runs 75%, level 1 50%)'],
+  ['Ult ticks', (s) => s.ultTicks, (v) => `${v}`, 'n', 'Reserve Cell. A cast spends up to 3'],
+  ['Tick kept', (s) => s.ultSave, (v) => `${Math.round(v * 100)}%`, 'pts', 'Tick Recycler, Overdrive gear, Surge Capacitor'],
   ['Graze radius', (s) => s.grazeR, pc, 'pct', 'Graze Field, Overdrive gear'],
   ['Pickup range', (s) => s.magnet / 80, pc, 'pct', 'Tractor Field, Greed gear'],
   ['XP gain', (s) => s.xpMul, pc, 'pct', 'Salvage Protocol, Greed gear'],
@@ -113,7 +115,7 @@ function loadoutTab(G) {
   const shipTip = tip(ship.name, [ship.desc, ship.trait ? ship.trait.text : '', ship.path ? `Path: ${TAGS[ship.path].name}` : ''], ship.color);
   let html = row('SHIP', `<button class="rd-tag" style="--c:${p.color || ship.color}"${shipTip}>${ship.name}<em>${ship.role}</em></button>`);
 
-  let pilot = chip(cls.color, cls.icon, tip(`${cls.name} · ${cls.role}`, [cls.desc, `Ultimate: ${cls.ult.name}. ${cls.ult.desc}`], cls.color));
+  let pilot = chip(cls.color, cls.icon, tip(`${cls.name} · ${cls.role}`, [cls.desc, `Ultimate: ${cls.ult.name}. ${cls.ult.desc}`, cls.ult.levels], cls.color));
   for (const id of p.passives || []) {
     const ps = cls.passives.find((x) => x.id === id);
     if (ps) pilot += chip(RARITY[ps.r].color, ps.icon, tip(ps.name, [ps.desc, `${RARITY[ps.r].name} ability`], RARITY[ps.r].color));

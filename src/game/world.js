@@ -6,7 +6,7 @@ import { TAU, segDist2, dist2 } from '../core/math.js';
 import { bg } from '../render/background.js';
 import { updateDirector } from './director.js';
 import { updatePlayer, drawPlayer, hurtPlayer, gainOverdrive, addScore } from './player.js';
-import { pilotTimeScale, domeErase, onGraze, phasing } from './pilot.js';
+import { pilotTimeScale, domeErase, onGraze, intangible, ultGraze } from './pilot.js';
 import { treeOnGraze, forcedCrit } from './tree.js';
 import { updateModules, updateBeams, drawModules, drawBeams, onBeam } from './modules.js';
 import { updateEnemies, damageEnemy } from './enemies.js';
@@ -197,8 +197,8 @@ function collide(p) {
   domeErase(p);
 
   // Enemy bullets → player (+ graze)
-  const grazeR = 24 * p.st.grazeR;
-  const ghost = phasing(p);
+  const grazeR = 24 * p.st.grazeR * ultGraze(p); // Phase Shift widens it
+  const ghost = intangible(p); // Phase Shift level 3: bullets pass through
   for (const b of G.eBullets) {
     if (b.dead || b.delay > 0) continue;
     const dx = b.x - p.x;

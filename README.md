@@ -105,9 +105,13 @@ Open **PILOT** on the campaign map to pick a class and equip **2 passives**. Ran
 
 | Class | Rank | Ultimate | Passives (rank) |
 |---|---|---|---|
-| STRIKER | 1 | **OVERDRIVE**: erase every bullet, blast all enemies, vacuum shards, +fire rate / +damage | Killstreak (1), Hair Trigger (2), Executioner (4), Bloodrush (5) |
-| ENGINEER | 3 | **FORTRESS PROTOCOL**: opening blast, then a bullet-eating dome and 2 extra wingmen | Salvager (3), Overflow (4), Drone Link (5), Nanorepair (7) |
-| GHOST | 6 | **PHASE SHIFT**: enemies, bullets and spawns slow to 40%, you are intangible, grazes strike back | Wide Graze (6), Slipstream (7), Riposte (8), Afterimage (10) |
+| STRIKER | 1 | **OVERDRIVE**: erase bullets, blast enemies, +fire rate / damage / score (LV3: whole screen, vacuums shards) | Killstreak (1), Hair Trigger (2), Executioner (4), Bloodrush (5) |
+| ENGINEER | 3 | **FORTRESS PROTOCOL**: opening blast (no erase), a bullet-eating dome and 2-4 extra wingmen; the dome bursts at the end, harder the more it absorbed | Salvager (3), Overflow (4), Drone Link (5), Nanorepair (7) |
+| GHOST | 6 | **PHASE SHIFT**: enemies and bullets slow (40% at LV3), faster ship and wider graze, grazes strike back; dodge chance at LV1-2, intangible at LV3 | Wide Graze (6), Slipstream (7), Riposte (8), Afterimage (10) |
+
+Each class's Common ability (Killstreak, Salvager, Wide Graze) comes with the class and starts equipped.
+
+**Ultimate levels.** The ult gauge banks **ticks** (ring segments). A full set of 3 takes as long as the old full meter. Pressing ult spends up to 3 ticks and fires at that level: LV1 is a quick, short panic button, LV3 is the full ultimate. Partial progress toward the next tick is kept. **Reserve Cell** (level-up card) banks up to 2 more ticks, shown in white, for a quick follow-up cast (5 max). **Tick Recycler** (card), the Overdrive gear modifier and the Surge Capacitor tree notable give a chance that each spent tick is kept (50% max). Level 2 runs for 75% of the ult duration and level 1 runs for 50%.
 
 ### Passive tree
 
@@ -129,7 +133,7 @@ Open **PILOT** on the campaign map to pick a class and equip **2 passives**. Ran
 - **Build.** Main cannon, stats (damage, fire rate, crit, pierce, speed, magnet, capacitor), defenses (hull, regenerating Aegis shield, extra dashes) and up to **4 weapon modules** (5 with Engineer's Overflow).
 - **Status and effect cards.** Wide Rounds / Accelerator Coils (projectile size, speed), Hyperflow (faster battle for score and credits), Lucky Dodge, Armor Piercing, Burst Fire, Cryo / Incendiary / Corrosive Rounds (stacking chill, burn, armor loss; each has a potency follow-up that only appears once you own it), Resonance Rounds (every Nth hit detonates) and Sundering Rounds (% max hull per hit). Armored enemies (tanks, carriers, hunters, elites, bosses) take less damage until you pierce or corrode it.
 - **Combo.** Kills chain into a score multiplier (up to x8). Getting hit breaks the chain.
-- **Graze and ultimate.** Skimming bullets and killing fills the ult meter. Every ultimate doubles your score while it lasts.
+- **Graze and ultimate.** Skimming bullets and killing fills the ult meter. Every ultimate raises your score multiplier while it lasts (Striker up to x2, Engineer and Ghost up to x1.5).
 - **Only the white core of your ship is the hitbox.** Dashing makes you invulnerable.
 
 ### Modules and evolutions

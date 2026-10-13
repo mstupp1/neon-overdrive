@@ -21,7 +21,7 @@ import { drawThemeSideHorizon, drawThemeSideDeck, drawThemeChaseHorizon, themeLa
 import { beat } from '../core/beat.js';
 import { input } from '../core/input.js';
 import { hurtPlayer, hitDamage, gainOverdrive, addScore } from './player.js';
-import { phasing } from './pilot.js';
+import { intangible } from './pilot.js';
 import { sparks, floatText, flash, addShake, ring } from './fx.js';
 import { sfx } from '../core/audio.js';
 
@@ -567,7 +567,7 @@ function sideWalls(p) {
     p.vx = Math.min(p.vx, -160);
     hit = true;
   }
-  if (hit && p.iframes <= 0 && p.dashT <= 0 && !phasing(p)) {
+  if (hit && p.iframes <= 0 && p.dashT <= 0 && !intangible(p)) {
     sparks(p.x, p.y, '#ffb13d', 10, 260);
     hurtPlayer(p);
   }
@@ -794,7 +794,7 @@ function passGate(g, p) {
   }
   g.hit = true;
   // Gates are solid: a dash's i-frames don't carry you through them (only a hit's grace or a Ghost phase does).
-  if (p.iframes > 0 || phasing(p)) return;
+  if (p.iframes > 0 || intangible(p)) return;
   sparks(p.x, p.y, '#ff3d7a', 14, 300);
   flash('255,61,122', 0.25);
   addShake(0.3);

@@ -1,6 +1,10 @@
 // Pilot classes: each replaces the Overdrive with its own ultimate and offers 4 passives (2 equipped).
 // - CLASSES[id].ult is cast through castUlt(p) (called by player.js activateOverdrive after the shared meter logic).
 //   The ult timer is p.odT for every class; `p.cls` says which effect runs while it is > 0.
+// - Ult levels: the meter banks ticks (ULT_TICK each; 3 by default, st.ultTicks with Reserve Cell / gear). A cast spends
+//   up to 3 banked ticks and fires at that level (p.ultLv); ULT_LV[cls][lv] holds each level's numbers. Level 3 is the
+//   old full-meter ultimate. st.ultSave = chance each spent tick is kept.
+// - Default ability: each class's rarity-0 ability comes with the class and starts equipped (initPilotProfile).
 // - Passives: numeric ones change `st` in applyPassives(st, p) (called at the end of recomputeStats);
 //   behavioural ones just set st flags (killstreak, exec, bloodrush, nanorepair, riposte, afterimage, slipstream)
 //   that the existing hook points check.
@@ -21,15 +25,41 @@ import { assetIcon } from '../ui/asset-icons.js';
 
 const svg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 
+// --- Ult levels -------------------------------------------------------------------------------
+// One tick = a third of the old full meter, so level 3 charges exactly as fast as the old ultimate did.
 const DOME_R = 85;
-const PHASE_SCALE = 0.4;
+export const ULT_TICK = 100 / 3;
+export const ULT_LEVELS = 3; // a cast spends at most this many ticks
+export const ULT_TICKS_MAX = 5; // banked ticks cap (Reserve Cell, gear, tree)
+
+// Per class, index = level. dur: x st.odDur. rate / dmg: main gun and modules (modules get 2/3 of the rate bonus).
+// score: score multiplier. speed: move speed. erase / blast: opening radius (Infinity = whole screen), blastDmg: x the
+// full blast. Engineer: wing = temporary wingmen, dome = dome radius, burst = end-of-dome burst scale.
+// Ghost: slow = enemy time scale, dodge = chance a hit misses, graze = graze radius, strike = graze strike scale.
+export const ULT_LV = {
+  striker: [null,
+    { dur: 0.5, rate: 1.2, dmg: 1.15, score: 1.3, speed: 1.03, erase: 90, blast: 0, pulse: 130 },
+    { dur: 0.75, rate: 1.35, dmg: 1.3, score: 1.6, speed: 1.06, erase: 220, blast: 240, blastDmg: 0.6, pulse: 300 },
+    { dur: 1, rate: 1.6, dmg: 1.5, score: 2, speed: 1.1, erase: Infinity, blast: Infinity, blastDmg: 1, pulse: 1100, vacuum: true },
+  ],
+  engineer: [null,
+    { dur: 0.5, rate: 1.1, dmg: 1.08, score: 1.15, speed: 1, wing: 2, dome: 64, burst: 0.7, blast: 0, pulse: 120 },
+    { dur: 0.75, rate: 1.2, dmg: 1.15, score: 1.3, speed: 1, wing: 3, dome: 74, burst: 0.85, blast: 240, blastDmg: 0.6, pulse: 300 },
+    { dur: 1, rate: 1.3, dmg: 1.25, score: 1.5, speed: 1, wing: 4, dome: 85, burst: 1, blast: Infinity, blastDmg: 1, pulse: 1100 },
+  ],
+  ghost: [null,
+    { dur: 0.5, rate: 1.1, dmg: 1.08, score: 1.15, speed: 1.06, slow: 0.8, dodge: 0.25, graze: 1.25, strike: 0.6, pulse: 200 },
+    { dur: 0.75, rate: 1.2, dmg: 1.15, score: 1.3, speed: 1.1, slow: 0.6, dodge: 0.5, graze: 1.4, strike: 0.8, pulse: 360 },
+    { dur: 1, rate: 1.3, dmg: 1.25, score: 1.5, speed: 1.15, slow: 0.4, intangible: true, graze: 1.6, strike: 1, pulse: 520 },
+  ],
+};
 
 export const CLASSES = [
   {
     id: 'striker', name: 'STRIKER', role: 'Assault', color: '#ff3df2', rgb: '255,61,242',
     desc: 'Raw firepower. Chain kills, then burst everything down.',
     icon: assetIcon('pilot', 'striker', svg('<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>')),
-    ult: { id: 'overdrive', name: 'OVERDRIVE', short: 'OVERDRIVE', desc: 'Erase every bullet, blast all enemies, and double fire, damage and score.' },
+    ult: { id: 'overdrive', name: 'OVERDRIVE', short: 'OVERDRIVE', desc: 'Erase bullets and blast enemies, then boost fire rate, damage and score.', levels: 'LV1 small erase · LV2 wider erase and blast · LV3 clears the screen' },
     passives: [
       { id: 'killstreak', name: 'Killstreak', r: 0, desc: '+2% damage per 10 combo, up to +20%.', icon: assetIcon('pilot', 'killstreak', svg('<path d="M4 20V10M10 20V6M16 20V12M22 20V3"/>')), apply(st) { st.killstreak = true; } },
       { id: 'hairtrigger', name: 'Hair Trigger', r: 1, desc: 'Critical hits deal +0.75x more.', icon: assetIcon('pilot', 'hairtrigger', svg('<circle cx="12" cy="12" r="6"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/>')), apply(st) { st.critMul += 0.75; } },
@@ -43,7 +73,7 @@ export const CLASSES = [
     id: 'engineer', name: 'ENGINEER', role: 'Support', color: '#ffb02e', rgb: '255,176,46',
     desc: 'Fortifies the battlefield. Domes, drones and a deep module bay.',
     icon: assetIcon('pilot', 'engineer', svg('<path d="M4 20v-5a8 8 0 0116 0v5z"/><path d="M12 7v4M9 20v-3h6v3"/>')),
-    ult: { id: 'fortress', name: 'FORTRESS PROTOCOL', short: 'FORTRESS', desc: 'A dome erases enemy bullets and two extra wingmen fire. Opens with a blast.' },
+    ult: { id: 'fortress', name: 'FORTRESS PROTOCOL', short: 'FORTRESS', desc: 'A dome soaks up bullets while extra wingmen fire, then bursts harder the more it absorbed.', levels: 'LV1 2 wingmen · LV2 3 wingmen and blast · LV3 4 wingmen, full blast' },
     passives: [
       { id: 'salvager', name: 'Salvager', r: 0, desc: '+25% credits from everything.', icon: assetIcon('pilot', 'salvager', svg('<circle cx="12" cy="12" r="9"/><path d="M15 8.5c-.8-1-2-1.5-3-1.5-1.7 0-3 1-3 2.5s1.3 2 3 2.5 3 1 3 2.5-1.3 2.5-3 2.5c-1 0-2.2-.5-3-1.5"/>')), apply(st) { st.creditMul *= 1.25; } },
       { id: 'overflow', name: 'Overflow', r: 2, desc: '+1 weapon module slot.', icon: assetIcon('pilot', 'overflow', svg('<rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><path d="M16.5 14v6M13.5 17h6"/>')), apply(st) { st.maxModules += 1; } },
@@ -57,7 +87,7 @@ export const CLASSES = [
     id: 'ghost', name: 'GHOST', role: 'Evasion', color: '#9d7bff', rgb: '157,123,255',
     desc: 'Lives on the edge of the bullet curtain. Graze, dash, strike.',
     icon: assetIcon('pilot', 'ghost', svg('<path d="M5 21V10a7 7 0 0114 0v11l-3-2-2 2-2-2-2 2-2-2z"/><circle cx="10" cy="11" r="1"/><circle cx="14" cy="11" r="1"/>')),
-    ult: { id: 'phase', name: 'PHASE SHIFT', short: 'PHASE SHIFT', desc: 'Enemies and bullets slow to 40%. You are intangible, and grazes strike back.' },
+    ult: { id: 'phase', name: 'PHASE SHIFT', short: 'PHASE SHIFT', desc: 'Enemies and bullets slow, you move faster with a wider graze, and grazes strike back.', levels: 'LV1 25% dodge · LV2 50% dodge, slower bullets · LV3 intangible' },
     passives: [
       { id: 'widegraze', name: 'Wide Graze', r: 0, desc: '+50% graze radius.', icon: assetIcon('pilot', 'widegraze', svg('<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/>')), apply(st) { st.grazeR *= 1.5; } },
       { id: 'slipstream', name: 'Slipstream', r: 1, desc: '+15% move speed for 1.5s after a graze.', icon: assetIcon('pilot', 'slipstream', svg('<path d="M3 8h12M3 12h18M3 16h12"/>')), apply(st) { st.slipstream = true; } },
@@ -96,17 +126,33 @@ export const passiveById = (id) => byPassive.get(id);
 export const classOfPassive = (id) => CLASSES.find((c) => c.passives.some((ps) => ps.id === id));
 export const ALL_PASSIVES = CLASSES.flatMap((c) => c.passives);
 
+// Each class's default ability (its Common one) comes with the class and starts equipped.
+export const defaultPassive = (c) => c.passives.find((ps) => ps.r === 0);
+function grantDefault(c, equip) {
+  const pl = profile.pilot;
+  const ps = defaultPassive(c);
+  if (!ps) return;
+  if (!pl.found.includes(ps.id)) pl.found.push(ps.id);
+  if (equip && !(pl.passives[c.id] || []).length) pl.passives[c.id] = [ps.id];
+}
+
 // Saves from before abilities were found: grant what the old rank gates had opened (classes 1/3/6, old passive ranks).
 const OLD_GATES = { striker: 1, engineer: 3, ghost: 6, killstreak: 1, hairtrigger: 2, executioner: 4, bloodrush: 5, salvager: 3, overflow: 4, dronelink: 5, nanorepair: 7, widegraze: 6, slipstream: 7, riposte: 8, afterimage: 10 };
 export function initPilotProfile() {
   const pl = profile.pilot;
-  if (!pl.legacy) return;
-  delete pl.legacy;
-  const rank = currentRank();
-  for (const c of CLASSES) {
-    if (rank < OLD_GATES[c.id]) continue;
-    if (!pl.classes.includes(c.id)) pl.classes.push(c.id);
-    for (const ps of c.passives) if (OLD_GATES[ps.id] && rank >= OLD_GATES[ps.id] && !pl.found.includes(ps.id)) pl.found.push(ps.id);
+  if (pl.legacy) {
+    delete pl.legacy;
+    const rank = currentRank();
+    for (const c of CLASSES) {
+      if (rank < OLD_GATES[c.id]) continue;
+      if (!pl.classes.includes(c.id)) pl.classes.push(c.id);
+      for (const ps of c.passives) if (OLD_GATES[ps.id] && rank >= OLD_GATES[ps.id] && !pl.found.includes(ps.id)) pl.found.push(ps.id);
+    }
+  }
+  // Once per save (new or old): every found class gets its default ability, equipped when nothing else is.
+  if (!pl.dflt) {
+    for (const c of CLASSES) if (pl.classes.includes(c.id)) grantDefault(c, true);
+    pl.dflt = 1;
   }
   saveProfile();
 }
@@ -115,6 +161,7 @@ export function initPilotProfile() {
 export function findClass(id) {
   if (!classById(id) || profile.pilot.classes.includes(id)) return false;
   profile.pilot.classes.push(id);
+  grantDefault(classById(id), true);
   saveProfile();
   return true;
 }
@@ -134,7 +181,8 @@ export function activeClass() {
 export function equippedPassives(clsId) {
   const c = classById(clsId);
   if (!c || !classUnlocked(c)) return [];
-  const ids = profile.pilot.passives[clsId] || [];
+  const dp = defaultPassive(c);
+  const ids = profile.pilot.passives[clsId] || (dp ? [dp.id] : []); // never configured (fresh or reset save): the default
   const out = [];
   for (const id of ids) {
     const ps = c.passives.find((x) => x.id === id);
@@ -219,52 +267,79 @@ export function initPilot(p, cls, passives) {
   p.tsc = 1; // smoothed enemy time scale
   p.domeFlare = 0;
   p.domeSfx = 0;
+  p.domeAbs = 0; // bullets the Fortress dome absorbed this cast
+  p.ultLv = 0; // level of the running ult
   p.echoI = 0;
   p.echoes = [];
   for (let i = 0; i < 6; i++) p.echoes.push({ x: 0, y: 0, t: 0 });
 }
 
-// True while the Striker's fire / damage boost applies (other classes only get their own ult effect).
+// True while the Striker's ult runs (its gold shots and muzzle); the shared boosts read ultFx below.
 export const boosted = (p) => p.odT > 0 && p.cls === 'striker';
 export const phasing = (p) => p.odT > 0 && p.cls === 'ghost';
 export const fortressOn = (p) => p.odT > 0 && p.cls === 'engineer';
 
+// --- Ult meter: banked ticks ------------------------------------------------------------------
+
+export const ultCap = (p) => ULT_TICK * clamp((p.st && p.st.ultTicks) || ULT_LEVELS, 1, ULT_TICKS_MAX);
+export const ultTicks = (p) => Math.floor((p.od + 1e-6) / ULT_TICK); // banked ticks
+export const ultCastLevel = (p) => Math.min(ULT_LEVELS, ultTicks(p)); // the level a cast now would fire at
+// Raw meter (no charge multipliers): story events, rewards. Clamped to the bank.
+export function addUltMeter(p, amount) {
+  p.od = clamp(p.od + amount, 0, ultCap(p));
+}
+
+// The running ult's level row (null when no ult is active).
+export const ultFx = (p) => (p && p.odT > 0 ? (ULT_LV[p.cls] || ULT_LV.striker)[p.ultLv || ULT_LEVELS] : null);
+export const ultDmg = (p) => { const f = ultFx(p); return f ? f.dmg : 1; };
+export const ultRate = (p) => { const f = ultFx(p); return f ? f.rate : 1; };
+export const ultModRate = (p) => 1 + (ultRate(p) - 1) * (2 / 3);
+export const ultScore = (p) => { const f = ultFx(p); return f ? f.score : 1; };
+export const ultSpeed = (p) => { const f = ultFx(p); return f ? f.speed : 1; };
+export const ultGraze = (p) => { const f = ultFx(p); return f && f.graze ? f.graze : 1; };
+export const ultWingmen = (p) => { const f = fortressOn(p) && ultFx(p); return f ? f.wing : 0; };
+export const domeR = (p) => { const f = ultFx(p); return f && f.dome ? f.dome : DOME_R; };
+// Bullets and hits pass straight through (Phase Shift level 3 only).
+export const intangible = (p) => { const f = phasing(p) && ultFx(p); return !!(f && f.intangible); };
+// Chance the ult makes a hit miss (Phase Shift levels 1-2); hurtPlayer folds it into Lucky Dodge.
+export const ultDodge = (p) => { const f = phasing(p) && ultFx(p); return f && f.dodge ? f.dodge : 0; };
+
 // --- Ultimates ------------------------------------------------------------------------------
 
-function blastNear(p, radius) {
-  const r2 = radius * radius;
+const BLAST = 30 * 0.35; // non-boss opening blast damage, x player damage x difficulty hull scale
+
+// Opening erase + blast shared by the Striker (erases) and the Engineer (blast only: its dome is the defence).
+function opening(p, f, erase) {
+  G.pulse = 0.001;
+  G.pulseMax = f.pulse;
+  if (erase && f.erase) {
+    let cleared = 0;
+    clearBullets(p.x, p.y, f.erase, () => cleared++);
+    if (cleared) G.score += cleared * 25 * comboMult();
+  }
+  if (!f.blast) return;
+  const r2 = f.blast * f.blast;
   for (const e of G.enemies) {
     if (e.dead || !e.entered || dist2(p.x, p.y, e.x, e.y) > r2) continue;
-    damageEnemy(e, e.boss ? e.maxHp * 0.02 : 30 * p.st.dmg * G.director.diff.hp * 0.35, e.x, e.y, true);
+    damageEnemy(e, (e.boss ? e.maxHp * 0.03 : BLAST * p.st.dmg * G.director.diff.hp) * f.blastDmg, e.x, e.y, true);
   }
 }
 
-// Each takes the caster (the player; step 6's ECLIPSE can call these with a boss-shaped caster).
+// Each takes the caster and its level row.
 const ULTS = {
-  striker(p) {
-    G.pulse = 0.001;
-    G.pulseMax = 1100;
-    let cleared = 0;
-    clearBullets(p.x, p.y, Infinity, () => cleared++);
-    if (cleared) G.score += cleared * 25 * comboMult();
-    for (const e of G.enemies) {
-      if (e.dead || !e.entered) continue;
-      damageEnemy(e, e.boss ? e.maxHp * 0.03 : 30 * p.st.dmg * G.director.diff.hp * 0.35, e.x, e.y, true);
-    }
-    vacuumAll();
+  striker(p, f) {
+    opening(p, f, true);
+    if (f.erase !== Infinity) ring(p.x, p.y, f.erase, '#ff3df2', 0.45);
+    if (f.vacuum) vacuumAll();
   },
-  engineer(p) {
-    G.pulse = 0.001;
-    G.pulseMax = 320;
-    let cleared = 0;
-    clearBullets(p.x, p.y, 260, () => cleared++);
-    if (cleared) G.score += cleared * 25 * comboMult();
-    blastNear(p, 260);
-    ring(p.x, p.y, DOME_R, '#ffb02e', 0.5);
+  engineer(p, f) {
+    opening(p, f, false);
+    p.domeAbs = 0;
+    ring(p.x, p.y, f.dome, '#ffb02e', 0.5);
   },
-  ghost(p) {
+  ghost(p, f) {
     G.pulse = 0.001;
-    G.pulseMax = 520;
+    G.pulseMax = f.pulse;
     p.ghostT = 0;
   },
 };
@@ -273,7 +348,31 @@ const ULTS = {
 export function castUlt(p) {
   p.odExt = 0;
   p.domeFlare = 0;
-  (ULTS[p.cls] || ULTS.striker)(p);
+  const f = ultFx(p);
+  (ULTS[p.cls] || ULTS.striker)(p, f);
+}
+
+// The ult just ran out (player.js). Fortress: the dome bursts, harder and wider the more bullets it absorbed.
+export function endUlt(p) {
+  if (p.cls !== 'engineer' || p.dead) return;
+  const f = ULT_LV.engineer[p.ultLv || ULT_LEVELS];
+  const n = p.domeAbs || 0;
+  p.domeAbs = 0;
+  const k = Math.min(1.5, 0.2 + n * 0.04) * f.burst; // 33 absorbed bullets = the full 1.5x
+  const R = Math.min(300, 100 + n * 5) * f.burst;
+  G.pulseColor = '#ffb02e';
+  G.pulse = 0.001;
+  G.pulseMax = R;
+  ring(p.x, p.y, R, '#ffb02e', 0.6);
+  sparks(p.x, p.y, '#ffd27a', 18, 320);
+  for (const e of G.enemies) {
+    if (e.dead || !e.entered) continue;
+    const rr = R + (e.r || 0);
+    if (dist2(p.x, p.y, e.x, e.y) > rr * rr) continue;
+    damageEnemy(e, e.boss ? e.maxHp * 0.0133 * k : BLAST * p.st.dmg * G.director.diff.hp * k, e.x, e.y, true);
+  }
+  floatText(p.x, p.y - 36, n ? `DOME BURST x${n}` : 'DOME BURST', '#ffb02e', 12, 1);
+  sfx.explode(0.8 + k * 0.4);
 }
 
 // Extra Overdrive time from Bloodrush kills (called from onEnemyKilled).
@@ -303,7 +402,8 @@ export function onSectorClear(p, bossSector) {
 
 // G.enemyTimeScale for this step (smoothed; 0.4 while phasing). Call before updating enemies.
 export function pilotTimeScale(p, dt) {
-  const target = p && !p.dead && phasing(p) ? PHASE_SCALE : 1;
+  const f = p && !p.dead && phasing(p) && ultFx(p);
+  const target = f ? f.slow : 1;
   if (!p) return (G.enemyTimeScale = 1);
   p.tsc += (target - p.tsc) * Math.min(1, 14 * dt);
   if (Math.abs(p.tsc - target) < 0.012) p.tsc = target;
@@ -361,8 +461,9 @@ export function spawnEchoes(p, dx, dy) {
 export function domeErase(p) {
   if (!fortressOn(p) || p.dead) return;
   let n = 0;
-  clearBullets(p.x, p.y, DOME_R, () => n++);
+  clearBullets(p.x, p.y, domeR(p), () => n++);
   if (n) {
+    p.domeAbs = (p.domeAbs || 0) + n; // feeds the end-of-dome burst
     for (let i = 0; i < n; i++) addScore(25);
     p.domeFlare = 0.18;
     if (p.domeSfx <= 0) {
@@ -384,7 +485,7 @@ export function onGraze(p) {
   if (phasing(p)) {
     const e = nearestEnemy(p.x, p.y);
     if (e) {
-      damageEnemy(e, 8 * st.dmg * p.pdm, e.x, e.y);
+      damageEnemy(e, 8 * st.dmg * p.pdm * ultFx(p).strike, e.x, e.y);
       sparks(e.x, e.y, '#d4c4ff', 3, 180);
     }
   }
