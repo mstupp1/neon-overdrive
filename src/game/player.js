@@ -18,7 +18,7 @@ import { vacuumAll } from './pickups.js';
 import { dashNova, resetModules, staticDischarge } from './modules.js';
 import { collectRelic } from './collectables.js';
 import { achEvent } from './achievements.js';
-import { CLASSES, activeClass, equippedPassives, passiveById, initPilot, castUlt, endUlt, boosted, phasing, fortressOn, bloodrush, onEliteKilled, updatePilot, spawnEchoes, ULT_TICK, ULT_LEVELS, ULT_LV, ultCap, ultTicks, ultCastLevel, ultDmg, ultRate, ultScore, ultSpeed, ultDodge, intangible, domeR } from './pilot.js';
+import { CLASSES, activeClass, equippedPassives, passiveById, initPilot, castUlt, endUlt, boosted, phasing, fortressOn, bloodrush, onEliteKilled, updatePilot, spawnEchoes, ULT_CELL, ULT_LEVELS, ULT_LV, ultCap, ultCells, ultCastLevel, ultDmg, ultRate, ultScore, ultSpeed, ultDodge, intangible, domeR } from './pilot.js';
 import { cine } from './cinematic.js';
 import { treeForRun, treeOnKill, treeOnDash } from './tree.js';
 import { sv } from './stageview.js';
@@ -58,11 +58,11 @@ export function createPlayer(ship, gear = true) {
     level: 1,
     xp: 0,
     xpNeed: xpFor(1),
-    od: 0, // ult meter: ULT_TICK per banked tick (pilot.js)
+    od: 0, // ult meter: ULT_CELL per banked cell (pilot.js)
     odT: 0,
     odDurMax: 0, // full duration of the running ult (HUD)
-    odReady: false, // at least one tick banked
-    odSeen: 0, // banked ticks already announced
+    odReady: false, // at least one cell banked
+    odSeen: 0, // banked cells already announced
     up: {},
     st: {},
     ghosts: [],
@@ -270,19 +270,19 @@ export function updatePlayer(p, dt) {
       floatText(p.x, p.y - 30, `${CLASSES.find((x) => x.id === p.cls).ult.short} END`, p.ucol, 10, 0.8);
       endUlt(p);
     }
-  } else if (c.od && ultTicks(p) >= 1) {
+  } else if (c.od && ultCells(p) >= 1) {
     activateOverdrive(p);
   }
-  // Each newly banked tick is announced: the level a cast would now fire at, or a reserve tick past level 3.
-  const ticks = ultTicks(p);
-  p.odReady = ticks >= 1;
-  if (ticks > p.odSeen && p.odT <= 0) {
+  // Each newly banked cell is announced: the level a cast would now fire at, or a reserve cell past level 3.
+  const cells = ultCells(p);
+  p.odReady = cells >= 1;
+  if (cells > p.odSeen && p.odT <= 0) {
     G.texts = G.texts.filter((t) => !t.text.endsWith(' READY') && !t.text.startsWith('ULT LV'));
     sfx.odReady();
-    const lv = Math.min(ULT_LEVELS, ticks);
-    floatText(p.x, p.y - 34, ticks > ULT_LEVELS ? `ULT LV${lv} +${ticks - ULT_LEVELS} BANKED` : lv === 1 ? `${ultOf(p).short} READY` : `ULT LV${lv}`, p.ucol, lv === ULT_LEVELS ? 12 : 11, 1.1);
+    const lv = Math.min(ULT_LEVELS, cells);
+    floatText(p.x, p.y - 34, cells > ULT_LEVELS ? `ULT LV${lv} +${cells - ULT_LEVELS} BANKED` : lv === 1 ? `${ultOf(p).short} READY` : `ULT LV${lv}`, p.ucol, lv === ULT_LEVELS ? 12 : 11, 1.1);
   }
-  p.odSeen = ticks;
+  p.odSeen = cells;
 
   updatePilot(p, dt);
 
@@ -392,14 +392,14 @@ function firePrimary(p, w) {
 const ultOf = (p) => CLASSES.find((x) => x.id === p.cls).ult;
 
 // Shared ult meter logic; the class-specific effect lives in pilot.js (castUlt). A cast spends up to ULT_LEVELS banked
-// ticks and fires at that level; each spent tick may be kept (st.ultSave). Partial progress toward the next tick stays.
+// cells and fires at that level; each spent cell may be kept (st.ultSave). Partial progress toward the next cell stays.
 export function activateOverdrive(p) {
   const lv = ultCastLevel(p);
   if (lv < 1) return;
   let kept = 0;
   for (let i = 0; i < lv; i++) if (p.st.ultSave && Math.random() < p.st.ultSave) kept++;
-  p.od = Math.max(0, p.od - (lv - kept) * ULT_TICK);
-  p.odSeen = ultTicks(p);
+  p.od = Math.max(0, p.od - (lv - kept) * ULT_CELL);
+  p.odSeen = ultCells(p);
   p.ultLv = lv;
   p.odT = p.odDurMax = p.st.odDur * ULT_LV[p.cls in ULT_LV ? p.cls : 'striker'][lv].dur;
   G.texts = G.texts.filter((t) => !t.text.endsWith(' READY') && !t.text.startsWith('ULT LV'));
@@ -413,7 +413,7 @@ export function activateOverdrive(p) {
   addShake(0.2 + 0.13 * lv);
   hitstop(lv === ULT_LEVELS ? 0.08 : 0.04);
   floatText(p.x, p.y - 40, `${cls.ult.short} LV${lv}!`, cls.color, 12 + 2 * lv, 1.2);
-  if (kept) floatText(p.x, p.y - 58, kept > 1 ? `${kept} TICKS KEPT` : 'TICK KEPT', '#ffffff', 10, 1);
+  if (kept) floatText(p.x, p.y - 58, kept > 1 ? `${kept} CELLS SAVED` : 'CELL SAVED', '#ffffff', 10, 1);
 }
 
 export function comboMult() {

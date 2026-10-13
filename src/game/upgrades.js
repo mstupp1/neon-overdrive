@@ -4,7 +4,7 @@
 import { weightedPick } from '../core/math.js';
 import { WEAPONS } from './ships.js';
 import { applyParts } from './parts.js';
-import { applyPassives, resetPilotStats, addUltMeter, ULT_LEVELS, ULT_TICKS_MAX } from './pilot.js';
+import { applyPassives, resetPilotStats, addUltMeter, ULT_LEVELS, ULT_CELLS_MAX } from './pilot.js';
 import { STATS, rollMods, itemLevel, TAGS, PATH_KIN, affixTag } from './parts.js';
 import { RARITY, rollRarity } from './rarity.js';
 import { profile, saveProfile } from '../core/storage.js';
@@ -114,8 +114,8 @@ export const UPGRADES = [
   { id: 'capacitor', name: 'Capacitor', cat: 'stat', max: 4, weight: 0.8, tier: 0, desc: () => '+25% Overdrive charge, +1s duration.' },
   { id: 'salvage', name: 'Salvage Protocol', cat: 'stat', max: 3, weight: 0.6, tier: 0, desc: () => '+15% XP from data shards.' },
   { id: 'chainlink', name: 'Chain Link', cat: 'stat', max: 3, weight: 0.6, tier: 0, desc: () => 'Combo lasts 0.8s longer. +1% damage per combo multiplier step.' },
-  { id: 'reserveCell', name: 'Reserve Cell', cat: 'stat', max: 2, weight: 0.5, tier: 0, desc: () => 'Bank 1 more ultimate tick. A cast still spends up to 3, so the spare fuels a quick follow-up.' },
-  { id: 'recycler', name: 'Tick Recycler', cat: 'stat', max: 3, weight: 0.5, tier: 0, desc: (lv) => `+12% chance each ultimate tick you spend is kept (${pct(0.12 * lv)}).` },
+  { id: 'reserveCell', name: 'Reserve Cell', cat: 'stat', max: 2, weight: 0.5, tier: 0, desc: () => 'Bank 1 more ultimate cell. A cast still spends up to 3, so the spare fuels a quick follow-up.' },
+  { id: 'recycler', name: 'Cell Recycler', cat: 'stat', max: 3, weight: 0.5, tier: 0, desc: (lv) => `+12% chance each ultimate cell you spend is saved (${pct(0.12 * lv)}).` },
   { id: 'grazer', name: 'Graze Field', cat: 'stat', max: 3, weight: 0.6, tier: 0, desc: () => '+30% graze radius, +35% Overdrive from grazes.' },
   { id: 'prospector', name: 'Prospector', cat: 'stat', max: 3, weight: 0.5, tier: 0, desc: () => '+20% credits from kills and drops.' },
   { id: 'hull', name: 'Reinforced Hull', cat: 'defense', max: 4, weight: 0.9, tier: 0, desc: () => '+1 max hull and repair 1.' },
@@ -307,8 +307,8 @@ export function recomputeStats(p) {
   st.hitIfr = 1; // invulnerability after a hit (gear modifiers, passive tree)
   st.rerolls = 0; // extra draft rerolls at the start of a run (gear, passive tree, Flux Core; main.js newWorld)
   st.aegisOd = 0; // ultimate meter per shield break (Aegis Prime)
-  st.ultTicks = ULT_LEVELS + lv('reserveCell'); // ult ticks the meter can bank (pilot.js)
-  st.ultSave = 0.12 * lv('recycler'); // chance each spent ult tick is kept
+  st.ultCells = ULT_LEVELS + lv('reserveCell'); // ult cells the meter can bank (pilot.js)
+  st.ultSave = 0.12 * lv('recycler'); // chance each spent ult cell is kept
   // Boost (boost.js): capacity, refill rate, burn time (drain ÷ eff) and stage-flow speed.
   st.boostCap = 1 + 0.25 * lv('boostTank');
   st.boostRegen = 1 + 0.3 * lv('ramScoop');
@@ -322,7 +322,7 @@ export function recomputeStats(p) {
   applyPassives(st, p);
   applyTree(st, p);
   st.maxHp = Math.max(1, st.maxHp);
-  st.ultTicks = Math.min(ULT_TICKS_MAX, Math.max(ULT_LEVELS, Math.round(st.ultTicks)));
+  st.ultCells = Math.min(ULT_CELLS_MAX, Math.max(ULT_LEVELS, Math.round(st.ultCells)));
   st.ultSave = Math.min(0.5, st.ultSave);
   if (st.shieldInterval) st.shieldInterval = Math.max(SHIELD_MIN, st.shieldInterval); // stacked recharge cuts bottom out
   p.maxHp = st.maxHp;

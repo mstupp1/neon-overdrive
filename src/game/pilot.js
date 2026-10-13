@@ -1,9 +1,9 @@
 // Pilot classes: each replaces the Overdrive with its own ultimate and offers 4 passives (2 equipped).
 // - CLASSES[id].ult is cast through castUlt(p) (called by player.js activateOverdrive after the shared meter logic).
 //   The ult timer is p.odT for every class; `p.cls` says which effect runs while it is > 0.
-// - Ult levels: the meter banks ticks (ULT_TICK each; 3 by default, st.ultTicks with Reserve Cell / gear). A cast spends
-//   up to 3 banked ticks and fires at that level (p.ultLv); ULT_LV[cls][lv] holds each level's numbers. Level 3 is the
-//   old full-meter ultimate. st.ultSave = chance each spent tick is kept.
+// - Ult levels: the meter banks cells (ULT_CELL each; 3 by default, st.ultCells with Reserve Cell / gear). A cast spends
+//   up to 3 banked cells and fires at that level (p.ultLv); ULT_LV[cls][lv] holds each level's numbers. Level 3 is the
+//   old full-meter ultimate. st.ultSave = chance each spent cell is kept.
 // - Default ability: each class's rarity-0 ability comes with the class and starts equipped (initPilotProfile).
 // - Passives: numeric ones change `st` in applyPassives(st, p) (called at the end of recomputeStats);
 //   behavioural ones just set st flags (killstreak, exec, bloodrush, nanorepair, riposte, afterimage, slipstream)
@@ -26,11 +26,11 @@ import { assetIcon } from '../ui/asset-icons.js';
 const svg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 
 // --- Ult levels -------------------------------------------------------------------------------
-// One tick = a third of the old full meter, so level 3 charges exactly as fast as the old ultimate did.
+// One cell = a third of the old full meter, so level 3 charges exactly as fast as the old ultimate did.
 const DOME_R = 85;
-export const ULT_TICK = 100 / 3;
-export const ULT_LEVELS = 3; // a cast spends at most this many ticks
-export const ULT_TICKS_MAX = 5; // banked ticks cap (Reserve Cell, gear, tree)
+export const ULT_CELL = 100 / 3;
+export const ULT_LEVELS = 3; // a cast spends at most this many cells
+export const ULT_CELLS_MAX = 5; // banked cells cap (Reserve Cell, gear, tree)
 
 // Per class, index = level. dur: x st.odDur. rate / dmg: main gun and modules (modules get 2/3 of the rate bonus).
 // score: score multiplier. speed: move speed. erase / blast: opening radius (Infinity = whole screen), blastDmg: x the
@@ -279,11 +279,11 @@ export const boosted = (p) => p.odT > 0 && p.cls === 'striker';
 export const phasing = (p) => p.odT > 0 && p.cls === 'ghost';
 export const fortressOn = (p) => p.odT > 0 && p.cls === 'engineer';
 
-// --- Ult meter: banked ticks ------------------------------------------------------------------
+// --- Ult meter: banked cells ------------------------------------------------------------------
 
-export const ultCap = (p) => ULT_TICK * clamp((p.st && p.st.ultTicks) || ULT_LEVELS, 1, ULT_TICKS_MAX);
-export const ultTicks = (p) => Math.floor((p.od + 1e-6) / ULT_TICK); // banked ticks
-export const ultCastLevel = (p) => Math.min(ULT_LEVELS, ultTicks(p)); // the level a cast now would fire at
+export const ultCap = (p) => ULT_CELL * clamp((p.st && p.st.ultCells) || ULT_LEVELS, 1, ULT_CELLS_MAX);
+export const ultCells = (p) => Math.floor((p.od + 1e-6) / ULT_CELL); // banked cells
+export const ultCastLevel = (p) => Math.min(ULT_LEVELS, ultCells(p)); // the level a cast now would fire at
 // Raw meter (no charge multipliers): story events, rewards. Clamped to the bank.
 export function addUltMeter(p, amount) {
   p.od = clamp(p.od + amount, 0, ultCap(p));

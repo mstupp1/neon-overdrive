@@ -111,7 +111,7 @@ Open **PILOT** on the campaign map to pick a class and equip **2 passives**. Ran
 
 Each class's Common ability (Killstreak, Salvager, Wide Graze) comes with the class and starts equipped.
 
-**Ultimate levels.** The ult gauge banks **ticks** (ring segments). A full set of 3 takes as long as the old full meter. Pressing ult spends up to 3 ticks and fires at that level: LV1 is a quick, short panic button, LV3 is the full ultimate. Partial progress toward the next tick is kept. **Reserve Cell** (level-up card) banks up to 2 more ticks, shown in white, for a quick follow-up cast (5 max). **Tick Recycler** (card), the Overdrive gear modifier and the Surge Capacitor tree notable give a chance that each spent tick is kept (50% max). Level 2 runs for 75% of the ult duration and level 1 runs for 50%.
+**Ultimate levels.** The ult gauge banks **cells** (ring segments). A full set of 3 takes as long as the old full meter. Pressing ult spends up to 3 cells and fires at that level: LV1 is a quick, short panic button, LV3 is the full ultimate. Partial progress toward the next cell is kept. **Reserve Cell** (level-up card) banks up to 2 more cells, shown in white, for a quick follow-up cast (5 max). **Cell Recycler** (card), the Overdrive gear modifier and the Surge Capacitor tree notable give a chance that each spent cell is saved (50% max). Level 2 runs for 75% of the ult duration and level 1 runs for 50%.
 
 ### Passive tree
 

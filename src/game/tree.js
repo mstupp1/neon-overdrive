@@ -196,7 +196,7 @@ const MODS = {
   odDurPct: (v) => `${pct(v)} ultimate duration`,
   grazeR: (v) => `${pct(v)} graze radius`,
   grazeOd: (v) => `${pct(v)} ultimate per graze`,
-  ultSave: (v) => `${pct(v)} chance a spent ultimate tick is kept`,
+  ultSave: (v) => `${pct(v)} chance a spent ultimate cell is saved`,
   hull: (v) => (v === 0.5 ? '+½ max hull (2 = +1)' : `${num(v)} max hull`),
   hitIfr: (v) => `${pct(v)} invulnerability after a hit`,
   shield: (v) => `A shield recharges every ${v}s (20% faster if you already have one)`,

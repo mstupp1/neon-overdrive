@@ -4,7 +4,7 @@ import { G, view, sectorInfo } from '../game/state.js';
 import { S, withAlpha } from './sprites.js';
 import { TAU, clamp, easeOutCubic } from '../core/math.js';
 import { comboMult } from '../game/player.js';
-import { CLASSES, ULT_TICK, ULT_LEVELS, ultTicks } from '../game/pilot.js';
+import { CLASSES, ULT_CELL, ULT_LEVELS, ultCells } from '../game/pilot.js';
 import { input } from '../core/input.js';
 import { sv } from '../game/stageview.js';
 import { profile } from '../core/storage.js';
@@ -308,12 +308,12 @@ function drawGauge(ctx, x, y, p, kind, sx = p.x, sy = p.y) {
   ctx.arc(x, y, r + 4, 0, TAU);
   ctx.fill();
   if (kind === 'od') {
-    // Banked ticks: one ring segment per tick the meter can hold (3 levels, plus reserve ticks in white). A cast spends up
+    // Banked cells: one ring segment per cell the meter can hold (3 levels, plus reserve cells in white). A cast spends up
     // to 3 and fires at that level; while it runs, an inner ring drains with its time.
     const active = p.odT > 0;
-    const n = (p.st && p.st.ultTicks) || ULT_LEVELS;
-    const ticks = ultTicks(p);
-    const lv = Math.min(ULT_LEVELS, ticks);
+    const n = (p.st && p.st.ultCells) || ULT_LEVELS;
+    const cells = ultCells(p);
+    const lv = Math.min(ULT_LEVELS, cells);
     const cls = CLASSES.find((c) => c.id === p.cls) || CLASSES[0];
     const col = cls.color;
     const gap = n > 3 ? 0.1 : 0.12;
@@ -326,7 +326,7 @@ function drawGauge(ctx, x, y, p, kind, sx = p.x, sy = p.y) {
       ctx.beginPath();
       ctx.arc(x, y, r, a0, a1);
       ctx.stroke();
-      const fill = i < ticks ? 1 : i === ticks ? clamp((p.od - ticks * ULT_TICK) / ULT_TICK, 0, 1) : 0;
+      const fill = i < cells ? 1 : i === cells ? clamp((p.od - cells * ULT_CELL) / ULT_CELL, 0, 1) : 0;
       if (fill <= 0) continue;
       ctx.strokeStyle = fill >= 1 ? c : withAlpha(c, active ? 0.3 : 0.5);
       ctx.lineWidth = fill >= 1 && !active && lv === ULT_LEVELS ? 5 + Math.sin(G.realTime * 8) * 1.2 : 4;
@@ -345,7 +345,7 @@ function drawGauge(ctx, x, y, p, kind, sx = p.x, sy = p.y) {
       const hint = keyHint('od') || 'TAP';
       text(ctx, `LV${lv}`, x, y - 5, 11, '#ffffff', 'center', 700);
       text(ctx, hint, x, y + 7, fitSize(ctx, hint, r * 1.2, 8, 700), withAlpha(col, 0.9), 'center', 700);
-    } else text(ctx, `${Math.floor((100 * p.od) / ULT_TICK)}%`, x, y - 1, 10, withAlpha(col, 0.85), 'center', 700);
+    } else text(ctx, `${Math.floor((100 * p.od) / ULT_CELL)}%`, x, y - 1, 10, withAlpha(col, 0.85), 'center', 700);
     text(ctx, cls.ult.short, x, y + r + 13, 9, col, 'center', 700);
   } else {
     const n = p.maxCharges;

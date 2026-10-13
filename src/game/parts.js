@@ -51,7 +51,7 @@ export const STATS = {
   odDur: { apply: (st, v) => (st.odDur += v), text: (v) => `+${v.toFixed(1)}s ultimate duration` },
   grazeR: { apply: (st, v) => (st.grazeR *= 1 + v), text: (v) => `+${P(v)} graze radius` },
   grazeOd: { apply: (st, v) => (st.grazeOd *= 1 + v), text: (v) => `+${P(v)} ultimate charge from grazes` },
-  ultSave: { apply: (st, v) => (st.ultSave += v), text: (v) => `+${P(v)} chance a spent ultimate tick is kept` },
+  ultSave: { apply: (st, v) => (st.ultSave += v), text: (v) => `+${P(v)} chance a spent ultimate cell is saved` },
   hull: { flat: true, apply: (st, v) => (st.maxHp += v), text: (v) => `${sg(v)}${Math.abs(v)} max hull` },
   iframes: { apply: (st, v) => (st.hitIfr *= 1 + v), text: (v) => `+${P(v)} invulnerability after a hit` },
   shield: { apply: (st, v) => (st.shieldInterval *= 1 - v), text: (v) => `Aegis Shield recharges ${P(v)} faster` },
