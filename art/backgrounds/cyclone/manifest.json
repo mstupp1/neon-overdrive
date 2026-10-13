@@ -229,6 +229,306 @@
         "clear_vertical_edges": true,
         "unique_colors": 12670
       }
+    },
+    {
+      "id": "overworld-far",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/overworld-far-v1.png",
+      "runtime": "../../../src/assets/backgrounds/cyclone/overworld-far-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-c2c93a09-7ce4-47dc-8b6d-4bb4953b1ef7.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster game background layer for NEON OVERDRIVE CYCLONE free-flight overworld. Subject: isolated floating circular storm collector platform and damaged antenna outriggers, overhead distant view. Fine crisp pixel art, deliberate small clusters readable at 360 virtual pixels across, no chunky blocks or photorealism. Palette: near-black teal and blue-grey metal, dim cyan turquoise seams. Almost-black material with sparse restrained colored edges, much dimmer than ships and bullets. Square composition, cluster occupies central 65 percent, broad fully transparent margins on ALL four sides. Several connected structures with open dark gaps; top-down overhead floating space scenery, no horizon skyline, no perspective floor. Entire silhouettes contained within image. Genuine transparent alpha background, no matte or checkerboard. No stars, sky, grid, floor, text, logo, HUD, ships, characters, targets, projectiles, pickups, bright white lights or wide bloom.",
+      "date": "2026-10-13",
+      "exportSize": [
+        720,
+        720
+      ],
+      "exportPadding": 16,
+      "sourceSha256": "46077ad0b281a9736bda25125a4470e7f7abd8762cd960dbd22292ee2c0b0256",
+      "runtimeSha256": "3751eaa24fb6798198756f6d3296dbe6153eb19d09fc7183431dfe9899cfd03a",
+      "runtimeBytes": 574989,
+      "alpha": {
+        "path": "src/assets/backgrounds/cyclone/overworld-far-v1.png",
+        "format": "PNG",
+        "width": 720,
+        "height": 720,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 61.363,
+        "partial_alpha_percent": 38.6,
+        "visible_bbox": [
+          16,
+          29,
+          696,
+          704
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 91210
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "id": "overworld-near",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/overworld-near-v1.png",
+      "runtime": "../../../src/assets/backgrounds/cyclone/overworld-near-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-7268cbe2-6ad4-4986-8b40-c9fd5ba7d35d.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster game background layer for NEON OVERDRIVE CYCLONE free-flight overworld. Subject: isolated broken turbine array and shattered collector machinery, overhead view. Fine crisp pixel art, deliberate small clusters readable at 360 virtual pixels across, no chunky blocks or photorealism. Palette: near-black teal and blue-grey metal, dim cyan turquoise seams. Almost-black material with sparse restrained colored edges, much dimmer than ships and bullets. Square composition, cluster occupies central 65 percent, broad fully transparent margins on ALL four sides. Several connected structures with open dark gaps; top-down overhead floating space scenery, no horizon skyline, no perspective floor. Entire silhouettes contained within image. Genuine transparent alpha background, no matte or checkerboard. No stars, sky, grid, floor, text, logo, HUD, ships, characters, targets, projectiles, pickups, bright white lights or wide bloom.",
+      "date": "2026-10-13",
+      "exportSize": [
+        720,
+        720
+      ],
+      "exportPadding": 16,
+      "sourceSha256": "76fa82e3e86ff8ba17a54e213caf4d8a577f1c7e0e4bf0452d82cb556549c0c3",
+      "runtimeSha256": "33c104e1c03729893e1e7359e46e024d7675540c157aed8b4154e5ee55746306",
+      "runtimeBytes": 498629,
+      "alpha": {
+        "path": "src/assets/backgrounds/cyclone/overworld-near-v1.png",
+        "format": "PNG",
+        "width": 720,
+        "height": 720,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 66.328,
+        "partial_alpha_percent": 33.655,
+        "visible_bbox": [
+          16,
+          33,
+          694,
+          704
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 88250
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "id": "obstacle-1",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/obstacle-1-v1.png",
+      "runtime": "../../../src/assets/backgrounds/cyclone/obstacle-1-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-2117700c-256b-4ef5-8962-034cafff7b74.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent top-down raster obstacle sprite for NEON OVERDRIVE CYCLONE overworld: compact charged mineral asteroid with dim cyan veins. Fine crisp pixel art with small deliberate clusters, dark substantial readable material, sparse restrained rim highlights. Palette: near-black teal and blue-grey metal, dim cyan turquoise seams. One roughly circular compact object, centered, body filling 86 percent of square canvas diameter, nearly round collision footprint, no long thin protrusions. Overhead view, all sides visible, complete silhouette entirely inside image with clear transparent margins, opaque dark body with rugged details. Genuine transparent alpha background outside object, not black matte or checkerboard. No scene, horizon, floor, stars, text, logo, HUD, ships, characters, shots, pickups, bright white lights or broad glow.",
+      "date": "2026-10-13",
+      "exportSize": [
+        256,
+        256
+      ],
+      "exportPadding": 8,
+      "sourceSha256": "becadcc34f14603abcdc79c41e1f42ef7b2ad6cb9472db41be162ff50dc47157",
+      "runtimeSha256": "6605575fcd67a9faa1914a9be92421193a0b8c3308ad92f6bd2f846e490df791",
+      "runtimeBytes": 102936,
+      "alpha": {
+        "path": "src/assets/backgrounds/cyclone/obstacle-1-v1.png",
+        "format": "PNG",
+        "width": 256,
+        "height": 256,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 41.672,
+        "partial_alpha_percent": 58.301,
+        "visible_bbox": [
+          8,
+          10,
+          245,
+          248
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 18991
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "id": "obstacle-2",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/obstacle-2-v1.png",
+      "runtime": "../../../src/assets/backgrounds/cyclone/obstacle-2-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-a23e35ff-19a4-43ef-b731-9aa531d47e35.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent top-down raster obstacle sprite for NEON OVERDRIVE CYCLONE overworld: compact circular collector station wreck chunk. Fine crisp pixel art with small deliberate clusters, dark substantial readable material, sparse restrained rim highlights. Palette: near-black teal and blue-grey metal, dim cyan turquoise seams. One roughly circular compact object, centered, body filling 86 percent of square canvas diameter, nearly round collision footprint, no long thin protrusions. Overhead view, all sides visible, complete silhouette entirely inside image with clear transparent margins, opaque dark body with rugged details. Genuine transparent alpha background outside object, not black matte or checkerboard. No scene, horizon, floor, stars, text, logo, HUD, ships, characters, shots, pickups, bright white lights or broad glow.",
+      "date": "2026-10-13",
+      "exportSize": [
+        256,
+        256
+      ],
+      "exportPadding": 8,
+      "sourceSha256": "3d34448dca58c4d2b3e5e21a3e92dadea5756cd5bb1b76a7a3e8eef5a79eaddc",
+      "runtimeSha256": "c1a15a48717e5115b82a275451557f01978c62a3ddfa17ff474cba02f94a6cdf",
+      "runtimeBytes": 116746,
+      "alpha": {
+        "path": "src/assets/backgrounds/cyclone/obstacle-2-v1.png",
+        "format": "PNG",
+        "width": 256,
+        "height": 256,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 40.767,
+        "partial_alpha_percent": 59.212,
+        "visible_bbox": [
+          8,
+          12,
+          242,
+          245
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 20698
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "id": "obstacle-3",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/obstacle-3-v1.png",
+      "runtime": "../../../src/assets/backgrounds/cyclone/obstacle-3-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-49f9caff-cbf0-4765-b20e-0130c0d4c02f.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent top-down raster obstacle sprite for NEON OVERDRIVE CYCLONE overworld: compact broken turbine rotor and hub. Fine crisp pixel art with small deliberate clusters, dark substantial readable material, sparse restrained rim highlights. Palette: near-black teal and blue-grey metal, dim cyan turquoise seams. One roughly circular compact object, centered, body filling 86 percent of square canvas diameter, nearly round collision footprint, no long thin protrusions. Overhead view, all sides visible, complete silhouette entirely inside image with clear transparent margins, opaque dark body with rugged details. Genuine transparent alpha background outside object, not black matte or checkerboard. No scene, horizon, floor, stars, text, logo, HUD, ships, characters, shots, pickups, bright white lights or broad glow.",
+      "date": "2026-10-13",
+      "exportSize": [
+        256,
+        256
+      ],
+      "exportPadding": 8,
+      "sourceSha256": "cc1a4a1d5c0f6d31a757a6eb9e5fac686b4975a501882c37b70397d4e893e221",
+      "runtimeSha256": "0ebd561f0fc6245440a9a83ed47609b6d5d9219435ad9b8df9bcd3144c33f106",
+      "runtimeBytes": 101971,
+      "alpha": {
+        "path": "src/assets/backgrounds/cyclone/obstacle-3-v1.png",
+        "format": "PNG",
+        "width": 256,
+        "height": 256,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 43.242,
+        "partial_alpha_percent": 56.744,
+        "visible_bbox": [
+          8,
+          14,
+          245,
+          247
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 17713
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "id": "obstacle-4",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/obstacle-4-v1.png",
+      "runtime": "../../../src/assets/backgrounds/cyclone/obstacle-4-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-82de0f24-a249-48f8-b9c4-757211c4b107.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent top-down raster obstacle sprite for NEON OVERDRIVE CYCLONE overworld: compact fused storm-damaged machinery chunk. Fine crisp pixel art with small deliberate clusters, dark substantial readable material, sparse restrained rim highlights. Palette: near-black teal and blue-grey metal, dim cyan turquoise seams. One roughly circular compact object, centered, body filling 86 percent of square canvas diameter, nearly round collision footprint, no long thin protrusions. Overhead view, all sides visible, complete silhouette entirely inside image with clear transparent margins, opaque dark body with rugged details. Genuine transparent alpha background outside object, not black matte or checkerboard. No scene, horizon, floor, stars, text, logo, HUD, ships, characters, shots, pickups, bright white lights or broad glow.",
+      "date": "2026-10-13",
+      "exportSize": [
+        256,
+        256
+      ],
+      "exportPadding": 8,
+      "sourceSha256": "bb872fb89aaf056519c4f9c3dab85892c70f3908587698a7e448f68ae4b29326",
+      "runtimeSha256": "b987dcceb24877ac1a72caa9ec01ca5c6df572ba2816ac72c73eef84ead8ffa7",
+      "runtimeBytes": 115952,
+      "alpha": {
+        "path": "src/assets/backgrounds/cyclone/obstacle-4-v1.png",
+        "format": "PNG",
+        "width": 256,
+        "height": 256,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 39.113,
+        "partial_alpha_percent": 60.855,
+        "visible_bbox": [
+          8,
+          14,
+          245,
+          246
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 21521
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
     }
   ],
   "runtimeTotalBytes": 1407427,
@@ -263,5 +563,7 @@
       "side",
       "chase"
     ]
-  }
+  },
+  "overworldBrief": "overworld-brief.md",
+  "overworldConcept": "../overworld-concept-v1.png"
 }

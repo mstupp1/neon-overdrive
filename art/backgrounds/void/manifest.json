@@ -229,6 +229,306 @@
         "clear_vertical_edges": true,
         "unique_colors": 10931
       }
+    },
+    {
+      "id": "overworld-far",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/overworld-far-v1.png",
+      "runtime": "../../../src/assets/backgrounds/void/overworld-far-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-58ead7a1-597b-47dc-9a57-709ceb89ebee.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster game background layer for NEON OVERDRIVE VOID free-flight overworld. Subject: isolated fractured alien monolith ring and disconnected relics, overhead distant view. Fine crisp pixel art, deliberate small clusters readable at 360 virtual pixels across, no chunky blocks or photorealism. Palette: near-black violet obsidian and dark indigo metal, sparse dim amber and purple cracks. Almost-black material with sparse restrained colored edges, much dimmer than ships and bullets. Square composition, cluster occupies central 65 percent, broad fully transparent margins on ALL four sides. Several connected structures with open dark gaps; top-down overhead floating space scenery, no horizon skyline, no perspective floor. Entire silhouettes contained within image. Genuine transparent alpha background, no matte or checkerboard. No stars, sky, grid, floor, text, logo, HUD, ships, characters, targets, projectiles, pickups, bright white lights or wide bloom.",
+      "date": "2026-10-13",
+      "exportSize": [
+        720,
+        720
+      ],
+      "exportPadding": 16,
+      "sourceSha256": "fb85ae65da6e674dc230e022abf7cb1ea6cadc084338339c1c799af04466419b",
+      "runtimeSha256": "893b436fd426c78799fe98f4d15082c1beb85022a28c1a414529fe666be60e4b",
+      "runtimeBytes": 404492,
+      "alpha": {
+        "path": "src/assets/backgrounds/void/overworld-far-v1.png",
+        "format": "PNG",
+        "width": 720,
+        "height": 720,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 70.724,
+        "partial_alpha_percent": 29.26,
+        "visible_bbox": [
+          33,
+          26,
+          677,
+          704
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 68198
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "id": "overworld-near",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/overworld-near-v1.png",
+      "runtime": "../../../src/assets/backgrounds/void/overworld-near-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-933c78ec-8fdf-4d0d-b2be-805ad54aa3d3.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster game background layer for NEON OVERDRIVE VOID free-flight overworld. Subject: isolated cluster of broken alien machinery and obsidian slabs, overhead view. Fine crisp pixel art, deliberate small clusters readable at 360 virtual pixels across, no chunky blocks or photorealism. Palette: near-black violet obsidian and dark indigo metal, sparse dim amber and purple cracks. Almost-black material with sparse restrained colored edges, much dimmer than ships and bullets. Square composition, cluster occupies central 65 percent, broad fully transparent margins on ALL four sides. Several connected structures with open dark gaps; top-down overhead floating space scenery, no horizon skyline, no perspective floor. Entire silhouettes contained within image. Genuine transparent alpha background, no matte or checkerboard. No stars, sky, grid, floor, text, logo, HUD, ships, characters, targets, projectiles, pickups, bright white lights or wide bloom.",
+      "date": "2026-10-13",
+      "exportSize": [
+        720,
+        720
+      ],
+      "exportPadding": 16,
+      "sourceSha256": "0b9d68768ef1ff1c43b9c17cbec2fae2c398385f716fe8783580f06c62c5eb1e",
+      "runtimeSha256": "49e5049cd9e843eae1ba2c4fa7589e8eb0ee2ad605f62544724de97015253208",
+      "runtimeBytes": 461427,
+      "alpha": {
+        "path": "src/assets/backgrounds/void/overworld-near-v1.png",
+        "format": "PNG",
+        "width": 720,
+        "height": 720,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 68.91,
+        "partial_alpha_percent": 31.035,
+        "visible_bbox": [
+          33,
+          34,
+          692,
+          670
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 68570
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "id": "obstacle-1",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/obstacle-1-v1.png",
+      "runtime": "../../../src/assets/backgrounds/void/obstacle-1-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-17972ae1-1297-4369-b943-c1603558a3ae.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent top-down raster obstacle sprite for NEON OVERDRIVE VOID overworld: compact obsidian asteroid with violet fractures. Fine crisp pixel art with small deliberate clusters, dark substantial readable material, sparse restrained rim highlights. Palette: near-black violet obsidian and dark indigo metal, sparse dim amber and purple cracks. One roughly circular compact object, centered, body filling 86 percent of square canvas diameter, nearly round collision footprint, no long thin protrusions. Overhead view, all sides visible, complete silhouette entirely inside image with clear transparent margins, opaque dark body with rugged details. Genuine transparent alpha background outside object, not black matte or checkerboard. No scene, horizon, floor, stars, text, logo, HUD, ships, characters, shots, pickups, bright white lights or broad glow.",
+      "date": "2026-10-13",
+      "exportSize": [
+        256,
+        256
+      ],
+      "exportPadding": 8,
+      "sourceSha256": "1ead8a7cb28cc57243dfa5146d3ad2b1d9681b38ea269a15750c87c77f785465",
+      "runtimeSha256": "c16b5bf7ca769ac1320561dcddfd013077df917d2de34310adfcdbb7068f48df",
+      "runtimeBytes": 101449,
+      "alpha": {
+        "path": "src/assets/backgrounds/void/obstacle-1-v1.png",
+        "format": "PNG",
+        "width": 256,
+        "height": 256,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 42.267,
+        "partial_alpha_percent": 57.693,
+        "visible_bbox": [
+          8,
+          17,
+          245,
+          239
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 16282
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "id": "obstacle-2",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/obstacle-2-v1.png",
+      "runtime": "../../../src/assets/backgrounds/void/obstacle-2-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-e5c67a29-96e7-4664-a9f1-6d3488547579.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent top-down raster obstacle sprite for NEON OVERDRIVE VOID overworld: compact thick monolith fragment with angular facets. Fine crisp pixel art with small deliberate clusters, dark substantial readable material, sparse restrained rim highlights. Palette: near-black violet obsidian and dark indigo metal, sparse dim amber and purple cracks. One roughly circular compact object, centered, body filling 86 percent of square canvas diameter, nearly round collision footprint, no long thin protrusions. Overhead view, all sides visible, complete silhouette entirely inside image with clear transparent margins, opaque dark body with rugged details. Genuine transparent alpha background outside object, not black matte or checkerboard. No scene, horizon, floor, stars, text, logo, HUD, ships, characters, shots, pickups, bright white lights or broad glow.",
+      "date": "2026-10-13",
+      "exportSize": [
+        256,
+        256
+      ],
+      "exportPadding": 8,
+      "sourceSha256": "c412dd3f8787317ddf2f28652452431e29fdacec6b07836790bf8e93f40e4efa",
+      "runtimeSha256": "1149c601f93448c8793e39bf73504f0b5a6315351d2f7eecec0b4e5e2c83a4ce",
+      "runtimeBytes": 101521,
+      "alpha": {
+        "path": "src/assets/backgrounds/void/obstacle-2-v1.png",
+        "format": "PNG",
+        "width": 256,
+        "height": 256,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 41.701,
+        "partial_alpha_percent": 58.273,
+        "visible_bbox": [
+          8,
+          16,
+          242,
+          243
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 17983
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "id": "obstacle-3",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/obstacle-3-v1.png",
+      "runtime": "../../../src/assets/backgrounds/void/obstacle-3-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-6081d099-4271-4559-b216-6ad3c07c4c1f.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent top-down raster obstacle sprite for NEON OVERDRIVE VOID overworld: compact alien spacecraft wreck fragment. Fine crisp pixel art with small deliberate clusters, dark substantial readable material, sparse restrained rim highlights. Palette: near-black violet obsidian and dark indigo metal, sparse dim amber and purple cracks. One roughly circular compact object, centered, body filling 86 percent of square canvas diameter, nearly round collision footprint, no long thin protrusions. Overhead view, all sides visible, complete silhouette entirely inside image with clear transparent margins, opaque dark body with rugged details. Genuine transparent alpha background outside object, not black matte or checkerboard. No scene, horizon, floor, stars, text, logo, HUD, ships, characters, shots, pickups, bright white lights or broad glow.",
+      "date": "2026-10-13",
+      "exportSize": [
+        256,
+        256
+      ],
+      "exportPadding": 8,
+      "sourceSha256": "8e760ebcd5e6c6088ede1fbfb2de9153af07e716523c70e4af1ecda8d3d93a96",
+      "runtimeSha256": "09a45068467efde089f41d2995acd6d03f5409dfdb83f215126581e6dcb23642",
+      "runtimeBytes": 102346,
+      "alpha": {
+        "path": "src/assets/backgrounds/void/obstacle-3-v1.png",
+        "format": "PNG",
+        "width": 256,
+        "height": 256,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 46.96,
+        "partial_alpha_percent": 52.998,
+        "visible_bbox": [
+          15,
+          11,
+          239,
+          244
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 19146
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "id": "obstacle-4",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/obstacle-4-v1.png",
+      "runtime": "../../../src/assets/backgrounds/void/obstacle-4-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-677fa21e-4853-478b-912b-bcccec026f12.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent top-down raster obstacle sprite for NEON OVERDRIVE VOID overworld: compact fractured geometric relic with dim amber seams. Fine crisp pixel art with small deliberate clusters, dark substantial readable material, sparse restrained rim highlights. Palette: near-black violet obsidian and dark indigo metal, sparse dim amber and purple cracks. One roughly circular compact object, centered, body filling 86 percent of square canvas diameter, nearly round collision footprint, no long thin protrusions. Overhead view, all sides visible, complete silhouette entirely inside image with clear transparent margins, opaque dark body with rugged details. Genuine transparent alpha background outside object, not black matte or checkerboard. No scene, horizon, floor, stars, text, logo, HUD, ships, characters, shots, pickups, bright white lights or broad glow.",
+      "date": "2026-10-13",
+      "exportSize": [
+        256,
+        256
+      ],
+      "exportPadding": 8,
+      "sourceSha256": "83ab9f73a8c48c210d20a9ab4ffead18a4b57b4be541a19017b71142255bfb85",
+      "runtimeSha256": "5a9e1cafde9d79a2000947d6b7c51e563b1eea698b8f16b065f4e2c5cc9202d8",
+      "runtimeBytes": 104317,
+      "alpha": {
+        "path": "src/assets/backgrounds/void/obstacle-4-v1.png",
+        "format": "PNG",
+        "width": 256,
+        "height": 256,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 38.515,
+        "partial_alpha_percent": 61.469,
+        "visible_bbox": [
+          8,
+          12,
+          246,
+          245
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 13609
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
     }
   ],
   "runtimeTotalBytes": 1437180,
@@ -255,5 +555,7 @@
     "clip": "skyline horizon",
     "sceneryDrawnAfter": true,
     "capture": "references/masked-top.png"
-  }
+  },
+  "overworldBrief": "overworld-brief.md",
+  "overworldConcept": "../overworld-concept-v1.png"
 }

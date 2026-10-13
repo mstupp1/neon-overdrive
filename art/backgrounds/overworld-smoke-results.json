@@ -1,0 +1,74 @@
+{
+  "date": "2026-10-13",
+  "browser": "Headless Chromium via Playwright",
+  "url": "http://127.0.0.1:8000/tools/background-preview.html?view=overworld",
+  "results": {
+    "genesis": {
+      "screen": "overworld",
+      "layers": "ready",
+      "rockWarpFinite": true,
+      "wasdMovement": true,
+      "boostToggle": true,
+      "mapToggle": true,
+      "pauseResume": true,
+      "draftReturn": true,
+      "denseCombat": true,
+      "portraitAndWide": true,
+      "consoleErrors": 0
+    },
+    "crimson": {
+      "screen": "overworld",
+      "layers": "ready",
+      "rockWarpFinite": true,
+      "wasdMovement": true,
+      "boostToggle": true,
+      "mapToggle": true,
+      "pauseResume": true,
+      "draftReturn": true,
+      "denseCombat": true,
+      "portraitAndWide": true,
+      "consoleErrors": 0
+    },
+    "cyclone": {
+      "screen": "overworld",
+      "layers": "ready",
+      "rockWarpFinite": true,
+      "wasdMovement": true,
+      "boostToggle": true,
+      "mapToggle": true,
+      "pauseResume": true,
+      "draftReturn": true,
+      "denseCombat": true,
+      "portraitAndWide": true,
+      "consoleErrors": 0
+    },
+    "void": {
+      "screen": "overworld",
+      "layers": "ready",
+      "rockWarpFinite": true,
+      "wasdMovement": true,
+      "boostToggle": true,
+      "mapToggle": true,
+      "pauseResume": true,
+      "draftReturn": true,
+      "denseCombat": true,
+      "portraitAndWide": true,
+      "consoleErrors": 0
+    }
+  },
+  "controls": {
+    "baselineToggle": "Each theme reported Procedural background after baseline, then Generated background with images ready after re-enable.",
+    "portraitLogicalView": "450 x 1000",
+    "wideLogicalView": "450 x 681.82",
+    "limitations": [
+      "Keyboard WASD was exercised in headless Chromium; physical gamepad and touch input were not tested.",
+      "Performance was not measured."
+    ]
+  },
+  "references": {
+    "generated": "art/backgrounds/<theme>/references/overworld-generated.png",
+    "baseline": "art/backgrounds/<theme>/references/overworld-baseline-live.png",
+    "nearRock": "art/backgrounds/<theme>/references/overworld-generated-rock.png",
+    "denseCombat": "art/backgrounds/<theme>/references/overworld-generated-dense.png"
+  }
+}

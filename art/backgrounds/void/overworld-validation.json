@@ -1,0 +1,160 @@
+{
+  "assets": [
+    {
+      "path": "src/assets/backgrounds/void/overworld-far-v1.png",
+      "format": "PNG",
+      "width": 720,
+      "height": 720,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 70.724,
+      "partial_alpha_percent": 29.26,
+      "visible_bbox": [
+        33,
+        26,
+        677,
+        704
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 68198
+    },
+    {
+      "path": "src/assets/backgrounds/void/overworld-near-v1.png",
+      "format": "PNG",
+      "width": 720,
+      "height": 720,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 68.91,
+      "partial_alpha_percent": 31.035,
+      "visible_bbox": [
+        33,
+        34,
+        692,
+        670
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 68570
+    },
+    {
+      "path": "src/assets/backgrounds/void/obstacle-1-v1.png",
+      "format": "PNG",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 42.267,
+      "partial_alpha_percent": 57.693,
+      "visible_bbox": [
+        8,
+        17,
+        245,
+        239
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 16282
+    },
+    {
+      "path": "src/assets/backgrounds/void/obstacle-2-v1.png",
+      "format": "PNG",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 41.701,
+      "partial_alpha_percent": 58.273,
+      "visible_bbox": [
+        8,
+        16,
+        242,
+        243
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 17983
+    },
+    {
+      "path": "src/assets/backgrounds/void/obstacle-3-v1.png",
+      "format": "PNG",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 46.96,
+      "partial_alpha_percent": 52.998,
+      "visible_bbox": [
+        15,
+        11,
+        239,
+        244
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 19146
+    },
+    {
+      "path": "src/assets/backgrounds/void/obstacle-4-v1.png",
+      "format": "PNG",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 38.515,
+      "partial_alpha_percent": 61.469,
+      "visible_bbox": [
+        8,
+        12,
+        246,
+        245
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 13609
+    }
+  ]
+}

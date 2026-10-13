@@ -251,6 +251,306 @@
         "clear_vertical_edges": true,
         "unique_colors": 16086
       }
+    },
+    {
+      "id": "overworld-far",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/overworld-far-v1.png",
+      "runtime": "../../../src/assets/backgrounds/crimson/overworld-far-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-187272a7-58c3-4600-a97b-6936ad186d88.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster game background layer for NEON OVERDRIVE CRIMSON free-flight overworld. Subject: isolated bio-corrupted refinery cluster engulfed in subtle organic tendrils, overhead distant view. Fine crisp pixel art, deliberate small clusters readable at 360 virtual pixels across, no chunky blocks or photorealism. Palette: near-black burgundy hulls, muted crimson seams, dark organic red tissue. Almost-black material with sparse restrained colored edges, much dimmer than ships and bullets. Square composition, cluster occupies central 65 percent, broad fully transparent margins on ALL four sides. Several connected structures with open dark gaps; top-down overhead floating space scenery, no horizon skyline, no perspective floor. Entire silhouettes contained within image. Genuine transparent alpha background, no matte or checkerboard. No stars, sky, grid, floor, text, logo, HUD, ships, characters, targets, projectiles, pickups, bright white lights or wide bloom.",
+      "date": "2026-10-13",
+      "exportSize": [
+        720,
+        720
+      ],
+      "exportPadding": 16,
+      "sourceSha256": "bd84c3c3b29ce4e531afe01f6369cc38ac8c4d5b73c37bec7c276c3c641ec91a",
+      "runtimeSha256": "0734a95a3f4646ee2c3531be53b17220acb9e93cc10356106d3b7b9c968fbc3f",
+      "runtimeBytes": 507206,
+      "alpha": {
+        "path": "src/assets/backgrounds/crimson/overworld-far-v1.png",
+        "format": "PNG",
+        "width": 720,
+        "height": 720,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 63.064,
+        "partial_alpha_percent": 36.911,
+        "visible_bbox": [
+          16,
+          21,
+          689,
+          704
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 83192
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "id": "overworld-near",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/overworld-near-v1.png",
+      "runtime": "../../../src/assets/backgrounds/crimson/overworld-near-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-0bafa406-026a-45a7-b0d2-40e27255a15f.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster game background layer for NEON OVERDRIVE CRIMSON free-flight overworld. Subject: isolated organic spore nest woven through broken refinery machinery, overhead view. Fine crisp pixel art, deliberate small clusters readable at 360 virtual pixels across, no chunky blocks or photorealism. Palette: near-black burgundy hulls, muted crimson seams, dark organic red tissue. Almost-black material with sparse restrained colored edges, much dimmer than ships and bullets. Square composition, cluster occupies central 65 percent, broad fully transparent margins on ALL four sides. Several connected structures with open dark gaps; top-down overhead floating space scenery, no horizon skyline, no perspective floor. Entire silhouettes contained within image. Genuine transparent alpha background, no matte or checkerboard. No stars, sky, grid, floor, text, logo, HUD, ships, characters, targets, projectiles, pickups, bright white lights or wide bloom.",
+      "date": "2026-10-13",
+      "exportSize": [
+        720,
+        720
+      ],
+      "exportPadding": 16,
+      "sourceSha256": "fd00f78ecc916b1bcf54697c4dbcacf8f46e3545bc6a33e113858675549d17eb",
+      "runtimeSha256": "1ad92c2237a1ae98c832fb31fb0cd328df37dbea004bfb155a5be1661308019e",
+      "runtimeBytes": 551081,
+      "alpha": {
+        "path": "src/assets/backgrounds/crimson/overworld-near-v1.png",
+        "format": "PNG",
+        "width": 720,
+        "height": 720,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 62.241,
+        "partial_alpha_percent": 37.721,
+        "visible_bbox": [
+          16,
+          26,
+          693,
+          704
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 107403
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "id": "obstacle-1",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/obstacle-1-v1.png",
+      "runtime": "../../../src/assets/backgrounds/crimson/obstacle-1-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-bbe8a2d8-6ae3-4222-9991-5808f1d537e9.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent top-down raster obstacle sprite for NEON OVERDRIVE CRIMSON overworld: compact infected asteroid with red mineral veins. Fine crisp pixel art with small deliberate clusters, dark substantial readable material, sparse restrained rim highlights. Palette: near-black burgundy hulls, muted crimson seams, dark organic red tissue. One roughly circular compact object, centered, body filling 86 percent of square canvas diameter, nearly round collision footprint, no long thin protrusions. Overhead view, all sides visible, complete silhouette entirely inside image with clear transparent margins, opaque dark body with rugged details. Genuine transparent alpha background outside object, not black matte or checkerboard. No scene, horizon, floor, stars, text, logo, HUD, ships, characters, shots, pickups, bright white lights or broad glow.",
+      "date": "2026-10-13",
+      "exportSize": [
+        256,
+        256
+      ],
+      "exportPadding": 8,
+      "sourceSha256": "637f446bfe6146625c9b369ae281b51ea5b9cfdfc31e0e555463f9f53c0a76e2",
+      "runtimeSha256": "23a361c20545f03892f76faf974ecc57dcfd1314d9aa17ab5f5284f32d076568",
+      "runtimeBytes": 104056,
+      "alpha": {
+        "path": "src/assets/backgrounds/crimson/obstacle-1-v1.png",
+        "format": "PNG",
+        "width": 256,
+        "height": 256,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 43.437,
+        "partial_alpha_percent": 56.523,
+        "visible_bbox": [
+          17,
+          12,
+          240,
+          245
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 20279
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "id": "obstacle-2",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/obstacle-2-v1.png",
+      "runtime": "../../../src/assets/backgrounds/crimson/obstacle-2-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-690ade15-c500-42fa-a949-56f335497281.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent top-down raster obstacle sprite for NEON OVERDRIVE CRIMSON overworld: compact calcified organic growth with ridges. Fine crisp pixel art with small deliberate clusters, dark substantial readable material, sparse restrained rim highlights. Palette: near-black burgundy hulls, muted crimson seams, dark organic red tissue. One roughly circular compact object, centered, body filling 86 percent of square canvas diameter, nearly round collision footprint, no long thin protrusions. Overhead view, all sides visible, complete silhouette entirely inside image with clear transparent margins, opaque dark body with rugged details. Genuine transparent alpha background outside object, not black matte or checkerboard. No scene, horizon, floor, stars, text, logo, HUD, ships, characters, shots, pickups, bright white lights or broad glow.",
+      "date": "2026-10-13",
+      "exportSize": [
+        256,
+        256
+      ],
+      "exportPadding": 8,
+      "sourceSha256": "4e71cdf001aaeb15334d2f45073339e224794635694386286fd4cf3c705e50bb",
+      "runtimeSha256": "be295ecaa660ebea51e4dd80bf4253e9f8a32e9fec0c475c7e2c79e5a6058bfb",
+      "runtimeBytes": 104360,
+      "alpha": {
+        "path": "src/assets/backgrounds/crimson/obstacle-2-v1.png",
+        "format": "PNG",
+        "width": 256,
+        "height": 256,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 42.451,
+        "partial_alpha_percent": 57.507,
+        "visible_bbox": [
+          14,
+          14,
+          243,
+          245
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 18815
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "id": "obstacle-3",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/obstacle-3-v1.png",
+      "runtime": "../../../src/assets/backgrounds/crimson/obstacle-3-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-a9a2b528-0117-4090-9e50-f8b5d52383fa.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent top-down raster obstacle sprite for NEON OVERDRIVE CRIMSON overworld: compact corrupted hull fragment with parasitic tissue. Fine crisp pixel art with small deliberate clusters, dark substantial readable material, sparse restrained rim highlights. Palette: near-black burgundy hulls, muted crimson seams, dark organic red tissue. One roughly circular compact object, centered, body filling 86 percent of square canvas diameter, nearly round collision footprint, no long thin protrusions. Overhead view, all sides visible, complete silhouette entirely inside image with clear transparent margins, opaque dark body with rugged details. Genuine transparent alpha background outside object, not black matte or checkerboard. No scene, horizon, floor, stars, text, logo, HUD, ships, characters, shots, pickups, bright white lights or broad glow.",
+      "date": "2026-10-13",
+      "exportSize": [
+        256,
+        256
+      ],
+      "exportPadding": 8,
+      "sourceSha256": "458952e18897641c857d7a188144cc4728ba8fa7a39ace4c3c65503dda1e8deb",
+      "runtimeSha256": "0dc2a33781bddc4b84473ca1078a3e46ddaed39eca6ed4f74f22e02ba53847db",
+      "runtimeBytes": 104257,
+      "alpha": {
+        "path": "src/assets/backgrounds/crimson/obstacle-3-v1.png",
+        "format": "PNG",
+        "width": 256,
+        "height": 256,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 44.394,
+        "partial_alpha_percent": 55.582,
+        "visible_bbox": [
+          8,
+          12,
+          245,
+          245
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 22179
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "id": "obstacle-4",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/obstacle-4-v1.png",
+      "runtime": "../../../src/assets/backgrounds/crimson/obstacle-4-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-b564fcb0-60fb-4eaf-bb5c-dd7a59f6d12d.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent top-down raster obstacle sprite for NEON OVERDRIVE CRIMSON overworld: compact organic-metal mass with restrained red seams. Fine crisp pixel art with small deliberate clusters, dark substantial readable material, sparse restrained rim highlights. Palette: near-black burgundy hulls, muted crimson seams, dark organic red tissue. One roughly circular compact object, centered, body filling 86 percent of square canvas diameter, nearly round collision footprint, no long thin protrusions. Overhead view, all sides visible, complete silhouette entirely inside image with clear transparent margins, opaque dark body with rugged details. Genuine transparent alpha background outside object, not black matte or checkerboard. No scene, horizon, floor, stars, text, logo, HUD, ships, characters, shots, pickups, bright white lights or broad glow.",
+      "date": "2026-10-13",
+      "exportSize": [
+        256,
+        256
+      ],
+      "exportPadding": 8,
+      "sourceSha256": "181825cf75810f564ac159648819d4944a3091ffd710e55e8ce48ff2d6a4578d",
+      "runtimeSha256": "7f3d08e539db9e5b70ff9907eac112979936beb0831ca575af853e11fbd025bc",
+      "runtimeBytes": 103703,
+      "alpha": {
+        "path": "src/assets/backgrounds/crimson/obstacle-4-v1.png",
+        "format": "PNG",
+        "width": 256,
+        "height": 256,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 41.875,
+        "partial_alpha_percent": 58.061,
+        "visible_bbox": [
+          8,
+          13,
+          245,
+          245
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 17572
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
     }
   ],
   "runtimeTotalBytes": 1281497,
@@ -274,5 +574,7 @@
     "clip": "skyline horizon",
     "sceneryDrawnAfter": true,
     "capture": "references/masked-top.png"
-  }
+  },
+  "overworldBrief": "overworld-brief.md",
+  "overworldConcept": "../overworld-concept-v1.png"
 }

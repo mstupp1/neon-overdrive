@@ -103,7 +103,15 @@ def export(args: argparse.Namespace) -> int:
         print("error: output must not overwrite the source image", file=sys.stderr)
         return 1
     image = load_rgba(args.image)
-    image = image.resize((args.out_width, args.out_height), Image.Resampling.NEAREST)
+    padding = args.padding
+    if padding < 0 or padding * 2 >= min(args.out_width, args.out_height):
+        print("error: padding must leave a nonempty image area", file=sys.stderr)
+        return 2
+    image = image.resize((args.out_width - padding * 2, args.out_height - padding * 2), Image.Resampling.NEAREST)
+    if padding:
+        framed = Image.new("RGBA", (args.out_width, args.out_height))
+        framed.paste(image, (padding, padding))
+        image = framed
     args.output.parent.mkdir(parents=True, exist_ok=True)
     image.save(args.output, format="PNG", optimize=False)
     print(f"wrote {args.output} ({image.width}x{image.height}, RGBA, nearest)")
@@ -151,6 +159,7 @@ def main() -> int:
     make.add_argument("output", type=Path)
     make.add_argument("--out-width", type=positive, required=True)
     make.add_argument("--out-height", type=positive, required=True)
+    make.add_argument("--padding", type=int, default=0, help="transparent export margin in pixels (source pixels remain intact)")
     make.add_argument("--width", type=positive, help="required source width")
     make.add_argument("--height", type=positive, help="required source height")
     make.add_argument("--require-alpha", action="store_true")

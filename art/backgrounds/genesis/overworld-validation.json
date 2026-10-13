@@ -1,0 +1,160 @@
+{
+  "assets": [
+    {
+      "path": "src/assets/backgrounds/genesis/overworld-far-v1.png",
+      "format": "PNG",
+      "width": 720,
+      "height": 720,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 66.372,
+      "partial_alpha_percent": 33.567,
+      "visible_bbox": [
+        16,
+        24,
+        693,
+        704
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 79032
+    },
+    {
+      "path": "src/assets/backgrounds/genesis/overworld-near-v1.png",
+      "format": "PNG",
+      "width": 720,
+      "height": 720,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 68.734,
+      "partial_alpha_percent": 31.254,
+      "visible_bbox": [
+        16,
+        16,
+        693,
+        704
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 67812
+    },
+    {
+      "path": "src/assets/backgrounds/genesis/obstacle-1-v1.png",
+      "format": "PNG",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 48.335,
+      "partial_alpha_percent": 51.614,
+      "visible_bbox": [
+        17,
+        12,
+        238,
+        245
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 16547
+    },
+    {
+      "path": "src/assets/backgrounds/genesis/obstacle-2-v1.png",
+      "format": "PNG",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 40.99,
+      "partial_alpha_percent": 58.977,
+      "visible_bbox": [
+        8,
+        15,
+        246,
+        245
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 16341
+    },
+    {
+      "path": "src/assets/backgrounds/genesis/obstacle-3-v1.png",
+      "format": "PNG",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 43.271,
+      "partial_alpha_percent": 56.699,
+      "visible_bbox": [
+        15,
+        15,
+        243,
+        248
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 16415
+    },
+    {
+      "path": "src/assets/backgrounds/genesis/obstacle-4-v1.png",
+      "format": "PNG",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 41.66,
+      "partial_alpha_percent": 58.315,
+      "visible_bbox": [
+        8,
+        14,
+        243,
+        244
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 17993
+    }
+  ]
+}

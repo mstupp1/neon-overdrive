@@ -1,0 +1,160 @@
+{
+  "assets": [
+    {
+      "path": "src/assets/backgrounds/cyclone/overworld-far-v1.png",
+      "format": "PNG",
+      "width": 720,
+      "height": 720,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 61.363,
+      "partial_alpha_percent": 38.6,
+      "visible_bbox": [
+        16,
+        29,
+        696,
+        704
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 91210
+    },
+    {
+      "path": "src/assets/backgrounds/cyclone/overworld-near-v1.png",
+      "format": "PNG",
+      "width": 720,
+      "height": 720,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 66.328,
+      "partial_alpha_percent": 33.655,
+      "visible_bbox": [
+        16,
+        33,
+        694,
+        704
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 88250
+    },
+    {
+      "path": "src/assets/backgrounds/cyclone/obstacle-1-v1.png",
+      "format": "PNG",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 41.672,
+      "partial_alpha_percent": 58.301,
+      "visible_bbox": [
+        8,
+        10,
+        245,
+        248
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 18991
+    },
+    {
+      "path": "src/assets/backgrounds/cyclone/obstacle-2-v1.png",
+      "format": "PNG",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 40.767,
+      "partial_alpha_percent": 59.212,
+      "visible_bbox": [
+        8,
+        12,
+        242,
+        245
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 20698
+    },
+    {
+      "path": "src/assets/backgrounds/cyclone/obstacle-3-v1.png",
+      "format": "PNG",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 43.242,
+      "partial_alpha_percent": 56.744,
+      "visible_bbox": [
+        8,
+        14,
+        245,
+        247
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 17713
+    },
+    {
+      "path": "src/assets/backgrounds/cyclone/obstacle-4-v1.png",
+      "format": "PNG",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 39.113,
+      "partial_alpha_percent": 60.855,
+      "visible_bbox": [
+        8,
+        14,
+        245,
+        246
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 21521
+    }
+  ]
+}

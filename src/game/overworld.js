@@ -36,6 +36,7 @@ import { resetModules } from './modules.js';
 import { gainCredits, payUnit } from './economy.js';
 import { drawGauges, drawHull } from '../render/hud.js';
 import { NODE_ICONS } from '../ui/meta.js';
+import { loadOverworldLayers, drawOverworldBackground, drawOverworldRock, obstacleVariant } from '../render/overworldLayers.js';
 
 const FONT = 'Orbitron, "Segoe UI", sans-serif';
 const FONT2 = 'Rajdhani, "Segoe UI", sans-serif';
@@ -392,6 +393,7 @@ export const overworld = {
     const fresh = !run.ow || run.ow.leg !== leg || run.ow.seed !== run.route.seed;
     if (fresh) run.ow = build(run);
     ow = run.ow;
+    loadOverworldLayers(run.system?.id || 'genesis');
     const p = G.player;
     if (fresh) {
       p.x = ow.start.x;
@@ -1190,6 +1192,10 @@ function drawWorld(ctx, k) {
   ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = 'source-over';
 
+  // Theme art drifts at three independent camera depths, behind the grid and gameplay.
+  drawOverworldBackground(ctx, G.run?.system?.id || 'genesis', ow,
+    { x0: field.x0, y0: field.y0, x1: field.x1, y1: field.y1 }, z, view.quality);
+
   // Grid: minor and major lines, only what's on screen.
   const G0 = 80;
   const vx0 = field.x0 - 60;
@@ -1285,8 +1291,11 @@ function drawTarget(ctx, z, h) {
 
 function drawRocks(ctx, vis, h) {
   ctx.lineJoin = 'round';
-  for (const r of ow.rocks) {
+  const theme = G.run?.system?.id || 'genesis';
+  for (let i = 0; i < ow.rocks.length; i++) {
+    const r = ow.rocks[i];
     if (!vis(r.x, r.y, r.r)) continue;
+    if (drawOverworldRock(ctx, theme, r, obstacleVariant(r, i), r.rot + ow.t * r.spin)) continue;
     rockPath(ctx, r);
     ctx.fillStyle = 'rgba(8,5,20,0.92)';
     ctx.fill();

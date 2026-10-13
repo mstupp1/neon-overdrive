@@ -1,0 +1,160 @@
+{
+  "assets": [
+    {
+      "path": "src/assets/backgrounds/crimson/overworld-far-v1.png",
+      "format": "PNG",
+      "width": 720,
+      "height": 720,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 63.064,
+      "partial_alpha_percent": 36.911,
+      "visible_bbox": [
+        16,
+        21,
+        689,
+        704
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 83192
+    },
+    {
+      "path": "src/assets/backgrounds/crimson/overworld-near-v1.png",
+      "format": "PNG",
+      "width": 720,
+      "height": 720,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 62.241,
+      "partial_alpha_percent": 37.721,
+      "visible_bbox": [
+        16,
+        26,
+        693,
+        704
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 107403
+    },
+    {
+      "path": "src/assets/backgrounds/crimson/obstacle-1-v1.png",
+      "format": "PNG",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 43.437,
+      "partial_alpha_percent": 56.523,
+      "visible_bbox": [
+        17,
+        12,
+        240,
+        245
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 20279
+    },
+    {
+      "path": "src/assets/backgrounds/crimson/obstacle-2-v1.png",
+      "format": "PNG",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 42.451,
+      "partial_alpha_percent": 57.507,
+      "visible_bbox": [
+        14,
+        14,
+        243,
+        245
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 18815
+    },
+    {
+      "path": "src/assets/backgrounds/crimson/obstacle-3-v1.png",
+      "format": "PNG",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 44.394,
+      "partial_alpha_percent": 55.582,
+      "visible_bbox": [
+        8,
+        12,
+        245,
+        245
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 22179
+    },
+    {
+      "path": "src/assets/backgrounds/crimson/obstacle-4-v1.png",
+      "format": "PNG",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 41.875,
+      "partial_alpha_percent": 58.061,
+      "visible_bbox": [
+        8,
+        13,
+        245,
+        245
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 17572
+    }
+  ]
+}

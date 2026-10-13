@@ -9,9 +9,9 @@
 </style>
 <aside>
   <h1>Campaign backgrounds</h1>
-  <p>Live, invulnerable test run. Uses the game's existing debug hook. These controls never save the test loadout.</p>
+  <p>Live, invulnerable test run. Steer with WASD or click to fly; Shift boosts. Uses the game's debug hook. These controls never save the test loadout.</p>
   <label for="theme">System theme</label><select id="theme" disabled><option value="genesis">Genesis</option><option value="crimson">Crimson</option><option value="cyclone">Cyclone</option><option value="void">Void</option></select>
-  <label for="view">Stage view</label><select id="view" disabled><option value="top">Top-down</option><option value="side">Side-scroll</option><option value="chase">Pursuit</option></select>
+  <label for="view">Stage view</label><select id="view" disabled><option value="top">Top-down</option><option value="side">Side-scroll</option><option value="chase">Pursuit</option><option value="overworld">Overworld</option></select>
   <button data-action="baseline" disabled>Procedural baseline</button>
   <button data-action="generated" disabled>Generated layers</button>
   <button data-action="waves" disabled>Wave fight</button>
@@ -27,7 +27,7 @@
 const frame = document.querySelector('iframe');
 const params = new URLSearchParams(location.search);
 if(['genesis','crimson','cyclone','void'].includes(params.get('theme'))) document.querySelector('#theme').value=params.get('theme');
-if(['top','side','chase'].includes(params.get('view'))) document.querySelector('#view').value=params.get('view');
+if(['top','side','chase','overworld'].includes(params.get('view'))) document.querySelector('#view').value=params.get('view');
 frame.addEventListener('load', () => {
   if(!frame.contentDocument.querySelector('#game')) return;
   const script = frame.contentDocument.createElement('script');

@@ -94,6 +94,306 @@
       "sourceSha256": "ab3d1a428acd43877e819efdc8f16055a3eea0761b27f6ec42d5b7caeef5f15b",
       "runtimeSha256": "240ca4d015735c3c3c13ffe65723131e54939c26880cfd53c7740d19961ed6f6",
       "runtimeBytes": 52493
+    },
+    {
+      "id": "overworld-far",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/overworld-far-v1.png",
+      "runtime": "../../../src/assets/backgrounds/genesis/overworld-far-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-ab8808b4-44c4-42eb-92c0-9cbcd0d164fa.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster game background layer for NEON OVERDRIVE GENESIS free-flight overworld. Subject: isolated abandoned orbital antenna array with broken lattice gantries, overhead distant view. Fine crisp pixel art, deliberate small clusters readable at 360 virtual pixels across, no chunky blocks or photorealism. Palette: near-black navy blue metal, dim cyan seams and very sparse magenta accents. Almost-black material with sparse restrained colored edges, much dimmer than ships and bullets. Square composition, cluster occupies central 65 percent, broad fully transparent margins on ALL four sides. Several connected structures with open dark gaps; top-down overhead floating space scenery, no horizon skyline, no perspective floor. Entire silhouettes contained within image. Genuine transparent alpha background, no matte or checkerboard. No stars, sky, grid, floor, text, logo, HUD, ships, characters, targets, projectiles, pickups, bright white lights or wide bloom.",
+      "date": "2026-10-13",
+      "exportSize": [
+        720,
+        720
+      ],
+      "exportPadding": 16,
+      "sourceSha256": "3a9fe66a1fac684695438b39bc0f2f7d7f3811423b986bbaccbc79db09e4efc5",
+      "runtimeSha256": "78f461ae1a8b06b1648e66761a6b72172bbd86e8e3aa0ef950680f83490d9102",
+      "runtimeBytes": 506205,
+      "alpha": {
+        "path": "src/assets/backgrounds/genesis/overworld-far-v1.png",
+        "format": "PNG",
+        "width": 720,
+        "height": 720,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 66.372,
+        "partial_alpha_percent": 33.567,
+        "visible_bbox": [
+          16,
+          24,
+          693,
+          704
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 79032
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "id": "overworld-near",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/overworld-near-v1.png",
+      "runtime": "../../../src/assets/backgrounds/genesis/overworld-near-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-414db5ec-11a9-4b64-a7de-2f7c6e977c5e.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster game background layer for NEON OVERDRIVE GENESIS free-flight overworld. Subject: isolated scattered cluster of armored station wreckage and cables, overhead view. Fine crisp pixel art, deliberate small clusters readable at 360 virtual pixels across, no chunky blocks or photorealism. Palette: near-black navy blue metal, dim cyan seams and very sparse magenta accents. Almost-black material with sparse restrained colored edges, much dimmer than ships and bullets. Square composition, cluster occupies central 65 percent, broad fully transparent margins on ALL four sides. Several connected structures with open dark gaps; top-down overhead floating space scenery, no horizon skyline, no perspective floor. Entire silhouettes contained within image. Genuine transparent alpha background, no matte or checkerboard. No stars, sky, grid, floor, text, logo, HUD, ships, characters, targets, projectiles, pickups, bright white lights or wide bloom.",
+      "date": "2026-10-13",
+      "exportSize": [
+        720,
+        720
+      ],
+      "exportPadding": 16,
+      "sourceSha256": "6d15b0ba50632fce9042c1328ef5d6b82984bd29eb74bd14f190f2945f415b88",
+      "runtimeSha256": "3e62b7e9a6f8a6a4d28502da7013eb77ef68584e6cf983cfe6b035b2ba7e2260",
+      "runtimeBytes": 445417,
+      "alpha": {
+        "path": "src/assets/backgrounds/genesis/overworld-near-v1.png",
+        "format": "PNG",
+        "width": 720,
+        "height": 720,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 68.734,
+        "partial_alpha_percent": 31.254,
+        "visible_bbox": [
+          16,
+          16,
+          693,
+          704
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 67812
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "id": "obstacle-1",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/obstacle-1-v1.png",
+      "runtime": "../../../src/assets/backgrounds/genesis/obstacle-1-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-2f5740c7-bf1c-44ba-a7e8-52750bf3e8ab.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent top-down raster obstacle sprite for NEON OVERDRIVE GENESIS overworld: compact metallic pitted asteroid with embedded ore. Fine crisp pixel art with small deliberate clusters, dark substantial readable material, sparse restrained rim highlights. Palette: near-black navy blue metal, dim cyan seams and very sparse magenta accents. One roughly circular compact object, centered, body filling 86 percent of square canvas diameter, nearly round collision footprint, no long thin protrusions. Overhead view, all sides visible, complete silhouette entirely inside image with clear transparent margins, opaque dark body with rugged details. Genuine transparent alpha background outside object, not black matte or checkerboard. No scene, horizon, floor, stars, text, logo, HUD, ships, characters, shots, pickups, bright white lights or broad glow.",
+      "date": "2026-10-13",
+      "exportSize": [
+        256,
+        256
+      ],
+      "exportPadding": 8,
+      "sourceSha256": "b9b32e4d87cade6a95cd16e59cdfdc40f15c1220c5d8bca26cd57ebe3ee81a91",
+      "runtimeSha256": "5937c903c2c13573d0c4b42d3e0488ea411d9d1eb9109cd47d229ea9fa523c4a",
+      "runtimeBytes": 92714,
+      "alpha": {
+        "path": "src/assets/backgrounds/genesis/obstacle-1-v1.png",
+        "format": "PNG",
+        "width": 256,
+        "height": 256,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 48.335,
+        "partial_alpha_percent": 51.614,
+        "visible_bbox": [
+          17,
+          12,
+          238,
+          245
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 16547
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "id": "obstacle-2",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/obstacle-2-v1.png",
+      "runtime": "../../../src/assets/backgrounds/genesis/obstacle-2-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-3d4b0a59-3c48-487d-a889-c842def3b58f.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent top-down raster obstacle sprite for NEON OVERDRIVE GENESIS overworld: compact round armored spacecraft hull wreck chunk. Fine crisp pixel art with small deliberate clusters, dark substantial readable material, sparse restrained rim highlights. Palette: near-black navy blue metal, dim cyan seams and very sparse magenta accents. One roughly circular compact object, centered, body filling 86 percent of square canvas diameter, nearly round collision footprint, no long thin protrusions. Overhead view, all sides visible, complete silhouette entirely inside image with clear transparent margins, opaque dark body with rugged details. Genuine transparent alpha background outside object, not black matte or checkerboard. No scene, horizon, floor, stars, text, logo, HUD, ships, characters, shots, pickups, bright white lights or broad glow.",
+      "date": "2026-10-13",
+      "exportSize": [
+        256,
+        256
+      ],
+      "exportPadding": 8,
+      "sourceSha256": "227df270f0a107b12fc33d527d048206d2ae9083e6c3b6c556f2ad2ff58ebfcf",
+      "runtimeSha256": "5dcf0d2d0a080ade4751ecd487ee07420e6c78396fcdef5d4028b4e20f7d959f",
+      "runtimeBytes": 105948,
+      "alpha": {
+        "path": "src/assets/backgrounds/genesis/obstacle-2-v1.png",
+        "format": "PNG",
+        "width": 256,
+        "height": 256,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 40.99,
+        "partial_alpha_percent": 58.977,
+        "visible_bbox": [
+          8,
+          15,
+          246,
+          245
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 16341
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "id": "obstacle-3",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/obstacle-3-v1.png",
+      "runtime": "../../../src/assets/backgrounds/genesis/obstacle-3-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-9955d047-ce54-4469-869d-153fde0674a6.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent top-down raster obstacle sprite for NEON OVERDRIVE GENESIS overworld: compact broken reactor machinery chunk. Fine crisp pixel art with small deliberate clusters, dark substantial readable material, sparse restrained rim highlights. Palette: near-black navy blue metal, dim cyan seams and very sparse magenta accents. One roughly circular compact object, centered, body filling 86 percent of square canvas diameter, nearly round collision footprint, no long thin protrusions. Overhead view, all sides visible, complete silhouette entirely inside image with clear transparent margins, opaque dark body with rugged details. Genuine transparent alpha background outside object, not black matte or checkerboard. No scene, horizon, floor, stars, text, logo, HUD, ships, characters, shots, pickups, bright white lights or broad glow.",
+      "date": "2026-10-13",
+      "exportSize": [
+        256,
+        256
+      ],
+      "exportPadding": 8,
+      "sourceSha256": "372cdbaec3e0a26fd595fa1382b35b910816612634d526d5cd51277384aafdc4",
+      "runtimeSha256": "bf4f00d1de6d18040c4854a036fb971d29cab3e46081a4b28c54ea26d39cb5b7",
+      "runtimeBytes": 104777,
+      "alpha": {
+        "path": "src/assets/backgrounds/genesis/obstacle-3-v1.png",
+        "format": "PNG",
+        "width": 256,
+        "height": 256,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 43.271,
+        "partial_alpha_percent": 56.699,
+        "visible_bbox": [
+          15,
+          15,
+          243,
+          248
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 16415
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "id": "obstacle-4",
+      "views": [
+        "overworld"
+      ],
+      "source": "sources/obstacle-4-v1.png",
+      "runtime": "../../../src/assets/backgrounds/genesis/obstacle-4-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a135df-2783-7a61-b8b5-a0a5215faed8/exec-12ca4a5c-ec65-4e01-89c5-5564cc13395a.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent top-down raster obstacle sprite for NEON OVERDRIVE GENESIS overworld: compact shattered station hub fragment. Fine crisp pixel art with small deliberate clusters, dark substantial readable material, sparse restrained rim highlights. Palette: near-black navy blue metal, dim cyan seams and very sparse magenta accents. One roughly circular compact object, centered, body filling 86 percent of square canvas diameter, nearly round collision footprint, no long thin protrusions. Overhead view, all sides visible, complete silhouette entirely inside image with clear transparent margins, opaque dark body with rugged details. Genuine transparent alpha background outside object, not black matte or checkerboard. No scene, horizon, floor, stars, text, logo, HUD, ships, characters, shots, pickups, bright white lights or broad glow.",
+      "date": "2026-10-13",
+      "exportSize": [
+        256,
+        256
+      ],
+      "exportPadding": 8,
+      "sourceSha256": "ed2542b8a432dae30b25c8b2cae8b4cfb03d21e3a8d4cb49305f58f738c60969",
+      "runtimeSha256": "db819db7373960ea326899c128d4de8610e1bcabd0fecbd539e33e6d04d9e709",
+      "runtimeBytes": 109737,
+      "alpha": {
+        "path": "src/assets/backgrounds/genesis/obstacle-4-v1.png",
+        "format": "PNG",
+        "width": 256,
+        "height": 256,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 41.66,
+        "partial_alpha_percent": 58.315,
+        "visible_bbox": [
+          8,
+          14,
+          243,
+          244
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 17993
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ]
     }
   ],
   "runtimeTotalBytes": 1162996,
@@ -138,5 +438,7 @@
     "skillValidator": "passed",
     "sideCapture": "references/generated-side.png",
     "pursuitCapture": "references/generated-chase.png"
-  }
+  },
+  "overworldBrief": "overworld-brief.md",
+  "overworldConcept": "../overworld-concept-v1.png"
 }

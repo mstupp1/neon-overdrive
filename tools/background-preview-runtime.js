@@ -1,12 +1,14 @@
 // Runs inside the preview iframe so imports share the live game's module state.
 import { bg } from '../src/render/background.js';
 import { loadThemeLayers, themeLayersReady, setThemeLayersEnabled } from '../src/render/backgroundLayers.js';
+import { loadOverworldLayers, overworldLayersReady, setOverworldLayersEnabled } from '../src/render/overworldLayers.js';
 import { SYSTEMS } from '../src/game/campaign.js';
 
 const N = window.NEON;
 let generated = true;
 let boosted = false;
 let frozen = false;
+let frozenScreen = 'play';
 let currentTheme = 'genesis';
 let currentView = 'top';
 const systemFor = (id) => SYSTEMS.find((system) => system.id === id) || SYSTEMS[0];
@@ -16,23 +18,52 @@ const emit = (status) => parent.postMessage({kind:'background-preview', ready:tr
 
 function configure(theme = currentTheme, view = currentView) {
   if (SYSTEMS.some((system) => system.id === theme)) currentTheme = theme;
-  if (['top','side','chase'].includes(view)) currentView = view;
+  if (['top','side','chase','overworld'].includes(view)) currentView = view;
   bg.setTheme(currentTheme);
   const requestedTheme = currentTheme;
   setThemeLayersEnabled(requestedTheme, generated);
-  loadThemeLayers(requestedTheme).then(() => {
+  const layered = currentView === 'overworld'
+    ? (setOverworldLayersEnabled(requestedTheme, generated), loadOverworldLayers(requestedTheme))
+    : loadThemeLayers(requestedTheme);
+  layered.then(() => {
     if (currentTheme !== requestedTheme) return;
-    emit(`${systemFor(requestedTheme).name} · ${currentView}\n${generated ? 'Generated' : 'Procedural'} background\nImages ${themeLayersReady(requestedTheme) ? 'ready' : 'unavailable: procedural fallback'}`);
+    const ready = currentView === 'overworld' ? overworldLayersReady(requestedTheme) : themeLayersReady(requestedTheme);
+    emit(`${systemFor(requestedTheme).name} · ${currentView}\n${generated ? 'Generated' : 'Procedural'} background\nImages ${ready ? 'ready' : 'unavailable: procedural fallback'}`);
   });
 }
 
 function start(boss = false) {
   const system = systemFor(currentTheme);
+  boosted = false;
+  N.input.hold('focus', false);
+  if (currentView === 'overworld') {
+    N.profile.settings.story = false;
+    N.launch(currentTheme, { story: false, intro: false });
+    if (N.G.screen === 'draft') {
+      // Genesis starts with a supply pick. Use its real Skip control, then fall
+      // back to the game's debug hook / first card if Fortune is already full.
+      const skip = document.querySelector('#skip-btn');
+      if (skip && !skip.disabled) skip.click();
+      if (N.G.screen === 'draft') N.skip();
+      if (N.G.screen === 'draft') {
+        const first = document.querySelector('#draft-cards .card');
+        if (first?._onPick && first.dataset.id) first._onPick(first.dataset.id);
+      }
+    }
+    N.G.player.god = true;
+    N.G.player.xp = -100000;
+    frozenScreen = 'overworld';
+    bg.setTheme(currentTheme);
+    frozen = false;
+    emit(`${system.name} · overworld\n${generated ? 'Generated' : 'Procedural'} background\nFree flight and combat`);
+    return;
+  }
   N.G.scriptCtrl = null;
   boosted = false;
   N.profile.settings.story = false;
   N.profile.settings.retro = 'pixel';
   N.startSpec({level:system.level, duration:boss ? 1 : 180, name:`${system.short} ASSET PREVIEW`, hue:system.hue, boss:boss ? system.boss : null, bossHp:0.15, obstacles:false, view:currentView, arenaView:currentView});
+  frozenScreen = 'play';
   N.G.autopilot = true;
   N.G.player.god = true;
   N.G.player.xp = -100000; // keep drafts out of the comparison
@@ -42,7 +73,7 @@ function start(boss = false) {
 }
 
 async function benchmark() {
-  if (currentView !== 'top') return emit('Benchmark is limited to the top-down background renderer. Select Top-down to compare its procedural and layered paths.');
+  if (currentView !== 'top') return emit('Benchmark is limited to the top-down fight background renderer. Select Top-down to compare its procedural and layered paths.');
   // Compare only the top-down background renderer: identical live state, a warmed canvas,
   // alternating order to reduce cache/order bias. This is not whole-game FPS.
   await loadThemeLayers(currentTheme);
@@ -88,21 +119,30 @@ window.addEventListener('message', ({source,data}) => {
   if(action==='configure') start();
   if(action==='baseline'||action==='generated') {
     generated=action==='generated'; setThemeLayersEnabled(currentTheme,generated);
-    emit(`${systemFor(currentTheme).name} · ${currentView}\n${generated?'Generated':'Procedural'} background\nImages ${themeLayersReady(currentTheme)?'ready':'loading / fallback'}`);
+    if (currentView === 'overworld') setOverworldLayersEnabled(currentTheme, generated);
+    const ready = currentView === 'overworld' ? overworldLayersReady(currentTheme) : themeLayersReady(currentTheme);
+    emit(`${systemFor(currentTheme).name} · ${currentView}\n${generated?'Generated':'Procedural'} background\nImages ${ready?'ready':'loading / fallback'}`);
   } else if(action==='waves') start();
   else if(action==='boss') start(true);
   else if(action==='dense') {
     start();
     const W=N.view.W;
-    ['spinner','sniper','tank','carrier','shielder','weaver'].forEach((type,i)=>N.spawn(type,W*(i+1)/7,160,{elite:true}));
-    emit(`${systemFor(currentTheme).name} · ${currentView}\nDense wave and fire contrast check`);
+    if (currentView === 'overworld') {
+      const p=N.G.player;
+      ['spinner','sniper','tank','carrier','shielder','weaver'].forEach((type,i)=>N.spawn(type,p.x+(i-2.5)*115,p.y-250,{elite:true}));
+      emit(`${systemFor(currentTheme).name} · overworld\nDense free-flight combat contrast check`);
+    } else {
+      ['spinner','sniper','tank','carrier','shielder','weaver'].forEach((type,i)=>N.spawn(type,W*(i+1)/7,160,{elite:true}));
+      emit(`${systemFor(currentTheme).name} · ${currentView}\nDense wave and fire contrast check`);
+    }
   } else if(action==='boost') {
     boosted=!boosted;
-    N.G.scriptCtrl=boosted ? ()=>({mode:'dir',dx:0,dy:0,dash:false,od:false,boost:true}) : null;
-    emit(`Boost ${boosted?'on':'off'}`);
+    if (currentView === 'overworld') N.input.hold('focus', boosted);
+    else N.G.scriptCtrl=boosted ? ()=>({mode:'dir',dx:0,dy:0,dash:false,od:false,boost:true}) : null;
+    emit(`Boost ${boosted?'on':'off'} · ${currentView}`);
   } else if(action==='freeze') {
     frozen=!frozen;
-    N.G.screen=frozen?'pause':'play';
+    N.G.screen=frozen?'pause':frozenScreen;
     emit(frozen?'Frozen scene':'Running scene');
   } else if(action==='benchmark') benchmark();
 });

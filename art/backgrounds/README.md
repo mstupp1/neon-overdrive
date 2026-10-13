@@ -1,5 +1,13 @@
 # Campaign parallax art
 
+## Free-flight overworlds
+
+Each system also has two transparent overhead scenery layers and four solid obstacle sprites generated with built-in imagegen. Genesis uses orbital salvage, Crimson uses bio-corrupted refinery wreckage, Cyclone uses storm collectors and turbines, and Void uses fractured monoliths and alien relics. The existing landmarks sit at a distant camera depth; far/near scenery travels at separate parallax rates below the reactive grid. Solid sprites follow the original collision geometry and rotation.
+
+The overworld briefs are in each system's `overworld-brief.md`; exact prompts and source/export provenance are appended to its manifest. Runtime exports use nearest-neighbor resizing with transparent framing (`background_assets.py export --padding`), preserving original alpha and source art. The preview's **Overworld** view supports free flight, baseline comparison, dense combat, boost, and freeze with saves isolated in memory. Run `node --test tools/test_overworld_layers.mjs` for loading, culling, parallax, and fallback coverage.
+
+## Combat cameras
+
 Generated with built-in imagegen. Four independent five-layer sets are used across top-down, side-scroll, and pursuit views. Each set has a landmark, far skyline, near skyline, far deck, and near deck. The new production set adds fifteen layers; the existing Genesis art is preserved.
 
 | System | Brief | Exact prompts, sources and hashes |
