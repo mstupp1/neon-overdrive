@@ -630,11 +630,11 @@ body {
     --c: var(--cyan);
     position: relative;
     display: grid;
-    grid-template-columns: 3.2em 1fr;
+    grid-template-columns: 5em minmax(0, 1fr);
     gap: 0.8em;
     align-items: center;
     text-align: left;
-    padding: 0.85em 1em;
+    padding: 0.65em 0.85em;
     color: var(--text);
     font-family: inherit;
     background: linear-gradient(100deg, color-mix(in srgb, var(--c) 14%, var(--panel)) 0%, var(--panel) 60%);
@@ -682,14 +682,14 @@ body {
 }
 
 .card-icon {
-    width: 3.2em;
-    height: 3.2em;
-    padding: 0.65em;
+    width: 5em;
+    height: 5em;
+    padding: 0.15em;
     border-radius: 2px;
     color: var(--c);
     background: color-mix(in srgb, var(--c) 12%, transparent);
     border: 1px solid color-mix(in srgb, var(--c) 40%, transparent);
-    filter: drop-shadow(0 0 0.3em var(--c));
+    filter: none;
 }
 
 .card-icon > :is(svg, .asset-icon) {
@@ -701,7 +701,8 @@ body {
 .card-top {
     display: flex;
     align-items: center;
-    gap: 0.5em;
+    gap: 0.3em 0.5em;
+    flex-wrap: wrap;
 }
 
 .card-name {
@@ -785,7 +786,7 @@ kbd {
     position: relative;
     width: 1.9em;
     height: 1.9em;
-    padding: 0.35em;
+    padding: 0.08em;
     border-radius: 2px;
     color: var(--c);
     background: color-mix(in srgb, var(--c) 12%, transparent);
@@ -1357,8 +1358,8 @@ input[type='range']::-moz-range-thumb {
 
 .rn-ico {
     display: block;
-    width: 58%;
-    height: 58%;
+    width: 88%;
+    height: 88%;
     margin: auto;
 }
 
@@ -1470,7 +1471,7 @@ input[type='range']::-moz-range-thumb {
 .node-icon {
     width: 4.5em;
     height: 4.5em;
-    padding: 1em;
+    padding: 0.15em;
     border-radius: 50%;
     color: var(--c);
     border: 2px solid var(--c);
@@ -1534,10 +1535,25 @@ input[type='range']::-moz-range-thumb {
 }
 
 .card.offer {
-    grid-template-columns: 3.2em 1fr auto;
+    grid-template-columns: 4.5em minmax(0, 1fr);
+    gap: 0.25em 0.75em;
     padding: 0.7em 0.9em;
 }
 
+.card.offer .card-icon {
+    width: 4.5em;
+    height: 4.5em;
+    grid-row: span 2;
+}
+.card.offer .price {
+    grid-column: 2;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.65em;
+    min-width: 0;
+    flex-wrap: wrap;
+}
 .card.offer .card-desc {
     font-size: 0.92em;
 }
@@ -1919,7 +1935,7 @@ input[type='range']::-moz-range-thumb {
 .slot {
     --c: var(--cyan);
     display: grid;
-    grid-template-columns: 2.4em 1fr auto;
+    grid-template-columns: 3.4em minmax(0, 1fr) auto;
     gap: 0.7em;
     align-items: center;
     padding: 0.4em 0.8em 0.4em 0.5em;
@@ -1937,9 +1953,9 @@ input[type='range']::-moz-range-thumb {
 .slot-ico {
     display: grid;
     place-items: center;
-    width: 2.4em;
-    height: 2.4em;
-    padding: 0.5em;
+    width: 3.4em;
+    height: 3.4em;
+    padding: 0.1em;
     border-radius: 2px;
     color: var(--c);
     background: color-mix(in srgb, var(--c) 10%, transparent);
@@ -2233,8 +2249,8 @@ input[type='range']::-moz-range-thumb {
 }
 
 .cls-ico {
-    width: 1.9em;
-    height: 1.9em;
+    width: 3.3em;
+    height: 3.3em;
     color: var(--c);
     filter: drop-shadow(0 0 0.25em var(--c));
 }
@@ -2601,7 +2617,7 @@ input[type='range']::-moz-range-thumb {
 #scr-event .node-icon {
     width: 3.6em;
     height: 3.6em;
-    padding: 0.75em;
+    padding: 0.1em;
     flex: none;
 }
 
@@ -2959,15 +2975,16 @@ input[type='range']::-moz-range-thumb {
 
 .gd-head {
     display: grid;
-    grid-template-columns: 2.4em 1fr auto;
+    grid-template-columns: 4.6em minmax(0, 1fr);
     gap: 0.6em;
     align-items: center;
 }
 
 .gd-ico {
-    width: 2.4em;
-    height: 2.4em;
-    padding: 0.45em;
+    width: 4.6em;
+    height: 4.6em;
+    padding: 0.1em;
+    grid-row: span 2;
     color: var(--rc);
     border: 1px solid var(--rc);
     border-radius: 2px;
@@ -3004,6 +3021,8 @@ input[type='range']::-moz-range-thumb {
     font-weight: 700;
     letter-spacing: 0.12em;
     color: var(--green);
+    grid-column: 2;
+    justify-self: start;
 }
 
 .gd-lines {
@@ -3126,7 +3145,7 @@ input[type='range']::-moz-range-thumb {
     --rc: rgba(255, 255, 255, 0.25);
     position: relative;
     aspect-ratio: 1;
-    padding: 0.9em;
+    padding: 0.2em 0.2em 0.85em;
     color: var(--rc);
     background: color-mix(in srgb, var(--rc) 9%, var(--panel));
     border: 1px solid color-mix(in srgb, var(--rc) 60%, transparent);
@@ -3407,8 +3426,8 @@ input[type='range']::-moz-range-thumb {
 }
 
 .ab-icon {
-    width: 1.5em;
-    height: 1.5em;
+    width: 3.2em;
+    height: 3.2em;
     color: var(--c);
     filter: drop-shadow(0 0 0.3em var(--c));
 }
@@ -3477,19 +3496,26 @@ input[type='range']::-moz-range-thumb {
     --rc: rgba(255, 255, 255, 0.2);
     width: 100%;
     max-width: 24em;
-    min-height: 5.6em; /* fixed: name line + 2 lines of text + state line */
+    min-height: 7.8em; /* reserve artwork, description and equipment state */
     padding: 0.45em 0.8em;
     text-align: left;
     background: linear-gradient(180deg, color-mix(in srgb, var(--rc) 9%, var(--panel)), var(--panel) 60%);
     border: 1px solid color-mix(in srgb, var(--rc) 50%, transparent);
     border-radius: 2px;
+    display: grid;
+    grid-template-columns: 4.2em minmax(0, 1fr);
+    gap: 0.7em;
+    align-items: center;
 }
+
+.ad-art { width: 4.2em; height: 4.2em; }
 
 .ad-top {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
     gap: 0.6em;
+    flex-wrap: wrap;
 }
 
 .ad-name {
@@ -3510,7 +3536,7 @@ input[type='range']::-moz-range-thumb {
 
 .ad-state {
     font-family: Orbitron, sans-serif;
-    font-size: 0.62em;
+    font-size: 0.72em;
     letter-spacing: 0.12em;
 }
 
@@ -4294,26 +4320,27 @@ input[type='range']::-moz-range-thumb {
     }
 }
 
-/* Flux Core: a two-column grid of compact nodes (icon | name, text, cost) so every node fits without scrolling. */
+/* Flux Core: compact artwork-led rows keep names and effects readable beside the art. */
 #core-list {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: 0.45em;
     width: 100%;
     max-width: 24em;
 }
 
 #core-list .card {
-    grid-template-columns: 2em minmax(0, 1fr);
-    align-items: start;
+    grid-template-columns: 3.6em minmax(0, 1fr) auto;
+    align-items: center;
     gap: 0.2em 0.5em;
-    padding: 0.5em 0.55em;
+    padding: 0.25em 0.55em;
 }
 
 #core-list .card-icon {
-    width: 2em;
-    height: 2em;
-    padding: 0.4em;
+    width: 3.6em;
+    height: 3.6em;
+    grid-row: 1;
+    padding: 0;
 }
 
 #core-list .card-top {
@@ -4330,11 +4357,12 @@ input[type='range']::-moz-range-thumb {
 }
 
 #core-list .price {
-    grid-column: 2;
-    flex-direction: row;
+    grid-column: 3;
+    grid-row: 1;
+    flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    gap: 0.5em;
+    gap: 0.15em;
     min-width: 0;
 }
 
@@ -4571,8 +4599,8 @@ input[type='range']::-moz-range-thumb {
 
 .rd-ico {
     flex: none;
-    width: 1.35em;
-    height: 1.35em;
+    width: 2.1em;
+    height: 2.1em;
     color: var(--c);
 }
 
@@ -4679,7 +4707,7 @@ input[type='range']::-moz-range-thumb {
     --c: var(--cyan);
     width: 2.1em;
     height: 2.1em;
-    padding: 0.35em;
+    padding: 0.08em;
     font: inherit;
     color: var(--c);
     background: color-mix(in srgb, var(--c) 12%, transparent);
@@ -4764,3 +4792,19 @@ input[type='range']::-moz-range-thumb {
 .asset-icon-fallback > svg { display: block; width: 100%; height: 100%; }
 .asset-icon-missing > img { display: none; }
 .asset-icon-missing > .asset-icon-fallback { display: contents; }
+
+
+/* Let the native artwork carry its own light; selection stays on the surrounding control. */
+:is(.card-icon, .slot-ico, .gd-ico, .cls-ico, .ab-icon):has(> .asset-icon) { filter: none; }
+/* Keep the native transparency and colour of the art, without a second neon blur. */
+.inv-tile > .asset-icon { filter: none; }
+:is(.card-icon, .cls-ico, .ab-icon) > .asset-icon {
+    transition: transform 0.18s ease;
+}
+:is(.card, .cls-tab, .ab-tile):is(:hover, .focus) :is(.card-icon, .cls-ico, .ab-icon) > .asset-icon {
+    transform: translateY(-0.08em) scale(1.04);
+}
+@media (prefers-reduced-motion: reduce) {
+    :is(.card-icon, .cls-ico, .ab-icon) > .asset-icon { transition: none; }
+    :is(.card, .cls-tab, .ab-tile):is(:hover, .focus) :is(.card-icon, .cls-ico, .ab-icon) > .asset-icon { transform: none; }
+}

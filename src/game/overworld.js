@@ -1383,7 +1383,7 @@ function drawExit(ctx, e) {
     ctx.stroke();
   }
   const ic = icon(n.type, col);
-  const is = boss ? 36 : 28;
+  const is = boss ? 62 : 46;
   ctx.globalAlpha = 1;
   if (ic.complete && ic.naturalWidth > 0) ctx.drawImage(ic, e.x - is / 2, e.y - is / 2, is, is);
   ctx.textAlign = 'center';
@@ -1433,14 +1433,14 @@ function drawSites(ctx, vis) {
       }
     }
     // A small square that bobs, with the kind's icon.
-    const half = 15;
+    const half = 21;
     const by = site.y + Math.sin(t * 2) * 3;
     ctx.globalAlpha = 0.95;
     ctx.fillStyle = 'rgba(5,3,13,0.7)';
     ctx.fillRect(site.x - half, by - half, half * 2, half * 2);
     ctx.strokeRect(site.x - half, by - half, half * 2, half * 2);
     const ic = icon(def.icon, def.color);
-    if (ic.complete && ic.naturalWidth > 0) ctx.drawImage(ic, site.x - 10, by - 10, 20, 20);
+    if (ic.complete && ic.naturalWidth > 0) ctx.drawImage(ic, site.x - 19, by - 19, 38, 38);
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
     ctx.font = `700 ${11.5 / ZOOM}px ${FONT}`;
@@ -1758,13 +1758,13 @@ function drawMap(ctx, a) {
     const y = my(e.y);
     if (!e.seen) continue;
     ctx.fillStyle = '#05030d';
-    ctx.fillRect(x - 9, y - 9, 18, 18);
+    ctx.fillRect(x - 12, y - 12, 24, 24);
     ctx.strokeStyle = col;
     ctx.lineWidth = 2;
-    ctx.strokeRect(x - 9, y - 9, 18, 18);
+    ctx.strokeRect(x - 12, y - 12, 24, 24);
     const ic = icon(e.node.type, col);
-    if (ic.complete && ic.naturalWidth > 0) ctx.drawImage(ic, x - 7, y - 7, 14, 14);
-    text(ctx, NODE_TYPES[e.node.type].name, x, y + 18, 11, col, 'center', 700, FONT2);
+    if (ic.complete && ic.naturalWidth > 0) ctx.drawImage(ic, x - 11, y - 11, 22, 22);
+    text(ctx, NODE_TYPES[e.node.type].name, x, y + 20, 11, col, 'center', 700, FONT2);
   }
   // Ship marker
   const p = G.player;

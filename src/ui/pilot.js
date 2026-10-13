@@ -88,7 +88,7 @@ function renderDetail() {
   const state = on ? '<b class="ok">EQUIPPED · SELECT TO REMOVE</b>' : open ? '<b>SELECT TO EQUIP</b>'
     : !owned ? '<i>FIND THIS CLASS FIRST</i>' : !passiveFound(ps) ? '<i>NOT FOUND · DROPS FROM BOSSES AND RANK-UPS</i>' : `<i>NEEDS RANK ${rankForRarity(ps.r)}</i>`;
   el.style.setProperty('--rc', RARITY[ps.r].color);
-  el.innerHTML = `<div class="ad-top"><span class="ad-name">${ps.name}</span><span class="pass-rar">${RARITY[ps.r].name}</span></div><p>${ps.desc}</p><div class="ad-state">${state}</div>`;
+  el.innerHTML = `<span class="ad-art">${ps.icon}</span><div><div class="ad-top"><span class="ad-name">${ps.name}</span><span class="pass-rar">${RARITY[ps.r].name}</span></div><p>${ps.desc}</p><div class="ad-state">${state}</div></div>`;
 }
 
 // Tile focus (keys / pad / hover) picks what the detail panel shows.
