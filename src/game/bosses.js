@@ -18,6 +18,7 @@ import { addScore } from './player.js';
 import { sv } from './stageview.js';
 import { MINI_ATTACKS, miniById, resetMini, miniBurst } from './minibosses.js';
 import { drawMini } from '../render/miniArt.js';
+import { topdownTargetY } from './topdownGeometry.js';
 
 const BOSSES = [
   { id: 'warden', name: 'WARDEN', title: 'Siege Mech', hp: 2400, r: 40, color: '#ff7a18', homeY: 165 },
@@ -63,6 +64,13 @@ export function spawnBoss(id, level, loop, hpMul = 1) {
     e.alpha = 1;
   }
   if (def.variant) e.homeY = VARIANTS[def.id][def.variant].homeY;
+  if (sv.mode === 'top') {
+    // Keep the full upper silhouette, including large orbital parts, below
+    // the horizon when each boss settles into its top-down arena anchor.
+    const topExtent = ({ warden: 62, hydra: 48, omega: 77, eclipse: 64 })[def.id] || def.r;
+    const extent = Math.max(topExtent, def.r || 0) + 18;
+    e.homeY = topdownTargetY(e.homeY + view.safeTop, view.H, view.safeTop, view.safeBottom, extent) - view.safeTop;
+  }
   if (def.id === 'eclipse') {
     e.alpha = 1;
     e.trail = [];

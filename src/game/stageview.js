@@ -90,7 +90,7 @@ function chaseProj() {
   if (P.H === r.H && P.top === r.top) return P;
   P.H = r.H;
   P.top = r.top;
-  P.hy = r.top + r.H * 0.15; // horizon: high, so the far lane fills the top of the screen
+  P.hy = r.top + r.H * 0.25; // horizon: leaves a deeper sky band above the reciprocal floor
   const yp = r.H * 0.8; // the jet's home row
   const sp = 0.95; // scale at the jet
   const rp = 0.85; // vertical squash at the jet
@@ -697,7 +697,7 @@ function drawSideBack(ctx, r) {
   const art = bg.theme && drawThemeSideHorizon(ctx, bg.theme, W, H, hor, sc, bg.t);
   if (!art) {
     // Far skyline (two procedural parallax ridges)
-    for (const [k, amp, a, sp] of [[0.004, 70, 0.22, 0.12], [0.009, 40, 0.35, 0.3]]) {
+    for (const [k, amp, a, sp] of [[0.004, 105, 0.22, 0.12], [0.009, 60, 0.35, 0.3]]) {
       ctx.beginPath();
       for (let x = -10; x <= W + 10; x += 10) {
         const u = x + sc * sp;

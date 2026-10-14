@@ -71,8 +71,18 @@ export function drawThemeHorizon(ctx, theme, W, horizon, t) {
   ctx.save();
   ctx.globalCompositeOperation = 'source-over';
   for (const layer of HORIZON) {
-    const x = (W - layer.w) * 0.5 + Math.sin(t * 0.05) * layer.sway;
-    let y = horizon - layer.h + 6;
+    const image = set.images[layer.key];
+    // Fit the gate inside its authored frame without stretching it. The
+    // skyline bands keep their existing wide framing and deck/grid alignment.
+    let width = layer.w;
+    let height = layer.h;
+    if (layer.key === 'gate' && image?.width && image?.height) {
+      const scale = Math.min(layer.w / image.width, layer.h / image.height);
+      width = image.width * scale;
+      height = image.height * scale;
+    }
+    const x = (W - width) * 0.5 + Math.sin(t * 0.05) * layer.sway;
+    let y = horizon - height + 6;
     // Match the original per-system silhouettes: the Genesis gate sits high,
     // while the planet/storm/void landmarks are framed lower in the sky.
     if (layer.key === 'gate') {
@@ -87,14 +97,14 @@ export function drawThemeHorizon(ctx, theme, W, horizon, t) {
     if (masked) {
       ctx.save();
       ctx.beginPath();
-      ctx.rect(0, -layer.h, W, horizon + layer.h);
+      ctx.rect(0, -height, W, horizon + height);
       ctx.clip();
     }
     if (layer.key === 'gate') {
       // Clip in screen space first, then turn the storm around its hidden eye.
-      drawLandmark(ctx, set.images[layer.key], x, y, layer.w, layer.h, theme, t);
+      drawLandmark(ctx, image, x, y, width, height, theme, t);
     } else {
-      ctx.drawImage(set.images[layer.key], x, y, layer.w, layer.h);
+      ctx.drawImage(image, x, y, width, height);
     }
     if (masked) ctx.restore();
   }
@@ -179,25 +189,25 @@ export function drawThemeSideHorizon(ctx, theme, W, H, horizon, scroll = 0, t = 
   if (!set?.enabled || !set.images) return false;
   ctx.save();
   ctx.globalCompositeOperation = 'source-over';
+  // Keep expanded parallax scenery above the reciprocal side-view floor.
+  ctx.beginPath(); ctx.rect(0, 0, W, horizon); ctx.clip();
   const gate = set.images.gate;
-  const gateHeight = 260 * gate.height / gate.width;
+  const baseGateWidth = 260;
+  const gateWidth = 390;
+  const gateHeight = gateWidth * gate.height / gate.width;
   ctx.globalAlpha = 0.34;
-  ctx.save();
-  if (theme === 'cyclone') {
-    ctx.beginPath(); ctx.rect(0, 0, W, horizon); ctx.clip();
-  }
-  drawLandmark(ctx, gate, W * 0.46 + Math.sin(scroll * 0.00011) * W * 0.08,
-    horizon - gateHeight + 5, 260, gateHeight, theme, t);
-  ctx.restore();
-  for (const [key, width, height, speed, alpha] of [
-    ['skylineFar', 500, 140, 0.012, 0.46], ['skylineNear', 510, 90, 0.03, 0.56],
+  const gateX = W * 0.46 + Math.sin(scroll * 0.00011) * W * 0.08 - (gateWidth - baseGateWidth) * 0.5;
+  drawLandmark(ctx, gate, gateX,
+    horizon - gateHeight, gateWidth, gateHeight, theme, t);
+  for (const [key, width, height, baseWidth, speed, alpha] of [
+    ['skylineFar', 750, 210, 500, 0.012, 0.46], ['skylineNear', 765, 135, 510, 0.03, 0.56],
   ]) {
     const image = set.images[key];
     // scroll is the side view's logical parallax distance (bg.scroll * 140).
-    const offset = ((scroll * speed * width / 140) % width + width) % width;
+    const offset = ((scroll * speed * baseWidth / 140) % width + width) % width;
     ctx.globalAlpha = alpha;
     for (let x = -width - offset; x < W + width; x += width - 2) {
-      ctx.drawImage(image, x, horizon - height + 4, width, height);
+      ctx.drawImage(image, x, horizon - height, width, height);
     }
   }
   ctx.restore();

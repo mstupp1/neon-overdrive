@@ -15,6 +15,8 @@ import { onKill as cineOnKill } from './cinematic.js';
 import { onEliteKilled } from './pilot.js';
 import { bossDamaged, updateBoss, every } from './bosses.js';
 import { armorOf, onPlayerHit, slowOf, updateStatus, applyStatus } from './status.js';
+import { topdownCombatTop } from './topdownGeometry.js';
+import { sv } from './stageview.js';
 
 export const TYPES = {
   dart: { hp: 3, r: 12, xp: 1, score: 100, spr: 'dart' },
@@ -495,11 +497,14 @@ export function weaverBeam(e) {
 // Blinker spot: near-but-not-on the player (>= 140px away), inside the upper play area.
 function blinkSpot(e) {
   const p = G.player;
+  const topY = !field.ow && !sv.active
+    ? topdownCombatTop(view.H, view.safeTop) + e.r
+    : view.safeTop + 70;
   for (let i = 0; i < 12; i++) {
     const a = rand(0, TAU);
     const d = rand(150, 250);
     const x = clamp(p.x + Math.cos(a) * d, 40, view.W - 40);
-    const y = clamp(p.y + Math.sin(a) * d, view.safeTop + 70, view.H * 0.62);
+    const y = clamp(p.y + Math.sin(a) * d, topY, view.H * 0.62);
     if (dist2(x, y, p.x, p.y) >= 140 * 140) {
       e.x = x;
       e.y = y;
@@ -507,7 +512,7 @@ function blinkSpot(e) {
     }
   }
   e.x = clamp(p.x + (p.x < view.W / 2 ? 170 : -170), 40, view.W - 40);
-  e.y = view.safeTop + 110;
+  e.y = !field.ow && !sv.active ? topY + 40 : view.safeTop + 110;
 }
 export { blinkSpot };
 

@@ -5,6 +5,7 @@ import { glow } from './sprites.js';
 import { rand, damp, wrapAngle, mulberry32, TAU } from '../core/math.js';
 import { beat } from '../core/beat.js';
 import { loadThemeLayers, drawThemeHorizon, drawThemeDeck } from './backgroundLayers.js';
+import { topdownHorizon } from '../game/topdownGeometry.js';
 
 // --- Per-system themes (campaign) ---------------------------------------------------
 // Each theme bakes ONE offscreen silhouette layer the first time it is used (never again), drawn behind the grid with a
@@ -496,7 +497,7 @@ export const bg = {
     }
 
     // Themed silhouette layer (one drawImage), slow parallax
-    const horizon = H * 0.12;
+    const horizon = topdownHorizon(H);
     if (this.theme) ctx.globalCompositeOperation = 'source-over';
     const layeredArt = this.theme && drawThemeHorizon(ctx, this.theme, W, horizon, this.t);
     if (T && !layeredArt) {

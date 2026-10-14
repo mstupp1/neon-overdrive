@@ -263,6 +263,53 @@ test('side and top-down layer draws restore canvas state and bound fractional wr
   }
 });
 
+test('expanded side horizon keeps authored scale, aspect, sky clipping, and continuous parallax', async () => {
+  globalThis.Image = MockImage;
+  MockImage.instances = [];
+  const layers = await import(`${moduleUrl.href}?expanded-side-horizon`);
+  const pending = layers.loadThemeLayers('crimson');
+  MockImage.instances.forEach((image) => image.succeed());
+  const images = await pending;
+  const ctx = context();
+  const W = 450;
+  const H = 896;
+  const horizon = H * 0.7;
+
+  assert.equal(layers.drawThemeSideHorizon(ctx, 'crimson', W, H, horizon, 12.25), true);
+  assert.deepEqual(ctx.clipCalls, [[0, 0, W, horizon]], 'all enlarged side scenery is clipped at the floor');
+  assert.equal(ctx.stack.length, 0, 'side horizon restores its clip');
+  const [gate] = ctx.calls.filter((call) => call[0] === images.gate);
+  assert.equal(gate[3], 390, 'side landmark width is enlarged by 1.5x');
+  assert.ok(Math.abs(gate[3] / gate[4] - images.gate.width / images.gate.height) < 1e-9, 'landmark aspect ratio is preserved');
+  const oldGateCenter = W * 0.46 + Math.sin(12.25 * 0.00011) * W * 0.08 + 130;
+  assert.ok(Math.abs(gate[1] + gate[3] * 0.5 - oldGateCenter) < 1e-9, 'enlargement preserves the landmark center');
+  assert.ok(Math.abs(gate[2] + gate[4] - horizon) < 1e-9, 'landmark bottom meets the horizon before clipping');
+
+  for (const [key, width, height] of [['skylineFar', 750, 210], ['skylineNear', 765, 135]]) {
+    const calls = ctx.calls.filter((call) => call[0] === images[key]);
+    assert.ok(calls.length >= 2, `${key} repeats across the screen`);
+    assert.ok(calls.every((call) => call[3] === width && call[4] === height && call[2] === horizon - height));
+    for (let i = 1; i < calls.length; i++) {
+      assert.equal(calls[i][1] - calls[i - 1][1], width - 2, `${key} repeats with its hidden-edge overlap`);
+    }
+  }
+
+  ctx.calls.length = 0;
+  layers.drawThemeSideHorizon(ctx, 'crimson', W, H, horizon, 12.75);
+  const farImage = images.skylineFar;
+  const firstFarX = ctx.calls.find((call) => call[0] === farImage)[1];
+  const expectedTravel = -0.5 * 0.012 * 500 / 140;
+  const ctxNext = context();
+  layers.drawThemeSideHorizon(ctxNext, 'crimson', W, H, horizon, 13.25);
+  const nextFarX = ctxNext.calls.find((call) => call[0] === farImage)[1];
+  assert.ok(Math.abs((nextFarX - firstFarX) - expectedTravel) < 1e-8, 'parallax speed uses the original world-travel scale');
+
+  const wrapped = context();
+  layers.drawThemeSideHorizon(wrapped, 'crimson', W, H, horizon, 9876.54321);
+  assert.ok(wrapped.calls.length <= 20, 'fractional wrap stays bounded at enlarged tile widths');
+  assert.deepEqual(wrapped.clipCalls, [[0, 0, W, horizon]]);
+});
+
 test('theme decks use each system grid period and horizon layers restore composite mode', async () => {
   globalThis.Image = MockImage;
   MockImage.instances = [];

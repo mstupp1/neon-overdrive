@@ -24,6 +24,7 @@ import { treeForRun, treeOnKill, treeOnDash } from './tree.js';
 import { sv } from './stageview.js';
 import { updateBoost, resetBoost, boostSpeed, boostScore, drawBoostShip, boostLen } from './boost.js';
 import { rollBurst, BURST_GAP } from './status.js';
+import { topdownCombatTop } from './topdownGeometry.js';
 
 // The opening cost makes the first few drafts earned milestones. Its relative
 // impact fades at higher levels, where quadratic growth controls progression.
@@ -126,7 +127,7 @@ export function playfieldBounds() {
   return {
     left: 14,
     right: view.W - 14,
-    top: view.safeTop + 84,
+    top: topdownCombatTop(view.H, view.safeTop),
     bottom: view.H - 18 - view.safeBottom,
   };
 }

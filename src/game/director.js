@@ -1,6 +1,6 @@
 // Sector flow and wave spawning: intro → waves → (boss) → clear → reward draft.
 
-import { G, view, sectorDifficulty, sectorInfo, isBossSector } from './state.js';
+import { G, view, field, sectorDifficulty, sectorInfo, isBossSector } from './state.js';
 import { applyModifiers, patternMul, MODIFIERS } from './modifiers.js';
 import { applyHeat } from './core.js';
 import { rand, chance, weightedPick, randInt } from '../core/math.js';
@@ -17,6 +17,7 @@ import { sfx, music } from '../core/audio.js';
 import { sv, viewName } from './stageview.js';
 import { rollField, spawnFormation, clearObstacles } from './obstacles.js';
 import { cruising } from './boost.js';
+import { topdownTargetY } from './topdownGeometry.js';
 
 export function createDirector() {
   return {
@@ -32,6 +33,9 @@ function later(delay, fn) {
 const W = () => view.W;
 const H = () => view.H;
 const top = () => view.safeTop;
+const targetY = (y) => !field.ow && !sv.active
+  ? topdownTargetY(y, H(), view.safeTop, view.safeBottom)
+  : y;
 
 const PATTERNS = [
   {
@@ -68,7 +72,7 @@ const PATTERNS = [
       const n = 4 + Math.min(2, Math.floor(G.sector / 3));
       for (let i = 0; i < n; i++) {
         const tx = 50 + (i * (W() - 100)) / (n - 1);
-        later(i * 0.12, () => spawnEnemy('dart', tx, -20, { mv: 'dive', tx, ty: rand(90, 190) + top(), shots: 0 }));
+        later(i * 0.12, () => spawnEnemy('dart', tx, -20, { mv: 'dive', tx, ty: targetY(rand(90, 190) + top()), shots: 0 }));
       }
     },
   },
@@ -98,7 +102,7 @@ const PATTERNS = [
       const n = G.sector >= 5 ? 2 : 1;
       for (let i = 0; i < n; i++) {
         const tx = n === 1 ? rand(100, W() - 100) : i === 0 ? rand(80, W() / 2 - 40) : rand(W() / 2 + 40, W() - 80);
-        later(i * 0.5, () => spawnEnemy('spinner', tx, -30, { mv: 'hover', tx, ty: rand(110, 250) + top(), stay: 7, fireDelay: 0.8 }));
+        later(i * 0.5, () => spawnEnemy('spinner', tx, -30, { mv: 'hover', tx, ty: targetY(rand(110, 250) + top()), stay: 7, fireDelay: 0.8 }));
       }
     },
   },
@@ -108,7 +112,7 @@ const PATTERNS = [
       const n = G.sector >= 6 ? 4 : 3;
       for (let i = 0; i < n; i++) {
         const tx = 60 + (i * (W() - 120)) / (n - 1);
-        later(i * 0.45, () => spawnEnemy('dasher', tx, -20, { tx, ty: rand(90, 170) + top() }));
+        later(i * 0.45, () => spawnEnemy('dasher', tx, -20, { tx, ty: targetY(rand(90, 170) + top()) }));
       }
     },
   },
@@ -124,7 +128,7 @@ const PATTERNS = [
       const n = G.sector >= 7 ? 3 : 2;
       for (let i = 0; i < n; i++) {
         later(i * 0.6, () => spawnEnemy('sniper', rand(40, W() - 40), -20, {
-          tx: rand(50, W() - 50), ty: rand(H() * 0.12, H() * 0.32) + top(), shots: 3,
+          tx: rand(50, W() - 50), ty: targetY(rand(H() * 0.12, H() * 0.32) + top()), shots: 3,
         }));
       }
     },
@@ -132,7 +136,7 @@ const PATTERNS = [
   {
     id: 'tank', min: 5, w: () => 1, cost: 3.4,
     run() {
-      spawnEnemy('tank', W() / 2 + rand(-80, 80), -40, { mv: 'hover', tx: W() / 2 + rand(-90, 90), ty: 140 + top(), stay: 12, fireDelay: 1 });
+      spawnEnemy('tank', W() / 2 + rand(-80, 80), -40, { mv: 'hover', tx: W() / 2 + rand(-90, 90), ty: targetY(140 + top()), stay: 12, fireDelay: 1 });
       later(1, () => PATTERNS[0].run());
     },
   },
@@ -160,13 +164,13 @@ const PATTERNS = [
           later(i * 0.12 + (left ? 0 : 0.5), () => spawnEnemy('swarm', left ? -15 : W() + 15, y, { mv: 'sweep', vx: left ? 240 : -240, vy: 0, curve: 110 }));
         }
       }
-      later(0.8, () => spawnEnemy('spinner', W() / 2, -30, { mv: 'hover', tx: W() / 2, ty: 200 + top(), stay: 6 }));
+      later(0.8, () => spawnEnemy('spinner', W() / 2, -30, { mv: 'hover', tx: W() / 2, ty: targetY(200 + top()), stay: 6 }));
     },
   },
   {
     id: 'carrier', min: 2, w: (s) => (s < 3 ? 0.55 : 1.1), cost: 2.8,
     run() {
-      spawnEnemy('carrier', rand(120, W() - 120), -40, { ty: rand(110, 170) + top() });
+      spawnEnemy('carrier', rand(120, W() - 120), -40, { ty: targetY(rand(110, 170) + top()) });
     },
   },
   {
@@ -175,11 +179,11 @@ const PATTERNS = [
       // Shielder with spinner escorts close enough to be tethered (link radius 210).
       const cx = rand(130, W() - 130);
       const tys = 118 + top();
-      spawnEnemy('shielder', cx, -30, { mv: 'hover', tx: cx, ty: tys, stay: 13, fireDelay: 2 });
+      spawnEnemy('shielder', cx, -30, { mv: 'hover', tx: cx, ty: targetY(tys), stay: 13, fireDelay: 2 });
       const xs = G.sector + G.loop * 9 >= 7 ? [-100, 0, 100] : [-95, 95];
       xs.forEach((dx, i) => {
         const tx = Math.max(50, Math.min(W() - 50, cx + dx));
-        later(0.5 + i * 0.3, () => spawnEnemy('spinner', tx, -30, { mv: 'hover', tx, ty: tys + (dx === 0 ? 120 : 75), stay: 11, fireDelay: 1 + i * 0.4 }));
+        later(0.5 + i * 0.3, () => spawnEnemy('spinner', tx, -30, { mv: 'hover', tx, ty: targetY(tys + (dx === 0 ? 120 : 75)), stay: 11, fireDelay: 1 + i * 0.4 }));
       });
     },
   },
@@ -347,7 +351,7 @@ function aliveEnemies() {
 function spawnHunter() {
   const d = G.director;
   d.hunterSpawned = true;
-  d.hunter = spawnEnemy('hunter', W() / 2, -50, { ty: 135 + top() });
+  d.hunter = spawnEnemy('hunter', W() / 2, -50, { ty: targetY(135 + top()) });
   if (G.mode === 'run') {
     banner('HUNTER', 'ELITE TARGET INBOUND', '#ff3b3b', 2);
     sfx.warn();
