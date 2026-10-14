@@ -25,6 +25,15 @@ import { sv } from './stageview.js';
 import { updateBoost, resetBoost, boostSpeed, boostScore, drawBoostShip, boostLen } from './boost.js';
 import { rollBurst, BURST_GAP } from './status.js';
 import { topdownCombatTop } from './topdownGeometry.js';
+import { bg } from '../render/background.js';
+
+// Handling feel (keyboard/gamepad; pointer steering keeps its own rates). Rates are damp() constants: higher = snappier.
+const REVERSE_SCALE = 0.65; // top speed going backward, relative to forward
+const RATE_THRUST = 8; // speeding up while pushing forward (~0.3s to full speed)
+const RATE_SIDE = 11; // speeding up sideways / backward
+const RATE_COAST = 5; // no input: glide to a stop
+const RATE_TURN = 15; // pushing against the current motion
+const PUSH_MAX = 0.35; // extra backdrop scroll at full forward speed (visual only)
 
 // The opening cost makes the first few drafts earned milestones. Its relative
 // impact fades at higher levels, where quadratic growth controls progression.
@@ -169,6 +178,14 @@ export function updatePlayer(p, dt) {
     mvx = c.dx;
     mvy = c.dy;
   }
+  // Reverse is slower than forward. "Forward" is screen-up in a fight and the nose heading in free flight.
+  const fwx = field.ow ? Math.cos(p.aim) : 0;
+  const fwy = field.ow ? Math.sin(p.aim) : -1;
+  const along = tvx * fwx + tvy * fwy;
+  if (along < 0) {
+    tvx -= along * fwx * (1 - REVERSE_SCALE);
+    tvy -= along * fwy * (1 - REVERSE_SCALE);
+  }
 
   // Cinematic fly-through (cinematic.js transit): the jet follows a scripted point, no dashing.
   const auto = p.auto;
@@ -216,13 +233,19 @@ export function updatePlayer(p, dt) {
     p.vx = damp(p.vx, tvx, 26, dt);
     p.vy = damp(p.vy, tvy, 26, dt);
   } else {
-    // A little thrust: the ship spools up to speed (~0.18s) but brakes and turns hard, so it carries without drifting.
-    // Braking = the wanted velocity is slower than, or turned away from, the current one. Same for keys, mouse and touch.
+    // Thrust: spools up (~0.3s), glides when input is released, brakes hard only when reversing against the current motion.
     const v2 = p.vx * p.vx + p.vy * p.vy;
-    const rate = tvx * p.vx + tvy * p.vy < v2 ? (c.mode === 'target' ? 26 : 22) : 13;
+    const tv2 = tvx * tvx + tvy * tvy;
+    const target = c.mode === 'target';
+    let rate;
+    if (tv2 < 400) rate = target ? 9 : RATE_COAST; // no input: slide to a stop
+    else if (tvx * p.vx + tvy * p.vy < v2 * 0.2) rate = target ? 26 : RATE_TURN; // reversing: bite hard
+    else rate = target ? 13 : (tvx * fwx + tvy * fwy) > 0 ? RATE_THRUST : RATE_SIDE;
     p.vx = damp(p.vx, tvx, rate, dt);
     p.vy = damp(p.vy, tvy, rate, dt);
   }
+  // Backdrop rush: forward speed pushes the stars and grid (visual only; bg.boost drives obstacle speed).
+  if (!field.ow && !auto) bg.pushT = Math.max(0, p.vx * fwx + p.vy * fwy) / 340 * PUSH_MAX - Math.max(0, -(p.vx * fwx + p.vy * fwy)) / 340 * 0.15;
   if (p.charges < p.maxCharges) {
     p.rechargeT += dt;
     if (p.rechargeT >= st.dashRecharge) {
@@ -240,8 +263,8 @@ export function updatePlayer(p, dt) {
   p.y = clamp(p.y, b.top, b.bottom);
   // Pointer steering: carry the target along with a dash so the ship stays where it dashed to.
   if (dashing && c.mode === 'target' && c.shift) c.shift(p.x - px, p.y - py);
-  p.bank = damp(p.bank, clamp(p.vx / 380, -1, 1), 12, dt);
-  p.pitch = damp(p.pitch, clamp(-p.vy / 380, -1, 1), 12, dt); // nose-forward stretch when climbing
+  p.bank = damp(p.bank, clamp(p.vx / 340, -1, 1), 12, dt);
+  p.pitch = damp(p.pitch, clamp(-p.vy / 340, -1, 1), 12, dt); // nose-forward stretch when climbing
 
   for (const g of p.ghosts) {
     g.life -= dt;

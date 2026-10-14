@@ -364,6 +364,8 @@ export const bg = {
   t: 0,
   scroll: 0,
   boost: 1,
+  push: 0, // visual-only extra scroll from the ship's forward speed (smoothed)
+  pushT: 0, // target for push, set by the player each frame
   stars: [],
   rush: [], // speed lines: faint at cruise and kept to the side lanes, raking the whole field when boosting
   nebula: [],
@@ -429,10 +431,13 @@ export const bg = {
     this.boost = damp(this.boost, boost, boost > this.boost ? 7 : 2.2, dt); // kicks in fast, coasts down
     this.dark = damp(this.dark, this.darkTarget, 2.5, dt);
     this.t += dt;
-    this.scroll += dt * 0.78 * this.boost;
+    this.push = damp(this.push, this.pushT, 5, dt);
+    this.pushT = 0; // the player re-asserts it every frame
+    const rush = this.boost * (1 + this.push);
+    this.scroll += dt * 0.78 * rush;
     this.updateField(dt);
     for (const s of this.stars) {
-      s.y += (s.speed * this.boost * dt) / view.H;
+      s.y += (s.speed * rush * dt) / view.H;
       if (s.y > 1) {
         s.y -= 1;
         s.x = Math.random();
