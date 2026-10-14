@@ -984,12 +984,14 @@ function toTitle(slam = false, demo = true) {
 }
 
 // Boot intro (src/game/intro.js): plays on a fresh attract world, then lands on the title with the logo slam.
-function playIntro() {
+// attract: the PRESS START idle loop (one press ends it).
+function playIntro(attract = false) {
   ui.hide();
   pauseBtn.hidden = true;
   touchUi.hidden = true;
   comms.clear();
   bootIntro.start({
+    attract,
     setup: () => newWorld('attract', curShip()),
     done: () => {
       profile.seenIntro = true;
@@ -1009,7 +1011,7 @@ function showPressStart(instant = false) {
   G.screen = 'press';
   music.setSet('normal');
   music.setDuck(1);
-  pressStart.start({ instant, done: () => toTitle(true, false) });
+  pressStart.start({ instant, done: () => toTitle(true, false), idle: () => playIntro(true) });
 }
 
 // --- UI handlers ---------------------------------------------------------------------
