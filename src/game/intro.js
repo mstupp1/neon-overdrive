@@ -4,7 +4,8 @@
 // Everything on the field is the live engine (attract mode: immortal ship, director waves); this module only scripts
 // the ship (G.scriptCtrl), draws the squadron and the aura, and drives the #intro text overlay.
 // Skipping: Esc / Back skips at once; any other key, click or tap arms a "press again" prompt (that first press also
-// unlocks audio, so the rest plays with sound) and a second press skips.
+// unlocks audio, so the rest plays with sound) and a second press skips. As the PRESS START attract loop (attract: true)
+// any single press ends it.
 
 import { G, view } from './state.js';
 import { S, glow } from '../render/sprites.js';
@@ -65,7 +66,7 @@ function dom() {
 function press(hard) {
   if (!s || s.done) return;
   if (s.t < 0.25) return; // the key that opened a replay from Settings
-  if (hard || s.armT > 0) return finish(true);
+  if (hard || s.attract || s.armT > 0) return finish(true);
   s.armT = 2.6;
   parts.skip.classList.add('armed');
   startMusic();
@@ -104,10 +105,10 @@ function ctrl() {
 }
 
 // Starts the intro. setup() builds a fresh attract world and returns nothing; done() goes to the title.
-function start({ setup, done }) {
+function start({ setup, done, attract = false }) {
   dom();
   setup();
-  s = { t: 0, done: false, armT: 0, cues: new Map(), dashed: {}, ult: false, chain: [], music: false, onDone: done, dark: 1, squad: [] };
+  s = { t: 0, done: false, armT: 0, cues: new Map(), dashed: {}, ult: false, chain: [], music: false, onDone: done, dark: 1, squad: [], attract };
   G.screen = 'intro';
   G.scriptCtrl = ctrl;
   setSfxMuted(false);
@@ -136,7 +137,7 @@ function start({ setup, done }) {
   el.classList.remove('out');
   parts.skip.classList.remove('armed');
   const touch = input.isTouchDevice && input.device !== 'keyboard';
-  parts.skip.querySelector('.soft').textContent = touch ? 'TAP TO SKIP' : 'PRESS ANY KEY TO SKIP';
+  parts.skip.querySelector('.soft').textContent = attract ? (touch ? 'TAP TO START' : 'PRESS START') : touch ? 'TAP TO SKIP' : 'PRESS ANY KEY TO SKIP';
   parts.skip.querySelector('.hard').textContent = touch ? 'TAP AGAIN TO SKIP' : 'PRESS AGAIN TO SKIP';
   for (const k of ['kicker', 'cap', 'mag', 'name']) parts[k].classList.remove('on', 'signal');
   startMusic();

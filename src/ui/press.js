@@ -2,13 +2,15 @@
 // The whole sequence is CSS keyframes keyed off one class (.play), so nothing restyles per frame; this module only
 // tracks when PRESS START is ready and listens for presses.
 // A press during the sequence jumps to PRESS START; a press there starts the game and hands over to the title menu.
-// Any key, click / tap or gamepad button counts.
+// Any key, click / tap or gamepad button counts. Left idle on PRESS START, it calls onIdle (the boot intro plays as an
+// attract loop and comes back here).
 
 import { input } from '../core/input.js';
 import { sfx } from '../core/audio.js';
 
 const READY = 2.7; // seconds until PRESS START shows (matches the CSS delays)
 const GO = 0.45; // fast-blink after the press, before the menu opens
+const IDLE = 25; // seconds on PRESS START before the attract loop
 
 let el = null;
 let s = null; // { t, ready, go, padHeld, onDone }
@@ -42,9 +44,9 @@ export const pressStart = {
     return !!s;
   },
   // done() opens the title menu. instant: skip the sequence (the boot intro already ended on the logo).
-  start({ done, instant = false }) {
+  start({ done, idle = null, instant = false }) {
     dom();
-    s = { t: 0, ready: false, go: -1, padHeld: true, onDone: done };
+    s = { t: 0, ready: false, idle: 0, go: -1, padHeld: true, onDone: done, onIdle: idle };
     el.classList.remove('play', 'done', 'go', 'out');
     el.hidden = false;
     void el.offsetWidth; // restart the keyframes
@@ -66,6 +68,12 @@ export const pressStart = {
     const held = input.device === 'pad' && input.anyHeld();
     if (held && !s.padHeld) press();
     s.padHeld = held;
+    if (s.ready && s.go < 0 && s.onIdle && (s.idle += dt) >= IDLE) {
+      const idle = s.onIdle;
+      s = null;
+      el.hidden = true;
+      return idle();
+    }
     if (s.go >= 0 && (s.go += dt) >= GO) {
       const done = s.onDone;
       s = null;
