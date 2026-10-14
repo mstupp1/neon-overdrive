@@ -5,7 +5,7 @@
 // play(lines, { blocking, onDone }) runs onDone exactly once (also when skipped or cleared). clear() drops silently.
 
 import { input } from '../core/input.js';
-import { S } from '../render/sprites.js';
+import { portraitArtwork } from './portraits.js';
 import { sfx } from '../core/audio.js';
 import { SPEAKERS } from '../game/story.js';
 import { activeClass } from '../game/pilot.js';
@@ -16,7 +16,6 @@ const LOCK = 0.3; // blocking: ignore input briefly so the press that opened the
 
 let el = null;
 let face = null;
-let fctx = null;
 let nameEl = null;
 let lineEl = null;
 let hintEl = null;
@@ -26,7 +25,6 @@ function init() {
   if (el) return;
   el = document.getElementById('comms');
   face = el.querySelector('.comms-face');
-  fctx = face.getContext('2d');
   nameEl = el.querySelector('.comms-name');
   lineEl = el.querySelector('.comms-line');
   hintEl = el.querySelector('.comms-hint');
@@ -42,9 +40,10 @@ function showLine() {
   el.style.setProperty('--c', col);
   el.classList.toggle('glitchy', !!sp.glitch);
   nameEl.textContent = sp.name;
-  fctx.clearRect(0, 0, face.width, face.height);
-  const spr = S[sp.portrait];
-  if (spr) fctx.drawImage(spr.img, 0, 0, face.width, face.height);
+  const portrait = portraitArtwork(sp.portrait.replace('portrait_', ''), 256);
+  portrait.classList.add('comms-face');
+  face.replaceWith(portrait);
+  face = portrait;
   q.chars = 0;
   q.shown = -1;
   q.hold = 0;

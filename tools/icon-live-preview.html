@@ -2,19 +2,21 @@
 <html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NEON OVERDRIVE · Live item artwork</title>
 <style>*{box-sizing:border-box}body{margin:0;display:flex;height:100vh;background:#080b18;color:#b6cedb;font:14px system-ui}aside{width:240px;flex-shrink:0;padding:24px;overflow:auto}h1{font-size:20px;color:#5ddbe3}p{line-height:1.6}button{display:block;width:100%;margin:10px 0;padding:12px;background:#172238;color:#b9e8ee;border:1px solid #375270;cursor:pointer}button:disabled{opacity:.4}iframe{border:0;flex:1;min-width:0;height:100vh}a{color:#5ddbe3}output{display:block;margin-top:20px;font:12px monospace}</style>
-<aside><h1>Item artwork</h1><p>Live menus and overworld. All preview changes use an in-memory copy of your save.</p><button data-action="draft" disabled>Upgrade draft</button><button data-action="pilot" disabled>Pilot abilities</button><button data-action="hangar" disabled>Gear inventory</button><button data-action="map" disabled>Overworld map</button><p><a href="icon-ui-preview.html">Full menu catalog</a><br><a href="icon-preview.html">Export contact sheet</a></p><output id="status">Loading game…</output></aside>
+<aside><h1>Item artwork</h1><p>Live menus and overworld. All preview changes use an in-memory copy of your save.</p><button data-action="draft" disabled>Upgrade draft</button><button data-action="pilot" disabled>Pilot abilities</button><button data-action="hangar" disabled>Gear inventory</button><button data-action="map" disabled>Overworld map</button><button data-action="comms" disabled>Character dialogue</button><button id="pixel-look" disabled>Toggle pixel look</button><p><a href="icon-ui-preview.html">Full menu catalog</a><br><a href="icon-preview.html">Export contact sheet</a></p><output id="status">Loading game…</output></aside>
 <iframe title="Live game artwork preview"></iframe>
 <script type="module">
 const frame=document.querySelector('iframe');
 const response=await fetch('../index.html');const html=await response.text();const root=new URL('../',location.href).href;const storage=new URL('background-preview-storage.js',location.href).href;
 frame.srcdoc=html.replace('<head>',`<head><base href="${root}"><script src="${storage}"><`+'/script>');
 const ready=setInterval(()=>{if(!frame.contentWindow.NEON)return;clearInterval(ready);document.querySelectorAll('button').forEach(b=>b.disabled=false);document.querySelector('#status').textContent='Ready';},100);
-for(const button of document.querySelectorAll('button'))button.addEventListener('click',()=>{
+document.querySelector('#pixel-look').addEventListener('click',()=>{const N=frame.contentWindow.NEON;N.profile.settings.retro=N.profile.settings.retro==='off'?'pixel':'off';});
+for(const button of document.querySelectorAll('[data-action]'))button.addEventListener('click',()=>{
  const N=frame.contentWindow.NEON;N.profile.settings.story=false;N.profile.settings.music=0;N.profile.settings.sfx=0;N.skipIntro();N.comms.skipAll();
  if(button.dataset.action==='draft'){N.startRun('vector');N.G.player.god=true;N.openDraft('sector');}
  if(button.dataset.action==='pilot'){N.grant({rankXp:10000});for(const id of ['engineer','ghost'])N.findClass(id);N.comms.skipAll();N.openPilot();}
  if(button.dataset.action==='hangar'){if(!N.gear().length){N.giveGear('core',2,6,'glass');N.giveGear('plating',3,6,'aegisPlate');N.giveGear('thrusters',2,6,'afterburner');}N.openHangar();}
  if(button.dataset.action==='map'){N.launch(1);N.G.player.god=true;N.skip();if(N.overworld.state){for(const exit of N.overworld.state.exits)exit.seen=true;if(!N.overworld.mapOpen)N.overworld.toggleMap();}}
+ if(button.dataset.action==='comms')N.comms.play([{who:'MAG',text:'Neural link stable. Choose your route, pilot.'},{who:'ECHO',text:'Ready. Keep the channel open.'},{who:'SIGNAL',text:'ACCESS DENIED. THIS GATE IS CLOSED.'}]);
  document.querySelector('#status').textContent=N.G.screen;
 });
 </script></html>

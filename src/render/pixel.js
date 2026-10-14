@@ -10,6 +10,7 @@
 // receiving pointer input. No WebGL → the setting is a no-op.
 
 import { profile } from '../core/storage.js';
+import { setPixelIconsEnabled } from '../ui/asset-icons.js';
 
 export const PIXEL_W = 360; // target virtual pixels across (the playfield is 450 units wide: ~1.25 units per pixel)
 
@@ -89,16 +90,14 @@ function makeTex(gl, filter) {
 
 // Pixel faces registered under the game's own family names, so every menu, button and HUD label switches without
 // touching the stylesheet: a FontFace added later wins over the @font-face rules with the same descriptors.
-// Silkscreen stands in for Orbitron (titles, buttons, numbers), Pixelify Sans for Rajdhani (body text).
+// Pixelify Sans stands in for Orbitron (titles and buttons). Rajdhani stays readable for body text.
 let pixelFaces = null;
 function retroFonts(on) {
   if (!document.fonts || typeof FontFace === 'undefined') return;
   if (!pixelFaces) {
     const url = (f) => `url(${new URL(`../fonts/${f}`, import.meta.url)}) format('woff2')`;
     pixelFaces = [
-      new FontFace('Orbitron', url('silkscreen-400.woff2'), { weight: '100 599', sizeAdjust: '88%' }),
-      new FontFace('Orbitron', url('silkscreen-700.woff2'), { weight: '600 1000', sizeAdjust: '88%' }),
-      new FontFace('Rajdhani', url('pixelify-sans.woff2'), { weight: '100 1000', sizeAdjust: '92%' }),
+      new FontFace('Orbitron', url('pixelify-sans.woff2'), { weight: '100 1000' }),
     ];
   }
   for (const f of pixelFaces) {
@@ -210,6 +209,7 @@ export const pixel = {
       this.mode = mode;
       changed = true;
       document.body.classList.toggle('retro-pixel', mode !== 'off');
+      setPixelIconsEnabled(mode !== 'off');
       retroFonts(mode !== 'off');
     }
     if (mode === 'off' || !lowH) return changed;

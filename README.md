@@ -252,6 +252,8 @@ Generated gameplay icons live in `src/assets/icons/` (upgrades, pilots, items an
 
 Serve the repository and open `/tools/icon-preview.html` to inspect exported artwork at several sizes, or `/tools/icon-ui-preview.html` to check the actual game definitions in production card styles and compare original glyphs. `/tools/icon-live-preview.html` opens real drafts, pilots, gear and the overworld map. Both game previews use in-memory storage.
 
+Pixel mode keeps menu image icons at 48×48, hangar ship previews at 64×64, and character portraits at 96×96. Headings and buttons use Pixelify Sans; reading text retains Rajdhani. The live artwork preview includes a mode toggle and character dialogue. Generated ECHO, MAG and SIGNAL portrait masters and prompts live in `art/portraits/`; runtime PNGs live in `src/assets/portraits/`. Run `node --test tools/test_menu_art.mjs` to check preview sizing and portrait fallbacks.
+
 Use the imagegen skill for individual transparent assets, following `art/icons/brief.md`. Export 256px RGBA runtime PNGs; keep labels and rarity frames in the UI. Run `node --test tools/test_icon_images.mjs` for Canvas loading and fallback checks.
 
 ## Performance notes

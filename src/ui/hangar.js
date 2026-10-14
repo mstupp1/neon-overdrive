@@ -7,6 +7,7 @@ import { G } from '../game/state.js';
 import { profile, saveProfile } from '../core/storage.js';
 import { sfx } from '../core/audio.js';
 import { S } from '../render/sprites.js';
+import { menuArtwork } from './menu-art.js';
 import { SHIPS, ownsShip, paintsFor, activePaint } from '../game/ships.js';
 import { SLOTS, SLOT_INFO, SLOT_CAP, TAGS, gearDef, gearByUid, gearInSlot, equippedParts, equippedOn, itemName, itemLines, itemTags, sellValue, itemScore } from '../game/parts.js';
 import { RARITY, rarityOdds } from '../game/rarity.js';
@@ -81,12 +82,9 @@ function renderStats(ship, owned) {
 }
 
 function shipArt(ship, owned) {
-  const cv = document.createElement('canvas');
-  cv.width = 112;
-  cv.height = 112;
-  cv.getContext('2d').drawImage(S['ship_' + ship.id].img, 0, 0, 112, 112);
-  if (!owned) cv.className = 'dim';
-  return cv;
+  const art = menuArtwork(S['ship_' + ship.id].img, 112, 64);
+  if (!owned) art.classList.add('dim');
+  return art;
 }
 
 // Rebuilds the main hangar screen.

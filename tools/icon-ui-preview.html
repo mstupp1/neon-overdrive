@@ -2,10 +2,10 @@
 <html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NEON OVERDRIVE · Icon integration</title>
 <link rel="stylesheet" href="../src/fonts/fonts.css"><link rel="stylesheet" href="../src/style.css"><link rel="stylesheet" href="../src/gallery.css">
-<style>html,body{height:auto;overflow:auto;touch-action:auto}body{display:block}main{max-width:1080px;margin:auto;padding:32px 24px}h1{font:22px Orbitron,sans-serif}h2{margin-top:32px;font:16px Orbitron,sans-serif;color:var(--cyan)}.preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px}.preview-grid .card{width:100%;min-height:92px;margin:0}.preview-grid .card-icon{flex-shrink:0}.preview-note{color:var(--dim)}a{color:var(--cyan)}</style>
+<style>html,body{height:auto;overflow:auto;touch-action:auto}body{display:block}main{max-width:1080px;margin:auto;padding:32px 24px}h1{font:22px Orbitron,sans-serif}h2{margin-top:32px;font:16px Orbitron,sans-serif;color:var(--cyan)}.preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px}.preview-grid .card{width:100%;min-height:92px;margin:0;opacity:1;transform:none}.preview-grid .card-icon{flex-shrink:0}.preview-note{color:var(--dim)}a{color:var(--cyan)}</style>
 <script src="background-preview-storage.js"></script>
-<style>body.original .asset-icon>img{display:none}body.original .asset-icon-fallback{display:contents}#compare{padding:8px 14px;background:#102432;border:1px solid #285369;color:var(--cyan);cursor:pointer}</style>
-<main><h1>Item artwork / Menu integration</h1><p class="preview-note">The game's actual icon definitions and card styles. Preview changes stay in memory.</p><button id="compare" aria-pressed="false">Show original glyphs</button><p id="coverage"></p><div id="catalog"></div><p><a href="icon-preview.html">Export contact sheet</a> · <a href="../index.html">Game</a></p></main>
+<style>body.original .asset-icon>img,body.original.retro-pixel .asset-icon>.asset-icon-pixel{display:none}body.original .asset-icon-fallback{display:contents}#compare,#pixel{padding:8px 14px;background:#102432;border:1px solid #285369;color:var(--cyan);cursor:pointer}</style>
+<main><h1>Item artwork / Menu integration</h1><p class="preview-note">The game's actual icon definitions and card styles. Preview changes stay in memory.</p><button id="compare" aria-pressed="false">Show original glyphs</button> <button id="pixel" aria-pressed="false">Pixel look OFF</button><p id="coverage"></p><div id="catalog"></div><p><a href="icon-preview.html">Export contact sheet</a> · <a href="../index.html">Game</a></p></main>
 <script type="module">
 import { ICONS, UPGRADES, CAT_COLORS } from '../src/game/upgrades.js';
 import { CLASSES } from '../src/game/pilot.js';
@@ -14,6 +14,7 @@ import { RELICS, CAPSULE_ICON } from '../src/game/collectables.js';
 import { CORE } from '../src/game/core.js';
 import { ECON_ICONS } from '../src/game/economy.js';
 import { NODE_ICONS } from '../src/ui/meta.js';
+import { setPixelIconsEnabled } from '../src/ui/asset-icons.js';
 const groups=[
  ['Upgrades & modules',Object.entries(ICONS).map(([id,icon])=>({id,name:UPGRADES.find(x=>x.id===id)?.name||id,icon,color:CAT_COLORS[UPGRADES.find(x=>x.id===id)?.cat]||'#3ff6ff'}))],
  ['Pilots & passives',CLASSES.flatMap(c=>[c,...c.passives])],
@@ -22,6 +23,7 @@ const groups=[
  ['Shop & dock',Object.entries(ECON_ICONS).map(([id,icon])=>({id,name:id,icon}))]
 ];
 document.querySelector('#compare').addEventListener('click',event=>{const original=document.body.classList.toggle('original');event.currentTarget.textContent=original?'Show generated artwork':'Show original glyphs';event.currentTarget.setAttribute('aria-pressed',String(original));});
+document.querySelector('#pixel').addEventListener('click',event=>{const on=document.body.classList.toggle('retro-pixel');setPixelIconsEnabled(on);event.currentTarget.textContent=`Pixel look ${on?'ON':'OFF'}`;event.currentTarget.setAttribute('aria-pressed',String(on));});
 let count=0;
 for(const [name,entries] of groups){const h=document.createElement('h2');h.textContent=`${name} / ${entries.length}`;document.querySelector('#catalog').append(h);const grid=document.createElement('div');grid.className='preview-grid';
  for(const entry of entries){const card=document.createElement('div');card.className='card';card.style.setProperty('--c',entry.color||'#3ff6ff');card.innerHTML=`<div class="card-icon">${entry.icon}</div><div><div class="card-top"><span class="card-name"></span></div><div class="card-desc"></div></div>`;card.querySelector('.card-name').textContent=entry.name;card.querySelector('.card-desc').textContent=entry.id;grid.append(card);count++;}

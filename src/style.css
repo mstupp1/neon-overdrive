@@ -1854,13 +1854,13 @@ input[type='range']::-moz-range-thumb {
     box-shadow: 0 0 1.2em color-mix(in srgb, var(--c) 18%, transparent);
 }
 
-.hs-art canvas {
+.hs-art .menu-art {
     width: 4.6em;
     height: 4.6em;
     display: block;
 }
 
-.hs-art canvas.dim {
+.hs-art .menu-art.dim {
     filter: grayscale(1) brightness(0.55);
 }
 
@@ -2210,7 +2210,7 @@ input[type='range']::-moz-range-thumb {
     box-shadow: 0 0 1.2em color-mix(in srgb, var(--c) 18%, transparent);
 }
 
-.pl-art canvas {
+.pl-art .menu-art {
     width: 4em;
     height: 4em;
     display: block;
@@ -5048,8 +5048,18 @@ input[type='range']::-moz-range-thumb {
     object-fit: contain;
 }
 .asset-icon-fallback { display: none; }
+.asset-icon-pixel { display: none; }
+.retro-pixel .asset-icon-pixel-ready > img { display: none; }
+.retro-pixel .asset-icon-pixel-ready > .asset-icon-pixel {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    image-rendering: pixelated;
+}
 .asset-icon-fallback > svg { display: block; width: 100%; height: 100%; }
-.asset-icon-missing > img { display: none; }
+.asset-icon-missing > img,
+.retro-pixel .asset-icon-missing > .asset-icon-pixel { display: none; }
 .asset-icon-missing > .asset-icon-fallback { display: contents; }
 
 
@@ -5068,16 +5078,30 @@ input[type='range']::-moz-range-thumb {
     :is(.card, .cls-tab, .ab-tile):is(:hover, .focus) :is(.card-icon, .cls-ico, .ab-icon) > .asset-icon { transform: none; }
 }
 
-/* Pixel-snapped menus (Pixel look on; .px-snap screens). pixel.js sets --vpx = one virtual pixel of the game's pixel
-   grid and --dpx = one device pixel, both in CSS px. Lines are whole virtual pixels thick, glows are hard rings instead
-   of blur, and on high-DPI screens the pixel fonts round to sizes where every font pixel is a whole device pixel
-   (Silkscreen: 8 font pixels per em at 88% size-adjust; Pixelify Sans: ~11 at 92%). 1x screens keep their sizes: the
-   nearest whole size there is a third too big or too small. */
+/* Menu previews switch resolution with the look, including already-open menus. */
+.menu-art { display: block; }
+.menu-art > canvas { display: block; width: 100%; height: 100%; }
+.menu-art > .menu-art-pixel { display: none; }
+.retro-pixel .menu-art > .menu-art-original { display: none; }
+.retro-pixel .menu-art > .menu-art-pixel { display: block; image-rendering: pixelated; }
+
+/* Keep pixel headings compact, and leave reading text in the normal body face. */
+.retro-pixel :is(.screen-title, .btn, .card-name, .cls-tab b, .hs-info h4, .pl-info h4, .ad-name, .gd-title b, .comms-name) {
+    letter-spacing: 0.04em;
+}
+.retro-pixel :is(.card-desc, .hs-info p, .pl-desc, .ad-art + div p, .gd-desc, .comms-line) {
+    line-height: 1.35;
+}
+.retro-pixel :is(.hs-stats b, .run-stats b, .pl-xp, .pl-rank, .gd-stats b) {
+    font-family: Rajdhani, 'Segoe UI', system-ui, sans-serif;
+}
+
+/* Pixel-snapped menus. --vpx and --dpx are virtual and device pixels in CSS units.
+   Pixelify headings use their native size; body text keeps the ordinary responsive sizing. */
 .retro-pixel .px-snap {
     --ring: 0 0 0 var(--vpx) rgba(63, 246, 255, 0.3), 0 0 0 calc(var(--vpx) * 2) rgba(63, 246, 255, 0.1);
     --ring-dim: 0 0 0 var(--vpx) rgba(63, 246, 255, 0.14);
-    --ob: calc(var(--dpx) * 9.0909); /* Silkscreen size per device pixel per font pixel */
-    --rj: calc(var(--dpx) * 12); /* Pixelify Sans, near enough */
+    --ob: calc(var(--dpx) * 11); /* Pixelify Sans size per device pixel per font pixel */
 }
 
 .retro-pixel .px-snap .screen-title {
@@ -5156,18 +5180,6 @@ input[type='range']::-moz-range-thumb {
     font-size: round(nearest, 1em, var(--ob));
 }
 
-.px-hidpi.retro-pixel .px-snap .set-row {
-    font-size: round(nearest, 1.1em, var(--rj));
-}
-
 .px-hidpi.retro-pixel .px-snap .set-row b {
     font-size: max(var(--ob), round(nearest, 0.85em, var(--ob)));
-}
-
-.px-hidpi.retro-pixel .px-snap .run-stats div {
-    font-size: round(nearest, 0.8em, var(--rj));
-}
-
-.px-hidpi.retro-pixel .px-snap .run-stats b {
-    font-size: round(nearest, 1.4em, var(--ob));
 }

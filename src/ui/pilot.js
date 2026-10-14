@@ -4,7 +4,7 @@
 import { G } from '../game/state.js';
 import { profile } from '../core/storage.js';
 import { sfx } from '../core/audio.js';
-import { S } from '../render/sprites.js';
+import { portraitArtwork } from './portraits.js';
 import { rankFor } from '../game/economy.js';
 import { CLASSES, classById, activeClass, classUnlocked, passiveUnlocked, passiveFound, equippedPassives, setClass, togglePassive, abilitySlots, rarityCap, rankForRarity, nextSlotRank } from '../game/pilot.js';
 import { RARITY } from '../game/rarity.js';
@@ -18,11 +18,7 @@ const lockSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 const fmt = (n) => Math.floor(n).toLocaleString();
 
 function portrait() {
-  const cv = document.createElement('canvas');
-  cv.width = 160;
-  cv.height = 160;
-  cv.getContext('2d').drawImage(S.portrait_echo.img, 0, 0, 160, 160);
-  return cv;
+  return portraitArtwork('echo');
 }
 
 function render() {
