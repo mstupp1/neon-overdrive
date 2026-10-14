@@ -427,6 +427,11 @@ function showCampaign(focusId) {
 // Between nodes the run is in the system's overworld (src/game/overworld.js): fly to a lit beacon to pick the next node.
 function showRoute() {
   const r = G.run;
+  // Open a new run in its first fight; free flight begins after that node.
+  if (r.sectors === 0 && r.row === -1) {
+    const first = reachableNodes(r.route, r.nodeId).find(isFight);
+    if (first) return pickRouteNode(first);
+  }
   ui.hide();
   sv.reset(); // the overworld is always top-down
   overworld.enter(r);
@@ -1520,7 +1525,7 @@ window.NEON = {
     return e;
   },
   rollDraft: (kind = 'level') => rollDraft(G.player, kind),
-  // Start a campaign run (1 = the normal start; a later 1-based index or system id starts there, debug); lands on the route screen.
+  // Start a campaign run (1 = the normal start; a later 1-based index or system id starts there, debug); enters the first fight.
   // The intro dialogue is skipped (still marked seen) unless opts.story is true.
   // The sector intro animation is skipped too unless opts.intro is true.
   launch(sys = 1, opts = {}) {
