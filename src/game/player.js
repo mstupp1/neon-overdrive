@@ -395,6 +395,7 @@ const ultOf = (p) => CLASSES.find((x) => x.id === p.cls).ult;
 // Shared ult meter logic; the class-specific effect lives in pilot.js (castUlt). A cast spends up to ULT_LEVELS banked
 // cells and fires at that level; each spent cell may be kept (st.ultSave). Partial progress toward the next cell stays.
 export function activateOverdrive(p) {
+  if (p.dead || p.odT > 0) return;
   const lv = ultCastLevel(p);
   if (lv < 1) return;
   let kept = 0;
@@ -429,7 +430,8 @@ export function addScore(base) {
 export function gainOverdrive(amount) {
   const p = G.player;
   if (!p || p.odT > 0 || p.dead) return;
-  p.od = Math.min(ultCap(p), p.od + amount * p.st.odGain);
+  // Slower baseline for kills, grazes, cells and passive charge; build bonuses still multiply it.
+  p.od = Math.min(ultCap(p), p.od + amount * 0.5 * p.st.odGain);
 }
 
 export function onEnemyKilled(e) {

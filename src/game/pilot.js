@@ -26,7 +26,7 @@ import { assetIcon } from '../ui/asset-icons.js';
 const svg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 
 // --- Ult levels -------------------------------------------------------------------------------
-// One cell = a third of the old full meter, so level 3 charges exactly as fast as the old ultimate did.
+// One cell = a third of a full meter; combat charge pacing lives in player.js gainOverdrive.
 const DOME_R = 85;
 export const ULT_CELL = 100 / 3;
 export const ULT_LEVELS = 3; // a cast spends at most this many cells

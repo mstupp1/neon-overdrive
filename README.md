@@ -111,7 +111,7 @@ Open **PILOT** on the campaign map to pick a class and equip **2 passives**. Ran
 
 Each class's Common ability (Killstreak, Salvager, Wide Graze) comes with the class and starts equipped.
 
-**Ultimate levels.** The ult gauge banks **cells** (ring segments). A full set of 3 takes as long as the old full meter. Pressing ult spends up to 3 cells and fires at that level: LV1 is a quick, short panic button, LV3 is the full ultimate. Partial progress toward the next cell is kept. **Reserve Cell** (level-up card) banks up to 2 more cells, shown in white, for a quick follow-up cast (5 max). **Cell Recycler** (card), the Overdrive gear modifier and the Surge Capacitor tree notable give a chance that each spent cell is saved (50% max). Level 2 runs for 75% of the ult duration and level 1 runs for 50%.
+**Ultimate levels.** The ult gauge banks **cells** (ring segments). Pressing ult spends up to 3 cells and fires at that level: LV1 is a quick, short panic button, LV3 is the full ultimate. Partial progress toward the next cell is kept. Charge from kills, grazes, pickups and passive generation pauses while an ultimate is active and resumes once it ends. Cell pickups are still consumed during an active ultimate but give no charge; avoid them if you want to collect them after it ends. Routine charge gains are halved, before build bonuses, so a cell pickup gives 15 meter points at the base rate. **Reserve Cell** (level-up card) banks up to 2 more cells, shown in white, for a quick follow-up cast (5 max). **Cell Recycler** (card), the Overdrive gear modifier and the Surge Capacitor tree notable give a chance that each spent cell is saved (50% max). Level 2 runs for 75% of the ult duration and level 1 runs for 50%.
 
 ### Passive tree
 
