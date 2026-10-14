@@ -42,13 +42,9 @@ function syncLocks(locks, rerolls) {
 const DRAFT_HOLD_MS = 500;
 let draftHold = null;
 
-function updateHoldVisual(card, progress, isHolding) {
+function updateHoldVisual(card, progress) {
   if (!card) return;
   card.style.setProperty('--hold', progress);
-  const pill = card.querySelector('.card-hold-pill');
-  if (pill) {
-    pill.textContent = isHolding ? (progress >= 1 ? 'CONFIRMED' : 'HOLDING...') : 'HOLD TO SELECT';
-  }
 }
 
 function startDraftHold(card, id, onPick, source, pointerId = null) {
@@ -70,7 +66,7 @@ function startDraftHold(card, id, onPick, source, pointerId = null) {
     completed: false,
   };
   card.classList.add('holding');
-  updateHoldVisual(card, 0, true);
+  updateHoldVisual(card, 0);
 }
 
 function cancelDraftHold() {
@@ -78,7 +74,7 @@ function cancelDraftHold() {
   if (!draftHold.completed) {
     if (draftHold.sound) draftHold.sound.stop();
     draftHold.card.classList.remove('holding');
-    updateHoldVisual(draftHold.card, 0, false);
+    updateHoldVisual(draftHold.card, 0);
   }
   draftHold = null;
 }
@@ -91,7 +87,7 @@ function completeDraftHold() {
   card.dataset.picked = 'true';
   card.classList.remove('holding');
   card.classList.add('hold-complete');
-  updateHoldVisual(card, 1, false);
+  updateHoldVisual(card, 1);
   sfx.select();
   draftHold = null;
   onPick(id);
@@ -276,7 +272,7 @@ export const ui = {
         if (draftHold && !draftHold.completed) {
           const elapsed = performance.now() - draftHold.startTime;
           const progress = Math.min(1, Math.max(0, elapsed / DRAFT_HOLD_MS));
-          updateHoldVisual(draftHold.card, progress, true);
+          updateHoldVisual(draftHold.card, progress);
           if (progress >= 1) completeDraftHold();
         }
       } else if (draftHold) {
@@ -311,7 +307,7 @@ export const ui = {
     }[kind] || ['LEVEL UP', '#fff', ''];
     $('#draft-title').textContent = T[0];
     $('#draft-title').style.color = T[1];
-    $('#draft-sub').textContent = note ? `${T[2]} · ${note}` : T[2];
+    $('#draft-sub').textContent = `${note ? `${T[2]} · ${note} · ` : `${T[2]} · `}HOLD TO PICK`;
     renderPaths($('#draft-paths'), player, fx);
     cancelDraftHold();
     const wrap = $('#draft-cards');
@@ -345,7 +341,7 @@ export const ui = {
         ? `<div class="card-rar"><b>${RARITY[info.r].name}</b>${info.levels > 1 ? `<span>+${info.levels} LEVELS</span>` : ''}${pn}</div><div class="card-mods">${info.mods.map((m) => `<i>${m}</i>`).join('')}</div>`
         : pn ? `<div class="card-rar plain">${pn}</div>` : '';
       const flag = fresh ? `<span class="card-flag disc">${STAR}NEW DISCOVERY</span>` : runNew ? '<span class="card-flag run">NEW THIS RUN</span>' : '';
-      b.innerHTML = `${flag}<div class="card-hold-wash"></div><div class="card-icon">${info.icon}</div><div><div class="card-top"><span class="card-name">${info.name}</span><span class="card-tag">${tag}</span><span class="card-hold-pill">HOLD TO SELECT</span></div><div class="card-desc">${info.desc}</div>${rar}${pips ? `<div class="pips">${pips}</div>` : ''}</div>${input.device === 'touch' ? '' : `<kbd>${i + 1}</kbd>`}<span class="card-lock" title="Lock: keep this card through a reroll">${LOCK_SVG}</span><span class="card-sel"></span><div class="card-hold-track"><div class="card-hold-bar"></div></div>`;
+      b.innerHTML = `${flag}<div class="card-hold-wash"></div><div class="card-icon">${info.icon}</div><div><div class="card-top"><span class="card-name">${info.name}</span><span class="card-tag">${tag}</span><span class="card-hold-cue" title="Hold to pick" aria-hidden="true"></span></div><div class="card-desc">${info.desc}</div>${rar}${pips ? `<div class="pips">${pips}</div>` : ''}</div>${input.device === 'touch' ? '' : `<kbd>${i + 1}</kbd>`}<span class="card-lock" title="Lock: keep this card through a reroll">${LOCK_SVG}</span><span class="card-sel"></span><div class="card-hold-track"><div class="card-hold-bar"></div></div>`;
       b.querySelector('.card-lock').addEventListener('click', (e) => {
         e.stopPropagation();
         if (onLock && onLock(i)) syncLocks(locks, rerolls);

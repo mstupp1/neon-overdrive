@@ -4496,45 +4496,46 @@ input[type='range']::-moz-range-thumb {
     box-shadow: 0 0 0.6em var(--rc, var(--c, var(--cyan))), 0 0 1.2em var(--rc, var(--c, var(--cyan)));
 }
 
-.card-hold-pill {
+.card-hold-cue {
+    position: relative;
+    flex: 0 0 1.05em;
+    width: 1.05em;
+    height: 1.05em;
     margin-left: auto;
-    font-family: Orbitron, sans-serif;
-    font-size: 0.62em;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    padding: 0.15em 0.55em;
-    border-radius: 1em;
-    color: rgba(233, 244, 255, 0.45);
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 50%;
+    background: conic-gradient(var(--rc, var(--c)) calc(var(--hold, 0) * 1turn), rgba(233, 244, 255, 0.18) 0);
     pointer-events: none;
     opacity: 0;
-    transform: translateY(2px);
-    transition: opacity 0.15s, transform 0.15s, color 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
-    white-space: nowrap;
+    transition: opacity 0.15s, filter 0.15s;
 }
 
-#draft-cards .card.focus .card-hold-pill,
-#draft-cards .card:hover .card-hold-pill,
-#draft-cards.no-keys .card .card-hold-pill {
-    opacity: 0.85;
-    transform: translateY(0);
+.card-hold-cue::after {
+    content: '';
+    position: absolute;
+    inset: 0.25em;
+    border-radius: 50%;
+    background: rgba(233, 244, 255, 0.5);
+    transition: background 0.15s, transform 0.15s;
 }
 
-#draft-cards .card.focus .card-hold-pill {
-    color: var(--cyan);
-    background: rgba(63, 246, 255, 0.12);
-    border-color: rgba(63, 246, 255, 0.45);
-    box-shadow: 0 0 0.5em rgba(63, 246, 255, 0.2);
-}
-
-#draft-cards .card.holding .card-hold-pill {
+#draft-cards .card.focus .card-hold-cue,
+#draft-cards .card:hover .card-hold-cue,
+#draft-cards.no-keys .card .card-hold-cue {
     opacity: 1;
-    color: #05030d;
+}
+
+#draft-cards .card.focus .card-hold-cue::after {
+    background: var(--cyan);
+}
+
+#draft-cards .card.holding .card-hold-cue {
+    opacity: 1;
+    filter: drop-shadow(0 0 0.45em var(--rc, var(--c, var(--cyan))));
+}
+
+#draft-cards .card.holding .card-hold-cue::after {
     background: var(--rc, var(--c, var(--cyan)));
-    border-color: var(--rc, var(--c, var(--cyan)));
-    box-shadow: 0 0 0.9em var(--rc, var(--c, var(--cyan)));
-    transform: scale(1.05);
+    transform: scale(0.8);
 }
 
 #draft-cards .card.holding {
