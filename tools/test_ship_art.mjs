@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { cannonMount, posedShipPoint, worldShipMount } from '../src/render/shipMounts.js';
+import { cannonMount, posedShipPoint, worldShipMount, ROLL_PERSPECTIVE } from '../src/render/shipMounts.js';
 import { withShipImages, shipSpriteForView, SHIP_ART } from '../src/render/shipImages.js';
 import { SHIPS, weaponStreams } from '../src/game/ships.js';
 import { shipPaint } from '../src/render/shipPaint.js';
@@ -71,8 +71,17 @@ test('all eight pulse levels fire every stream from a physical cannon', () => {
 });
 
 test('barrel points follow banking, pitch and arbitrary free-flight headings', () => {
-  assert.deepEqual(posedShipPoint([-4, -12], 1, 1), [-2.88, -12.72]);
-  const point = posedShipPoint([-4, -12], 1, 1, 0);
+  // Full right bank: the left (rising) wing foreshortens across but grows toward the overhead camera.
+  const rolled = posedShipPoint([-4, -12], 1, 1);
+  close(rolled[0], -4 * Math.cos(0.6)); close(rolled[1], -12 * (1 + 4 * Math.sin(0.6) * ROLL_PERSPECTIVE) * 1.06);
+  const dipping = posedShipPoint([4, -12], 1, 0);
+  assert.ok(Math.abs(dipping[1]) < 12 && Math.abs(posedShipPoint([-4, -12], 1, 0)[1]) > 12);
+  // Side view: diving (bank > 0 moves down the screen) turns the nose clockwise, i.e. down on screen.
+  const nose = posedShipPoint([0, -30], 1, 0, null, 'side');
+  assert.ok(nose[0] > 0); close(Math.hypot(...nose), 30);
+  // Pursuit keeps the old boolean flag working.
+  assert.deepEqual(posedShipPoint([3, -9], 0.5, 0.2, null, true), posedShipPoint([3, -9], 0.5, 0.2, null, 'chase'));
+  const point = posedShipPoint([-4, -12], 0, 0, 0);
   close(point[0], 12); close(point[1], -4);
   const p = { x: 120, y: 300, bank: 0, pitch: 0, aim: Math.PI / 3 };
   const world = worldShipMount(mounts[0], p, 'top', true);

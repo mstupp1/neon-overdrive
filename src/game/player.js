@@ -3,9 +3,9 @@
 import { G, view, field } from './state.js';
 import { S, glow, flame } from '../render/sprites.js';
 import { SHIP_ENGINES } from '../render/shipArt.js';
-import { shipSpriteForView } from '../render/shipImages.js';
-import { cannonMount, worldShipMount } from '../render/shipMounts.js';
-import { clamp, damp, rand, TAU } from '../core/math.js';
+import { shipSpriteForView, drawPosedHull } from '../render/shipImages.js';
+import { cannonMount, worldShipMount, shipPoseLocal, SIDE_TILT } from '../render/shipMounts.js';
+import { clamp, damp, rand, TAU, wrapAngle } from '../core/math.js';
 import { WEAPONS, weaponStreams, weaponDamageScale, activePaint } from './ships.js';
 import { equippedParts, itemTags } from './parts.js';
 import { profile } from '../core/storage.js';
@@ -266,8 +266,20 @@ export function updatePlayer(p, dt) {
   p.y = clamp(p.y, b.top, b.bottom);
   // Pointer steering: carry the target along with a dash so the ship stays where it dashed to.
   if (dashing && c.mode === 'target' && c.shift) c.shift(p.x - px, p.y - py);
-  p.bank = damp(p.bank, clamp(p.vx / 340, -1, 1), 12, dt);
-  p.pitch = damp(p.pitch, clamp(-p.vy / 340, -1, 1), 12, dt); // nose-forward stretch when climbing
+  // Bank and pitch read the motion in the ship's own frame: sideways speed banks, speed along the nose pitches.
+  // In free flight the hull banks into the curve of its flight path, as a plane does, and half as much into a
+  // sideways slide while strafing a target.
+  let side = p.vx, fwd = -p.vy, curve = 0;
+  if (field.ow) {
+    const c = Math.cos(p.aim), sn = Math.sin(p.aim);
+    side = (-p.vx * sn + p.vy * c) * 0.5;
+    fwd = p.vx * c + p.vy * sn;
+    const speed = Math.hypot(p.vx, p.vy), heading = Math.atan2(p.vy, p.vx);
+    if (dt > 0 && speed > 40 && p.pathPrev !== undefined) curve = (wrapAngle(heading - p.pathPrev) / dt) * Math.min(1, speed / 220);
+    p.pathPrev = speed > 40 ? heading : undefined;
+  } else p.pathPrev = undefined;
+  p.bank = damp(p.bank, clamp(side / 340 + curve * 0.35, -1, 1), 12, dt);
+  p.pitch = damp(p.pitch, clamp(fwd / 340, -1, 1), 12, dt); // nose-forward stretch when climbing
 
   for (const g of p.ghosts) {
     g.life -= dt;
@@ -641,7 +653,7 @@ export function gainXp(p, v) {
 }
 
 // Engine flames in ship space (under the hull sprite): longer when climbing or dashing, flickering per nozzle.
-function drawFlames(ctx, p, alpha, od, sprite) {
+function drawFlames(ctx, p, alpha, od, sprite, pose) {
   const eng = sprite.engines || SHIP_ENGINES[p.ship.id];
   if (!eng) return;
   const fl = flame(od ? p.ucol : p.color);
@@ -650,7 +662,8 @@ function drawFlames(ctx, p, alpha, od, sprite) {
   const len = (0.9 + push * 0.7) * (p.dashT > 0 ? 1.7 : 1) * (od ? 1.25 : 1) * boostLen(p);
   ctx.globalCompositeOperation = 'lighter';
   for (let i = 0; i < eng.length; i++) {
-    const [x, y, w] = eng[i];
+    const [x, y] = pose(eng[i]);
+    const w = eng[i][2];
     const flick = 0.85 + 0.15 * Math.sin(G.time * 53 + i * 2.1) + 0.08 * Math.sin(G.time * 97 + i);
     const h = w * 3.4 * len * flick;
     ctx.globalAlpha = alpha * 0.95;
@@ -718,25 +731,27 @@ export function drawPlayer(ctx, k) {
   if (p.iframes > 0 && p.dashT <= 0 && Math.floor(G.time * 20) % 2 === 0) alpha = 0.35;
   if (ph) alpha = 0.5 + Math.sin(G.time * 14) * 0.12;
   ctx.globalAlpha = alpha;
-  if (field.ow) {
-    // Free flight: the sprite turns to the facing (it points up at aim -90 degrees).
-    const a = p.aim + Math.PI / 2;
-    const c = Math.cos(a) * k;
-    const sn = Math.sin(a) * k;
-    ctx.setTransform(c, sn, -sn, c, p.x * k + view.ox, p.y * k + view.oy);
-  } else {
-    const sx = 1 - Math.abs(p.bank) * 0.28;
-    const sy = 1 + p.pitch * 0.06;
-    ctx.setTransform(k * sx, 0, 0, k * sy, p.x * k + view.ox, p.y * k + view.oy); // (chase: stageview.js tilts it)
-  }
-  drawFlames(ctx, p, alpha, od, spr);
-  ctx.drawImage(spr.img, -spr.half, -spr.half, spr.size, spr.size);
+  // Ship space, posed for movement (shipMounts.js): free flight turns to the facing, the side view pitches the
+  // nose, the chase view's roll comes from stageview's cutout tilt, and top-down rolls the hull in drawPosedHull.
+  const mode = field.ow ? 'top' : sv.mode;
+  let rot = 0;
+  if (field.ow) rot = p.aim + Math.PI / 2; // the sprite points up at aim -90 degrees
+  else if (mode === 'side') rot = p.bank * SIDE_TILT;
+  const c = Math.cos(rot) * k;
+  const sn = Math.sin(rot) * k;
+  ctx.setTransform(c, sn, -sn, c, p.x * k + view.ox, p.y * k + view.oy);
+  const pose = mode === 'side' ? ([x, y]) => [x, y * (1 + p.pitch * 0.04)] : (pt) => shipPoseLocal(pt, p.bank, p.pitch, mode);
+  drawFlames(ctx, p, alpha, od, spr, pose);
+  drawPosedHull(ctx, spr, p.bank, p.pitch, mode, alpha);
   if (p.ship.weapon === 'charge' && G.mode !== 'attract' && spr.muzzles) {
     const t = Math.max(0, Math.min(1, 1 - p.fireT / WEAPONS.charge.interval));
     const orb = glow(p.bulletColor, 64), size = 8 + t * 26;
     ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = alpha * (0.25 + t * 0.55);
-    for (const [x, y] of spr.muzzles) ctx.drawImage(orb.img, x - size / 2, y - size / 2, size, size);
+    for (const m of spr.muzzles) {
+      const [x, y] = pose(m);
+      ctx.drawImage(orb.img, x - size / 2, y - size / 2, size, size);
+    }
     ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = alpha;
   }
@@ -744,7 +759,8 @@ export function drawPlayer(ctx, k) {
     ctx.globalCompositeOperation = 'lighter';
     const muzzle = glow(boosted(p) ? '#ffd23f' : p.bulletColor, 32);
     const core = glow('#ffffff', 32);
-    for (const [x, y] of spr.muzzles) {
+    for (const m of spr.muzzles) {
+      const [x, y] = pose(m);
       ctx.globalAlpha = alpha * 0.75;
       ctx.drawImage(muzzle.img, x - 5, y - 5, 10, 10);
       ctx.drawImage(core.img, x - 2, y - 2, 4, 4);

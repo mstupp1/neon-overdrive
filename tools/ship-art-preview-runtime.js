@@ -36,7 +36,7 @@ window.addEventListener('message', async event => {
         const offset = streams[i][0];
         const mounts = sprite.muzzles;
         const mount = mounts[offset < 0 ? 0 : offset > 0 ? mounts.length - 1 : i % mounts.length];
-        const point = posedShipPoint(mount, p.bank, p.pitch, null, mode === 'chase');
+        const point = posedShipPoint(mount, p.bank, p.pitch, null, mode);
         const b = G.pBullets[i];
         let error;
         if (mode === 'chase') {
