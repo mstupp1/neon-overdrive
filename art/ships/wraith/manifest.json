@@ -1,0 +1,120 @@
+{
+  "subject": "WRAITH",
+  "method": "built-in imagegen",
+  "style_guide": "art/STYLE.md",
+  "reference": "art/ships/vector/sources/top-v1.png (style only); art/ships/references/procedural-fleet.jpg (silhouette guidance for WRAITH)",
+  "export": {
+    "tool": "tools/ship_assets.py",
+    "size": [
+      256,
+      256
+    ],
+    "mode": "RGBA",
+    "resampling": "Lanczos",
+    "padding": "center, preserve aspect ratio"
+  },
+  "assets": [
+    {
+      "view": "top",
+      "camera": "Orthographic directly overhead; nose up",
+      "source": "art/ships/wraith/sources/top-v1.png",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "source_sha256": "e17864a60bfd036d357d65600de17202270463a7d461395a3a70ba09a191d035",
+      "prompt": "art/ships/wraith/prompts/top.txt",
+      "input_reference": "art/ships/vector/sources/top-v1.png (style only)",
+      "runtime": "src/assets/ships/wraith/top-v1.png",
+      "runtime_sha256": "3efa9907854e0a3bda647152e09da973cc4c543bc0ea617e50e5b16b0a1f132e",
+      "source_muzzle_pixels": [
+        [
+          371,
+          368
+        ],
+        [
+          653,
+          368
+        ]
+      ],
+      "source_engine_pixels": [
+        [
+          370,
+          1414
+        ],
+        [
+          660,
+          1414
+        ]
+      ]
+    },
+    {
+      "view": "side",
+      "camera": "Near-horizontal side elevation; slight dorsal reveal; nose right",
+      "source": "art/ships/wraith/sources/side-v1.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "source_sha256": "35664ddd85cc119578c222bdb43fe9f10690e7eef8e56bce8f83fc946a7e62e7",
+      "prompt": "art/ships/wraith/prompts/side.txt",
+      "input_reference": "art/ships/wraith/sources/top-v1.png; art/ships/vector/sources/top-v1.png (style only)",
+      "runtime": "src/assets/ships/wraith/side-v1.png",
+      "runtime_sha256": "19d33c3ac17dc0200d162244b9055b53b792849be78c3188a1deb5e3b4dee560",
+      "source_muzzle_pixels": [
+        [
+          1432,
+          352
+        ],
+        [
+          1432,
+          550
+        ]
+      ],
+      "source_engine_pixels": [
+        [
+          147,
+          352
+        ],
+        [
+          147,
+          550
+        ]
+      ]
+    },
+    {
+      "view": "pursuit",
+      "camera": "Centered low rear pursuit; visible engine faces and foreshortened nose",
+      "source": "art/ships/wraith/sources/pursuit-v1.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "source_sha256": "fa677548ca4014e0f735c548081d0bbd5b0495f3074c98e9146e15b8662fe489",
+      "prompt": "art/ships/wraith/prompts/pursuit.txt",
+      "input_reference": "art/ships/wraith/sources/side-v1.png; art/ships/vector/sources/top-v1.png (style only)",
+      "runtime": "src/assets/ships/wraith/pursuit-v1.png",
+      "runtime_sha256": "fac19dcf4c5bce04b0bfd943b9f196dc45e1fabf4eb2c50b86e734b983e2a14b",
+      "source_muzzle_pixels": [
+        [
+          875,
+          138
+        ],
+        [
+          900,
+          138
+        ]
+      ],
+      "source_engine_pixels": [
+        [
+          464,
+          600
+        ],
+        [
+          1312,
+          600
+        ]
+      ]
+    }
+  ]
+}

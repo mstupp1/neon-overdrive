@@ -1,0 +1,140 @@
+{
+  "subject": "MONOLITH",
+  "method": "built-in imagegen",
+  "style_guide": "art/STYLE.md",
+  "reference": "art/ships/vector/sources/top-v1.png",
+  "reference_sha256": "f2c2564e878485c04b19522de9fb6317a485ddeeb4560fd410d7a01e217c8e3a",
+  "export": {
+    "tool": "tools/ship_assets.py",
+    "size": [
+      256,
+      256
+    ],
+    "mode": "RGBA",
+    "resampling": "Lanczos",
+    "padding": "center, preserve aspect ratio",
+    "margin": 8
+  },
+  "assets": [
+    {
+      "view": "top",
+      "camera": "Orthographic directly overhead; nose up",
+      "source": "art/ships/monolith/sources/top-v1.png",
+      "source_size": [
+        1254,
+        1254
+      ],
+      "source_sha256": "affaafbf3c59a8f3490850070a9554138333f7d6398907536aa71e564badb1e3",
+      "prompt": "art/ships/monolith/prompts/top-v1.txt",
+      "input_reference": "art/ships/vector/sources/top-v1.png",
+      "runtime": "src/assets/ships/monolith/top-v2.png",
+      "runtime_sha256": "8705c82ebb7311ca9f4211bbf4e9b38c054013c91db780eb0b321c324ba0acf9",
+      "source_muzzle_pixels": [
+        [
+          627,
+          27
+        ]
+      ],
+      "source_engine_pixels": [
+        [
+          455,
+          1190
+        ],
+        [
+          627,
+          1190
+        ],
+        [
+          799,
+          1190
+        ]
+      ],
+      "content_box": [
+        8,
+        8,
+        240,
+        240
+      ]
+    },
+    {
+      "view": "side",
+      "camera": "Near-horizontal side elevation; slight dorsal reveal; nose right",
+      "source": "art/ships/monolith/sources/side-v1.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "source_sha256": "404509a47ece055a84541a30db1f573654087999f57e6ee15a27df28056b7694",
+      "prompt": "art/ships/monolith/prompts/side-v1.txt",
+      "input_reference": "art/ships/monolith/sources/top-v1.png",
+      "runtime": "src/assets/ships/monolith/side-v2.png",
+      "runtime_sha256": "84fb9c5e39f8350b3c0380b9c440f5e51e92adf86b5b1a3d50b6c5df3c73af14",
+      "source_muzzle_pixels": [
+        [
+          1700,
+          445
+        ]
+      ],
+      "source_engine_pixels": [
+        [
+          94,
+          265
+        ],
+        [
+          94,
+          445
+        ],
+        [
+          94,
+          625
+        ]
+      ],
+      "content_box": [
+        8,
+        68,
+        240,
+        120
+      ]
+    },
+    {
+      "view": "pursuit",
+      "camera": "Low rear-facing pursuit; foreshortened hull, rear engines toward viewer",
+      "source": "art/ships/monolith/sources/pursuit-v1.png",
+      "source_size": [
+        1860,
+        846
+      ],
+      "source_sha256": "35178d3d77f212f1cd08a9a2e06e1ce45b98603694c83791a70f842b30b7cdcc",
+      "prompt": "art/ships/monolith/prompts/pursuit-v1.txt",
+      "input_reference": "art/ships/monolith/sources/top-v1.png",
+      "runtime": "src/assets/ships/monolith/pursuit-v2.png",
+      "runtime_sha256": "3f5815037afaaec7de23ba18ff2d282ef84fa4b8fa6a2b8ac68a9881d2807d9b",
+      "source_muzzle_pixels": [
+        [
+          930,
+          60
+        ]
+      ],
+      "source_engine_pixels": [
+        [
+          455,
+          700
+        ],
+        [
+          930,
+          700
+        ],
+        [
+          1405,
+          700
+        ]
+      ],
+      "content_box": [
+        8,
+        73,
+        240,
+        109
+      ]
+    }
+  ]
+}

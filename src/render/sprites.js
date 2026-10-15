@@ -4,6 +4,7 @@
 import { TAU } from '../core/math.js';
 import { withAlpha, poly, regular, glowStroke, shade } from './ink.js';
 import { drawShip } from './shipArt.js';
+import { withShipImages } from './shipImages.js';
 import { buildEnemyArt } from './enemyArt.js';
 import { shotStyle, superKi, moduleShot, withTrail } from './shots.js';
 
@@ -168,7 +169,7 @@ export function glintSpr(color) {
 
 // Ship art lives in shipArt.js (layered parts, weapons, seams, engines, canopy) and bakes from one paint colour.
 function shipSprite(id, color) {
-  return makeSprite(64, (g) => drawShip(g, id, color), false, 3);
+  return withShipImages(id, color, makeSprite(64, (g) => drawShip(g, id, color), false, 3));
 }
 
 // --- Build all sprites --------------------------------------------------------

@@ -1,0 +1,10 @@
+Use case: stylized-concept.
+Asset type: production transparent player spaceship sprite for the browser neon arcade shooter NEON OVERDRIVE.
+Primary request: Create the TOP-DOWN view of VECTOR, the starter all-rounder fighter. This is one single isolated ship, not a sheet or a presentation.
+Design identity: sleek small symmetric twin-engine fighter, narrow long needle-like pointed nose, central tapered fuselage, compact dark cyan glass canopy forward of center, small paired forward canards, swept delta wings broadening toward the rear, one forward-firing pulse cannon on each outer wing, two separate rectangular engine nacelles close to the fuselage at the rear. Overall length slightly greater than wingspan, about 46:39. No huge vertical tail or extra wings.
+Style: polished hand-painted sci-fi game sprite with dimensional metallic gunmetal armor, pale silver highlights and vivid electric cyan (#3ff6ff) illuminated panel seams and edges. Strong clean silhouette, medium broad panels, restrained microdetail; readable when hull is only 46 pixels tall. Match a dark cyberpunk neon arcade game. Cyan should be prominent, with bright canopy and edge highlights but real dark metal surfaces.
+Camera: exact orthographic directly overhead dorsal view, no visible side faces, no perspective, no yaw or roll. Nose exactly toward TOP of image, twin exhausts toward BOTTOM. Bilateral symmetry.
+Framing: square canvas, ship centered with entire silhouette visible and at least 12% empty margin on every side. Ship hull occupies about 74% of image height.
+Background: truly transparent alpha, no scenery, no floor, no cast shadow.
+Lighting: soft top lighting, restrained baked cyan edge glow only close to hull. Engines have luminous cyan nozzles but NO exhaust flames or trails; flames are animated separately in game.
+Constraints: ONE ship only. No text, symbols, lettering, logos, watermark, frame, guides or labels. Do not include any other view. Do not include projectiles. Preserve clear empty alpha around ship.

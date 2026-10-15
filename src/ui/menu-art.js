@@ -1,6 +1,6 @@
 // Menu artwork keeps both resolutions ready, so the CSS mode switch is instant.
 // This is separate from gameplay sprites: changing the menu look never changes combat art.
-export function menuArtwork(source, fullSize, pixelSize, fallback = source) {
+export function menuArtwork(source, fullSize, pixelSize, fallback = source, ready = null) {
   const wrapper = document.createElement('span');
   wrapper.className = 'menu-art';
   wrapper.setAttribute('aria-hidden', 'true');
@@ -28,5 +28,6 @@ export function menuArtwork(source, fullSize, pixelSize, fallback = source) {
     paint(fallback);
     source.addEventListener('load', () => paint(source), { once: true });
   } else paint(source);
+  if (ready) ready.then(image => { if (image) paint(image); });
   return wrapper;
 }

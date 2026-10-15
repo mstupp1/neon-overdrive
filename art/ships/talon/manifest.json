@@ -1,0 +1,113 @@
+{
+  "subject": "TALON",
+  "method": "built-in imagegen",
+  "style_guide": "art/STYLE.md",
+  "reference": "art/ships/vector/sources/top-v1.png (style only); art/ships/references/procedural-fleet.jpg (silhouette guidance for WRAITH)",
+  "export": {
+    "tool": "tools/ship_assets.py",
+    "size": [
+      256,
+      256
+    ],
+    "mode": "RGBA",
+    "resampling": "Lanczos",
+    "padding": "center, preserve aspect ratio"
+  },
+  "assets": [
+    {
+      "view": "top",
+      "camera": "Orthographic directly overhead; nose up",
+      "source": "art/ships/talon/sources/top-v1.png",
+      "source_size": [
+        1256,
+        1256
+      ],
+      "source_sha256": "f1ac91ceab8f86d3eaef436e7fdf0ee7b161c3864f0e5b51b2012ad853d11890",
+      "prompt": "art/ships/talon/prompts/top.txt",
+      "input_reference": "art/ships/vector/sources/top-v1.png (style only)",
+      "runtime": "src/assets/ships/talon/top-v1.png",
+      "runtime_sha256": "57e70063d7edf83565b19c30d81e9ed4e974c0f476d200a15878819fe72234b3",
+      "source_muzzle_pixels": [
+        [
+          627,
+          34
+        ]
+      ],
+      "source_engine_pixels": [
+        [
+          572,
+          1164
+        ],
+        [
+          683,
+          1164
+        ]
+      ]
+    },
+    {
+      "view": "side",
+      "camera": "Near-horizontal side elevation; slight dorsal reveal; nose right",
+      "source": "art/ships/talon/sources/side-v1.png",
+      "source_size": [
+        2124,
+        740
+      ],
+      "source_sha256": "7f76c44bfec3767b6b5421e55f5c62fb727e498758e85f84e5b1404268b9d69d",
+      "prompt": "art/ships/talon/prompts/side.txt",
+      "input_reference": "art/ships/talon/sources/top-v1.png; art/ships/vector/sources/top-v1.png (style only)",
+      "runtime": "src/assets/ships/talon/side-v1.png",
+      "runtime_sha256": "f8ecd0bb515a50e34c9c462456c682fab4b231ee4dcf8723819a2b6611f37240",
+      "source_muzzle_pixels": [
+        [
+          1980,
+          410
+        ]
+      ],
+      "source_engine_pixels": [
+        [
+          167,
+          344
+        ],
+        [
+          167,
+          448
+        ]
+      ]
+    },
+    {
+      "view": "pursuit",
+      "camera": "Centered low rear pursuit; visible engine faces and foreshortened nose",
+      "source": "art/ships/talon/sources/pursuit-v1.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "source_sha256": "9f1164b93cc2d941a649185ceab48a21db5e99e248008f1b6a7db20134d23da0",
+      "prompt": "art/ships/talon/prompts/pursuit.txt",
+      "input_reference": "art/ships/talon/sources/side-v1.png; art/ships/vector/sources/top-v1.png (style only)",
+      "runtime": "src/assets/ships/talon/pursuit-v1.png",
+      "runtime_sha256": "22cb4533a1eceaa3b788cda9ef9c0497ad9add474a499b260e1d4691d159384f",
+      "source_muzzle_pixels": [
+        [
+          770,
+          35
+        ]
+      ],
+      "source_engine_pixels": [
+        [
+          640,
+          850
+        ],
+        [
+          895,
+          850
+        ]
+      ]
+    }
+  ],
+  "source_padding": {
+    "source": "art/ships/talon/sources/top-generated-v1.png",
+    "operation": "centered on transparent canvas with one-pixel clear padding on every edge; original pixels preserved",
+    "source_sha256": "7a74b72d6e3ac676a23c7da91c6529c2907029d72212aee82a70fb38601dc7b3"
+  }
+}

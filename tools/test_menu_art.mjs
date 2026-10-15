@@ -56,3 +56,24 @@ test('unavailable portrait artwork keeps a visible fallback', () => {
     for (const canvas of art.children) assert.equal(canvas.calls.at(-1)[1], fallback);
   });
 });
+
+test('late generated ship baking refreshes both menu resolutions after the fallback', async () => {
+  const previous = globalThis.document;
+  let release;
+  const ready = new Promise(resolve => { release = resolve; });
+  try {
+    globalThis.document = { createElement() {
+      const element = { children: [], calls: [], setAttribute() {}, append(...nodes) { this.children.push(...nodes); },
+        getContext() { return { clearRect: (...args) => this.calls.push(['clear', ...args]), drawImage: (...args) => this.calls.push(['draw', ...args]) }; } };
+      return element;
+    } };
+    const fallback = { width: 192, height: 192 }, baked = { width: 192, height: 192 };
+    const art = menuArtwork(fallback, 112, 64, fallback, ready);
+    assert.equal(art.children[0].calls.at(-1)[1], fallback);
+    release(baked); await ready; await Promise.resolve();
+    for (const canvas of art.children) {
+      assert.deepEqual(canvas.calls.at(-2), ['clear', 0, 0, canvas.width, canvas.height]);
+      assert.equal(canvas.calls.at(-1)[1], baked);
+    }
+  } finally { globalThis.document = previous; }
+});

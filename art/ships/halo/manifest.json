@@ -1,0 +1,54 @@
+{
+  "subject": "HALO",
+  "method": "built-in imagegen",
+  "style_guide": "art/STYLE.md",
+  "design_reference": "art/ships/references/procedural-fleet.jpg",
+  "export": {
+    "tool": "tools/ship_assets.py",
+    "size": [256, 256],
+    "mode": "RGBA",
+    "resampling": "Lanczos",
+    "padding": "center, preserve aspect ratio"
+  },
+  "assets": [
+    {
+      "view": "top",
+      "camera": "Orthographic directly overhead; nose up",
+      "source": "art/ships/halo/sources/top-v1.png",
+      "source_size": [1254, 1254],
+      "source_sha256": "a2af7a6900e86940ce213e3a677d6b4d673c2592e84de30197c455f6676e106e",
+      "prompt": "art/ships/halo/prompts/top.txt",
+      "input_reference": "art/ships/references/procedural-fleet.jpg",
+      "runtime": "src/assets/ships/halo/top-v1.png",
+      "runtime_sha256": "2e50a0b8538051b4a1602ce45b2b0f78e38ceb437e094d5b7deec446e9a793ca",
+      "source_muzzle_pixels": [[545, 301], [708, 301]],
+      "source_engine_pixels": [[570, 960], [703, 960]]
+    },
+    {
+      "view": "side",
+      "camera": "Near-horizontal side elevation, about 10 degrees above wing plane; nose right",
+      "source": "art/ships/halo/sources/side-v1.png",
+      "source_size": [1254, 1254],
+      "source_sha256": "4a085bca1dbe219cfd2780302e6d72aab996badc4e94c80a63d66b8589c11977",
+      "prompt": "art/ships/halo/prompts/side.txt",
+      "input_reference": "art/ships/halo/sources/top-v1.png",
+      "runtime": "src/assets/ships/halo/side-v1.png",
+      "runtime_sha256": "a137970f6c120e98c06a3c27cf274258d8336d6b274a4eda8a6942f04b82c26c",
+      "source_muzzle_pixels": [[965, 638], [965, 682]],
+      "source_engine_pixels": [[118, 565], [118, 654]]
+    },
+    {
+      "view": "pursuit",
+      "camera": "Centered rear view, 15 degree dorsal reveal, wide low hull, engine apertures facing viewer, drone rail foreshortened into an attached arc",
+      "source": "art/ships/halo/sources/pursuit-v1.png",
+      "source_size": [1254, 1254],
+      "source_sha256": "b8fe790cc3c31fd5c837f5f3a09257924c5c333a68544124617e157ab4a9714a",
+      "prompt": "art/ships/halo/prompts/pursuit.txt",
+      "input_reference": "art/ships/halo/sources/top-v1.png",
+      "runtime": "src/assets/ships/halo/pursuit-v1.png",
+      "runtime_sha256": "5e8c47fffb4f44d09b26cc2157ca4a4cc50f31cd40830ffea58b810762662a34",
+      "source_muzzle_pixels": [[546, 435], [708, 435]],
+      "source_engine_pixels": [[535, 880], [723, 880]]
+    }
+  ]
+}

@@ -69,6 +69,7 @@ gameplay tests.
 
 - Music changes: follow [music-pipeline](.agents/skills/music-pipeline/SKILL.md).
 - Background changes: follow [neon-background-assets](.agents/skills/neon-background-assets/SKILL.md).
+- Ships, portraits and item artwork: follow [neon-game-art](.agents/skills/neon-game-art/SKILL.md) and the [shared art guide](art/STYLE.md).
 - Other artwork: see [README artwork guidance](README.md#item-artwork-workflow).
 - Keep this guide short and limited to durable working instructions.
   Put feature explanations in the README and implementation details near the

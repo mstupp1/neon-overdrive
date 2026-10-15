@@ -1,0 +1,121 @@
+{
+  "subject": "VECTOR",
+  "method": "built-in imagegen",
+  "style_guide": "art/STYLE.md",
+  "reference": "art/ships/vector/sources/top-initial.png",
+  "reference_sha256": "1daf6d2536e688eca395b9cd04faddf9e86d7c3b2a403146fa8d5b65e6b4fbf5",
+  "export": {
+    "tool": "tools/ship_assets.py",
+    "size": [
+      256,
+      256
+    ],
+    "mode": "RGBA",
+    "resampling": "Lanczos",
+    "padding": "center, preserve aspect ratio"
+  },
+  "assets": [
+    {
+      "view": "top",
+      "camera": "Orthographic directly overhead; nose up",
+      "source": "art/ships/vector/sources/top-v1.png",
+      "source_size": [
+        1254,
+        1254
+      ],
+      "source_sha256": "f2c2564e878485c04b19522de9fb6317a485ddeeb4560fd410d7a01e217c8e3a",
+      "prompt": "art/ships/vector/prompts/top-aligned.txt",
+      "input_reference": "art/ships/vector/sources/top-initial.png",
+      "runtime": "src/assets/ships/vector/top-v1.png",
+      "runtime_sha256": "f65eb211b3a095c85becc59987076333844edd557c441cddea07faa1145f0b03",
+      "source_muzzle_pixels": [
+        [
+          554,
+          232
+        ],
+        [
+          699,
+          230
+        ]
+      ],
+      "source_engine_pixels": [
+        [
+          507,
+          1140
+        ],
+        [
+          739,
+          1140
+        ]
+      ]
+    },
+    {
+      "view": "side",
+      "camera": "Near-horizontal side elevation; slight dorsal reveal; nose right",
+      "source": "art/ships/vector/sources/side-v1.png",
+      "source_size": [
+        1254,
+        1254
+      ],
+      "source_sha256": "6136c47e9a56c84df737dc7161039d9f055a2ba00b2d849dbeed926166e05e15",
+      "prompt": "art/ships/vector/prompts/side.txt",
+      "input_reference": "art/ships/vector/sources/top-v1.png",
+      "runtime": "src/assets/ships/vector/side-v1.png",
+      "runtime_sha256": "913b58d56759364b848c6fb655a378e607e5ec45169d97f366432bb3deb242c6",
+      "source_muzzle_pixels": [
+        [
+          896,
+          575
+        ],
+        [
+          949,
+          660
+        ]
+      ],
+      "source_engine_pixels": [
+        [
+          86,
+          590
+        ],
+        [
+          86,
+          700
+        ]
+      ]
+    },
+    {
+      "view": "pursuit",
+      "camera": "Centered elevated rear view; wide foreshortened wings; engines toward viewer",
+      "source": "art/ships/vector/sources/pursuit-v1.png",
+      "source_size": [
+        1254,
+        1254
+      ],
+      "source_sha256": "2f370f75c14fcb7053baa945a3b4343845edcd6ddab67a5920a62c25a478ea07",
+      "prompt": "art/ships/vector/prompts/pursuit.txt",
+      "input_reference": "art/ships/vector/sources/top-v1.png",
+      "runtime": "src/assets/ships/vector/pursuit-v1.png",
+      "runtime_sha256": "3ad1e19b125f3e0fe4be5c624580a93bc9b345eaaab28aad18a20ebb6e7af164",
+      "source_muzzle_pixels": [
+        [
+          558,
+          487
+        ],
+        [
+          696,
+          487
+        ]
+      ],
+      "source_engine_pixels": [
+        [
+          495,
+          912
+        ],
+        [
+          760,
+          912
+        ]
+      ]
+    }
+  ]
+}

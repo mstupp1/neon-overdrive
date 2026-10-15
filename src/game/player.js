@@ -3,6 +3,8 @@
 import { G, view, field } from './state.js';
 import { S, glow, flame } from '../render/sprites.js';
 import { SHIP_ENGINES } from '../render/shipArt.js';
+import { shipSpriteForView } from '../render/shipImages.js';
+import { cannonMount, worldShipMount } from '../render/shipMounts.js';
 import { clamp, damp, rand, TAU } from '../core/math.js';
 import { WEAPONS, weaponStreams, weaponDamageScale, activePaint } from './ships.js';
 import { equippedParts, itemTags } from './parts.js';
@@ -44,6 +46,7 @@ export function createPlayer(ship, gear = true) {
   const p = {
     ship,
     color: activePaint(profile, ship).color,
+    bulletColor: activePaint(profile, ship).bullet,
     parts: gear ? equippedParts(profile, ship.id) : [],
     fluxCore: gear ? { ...profile.core } : null, // Flux Core levels (core.js)
     x: view.W / 2,
@@ -376,6 +379,16 @@ export function updatePlayer(p, dt) {
   if (st.perpetual && p.odT <= 0) gainOverdrive(st.perpetual * dt); // Perpetual Engine
 }
 
+// Pursuit hulls stand above the projected flight plane. Invert the camera at the
+// visible barrel tip so the shot starts on that tip rather than behind the hull.
+function primaryMuzzle(p, ox, index, c, sn) {
+  const sprite = shipSpriteForView(S['ship_' + p.ship.id], field.ow ? 'top' : sv.mode);
+  const mount = cannonMount(sprite.muzzles, ox, index);
+  if (!mount) return { x: p.x + ox * c + 12 * sn, y: p.y + ox * sn - 12 * c };
+  const chaseFrame = !field.ow && sv.mode === 'chase' ? cine.camera() : null;
+  return worldShipMount(mount, p, sv.mode, field.ow, sv, chaseFrame);
+}
+
 function firePrimary(p, w) {
   const lv = p.st.mainLv;
   const streams = weaponStreams(p.ship.weapon, lv);
@@ -388,8 +401,9 @@ function firePrimary(p, w) {
   const c = Math.cos(p.aim + Math.PI / 2);
   const sn = Math.sin(p.aim + Math.PI / 2);
   const wn = field.ow ? [c, sn] : null;
-  for (const [ox, a, ph] of streams) {
-    playerBullet(p.x + ox * c + 12 * sn, p.y + ox * sn - 12 * c, p.aim + a, w.speed, dmg, spr, {
+  for (const [index, [ox, a, ph]] of streams.entries()) {
+    const muzzle = primaryMuzzle(p, ox, index, c, sn);
+    playerBullet(muzzle.x, muzzle.y, p.aim + a, w.speed, dmg, spr, {
       wn,
       wave: w.wave ? w.wave * (1 + (lv - 1) * 0.06) : 0,
       wphase: ph || 0,
@@ -406,8 +420,9 @@ function firePrimary(p, w) {
     });
   }
   if (charge) {
-    ring(p.x + 14 * sn, p.y - 14 * c, 26, p.ship.bullet, 0.18);
-    sparks(p.x + 16 * sn, p.y - 16 * c, p.ship.bullet, 6, 220, p.aim, 1.2);
+    const muzzle = primaryMuzzle(p, 0, 0, c, sn);
+    ring(muzzle.x, muzzle.y, 26, p.bulletColor, 0.18);
+    sparks(muzzle.x, muzzle.y, p.bulletColor, 6, 220, p.aim, 1.2);
   }
   p.muzzle = 0.05;
   sfx.shoot();
@@ -626,8 +641,8 @@ export function gainXp(p, v) {
 }
 
 // Engine flames in ship space (under the hull sprite): longer when climbing or dashing, flickering per nozzle.
-function drawFlames(ctx, p, alpha, od) {
-  const eng = SHIP_ENGINES[p.ship.id];
+function drawFlames(ctx, p, alpha, od, sprite) {
+  const eng = sprite.engines || SHIP_ENGINES[p.ship.id];
   if (!eng) return;
   const fl = flame(od ? p.ucol : p.color);
   const speed = Math.min(1, Math.hypot(p.vx, p.vy) / 320);
@@ -648,7 +663,7 @@ function drawFlames(ctx, p, alpha, od) {
 export function drawPlayer(ctx, k) {
   const p = G.player;
   if (!p || p.dead) return;
-  const spr = S['ship_' + p.ship.id];
+  const spr = shipSpriteForView(S['ship_' + p.ship.id], field.ow ? 'top' : sv.mode);
   const od = p.odT > 0;
   const ph = phasing(p);
 
@@ -678,20 +693,20 @@ export function drawPlayer(ctx, k) {
   ctx.drawImage(gl.img, p.x - gs / 2, p.y - gs / 2 + 4, gs, gs);
   const nx = Math.cos(p.aim); // nose direction
   const ny = Math.sin(p.aim);
-  if (p.muzzle > 0) {
+  if (p.muzzle > 0 && !spr.muzzles) {
     // Muzzle flash: a ki flare in the shot colour around a white pop.
     ctx.globalAlpha = 0.55;
-    const cg = glow(boosted(p) ? '#ffd23f' : p.ship.bullet, 64);
+    const cg = glow(boosted(p) ? '#ffd23f' : p.bulletColor, 64);
     ctx.drawImage(cg.img, p.x + nx * 16 - 16, p.y + ny * 16 - 16, 32, 32);
     ctx.globalAlpha = 0.75;
     const mg = glow('#ffffff', 32);
     ctx.drawImage(mg.img, p.x + nx * 16 - 10, p.y + ny * 16 - 10, 20, 20);
   }
-  if (p.ship.weapon === 'charge' && G.mode !== 'attract') {
+  if (p.ship.weapon === 'charge' && G.mode !== 'attract' && !spr.muzzles) {
     // Charge-up orb at the muzzle: grows as the next shot comes online.
     const w = WEAPONS.charge;
     const t = Math.max(0, Math.min(1, 1 - p.fireT / w.interval));
-    const cg = glow(p.ship.bullet, 64);
+    const cg = glow(p.bulletColor, 64);
     const cs = 8 + t * 26;
     ctx.globalAlpha = 0.25 + t * 0.55;
     ctx.drawImage(cg.img, p.x + nx * 20 - cs / 2, p.y + ny * 20 - cs / 2, cs, cs);
@@ -714,8 +729,28 @@ export function drawPlayer(ctx, k) {
     const sy = 1 + p.pitch * 0.06;
     ctx.setTransform(k * sx, 0, 0, k * sy, p.x * k + view.ox, p.y * k + view.oy); // (chase: stageview.js tilts it)
   }
-  drawFlames(ctx, p, alpha, od);
+  drawFlames(ctx, p, alpha, od, spr);
   ctx.drawImage(spr.img, -spr.half, -spr.half, spr.size, spr.size);
+  if (p.ship.weapon === 'charge' && G.mode !== 'attract' && spr.muzzles) {
+    const t = Math.max(0, Math.min(1, 1 - p.fireT / WEAPONS.charge.interval));
+    const orb = glow(p.bulletColor, 64), size = 8 + t * 26;
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = alpha * (0.25 + t * 0.55);
+    for (const [x, y] of spr.muzzles) ctx.drawImage(orb.img, x - size / 2, y - size / 2, size, size);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = alpha;
+  }
+  if (p.muzzle > 0 && spr.muzzles) {
+    ctx.globalCompositeOperation = 'lighter';
+    const muzzle = glow(boosted(p) ? '#ffd23f' : p.bulletColor, 32);
+    const core = glow('#ffffff', 32);
+    for (const [x, y] of spr.muzzles) {
+      ctx.globalAlpha = alpha * 0.75;
+      ctx.drawImage(muzzle.img, x - 5, y - 5, 10, 10);
+      ctx.drawImage(core.img, x - 2, y - 2, 4, 4);
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
   ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
   ctx.globalAlpha = 1;
 
@@ -742,21 +777,4 @@ export function drawPlayer(ctx, k) {
     ctx.stroke();
   }
 
-  // Hitbox core — always visible; stronger while focusing.
-  const hb = p.focus ? 1 : 0.75;
-  ctx.fillStyle = `rgba(255,255,255,${hb})`;
-  ctx.beginPath();
-  ctx.arc(p.x, p.y + 1, p.r, 0, TAU);
-  ctx.fill();
-  ctx.strokeStyle = p.hurtT > 0 ? '#ff4d6d' : od ? p.ucol : p.color;
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.arc(p.x, p.y + 1, p.r + 2, 0, TAU);
-  ctx.stroke();
-  if (p.focus) {
-    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-    ctx.beginPath();
-    ctx.arc(p.x, p.y + 1, 22, 0, TAU);
-    ctx.stroke();
-  }
 }

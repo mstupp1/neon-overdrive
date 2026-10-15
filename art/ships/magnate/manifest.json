@@ -1,0 +1,164 @@
+{
+  "subject": "MAGNATE",
+  "method": "built-in imagegen",
+  "style_guide": "art/STYLE.md",
+  "reference": "art/ships/vector/sources/top-v1.png",
+  "reference_sha256": "f2c2564e878485c04b19522de9fb6317a485ddeeb4560fd410d7a01e217c8e3a",
+  "export": {
+    "tool": "tools/ship_assets.py",
+    "size": [
+      256,
+      256
+    ],
+    "mode": "RGBA",
+    "resampling": "Lanczos",
+    "padding": "center, preserve aspect ratio",
+    "margin": 8
+  },
+  "assets": [
+    {
+      "view": "top",
+      "camera": "Orthographic directly overhead; nose up",
+      "source": "art/ships/magnate/sources/top-v1.png",
+      "source_size": [
+        1254,
+        1254
+      ],
+      "source_sha256": "c47e7c0fd35cf8ef290782d9b3a284e31a0796bd6d9298beb746b78863bbe143",
+      "prompt": "art/ships/magnate/prompts/top-v1.txt",
+      "input_reference": "art/ships/vector/sources/top-v1.png",
+      "runtime": "src/assets/ships/magnate/top-v2.png",
+      "runtime_sha256": "10d3e93d33d1631dfa98e5353aa76ab6a21daf9876dc136881656ac652b8772c",
+      "source_muzzle_pixels": [
+        [
+          520,
+          250
+        ],
+        [
+          700,
+          250
+        ]
+      ],
+      "source_engine_pixels": [
+        [
+          340,
+          1094
+        ],
+        [
+          520,
+          1094
+        ],
+        [
+          730,
+          1094
+        ],
+        [
+          910,
+          1094
+        ]
+      ],
+      "content_box": [
+        8,
+        8,
+        240,
+        240
+      ]
+    },
+    {
+      "view": "side",
+      "camera": "Near-horizontal side elevation; slight dorsal reveal; nose right",
+      "source": "art/ships/magnate/sources/side-v1.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "source_sha256": "ff6fec2a764388cd933aeb84a163c8b28b3786663bfb8aec0cda75da153ede82",
+      "prompt": "art/ships/magnate/prompts/side-v1.txt",
+      "input_reference": "art/ships/magnate/sources/top-v1.png",
+      "runtime": "src/assets/ships/magnate/side-v2.png",
+      "runtime_sha256": "d179474b44920c2eca3b3a4ad6f53980cff245dcf719904a88875da97b27c86d",
+      "source_muzzle_pixels": [
+        [
+          1190,
+          320
+        ],
+        [
+          1188,
+          555
+        ]
+      ],
+      "source_engine_pixels": [
+        [
+          180,
+          280
+        ],
+        [
+          60,
+          360
+        ],
+        [
+          180,
+          490
+        ],
+        [
+          50,
+          570
+        ]
+      ],
+      "content_box": [
+        8,
+        68,
+        240,
+        120
+      ]
+    },
+    {
+      "view": "pursuit",
+      "camera": "Low rear-facing pursuit; foreshortened hull, rear engines toward viewer",
+      "source": "art/ships/magnate/sources/pursuit-v1.png",
+      "source_size": [
+        1902,
+        827
+      ],
+      "source_sha256": "fcf6c1ea5aa1fe203d7c4d4f5aeb554990fe555e1cf16bd481b48e3c89759b84",
+      "prompt": "art/ships/magnate/prompts/pursuit-v1.txt",
+      "input_reference": "art/ships/magnate/sources/top-v1.png",
+      "runtime": "src/assets/ships/magnate/pursuit-v2.png",
+      "runtime_sha256": "931f5b7a0cfa1a5dcb510e026e91e668620373464e4cda2812e0bb4e56f31efd",
+      "source_muzzle_pixels": [
+        [
+          900,
+          150
+        ],
+        [
+          1000,
+          150
+        ]
+      ],
+      "source_engine_pixels": [
+        [
+          320,
+          680
+        ],
+        [
+          740,
+          680
+        ],
+        [
+          1160,
+          680
+        ],
+        [
+          1580,
+          680
+        ]
+      ],
+      "content_box": [
+        8,
+        76,
+        240,
+        104
+      ]
+    }
+  ]
+}

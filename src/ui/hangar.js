@@ -82,7 +82,8 @@ function renderStats(ship, owned) {
 }
 
 function shipArt(ship, owned) {
-  const art = menuArtwork(S['ship_' + ship.id].img, 112, 64);
+  const sprite = S['ship_' + ship.id];
+  const art = menuArtwork(sprite.img, 112, 64, sprite.img, sprite.ready?.then(() => sprite.img));
   if (!owned) art.classList.add('dim');
   return art;
 }

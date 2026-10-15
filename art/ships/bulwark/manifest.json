@@ -1,0 +1,152 @@
+{
+  "subject": "BULWARK",
+  "method": "built-in imagegen",
+  "style_guide": "art/STYLE.md",
+  "reference": "art/ships/vector/sources/top-v1.png",
+  "reference_sha256": "f2c2564e878485c04b19522de9fb6317a485ddeeb4560fd410d7a01e217c8e3a",
+  "export": {
+    "tool": "tools/ship_assets.py",
+    "size": [
+      256,
+      256
+    ],
+    "mode": "RGBA",
+    "resampling": "Lanczos",
+    "padding": "center, preserve aspect ratio",
+    "margin": 8
+  },
+  "assets": [
+    {
+      "view": "top",
+      "camera": "Orthographic directly overhead; nose up",
+      "source": "art/ships/bulwark/sources/top-v1.png",
+      "source_size": [
+        1105,
+        1423
+      ],
+      "source_sha256": "9ef268a6f172bab7107f9b269614314bbcc595926f14a9a818d78dc2ff7948e1",
+      "prompt": "art/ships/bulwark/prompts/top-v1.txt",
+      "input_reference": "art/ships/vector/sources/top-v1.png",
+      "runtime": "src/assets/ships/bulwark/top-v2.png",
+      "runtime_sha256": "c4c6efe5a9484fde6e43e85f9ea6b088b83d83b17e0a6f32ec8153d79699fa1f",
+      "source_muzzle_pixels": [
+        [
+          552,
+          52
+        ]
+      ],
+      "source_engine_pixels": [
+        [
+          300,
+          1300
+        ],
+        [
+          430,
+          1300
+        ],
+        [
+          675,
+          1300
+        ],
+        [
+          800,
+          1300
+        ]
+      ],
+      "content_box": [
+        35,
+        8,
+        186,
+        240
+      ]
+    },
+    {
+      "view": "side",
+      "camera": "Near-horizontal side elevation; slight dorsal reveal; nose right",
+      "source": "art/ships/bulwark/sources/side-v1.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "source_sha256": "39f0feb7de32348178d3908854c84975a1175048b0fe74cfacc3e0d779fd90f5",
+      "prompt": "art/ships/bulwark/prompts/side-v1.txt",
+      "input_reference": "art/ships/bulwark/sources/top-v1.png",
+      "runtime": "src/assets/ships/bulwark/side-v2.png",
+      "runtime_sha256": "2b1527430f9fc72726004db3524144fadf2acfa6c11cfd49a02aa95c964720fd",
+      "source_muzzle_pixels": [
+        [
+          1705,
+          445
+        ]
+      ],
+      "source_engine_pixels": [
+        [
+          138,
+          250
+        ],
+        [
+          120,
+          355
+        ],
+        [
+          120,
+          500
+        ],
+        [
+          250,
+          580
+        ]
+      ],
+      "content_box": [
+        8,
+        68,
+        240,
+        120
+      ]
+    },
+    {
+      "view": "pursuit",
+      "camera": "Low rear-facing pursuit; foreshortened hull, rear engines toward viewer",
+      "source": "art/ships/bulwark/sources/pursuit-v1.png",
+      "source_size": [
+        1942,
+        809
+      ],
+      "source_sha256": "33723ec2ade01ee991047f5fa5d4408877bdc1d6bf2bc16a7ef591bb9aeb5466",
+      "prompt": "art/ships/bulwark/prompts/pursuit-v1.txt",
+      "input_reference": "art/ships/bulwark/sources/top-v1.png",
+      "runtime": "src/assets/ships/bulwark/pursuit-v2.png",
+      "runtime_sha256": "1c79981fa66a888c365123f805ba07a8508976ced81b9b3abf281a9380b3d8f0",
+      "source_muzzle_pixels": [
+        [
+          971,
+          174
+        ]
+      ],
+      "source_engine_pixels": [
+        [
+          510,
+          578
+        ],
+        [
+          724,
+          578
+        ],
+        [
+          1218,
+          578
+        ],
+        [
+          1432,
+          578
+        ]
+      ],
+      "content_box": [
+        8,
+        78,
+        240,
+        100
+      ]
+    }
+  ]
+}

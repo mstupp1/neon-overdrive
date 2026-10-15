@@ -248,6 +248,10 @@ Run `node --test tools/test_background_layers.mjs` for renderer checks. `tools/b
 
 ## Item artwork workflow
 
+All generated artwork follows [shared art direction and process](art/STYLE.md). Use [neon-game-art](.agents/skills/neon-game-art/SKILL.md) for ships, portraits and icons; scenery follows the background skill.
+
+The player fleet uses generated top-down, side and pursuit hulls from `src/assets/ships/<id>/`, with procedural loading/failure fallbacks and cached paint variants. [Ship artwork records](art/ships/README.md) link the workflow; each ship's manifest preserves source masters, exact prompts and measured cannon/engine anchors. Open `/tools/ship-art-preview.html` to compare all ships and cameras, native-size readability, paint, pixel look and live firing alignment. Its game preview uses in-memory storage. Run `node --test tools/test_ship_art.mjs` for provenance, paint, attachment geometry and fallback checks; `python3 tools/ship_assets.py <source> <new-runtime-path>` makes a versioned 256px RGBA export, and `python3 tools/ship_assets.py art/ships/<id>/manifest.json --manifest` validates the selected set.
+
 Generated gameplay icons live in `src/assets/icons/` (upgrades, pilots, items and choices). Source masters and prompts are preserved in the matching `art/icons/` directories. The shared `src/ui/asset-icons.js` renderer supports both menu markup and overworld Canvas icons, retaining the original SVG as an image-load fallback.
 
 Serve the repository and open `/tools/icon-preview.html` to inspect exported artwork at several sizes, or `/tools/icon-ui-preview.html` to check the actual game definitions in production card styles and compare original glyphs. `/tools/icon-live-preview.html` opens real drafts, pilots, gear and the overworld map. Both game previews use in-memory storage.

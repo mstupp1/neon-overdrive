@@ -1,0 +1,55 @@
+{
+  "subject": "PHANTOM",
+  "method": "built-in imagegen",
+  "style_guide": "art/STYLE.md",
+  "design_reference": "art/ships/references/procedural-fleet.jpg",
+  "style_reference": "art/ships/vector/sources/top-v1.png",
+  "export": {
+    "tool": "tools/ship_assets.py",
+    "size": [256, 256],
+    "mode": "RGBA",
+    "resampling": "Lanczos",
+    "padding": "center, preserve aspect ratio"
+  },
+  "assets": [
+    {
+      "view": "top",
+      "camera": "Orthographic directly overhead; nose up",
+      "source": "art/ships/phantom/sources/top-v1.png",
+      "source_size": [1254, 1254],
+      "source_sha256": "d0e157e3269933a87af7cf4c3a7a274238cfcd2d2dc5259bc9890c05d707759d",
+      "prompt": "art/ships/phantom/prompts/top.txt",
+      "input_reference": ["art/ships/references/procedural-fleet.jpg", "art/ships/vector/sources/top-v1.png"],
+      "runtime": "src/assets/ships/phantom/top-v1.png",
+      "runtime_sha256": "17faa6f40b56f86e16437154381778d23586ffd12d9e64e854f9cef50593844f",
+      "source_muzzle_pixels": [[475, 405], [780, 405]],
+      "source_engine_pixels": [[550, 975], [705, 975]]
+    },
+    {
+      "view": "side",
+      "camera": "Near-horizontal side elevation, about 10 degrees above wing plane; nose right",
+      "source": "art/ships/phantom/sources/side-v1.png",
+      "source_size": [1254, 1254],
+      "source_sha256": "5b74a38ad3b81b52261e2c64ca193ecf524187739cb5db4cf9435c287ae54b8d",
+      "prompt": "art/ships/phantom/prompts/side.txt",
+      "input_reference": "art/ships/phantom/sources/top-v1.png",
+      "runtime": "src/assets/ships/phantom/side-v1.png",
+      "runtime_sha256": "3b578918006052804bb7d712185d1ae5231947ac4d3cc1a75c5cc88aec5798a3",
+      "source_muzzle_pixels": [[876, 524], [910, 714]],
+      "source_engine_pixels": [[122, 559], [120, 640]]
+    },
+    {
+      "view": "pursuit",
+      "camera": "Centered rear view, 15 degree dorsal reveal, wide foreshortened crescent wings, engine apertures facing viewer",
+      "source": "art/ships/phantom/sources/pursuit-v1.png",
+      "source_size": [1254, 1254],
+      "source_sha256": "12e324203027057053313d7ba69c1d72811394c23c21f0a3f8005144885b6970",
+      "prompt": "art/ships/phantom/prompts/pursuit.txt",
+      "input_reference": "art/ships/phantom/sources/top-v1.png",
+      "runtime": "src/assets/ships/phantom/pursuit-v1.png",
+      "runtime_sha256": "390eba4f71218368d64f0f9a500e9b35f4ac6e004c8e11165bd04f4a46a42002",
+      "source_muzzle_pixels": [[480, 450], [770, 450]],
+      "source_engine_pixels": [[530, 890], [720, 890]]
+    }
+  ]
+}

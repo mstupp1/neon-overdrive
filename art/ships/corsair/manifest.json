@@ -1,0 +1,54 @@
+{
+  "subject": "CORSAIR",
+  "method": "built-in imagegen",
+  "style_guide": "art/STYLE.md",
+  "design_reference": "art/ships/references/procedural-fleet.jpg",
+  "export": {
+    "tool": "tools/ship_assets.py",
+    "size": [256, 256],
+    "mode": "RGBA",
+    "resampling": "Lanczos",
+    "padding": "center, preserve aspect ratio"
+  },
+  "assets": [
+    {
+      "view": "top",
+      "camera": "Orthographic directly overhead; nose up",
+      "source": "art/ships/corsair/sources/top-v1.png",
+      "source_size": [1254, 1254],
+      "source_sha256": "7e3546befc6e0ba2a9df35cc3a6e60770920d8a9c3d8d59c9467a7f108be3db5",
+      "prompt": "art/ships/corsair/prompts/top.txt",
+      "input_reference": "art/ships/references/procedural-fleet.jpg",
+      "runtime": "src/assets/ships/corsair/top-v1.png",
+      "runtime_sha256": "ea6798ff1bd83b60baa1f412d6189021ce29634549a2e7fe1efd081ddca3c445",
+      "source_muzzle_pixels": [[193, 351], [1038, 351]],
+      "source_engine_pixels": [[578, 1030], [678, 1030]]
+    },
+    {
+      "view": "side",
+      "camera": "Near-horizontal side elevation, about 10 degrees above wing plane; nose right",
+      "source": "art/ships/corsair/sources/side-v1.png",
+      "source_size": [1774, 887],
+      "source_sha256": "88e3253f6cbbdbecf9d5c611a7308257ff1d57f3e3bcacb0ec0d0acb4bd428da",
+      "prompt": "art/ships/corsair/prompts/side.txt",
+      "input_reference": "art/ships/corsair/sources/top-v1.png",
+      "runtime": "src/assets/ships/corsair/side-v1.png",
+      "runtime_sha256": "69dc923402fcf7fee3b2b6848a73e431b101224b61965784f1d931d0e3453ab3",
+      "source_muzzle_pixels": [[1663, 461], [1631, 528]],
+      "source_engine_pixels": [[112, 401], [112, 491]]
+    },
+    {
+      "view": "pursuit",
+      "camera": "Centered rear view, 15 degree dorsal reveal, wide foreshortened fork wings, engine apertures facing viewer",
+      "source": "art/ships/corsair/sources/pursuit-v1.png",
+      "source_size": [1254, 1254],
+      "source_sha256": "b1cd619809ff0d4a5cb073efc8e33f1f2a4ff1974e68fa2287e2f159ca704854",
+      "prompt": "art/ships/corsair/prompts/pursuit.txt",
+      "input_reference": "art/ships/corsair/sources/top-v1.png",
+      "runtime": "src/assets/ships/corsair/pursuit-v1.png",
+      "runtime_sha256": "640f16a8448057d56a3096f4240c295dc377112515a2ef6404e025b3f8afd395",
+      "source_muzzle_pixels": [[123, 351], [1097, 351]],
+      "source_engine_pixels": [[552, 948], [680, 948]]
+    }
+  ]
+}
