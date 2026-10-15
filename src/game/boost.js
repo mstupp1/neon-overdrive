@@ -18,6 +18,7 @@ import { ring, sparks, addShake } from './fx.js';
 import { sfx } from '../core/audio.js';
 import { sv } from './stageview.js';
 import { drawComet } from '../render/comet.js';
+import { glow } from '../render/sprites.js';
 
 export const BOOST = {
   cap: 100, // meter units at boostCap 1
@@ -233,7 +234,8 @@ export function drawBoostFx(ctx) {
 // Ship-side boost visuals (drawPlayer, under the hull): a ki comet. An energy shell wraps the ship in its colour,
 // flame licks and long wisps stream behind (baked in render/comet.js), and a few live speed lines peel off the
 // flanks. Sized from the hull (spr.reach). The pursuit camera sits behind the ship, so there the tail is a stub and
-// the speed lines burst outward around the shell, toward the camera.
+// the speed lines burst outward around the shell, toward the camera. Free flight has no comet (the hull turns to
+// auto-aim, so a nose-led aura would point anywhere): see drawFreeBoost.
 const wisps = [];
 export function drawBoostShip(ctx, p, spr) {
   const V = p.boostV;
@@ -241,7 +243,8 @@ export function drawBoostShip(ctx, p, spr) {
     wisps.length = 0;
     return;
   }
-  const chase = !field.ow && sv.mode === 'chase';
+  if (field.ow) return drawFreeBoost(ctx, p, spr, V);
+  const chase = sv.mode === 'chase';
   const reach = (spr && spr.reach) || 18;
   const kick = p.boostKick / 0.35; // ignition: the head flares, then settles
   const r = reach * (chase ? 0.95 : 1.05) * (1 + 0.45 * kick * kick);
@@ -249,13 +252,8 @@ export function drawBoostShip(ctx, p, spr) {
   const len = (chase ? 0.22 : 1) * (0.45 + 0.55 * V) * (0.8 + 0.35 * surge) * (1 + 0.05 * Math.sin(G.time * 37));
   const color = p.odT > 0 ? p.ucol : p.color;
   // The side view composites through a transparent offscreen layer, where additive light piles up into solid white.
-  const lum = !field.ow && sv.mode === 'side' ? 0.45 : 1;
+  const lum = sv.mode === 'side' ? 0.45 : 1;
   ctx.save();
-  if (field.ow) {
-    ctx.translate(p.x, p.y);
-    ctx.rotate(p.aim + Math.PI / 2);
-    ctx.translate(-p.x, -p.y);
-  }
   ctx.globalCompositeOperation = 'lighter';
   const hx = p.x;
   const hy = p.y - reach * (chase ? 0.05 : 0.3);
@@ -306,6 +304,49 @@ export function drawBoostShip(ctx, p, spr) {
     ctx.beginPath();
     ctx.moveTo(x0, y0);
     ctx.lineTo(x1, y1);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// Free flight: a soft halo in the ship's colour and speed lines left behind along the flight path (world space, so
+// they follow where the ship moves, not where it faces). Nothing when hovering.
+function drawFreeBoost(ctx, p, spr, V) {
+  const reach = (spr && spr.reach) || 18;
+  const color = p.odT > 0 ? p.ucol : p.color;
+  const sp = Math.hypot(p.vx, p.vy);
+  const move = Math.min(1, sp / 260);
+  const now = G.time;
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  const halo = glow(color, 64);
+  const hs = reach * (3.4 + 0.8 * (p.boostKick / 0.35));
+  ctx.globalAlpha = V * (0.45 + 0.1 * Math.sin(now * 23));
+  ctx.drawImage(halo.img, p.x - hs / 2, p.y - hs / 2, hs, hs);
+  if (!wisps.last || now < wisps.last || now - wisps.last > 0.5) wisps.last = now;
+  const per = 1 / (40 * (view.quality || 1));
+  while (now - wisps.last >= per) {
+    wisps.last += per;
+    if (move < 0.15) continue;
+    const dx = p.vx / sp;
+    const dy = p.vy / sp;
+    const u = rand(-1, 1) * reach * 0.9;
+    wisps.push({ t0: wisps.last, x: p.x - dy * u - dx * reach * 0.3, y: p.y + dx * u - dy * reach * 0.3, dx, dy, len: reach * rand(2, 4.5) * move, d: rand(0.18, 0.3), w: rand(0.8, 1.6), hot: Math.random() < 0.3 });
+  }
+  ctx.lineCap = 'round';
+  for (let i = wisps.length - 1; i >= 0; i--) {
+    const w = wisps[i];
+    const a = (now - w.t0) / w.d;
+    if (a >= 1 || a < 0 || w.dx === undefined) {
+      wisps.splice(i, 1);
+      continue;
+    }
+    ctx.globalAlpha = V * (1 - a) * (w.hot ? 0.9 : 0.6);
+    ctx.strokeStyle = w.hot ? '#ffffff' : color;
+    ctx.lineWidth = w.w;
+    ctx.beginPath();
+    ctx.moveTo(w.x, w.y);
+    ctx.lineTo(w.x - w.dx * w.len * (1 + a), w.y - w.dy * w.len * (1 + a));
     ctx.stroke();
   }
   ctx.restore();
