@@ -4496,48 +4496,6 @@ input[type='range']::-moz-range-thumb {
     box-shadow: 0 0 0.6em var(--rc, var(--c, var(--cyan))), 0 0 1.2em var(--rc, var(--c, var(--cyan)));
 }
 
-.card-hold-cue {
-    position: relative;
-    flex: 0 0 1.05em;
-    width: 1.05em;
-    height: 1.05em;
-    margin-left: auto;
-    border-radius: 50%;
-    background: conic-gradient(var(--rc, var(--c)) calc(var(--hold, 0) * 1turn), rgba(233, 244, 255, 0.18) 0);
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.15s, filter 0.15s;
-}
-
-.card-hold-cue::after {
-    content: '';
-    position: absolute;
-    inset: 0.25em;
-    border-radius: 50%;
-    background: rgba(233, 244, 255, 0.5);
-    transition: background 0.15s, transform 0.15s;
-}
-
-#draft-cards .card.focus .card-hold-cue,
-#draft-cards .card:hover .card-hold-cue,
-#draft-cards.no-keys .card .card-hold-cue {
-    opacity: 1;
-}
-
-#draft-cards .card.focus .card-hold-cue::after {
-    background: var(--cyan);
-}
-
-#draft-cards .card.holding .card-hold-cue {
-    opacity: 1;
-    filter: drop-shadow(0 0 0.45em var(--rc, var(--c, var(--cyan))));
-}
-
-#draft-cards .card.holding .card-hold-cue::after {
-    background: var(--rc, var(--c, var(--cyan)));
-    transform: scale(0.8);
-}
-
 #draft-cards .card.holding {
     transform: scale(1.025);
     border-color: var(--rc, var(--c, var(--cyan)));
