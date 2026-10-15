@@ -394,6 +394,32 @@
         1254,
         1254
       ]
+    },
+    {
+      "id": "campaign-card",
+      "source": "sources/campaign-card-v1.png",
+      "runtime": "../../../src/assets/backgrounds/genesis/campaign-card-v1.png",
+      "generator": "built-in imagegen",
+      "date": "2026-10-14",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a13d57-9cae-7673-8078-fed859d1a1b4/exec-f2d358b1-fe80-4bdd-8c9d-23fcf02c8dfe.png",
+      "prompt": "Use case: stylized-concept. Asset type: opaque landscape campaign sector card for NEON OVERDRIVE. Primary request: create one polished panoramic environment illustration using the accepted genesis background landmark and skyline artwork from this project as visual reference. Scene: NEON GENESIS: monumental blue industrial ring gate arch rising behind a distant tiered machine city, dark navy gunmetal, restrained electric blue and cyan seams with sparse magenta windows. Preserve that system's established identity and crisp detailed pixel-art language; deliberate fine pixel clusters rather than chunky blocks, dark beveled industrial shapes, atmospheric depth, sparse emissive accents, no broad white highlights or excessive bloom. Composition: 2:1 landscape, intended runtime export 768x384 and displayed about 200x100 CSS pixels; the landmark should remain clear at that small size. Landmark fills upper two-thirds, skyline forms shallow lower band; keep bottom quarter dark and calm for runtime text overlay. Camera: distant cinematic environmental vista, not overhead. Fully opaque near-black navy space/sky backdrop, no transparency. No text, letters, typography, UI, cards, frame, borders, logos, watermark, ships, enemies, characters, bullets, HUD, crosshairs, grid or combat effects. This is a single unframed environment image.",
+      "references": [
+        "src/assets/backgrounds/genesis/gate-v1.png",
+        "src/assets/backgrounds/genesis/skyline-far-v1.png"
+      ],
+      "camera": "distant cinematic landscape, opaque card illustration",
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "exportSize": [
+        768,
+        384
+      ],
+      "resampling": "nearest",
+      "sourceSha256": "c0933de076e6430f47b2660f615a8f480ff50c8eca4c501890eb07edc8b3c82c",
+      "runtimeSha256": "7bba71904d58e35b5ece8ca3d583971659e644a4d91a4f247588758b9f9c9c18",
+      "runtimeBytes": 387365
     }
   ],
   "runtimeTotalBytes": 1162996,

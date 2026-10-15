@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NEON OVERDRIVE · Campaign cards</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:#080b18;color:#b6cedb;font:14px system-ui;display:flex;gap:0}
+  aside{width:270px;flex:0 0 270px;padding:20px;overflow:auto;border-right:1px solid #243249}h1{font-size:19px;color:#5ddbe3;margin:0 0 8px}p{line-height:1.45;color:#91a9bc;font-size:13px}
+  label{display:block;margin:14px 0 5px;color:#83a5bb;font-size:11px;text-transform:uppercase;letter-spacing:.08em}select,button{display:block;width:100%;margin:6px 0 10px;padding:9px;background:#172238;color:#b9e8ee;border:1px solid #375270;font:inherit}button{cursor:pointer}button:disabled,select:disabled{opacity:.4}
+  .stage{flex:1;min-width:0;min-height:100vh;overflow:auto;display:flex;align-items:center;justify-content:center;padding:20px}iframe{display:block;flex:none;border:1px solid #375270;background:#05030d;box-shadow:0 12px 48px #0009}output{display:block;white-space:pre-wrap;font:11px/1.5 ui-monospace,monospace;color:#a9c4d2;margin-top:16px;min-height:3em}
+  @media(max-width:700px){body{display:block}aside{width:100%;border-right:0;border-bottom:1px solid #243249}.stage{min-height:60vh;justify-content:flex-start}}
+</style>
+<aside>
+  <h1>Campaign cards</h1>
+  <p>Live campaign menu. Preview state is held in an in-memory copy of the save; your real save is preserved.</p>
+  <label for="state">Progress state</label>
+  <select id="state" disabled>
+    <option value="fresh">Fresh save</option>
+    <option value="partial">Partial · Genesis cleared, Crimson at sector 4</option>
+    <option value="all-cleared">All systems cleared</option>
+    <option value="clear-precedence">Void cleared · best system -1</option>
+  </select>
+  <label for="info">First-run info</label>
+  <select id="info" disabled><option value="shown">Shown</option><option value="hidden">Hidden</option></select>
+  <label for="viewport">Preview viewport</label>
+  <select id="viewport" disabled>
+    <option value="desktop">Desktop · fit available</option>
+    <option value="390x844">390 × 844 portrait</option>
+    <option value="320x568">320 × 568 narrow portrait</option>
+    <option value="844x390">844 × 390 landscape</option>
+  </select>
+  <button id="failed-image" data-action="failed-image" disabled>Force one missing image</button>
+  <output id="status">Loading game…</output>
+</aside>
+<main class="stage"><iframe title="Live campaign card preview"></iframe></main>
+<script type="module">
+const frame=document.querySelector('iframe');
+const stage=document.querySelector('.stage');
+const response=await fetch('../index.html');
+const html=await response.text();
+const root=new URL('../',location.href).href;
+const storage=new URL('background-preview-storage.js',location.href).href;
+const status=document.querySelector('#status');
+let ready=false;
+const send=(action='render')=>frame.contentWindow.postMessage({kind:'campaign-preview-action',action,state:document.querySelector('#state').value,info:document.querySelector('#info').value},location.origin);
+function sizeFrame(){
+ const value=document.querySelector('#viewport').value;
+ if(value==='desktop'){
+   frame.style.width=`${Math.max(360,Math.min(1100,stage.clientWidth-40))}px`;
+   frame.style.height=`${Math.max(520,Math.min(900,stage.clientHeight-40))}px`;
+ }else{const [w,h]=value.split('x').map(Number);frame.style.width=`${w}px`;frame.style.height=`${h}px`;}
+ send('resize');
+}
+frame.addEventListener('load',()=>{
+ if(!frame.contentDocument.querySelector('#game'))return;
+ const script=frame.contentDocument.createElement('script');
+ script.type='module';
+ script.src=new URL('campaign-preview-runtime.js',location.href).href;
+ frame.contentDocument.body.append(script);
+});
+window.addEventListener('message',({source,data})=>{
+ if(source!==frame.contentWindow||data?.kind!=='campaign-preview')return;
+ status.textContent=data.status;
+ if(data.ready&&!ready){ready=true;document.querySelectorAll('select,button').forEach(el=>el.disabled=false);sizeFrame();}
+});
+document.querySelector('#state').addEventListener('change',()=>send());
+document.querySelector('#info').addEventListener('change',()=>send());
+document.querySelector('#viewport').addEventListener('change',sizeFrame);
+document.querySelector('#failed-image').addEventListener('click',()=>send('failed-image'));
+window.addEventListener('resize',()=>{if(document.querySelector('#viewport').value==='desktop')sizeFrame();});
+frame.srcdoc=html.replace('<head>',`<head><base href="${root}"><script src="${storage}"><`+'/script>');
+</script>
+</html>

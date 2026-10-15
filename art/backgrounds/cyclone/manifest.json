@@ -529,6 +529,32 @@
         1254,
         1254
       ]
+    },
+    {
+      "id": "campaign-card",
+      "source": "sources/campaign-card-v1.png",
+      "runtime": "../../../src/assets/backgrounds/cyclone/campaign-card-v1.png",
+      "generator": "built-in imagegen",
+      "date": "2026-10-14",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a13d57-9cae-7673-8078-fed859d1a1b4/exec-e2a1336f-e2c7-4a26-99a8-b6a22f8c65f1.png",
+      "prompt": "Use case: stylized-concept. Asset type: opaque landscape campaign sector card for NEON OVERDRIVE. Primary request: create one polished panoramic environment illustration using the accepted cyclone background landmark and skyline artwork from this project as visual reference. Scene: CYAN CYCLONE: immense spiral cyan storm eye with dark mechanical collector towers embedded around it, floating atmospheric stations below, deep teal machinery with restrained cyan seams. Preserve that system's established identity and crisp detailed pixel-art language; deliberate fine pixel clusters rather than chunky blocks, dark beveled industrial shapes, atmospheric depth, sparse emissive accents, no broad white highlights or excessive bloom. Composition: 2:1 landscape, intended runtime export 768x384 and displayed about 200x100 CSS pixels; the landmark should remain clear at that small size. Landmark fills upper two-thirds, skyline forms shallow lower band; keep bottom quarter dark and calm for runtime text overlay. Camera: distant cinematic environmental vista, not overhead. Fully opaque near-black navy space/sky backdrop, no transparency. No text, letters, typography, UI, cards, frame, borders, logos, watermark, ships, enemies, characters, bullets, HUD, crosshairs, grid or combat effects. This is a single unframed environment image.",
+      "references": [
+        "src/assets/backgrounds/cyclone/gate-v1.png",
+        "src/assets/backgrounds/cyclone/skyline-far-v1.png"
+      ],
+      "camera": "distant cinematic landscape, opaque card illustration",
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "exportSize": [
+        768,
+        384
+      ],
+      "resampling": "nearest",
+      "sourceSha256": "da676c9fdb51123fe3b3930b9400dc7592e958be529b12c6b41bc78844a2ee33",
+      "runtimeSha256": "c1687e2249be6d272f54ba3bb5149a7355840caea81f2136f63866474abe3ecc",
+      "runtimeBytes": 573719
     }
   ],
   "runtimeTotalBytes": 1407427,

@@ -551,6 +551,32 @@
         1254,
         1254
       ]
+    },
+    {
+      "id": "campaign-card",
+      "source": "sources/campaign-card-v1.png",
+      "runtime": "../../../src/assets/backgrounds/crimson/campaign-card-v1.png",
+      "generator": "built-in imagegen",
+      "date": "2026-10-14",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a13d57-9cae-7673-8078-fed859d1a1b4/exec-c25526a9-16d5-4efd-b7ad-180bc4119bb5.png",
+      "prompt": "Use case: stylized-concept. Asset type: opaque landscape campaign sector card for NEON OVERDRIVE. Primary request: create one polished panoramic environment illustration using the accepted crimson background landmark and skyline artwork from this project as visual reference. Scene: CRIMSON TIDE: immense dark red ringed planet and a small dim moon above a distant burgundy refinery skyline, subtle red atmospheric glow and muted crimson seams. Preserve that system's established identity and crisp detailed pixel-art language; deliberate fine pixel clusters rather than chunky blocks, dark beveled industrial shapes, atmospheric depth, sparse emissive accents, no broad white highlights or excessive bloom. Composition: 2:1 landscape, intended runtime export 768x384 and displayed about 200x100 CSS pixels; the landmark should remain clear at that small size. Landmark fills upper two-thirds, skyline forms shallow lower band; keep bottom quarter dark and calm for runtime text overlay. Camera: distant cinematic environmental vista, not overhead. Fully opaque near-black navy space/sky backdrop, no transparency. No text, letters, typography, UI, cards, frame, borders, logos, watermark, ships, enemies, characters, bullets, HUD, crosshairs, grid or combat effects. This is a single unframed environment image.",
+      "references": [
+        "src/assets/backgrounds/crimson/gate-v1.png",
+        "src/assets/backgrounds/crimson/skyline-far-v1.png"
+      ],
+      "camera": "distant cinematic landscape, opaque card illustration",
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "exportSize": [
+        768,
+        384
+      ],
+      "resampling": "nearest",
+      "sourceSha256": "00b400fd38aedea53fa73eb357697316ea4cafda7521a32bc6074a87e5f80730",
+      "runtimeSha256": "dd3c6994d82d8d727bfffbe83d247cb139d6a4e8d2aa97995872a6f3f0c698d6",
+      "runtimeBytes": 525798
     }
   ],
   "runtimeTotalBytes": 1281497,

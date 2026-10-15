@@ -44,27 +44,26 @@ const hsl = (h, l = 62) => `hsl(${h},100%,${l}%)`;
 
 // --- Campaign map ---------------------------------------------------------------
 
-const MAP_X = [34, 66, 34, 66];
-const mapY = (i) => 87.5 - i * 25; // act 1 at the bottom
-
 export const meta = {
   // The run's four systems as a progress track (furthest point any run reached), plus the run rules. Returns LAUNCH.
   renderCampaign(shipName) {
     const map = $('#sys-map');
     const c = profile.campaign;
     const reached = (i) => i <= c.bestSys || i === 0;
-    let lines = '';
-    for (let i = 0; i < SYSTEMS.length - 1; i++) {
-      lines += `<line x1="${MAP_X[i]}" y1="${mapY(i)}" x2="${MAP_X[i + 1]}" y2="${mapY(i + 1)}" class="${reached(i + 1) ? 'open' : ''}" style="stroke:${hsl(SYSTEMS[i + 1].hue)}"/>`;
-    }
-    let nodes = '';
-    SYSTEMS.forEach((s, i) => {
+    const cards = SYSTEMS.map((s, i) => {
       const done = c.cleared.includes(s.id);
       const seen = reached(i);
       const sub = done ? 'CLEARED' : i === c.bestSys ? `BEST · SECTOR ${c.bestRow + 1}` : seen ? `ACT ${s.act} · ${bossById(s.boss).name}` : 'UNCHARTED';
-      nodes += `<div class="sys${done ? ' done' : ''}${seen ? '' : ' locked'}${i === Math.max(0, c.bestSys) ? ' sel' : ''}" style="--c:${hsl(s.hue)};left:${MAP_X[i]}%;top:${mapY(i)}%"><span class="sys-orb">${done ? NODE_ICONS.check : seen ? s.act : NODE_ICONS.lock}</span><span class="sys-txt"><b>${s.name}</b><i>${sub}</i></span></div>`;
-    });
-    map.innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none">${lines}</svg>${nodes}`;
+      const state = done ? 'cleared' : seen ? 'discovered' : 'undiscovered';
+      const icon = done ? NODE_ICONS.check : seen ? `<span class="sys-act">ACT ${s.act}</span>` : NODE_ICONS.lock;
+      const art = new URL(`../assets/backgrounds/${s.id}/campaign-card-v1.png`, import.meta.url).href;
+      return `<article class="sys ${state}${i === Math.max(0, c.bestSys) ? ' frontier' : ''}" style="--c:${hsl(s.hue)}">
+        <img class="sys-art" src="${art}" alt="" aria-hidden="true" onerror="this.hidden=true;this.parentElement.classList.add('no-art')">
+        <span class="sys-copy"><b>${s.name}</b><i>${sub}</i></span><span class="sys-mark" aria-hidden="true">${icon}</span>
+      </article>`;
+    }).join('');
+    // DOM order stays aligned with campaign progression; column-reverse presents the journey bottom-to-top.
+    map.innerHTML = `<div class="sys-track" aria-label="Campaign systems">${cards}</div>`;
     const rk = rankFor(profile.rankXp);
     $('#camp-pilot').innerHTML = `<span class="gold">${coin}${fmt(profile.credits)}</span><span class="rank">RANK <b>${rk.rank}</b></span><span class="rankbar"><i style="width:${rk.need ? Math.round((100 * rk.into) / rk.need) : 100}%"></i></span><span class="rank">${shipName}</span><span class="rank cls" style="--c:${activeClass().color}">${activeClass().name}</span>`;
     const best = c.bestSys < 0 ? 'NO RUNS YET' : profile.bestDeep ? `BEST · DEEP GRID ${profile.bestDeep}` : c.cleared.length >= SYSTEMS.length ? 'ALL SYSTEMS CLEARED' : `BEST · ${SYSTEMS[c.bestSys].short} SECTOR ${c.bestRow + 1}`;
