@@ -81,9 +81,20 @@ function renderStats(ship, owned) {
     : '<em>Equip gear to set your build paths</em>';
 }
 
+// Generated hulls bake into a roomier box than the procedural 64-unit sprite; frame the card on
+// that central 64 units so hangar art keeps its size.
+function hullImage(sprite) {
+  if (!sprite.generated || sprite.size <= 64) return sprite.img;
+  const px = sprite.img.width * 64 / sprite.size, edge = (sprite.img.width - px) / 2;
+  const c = document.createElement('canvas');
+  c.width = c.height = Math.round(px);
+  c.getContext('2d').drawImage(sprite.img, edge, edge, px, px, 0, 0, c.width, c.height);
+  return c;
+}
+
 function shipArt(ship, owned) {
   const sprite = S['ship_' + ship.id];
-  const art = menuArtwork(sprite.img, 112, 64, sprite.img, sprite.ready?.then(() => sprite.img));
+  const art = menuArtwork(hullImage(sprite), 112, 64, sprite.img, sprite.ready?.then(() => hullImage(sprite)));
   if (!owned) art.classList.add('dim');
   return art;
 }
