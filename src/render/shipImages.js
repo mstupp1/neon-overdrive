@@ -6,6 +6,7 @@ import { exportedShipPoint } from './shipAssetGeometry.js';
 export { SHIP_ART };
 export const VECTOR_ART = SHIP_ART.vector;
 
+const BOX = 80;
 const sources = new Map();
 const variants = new Map();
 function load(id, file) {
@@ -55,15 +56,20 @@ function bake(image, spec, mode, color, stock) {
     // Stageview rotates the whole side-scrolling world clockwise a quarter turn.
     return mode === 'side' ? [y, -x] : [x, y];
   };
+  // Hulls are fitted to their footprint box, which can exceed the procedural 64-unit sprite,
+  // so the baked canvas is BOX units square (3 px per unit, close to the 256 px export).
   const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = 192;
+  canvas.width = canvas.height = BOX * 3;
   const ctx = canvas.getContext('2d');
   ctx.scale(3, 3);
-  ctx.translate(32, 32);
+  ctx.translate(BOX / 2, BOX / 2);
   if (mode === 'side') ctx.rotate(-Math.PI / 2);
   ctx.drawImage(source, dx, dy, source.width * scale, source.height * scale);
-  return { img: canvas, size: 64, half: 32, generated: true,
-    muzzles: spec.muzzles.map(point), engines: spec.engines.map(p => [...point(p), 3.6]) };
+  // Exhaust and the shield ring follow the hull's drawn size instead of fixed widths.
+  const long = Math.max(x1 - x0, y1 - y0) * scale;
+  const flameW = Math.min(5.2, Math.max(3.6, long * 0.085));
+  return { img: canvas, size: BOX, half: BOX / 2, generated: true, reach: long / 2,
+    muzzles: spec.muzzles.map(point), engines: spec.engines.map(p => [...point(p), flameW]) };
 }
 
 export function withShipImages(id, color, fallback) {

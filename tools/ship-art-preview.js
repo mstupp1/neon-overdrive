@@ -43,7 +43,7 @@ function drawFleet(canvas, generated) {
     ctx.save();
     ctx.translate(x, y);
     if (mode === 'side') ctx.rotate(Math.PI / 2);
-    ctx.drawImage(art.img, -64, -64, 128, 128);
+    ctx.drawImage(art.img, -art.size, -art.size, art.size * 2, art.size * 2);
     ctx.restore();
     ctx.fillStyle = ship.color; ctx.font = '15px system-ui'; ctx.textAlign = 'center'; ctx.fillText(ship.name, x, y + 82);
   }
@@ -64,7 +64,7 @@ function draw() {
     ctx.save();
     if (mode === 'chase') ctx.rotate(bank * 0.42);
     ctx.scale(1 - Math.abs(bank) * 0.28, 1);
-    ctx.drawImage(s.img, -32, -32, 64, 64);
+    ctx.drawImage(s.img, -s.half, -s.half, s.size, s.size);
     ctx.restore();
     if (guides) for (const mount of s.muzzles || []) {
       const [x, y] = posedShipPoint(mount, bank, 0, null, mode === 'chase');
@@ -74,7 +74,7 @@ function draw() {
     // A second sample at native game scale exposes detail that disappears in combat.
     ctx.setTransform(1, 0, 0, 1, 0, 0);ctx.translate(42, 305);
     if (mode === 'side') ctx.rotate(Math.PI / 2);
-    ctx.drawImage(s.img, -32, -32, 64, 64);
+    ctx.drawImage(s.img, -s.half, -s.half, s.size, s.size);
     ctx.setTransform(1, 0, 0, 1, 0, 0);ctx.fillStyle = '#7796a5';ctx.font = '12px system-ui';ctx.fillText('1× gameplay scale', 80, 311);
   }
   document.querySelector('#asset-status').textContent = `${loaded}/3 generated views loaded`;

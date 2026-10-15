@@ -773,7 +773,7 @@ export function drawPlayer(ctx, k) {
     ctx.strokeStyle = 'rgba(63,246,255,' + (0.45 + Math.sin(G.time * 5) * 0.15) + ')';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(p.x, p.y, 25, 0, TAU);
+    ctx.arc(p.x, p.y, Math.max(25, (spr.reach || 0) + 4), 0, TAU);
     ctx.stroke();
   }
 
