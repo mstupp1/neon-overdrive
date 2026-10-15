@@ -161,8 +161,10 @@ export const profile = load();
 export function saveProfile() {
   try {
     localStorage.setItem(KEY, JSON.stringify(profile));
+    return true;
   } catch (e) {
     /* storage unavailable */
+    return false;
   }
 }
 

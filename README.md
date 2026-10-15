@@ -260,6 +260,16 @@ Pixel mode keeps menu image icons at 48×48, hangar ship previews at 64×64, and
 
 Use the imagegen skill for individual transparent assets, following `art/icons/brief.md`. Export 256px RGBA runtime PNGs; keep labels and rarity frames in the UI. Run `node --test tools/test_icon_images.mjs` for Canvas loading and fallback checks.
 
+## Debug drawer
+
+On desktop, click the quiet **DEV** tab at the bottom-right edge, or press the backtick key (\`). The game keeps running while the drawer is open; Escape closes it. **Freeze gameplay** stops the world without opening the pause screen, while music and debug controls remain active. It stays frozen after closing the drawer until **Resume gameplay** is pressed; a new run or return to title clears the freeze. Its collapsible groups expose campaign/system launches, endless and encounter tests, camera switching, autopilot and simulation, upgrades and drops, progression grants, screen previews and artwork tools. Keyboard Tab/Shift+Tab navigate controls; gamepad up/down navigates, left/right changes selectors, A activates and B closes.
+
+**Progression → Unlock everything** saves all ships and paints, pilot classes and abilities, upgrade discoveries, relics, achievements and Overdrive tiers. It supplies max pilot rank, enough points to fill each passive tree, credits and Flux. Allocation, equipment and current run upgrades remain build choices; use the upgrade and gear controls to test individual items. Flux Core levels have no maximum.
+
+The first unlock stores a backup in this browser. **Restore pre-unlock progression** restores that snapshot, including records and inventory, and returns to the title; current settings are kept. Repeated unlocks preserve the first backup. Live-run progression changes take effect on the next launch; reopen progression screens to refresh their contents. The drawer is hidden for touch-only devices. The console equivalents remain available through `NEON`, including `NEON.debug.open()`, `NEON.debug.unlockEverything()` and `NEON.debug.restoreProfile()`.
+
+Run `node --test tools/test_debug_profile.mjs tools/test_ultimate_charge.mjs` for progression restoration and ultimate-meter checks.
+
 ## Performance notes
 
 - All glow is baked into offscreen sprites once; nothing uses `shadowBlur` per frame.

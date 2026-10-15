@@ -23,6 +23,7 @@ import { makeItem } from './game/parts.js';
 import { spawnEnemy, spawnWeavers } from './game/enemies.js';
 import { step, renderWorld, drawStandees } from './game/world.js';
 import { ui } from './ui/screens.js';
+import { debugDrawer, initDebugDrawer } from './ui/debug.js';
 import { renderRunDetails, setRunTab } from './ui/rundetails.js';
 import { comms } from './ui/comms.js';
 import { meta } from './ui/meta.js';
@@ -156,6 +157,7 @@ function hideBossCard() {
 }
 
 function newWorld(mode, shipDef, run = null) {
+  debugDrawer.reset?.();
   if (mode === 'run') {
     bootIntro.abort(); // its scripted ship control would otherwise fly the run
     pressStart.stop();
@@ -1270,8 +1272,10 @@ function frame(now) {
   requestAnimationFrame(frame);
   const raw = Math.min(0.1, (now - last) / 1000);
   last = now;
-  G.realTime += raw;
   pollGamepads();
+  if (debugDrawer.open) debugDrawer.update();
+  const worldDt = debugDrawer.frozen && G.mode === 'run' ? 0 : raw;
+  G.realTime += worldDt;
 
   // Adaptive quality: sustained slow frames lower resolution and particle budget.
   frameAvg += (raw * 1000 - frameAvg) * 0.05;
@@ -1284,26 +1288,26 @@ function frame(now) {
     }
   } else slowFrames = 0;
 
-  achTick(raw);
+  achTick(worldDt);
   comms.update(raw, G.screen === 'play' || G.screen === 'overworld');
   if (G.screen === 'intro') bootIntro.update(raw);
   else if (G.screen === 'press') pressStart.update(raw);
   else if (G.screen === 'sector-intro') {
     if (input.consume('confirm') || input.consume('back') || input.consume('dash')) sectorIntro.skip();
-    if (sectorIntro.update(raw)) finishSectorIntro();
+    if (sectorIntro.update(worldDt)) finishSectorIntro();
   } else if (G.screen === 'play') {
     if (input.consume('pause')) pause();
   } else if (G.screen === 'overworld') {
     if (input.consume('pause')) pause();
-    else if (!comms.blocking) overworld.update(raw);
+    else if (!comms.blocking && worldDt > 0) overworld.update(worldDt);
   } else if (!comms.blocking) {
-    ui.update();
+    if (!debugDrawer.open) ui.update();
     input.consume('pause') && G.screen === 'pause' && unpause();
   }
 
-  G.frameDt = simulating() ? raw : 0; // screen-space effects that should freeze with the game (boost streaks)
-  if (simulating()) {
-    let dt = raw;
+  G.frameDt = simulating() ? worldDt : 0; // screen-space effects that should freeze with the game (boost streaks)
+  if (simulating() && worldDt > 0) {
+    let dt = worldDt;
     if (G.hitstop > 0) {
       G.hitstop -= raw;
       dt = 0;
@@ -1318,20 +1322,20 @@ function frame(now) {
       step(s);
       dt -= s;
     }
-    afterStep(raw);
+    afterStep(worldDt);
   }
 
   // Real-time effects
-  G.shake = Math.max(0, G.shake - raw * 1.8);
-  G.flash = Math.max(0, G.flash - raw * 2.5);
-  updateBanner(raw);
+  G.shake = Math.max(0, G.shake - worldDt * 1.8);
+  G.flash = Math.max(0, G.flash - worldDt * 2.5);
+  updateBanner(worldDt);
   mapBtn.hidden = G.screen !== 'overworld';
   const boost = Math.max(cine.boost(), G.player && (G.player.odT > 0 || G.player.dashT > 0) ? 3 : G.director && G.director.state === 'clear' ? 4 : 1, G.player && G.player.boostV ? 1 + 3.2 * G.player.boostV : 1);
   const dk = !!(G.mode === 'run' && (G.screen === 'play' || G.screen === 'pause' || G.screen === 'pause-settings' || G.screen === 'pause-run') && G.director.diff.blackout && G.director.state !== 'clear' && G.director.state !== 'await'); // not on result screens
   bg.setDark(dk);
   vignette.classList.toggle('dark', dk);
   const intro = G.screen === 'sector-intro';
-  bg.update(simulating() || intro ? raw * cine.bgScale() : raw * 0.25, intro ? sectorIntro.boost() : boost);
+  bg.update(simulating() || intro ? worldDt * cine.bgScale() : worldDt * 0.25, intro ? sectorIntro.boost() : boost);
   music.update(raw);
   musicBeat.update();
   // Menu titles glow with the beat too (an opacity-only layer per title: see ui/beat.js).
@@ -1593,6 +1597,9 @@ window.NEON = {
   openHangar: () => (showCampaign(), openHangar()),
   openFab: () => (showCampaign(), openHangar(), openFab()),
   openPilot: () => (showCampaign(), openPilot()),
+  openGallery: () => (toTitle(), openGallery(() => toTitle())),
+  openAchievements: () => (toTitle(), openAchievements(() => toTitle())),
+  openCore: () => (showCampaign(), openCore(() => showCampaign())),
   unequip: unequipSlot,
   paint: setPaint,
   // Pilot (return '' on success, else a reason). Classes / passives are rank-gated: grant({rankXp}) first.
@@ -1658,3 +1665,4 @@ window.NEON = {
 };
 
 boot();
+initDebugDrawer(window.NEON);

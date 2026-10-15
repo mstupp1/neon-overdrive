@@ -72,6 +72,17 @@ export const input = {
   clear() {
     pressedAt.clear();
   },
+  releaseAll() {
+    this.clear();
+    held.clear();
+    padHeld.clear();
+    touchHeld.clear();
+    this.mouseDown = false;
+    this.touch = null;
+    this.padX = this.padY = this.aimX = this.aimY = 0;
+    this.holdTarget();
+    this.holding = false;
+  },
   down(action) {
     return held.has(action) || padHeld.has(action) || touchHeld.has(action);
   },
