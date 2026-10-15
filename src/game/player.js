@@ -673,7 +673,7 @@ export function drawPlayer(ctx, k) {
     ctx.globalAlpha = g.boost ? (g.life / 0.22) * 0.2 : (g.life / 0.22) * (ph ? 0.5 : 0.35);
     ctx.drawImage(spr.img, g.x - spr.half, g.y - spr.half, spr.size, spr.size);
   }
-  drawBoostShip(ctx, p);
+  drawBoostShip(ctx, p, spr);
   // Afterimage passive: pending echoes
   if (p.st.afterimage) {
     for (const e of p.echoes) {
