@@ -14,6 +14,7 @@
 // The view changes at the midpoint of a zone fly-through (director.js), behind a flash.
 
 import { G, view } from './state.js';
+import { CHASE_TILT } from '../render/shipMounts.js';
 import { clamp, rand } from '../core/math.js';
 import { glow } from '../render/sprites.js';
 import { bg } from '../render/background.js';
@@ -51,7 +52,7 @@ const HOVER = 34;
 // sideways speed, read from how far they moved since the last frame (bosses only a little).
 const banks = new WeakMap();
 function tilt(o) {
-  if (o === G.player) return o.bank * 0.42;
+  if (o === G.player) return o.bank * CHASE_TILT;
   let b = banks.get(o);
   if (!b) {
     banks.set(o, { x: o.x, t: G.time, v: 0 });

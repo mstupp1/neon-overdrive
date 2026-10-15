@@ -3,6 +3,7 @@
 import { SHIP_ART } from './shipImageSpecs.js';
 import { shipPaint } from './shipPaint.js';
 import { exportedShipPoint } from './shipAssetGeometry.js';
+import { ROLL, ROLL_PERSPECTIVE } from './shipMounts.js';
 export { SHIP_ART };
 export const VECTOR_ART = SHIP_ART.vector;
 
@@ -69,7 +70,27 @@ function bake(image, spec, mode, color, stock) {
   const long = Math.max(x1 - x0, y1 - y0) * scale;
   const flameW = Math.min(5.2, Math.max(3.6, long * 0.085));
   return { img: canvas, size: BOX, half: BOX / 2, generated: true, reach: long / 2,
+    shade: mode === 'side' ? null : [rollShade(canvas, 1), rollShade(canvas, -1)],
     muzzles: spec.muzzles.map(point), engines: spec.engines.map(p => [...point(p), flameW]) };
+}
+
+// Light for a banked hull, masked to its silhouette: the rising wing (left for side 1, right for -1) catches light from
+// above and the dipping wing falls into shadow. Drawn over the hull with an alpha that follows the bank.
+function rollShade(hull, side) {
+  const c = document.createElement('canvas');
+  c.width = hull.width;
+  c.height = hull.height;
+  const g = c.getContext('2d');
+  g.drawImage(hull, 0, 0);
+  g.globalCompositeOperation = 'source-atop';
+  const grd = g.createLinearGradient(side > 0 ? c.width * 0.18 : c.width * 0.82, 0, side > 0 ? c.width * 0.82 : c.width * 0.18, 0);
+  grd.addColorStop(0, 'rgba(255,255,255,0.75)');
+  grd.addColorStop(0.45, 'rgba(255,255,255,0)');
+  grd.addColorStop(0.55, 'rgba(0,0,8,0)');
+  grd.addColorStop(1, 'rgba(0,0,8,0.8)');
+  g.fillStyle = grd;
+  g.fillRect(0, 0, c.width, c.height);
+  return c;
 }
 
 export function withShipImages(id, color, fallback) {
@@ -96,4 +117,36 @@ export function withShipImages(id, color, fallback) {
 
 export function shipSpriteForView(sprite, mode = 'top') {
   return mode === 'top' ? sprite : sprite.views?.[mode] || sprite.procedural || sprite;
+}
+
+// The hull image, posed. Top-down rolls are drawn as narrow vertical strips so the rising wing can grow toward the
+// camera while the dipping wing shrinks (a cheap perspective roll instead of a flat squash), with baked light on
+// the rising side. Strip heights and offsets match shipPoseLocal, which places muzzles and engines.
+const ROLL_STRIPS = 16;
+export function drawPosedHull(ctx, spr, bank, pitch, mode, alpha = 1) {
+  const { img, size, half } = spr;
+  const shade = spr.shade && Math.abs(bank) > 0.02 && mode !== 'side' ? spr.shade[bank > 0 ? 0 : 1] : null;
+  if (mode === 'top' && Math.abs(bank) > 0.02) {
+    const r = bank * ROLL, cr = Math.cos(r), sr = Math.sin(r) * ROLL_PERSPECTIVE;
+    const sy = 1 + pitch * 0.06;
+    const step = size / ROLL_STRIPS, px = img.width / size;
+    for (const [layer, a] of shade ? [[img, alpha], [shade, alpha * Math.abs(bank) * 0.5]] : [[img, alpha]]) {
+      ctx.globalAlpha = a;
+      for (let i = 0; i < ROLL_STRIPS; i++) {
+        const u = -half + i * step;
+        const h = (1 - (u + step / 2) * sr) * sy;
+        ctx.drawImage(layer, i * step * px, 0, step * px, img.height, u * cr, -half * h, step * cr + 0.15, size * h);
+      }
+    }
+    ctx.globalAlpha = alpha;
+    return;
+  }
+  const sx = mode === 'chase' ? 1 - Math.abs(bank) * 0.1 : 1;
+  const sy = 1 + pitch * (mode === 'side' ? 0.04 : 0.06);
+  ctx.drawImage(img, -half * sx, -half * sy, size * sx, size * sy);
+  if (shade) {
+    ctx.globalAlpha = alpha * Math.abs(bank) * 0.35;
+    ctx.drawImage(shade, -half * sx, -half * sy, size * sx, size * sy);
+    ctx.globalAlpha = alpha;
+  }
 }

@@ -1,7 +1,7 @@
 import { drawShip } from '../src/render/shipArt.js';
 import { makeSprite } from '../src/render/sprites.js';
-import { withShipImages, shipSpriteForView, SHIP_ART } from '../src/render/shipImages.js';
-import { posedShipPoint } from '../src/render/shipMounts.js';
+import { withShipImages, shipSpriteForView, drawPosedHull, SHIP_ART } from '../src/render/shipImages.js';
+import { posedShipPoint, CHASE_TILT, SIDE_TILT } from '../src/render/shipMounts.js';
 import { SHIPS, paintsFor } from '../src/game/ships.js';
 
 const originals = Object.fromEntries(SHIPS.map(ship => [ship.id, makeSprite(64, g => drawShip(g, ship.id, ship.color), false, 3)]));
@@ -62,12 +62,12 @@ function draw() {
     ctx.translate(256, 180); ctx.scale(5, 5);
     if (mode === 'side') ctx.rotate(Math.PI / 2);
     ctx.save();
-    if (mode === 'chase') ctx.rotate(bank * 0.42);
-    ctx.scale(1 - Math.abs(bank) * 0.28, 1);
-    ctx.drawImage(s.img, -s.half, -s.half, s.size, s.size);
+    if (mode === 'chase') ctx.rotate(bank * CHASE_TILT);
+    if (mode === 'side') ctx.rotate(bank * SIDE_TILT);
+    drawPosedHull(ctx, s, bank, 0, mode);
     ctx.restore();
     if (guides) for (const mount of s.muzzles || []) {
-      const [x, y] = posedShipPoint(mount, bank, 0, null, mode === 'chase');
+      const [x, y] = posedShipPoint(mount, bank, 0, null, mode);
       ctx.strokeStyle = '#ffcb5d'; ctx.lineWidth = 0.25;
       ctx.beginPath();ctx.moveTo(x - 1.3, y);ctx.lineTo(x + 1.3, y);ctx.moveTo(x, y + 1.3);ctx.lineTo(x, y - 7);ctx.stroke();
     }
