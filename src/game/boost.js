@@ -17,6 +17,7 @@ import { damp, rand, TAU } from '../core/math.js';
 import { ring, sparks, addShake } from './fx.js';
 import { sfx } from '../core/audio.js';
 import { sv } from './stageview.js';
+import { drawComet } from '../render/comet.js';
 
 export const BOOST = {
   cap: 100, // meter units at boostCap 1
@@ -229,10 +230,26 @@ export function drawBoostFx(ctx) {
   ctx.restore();
 }
 
-// Ship-side boost visuals (drawPlayer): a shock cone ahead of the nose.
-export function drawBoostShip(ctx, p) {
+// Ship-side boost visuals (drawPlayer, under the hull): a ki comet. An energy shell wraps the ship in its colour,
+// flame licks and long wisps stream behind (baked in render/comet.js), and a few live speed lines peel off the
+// flanks. Sized from the hull (spr.reach). The pursuit camera sits behind the ship, so there the tail is a stub and
+// the speed lines burst outward around the shell, toward the camera.
+const wisps = [];
+export function drawBoostShip(ctx, p, spr) {
   const V = p.boostV;
-  if (!V) return;
+  if (!V) {
+    wisps.length = 0;
+    return;
+  }
+  const chase = !field.ow && sv.mode === 'chase';
+  const reach = (spr && spr.reach) || 18;
+  const kick = p.boostKick / 0.35; // ignition: the head flares, then settles
+  const r = reach * (chase ? 0.95 : 1.05) * (1 + 0.45 * kick * kick);
+  const surge = Math.min(1, Math.max(0, (p.flow || 1) - 1) / 0.8); // the tail grows as the stage speeds up
+  const len = (chase ? 0.22 : 1) * (0.45 + 0.55 * V) * (0.8 + 0.35 * surge) * (1 + 0.05 * Math.sin(G.time * 37));
+  const color = p.odT > 0 ? p.ucol : p.color;
+  // The side view composites through a transparent offscreen layer, where additive light piles up into solid white.
+  const lum = !field.ow && sv.mode === 'side' ? 0.45 : 1;
   ctx.save();
   if (field.ow) {
     ctx.translate(p.x, p.y);
@@ -240,14 +257,55 @@ export function drawBoostShip(ctx, p) {
     ctx.translate(-p.x, -p.y);
   }
   ctx.globalCompositeOperation = 'lighter';
-  const fl = 0.8 + 0.2 * Math.sin(G.time * 40);
-  for (let i = 0; i < 3; i++) {
-    const r = 20 + i * 7;
-    ctx.globalAlpha = V * (0.55 - i * 0.15) * fl;
-    ctx.strokeStyle = i ? '#ffb13d' : '#fff3d6';
-    ctx.lineWidth = 2 - i * 0.4;
+  const hx = p.x;
+  const hy = p.y - reach * (chase ? 0.05 : 0.3);
+  drawComet(ctx, color, hx, hy, r, len, chase ? 1.15 : 1, lum * V * (chase ? 0.7 : 1) * (0.85 + 0.15 * Math.sin(G.time * 29)), G.time);
+  // Speed lines: spawned on the shell, they slide back (or out, in pursuit) and stretch, then fade.
+  const now = G.time;
+  const per = 1 / ((chase ? 60 : 30) * (view.quality || 1));
+  if (!wisps.last || now < wisps.last || now - wisps.last > 0.5) wisps.last = now;
+  while (now - wisps.last >= per) {
+    wisps.last += per;
+    wisps.push({
+      t0: wisps.last,
+      u: (Math.random() < 0.5 ? -1 : 1) * rand(0.55, 1.05),
+      ang: Math.PI / 2 + rand(-1, 1) * Math.PI * 0.8, // pursuit: mostly out the sides and bottom
+      d: rand(0.16, 0.28),
+      w: rand(0.8, 1.7),
+      hot: Math.random() < 0.3,
+    });
+  }
+  const tail = r * 7 * len;
+  ctx.lineCap = 'round';
+  for (let i = wisps.length - 1; i >= 0; i--) {
+    const w = wisps[i];
+    const a = (now - w.t0) / w.d;
+    if (a >= 1 || a < 0) {
+      wisps.splice(i, 1);
+      continue;
+    }
+    let x0, y0, x1, y1;
+    if (chase) {
+      const c = Math.cos(w.ang);
+      const sn = Math.sin(w.ang);
+      const d1 = r * (0.95 + a * a * 2.4);
+      const d0 = Math.max(r * 0.85, d1 - r * (0.3 + a * 0.9));
+      x0 = hx + c * d0;
+      y0 = hy + sn * d0 * 0.8;
+      x1 = hx + c * d1;
+      y1 = hy + sn * d1 * 0.8;
+    } else {
+      x0 = hx + w.u * r * (1 - a * 0.35);
+      y1 = hy + r * 0.2 + a * tail;
+      y0 = y1 - r * (0.6 + a * 2.2) * len;
+      x1 = x0 - w.u * r * 0.1;
+    }
+    ctx.globalAlpha = lum * V * (1 - a) * (w.hot ? 0.8 : 0.5) * (chase ? 1.3 : 1);
+    ctx.strokeStyle = w.hot ? '#ffffff' : color;
+    ctx.lineWidth = w.w;
     ctx.beginPath();
-    ctx.arc(p.x, p.y + 4 + i * 5, r, -Math.PI / 2 - 0.75 + i * 0.12, -Math.PI / 2 + 0.75 - i * 0.12);
+    ctx.moveTo(x0, y0);
+    ctx.lineTo(x1, y1);
     ctx.stroke();
   }
   ctx.restore();
