@@ -4,7 +4,8 @@
 // - Ult levels: the meter banks cells (ULT_CELL each; 3 by default, st.ultCells with Reserve Cell / gear). A cast spends
 //   up to 3 banked cells and fires at that level (p.ultLv); ULT_LV[cls][lv] holds each level's numbers. Level 3 is the
 //   old full-meter ultimate. st.ultSave = chance each spent cell is kept.
-// - Default ability: each class's rarity-0 ability comes with the class and starts equipped (initPilotProfile).
+// - Default ability: each class's rarity-0 ability comes with the class and starts equipped (initPilotProfile). A brand
+//   new pilot (no runs yet) earns it at the end of their first run instead (grantFirstAbilities from main.js bankRun).
 // - Passives: numeric ones change `st` in applyPassives(st, p) (called at the end of recomputeStats);
 //   behavioural ones just set st flags (killstreak, exec, bloodrush, nanorepair, riposte, afterimage, slipstream)
 //   that the existing hook points check.
@@ -149,12 +150,27 @@ export function initPilotProfile() {
       for (const ps of c.passives) if (OLD_GATES[ps.id] && rank >= OLD_GATES[ps.id] && !pl.found.includes(ps.id)) pl.found.push(ps.id);
     }
   }
-  // Once per save (new or old): every found class gets its default ability, equipped when nothing else is.
-  if (!pl.dflt) {
-    for (const c of CLASSES) if (pl.classes.includes(c.id)) grantDefault(c, true);
-    pl.dflt = 1;
-  }
+  // Once per save that has flown a run: every found class gets its default ability, equipped when nothing else is.
+  // A pilot with no runs waits for the end of the first one (grantFirstAbilities).
+  if (profile.runs > 0) grantFirstAbilities();
   saveProfile();
+}
+
+// First run over (or an older save on boot): grants each found class's default ability once.
+// Returns the default abilities this call newly found ([] when already granted).
+export function grantFirstAbilities() {
+  const pl = profile.pilot;
+  if (pl.dflt) return [];
+  const out = [];
+  for (const c of CLASSES) {
+    if (!pl.classes.includes(c.id)) continue;
+    const ps = defaultPassive(c);
+    if (ps && !pl.found.includes(ps.id)) out.push(ps);
+    grantDefault(c, true);
+  }
+  pl.dflt = 1;
+  saveProfile();
+  return out;
 }
 
 // Unlocks a found class / ability; returns true when it was new.
