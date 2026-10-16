@@ -25,7 +25,9 @@ It deploys as-is to any static host (itch.io, GitHub Pages, Netlify...). Fonts a
 
 On touch, the DASH and ULT buttons (and BOOST above DASH) sit together in one bottom corner so one thumb works them while the other hand steers; **Settings → Touch buttons** picks the corner (RIGHT by default, or LEFT).
 
-Menus: arrows / d-pad move to the nearest item in that direction (console-style: Down goes to the row below), Enter / Space / A to select, Esc / B to go back (or skip dialogue), `1`-`3` to pick an upgrade, `R` to reroll (or retry on the game-over screen), `F` to lock the focused draft card. Items you cannot afford stay focusable and show their price.
+Menus: up / down (arrows, d-pad, stick) always step one row, landing in the column you came from; left / right step along a row, and on a `‹ value ›` selector (ship card, Overdrive tier, settings toggles) change the value. Enter / Space / A to select, Esc / B to go back (or skip dialogue), Q / E or LB / RB to switch the screen's tabs. A footer under every menu shows the buttons for the current device and can be clicked or tapped (BACK is how touch leaves a screen). `1`-`3` to pick an upgrade, `R` to reroll (or retry on the game-over screen), `F` to lock the focused draft card. Items you cannot afford stay focusable and show their price. Names that don't fit end in an ellipsis; hovering or focusing them shows the full text.
+
+The title menu is PLAY, HANGAR, COLLECTION, HOW TO PLAY and SETTINGS. **HANGAR** (also on the campaign map) is one hub with SHIP · FAB · PILOT · TREE · FLUX tabs; **COLLECTION** holds GALLERY and ACHIEVEMENTS.
 
 ## Campaign
 
@@ -69,7 +71,7 @@ Title **PLAY** opens the campaign map, then LAUNCH. A **run** flies all four sys
 
 ### Ships
 
-Ships are bought with credits in the **Hangar** (campaign map -> HANGAR), or granted free when you reach the legacy unlock goal.
+Ships are bought with credits in the **Hangar** (title menu or campaign map -> HANGAR), or granted free when you reach the legacy unlock goal.
 
 | Ship | Style | Hull | Price | Free unlock |
 |---|---|---|---|---|
@@ -178,13 +180,13 @@ Best score, unlocks, credits, rank, gear and settings persist in `localStorage` 
 
 ## Gallery and achievements
 
-**GALLERY** (title menu) holds 30 **relics** in five themed sets of six: GRID ORIGINS, BIO BLOOM, DATA STORM and EVENTIDE (one per campaign system) and GRID JUNK (a small share of finds in any system). Each set has 3 commons, 2 rares and a legendary.
+**GALLERY** (title menu -> COLLECTION) holds 30 **relics** in five themed sets of six: GRID ORIGINS, BIO BLOOM, DATA STORM and EVENTIDE (one per campaign system) and GRID JUNK (a small share of finds in any system). Each set has 3 commons, 2 rares and a legendary.
 
 - **Buy** commons (150) and rares (350) in the Gallery, or open a **Data Capsule** (180) for a random common or rare you don't own yet.
 - **Find** them in the field: any kill has a tiny chance to drop a golden relic cache (elites 4%, Hunters 20%, bosses 35%). It drops a relic from the set of the system you're flying, preferring ones you don't own. **Legendaries are field finds only.** Finds are kept even if you die.
 - Completing a set pays a 250 credit bonus.
 
-**ACHIEVEMENTS** (title menu): 44 achievements in four tabs (Combat, Skill, Career, Oddities), some hidden behind a one-line hint until unlocked. Each pays credits (bronze 20, silver 60, gold 150). Unlocks, relic finds and set completions pop a small toast at the top of the screen. Older saves get what they already earned on first load.
+**ACHIEVEMENTS** (COLLECTION, second tab): 44 achievements in four tabs (Combat, Skill, Career, Oddities), some hidden behind a one-line hint until unlocked. Each pays credits (bronze 20, silver 60, gold 150). Unlocks, relic finds and set completions pop a small toast at the top of the screen. Older saves get what they already earned on first load.
 
 ## Settings
 
@@ -223,9 +225,10 @@ src/game/story.js     dialogue and the 10 anomaly events
 src/game/intro.js     skippable boot intro (scripted in-engine cinematic)
 src/game/upgrades.js  upgrade pool, drafts, stat recompute
 src/game/bullets.js, pickups.js, fx.js, world.js, bot.js   projectiles, pickups, particles, step + collisions, autopilot
-src/ui/screens.js     menu navigation, draft cards, results
+src/ui/screens.js     menu navigation (rows, tabs, button prompts, hub headers), draft cards, results
 src/ui/meta.js        campaign / route / market / dock / event / extraction screens
 src/ui/hangar.js      Hangar (ships, paint), inventory, Fabricator
+src/ui/hub.js         where the HANGAR / COLLECTION hubs return on BACK
 src/ui/pilot.js       Pilot screen (class, abilities)
 src/ui/tree.js        Passive tree screen (pan / zoom canvas)
 src/ui/comms.js       dialogue overlay

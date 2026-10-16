@@ -83,62 +83,51 @@
         </div>
 
         <!-- TITLE -->
-        <section class="screen" id="scr-title" data-back="">
+                <section class="screen" id="scr-title" data-back="">
             <div class="logo" aria-label="Neon Overdrive">
                 <span class="logo-top" data-text="NEON">NEON</span>
                 <span class="logo-bottom" data-text="OVERDRIVE">OVERDRIVE</span>
             </div>
             <p class="tagline">ROGUELIKE ARCADE SHOOTER</p>
-            <nav class="menu">
+            <nav class="menu main-menu">
                 <button class="btn primary" data-act="play">PLAY</button>
+                <button class="btn" data-act="hangar">HANGAR</button>
+                <button class="btn" data-act="gallery">COLLECTION</button>
                 <button class="btn" data-act="help">HOW TO PLAY</button>
                 <button class="btn" data-act="settings">SETTINGS</button>
-                <div class="pair">
-                    <button class="btn small" data-act="gallery">GALLERY</button>
-                    <button class="btn small" data-act="achievements">ACHIEVEMENTS</button>
-                </div>
             </nav>
             <div class="records" id="title-records"></div>
-            <div class="foot-hint" id="title-hint"></div>
         </section>
 
         <!-- GALLERY (relic sets) -->
-        <section class="screen" id="scr-gallery" data-back="leaveGallery">
-            <h2 class="screen-title">GALLERY</h2>
+                <section class="screen hub" id="scr-gallery" data-hub="collect:gallery" data-back="leaveGallery">
             <div class="pilot-line" id="gl-head"></div>
-            <div class="gl-tabs" id="gl-tabs"></div>
+            <div class="gl-tabs" id="gl-tabs" data-row></div>
             <div class="gl-set" id="gl-set"></div>
             <div class="gl-grid" id="gl-grid"></div>
             <div class="gl-detail" id="gl-detail"></div>
             <nav class="menu row">
                 <button class="btn small" data-act="capsule" id="gl-capsule">CAPSULE</button>
-                <button class="btn ghost small" data-act="leaveGallery">BACK</button>
             </nav>
         </section>
 
         <!-- ACHIEVEMENTS -->
-        <section class="screen" id="scr-achievements" data-back="leaveAch">
-            <h2 class="screen-title">ACHIEVEMENTS</h2>
+                <section class="screen hub" id="scr-achievements" data-hub="collect:ach" data-back="leaveAch" data-noselect>
             <div class="pilot-line ach-head" id="ach-head"></div>
-            <div class="gl-tabs ach-tabs" id="ach-tabs"></div>
+            <div class="gl-tabs ach-tabs" id="ach-tabs" data-row></div>
             <div class="ach-list" id="ach-list"></div>
-            <nav class="menu row">
-                <button class="btn ghost small" data-act="leaveAch" id="ach-back">BACK</button>
-            </nav>
         </section>
 
         <!-- SHIP SELECT -->
         <!-- HANGAR (reachable from the campaign map only) -->
-        <section class="screen" id="scr-hangar" data-back="leaveHangar">
-            <h2 class="screen-title">HANGAR</h2>
-            <div class="pilot-line" id="hangar-credits"></div>
+                <!-- HANGAR hub (title menu or campaign): SHIP · FABRICATOR · PILOT · TREE · FLUX CORE tabs (screens.js initHubs) -->
+        <section class="screen hub" id="scr-hangar" data-hub="hangar:ship" data-back="leaveHangar">
             <div class="hs-ship">
-                <button class="hs-nav" data-act="hprev" aria-label="Previous ship">&#8249;</button>
-                <div class="hs-card" id="hs-card"></div>
-                <button class="hs-nav" data-act="hnext" aria-label="Next ship">&#8250;</button>
+                <button class="hs-nav" data-act="hprev" data-nofocus tabindex="-1" aria-label="Previous ship">&#8249;</button>
+                <button class="hs-card" id="hs-card" data-act="hact" data-cycle="hship"></button>
+                <button class="hs-nav" data-act="hnext" data-nofocus tabindex="-1" aria-label="Next ship">&#8250;</button>
             </div>
             <div class="hs-dots" id="hs-dots"></div>
-            <button class="btn primary hs-act" data-act="hact" id="hs-act">SELECT</button>
             <div class="hs-label">GEAR</div>
             <div class="slots" id="hs-slots"></div>
             <div class="hs-label">PAINT</div>
@@ -146,73 +135,50 @@
             <div class="hs-label">LOADOUT</div>
             <div class="hs-stats" id="hs-stats"></div>
             <div class="hs-paths" id="hs-paths"></div>
-            <nav class="menu row">
-                <button class="btn small" data-act="hfab" id="hs-fab">FABRICATOR</button>
-                <button class="btn ghost small" data-act="leaveHangar" id="hs-back">BACK</button>
-            </nav>
         </section>
 
         <!-- PILOT (reachable from the campaign map only) -->
-        <section class="screen" id="scr-pilot" data-back="leavePilot">
-            <h2 class="screen-title">PILOT</h2>
+                <section class="screen hub" id="scr-pilot" data-hub="hangar:pilot" data-back="leavePilot">
             <div class="pilot-card" id="pl-card"></div>
-            <div class="hs-label">CLASS</div>
             <div class="cls-tabs" id="pl-tabs"></div>
             <div class="cls-info" id="pl-info"></div>
             <div class="hs-label" id="pl-pass-label">PASSIVES</div>
             <div class="ab-grid" id="pl-passives"></div>
             <div class="ab-detail" id="pl-detail"></div>
-            <nav class="menu row">
-                <button class="btn small" data-act="tree" id="pl-tree">PASSIVE TREE</button>
-                <button class="btn ghost small" data-act="leavePilot" id="pl-back">BACK</button>
-            </nav>
         </section>
 
         <!-- PASSIVE TREE (per class, opened from PILOT) -->
-        <section class="screen" id="scr-tree" data-back="leaveTree">
-            <h2 class="screen-title">PASSIVE TREE</h2>
+                <section class="screen hub" id="scr-tree" data-hub="hangar:tree" data-back="leaveTree">
             <div class="cls-tabs tree-tabs" id="tree-tabs"></div>
             <div class="tree-points" id="tree-points"></div>
             <button class="tree-view" id="tree-view" data-act="treeView" aria-label="Passive tree"><canvas id="tree-canvas"></canvas><span class="tree-zoom"><i data-zoom="1">+</i><i data-zoom="-1">−</i><i data-zoom="0">⌂</i></span></button>
             <div class="tree-detail" id="tree-detail"></div>
             <nav class="menu row">
                 <button class="btn ghost small" data-act="treeReset" id="tree-reset">REFUND ALL</button>
-                <button class="btn ghost small" data-act="leaveTree" id="tree-back">BACK</button>
             </nav>
         </section>
 
         <!-- FLUX CORE (endgame upgrades) -->
-        <section class="screen" id="scr-core" data-back="leaveCore">
-            <h2 class="screen-title">FLUX CORE</h2>
+                <section class="screen hub" id="scr-core" data-hub="hangar:core" data-back="leaveCore">
             <p class="screen-sub" id="core-sub"></p>
-            <div class="cards still" id="core-list"></div>
-            <nav class="menu row">
-                <button class="btn ghost small" data-act="leaveCore">BACK</button>
-            </nav>
+            <div class="core-grid" id="core-list"></div>
+            <div class="core-detail" id="core-detail"></div>
         </section>
 
         <!-- HANGAR PART LIST -->
-        <section class="screen" id="scr-parts" data-back="partsBack">
-            <h2 class="screen-title" id="parts-title">CORE</h2>
-            <p class="screen-sub" id="parts-sub"></p>
-            <div class="pilot-line" id="parts-credits"></div>
+                <section class="screen hub" id="scr-parts" data-hub="hangar:ship" data-back="partsBack" data-back-label="SHIP">
+            <div class="sub-head"><b id="parts-title">CORE</b><span id="parts-sub"></span></div>
             <div class="gear-detail" id="parts-detail"></div>
             <div class="inv-grid" id="parts-list"></div>
             <nav class="menu row">
                 <button class="btn small" data-act="gsell" id="parts-sell">SELL</button>
                 <button class="btn small" data-act="gjunk" id="parts-junk">SELL JUNK</button>
-            </nav>
-            <nav class="menu row">
                 <button class="btn small" data-act="gfab" id="parts-fab">FABRICATOR</button>
-                <button class="btn ghost small" data-act="partsBack" id="parts-back">BACK</button>
             </nav>
         </section>
 
         <!-- FABRICATOR (roll new gear) -->
-        <section class="screen" id="scr-fab" data-back="fabBack">
-            <h2 class="screen-title">FABRICATOR</h2>
-            <p class="screen-sub">Roll new gear. The odds climb the further you fly and the higher your Overdrive tier.</p>
-            <div class="pilot-line" id="fab-credits"></div>
+                <section class="screen hub" id="scr-fab" data-hub="hangar:fab" data-back="fabBack">
             <div class="fab-odds" id="fab-odds"></div>
             <div class="fab-slots" id="fab-slots"></div>
             <nav class="menu row fab-rolls">
@@ -222,14 +188,12 @@
             <div class="gear-detail" id="fab-result"></div>
             <nav class="menu row">
                 <button class="btn small" data-act="finv" id="fab-inv">INVENTORY</button>
-                <button class="btn ghost small" data-act="fabBack" id="fab-back">BACK</button>
             </nav>
         </section>
 
         <!-- CAMPAIGN MAP -->
-        <section class="screen" id="scr-campaign" data-back="back">
+                <section class="screen" id="scr-campaign" data-back="back">
             <h2 class="screen-title">CAMPAIGN</h2>
-            <p class="screen-sub">Fight through every system in one run</p>
             <div class="pilot-line" id="camp-pilot"></div>
             <div class="sysmap" id="sys-map"></div>
             <div class="sys-detail" id="sys-detail"></div>
@@ -240,15 +204,8 @@
             </div>
             <nav class="menu">
                 <button class="btn primary" data-act="launch" id="launch-btn">LAUNCH</button>
-                <div class="pair">
-                    <button class="btn small" data-act="hangar" id="ship-btn">HANGAR</button>
-                    <button class="btn small" data-act="pilot" id="pilot-btn">PILOT</button>
-                </div>
-                <div class="pair">
-                    <button class="btn small" data-act="tier" id="tier-btn">OVERDRIVE 0</button>
-                    <button class="btn small" data-act="core" id="core-btn">FLUX CORE</button>
-                </div>
-                <button class="btn ghost small" data-act="back">BACK</button>
+                <button class="btn opt" data-act="tier" data-cycle="tierStep" id="tier-btn">OVERDRIVE</button>
+                <button class="btn" data-act="hangar" id="ship-btn">HANGAR</button>
             </nav>
         </section>
 
@@ -279,7 +236,7 @@
         </section>
 
         <!-- BLACK MARKET -->
-        <section class="screen" id="scr-market" data-back="nodeDone">
+        <section class="screen" id="scr-market" data-back="nodeDone" data-back-label="LEAVE">
             <h2 class="screen-title" id="market-title">BLACK MARKET</h2>
             <div class="wallet" id="market-wallet"></div>
             <p class="route-hint" id="market-hint"></p>
@@ -316,7 +273,7 @@
         </section>
 
         <!-- UPGRADE DRAFT -->
-        <section class="screen draft" id="scr-draft" data-back="">
+        <section class="screen draft" id="scr-draft" data-back="" data-select-label="HOLD TO PICK">
             <div class="draft-head">
                 <h2 class="screen-title" id="draft-title">LEVEL UP</h2>
                 <p class="screen-sub" id="draft-sub">Choose an upgrade</p>
@@ -331,7 +288,7 @@
         </section>
 
         <!-- PAUSE -->
-        <section class="screen px-snap" id="scr-pause" data-back="resume">
+        <section class="screen px-snap" id="scr-pause" data-back="resume" data-back-label="RESUME">
             <h2 class="screen-title">PAUSED</h2>
             <div class="run-stats" id="pause-stats"></div>
             <div class="build big" id="pause-build"></div>
@@ -345,57 +302,51 @@
         </section>
 
         <!-- RUN DETAILS (from pause): three tabs stacked in one cell, so switching never moves anything -->
-        <section class="screen" id="scr-run" data-back="runBack">
+                <!-- RUN DETAILS (from pause): three tabs stacked in one cell, so switching never moves anything -->
+        <section class="screen" id="scr-run" data-back="runBack" data-noselect>
             <h2 class="screen-title">RUN DETAILS</h2>
             <p class="screen-sub" id="run-sub"></p>
-            <div class="help-tabs run-tabs">
-                <button class="btn small on" data-act="runTab" data-tab="tech">TECH</button>
-                <button class="btn small" data-act="runTab" data-tab="stats">STATS</button>
-                <button class="btn small" data-act="runTab" data-tab="loadout">LOADOUT</button>
-            </div>
+            <div class="tabbar primary" data-nofocus><button class="tk" data-k="tabL" tabindex="-1" aria-label="Previous tab"></button><div class="tabs"><button class="tab on" data-act="runTab" data-tab="tech">TECH</button><button class="tab" data-act="runTab" data-tab="stats">STATS</button><button class="tab" data-act="runTab" data-tab="loadout">LOADOUT</button></div><button class="tk" data-k="tabR" tabindex="-1" aria-label="Next tab"></button></div>
             <div class="rd-panel">
                 <div class="rd-tab" id="run-tab-tech" data-tab="tech"></div>
                 <div class="rd-tab tab-off" id="run-tab-stats" data-tab="stats"></div>
                 <div class="rd-tab tab-off" id="run-tab-loadout" data-tab="loadout"></div>
             </div>
-            <nav class="menu">
-                <button class="btn ghost" data-act="runBack" id="run-back">BACK</button>
-            </nav>
         </section>
 
         <!-- SETTINGS -->
-        <section class="screen px-snap" id="scr-settings" data-back="back">
+                <section class="screen px-snap" id="scr-settings" data-back="back">
             <h2 class="screen-title">SETTINGS</h2>
-            <div class="settings">
-                <label class="set-row"><span>Music</span><input type="range" min="0" max="100" step="5" id="set-music"><b id="set-music-v"></b></label>
-                <label class="set-row"><span>Sound FX</span><input type="range" min="0" max="100" step="5" id="set-sfx"><b id="set-sfx-v"></b></label>
-                <button class="set-row toggle" data-set="shake"><span>Screen shake</span><b></b></button>
-                <button class="set-row toggle" data-set="flashes"><span>Screen flashes</span><b></b></button>
-                <button class="set-row toggle" data-set="bloom"><span>Bloom</span><b></b></button>
-                <button class="set-row toggle" data-act="retro" id="set-retro"><span>Pixel look</span><b></b></button>
-                <button class="set-row toggle" data-set="beat"><span>Music pulse</span><b></b></button>
-                <button class="set-row toggle" data-set="damageNumbers"><span>Damage numbers</span><b></b></button>
-                <button class="set-row toggle" data-set="story"><span>Story dialogue</span><b></b></button>
-                <button class="set-row" data-act="touchSide" id="set-side"><span>Touch buttons</span><b></b></button>
-                <button class="set-row" data-act="intro" id="set-intro"><span>Replay intro</span><b>▸</b></button>
-                <button class="set-row" data-act="fullscreen"><span>Fullscreen</span><b>⤢</b></button>
-                <button class="set-row danger" data-act="reset"><span id="reset-label">Reset progress</span><b>⟲</b></button>
+            <div class="tabbar primary" data-nofocus><button class="tk" data-k="tabL" tabindex="-1" aria-label="Previous tab"></button><div class="tabs"><button class="tab on" data-act="setTab" data-tab="audio">AUDIO</button><button class="tab" data-act="setTab" data-tab="video">DISPLAY</button><button class="tab" data-act="setTab" data-tab="game">GAME</button></div><button class="tk" data-k="tabR" tabindex="-1" aria-label="Next tab"></button></div>
+            <div class="settings tab-stack">
+                <div class="set-page" data-tab="audio">
+                    <label class="set-row"><span>Music</span><input type="range" min="0" max="100" step="5" id="set-music"><b id="set-music-v"></b></label>
+                    <label class="set-row"><span>Sound FX</span><input type="range" min="0" max="100" step="5" id="set-sfx"><b id="set-sfx-v"></b></label>
+                    <button class="set-row toggle" data-set="beat"><span>Music pulse</span><b></b></button>
+                </div>
+                <div class="set-page tab-off" data-tab="video">
+                    <button class="set-row toggle" data-set="shake"><span>Screen shake</span><b></b></button>
+                    <button class="set-row toggle" data-set="flashes"><span>Screen flashes</span><b></b></button>
+                    <button class="set-row toggle" data-set="bloom"><span>Bloom</span><b></b></button>
+                    <button class="set-row toggle" data-act="retro" id="set-retro"><span>Pixel look</span><b></b></button>
+                    <button class="set-row toggle" data-set="damageNumbers"><span>Damage numbers</span><b></b></button>
+                    <button class="set-row" data-act="fullscreen"><span>Fullscreen</span><b>⤢</b></button>
+                </div>
+                <div class="set-page tab-off" data-tab="game">
+                    <button class="set-row toggle" data-set="story"><span>Story dialogue</span><b></b></button>
+                    <button class="set-row" data-act="touchSide" data-cycle="touchSide" id="set-side"><span>Touch buttons</span><b></b></button>
+                    <button class="set-row" data-act="intro" id="set-intro"><span>Replay intro</span><b>▸</b></button>
+                    <button class="set-row danger" data-act="reset"><span id="reset-label">Reset progress</span><b>⟲</b></button>
+                </div>
             </div>
-            <nav class="menu row">
-                <button class="btn ghost" data-act="back">BACK</button>
-            </nav>
         </section>
 
         <!-- HELP -->
-        <section class="screen" id="scr-help" data-back="back">
+        <section class="screen" id="scr-help" data-back="back" data-noselect>
             <h2 class="screen-title">HOW TO PLAY</h2>
-            <div class="help-tabs">
-                <button class="btn small on" data-act="helpTab" data-tab="controls">CONTROLS</button>
-                <button class="btn small" data-act="helpTab" data-tab="survive">SURVIVE</button>
-                <button class="btn small" data-act="helpTab" data-tab="campaign">CAMPAIGN</button>
-            </div>
-            <div class="help">
-                <div class="help-block on" data-tab="controls">
+            <div class="tabbar primary" data-nofocus><button class="tk" data-k="tabL" tabindex="-1" aria-label="Previous tab"></button><div class="tabs"><button class="tab on" data-act="helpTab" data-tab="controls">CONTROLS</button><button class="tab" data-act="helpTab" data-tab="survive">SURVIVE</button><button class="tab" data-act="helpTab" data-tab="build">BUILD</button><button class="tab" data-act="helpTab" data-tab="campaign">CAMPAIGN</button></div><button class="tk" data-k="tabR" tabindex="-1" aria-label="Next tab"></button></div>
+            <div class="help tab-stack">
+                <div class="help-block" data-tab="controls">
                     <h3>Controls</h3>
                     <table class="keys">
                         <tr><td>Move</td><td><kbd>WASD</kbd> <kbd>←↑↓→</kbd> · mouse · drag · stick</td></tr>
@@ -403,36 +354,39 @@
                         <tr><td>Ultimate</td><td><kbd>E</kbd> · right click · button · <kbd>B</kbd></td></tr>
                         <tr><td>Boost</td><td>Hold <kbd>Shift</kbd> · BOOST button · <kbd>LB</kbd>: burn the boost meter to rush the stage in fights or fly faster in the overworld</td></tr>
                         <tr><td>Pause</td><td><kbd>Esc</kbd> <kbd>P</kbd> · Start</td></tr>
+                        <tr><td>Menus</td><td><kbd>←↑↓→</kbd> · d-pad, <kbd>Enter</kbd> · <kbd>A</kbd> select, <kbd>Esc</kbd> · <kbd>B</kbd> back, <kbd>Q</kbd> <kbd>E</kbd> · <kbd>LB</kbd> <kbd>RB</kbd> switch tabs</td></tr>
                     </table>
                 </div>
-                <div class="help-block" data-tab="survive">
+                <div class="help-block tab-off" data-tab="survive">
                     <h3>Survive</h3>
                     <ul>
                         <li>Your ship fires automatically. Only the <b>white core</b> can be hit.</li>
                         <li><b>Dash</b> through danger — you're untouchable mid-dash.</li>
                         <li><b>Graze</b> bullets and chain kills to charge your <b class="pink">Ultimate</b>. Your pilot class replaces Overdrive: <b>Striker</b> erases every bullet and doubles fire and damage, <b>Engineer</b> raises a bullet-eating dome with extra wingmen, <b>Ghost</b> slows time around you and turns grazes into strikes. All of them double your score.</li>
-                        <li>Classes and abilities are <b>found</b>: bosses and the Hunter drop them, and every Pilot Rank hands you one. Your rank sets how many abilities you can equip on the <b>Pilot</b> screen, and how rare.</li>
                         <li>Collect <b class="cyan">data shards</b> to level up. Level-ups tune what you already fly: +1 to a stat or defense (owned or new), or a small <b>Tune</b>. Your <b>Main Cannon</b> grows with the run, at each system's halfway point and each boss. Build around up to 4 weapon modules.</li>
                         <li>Clear sectors for <b class="green">rewards</b>: new tech, module levels and evolutions, with a rarity roll. Bosses roll rarer.</li>
                     </ul>
                 </div>
-                <div class="help-block" data-tab="campaign">
-                    <h3>Campaign</h3>
+                <div class="help-block tab-off" data-tab="build">
+                    <h3>Build</h3>
                     <ul>
-                        <li>Pick a star system, then jump along a <b>route</b>: combat, elite, <b class="gold">market</b>, <b class="green">dock</b>, <b class="violet">anomaly</b>, then the boss.</li>
-                        <li>You earn <b class="gold">credits</b> in a run. Extract after the boss to bank them all; die and keep half. Spend them in the <b>Hangar</b> on ships and paint, or roll gear in the <b>Fabricator</b>.</li>
                         <li>Reward cards and gear roll a rarity: <b style="color:#d9dee8">Common</b>, <b style="color:#5dff6a">Uncommon</b>, <b style="color:#4d9dff">Rare</b>, <b style="color:#c45bff">Epic</b>, <b style="color:#ff9a1f">Legendary</b>. Deeper systems and higher Overdrive tiers roll rarer. A rarer piece's bonus modifiers stay on its build path. Bosses always drop gear, and you keep every piece you find.</li>
                         <li>Lock a draft card (its lock icon) to keep it when you reroll. You start each run with 3 rerolls and earn one every 5 levels and per boss.</li>
                         <li>The first two build paths you raise to 5 levels lock in as your <b>specializations</b>, with mastery bonuses at 5, 10 and 15. After that the other paths share 10 <b>splash</b> levels.</li>
                         <li><b>Skip</b> a draft to bank <b class="gold">Fortune</b> (+1 level-up, +2 reward, max 6). Your next reward spends it: luckier rolls, and at 2 / 4 / 6 one card is at least Rare / Epic / Legendary.</li>
-                        <li>Anomalies are risk-for-reward choices. Black Market and Docks heal and upgrade mid-run.</li>
                         <li>Deeper systems add new tech to the draft. <b>NEW DISCOVERY</b> marks one you have never seen, and from then on it can turn up in any system. <b class="cyan">NEW THIS RUN</b> marks one you know but don't own yet.</li>
                     </ul>
                 </div>
+                <div class="help-block tab-off" data-tab="campaign">
+                    <h3>Campaign</h3>
+                    <ul>
+                        <li>Pick a star system, then jump along a <b>route</b>: combat, elite, <b class="gold">market</b>, <b class="green">dock</b>, <b class="violet">anomaly</b>, then the boss.</li>
+                        <li>You earn <b class="gold">credits</b> in a run. Extract after the boss to bank them all; die and keep half. Spend them in the <b>Hangar</b> on ships and paint, or roll gear in the <b>Fabricator</b>.</li>
+                        <li>Classes and abilities are <b>found</b>: bosses and the Hunter drop them, and every Pilot Rank hands you one. Your rank sets how many abilities you can equip on the <b>Pilot</b> screen, and how rare.</li>
+                        <li>Anomalies are risk-for-reward choices. Black Market and Docks heal and upgrade mid-run.</li>
+                    </ul>
+                </div>
             </div>
-            <nav class="menu row">
-                <button class="btn primary" data-act="back" id="help-back">GOT IT</button>
-            </nav>
         </section>
 
         <!-- GAME OVER -->
@@ -454,6 +408,9 @@
                 </div>
             </nav>
         </section>
+
+        <!-- Button prompts under every menu (screens.js renderPrompts) -->
+        <div id="prompts" class="prompts" hidden></div>
 
         <noscript>
             <div class="noscript">NEON OVERDRIVE needs JavaScript enabled.</div>

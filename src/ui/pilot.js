@@ -9,7 +9,6 @@ import { rankFor } from '../game/economy.js';
 import { CLASSES, classById, activeClass, classUnlocked, passiveUnlocked, passiveFound, equippedPassives, setClass, togglePassive, abilitySlots, rarityCap, rankForRarity, nextSlotRank } from '../game/pilot.js';
 import { RARITY } from '../game/rarity.js';
 import { ui, $ } from './screens.js';
-import { treeLabel } from './tree.js';
 
 let viewCls = 'striker'; // class whose details are open (may be a locked one, preview only)
 let detailId = null; // ability shown in the detail panel
@@ -38,16 +37,14 @@ function render() {
   $('#pl-tabs').innerHTML = CLASSES.map((c) => {
     const open = classUnlocked(c);
     const cur = act.id === c.id;
-    return `<button class="cls-tab${cur ? ' cur' : ''}${viewCls === c.id ? ' view' : ''}${open ? '' : ' locked'}" data-act="pclass" data-id="${c.id}" style="--c:${c.color}" aria-pressed="${cur}"><span class="cls-ico">${open ? c.icon : lockSvg}</span><b>${c.name}</b><i>${open ? (cur ? 'ACTIVE' : c.role.toUpperCase()) : 'NOT FOUND'}</i></button>`;
+    return `<button class="cls-tab${cur ? ' cur' : ''}${viewCls === c.id ? ' view' : ''}${open ? '' : ' locked'}" data-act="pclass" data-id="${c.id}" style="--c:${c.color}" aria-pressed="${cur}"><span class="cls-ico">${open ? c.icon : lockSvg}</span><span class="cls-txt"><b class="clip">${c.name}</b><i class="clip">${open ? (cur ? 'ACTIVE' : c.role.toUpperCase()) : 'NOT FOUND'}</i></span></button>`;
   }).join('');
 
   // Class info
   const info = $('#pl-info');
   info.style.setProperty('--c', view.color);
   info.classList.toggle('locked', !owned);
-  info.innerHTML = `<div class="ci-top"><span class="role">${view.role.toUpperCase()}${owned ? '' : ' · NOT FOUND · DROPS FROM BOSSES'}</span></div><p>${view.desc}</p><div class="ci-ult"><em>ULTIMATE</em><b>${view.ult.name}</b><span>${view.ult.desc}</span><span class="ci-lv">${view.ult.levels}</span></div>`;
-
-  $('#pl-tree').textContent = treeLabel(view.id);
+  info.innerHTML = `<div class="ci-top"><span class="role">${view.role.toUpperCase()}${owned ? '' : ' · NOT FOUND · DROPS FROM BOSSES'}</span></div><p>${view.desc}</p><div class="ci-ult"><em>ULTIMATE</em><b>${view.ult.name}</b><span>${view.ult.desc}</span><span class="ci-lv" title="${view.ult.levels}">${view.ult.levels}</span></div>`;
 
   // Abilities: found ones equip into rank-gated slots; rarity above the rank cap stays locked.
   const eq = equippedPassives(view.id).map((x) => x.id);
@@ -64,7 +61,7 @@ function render() {
     const open = passiveUnlocked(view, ps);
     const on = eq.includes(ps.id);
     const mark = on ? '<b class="ab-mark">✓</b>' : open ? '' : `<span class="ab-mark lk">${lockSvg}</span>`;
-    return `<button class="ab-tile r${ps.r}${on ? ' on' : ''}${open ? '' : ' locked'}${passiveFound(ps) ? '' : ' unfound'}" data-act="ppass" data-id="${ps.id}" style="--rc:${RARITY[ps.r].color}" aria-pressed="${on}"><span class="ab-icon">${ps.icon}</span><span class="ab-name">${ps.name}</span>${mark}</button>`;
+    return `<button class="ab-tile r${ps.r}${on ? ' on' : ''}${open ? '' : ' locked'}${passiveFound(ps) ? '' : ' unfound'}" data-act="ppass" data-id="${ps.id}" style="--rc:${RARITY[ps.r].color}" aria-pressed="${on}"><span class="ab-icon">${ps.icon}</span><span class="ab-name clip">${ps.name}</span>${mark}</button>`;
   }).join('');
   renderDetail();
 }
@@ -108,7 +105,7 @@ export function showPilot(focus) {
   G.screen = 'pilot';
   render();
   let el = typeof focus === 'string' ? focusEl(focus) : focus;
-  if (!el) el = focusEl('.cls-tab.view') || $('#pl-back');
+  if (!el) el = focusEl('.cls-tab.view');
   ui.show('pilot', { focus: el });
 }
 

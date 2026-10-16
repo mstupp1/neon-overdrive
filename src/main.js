@@ -33,10 +33,11 @@ import { pilotActs, openPilot, showPilot, initPilotUi } from './ui/pilot.js';
 import { treeActs, openTree, treeView } from './ui/tree.js';
 import * as passiveTree from './game/tree.js';
 import { galleryActs, openGallery, openAchievements } from './ui/gallery.js';
+import { hub, hubExit } from './ui/hub.js';
 import { initToasts, notifyBacklog } from './ui/toasts.js';
 import { achInit, achTick } from './game/achievements.js';
 import { rollRelicDrop } from './game/collectables.js';
-import { setClass, setPassives, initPilotProfile, findClass, findPassive } from './game/pilot.js';
+import { setClass, setPassives, initPilotProfile, findClass, findPassive, activeClass } from './game/pilot.js';
 import { buyShip, equipPart, unequipSlot, setPaint, selectShip, applyAllPaints, rollGear, sellGear, sellJunk, initGear } from './game/hangar.js';
 import { SYSTEMS, systemById, generateRoute, nodeSpec, reachableNodes, routeNode, REWARDS, isFight } from './game/campaign.js';
 import { rand, pick, lerp, easeInOut } from './core/math.js';
@@ -1021,6 +1022,14 @@ function showPressStart(instant = false) {
   pressStart.start({ instant, done: () => toTitle(true, false), idle: () => playIntro(true) });
 }
 
+// Tabbed pages stacked in one cell (.tab-stack): the tab button lights up, the other pages hide but keep their room.
+function showTab(scr, tab) {
+  document.querySelectorAll(`${scr} [data-tab]`).forEach((el) => {
+    const on = el.dataset.tab === tab;
+    el.classList.toggle(el.classList.contains('tab') ? 'on' : 'tab-off', el.classList.contains('tab') ? on : !on);
+  });
+}
+
 // --- UI handlers ---------------------------------------------------------------------
 
 ui.init({
@@ -1030,7 +1039,8 @@ ui.init({
       saveProfile();
       settingsReturn = 'campaign';
       G.screen = 'help';
-      ui.show('help', { focus: document.getElementById('help-back') });
+      document.getElementById('scr-help').dataset.backLabel = 'CONTINUE';
+      ui.show('help');
       return;
     }
     showCampaign();
@@ -1038,7 +1048,8 @@ ui.init({
   help() {
     settingsReturn = 'title';
     G.screen = 'help';
-    ui.show('help', { focus: document.getElementById('help-back') });
+    document.getElementById('scr-help').dataset.backLabel = 'BACK';
+    ui.show('help');
   },
   settings() {
     settingsReturn = G.screen === 'pause' ? 'pause' : 'title';
@@ -1068,7 +1079,10 @@ ui.init({
     }
   },
   helpTab(btn) {
-    document.querySelectorAll('#scr-help [data-tab]').forEach((el) => el.classList.toggle('on', el.dataset.tab === btn.dataset.tab));
+    showTab('#scr-help', btn.dataset.tab);
+  },
+  setTab(btn) {
+    showTab('#scr-settings', btn.dataset.tab);
   },
   launch: () => launchRun(),
   // Campaign "how a run works" box: toggled by the ? button, opens once by itself.
@@ -1081,28 +1095,45 @@ ui.init({
     }
     (box.hidden ? document.querySelector('#sys-detail .info-btn') : box.querySelector('.btn')).focus();
   },
-  hangar: () => openHangar(),
-  core: () => openCore(() => showCampaign('core-btn')),
+  // HANGAR hub (SHIP · FABRICATOR · PILOT · TREE · FLUX CORE) from the title menu or the campaign map.
+  hangar() {
+    hub.exit = ui.current === 'campaign' ? () => showCampaign('ship-btn') : () => titleMenu('[data-act=hangar]');
+    openHangar();
+  },
+  // A hub tab: 'hangar:pilot', 'collect:ach', ...
+  hub(btn) {
+    const [, tab] = btn.dataset.hubTab.split(':');
+    if (tab === 'ship') openHangar();
+    else if (tab === 'fab') openFab('hub');
+    else if (tab === 'pilot') openPilot();
+    else if (tab === 'tree') {
+      openTree(null, hubExit);
+      tip('tree');
+    } else if (tab === 'core') openCore(hubExit);
+    else if (tab === 'gallery') openGallery(hubExit);
+    else if (tab === 'ach') openAchievements(hubExit);
+  },
   ...coreActs,
-  // Overdrive tier for the next launch: cycles through the unlocked tiers.
+  // Overdrive tier for the next launch: confirm cycles through the unlocked tiers, left / right step it.
   tier() {
+    this.tierStep(null, 1);
+  },
+  tierStep(btn, d = 1) {
     if (!profile.tierMax) return;
-    profile.tier = (profile.tier + 1) % (profile.tierMax + 1);
+    profile.tier = (profile.tier + d + profile.tierMax + 1) % (profile.tierMax + 1);
     saveProfile();
     showCampaign('tier-btn');
   },
-  leaveHangar: () => showCampaign(),
+  leaveHangar: () => hubExit(),
   ...hangarActs,
-  pilot: () => openPilot(),
-  leavePilot: () => showCampaign(),
+  leavePilot: () => hubExit(),
   ...pilotActs,
-  tree() {
-    openTree(document.querySelector('#pl-tabs .view')?.dataset.id, () => showPilot('#pl-tree'));
-    tip('tree');
-  },
   ...treeActs,
-  gallery: () => openGallery(() => titleMenu('[data-act=gallery]')),
-  achievements: () => openAchievements(() => titleMenu('[data-act=achievements]')),
+  // COLLECTION hub (GALLERY · ACHIEVEMENTS), off the title menu.
+  gallery() {
+    hub.exit = () => titleMenu('[data-act=gallery]');
+    openGallery(hubExit);
+  },
   ...galleryActs,
   campaign: () => showCampaign(),
   upgrade: () => showCampaign('ship-btn'),
@@ -1229,6 +1260,13 @@ for (const [id, action] of [['touch-od', 'od'], ['touch-dash', 'dash']]) {
   el.addEventListener('pointerdown', down);
   for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) el.addEventListener(ev, up);
 }
+
+// Marks on the hub tabs: unspent tree points, gear and relics not yet looked at.
+ui.badges = () => ({
+  'hangar:tree': passiveTree.pointsLeft(activeClass().id),
+  'hangar:ship': profile.gearNew.length > 0,
+  'collect:gallery': profile.relicNew.length > 0,
+});
 
 input.onAnyGesture = unlockAudio;
 input.getAnchor = () => (G.screen === 'overworld' ? overworld.anchor() : G.player ? (sv.active ? sv.toScreen(G.player.x, G.player.y) : { x: G.player.x, y: G.player.y }) : { x: view.W / 2, y: view.H * 0.8 });
@@ -1556,6 +1594,13 @@ window.NEON = {
     return curEvent.done;
   },
   eventState: () => curEvent,
+  // Debug / screenshots: open a route stop ('market' | 'dock' | 'vault' | 'rift' | 'anomaly') in the current campaign run.
+  visit(type = 'market') {
+    if (!G.run || G.run.mode !== 'campaign') return false;
+    visitNode({ type, id: -1, row: G.run.row, x: 0.5, links: [], modifiers: [] });
+    return G.screen;
+  },
+  gameOver: () => gameOver(),
   extract, // debug: end the campaign run now (post-boss dialogue → extraction screen)
   showBossCard: onBossWarn,
   // Pick the i-th currently reachable route node.
@@ -1594,19 +1639,19 @@ window.NEON = {
   skip: () => skipDraft(),
   openDraft: (kind = 'level') => openDraft(kind),
   // Menus (debug / screenshots): open the Hangar, Fabricator or Pilot screen over the campaign map.
-  openHangar: () => (showCampaign(), openHangar()),
-  openFab: () => (showCampaign(), openHangar(), openFab()),
-  openPilot: () => (showCampaign(), openPilot()),
-  openGallery: () => (toTitle(), openGallery(() => toTitle())),
-  openAchievements: () => (toTitle(), openAchievements(() => toTitle())),
-  openCore: () => (showCampaign(), openCore(() => showCampaign())),
+  openHangar: () => (showCampaign(), (hub.exit = () => showCampaign()), openHangar()),
+  openFab: () => (showCampaign(), (hub.exit = () => showCampaign()), openFab('hub')),
+  openPilot: () => (showCampaign(), (hub.exit = () => showCampaign()), openPilot()),
+  openGallery: () => (toTitle(), (hub.exit = () => toTitle()), openGallery(hubExit)),
+  openAchievements: () => (toTitle(), (hub.exit = () => toTitle()), openAchievements(hubExit)),
+  openCore: () => (showCampaign(), (hub.exit = () => showCampaign()), openCore(hubExit)),
   unequip: unequipSlot,
   paint: setPaint,
   // Pilot (return '' on success, else a reason). Classes / passives are rank-gated: grant({rankXp}) first.
   setClass,
   setPassives,
   // Passive tree (game/tree.js): allocate / refund / resetTree(cls, id) return '' or a reason; openTree(cls) shows it.
-  tree: { ...passiveTree, open: (cls) => openTree(cls, () => showPilot('#pl-tree')), view: treeView },
+  tree: { ...passiveTree, open: (cls) => (showCampaign(), (hub.exit = () => showCampaign()), openTree(cls, hubExit)), view: treeView },
   campaign: { SYSTEMS, generateRoute, nodeSpec, reachableNodes },
   // opts.nodePick(nodes) → index overrides the default (random fighting node).
   simulate(seconds, pickFn = (choices) => pick(choices), opts = {}) {

@@ -27,12 +27,12 @@ const fieldName = (t) => (t.system ? SYSTEMS.find((s) => s.id === t.system).name
 function renderGallery() {
   const t = theme();
   const owned = RELICS.filter((r) => ownsRelic(r.id)).length;
-  $('#gl-head').innerHTML = `<span class="gold">${coin}${fmt(profile.credits)}</span><span>RELICS <b>${owned}/${RELICS.length}</b></span>`;
+  $('#gl-head').innerHTML = `<span>RELICS <b>${owned}/${RELICS.length}</b></span>`;
 
   $('#gl-tabs').innerHTML = THEMES.map((th, i) => {
     const n = relicsOf(th.id).filter((r) => ownsRelic(r.id)).length;
     const fresh = relicsOf(th.id).some((r) => profile.relicNew.includes(r.id));
-    return `<button class="gl-tab${i === tab ? ' cur' : ''}${setDone(th.id) ? ' done' : ''}" data-act="gltab" data-i="${i}" style="--c:${th.color}"><b>${th.name}</b><i>${n}/6</i>${fresh ? '<s></s>' : ''}</button>`;
+    return `<button class="gl-tab${i === tab ? ' cur' : ''}${setDone(th.id) ? ' done' : ''}" data-act="gltab" data-i="${i}" style="--c:${th.color}"><b class="clip">${th.name}</b><i>${n}/6</i>${fresh ? '<s></s>' : ''}</button>`;
   }).join('');
 
   const set = relicsOf(t.id);
@@ -121,7 +121,7 @@ function renderAchievements() {
     const pr = !on && achProgress(a.id);
     const right = on ? t.name : pr ? `${fmt(Math.min(pr[0], pr[1]))}/${fmt(pr[1])}` : `${coin}${t.reward}`;
     const bar = pr ? `<span class="ach-prog"><i style="width:${Math.min(100, (pr[0] / pr[1]) * 100)}%"></i></span>` : '';
-    html += `<button class="ach${on ? ' on' : ''}${secret ? ' secret' : ''}" tabindex="-1" style="--c:${t.color}"><span class="ach-ico">${on ? STAR : LOCK}</span><span class="ach-txt"><b>${secret ? '???' : a.name}</b><span>${secret ? a.hint || 'Hidden. Keep flying.' : a.desc}</span>${bar}</span><span class="ach-rw">${right}</span></button>`;
+    html += `<button class="ach${on ? ' on' : ''}${secret ? ' secret' : ''}" tabindex="-1" style="--c:${t.color}"><span class="ach-ico">${on ? STAR : LOCK}</span><span class="ach-txt"><b class="clip">${secret ? '???' : a.name}</b><span class="clip">${secret ? a.hint || 'Hidden. Keep flying.' : a.desc}</span>${bar}</span><span class="ach-rw">${right}</span></button>`;
   }
   $('#ach-list').innerHTML = html;
 }

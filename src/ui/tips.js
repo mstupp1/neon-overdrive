@@ -3,6 +3,8 @@
 //  - mouse: hovering an item shows its tip, leaving hides it
 //  - keys / pad: the focused item shows its tip (screens.js dispatches 'menufocus' when focus moves)
 //  - touch: tapping a tip-only item (no data-act) toggles its tip; any other tap hides it
+// Truncated text: single-line fields marked .clip end in an ellipsis when they don't fit. An item without a tip of its
+// own whose .clip text is cut shows the full text of its .clip fields as its tip (first one as the title).
 // The box is absolutely positioned outside the screens, so it never moves or resizes anything in the menu.
 
 let box = null;
@@ -34,6 +36,10 @@ export function initTips() {
     if (e.pointerType === 'touch') return;
     const el = e.target.closest('[data-tip]');
     if (el) showTip(el);
+    else {
+      const it = e.target.closest('button, .set-row');
+      if (it && it !== owner && clipTip(it)) owner = it;
+    }
   });
   app.addEventListener('pointerout', (e) => {
     if (e.pointerType === 'touch' || !owner) return;
@@ -49,7 +55,7 @@ export function initTips() {
   app.addEventListener('menufocus', (e) => {
     if (performance.now() - touchAt < 500) return;
     if (e.target.dataset.tip != null) showTip(e.target);
-    else hideTip();
+    else if (!clipTip(e.target)) hideTip();
   });
   window.addEventListener('resize', hideTip);
 }
@@ -74,6 +80,23 @@ export function showTip(el) {
   box.style.setProperty('--c', el.dataset.tipC || 'var(--cyan)');
   box.hidden = false;
   place(el);
+}
+
+// Shows the full text of el's truncated .clip fields; false when nothing in it is cut.
+function clipTip(el) {
+  const clips = [...el.querySelectorAll('.clip')];
+  if (!clips.some((c) => c.scrollWidth > c.clientWidth + 1)) return false;
+  const [first, ...rest] = clips.map((c) => c.textContent.trim()).filter(Boolean);
+  const color = getComputedStyle(clips[0]).color;
+  el.dataset.tipT = first;
+  el.dataset.tip = rest.join('\n');
+  el.dataset.tipC = color;
+  showTip(el);
+  // The tip came from the layout, not the markup: drop it so a re-render (or a wider window) decides afresh.
+  delete el.dataset.tip;
+  delete el.dataset.tipT;
+  delete el.dataset.tipC;
+  return true;
 }
 
 export function hideTip() {

@@ -73,10 +73,12 @@ export const meta = {
     $('#sys-detail').style.setProperty('--c', hsl(SYSTEMS[0].hue));
     $('#sys-detail').innerHTML = `<div class="sys-meta"><span>${best}</span>${heat}</div><button class="info-btn" data-act="runInfo" aria-label="How a run works" title="How a run works">?</button>`;
     $('#run-info').hidden = profile.seenRunInfo;
+    // Overdrive tier: a ‹ value › selector (left / right step it, confirm cycles); locked until THE VOID falls once.
     const tb = $('#tier-btn');
-    tb.textContent = profile.tierMax ? `OVERDRIVE ${t}` : 'OVERDRIVE';
+    tb.innerHTML = profile.tierMax ? `<span>OVERDRIVE</span><span class="opt-v"><i>‹</i><b>${t ? `TIER ${t}` : 'OFF'}</b><i>›</i></span>` : '<span>OVERDRIVE</span><span class="opt-v"><b>LOCKED</b></span>';
     tb.disabled = !profile.tierMax;
-    $('#core-btn').innerHTML = `FLUX CORE${profile.flux ? ` · ${fmt(profile.flux)}` : ''}`;
+    if (profile.tierMax) tb.setAttribute('data-tip-t', 'OVERDRIVE');
+    if (profile.tierMax) tb.dataset.tip = 'Harder enemies, richer rewards and Flux drops. Clearing THE VOID on a tier unlocks the next.';
     return $('#launch-btn');
   },
 
