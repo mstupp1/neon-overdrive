@@ -16,6 +16,22 @@ Use deterministic export tools for resizing and RGBA conversion, preserving genu
 
 Check assets enlarged and at their actual display size, in normal and pixel look. For runtime changes, retain a loading/failure fallback, cache decoded images and baked variants, and smoke-test the affected screen or camera in a browser. Use in-memory preview storage so visual review does not modify the real save. Report what was verified and any remaining limitations.
 
+## Consistent additions and revisions
+
+Use an accepted full-resolution image as the visual identity reference, supported by its brief and current renderer. For a new subject, establish one selected identity before making variants. For a redo, state what changes and what stays: silhouette, face or mask, proportions, materials, accent palette, framing, apparent size and lighting as relevant. Existing artwork establishes the visual world, not a requirement that every character or hull share the same shape. Do not invent unspecified character traits as canon.
+
+Record the actual input images, exact prompt, selected revision, source/output hashes and export operations. Preserve whole original generations, including component sheets; keep rejected versions out of selected mappings. Version replacements and update the consumer's actual reference. Do not treat old validation notes as evidence for a new revision.
+
+## Camera and component checks
+
+Name the subject and consumer when describing a camera. Player hulls face up overhead, right in side-source art and away in rear pursuit. Enemies face down overhead, left in side-source art and toward the camera in pursuit. Portrait framing follows its UI rather than those flight axes. Runtime transforms can differ from source-image axes: inspect the relevant implementation before positioning or animating anything.
+
+Reference images can bias imagegen toward the original view even when the prompt requests another camera. Compare the outputs side by side: look for actual foreshortening, front/rear apertures and visible faces of the object. A requested angle is not proof. Radial or spherical designs may legitimately retain similar silhouettes; directional hulls need a real viewpoint change.
+
+For articulated artwork, omit moving pieces from the static base and preserve separately generated parts. Component sheets can help consistency, but inspect actual cell boundaries, scale, clipped tips and neighboring fragments before extraction. Register parts with measured hubs/hinges on a common source canvas and export frame; independently fitting each part to the same box breaks scale. Keep exact crop/scale/placement records. Check the assembled result at motion extremes and through complete hit flashes; transparent padding cannot repair already clipped geometry.
+
+Category-specific instructions live in the [game-art skill](../.agents/skills/neon-game-art/SKILL.md), including its character and enemy references, and the [background skill](../.agents/skills/neon-background-assets/SKILL.md). Consult source modules for current schemas, dimensions and behavior instead of copying roster counts or old defaults into new work.
+
 ## Ship-specific checks
 
 Use the game's logical coordinates and camera transforms. Record measured cannon-tip and engine-nozzle anchors on the selected images; prompting with coordinates alone does not guarantee pixel placement. Preserve original source dimensions so attachment coordinates follow any padding added during export. Check that each point lies on the intended aperture, not merely somewhere inside the image. Bullet origins, muzzle flashes and exhaust should use those same anchors, accounting for banking, free-flight rotation, the side world's quarter turn and pursuit projection. Inspect firing while stationary and moving, with upgraded volleys as well as the starting weapon. Preserve weapon timing, damage and stream counts unless balancing is explicitly requested.
