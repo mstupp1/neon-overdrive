@@ -388,6 +388,18 @@ test('chase deck projects reciprocal strips, wraps fractional travel safely, and
   assert.notEqual(ctx.calls[0][2], phaseA, 'fractional travel advances the texture source phase');
   assert.equal(layers.drawChaseDeckLayer(ctx, image, W, H, { ...projection, A: 0 }, 1), false, 'degenerate projection is rejected');
 
+  // A panned camera (cx: the virtual x it is centred on) slides each strip by the lane offset at that strip's depth.
+  ctx.calls.length = 0;
+  layers.drawChaseDeckLayer(ctx, image, W, H, projection, 5);
+  const centred = ctx.calls.map((c) => c.slice());
+  ctx.calls.length = 0;
+  layers.drawChaseDeckLayer(ctx, image, W, H, { ...projection, cx: 300 }, 5);
+  assert.equal(ctx.calls.length, centred.length);
+  ctx.calls.forEach((call, i) => {
+    const dw = call[7];
+    assert.ok(Math.abs(call[5] - (centred[i][5] - (75 * dw) / projection.CW)) < 1e-6, 'panned strip shifts by (cx - CW/2) at its scale');
+  });
+
   for (const travel of [-1e-7, 0, 1e-7, 549.9999999, 550, 550.0000001]) {
     ctx.calls.length = 0;
     assert.equal(layers.drawChaseDeckLayer(ctx, image, W, H, projection, travel, { repeats: 2 }), true);

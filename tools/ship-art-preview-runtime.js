@@ -43,8 +43,7 @@ window.addEventListener('message', async event => {
           const frame = cine.camera();
           const origin = sv.toScreen(p.x * frame.z + frame.x, p.y * frame.z + frame.y);
           const actual = sv.toScreen(b.x * frame.z + frame.x, b.y * frame.z + frame.y);
-          const fog = Math.max(0, Math.min(1, (p.y * frame.z + frame.y + 20) / 260));
-          const scale = frame.z * (0.4 + 0.6 * fog);
+          const scale = frame.z * sv.cutoutGrow(p.y * frame.z + frame.y);
           error = Math.hypot(actual.x - origin.x - point[0] * origin.s * scale,
             actual.y - origin.y - point[1] * origin.s * scale);
         } else error = Math.hypot(b.x - p.x - point[0], b.y - p.y - point[1]);
