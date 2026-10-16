@@ -237,6 +237,8 @@ export function drawThemeSideDeck(ctx, theme, W, H, horizon, scroll = 0) {
 // being stretched as a screen-space trapezoid.
 export function drawChaseDeckLayer(ctx, image, W, H, projection, travel = 0, options = {}) {
   const { hy, A, Yc, f, CW, CH } = projection || {};
+  // cx: the virtual x the camera is centred on (the chase camera slides after the jet); the lane centre by default.
+  const pan = Number.isFinite(projection?.cx) ? CW / 2 - projection.cx : 0;
   const alpha = options.alpha ?? 0.42;
   const repeats = options.repeats ?? 2;
   const maxStrips = Math.min(160, Math.max(1, Math.floor(options.maxStrips ?? 160)));
@@ -283,7 +285,7 @@ export function drawChaseDeckLayer(ctx, image, W, H, projection, travel = 0, opt
     const fade = 0.2 + 0.8 * Math.min(1, Math.max(0, vm / (CH * 0.35)));
     if ([sy, nextSy, width, srcY, srcH].every(Number.isFinite) && nextSy > sy && width > 0 && srcH > 0) {
       ctx.globalAlpha = alpha * fade;
-      ctx.drawImage(image, 0, srcY, image.width, srcH, W * 0.5 - width * 0.5, sy, width, nextSy - sy + 0.4);
+      ctx.drawImage(image, 0, srcY, image.width, srcH, W * 0.5 + (pan / CW - 0.5) * width, sy, width, nextSy - sy + 0.4);
       strips++;
     }
     sy = nextSy;
