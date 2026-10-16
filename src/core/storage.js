@@ -41,7 +41,7 @@ const DEFAULTS = {
   equip: {}, // shipId → { core, plating, thrusters } item uids
   paint: {}, // shipId → palette index
   paintsOwned: {}, // shipId → [owned palette indices] (0 = stock, always owned)
-  pilot: { cls: 'striker', passives: {}, classes: ['striker'], found: ['killstreak'], pity: 0, dflt: 0 }, // passives: cls → [ids]; classes / found: discovered classes and abilities; dflt: default abilities granted (pilot.js)
+  pilot: { cls: 'striker', passives: {}, classes: ['striker'], found: [], pity: 0, dflt: 0 }, // passives: cls → [ids]; classes / found: discovered classes and abilities; dflt: default abilities granted (pilot.js: after the first run)
   tree: {}, // passive tree (game/tree.js): cls → [allocated node ids]
   relics: [], // owned relic ids (collectables.js)
   relicNew: [], // owned but not yet seen in the gallery
