@@ -168,7 +168,7 @@ export const STORY = {
   // A new pilot's first run is over: their first ability just unlocked (main.js gameOver / finishExtract).
   firstRun: (names) => [
     L('MAG', `First flight logged, ECHO. You've unlocked your first ability: ${names}. It's already equipped.`),
-    L('MAG', 'From the campaign screen, the HANGAR fits ships with the gear you find, and PILOT is where you equip abilities. Then launch again.'),
+    L('MAG', 'From the campaign screen, the HANGAR fits ships with the gear you find, and its PILOT tab is where you equip abilities. Then launch again.'),
   ],
 };
 

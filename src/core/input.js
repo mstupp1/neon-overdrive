@@ -20,6 +20,8 @@ const BIND = {
   two: ['Digit2', 'Numpad2'],
   three: ['Digit3', 'Numpad3'],
   map: ['KeyM', 'Tab'], // overworld route map overlay
+  tabL: ['KeyQ', 'PageUp'], // menus: previous tab (LB)
+  tabR: ['KeyE', 'PageDown'], // menus: next tab (RB)
 };
 
 const codeToActions = new Map();
@@ -158,6 +160,11 @@ window.addEventListener('blur', () => {
   padHeld.clear();
 });
 
+// A touch anywhere (menus included) switches the prompts and hints to touch; the first key or pad press switches back.
+window.addEventListener('pointerdown', (e) => {
+  if (e.pointerType === 'touch') input.setDevice('touch');
+}, { capture: true });
+
 // --- Pointer (mouse + touch) -------------------------------------------------
 
 function toLogical(clientX, clientY) {
@@ -269,8 +276,8 @@ const PAD_BUTTONS = {
   1: ['od', 'back'],
   2: ['od', 'lock'],
   3: ['reroll'],
-  4: ['focus'],
-  5: ['focus'],
+  4: ['focus', 'tabL'],
+  5: ['focus', 'tabR'],
   6: ['focus'],
   7: ['dash'],
   8: ['back', 'map'],

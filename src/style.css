@@ -2977,9 +2977,6 @@ input[type='range']::-moz-range-thumb {
     background: linear-gradient(180deg, rgba(63, 246, 255, 0.24), rgba(63, 246, 255, 0.08) 55%, rgba(63, 246, 255, 0.18));
 }
 
-.help-block:not(.on) {
-    display: none;
-}
 
 @media (prefers-reduced-motion: reduce) {
     .btn::after {
@@ -4630,52 +4627,6 @@ input[type='range']::-moz-range-thumb {
     }
 }
 
-/* Flux Core: compact artwork-led rows keep names and effects readable beside the art. */
-#core-list {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0.45em;
-    width: 100%;
-    max-width: 24em;
-}
-
-#core-list .card {
-    grid-template-columns: 3.6em minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 0.2em 0.5em;
-    padding: 0.25em 0.55em;
-}
-
-#core-list .card-icon {
-    width: 3.6em;
-    height: 3.6em;
-    grid-row: 1;
-    padding: 0;
-}
-
-#core-list .card-top {
-    flex-wrap: wrap;
-    gap: 0.1em 0.4em;
-}
-
-#core-list .card-name {
-    font-size: 0.78em;
-}
-
-#core-list .card-desc {
-    font-size: 0.82em;
-}
-
-#core-list .price {
-    grid-column: 3;
-    grid-row: 1;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 0.15em;
-    min-width: 0;
-}
-
 /* --- Build paths and Fortune (draft) ---------------------------------------------------------------------------
    Two fixed lines under the subtitle: specializations / splash, then Fortune. Cards carry a path note. */
 .draft-paths {
@@ -5233,4 +5184,727 @@ input[type='range']::-moz-range-thumb {
 
 .px-hidpi.retro-pixel .px-snap .set-row b {
     font-size: max(var(--ob), round(nearest, 0.85em, var(--ob)));
+}
+
+/* --- Menu pass (2026-10): console frame ------------------------------------------------------------------------
+   Every menu: a footer of button prompts (#prompts), main tab bars stepped with Q / E or LB / RB (.tabbar.primary),
+   hub screens with a header (name, currencies, tabs), and single-line fields that truncate (.clip) instead of
+   pushing the layout around. Navigation is row based (screens.js navRows). */
+
+/* Room for the prompt footer, in #app units so a fitted (shrunk) screen still clears it. */
+#app > .screen {
+    padding-bottom: calc(var(--safe-bottom) + var(--u) * 16px * 3.3);
+}
+
+.prompts {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(var(--safe-bottom) + 0.7em);
+    z-index: 30;
+    display: flex;
+    justify-content: center;
+    gap: 0.4em;
+    padding: 0 0.8em;
+    pointer-events: none;
+}
+
+#comms.on:not(.hold) ~ .prompts {
+    display: none;
+}
+
+.pr {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    min-height: 2.2em;
+    padding: 0.25em 0.75em 0.25em 0.45em;
+    font: 700 0.78em Orbitron, sans-serif;
+    letter-spacing: 0.14em;
+    color: rgba(233, 244, 255, 0.82);
+    background: rgba(5, 3, 15, 0.72);
+    border: 1px solid rgba(63, 246, 255, 0.22);
+    border-radius: 2px;
+    cursor: pointer;
+    pointer-events: auto;
+    outline: none;
+    white-space: nowrap;
+}
+
+.pr:hover {
+    color: #fff;
+    border-color: var(--cyan);
+    box-shadow: 0 0 0.8em rgba(63, 246, 255, 0.3);
+}
+
+/* Touch: plain labels, sized as tap targets. */
+.pr:not(:has(.kc)) {
+    min-height: 2.75em;
+    padding: 0.3em 1.2em;
+}
+
+/* Key / button glyphs: keyboard keys are square caps, pad buttons coloured face buttons. */
+.kc {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.75em;
+    height: 1.75em;
+    padding: 0 0.35em;
+    font: 700 0.82em Orbitron, sans-serif;
+    letter-spacing: 0.04em;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(233, 244, 255, 0.55);
+    border-bottom-width: 2px;
+    border-radius: 2px;
+    text-shadow: none;
+}
+
+.kc.pad {
+    min-width: 1.75em;
+    padding: 0;
+    border-radius: 50%;
+    border-width: 1px;
+    --k: #e9f4ff;
+    color: var(--k);
+    border-color: var(--k);
+    background: color-mix(in srgb, var(--k) 16%, transparent);
+}
+
+.kc.pad.k-confirm { --k: #5dff6a; }
+.kc.pad.k-back { --k: #ff4d6d; }
+.kc.pad.k-lock { --k: #4d9dff; }
+.kc.pad.k-reroll { --k: #ffd24a; }
+
+.kc.pad.k-tabL,
+.kc.pad.k-tabR {
+    width: auto;
+    min-width: 2.3em;
+    padding: 0 0.3em;
+    border-radius: 2px;
+}
+
+/* --- Main tab bars ------------------------------------------------------------------------------------------- */
+.tabbar.primary {
+    display: flex;
+    align-items: stretch;
+    gap: 0.35em;
+    width: 100%;
+    max-width: 26em;
+    flex-shrink: 0;
+}
+
+.tabbar .tabs {
+    flex: 1;
+    display: flex;
+    min-width: 0;
+    border-bottom: 1px solid rgba(63, 246, 255, 0.25);
+}
+
+.tabbar .tab {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3em;
+    padding: 0.7em 0.45em 0.6em;
+    font: 700 0.8em Orbitron, sans-serif;
+    letter-spacing: 0.1em;
+    color: rgba(233, 244, 255, 0.5);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    outline: none;
+}
+
+.tabbar .tab-l,
+.tabbar .tab:not(:has(.tab-l)) {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* The open tab never truncates; the others give way. */
+.tabbar .tab.on {
+    flex-shrink: 0;
+    color: #fff;
+    text-shadow: 0 0 0.5em var(--cyan);
+    background: linear-gradient(0deg, rgba(63, 246, 255, 0.16), transparent 85%);
+}
+
+.tabbar .tab.on::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    background: var(--cyan);
+    box-shadow: 0 0 0.6em var(--cyan);
+}
+
+.tabbar .tab:hover {
+    color: #fff;
+}
+
+.tab-badge {
+    flex-shrink: 0;
+    min-width: 1.3em;
+    height: 1.3em;
+    padding: 0 0.25em;
+    display: inline-grid;
+    place-items: center;
+    font-style: normal;
+    font-size: 0.85em;
+    color: #05030d;
+    background: var(--yellow);
+    border-radius: 2px;
+}
+
+.tab-badge:empty {
+    min-width: 0.55em;
+    width: 0.55em;
+    height: 0.55em;
+    padding: 0;
+}
+
+.tabbar .tk {
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+.tabbar .tk:empty {
+    display: none;
+}
+
+/* Tab pages stacked in one cell: the stack is as tall as the tallest page, so switching never moves anything. */
+.tab-stack {
+    display: grid !important;
+}
+
+.tab-stack > * {
+    grid-area: 1 / 1;
+    min-width: 0;
+}
+
+.tab-off {
+    visibility: hidden;
+}
+
+/* --- Hub screens (HANGAR, COLLECTION) ------------------------------------------------------------------------ */
+#app > .screen.hub {
+    justify-content: flex-start;
+    gap: 0.75em;
+    padding-top: calc(var(--safe-top) + 1em);
+}
+
+/* Hub pages are fitted by type size (ui.fit), never by squashing a panel under its own text. */
+#app > .screen.hub > :not(.tree-view) {
+    flex-shrink: 0;
+}
+
+.hub-head {
+    width: 100%;
+    max-width: 26em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35em;
+    flex-shrink: 0;
+}
+
+.hub-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1em;
+}
+
+.hub-title {
+    margin: 0;
+    font: 900 1.45em Orbitron, sans-serif;
+    letter-spacing: 0.1em;
+    color: #fff;
+    text-shadow: 0 0 0.35em var(--cyan), 0 0 1.1em rgba(63, 246, 255, 0.45);
+}
+
+.hub-res {
+    display: flex;
+    gap: 0.9em;
+    font: 700 0.9em Orbitron, sans-serif;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+}
+
+.hub-res .coin {
+    width: 1.05em;
+    height: 1.05em;
+    vertical-align: -0.18em;
+    margin-right: 0.3em;
+}
+
+.hub-res .flux {
+    color: #b48bff;
+}
+
+.sub-head {
+    width: 100%;
+    max-width: 24em;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.8em;
+    font: 700 0.85em Orbitron, sans-serif;
+    letter-spacing: 0.14em;
+    color: var(--dim);
+}
+
+.sub-head b {
+    font-size: 1.25em;
+    letter-spacing: 0.1em;
+    text-shadow: 0 0 0.5em currentColor;
+}
+
+/* Single-line text that must not grow its box: ellipsis, with the full text in a tip (tips.js clipTip). */
+.clip {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* --- Title + campaign menus ---------------------------------------------------------------------------------- */
+.main-menu {
+    width: min(17em, 100%);
+}
+
+.main-menu .btn {
+    text-align: left;
+    padding-left: 2.1em;
+}
+
+.btn.opt {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6em;
+    padding-left: 2.1em;
+    padding-right: 1em;
+}
+
+.btn.opt .opt-v {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.btn.opt .opt-v b {
+    min-width: 4.6em; /* TIER 10 fits: stepping the value never moves the arrows */
+    text-align: center;
+    color: var(--yellow);
+}
+
+.btn.opt .opt-v i {
+    font-style: normal;
+    color: var(--cyan);
+    opacity: 0.55;
+}
+
+.btn.opt.focus .opt-v i {
+    opacity: 1;
+}
+
+#scr-campaign .menu {
+    width: min(19em, 100%);
+}
+
+/* --- Hangar: the ship card is the selector --------------------------------------------------------------------- */
+.hs-ship {
+    max-width: 26em;
+}
+
+.hs-nav {
+    font-size: 1.3em;
+    opacity: 0.75;
+}
+
+button.hs-card {
+    position: relative;
+    grid-template-columns: 4.6em minmax(0, 1fr);
+    grid-template-rows: 1fr auto;
+    row-gap: 0.4em;
+    min-height: 9.6em;
+    text-align: left;
+    color: var(--text);
+    font: inherit;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+button.hs-card.focus,
+button.hs-card:hover {
+    border-color: var(--c);
+    box-shadow: 0 0 1.4em color-mix(in srgb, var(--c) 45%, transparent), inset 0 0 1.2em color-mix(in srgb, var(--c) 14%, transparent);
+}
+
+.hs-card .hs-info {
+    min-width: 0;
+    align-self: start;
+}
+
+.hs-card .hs-desc {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+    min-height: 3.6em; /* three lines reserved: ships with shorter blurbs don't make the card jump */
+}
+
+.hs-actline {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+    padding-top: 0.4em;
+    border-top: 1px solid color-mix(in srgb, var(--c) 25%, transparent);
+    font: 700 0.78em Orbitron, sans-serif;
+    letter-spacing: 0.12em;
+}
+
+.hs-actline .hs-n {
+    color: var(--dim);
+    min-width: 3.4em;
+}
+
+.hs-actline .hs-buy {
+    margin-left: auto;
+    color: #fff;
+}
+
+.hs-actline .hs-on {
+    margin-left: auto;
+    color: var(--green);
+}
+
+.hs-actline small {
+    font: 700 0.9em Rajdhani, sans-serif;
+    color: var(--red);
+    letter-spacing: 0.1em;
+}
+
+.hs-actline .coin {
+    width: 1.1em;
+    height: 1.1em;
+    vertical-align: -0.2em;
+    margin: 0 0.2em;
+}
+
+.slot-txt {
+    min-width: 0;
+}
+
+.swatch b.clip {
+    max-width: 100%;
+}
+
+/* --- Flux Core: tile grid + detail ------------------------------------------------------------------------------ */
+.core-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45em;
+    width: 100%;
+    max-width: 26em;
+}
+
+.core-tile {
+    --c: var(--cyan);
+    display: grid;
+    grid-template-columns: 2.6em minmax(0, 1fr);
+    gap: 0.55em;
+    align-items: center;
+    padding: 0.4em 0.55em;
+    text-align: left;
+    color: var(--text);
+    font: inherit;
+    background: linear-gradient(100deg, color-mix(in srgb, var(--c) 12%, var(--panel)) 0%, var(--panel) 70%);
+    border: 1px solid color-mix(in srgb, var(--c) 30%, transparent);
+    border-radius: 2px;
+    cursor: pointer;
+    outline: none;
+}
+
+.core-tile.focus,
+.core-tile:hover {
+    border-color: var(--c);
+    box-shadow: 0 0 1em color-mix(in srgb, var(--c) 40%, transparent);
+}
+
+.core-tile.cant .ct-txt i {
+    opacity: 0.55;
+}
+
+.ct-ico,
+.cd-ico {
+    display: block;
+    width: 2.6em;
+    height: 2.6em;
+}
+
+.ct-ico > *,
+.cd-ico > * {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.ct-txt {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+}
+
+.ct-txt b {
+    font: 700 0.8em Orbitron, sans-serif;
+    letter-spacing: 0.04em;
+}
+
+.ct-txt i {
+    display: flex;
+    justify-content: space-between;
+    font: 700 0.72em Orbitron, sans-serif;
+    font-style: normal;
+    letter-spacing: 0.08em;
+}
+
+.ct-txt em {
+    font-style: normal;
+    color: var(--c);
+}
+
+.ct-txt .coin,
+.cd-buy .coin,
+#core-sub .coin {
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.15em;
+    margin-right: 0.2em;
+}
+
+.core-detail {
+    --c: var(--cyan);
+    width: 100%;
+    max-width: 26em;
+    min-height: 7.4em; /* the longest description, so moving between tiles never shifts anything */
+    display: grid;
+    grid-template-columns: 3.6em minmax(0, 1fr);
+    gap: 0.8em;
+    align-items: start;
+    padding: 0.7em 0.9em;
+    background: var(--panel);
+    border: 1px solid color-mix(in srgb, var(--c) 40%, transparent);
+    border-radius: 2px;
+}
+
+.core-detail .cd-ico {
+    width: 3.6em;
+    height: 3.6em;
+}
+
+.cd-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.6em;
+    font: 700 0.95em Orbitron, sans-serif;
+    letter-spacing: 0.06em;
+}
+
+.cd-top em {
+    font-style: normal;
+    color: var(--c);
+}
+
+.core-detail p {
+    margin: 0.3em 0;
+    font-size: 1em;
+    line-height: 1.25;
+    color: rgba(233, 244, 255, 0.78);
+}
+
+.cd-buy {
+    display: flex;
+    gap: 0.8em;
+    align-items: center;
+    font: 700 0.8em Orbitron, sans-serif;
+    letter-spacing: 0.1em;
+}
+
+.cd-buy b {
+    color: var(--green);
+}
+
+.cd-buy i {
+    font-style: normal;
+    color: var(--red);
+}
+
+.cd-buy.dim .flux {
+    opacity: 0.55;
+}
+
+/* --- Settings + help pages ------------------------------------------------------------------------------------- */
+.settings.tab-stack {
+    max-width: 22em;
+}
+
+.set-page {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+}
+
+#scr-settings .tabbar,
+#scr-help .tabbar,
+#scr-run .tabbar {
+    max-width: 24em;
+}
+
+.help.tab-stack {
+    gap: 0;
+}
+
+/* Toggles say they flip with left / right when focused. */
+.set-row.toggle.focus b::before {
+    content: '‹ ';
+    opacity: 0.6;
+}
+
+.set-row.toggle.focus b::after {
+    content: ' ›';
+    opacity: 0.6;
+}
+
+/* Gallery / achievements under the COLLECTION header. */
+#scr-gallery .pilot-line,
+#scr-achievements .pilot-line {
+    margin-top: -0.2em;
+}
+
+.ach-txt {
+    min-width: 0;
+}
+
+.set-row.toggle b {
+    min-width: 4.4em; /* room for the ‹ › marks the focused toggle gets */
+}
+
+/* --- Pilot (HANGAR → PILOT): one compact rank strip, class chips side by side, clamped class text ------------- */
+#scr-pilot .pilot-card {
+    grid-template-columns: 2.8em minmax(0, 1fr);
+    gap: 0.7em;
+    padding: 0.35em 0.8em;
+    max-width: 26em;
+}
+
+#scr-pilot .pl-art,
+#scr-pilot .pl-art > * {
+    width: 2.8em;
+    height: 2.8em;
+}
+
+#scr-pilot .pl-info {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: 0.9em;
+}
+
+#scr-pilot .pl-info .role {
+    display: none;
+}
+
+#scr-pilot .pl-info h4 {
+    grid-row: 1 / 3;
+    margin: 0;
+}
+
+#scr-pilot .pl-rank {
+    margin: 0;
+}
+
+#scr-pilot .pl-xp {
+    margin: 0;
+}
+
+#scr-pilot .cls-tabs,
+#scr-pilot .cls-info,
+#scr-pilot .ab-grid,
+#scr-pilot .ab-detail,
+#scr-pilot .hs-label {
+    max-width: 26em;
+}
+
+#scr-pilot .cls-tab {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 0.5em;
+    padding: 0.4em 0.55em;
+    text-align: left;
+}
+
+#scr-pilot .cls-tab .cls-ico {
+    flex-shrink: 0;
+    width: 2.2em;
+    height: 2.2em;
+}
+
+#scr-pilot .cls-tab > b,
+#scr-pilot .cls-tab > i {
+    display: none;
+}
+
+#scr-pilot .cls-tab .cls-txt {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+#scr-pilot .cls-info {
+    min-height: 0;
+    padding: 0.5em 0.85em;
+}
+
+#scr-pilot .cls-info p,
+#scr-pilot .ci-ult span:not(.ci-lv) {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    min-height: 2.5em; /* two lines reserved: switching classes never moves the abilities */
+}
+
+#scr-pilot .ci-ult .ci-lv {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.hub-title .hub-page {
+    margin-left: 0.6em;
+    font-size: 0.5em;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    color: var(--dim);
+    text-shadow: none;
+    vertical-align: 0.25em;
 }

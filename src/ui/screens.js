@@ -32,9 +32,8 @@ function syncLocks(locks, rerolls) {
   const cards = screens.draft.querySelectorAll('#draft-cards .card');
   cards.forEach((c, i) => c.classList.toggle('locked-card', locks.has(i)));
   const n = cards.length - locks.size;
-  const keys = input.device === 'keyboard' ? '  [R] · LOCK [F]' : input.device === 'pad' ? ' · LOCK [X]' : '';
   const rr = $('#reroll-btn');
-  rr.textContent = `${locks.size ? 'REROLL UNLOCKED' : 'REROLL'} (${rerolls})${keys}`;
+  rr.textContent = `${locks.size ? 'REROLL UNLOCKED' : 'REROLL'} (${rerolls})`;
   rr.disabled = rerolls <= 0 || n <= 0;
 }
 
@@ -93,10 +92,116 @@ function completeDraftHold() {
   onPick(id);
 }
 
+// --- Button prompts ---------------------------------------------------------------------------------------------------
+// A console-style footer under every menu: what each button does here, in the current device's glyphs (keys, pad
+// buttons, or plain labels on touch). Mouse and touch can click them: BACK is how a pointer leaves a screen.
+// Screens: data-back (+ data-back-label) adds BACK, data-select-label renames SELECT, data-noselect drops it;
+// ui.prompts(name, fn) adds per-screen extras ({k, label, act}).
+const GLYPHS = {
+  keyboard: { confirm: 'ENTER', back: 'ESC', reroll: 'R', lock: 'F', tabL: 'Q', tabR: 'E' },
+  pad: { confirm: 'A', back: 'B', reroll: 'Y', lock: 'X', tabL: 'LB', tabR: 'RB' },
+};
+let promptDevice = null;
+const extraPrompts = {};
+
+// The key / button glyph for a menu action on the current device ('' on touch).
+export function keyCap(k) {
+  const pad = input.device === 'pad';
+  const g = input.device === 'touch' ? null : (pad ? GLYPHS.pad : GLYPHS.keyboard)[k];
+  return g ? `<kbd class="kc k-${k}${pad ? ' pad' : ''}">${g}</kbd>` : '';
+}
+
+// --- Hubs -------------------------------------------------------------------------------------------------------------
+// Screens that share one tabbed hub carry data-hub="hub:tab": they get a header with the hub's name, the player's
+// currencies and the hub's tab bar (Q / E or LB / RB step it; clicking a tab opens it through the 'hub' handler).
+const HUBS = {
+  // [id, tab label, page name in the header]
+  hangar: { title: 'HANGAR', tabs: [['ship', 'SHIP', 'SHIP & GEAR'], ['fab', 'FAB', 'FABRICATOR'], ['pilot', 'PILOT', 'PILOT'], ['tree', 'TREE', 'PASSIVE TREE'], ['core', 'FLUX', 'FLUX CORE']] },
+  collect: { title: 'COLLECTION', tabs: [['gallery', 'GALLERY', 'RELICS'], ['ach', 'ACHIEVEMENTS', 'ACHIEVEMENTS']] },
+};
+const COIN = '<svg class="coin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5l3.5 4.5-3.5 4.5-3.5-4.5z"/></svg>';
+const FLUX = '<svg class="coin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 3l7 9-7 9-7-9z"/><path d="M12 8l3 4-3 4-3-4z"/></svg>';
+
+// Markup for a main tab bar: [{label, act, attrs, on}]. The end caps show the Q / E (LB / RB) glyphs.
+export function tabbar(tabs) {
+  const t = tabs.map((x) => `<button class="tab${x.on ? ' on' : ''}" data-act="${x.act}" ${x.attrs || ''}><span class="tab-l">${x.label}</span><i class="tab-badge" hidden></i></button>`).join('');
+  return `<div class="tabbar primary" data-nofocus><button class="tk" data-k="tabL" tabindex="-1" aria-label="Previous tab"></button><div class="tabs">${t}</div><button class="tk" data-k="tabR" tabindex="-1" aria-label="Next tab"></button></div>`;
+}
+
+function initHubs() {
+  for (const el of document.querySelectorAll('.screen[data-hub]')) {
+    const [hub, cur] = el.dataset.hub.split(':');
+    const h = HUBS[hub];
+    const head = document.createElement('header');
+    head.className = 'hub-head';
+    const page = h.tabs.find(([id]) => id === cur)[2];
+    head.innerHTML = `<div class="hub-top"><h2 class="hub-title">${h.title}<span class="hub-page">${page}</span></h2><div class="hub-res" data-res></div></div>${tabbar(h.tabs.map(([id, label, name]) => ({ label, act: 'hub', attrs: `data-hub-tab="${hub}:${id}" aria-label="${name}"`, on: id === cur })))}`;
+    el.prepend(head);
+  }
+}
+
+function renderHubHead(el) {
+  const res = el.querySelector('[data-res]');
+  if (!res) return;
+  const fmt = (n) => Math.floor(n).toLocaleString();
+  res.innerHTML = `<span class="gold">${COIN}${fmt(profile.credits)}</span>${profile.flux || profile.tierMax ? `<span class="flux">${FLUX}${fmt(profile.flux)}</span>` : ''}`;
+  const badges = ui.badges ? ui.badges() : {};
+  for (const t of el.querySelectorAll('.tab[data-hub-tab]')) {
+    const b = t.querySelector('.tab-badge');
+    const v = badges[t.dataset.hubTab];
+    b.hidden = !v;
+    b.textContent = typeof v === 'number' ? v : '';
+  }
+}
+
+function renderPrompts() {
+  promptDevice = input.device;
+  const bar = $('#prompts');
+  for (const k of document.querySelectorAll('.tabbar.primary .tk')) k.innerHTML = keyCap(k.dataset.k);
+  if (!bar) return;
+  const el = current && screens[current];
+  if (!el) {
+    bar.hidden = true;
+    return;
+  }
+  const list = [];
+  if (input.device !== 'touch' && !el.hasAttribute('data-noselect')) list.push({ k: 'confirm', label: el.dataset.selectLabel || 'SELECT' });
+  for (const p of extraPrompts[current]?.() || []) if (p && (p.touch || input.device !== 'touch')) list.push(p);
+  if (el.dataset.back) list.push({ k: 'back', label: el.dataset.backLabel || 'BACK' });
+  bar.innerHTML = list.map((p) => `<button class="pr pr-${p.k}" data-pr="${p.k}"${p.act ? ` data-pr-act="${p.act}"` : ''} tabindex="-1">${keyCap(p.k)}<span>${p.label}</span></button>`).join('');
+  bar.hidden = !list.length;
+}
+
+function promptClick(e) {
+  const b = e.target.closest('[data-pr]');
+  if (!b || !current || performance.now() < lockUntil) return;
+  const k = b.dataset.pr;
+  if (b.dataset.prAct) {
+    sfx.select();
+    return handlers[b.dataset.prAct]?.();
+  }
+  if (k === 'back') {
+    const act = screens[current].dataset.back;
+    if (act && handlers[act]) {
+      sfx.ui();
+      handlers[act]();
+    }
+  } else if (k === 'confirm') {
+    const t = focusables()[focusIdx];
+    if (t && !(current === 'draft' && t.classList.contains('card'))) t.click();
+  } else if (k === 'reroll' && current === 'draft') $('#reroll-btn').click();
+  else if (k === 'lock' && current === 'draft') {
+    const card = screens.draft.querySelector('.card.focus');
+    if (card && draftLock && draftLock(+card.dataset.i)) syncLocks(lastLocks, lastRerolls);
+  }
+}
+
 export const ui = {
   get current() {
     return current;
   },
+
+  badges: null, // () → {'hub:tab': count | true}: marks on hub tabs (unspent points, new gear / relics)
 
   init(h) {
     handlers = h;
@@ -109,7 +214,13 @@ export const ui = {
         // Unaffordable items stay focusable (aria-disabled) so their price and text can be read with keys / a pad.
         if (btn.getAttribute('aria-disabled') === 'true') return sfx.ui();
         sfx.select();
+        const on = current;
         handlers[btn.dataset.act]?.(btn);
+        // A page tab swapped what is on screen without re-opening it: start the focus at the top of the new page.
+        if (btn.classList.contains('tab') && current === on && !focusables()[focusIdx]?.classList.contains('focus')) {
+          focusIdx = 0;
+          applyFocus();
+        }
       });
       el.addEventListener('pointerover', (e) => {
         if (guarded) return; // a cursor resting where a new screen's button appears doesn't grab focus
@@ -131,8 +242,23 @@ export const ui = {
     window.addEventListener('blur', () => {
       cancelDraftHold();
     });
+    initHubs();
     this.initSettings();
     initTips();
+    $('#prompts')?.addEventListener('click', promptClick);
+    for (const k of document.querySelectorAll('.tabbar.primary .tk')) {
+      k.addEventListener('click', () => performance.now() >= lockUntil && switchTab(k.dataset.k === 'tabL' ? -1 : 1));
+    }
+  },
+
+  // Extra footer prompts for a screen: fn() → [{k: input action, label, act?: handler, touch?: also on touch}].
+  prompts(name, fn) {
+    extraPrompts[name] = fn;
+  },
+
+  /** Re-draw the footer prompts (state they show changed). */
+  refreshPrompts() {
+    renderPrompts();
   },
 
   show(name, { lock = 0, focus = 0, guard = false } = {}) {
@@ -149,6 +275,8 @@ export const ui = {
     hideTip();
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     if (focus instanceof Element) focusIdx = Math.max(0, focusables().indexOf(focus)); // focus a given element
+    renderPrompts();
+    if (name) renderHubHead(screens[name]);
     if (name) fit(screens[name], same);
     applyFocus();
   },
@@ -171,7 +299,7 @@ export const ui = {
     if (now >= fitCheckAt) {
       fitCheckAt = now + 250;
       const el = screens[current];
-      if (el.scrollHeight > el.clientHeight + 1 || el.clientHeight !== el._fitH || el.clientWidth !== el._fitW) fit(el);
+      if (overflow(el) > 1 || el.clientHeight !== el._fitH || el.clientWidth !== el._fitW) fit(el);
     }
     if (guarded) {
       if (input.anyHeld() || performance.now() < guardUntil) {
@@ -181,6 +309,7 @@ export const ui = {
       guarded = false;
       screens[current].classList.remove('guarded');
     }
+    if (input.device !== promptDevice) renderPrompts();
     const items = focusables();
     if (!items.length) {
       // Nothing focusable: back must still escape the screen.
@@ -196,15 +325,22 @@ export const ui = {
     const isRow = el && el.classList.contains('set-row') && el.querySelector('input[type=range]');
     const range = isRange ? el : isRow ? el.querySelector('input') : null;
 
-    // Console-style: arrows / d-pad move to the nearest item on screen in that direction (see moveDir).
-    if (input.consume('up')) moveDir(0, -1);
-    if (input.consume('down')) moveDir(0, 1);
-    // Left / right on a slider nudges it; on a settings toggle with nothing beside it, flips it (‹ ON ›).
+    // Console-style rows: up / down step a row, left / right step along it (see moveRow).
+    if (input.consume('up')) moveRow(-1);
+    if (input.consume('down')) moveRow(1);
+    // Left / right on a slider nudges it; on a selector (‹ VALUE ›, data-cycle) steps its value; on a settings toggle
+    // with nothing beside it, flips it.
     for (const [k, d] of [['left', -1], ['right', 1]]) {
       if (!input.consume(k)) continue;
       if (range) nudge(range, d);
-      else if (!moveDir(d, 0) && el.classList.contains('toggle') && performance.now() >= lockUntil) el.click();
+      else if (el.dataset.cycle && handlers[el.dataset.cycle]) {
+        if (performance.now() >= lockUntil) {
+          sfx.ui();
+          handlers[el.dataset.cycle](el, d);
+        }
+      } else if (!moveCol(d) && el.classList.contains('toggle') && performance.now() >= lockUntil) el.click();
     }
+    for (const [k, d] of [['tabL', -1], ['tabR', 1]]) if (input.consume(k) && performance.now() >= lockUntil) switchTab(d);
     if (input.consume('confirm') && performance.now() >= lockUntil) {
       const target = items[focusIdx];
       if (target && !range) {
@@ -290,7 +426,6 @@ export const ui = {
     r.innerHTML = profile.runs
       ? `<div>BEST<b>${formatScore(profile.best)}</b></div><div>FURTHEST<b>${profile.campaign.bestSys < 0 ? '-' : SYSTEMS[profile.campaign.bestSys].short}</b></div><div>RUNS<b>${profile.runs}</b></div>`
       : '';
-    $('#title-hint').textContent = input.isTouchDevice ? 'Tap PLAY to begin' : 'Enter / Space to select';
   },
 
   // --- Draft --------------------------------------------------------------------
@@ -462,6 +597,9 @@ export const ui = {
   },
 };
 
+ui.prompts('draft', () => [{ k: 'reroll', label: 'REROLL' }, { k: 'lock', label: 'LOCK' }]);
+ui.prompts('over', () => [{ k: 'reroll', label: 'RETRY', act: 'retry' }]);
+
 const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l2.9 6.6 7.1.7-5.4 4.8 1.6 7-6.2-3.7-6.2 3.7 1.6-7L2 9.3l7.1-.7z"/></svg>';
 
 export function stat(label, value) {
@@ -537,19 +675,35 @@ export function renderBuild(el, p, focusable = false) {
 const MIN_FIT = 0.72;
 let fitCheckAt = 0;
 
+// How far a screen's content runs into its bottom padding (the prompt footer's room) or past it. scrollHeight leaves
+// a flex column's end padding out, so measure the children.
+function overflow(el) {
+  const pb = parseFloat(getComputedStyle(el).paddingBottom) || 0;
+  let bottom = 0;
+  for (const c of el.children) {
+    if (c.offsetParent === null) continue;
+    const cs = getComputedStyle(c);
+    if (cs.position === 'absolute') continue;
+    bottom = Math.max(bottom, c.offsetTop + c.offsetHeight + (parseFloat(cs.marginBottom) || 0));
+  }
+  return Math.max(el.scrollHeight - el.clientHeight, bottom + pb - el.clientHeight);
+}
+
 function fit(el, keep = false) {
-  if (keep && el._pinned && el.scrollHeight <= el.clientHeight + 1) return;
+  if (keep && el._pinned && overflow(el) <= 1) return;
   el.style.fontSize = '';
   el.style.justifyContent = '';
   el.style.paddingTop = '';
   let k = 1;
-  for (let i = 0; i < 6 && k > MIN_FIT && el.scrollHeight > el.clientHeight + 1; i++) {
-    k = Math.max(MIN_FIT, k * Math.min(0.97, el.clientHeight / el.scrollHeight));
+  for (let i = 0; i < 6 && k > MIN_FIT; i++) {
+    const over = overflow(el);
+    if (over <= 1) break;
+    k = Math.max(MIN_FIT, k * Math.min(0.97, el.clientHeight / (el.clientHeight + over)));
     el.style.fontSize = `${k}em`;
   }
   pin(el);
   // Pinning can add a pixel or two of padding to a screen that only just fit: shrink a hair more so it can't scroll.
-  if (el.scrollHeight > el.clientHeight && k < 1 && k > MIN_FIT) {
+  if (overflow(el) > 0 && k < 1 && k > MIN_FIT) {
     k = Math.max(MIN_FIT, k * 0.99);
     el.style.fontSize = `${k}em`;
     el.style.justifyContent = '';
@@ -574,7 +728,8 @@ function focusables() {
   if (!current) return [];
   const root = screens[current];
   // .tab-off: an inactive tab kept in the layout (visibility only), so its items are skipped.
-  return [...root.querySelectorAll('button:not([disabled]), .set-row')].filter((el) => el.offsetParent !== null && !el.closest('.tab-off'));
+  // [data-nofocus]: pointer-only controls (tab bars switch with Q / E or the bumpers, carousel arrows with left / right).
+  return [...root.querySelectorAll('button:not([disabled]), .set-row')].filter((el) => el.offsetParent !== null && !el.closest('.tab-off, [data-nofocus]'));
 }
 
 function applyFocus() {
@@ -588,63 +743,97 @@ function applyFocus() {
   items[focusIdx].scrollIntoView({ block: 'nearest' });
 }
 
-// Directional focus: the nearest item past the focused one in that direction, preferring items that line up with
-// it (same column for up / down, same row for left / right). With nothing that way it wraps to the far end of the
-// same column / row, else stays put. A run of moves along one axis keeps its column (or row) through wide items,
-// so down-down-up from a narrow button over a wide one lands back where it started.
-let navAnchor = null; // {axis, v, el}: the line held by consecutive moves along one axis
-function moveDir(dx, dy) {
+// Row navigation (console style). The focusable items are read as rows: items whose vertical spans line up form a
+// row, ordered left to right (a [data-row] container forces its items into one row). Up / down always step to the
+// row above / below (wrapping at the ends), landing on the item nearest the column the moves started from; left / right
+// step along the row, wrapping within it. Nothing ever skips a row or jumps sideways on a vertical press.
+let navX = null; // {el, x}: the column held by a run of up / down presses
+const rowMemory = new WeakMap(); // a row's first item → the item last left in that row
+function navRows(items) {
+  const keyed = new Map();
+  const boxes = [];
+  items.forEach((el) => {
+    const r = el.getBoundingClientRect();
+    const o = { el, t: r.top, b: r.bottom, l: r.left, r: r.right, cx: (r.left + r.right) / 2, cy: (r.top + r.bottom) / 2 };
+    const key = el.closest('[data-row]');
+    if (key) {
+      const g = keyed.get(key);
+      if (g) {
+        g.items.push(o);
+        g.cy = Math.min(g.cy, o.cy);
+        return;
+      }
+      const row = { items: [o], t: o.t, b: o.b, cy: o.cy, fixed: true };
+      keyed.set(key, row);
+      boxes.push(row);
+      return;
+    }
+    boxes.push({ items: [o], t: o.t, b: o.b, cy: o.cy });
+  });
+  boxes.sort((a, b) => a.cy - b.cy);
+  const rows = [];
+  for (const g of boxes) {
+    const last = rows[rows.length - 1];
+    // Same row: this item's centre sits inside the row's first item's span, or the other way round.
+    if (last && !g.fixed && !last.fixed && ((g.cy > last.t && g.cy < last.b) || (last.cy > g.t && last.cy < g.b))) last.items.push(...g.items);
+    else rows.push(g);
+  }
+  for (const r of rows) r.items.sort((a, b) => a.l - b.l);
+  return rows;
+}
+
+function navTo(el) {
+  const items = focusables();
+  const i = items.indexOf(el);
+  if (i < 0 || i === focusIdx) return false;
+  focusIdx = i;
+  applyFocus();
+  sfx.ui();
+  return true;
+}
+
+function moveRow(dy) {
   const items = focusables();
   const cur = items[focusIdx];
   if (!cur) return false;
-  const vert = dy !== 0;
-  const dir = vert ? dy : dx;
-  const box = (el) => {
-    const r = el.getBoundingClientRect();
-    // a / b: span along the move axis; lo / hi: span across it
-    return vert ? { a: r.top, b: r.bottom, lo: r.left, hi: r.right } : { a: r.left, b: r.right, lo: r.top, hi: r.bottom };
-  };
-  const r = box(cur);
-  const axis = vert ? 'y' : 'x';
-  const held = navAnchor && navAnchor.axis === axis && navAnchor.el === cur;
-  const line = held ? navAnchor.v : (r.lo + r.hi) / 2;
-  const off = (o) => (line < o.lo ? o.lo - line : line > o.hi ? line - o.hi : 0); // anchor line to the item's span
-  let best = null;
-  let bs = Infinity;
-  const boxes = items.map((el) => (el === cur ? null : box(el)));
-  boxes.forEach((o, i) => {
-    if (!o) return;
-    // Past the focused item: beyond half the shorter one's depth, so same-row items of other sizes never count.
-    const half = Math.min(r.b - r.a, o.b - o.a) / 2;
-    const ahead = dir > 0 ? o.a >= r.b - half : o.b <= r.a + half;
-    if (!ahead) return;
-    const gap = Math.max(0, dir > 0 ? o.a - r.b : r.a - o.b);
-    const across = Math.max(0, o.lo - r.hi, r.lo - o.hi); // 0 when the spans overlap (same column / row)
-    const score = gap + across * 3 + off(o) * 0.6;
-    if (score < bs) {
-      bs = score;
-      best = i;
-    }
-  });
-  if (best === null) {
-    // Wrap: the farthest item the other way that shares the column / row.
-    let far = Infinity;
-    boxes.forEach((o, i) => {
-      if (!o || o.hi <= r.lo || o.lo >= r.hi) return;
-      const edge = dir > 0 ? o.a : -o.b;
-      const score = edge + off(o) * 0.01;
-      if (score < far && (dir > 0 ? o.a < r.a : o.b > r.b)) {
-        far = score;
-        best = i;
-      }
-    });
-  }
-  if (best === null) return false;
-  focusIdx = best;
-  applyFocus();
-  const o = boxes[best];
-  navAnchor = { axis, v: Math.min(Math.max(line, o.lo), o.hi), el: items[best] };
-  sfx.ui();
+  const rows = navRows(items);
+  const ri = rows.findIndex((r) => r.items.some((o) => o.el === cur));
+  if (ri < 0 || rows.length < 2) return false;
+  const here = rows[ri].items.find((o) => o.el === cur);
+  const held = navX && navX.el === cur;
+  const x = held ? navX.x : here.cx;
+  const row = rows[(ri + dy + rows.length) % rows.length];
+  let best = row.items[0];
+  for (const o of row.items) if (Math.abs(o.cx - x) < Math.abs(best.cx - x) - 0.5) best = o;
+  // From a wide item (a card, a full-width button) over several narrower ones: back to the item last left in that
+  // row, else its first item it spans, so a row is always entered at a place you can predict.
+  const under = row.items.filter((o) => o.cx >= here.l && o.cx <= here.r);
+  if (under.length > 1) best = under.find((o) => o.el === rowMemory.get(row.items[0].el)) || under[0];
+  if (rows[ri].items.length > 1) rowMemory.set(rows[ri].items[0].el, cur);
+  if (!navTo(best.el)) return false;
+  navX = { el: best.el, x };
+  return true;
+}
+
+function moveCol(dx) {
+  const items = focusables();
+  const cur = items[focusIdx];
+  if (!cur) return false;
+  const row = navRows(items).find((r) => r.items.some((o) => o.el === cur));
+  if (!row || row.items.length < 2) return false;
+  const ci = row.items.findIndex((o) => o.el === cur);
+  navX = null;
+  return navTo(row.items[(ci + dx + row.items.length) % row.items.length].el);
+}
+
+// Q / E (LB / RB): step the screen's main tab bar, wrapping.
+function switchTab(d) {
+  const bar = screens[current] && screens[current].querySelector('.tabbar.primary');
+  if (!bar) return false;
+  const tabs = [...bar.querySelectorAll('.tab')].filter((t) => !t.disabled);
+  if (tabs.length < 2) return false;
+  const i = Math.max(0, tabs.findIndex((t) => t.classList.contains('on')));
+  tabs[(i + d + tabs.length) % tabs.length].click();
   return true;
 }
 

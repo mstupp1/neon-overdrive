@@ -14,6 +14,7 @@ import { RARITY, rarityOdds } from '../game/rarity.js';
 import { recomputeStats } from '../game/upgrades.js';
 import { selectShip, buyShip, equipPart, unequipSlot, setPaint, ownsPaint, rollGear, sellGear, sellJunk, junkIn, ROLL_COST, fabLuck, fabItemLevel } from '../game/hangar.js';
 import { ui, $ } from './screens.js';
+import { hubExit } from './hub.js';
 
 const coin = '<svg class="coin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5l3.5 4.5-3.5 4.5-3.5-4.5z"/></svg>';
 const fmt = (n) => Math.floor(n).toLocaleString();
@@ -23,7 +24,7 @@ let slot = 'core'; // slot open in the inventory / Fabricator
 let sel = null; // inventory: uid shown in the detail panel
 let confirmSell = null; // uid waiting for a second SELL press (Epic / Legendary)
 let lastRoll = null; // Fabricator: the last rolled item (shown in its result panel)
-let fabFrom = 'hangar'; // where the Fabricator's BACK goes: 'hangar' | 'parts'
+let fabFrom = 'hub'; // where the Fabricator's BACK goes: 'hub' (out of the hangar) | 'parts' (its inventory)
 const viewShip = () => SHIPS[viewIdx];
 
 // Derived stats for a ship wearing `parts` (stock kit upgrades included).
@@ -105,36 +106,31 @@ function render() {
   const owned = ownsShip(profile, ship);
   const selShip = profile.lastShip === ship.id;
   const paint = activePaint(profile, ship);
-  $('#hangar-credits').innerHTML = `<span class="gold">${coin}${fmt(profile.credits)}</span>`;
 
+  // The card is the ship selector: left / right (or the arrows) browse, confirm buys / selects.
   const card = $('#hs-card');
   card.style.setProperty('--c', paint.color);
   card.classList.toggle('locked', !owned);
-  const legacy = ship.unlock ? `<p class="hs-or">OR ${ship.unlock.text.toUpperCase()}</p>` : '';
+  const legacy = ship.unlock ? `<p class="hs-or clip">OR ${ship.unlock.text.toUpperCase()}</p>` : '';
   const path = ship.path ? `<span class="hs-path" style="--t:${TAGS[ship.path].color}">${TAGS[ship.path].name}</span>` : '';
-  const trait = ship.trait ? `<p class="hs-trait">${ship.trait.text}</p>` : '';
-  card.innerHTML = `<div class="hs-art"></div><div class="hs-info"><div class="role">${ship.role}${path}${selShip ? ' · <em>ACTIVE</em>' : ''}</div><h4>${ship.name}</h4><p>${ship.desc}</p>${trait}${owned ? '' : legacy}</div>`;
-  card.querySelector('.hs-art').appendChild(shipArt(ship, owned));
-  $('#hs-dots').innerHTML = SHIPS.map((s, i) => `<i class="${i === viewIdx ? 'on' : ''}${ownsShip(profile, s) ? ' own' : ''}"></i>`).join('');
-
-  const act = $('#hs-act');
-  act.className = 'btn primary hs-act';
-  act.disabled = false;
-  act.setAttribute('aria-disabled', 'false');
+  const trait = ship.trait ? `<p class="hs-trait clip">${ship.trait.text}</p>` : '';
+  let actLine;
+  card.removeAttribute('aria-disabled');
   if (!owned) {
     const afford = profile.credits >= ship.price;
-    act.innerHTML = `<span>BUY ${coin}${fmt(ship.price)}</span>`;
-    act.setAttribute('aria-disabled', afford ? 'false' : 'true'); // dim but focusable
-    act.dataset.mode = 'buy';
-    if (!afford) act.innerHTML += `<small>NEED ${fmt(ship.price - profile.credits)}</small>`;
+    card.dataset.mode = 'buy';
+    actLine = `<span class="hs-buy">BUY ${coin}${fmt(ship.price)}</span>${afford ? '' : `<small>NEED ${fmt(ship.price - profile.credits)}</small>`}`;
   } else if (selShip) {
-    act.textContent = 'SELECTED';
-    act.disabled = true;
-    act.dataset.mode = 'none';
+    card.dataset.mode = 'none';
+    actLine = '<span class="hs-on">ACTIVE SHIP</span>';
   } else {
-    act.textContent = 'SELECT';
-    act.dataset.mode = 'select';
+    card.dataset.mode = 'select';
+    actLine = '<span class="hs-buy">SELECT</span>';
   }
+  card.innerHTML = `<div class="hs-art"></div><div class="hs-info"><div class="role clip">${ship.role}${path}</div><h4 class="clip">${ship.name}</h4><p class="hs-desc">${ship.desc}</p>${trait}${owned ? '' : legacy}</div><div class="hs-actline"><span class="hs-n">${viewIdx + 1}/${SHIPS.length}</span>${actLine}</div>`;
+  card.querySelector('.hs-art').appendChild(shipArt(ship, owned));
+  card.setAttribute('aria-label', `${ship.name}: ${owned ? (selShip ? 'active ship' : 'select') : 'buy'}. Left and right browse ships.`);
+  $('#hs-dots').innerHTML = SHIPS.map((s, i) => `<i class="${i === viewIdx ? 'on' : ''}${ownsShip(profile, s) ? ' own' : ''}"></i>`).join('');
 
   // Slots
   const eq = profile.equip[ship.id] || {};
@@ -143,9 +139,9 @@ function render() {
     const info = SLOT_INFO[sl];
     const fresh = gearInSlot(profile, sl).some((g) => profile.gearNew.includes(g.uid));
     const c = item ? RARITY[item.r].color : info.color;
-    const name = item ? `<b style="color:${item.r ? c : ''}">${itemName(item)}</b>` : '<b>EMPTY</b>';
+    const name = item ? `<b class="clip" style="color:${item.r ? c : ''}">${itemName(item)}</b>` : '<b>EMPTY</b>';
     const sub = item ? `${info.name} · ${RARITY[item.r].name} · IL ${item.il}` : `${info.name} · ${gearInSlot(profile, sl).length}/${SLOT_CAP}`;
-    return `<button class="slot${item ? ' filled' : ''}" data-act="hslot" data-slot="${sl}" ${owned ? '' : 'disabled'} style="--c:${c}"><span class="slot-ico">${item ? gearDef(item.base).icon : '<i>+</i>'}</span><span class="slot-txt"><em>${sub}</em>${name}</span><span class="slot-go">${fresh ? '<i class="newdot">NEW</i>' : ''}›</span></button>`;
+    return `<button class="slot${item ? ' filled' : ''}" data-act="hslot" data-slot="${sl}" ${owned ? '' : 'disabled'} style="--c:${c}"><span class="slot-ico">${item ? gearDef(item.base).icon : '<i>+</i>'}</span><span class="slot-txt"><em class="clip">${sub}</em>${name}</span><span class="slot-go">${fresh ? '<i class="newdot">NEW</i>' : ''}›</span></button>`;
   }).join('');
 
   // Paints
@@ -155,7 +151,7 @@ function render() {
     const afford = profile.credits >= pt.price;
     const dis = !owned;
     const cant = owned && !has && !afford;
-    return `<button class="swatch${on ? ' on' : ''}${has ? '' : ' buy'}" data-act="hpaint" data-i="${i}" ${dis ? 'disabled' : ''}${cant ? ' aria-disabled="true"' : ''} style="--c:${pt.color}" aria-label="${pt.name}"><span class="sw-dot"></span><b>${pt.name}</b><i>${on ? 'EQUIPPED' : has ? 'OWNED' : coin + pt.price}</i></button>`;
+    return `<button class="swatch${on ? ' on' : ''}${has ? '' : ' buy'}" data-act="hpaint" data-i="${i}" ${dis ? 'disabled' : ''}${cant ? ' aria-disabled="true"' : ''} style="--c:${pt.color}" aria-label="${pt.name}"><span class="sw-dot"></span><b class="clip">${pt.name}</b><i>${on ? 'EQUIPPED' : has ? 'OWNED' : coin + pt.price}</i></button>`;
   }).join('');
 
   renderStats(ship, owned);
@@ -169,13 +165,13 @@ export function showHangar(focus) {
   G.screen = 'hangar';
   render();
   let el = typeof focus === 'string' ? focusEl(focus) : focus;
-  if (!el || el.disabled) el = $('#hs-act:not([disabled])') || focusEl('#hs-slots .slot:not([disabled])') || $('#hs-back');
+  if (!el || el.disabled) el = $('#hs-card');
   ui.show('hangar', { focus: el });
 }
 
 export function openHangar() {
   viewIdx = Math.max(0, SHIPS.findIndex((s) => s.id === profile.lastShip));
-  showHangar('#hs-act');
+  showHangar('#hs-card');
 }
 
 // --- Item detail panel (inventory and Fabricator) -----------------------------------------------
@@ -211,10 +207,9 @@ function showParts(focus) {
   const items = sorted(gearInSlot(profile, slot));
   const equippedUid = (profile.equip[ship.id] || {})[slot];
   if (!items.some((g) => g.uid === sel)) sel = equippedUid && gearByUid(profile, equippedUid) ? equippedUid : items[0] ? items[0].uid : null;
-  $('#parts-title').textContent = info.name;
-  $('#parts-title').style.textShadow = `0 0 0.35em ${info.color}, 0 0 1.2em ${info.color}`;
+  $('#parts-title').textContent = `${info.name} GEAR`;
+  $('#parts-title').style.color = info.color;
   $('#parts-sub').textContent = `${ship.name} · ${items.length}/${SLOT_CAP} PIECES`;
-  $('#parts-credits').innerHTML = `<span class="gold">${coin}${fmt(profile.credits)}</span>`;
   renderDetail();
   const wrap = $('#parts-list');
   wrap.innerHTML = '';
@@ -290,7 +285,6 @@ function showFab(focus) {
   G.screen = 'fab';
   const find = shipFind();
   const luck = fabLuck(find);
-  $('#fab-credits').innerHTML = `<span class="gold">${coin}${fmt(profile.credits)}</span>`;
   const std = rarityOdds(luck, 0);
   const pre = rarityOdds(luck, 2);
   const pct = (x) => (x <= 0 ? '-' : x < 0.01 ? (x * 100).toFixed(1) + '%' : Math.round(x * 100) + '%');
@@ -314,7 +308,7 @@ function showFab(focus) {
   ui.show('fab', { focus: el });
 }
 
-export function openFab(from = 'hangar') {
+export function openFab(from = 'hub') {
   fabFrom = from;
   lastRoll = null;
   showFab();
@@ -328,21 +322,25 @@ const bought = () => {
 // data-act handlers merged into main's ui.init.
 export const hangarActs = {
   hprev() {
-    viewIdx = (viewIdx + SHIPS.length - 1) % SHIPS.length;
-    showHangar('[data-act=hprev]');
+    hangarActs.hship(null, -1);
   },
   hnext() {
-    viewIdx = (viewIdx + 1) % SHIPS.length;
-    showHangar('[data-act=hnext]');
+    hangarActs.hship(null, 1);
+  },
+  // Ship carousel: left / right on the card, or its arrows.
+  hship(btn, d) {
+    viewIdx = (viewIdx + d + SHIPS.length) % SHIPS.length;
+    showHangar('#hs-card');
   },
   hact(btn) {
     const ship = viewShip();
+    if (btn.dataset.mode === 'none') return showHangar('#hs-slots .slot');
     if (btn.dataset.mode === 'buy') {
       if (buyShip(ship.id)) return sfx.ui();
       bought();
     }
     selectShip(ship.id);
-    showHangar('#hs-slots .slot');
+    showHangar('#hs-card');
   },
   hslot(btn) {
     slot = btn.dataset.slot;
@@ -386,9 +384,6 @@ export const hangarActs = {
   gfab() {
     openFab('parts');
   },
-  hfab() {
-    openFab('hangar');
-  },
   fslot(btn) {
     slot = btn.dataset.slot;
     showFab(`[data-act=fslot][data-slot="${slot}"]`);
@@ -411,7 +406,7 @@ export const hangarActs = {
   },
   fabBack() {
     if (fabFrom === 'parts') showParts();
-    else showHangar('#hs-fab');
+    else hubExit();
   },
   hpaint(btn) {
     const ship = viewShip();
