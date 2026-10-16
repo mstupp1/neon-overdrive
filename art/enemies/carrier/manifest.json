@@ -1,0 +1,1048 @@
+{
+  "subject": "carrier",
+  "logicalSize": 84,
+  "tint": "#ffc27a",
+  "views": {
+    "top": {
+      "source": "art/enemies/carrier/sources/top-v3.png",
+      "sourceSha256": "e5ea2c83ef76f56edbb6dde088abaa5f4b20790c0fda741441b9edd7a53ae40b",
+      "output": "src/assets/enemies/carrier/top-v3.png",
+      "outputSha256": "727f93de7f56016e4dad9e55dc6df62db5441fae3f6e5b63e1672a76cfb10cda",
+      "sourceSize": {
+        "width": 724,
+        "height": 724
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        54,
+        43,
+        680,
+        680
+      ],
+      "resizeSize": [
+        201,
+        205
+      ],
+      "offset": [
+        27,
+        25
+      ],
+      "contentBox": [
+        27,
+        25,
+        228,
+        230
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Direct overhead orthographic; nose faces down-screen (+y).",
+      "prompt": {
+        "path": "art/enemies/carrier/prompts/top-v3.txt",
+        "sha256": "bc75880fa201755cdadc8325aa4da4bee87785f28a9cd49e233533ddc3ec62a0"
+      },
+      "sourceSheet": {
+        "grid": [
+          3,
+          1
+        ],
+        "cellMap": {
+          "base": 0,
+          "doorLeft": 1,
+          "doorRight": 2
+        },
+        "baseCellRect": [
+          0,
+          0,
+          724,
+          724
+        ],
+        "registration": {
+          "canvas": [
+            724,
+            724
+          ],
+          "postTransform": {
+            "uniformScale": 0.88,
+            "centered": true
+          },
+          "doorLeftCrop": [
+            285,
+            130,
+            470,
+            570
+          ],
+          "doorLeftTarget": [
+            252,
+            200,
+            78,
+            170
+          ],
+          "doorRightCrop": [
+            235,
+            125,
+            390,
+            565
+          ],
+          "doorRightTarget": [
+            394,
+            200,
+            78,
+            170
+          ]
+        },
+        "identityReferences": [
+          {
+            "path": "art/enemies/carrier/sources/top-v1.png",
+            "sha256": "54c419557ede8f3de5b8d319d0998295635fa27389db0cb21e45c2a9cf6044b0"
+          }
+        ],
+        "path": "art/enemies/carrier/sheets/top-v4.png",
+        "sheetSha256": "979bfe70a805b2285fa07ae4274c31f4e862c0863ec0226144fbd58250487e7f",
+        "sourceHashes": {
+          "path": "979bfe70a805b2285fa07ae4274c31f4e862c0863ec0226144fbd58250487e7f"
+        },
+        "registrationSha256": "e7a3d7304b287551d4ea22f289dfbb40112f46ad706c8220985b024b0e4a33ae"
+      },
+      "inputReferences": [
+        {
+          "path": "art/enemies/carrier/sources/top-v1.png",
+          "sha256": "54c419557ede8f3de5b8d319d0998295635fa27389db0cb21e45c2a9cf6044b0"
+        }
+      ],
+      "layers": {
+        "doorLeft": {
+          "source": "art/enemies/carrier/layers/top/doorLeft-v3.png",
+          "sourceSha256": "47b4125a90067b6dde819a3bc86dcd0331c9c64674a2c0222e2f486f8bb955f2",
+          "output": "src/assets/enemies/carrier/layers/top/doorLeft-v3.png",
+          "outputSha256": "6e4677b763a5e0cbab4692d460d5e0c6bbf367a4da76199bfc508857ca644f49",
+          "sourceSize": {
+            "width": 724,
+            "height": 724
+          },
+          "exportSize": {
+            "width": 256,
+            "height": 256
+          },
+          "cropRect": [
+            54,
+            43,
+            680,
+            680
+          ],
+          "resizeSize": [
+            201,
+            205
+          ],
+          "offset": [
+            27,
+            25
+          ],
+          "contentBox": [
+            27,
+            25,
+            228,
+            230
+          ],
+          "alpha": true,
+          "operation": "apply base view crop/scale/offset to registered full-canvas layer; Lanczos resize",
+          "inputReferences": [
+            {
+              "path": "art/enemies/carrier/sources/top-v1.png",
+              "sha256": "54c419557ede8f3de5b8d319d0998295635fa27389db0cb21e45c2a9cf6044b0"
+            },
+            {
+              "path": "art/enemies/carrier/sources/top-v3.png",
+              "sha256": "e5ea2c83ef76f56edbb6dde088abaa5f4b20790c0fda741441b9edd7a53ae40b"
+            }
+          ],
+          "sourceSheet": {
+            "grid": [
+              3,
+              1
+            ],
+            "cellMap": {
+              "base": 0,
+              "doorLeft": 1,
+              "doorRight": 2
+            },
+            "baseCellRect": [
+              0,
+              0,
+              724,
+              724
+            ],
+            "registration": {
+              "canvas": [
+                724,
+                724
+              ],
+              "postTransform": {
+                "uniformScale": 0.88,
+                "centered": true
+              },
+              "doorLeftCrop": [
+                285,
+                130,
+                470,
+                570
+              ],
+              "doorLeftTarget": [
+                252,
+                200,
+                78,
+                170
+              ],
+              "doorRightCrop": [
+                235,
+                125,
+                390,
+                565
+              ],
+              "doorRightTarget": [
+                394,
+                200,
+                78,
+                170
+              ]
+            },
+            "identityReferences": [
+              {
+                "path": "art/enemies/carrier/sources/top-v1.png",
+                "sha256": "54c419557ede8f3de5b8d319d0998295635fa27389db0cb21e45c2a9cf6044b0"
+              }
+            ],
+            "path": "art/enemies/carrier/sheets/top-v4.png",
+            "sheetSha256": "979bfe70a805b2285fa07ae4274c31f4e862c0863ec0226144fbd58250487e7f",
+            "sourceHashes": {
+              "path": "979bfe70a805b2285fa07ae4274c31f4e862c0863ec0226144fbd58250487e7f"
+            },
+            "registrationSha256": "e7a3d7304b287551d4ea22f289dfbb40112f46ad706c8220985b024b0e4a33ae"
+          },
+          "prompt": {
+            "path": "art/enemies/carrier/prompts/layers/top/doorLeft-v3.txt",
+            "sha256": "bc75880fa201755cdadc8325aa4da4bee87785f28a9cd49e233533ddc3ec62a0"
+          },
+          "measuredPivotSourcePx": [
+            291.0,
+            285.0
+          ],
+          "measuredPivotExportNormalized": [
+            0.402724,
+            0.401878
+          ]
+        },
+        "doorRight": {
+          "source": "art/enemies/carrier/layers/top/doorRight-v3.png",
+          "sourceSha256": "e7fd4ddc567f142014ae7359f0b2acbd350837e80d13bf2b7d709660c7e3700b",
+          "output": "src/assets/enemies/carrier/layers/top/doorRight-v3.png",
+          "outputSha256": "50af11b31a5cd39d3fe920f7e05e1f244bbeac0c47a4918a0ea4b177368b9418",
+          "sourceSize": {
+            "width": 724,
+            "height": 724
+          },
+          "exportSize": {
+            "width": 256,
+            "height": 256
+          },
+          "cropRect": [
+            54,
+            43,
+            680,
+            680
+          ],
+          "resizeSize": [
+            201,
+            205
+          ],
+          "offset": [
+            27,
+            25
+          ],
+          "contentBox": [
+            27,
+            25,
+            228,
+            230
+          ],
+          "alpha": true,
+          "operation": "apply base view crop/scale/offset to registered full-canvas layer; Lanczos resize",
+          "inputReferences": [
+            {
+              "path": "art/enemies/carrier/sources/top-v1.png",
+              "sha256": "54c419557ede8f3de5b8d319d0998295635fa27389db0cb21e45c2a9cf6044b0"
+            },
+            {
+              "path": "art/enemies/carrier/sources/top-v3.png",
+              "sha256": "e5ea2c83ef76f56edbb6dde088abaa5f4b20790c0fda741441b9edd7a53ae40b"
+            }
+          ],
+          "sourceSheet": {
+            "grid": [
+              3,
+              1
+            ],
+            "cellMap": {
+              "base": 0,
+              "doorLeft": 1,
+              "doorRight": 2
+            },
+            "baseCellRect": [
+              0,
+              0,
+              724,
+              724
+            ],
+            "registration": {
+              "canvas": [
+                724,
+                724
+              ],
+              "postTransform": {
+                "uniformScale": 0.88,
+                "centered": true
+              },
+              "doorLeftCrop": [
+                285,
+                130,
+                470,
+                570
+              ],
+              "doorLeftTarget": [
+                252,
+                200,
+                78,
+                170
+              ],
+              "doorRightCrop": [
+                235,
+                125,
+                390,
+                565
+              ],
+              "doorRightTarget": [
+                394,
+                200,
+                78,
+                170
+              ]
+            },
+            "identityReferences": [
+              {
+                "path": "art/enemies/carrier/sources/top-v1.png",
+                "sha256": "54c419557ede8f3de5b8d319d0998295635fa27389db0cb21e45c2a9cf6044b0"
+              }
+            ],
+            "path": "art/enemies/carrier/sheets/top-v4.png",
+            "sheetSha256": "979bfe70a805b2285fa07ae4274c31f4e862c0863ec0226144fbd58250487e7f",
+            "sourceHashes": {
+              "path": "979bfe70a805b2285fa07ae4274c31f4e862c0863ec0226144fbd58250487e7f"
+            },
+            "registrationSha256": "e7a3d7304b287551d4ea22f289dfbb40112f46ad706c8220985b024b0e4a33ae"
+          },
+          "prompt": {
+            "path": "art/enemies/carrier/prompts/layers/top/doorRight-v3.txt",
+            "sha256": "bc75880fa201755cdadc8325aa4da4bee87785f28a9cd49e233533ddc3ec62a0"
+          },
+          "measuredPivotSourcePx": [
+            433.0,
+            285.0
+          ],
+          "measuredPivotExportNormalized": [
+            0.580827,
+            0.401878
+          ]
+        }
+      }
+    },
+    "side": {
+      "source": "art/enemies/carrier/sources/side-v3.png",
+      "sourceSha256": "7e28ae8b827598029750a735168ff59e7528818ac13f6550311608dc463647c3",
+      "output": "src/assets/enemies/carrier/side-v3.png",
+      "outputSha256": "af3217cbe6f20590c2f87e38cbb03016f35c0d5e755391f9519592d73dfaa3ed",
+      "sourceSize": {
+        "width": 1774,
+        "height": 887
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        30,
+        37,
+        1744,
+        855
+      ],
+      "resizeSize": [
+        205,
+        98
+      ],
+      "offset": [
+        25,
+        79
+      ],
+      "contentBox": [
+        25,
+        79,
+        230,
+        177
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "True side profile; nose reads screen-left after the side camera transform.",
+      "prompt": {
+        "path": "art/enemies/carrier/prompts/side-v3.txt",
+        "sha256": "a12acbd511d213e994b6e447c54a96a144e93572afbb35524d043b88f0ea0cda"
+      },
+      "sourceSheet": {
+        "grid": [
+          3,
+          1
+        ],
+        "cellMap": {
+          "doorLeft": 1,
+          "doorRight": 2
+        },
+        "openHull": "art/enemies/carrier/sources/side-v3.png",
+        "registration": {
+          "canvas": [
+            1774,
+            887
+          ],
+          "doorLeftCrop": [
+            440,
+            320,
+            724,
+            430
+          ],
+          "doorLeftTarget": [
+            780,
+            365,
+            500,
+            138
+          ],
+          "doorRightCrop": [
+            285,
+            390,
+            625,
+            505
+          ],
+          "doorRightTarget": [
+            780,
+            510,
+            500,
+            138
+          ]
+        },
+        "note": "The sheet hull crossed the first equal-third crop boundary, so the selected open-hull base is the separately generated side-v3 master.",
+        "identityReferences": [
+          {
+            "path": "art/enemies/carrier/sources/side-v1.png",
+            "sha256": "5df39483cc9e48449ccfc07f369b4fee92fe16d8a30d89e2686faf969681af11"
+          }
+        ],
+        "path": "art/enemies/carrier/sheets/side-v4.png",
+        "sheetSha256": "10d09300b6a46b227a7384be86619e8d7a353eec43023a686838d276d53c8059",
+        "sourceHashes": {
+          "path": "10d09300b6a46b227a7384be86619e8d7a353eec43023a686838d276d53c8059",
+          "openHull": "7e28ae8b827598029750a735168ff59e7528818ac13f6550311608dc463647c3"
+        },
+        "registrationSha256": "0a93959268073a168e5aacd66b3c20ce61cf249f57c995ab202042fd9277f55f"
+      },
+      "inputReferences": [
+        {
+          "path": "art/enemies/carrier/sources/side-v1.png",
+          "sha256": "5df39483cc9e48449ccfc07f369b4fee92fe16d8a30d89e2686faf969681af11"
+        }
+      ],
+      "layers": {
+        "doorLeft": {
+          "source": "art/enemies/carrier/layers/side/doorLeft-v3.png",
+          "sourceSha256": "684307f90e08dfc361abd6102765d52321ac219de5e6d3fafb6463995843ecd9",
+          "output": "src/assets/enemies/carrier/layers/side/doorLeft-v3.png",
+          "outputSha256": "962f49bb618fc8a91225a475d5f56be244fb8afe45e4c790c6974a7de77c4ec8",
+          "sourceSize": {
+            "width": 1774,
+            "height": 887
+          },
+          "exportSize": {
+            "width": 256,
+            "height": 256
+          },
+          "cropRect": [
+            30,
+            37,
+            1744,
+            855
+          ],
+          "resizeSize": [
+            205,
+            98
+          ],
+          "offset": [
+            25,
+            79
+          ],
+          "contentBox": [
+            25,
+            79,
+            230,
+            177
+          ],
+          "alpha": true,
+          "operation": "apply base view crop/scale/offset to registered full-canvas layer; Lanczos resize",
+          "inputReferences": [
+            {
+              "path": "art/enemies/carrier/sources/side-v1.png",
+              "sha256": "5df39483cc9e48449ccfc07f369b4fee92fe16d8a30d89e2686faf969681af11"
+            },
+            {
+              "path": "art/enemies/carrier/sources/side-v3.png",
+              "sha256": "7e28ae8b827598029750a735168ff59e7528818ac13f6550311608dc463647c3"
+            }
+          ],
+          "sourceSheet": {
+            "grid": [
+              3,
+              1
+            ],
+            "cellMap": {
+              "doorLeft": 1,
+              "doorRight": 2
+            },
+            "openHull": "art/enemies/carrier/sources/side-v3.png",
+            "registration": {
+              "canvas": [
+                1774,
+                887
+              ],
+              "doorLeftCrop": [
+                440,
+                320,
+                724,
+                430
+              ],
+              "doorLeftTarget": [
+                780,
+                365,
+                500,
+                138
+              ],
+              "doorRightCrop": [
+                285,
+                390,
+                625,
+                505
+              ],
+              "doorRightTarget": [
+                780,
+                510,
+                500,
+                138
+              ]
+            },
+            "note": "The sheet hull crossed the first equal-third crop boundary, so the selected open-hull base is the separately generated side-v3 master.",
+            "identityReferences": [
+              {
+                "path": "art/enemies/carrier/sources/side-v1.png",
+                "sha256": "5df39483cc9e48449ccfc07f369b4fee92fe16d8a30d89e2686faf969681af11"
+              }
+            ],
+            "path": "art/enemies/carrier/sheets/side-v4.png",
+            "sheetSha256": "10d09300b6a46b227a7384be86619e8d7a353eec43023a686838d276d53c8059",
+            "sourceHashes": {
+              "path": "10d09300b6a46b227a7384be86619e8d7a353eec43023a686838d276d53c8059",
+              "openHull": "7e28ae8b827598029750a735168ff59e7528818ac13f6550311608dc463647c3"
+            },
+            "registrationSha256": "0a93959268073a168e5aacd66b3c20ce61cf249f57c995ab202042fd9277f55f"
+          },
+          "prompt": {
+            "path": "art/enemies/carrier/prompts/layers/side/doorLeft-v3.txt",
+            "sha256": "48ee45dbbe45c0d3783141d979f626752b63e9f61ecf6b38edf1671f29530395"
+          },
+          "measuredPivotSourcePx": [
+            1030.0,
+            434.0
+          ],
+          "measuredPivotExportNormalized": [
+            0.564857,
+            0.494384
+          ]
+        },
+        "doorRight": {
+          "source": "art/enemies/carrier/layers/side/doorRight-v3.png",
+          "sourceSha256": "47c1345af80dc436eb2dc303cc5a353ef4588b2197bc2dbbf19819b31ef10fcc",
+          "output": "src/assets/enemies/carrier/layers/side/doorRight-v3.png",
+          "outputSha256": "b7f693bf7ccb194bec16a57fb575a5a38a365c4bf32cd2e4c0b3d20dbe585f14",
+          "sourceSize": {
+            "width": 1774,
+            "height": 887
+          },
+          "exportSize": {
+            "width": 256,
+            "height": 256
+          },
+          "cropRect": [
+            30,
+            37,
+            1744,
+            855
+          ],
+          "resizeSize": [
+            205,
+            98
+          ],
+          "offset": [
+            25,
+            79
+          ],
+          "contentBox": [
+            25,
+            79,
+            230,
+            177
+          ],
+          "alpha": true,
+          "operation": "apply base view crop/scale/offset to registered full-canvas layer; Lanczos resize",
+          "inputReferences": [
+            {
+              "path": "art/enemies/carrier/sources/side-v1.png",
+              "sha256": "5df39483cc9e48449ccfc07f369b4fee92fe16d8a30d89e2686faf969681af11"
+            },
+            {
+              "path": "art/enemies/carrier/sources/side-v3.png",
+              "sha256": "7e28ae8b827598029750a735168ff59e7528818ac13f6550311608dc463647c3"
+            }
+          ],
+          "sourceSheet": {
+            "grid": [
+              3,
+              1
+            ],
+            "cellMap": {
+              "doorLeft": 1,
+              "doorRight": 2
+            },
+            "openHull": "art/enemies/carrier/sources/side-v3.png",
+            "registration": {
+              "canvas": [
+                1774,
+                887
+              ],
+              "doorLeftCrop": [
+                440,
+                320,
+                724,
+                430
+              ],
+              "doorLeftTarget": [
+                780,
+                365,
+                500,
+                138
+              ],
+              "doorRightCrop": [
+                285,
+                390,
+                625,
+                505
+              ],
+              "doorRightTarget": [
+                780,
+                510,
+                500,
+                138
+              ]
+            },
+            "note": "The sheet hull crossed the first equal-third crop boundary, so the selected open-hull base is the separately generated side-v3 master.",
+            "identityReferences": [
+              {
+                "path": "art/enemies/carrier/sources/side-v1.png",
+                "sha256": "5df39483cc9e48449ccfc07f369b4fee92fe16d8a30d89e2686faf969681af11"
+              }
+            ],
+            "path": "art/enemies/carrier/sheets/side-v4.png",
+            "sheetSha256": "10d09300b6a46b227a7384be86619e8d7a353eec43023a686838d276d53c8059",
+            "sourceHashes": {
+              "path": "10d09300b6a46b227a7384be86619e8d7a353eec43023a686838d276d53c8059",
+              "openHull": "7e28ae8b827598029750a735168ff59e7528818ac13f6550311608dc463647c3"
+            },
+            "registrationSha256": "0a93959268073a168e5aacd66b3c20ce61cf249f57c995ab202042fd9277f55f"
+          },
+          "prompt": {
+            "path": "art/enemies/carrier/prompts/layers/side/doorRight-v3.txt",
+            "sha256": "48ee45dbbe45c0d3783141d979f626752b63e9f61ecf6b38edf1671f29530395"
+          },
+          "measuredPivotSourcePx": [
+            1030.0,
+            579.0
+          ],
+          "measuredPivotExportNormalized": [
+            0.564857,
+            0.562242
+          ]
+        }
+      }
+    },
+    "chase": {
+      "source": "art/enemies/carrier/sources/chase-v3.png",
+      "sourceSha256": "12eba059f43d5c78713577fc1dc02a17dc7f56199566a369d1973f8363c2d8fb",
+      "output": "src/assets/enemies/carrier/chase-v3.png",
+      "outputSha256": "bfb61e84e6df239675fc219bd1ce622f7c23e5074f16fc6be95e6ac9cfa2798d",
+      "sourceSize": {
+        "width": 2172,
+        "height": 724
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        130,
+        61,
+        2041,
+        680
+      ],
+      "resizeSize": [
+        205,
+        66
+      ],
+      "offset": [
+        25,
+        95
+      ],
+      "contentBox": [
+        25,
+        95,
+        230,
+        161
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/carrier/prompts/chase-v3.txt",
+        "sha256": "2a56c78efc9514606acf9e4a1a670dcebb758305059a96ca03a80e9d2e1c409a"
+      },
+      "sourceSheet": {
+        "grid": [
+          3,
+          1
+        ],
+        "sheetStatus": "Original three-cell attempt retained for provenance; cell artwork spills across boundaries. Selected frontal hull is a separate direct generation; doors are cropped from chase-doors-v3.png.",
+        "doorGrid": [
+          2,
+          1
+        ],
+        "base": "art/enemies/carrier/sources/chase-v3.png",
+        "registration": {
+          "canvas": [
+            2172,
+            724
+          ],
+          "postTransform": {
+            "uniformScale": 0.88,
+            "centered": true
+          },
+          "doorLeftCrop": [
+            65,
+            100,
+            1020,
+            625
+          ],
+          "doorLeftTarget": [
+            700,
+            215,
+            220,
+            185
+          ],
+          "doorRightCrop": [
+            1151,
+            100,
+            2106,
+            625
+          ],
+          "doorRightTarget": [
+            1250,
+            215,
+            220,
+            185
+          ]
+        },
+        "cameraQA": "Near-horizon frontal elevation, broad low wings, direct approach; slight visible top plane remains.",
+        "identityReferences": [
+          {
+            "path": "art/enemies/carrier/sources/chase-v2.png",
+            "sha256": "83b725035bfc2a01df064b57969c1c3ec3a350a9cc445c895ef28fcb343cdad8"
+          }
+        ],
+        "path": "art/enemies/carrier/sheets/chase-v3.png",
+        "doorSheetPath": "art/enemies/carrier/sheets/chase-doors-v3.png",
+        "sheetSha256": "08423ad61aada84a269bebbd75bfa3dff9bee235e267061c83a923f6803c538b",
+        "doorSheetSha256": "91dec43104a742d9ca351c1435f9d5da2a94f5f7b0300abd566d234571c8d96c",
+        "sourceHashes": {
+          "path": "08423ad61aada84a269bebbd75bfa3dff9bee235e267061c83a923f6803c538b",
+          "base": "12eba059f43d5c78713577fc1dc02a17dc7f56199566a369d1973f8363c2d8fb"
+        },
+        "registrationSha256": "3ed825934c9780763eff184785408ab9ae55940d181f15df53554fdd704cfbcb"
+      },
+      "inputReferences": [
+        {
+          "path": "art/enemies/carrier/sources/chase-v2.png",
+          "sha256": "83b725035bfc2a01df064b57969c1c3ec3a350a9cc445c895ef28fcb343cdad8"
+        }
+      ],
+      "layers": {
+        "doorLeft": {
+          "source": "art/enemies/carrier/layers/chase/doorLeft-v3.png",
+          "sourceSha256": "fa782e7552abc4a2d496ee0ddbd5f9421f4c1454dcf39e95b10535032cc00642",
+          "output": "src/assets/enemies/carrier/layers/chase/doorLeft-v3.png",
+          "outputSha256": "d73f2752416dc25cab39ad54126f039842adf023ec31519ddbe2e6a1b7b13e43",
+          "sourceSize": {
+            "width": 2172,
+            "height": 724
+          },
+          "exportSize": {
+            "width": 256,
+            "height": 256
+          },
+          "cropRect": [
+            130,
+            61,
+            2041,
+            680
+          ],
+          "resizeSize": [
+            205,
+            66
+          ],
+          "offset": [
+            25,
+            95
+          ],
+          "contentBox": [
+            25,
+            95,
+            230,
+            161
+          ],
+          "alpha": true,
+          "operation": "apply base view crop/scale/offset to registered full-canvas layer; Lanczos resize",
+          "inputReferences": [
+            {
+              "path": "art/enemies/carrier/sources/chase-v2.png",
+              "sha256": "83b725035bfc2a01df064b57969c1c3ec3a350a9cc445c895ef28fcb343cdad8"
+            },
+            {
+              "path": "art/enemies/carrier/sources/chase-v3.png",
+              "sha256": "12eba059f43d5c78713577fc1dc02a17dc7f56199566a369d1973f8363c2d8fb"
+            }
+          ],
+          "sourceSheet": {
+            "grid": [
+              3,
+              1
+            ],
+            "sheetStatus": "Original three-cell attempt retained for provenance; cell artwork spills across boundaries. Selected frontal hull is a separate direct generation; doors are cropped from chase-doors-v3.png.",
+            "doorGrid": [
+              2,
+              1
+            ],
+            "base": "art/enemies/carrier/sources/chase-v3.png",
+            "registration": {
+              "canvas": [
+                2172,
+                724
+              ],
+              "postTransform": {
+                "uniformScale": 0.88,
+                "centered": true
+              },
+              "doorLeftCrop": [
+                65,
+                100,
+                1020,
+                625
+              ],
+              "doorLeftTarget": [
+                700,
+                215,
+                220,
+                185
+              ],
+              "doorRightCrop": [
+                1151,
+                100,
+                2106,
+                625
+              ],
+              "doorRightTarget": [
+                1250,
+                215,
+                220,
+                185
+              ]
+            },
+            "cameraQA": "Near-horizon frontal elevation, broad low wings, direct approach; slight visible top plane remains.",
+            "identityReferences": [
+              {
+                "path": "art/enemies/carrier/sources/chase-v2.png",
+                "sha256": "83b725035bfc2a01df064b57969c1c3ec3a350a9cc445c895ef28fcb343cdad8"
+              }
+            ],
+            "path": "art/enemies/carrier/sheets/chase-v3.png",
+            "doorSheetPath": "art/enemies/carrier/sheets/chase-doors-v3.png",
+            "sheetSha256": "08423ad61aada84a269bebbd75bfa3dff9bee235e267061c83a923f6803c538b",
+            "doorSheetSha256": "91dec43104a742d9ca351c1435f9d5da2a94f5f7b0300abd566d234571c8d96c",
+            "sourceHashes": {
+              "path": "08423ad61aada84a269bebbd75bfa3dff9bee235e267061c83a923f6803c538b",
+              "base": "12eba059f43d5c78713577fc1dc02a17dc7f56199566a369d1973f8363c2d8fb"
+            },
+            "registrationSha256": "3ed825934c9780763eff184785408ab9ae55940d181f15df53554fdd704cfbcb"
+          },
+          "prompt": {
+            "path": "art/enemies/carrier/prompts/layers/chase/doorLeft-v3.txt",
+            "sha256": "d9d159a598ee69b9b5cba3d863366d8dbbf7987f81ebd706b2c1f27a209eba0c"
+          },
+          "measuredPivotSourcePx": [
+            810.0,
+            307.5
+          ],
+          "measuredPivotExportNormalized": [
+            0.382602,
+            0.473761
+          ]
+        },
+        "doorRight": {
+          "source": "art/enemies/carrier/layers/chase/doorRight-v3.png",
+          "sourceSha256": "2e9020852d49246210c539b9efcbb0bb18e2bb4f0eac19b60ba1f7fd5565eaf7",
+          "output": "src/assets/enemies/carrier/layers/chase/doorRight-v3.png",
+          "outputSha256": "390ac98f5f7e1f5cbdd7e3200ee2609fcaf373c88d93eda80f22a361e5d20013",
+          "sourceSize": {
+            "width": 2172,
+            "height": 724
+          },
+          "exportSize": {
+            "width": 256,
+            "height": 256
+          },
+          "cropRect": [
+            130,
+            61,
+            2041,
+            680
+          ],
+          "resizeSize": [
+            205,
+            66
+          ],
+          "offset": [
+            25,
+            95
+          ],
+          "contentBox": [
+            25,
+            95,
+            230,
+            161
+          ],
+          "alpha": true,
+          "operation": "apply base view crop/scale/offset to registered full-canvas layer; Lanczos resize",
+          "inputReferences": [
+            {
+              "path": "art/enemies/carrier/sources/chase-v2.png",
+              "sha256": "83b725035bfc2a01df064b57969c1c3ec3a350a9cc445c895ef28fcb343cdad8"
+            },
+            {
+              "path": "art/enemies/carrier/sources/chase-v3.png",
+              "sha256": "12eba059f43d5c78713577fc1dc02a17dc7f56199566a369d1973f8363c2d8fb"
+            }
+          ],
+          "sourceSheet": {
+            "grid": [
+              3,
+              1
+            ],
+            "sheetStatus": "Original three-cell attempt retained for provenance; cell artwork spills across boundaries. Selected frontal hull is a separate direct generation; doors are cropped from chase-doors-v3.png.",
+            "doorGrid": [
+              2,
+              1
+            ],
+            "base": "art/enemies/carrier/sources/chase-v3.png",
+            "registration": {
+              "canvas": [
+                2172,
+                724
+              ],
+              "postTransform": {
+                "uniformScale": 0.88,
+                "centered": true
+              },
+              "doorLeftCrop": [
+                65,
+                100,
+                1020,
+                625
+              ],
+              "doorLeftTarget": [
+                700,
+                215,
+                220,
+                185
+              ],
+              "doorRightCrop": [
+                1151,
+                100,
+                2106,
+                625
+              ],
+              "doorRightTarget": [
+                1250,
+                215,
+                220,
+                185
+              ]
+            },
+            "cameraQA": "Near-horizon frontal elevation, broad low wings, direct approach; slight visible top plane remains.",
+            "identityReferences": [
+              {
+                "path": "art/enemies/carrier/sources/chase-v2.png",
+                "sha256": "83b725035bfc2a01df064b57969c1c3ec3a350a9cc445c895ef28fcb343cdad8"
+              }
+            ],
+            "path": "art/enemies/carrier/sheets/chase-v3.png",
+            "doorSheetPath": "art/enemies/carrier/sheets/chase-doors-v3.png",
+            "sheetSha256": "08423ad61aada84a269bebbd75bfa3dff9bee235e267061c83a923f6803c538b",
+            "doorSheetSha256": "91dec43104a742d9ca351c1435f9d5da2a94f5f7b0300abd566d234571c8d96c",
+            "sourceHashes": {
+              "path": "08423ad61aada84a269bebbd75bfa3dff9bee235e267061c83a923f6803c538b",
+              "base": "12eba059f43d5c78713577fc1dc02a17dc7f56199566a369d1973f8363c2d8fb"
+            },
+            "registrationSha256": "3ed825934c9780763eff184785408ab9ae55940d181f15df53554fdd704cfbcb"
+          },
+          "prompt": {
+            "path": "art/enemies/carrier/prompts/layers/chase/doorRight-v3.txt",
+            "sha256": "d9d159a598ee69b9b5cba3d863366d8dbbf7987f81ebd706b2c1f27a209eba0c"
+          },
+          "measuredPivotSourcePx": [
+            1360.0,
+            307.5
+          ],
+          "measuredPivotExportNormalized": [
+            0.613073,
+            0.473761
+          ]
+        }
+      }
+    }
+  },
+  "prompts": {
+    "top": "art/enemies/carrier/prompts/top-v3.txt",
+    "side": "art/enemies/carrier/prompts/side-v3.txt",
+    "chase": "art/enemies/carrier/prompts/chase-v3.txt"
+  },
+  "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
+}

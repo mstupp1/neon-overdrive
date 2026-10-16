@@ -2,6 +2,7 @@
 
 import { G, view, field, inField } from './state.js';
 import { S, glow } from '../render/sprites.js';
+import { drawEnemyHull, enemySpriteForView } from '../render/enemyImages.js';
 import { TAU, segDist2, dist2 } from '../core/math.js';
 import { bg } from '../render/background.js';
 import { updateDirector } from './director.js';
@@ -341,6 +342,7 @@ function drawShieldLinks(ctx) {
 // solo: one enemy drawn as a chase-view cutout (drawStandees); its snake tail and shield tethers are drawn elsewhere.
 function drawEnemies(ctx, k, list = G.enemies, solo = false) {
   const dark = !!(G.director && G.director.diff.blackout);
+  const mode = sv.active ? sv.mode : 'top';
   for (const e of list) {
     if (e.dead || (field.ow && !inField(e.x, e.y, 120))) continue;
     if (e.boss) {
@@ -349,13 +351,13 @@ function drawEnemies(ctx, k, list = G.enemies, solo = false) {
       continue;
     }
     const scale = e.elite ? 1.2 : 1;
+    ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
     if (e.type === 'snake' && !solo) {
-      const seg = S.snakeSeg;
+      const seg = enemySpriteForView(S.snakeSeg, mode);
       for (let i = e.parts.length - 1; i >= 1; i--) {
         const pt = e.parts[i];
-        const img = e.flash > 0 ? seg.flash : seg.img;
         const sz = seg.size * (1 - i * 0.04) * scale;
-        ctx.drawImage(img, pt.x - sz / 2, pt.y - sz / 2, sz, sz);
+        ctx.drawImage(e.flash > 0 ? seg.flash : seg.img, pt.x - sz / 2, pt.y - sz / 2, sz, sz);
       }
     }
     if (e.elite) {
@@ -365,7 +367,8 @@ function drawEnemies(ctx, k, list = G.enemies, solo = false) {
       ctx.globalAlpha = 1;
     }
     const s = e.spr;
-    const img = e.flash > 0 ? s.flash : s.img;
+    const viewSprite = enemySpriteForView(s, mode);
+    const img = e.flash > 0 ? viewSprite.flash : viewSprite.img;
     if (dark && e.color) {
       // Blackout: a soft halo so enemies stay readable on the dark field.
       const gl = glow(e.color, 64);
@@ -377,7 +380,8 @@ function drawEnemies(ctx, k, list = G.enemies, solo = false) {
       ctx.globalAlpha = 1;
     }
     if (e.alpha !== undefined) ctx.globalAlpha = e.alpha;
-    drawRot(ctx, img, e.x, e.y, e.rot, s.size * scale, k);
+    if (viewSprite.layers) drawEnemyHull(ctx, s, e, mode, k, view.ox, view.oy, scale, G.time);
+    else drawRot(ctx, img, e.x, e.y, mode === 'chase' && viewSprite.generated ? 0 : e.rot, viewSprite.size * scale, k);
     if (e.alpha !== undefined) ctx.globalAlpha = 1;
   }
   ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
@@ -475,7 +479,7 @@ export function drawStandees(ctx, place) {
       drawEnemies(ctx, k, one, true);
     } else if (st.kind === 2) {
       const { e, i } = st.o;
-      const seg = S.snakeSeg;
+      const seg = enemySpriteForView(S.snakeSeg, sv.mode);
       const sz = seg.size * (1 - i * 0.04) * (e.elite ? 1.2 : 1);
       ctx.drawImage(e.flash > 0 ? seg.flash : seg.img, e.parts[i].x - sz / 2, e.parts[i].y - sz / 2, sz, sz);
     } else {

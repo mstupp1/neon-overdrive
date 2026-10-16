@@ -1,0 +1,12 @@
+Use case: stylized-concept
+Asset type: transparent enemy combat sprite for a neon browser shooter
+Primary request: create a true front-facing pursuit-camera view of the exact mechanical serpent head shown in Image 1, approaching the player. Image 1 is a top-down identity and material reference only; do not rotate it or depict its rear.
+Input images: Image 1: reference for this enemy's dark gunmetal segmented armor, pointed central plate, paired acid-green eyes, and lime seams.
+Scene/backdrop: none; genuine transparent background.
+Subject: one armored serpent head looking directly toward the camera as it approaches. Show a broad, symmetric forward face with both green eyes visible, the central pointed armor plate foreshortened toward the viewer, and layered cheek/side armor. It must read as the front of the approaching enemy, not the back of the player's ship.
+Style/medium: polished 3D game illustration with beveled gunmetal panels, crisp seams, restrained emissive glow.
+Composition/framing: single centered compact combat cutout, square canvas, full silhouette with transparent margin; readable at a small 40-unit game-sprite footprint.
+Lighting/mood: restrained neon highlights, bright enough to separate from dark scenery without broad white bloom.
+Color palette: near-black navy and gunmetal with acid-green eyes and seams matching Image 1.
+Constraints: keep the same enemy identity and armor language; true FRONT approach view with bilateral eyes and facial armor.
+Avoid: overhead view, rotated top view, rear view, side profile, three-quarter view, extra subjects, ground, shadow, text, border, checkerboard, watermark.

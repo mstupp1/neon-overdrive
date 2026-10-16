@@ -1,0 +1,152 @@
+{
+  "subject": "splitter",
+  "logicalSize": 48,
+  "tint": "#ff5ce1",
+  "views": {
+    "top": {
+      "source": "art/enemies/splitter/sources/top-v1.png",
+      "sourceSha256": "12238a405e1ad5c14ceafc9e28aea1c470c3cebab3183fb9fec7192d70dfd42f",
+      "output": "src/assets/enemies/splitter/top-v1.png",
+      "outputSha256": "ca2324f5539e7d0b4d7ccafb74fee54f7224a9367b68b9884d9dfb876f407b48",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        41,
+        44,
+        1230,
+        1254
+      ],
+      "resizeSize": [
+        201,
+        205
+      ],
+      "offset": [
+        27,
+        25
+      ],
+      "contentBox": [
+        27,
+        25,
+        228,
+        230
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Direct overhead orthographic; nose faces down-screen (+y).",
+      "prompt": {
+        "path": "art/enemies/splitter/prompts/top-v1.txt",
+        "sha256": "38fb296efb73cf690c7db729430b6638698f0949ec82f604311f798f048c7625"
+      },
+      "sourceSheet": null,
+      "inputReferences": []
+    },
+    "side": {
+      "source": "art/enemies/splitter/sources/side-v1.png",
+      "sourceSha256": "4e35499e8a3c754c950f585cb77438a955b3fab9f44484a9649e1493c6c08fc3",
+      "output": "src/assets/enemies/splitter/side-v1.png",
+      "outputSha256": "5866e049d302795a971ed7e2f1838fd2068f3a8be1c3138b470d12ed512aca8f",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        0,
+        35,
+        1179,
+        1214
+      ],
+      "resizeSize": [
+        205,
+        205
+      ],
+      "offset": [
+        25,
+        25
+      ],
+      "contentBox": [
+        25,
+        25,
+        230,
+        230
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "True side profile; nose reads screen-left after the side camera transform.",
+      "prompt": {
+        "path": "art/enemies/splitter/prompts/side-v1.txt",
+        "sha256": "b9af72b13898eb0341437d791f224acbd9d3ae1b10fa1bc6f6fad88a895deb73"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/splitter/sources/top-v1.png",
+          "sha256": "12238a405e1ad5c14ceafc9e28aea1c470c3cebab3183fb9fec7192d70dfd42f"
+        }
+      ]
+    },
+    "chase": {
+      "source": "art/enemies/splitter/sources/chase-v2.png",
+      "sourceSha256": "ceec4781b9eadf09e59a803454b8a7d3774a532822ea34b9f539d40e8a574fab",
+      "output": "src/assets/enemies/splitter/chase-v2.png",
+      "outputSha256": "564685261cd9a2d618a9b8bd90ae5ebb371ff3f0c6d20f3c804a7538f8a8b916",
+      "sourceSize": {
+        "width": 1536,
+        "height": 1024
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        0,
+        28,
+        1522,
+        1024
+      ],
+      "resizeSize": [
+        205,
+        134
+      ],
+      "offset": [
+        25,
+        61
+      ],
+      "contentBox": [
+        25,
+        61,
+        230,
+        195
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/splitter/prompts/chase-v2.txt",
+        "sha256": "1178d464439bf45596f9eff10a23d87bdd350b4cf69aac63b0d0de9eb4282c9b"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/splitter/sources/top-v1.png",
+          "sha256": "12238a405e1ad5c14ceafc9e28aea1c470c3cebab3183fb9fec7192d70dfd42f"
+        }
+      ]
+    }
+  },
+  "prompts": {
+    "top": "art/enemies/splitter/prompts/top-v1.txt",
+    "side": "art/enemies/splitter/prompts/side-v1.txt",
+    "chase": "art/enemies/splitter/prompts/chase-v2.txt"
+  },
+  "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
+}

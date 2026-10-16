@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: transparent enemy combat sprite for a neon browser shooter
+Primary request: create a true side-view version of the exact mechanical serpent head shown in Image 1. Image 1 is a top-down identity and material reference only; do not rotate or flatten it.
+Input images: Image 1: reference for the same enemy's silhouette, dark gunmetal armor, panel seams, and acid-green emissive accents.
+Subject: one armored serpent head, viewed directly from its left side and facing screen-left. Preserve the long tapered snout, layered angular plates, paired green eye identity, and small bright green seams from the reference. Show a narrow side profile with enough dorsal reveal to read the armor.
+Composition/framing: single centered subject on a square transparent canvas, full silhouette visible with margin. Intended to read at a small 40-unit game-sprite footprint.
+Lighting/mood: crisp restrained neon highlights, readable against dark and light backgrounds.
+Color palette: near-black navy and gunmetal with bright acid-green emissive accents matching Image 1.
+Materials/textures: beveled mechanical plating, crisp edges, subtle realistic metal reflections, no broad white bloom.
+Constraints: genuine transparent background; keep one subject and its recognizable identity; side-on horizontal profile facing LEFT.
+Avoid: top-down view, rotated top view, three-quarter view, rear view, extra creatures, text, border, ground, shadow, checkerboard, watermark.

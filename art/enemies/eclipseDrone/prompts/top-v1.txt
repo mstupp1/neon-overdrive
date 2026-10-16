@@ -1,0 +1,10 @@
+Use case: stylized-concept
+Asset type: transparent 2D combat game enemy sprite master
+Primary request: Create a top-down sprite master for NEON OVERDRIVE's ECLIPSE Dark Fortress stealth drone. Match the existing procedural silhouette: one small compact, angular stealth craft with a broad clipped shoulder line at the rear and a narrow triangular nose pointing DOWN toward the bottom edge (+y). The body outline is a dark six-point stealth wedge with a shallow central notch at the top/rear and a single sharp lower/front point. Keep it simple and readable at 36 logical pixels, not a large fighter.
+Scene/backdrop: genuine transparent alpha; no floor or environment.
+Subject: one centered enemy drone only, straight overhead orthographic view.
+Style/medium: NEON OVERDRIVE combat art, near-black navy gunmetal and dark glass, crisp bevels, restrained deep violet and magenta emissive seams (#ff3df2), tiny violet central sensor; keep the silhouette readable and avoid broad white shine.
+Composition/framing: square 1024x1024 transparent sprite master, subject centered and fully visible with ample transparent margin. Nose points down.
+Lighting/mood: stealthy, ominous, controlled magenta energy.
+Materials/textures: dark matte-faceted armor, narrow sharp magenta seams and one small glow.
+Constraints: preserve the compact notched triangular silhouette and dark purple identity. Real transparent alpha, no checkerboard or matte. No text, border, watermark, bullets, extra objects, floor shadow or crop.

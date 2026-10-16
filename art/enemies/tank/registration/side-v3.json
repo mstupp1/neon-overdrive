@@ -1,0 +1,10 @@
+[
+  {
+    "output": "art/enemies/tank/layers/side/carriage-v3.png",
+    "registeredPivot": [
+      820,
+      405
+    ],
+    "method": "Generated isolated carriage source cropped to alpha threshold >4 bbox [43,213,1664,727], Lanczos-resized to 1000x317 (scale 0.616903), positioned at [104,124] with lower turntable center registered at [820,405]."
+  }
+]

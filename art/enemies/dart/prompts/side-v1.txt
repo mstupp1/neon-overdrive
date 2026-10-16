@@ -1,0 +1,6 @@
+Use case: stylized-concept
+Asset type: NEON OVERDRIVE enemy combat sprite, rendered at only 30–48 logical pixels. One isolated subject, genuine transparent background. High-quality illustrated industrial sci-fi sprite with broad readable dark gunmetal armor, beveled panels, dark glass, restrained emissive accent, crisp silhouette; avoid broad white areas, excessive bloom, tiny busy detail, text, floor/shadow, labels, exhaust flames, projectiles, background, checkerboard. Preserve strong silhouette and generous transparent margin, centered mechanical pivot. Not a scene or poster.
+Input image 1: selected overhead identity reference; preserve this EXACT enemy design, panels, materials, color and anatomy.
+Subject: small slender cyan #35e0ff hostile arrow interceptor, needle nose, sharply swept paired wings, two slim forward barrels beside central body, narrow glowing eye, rear nozzle. Silhouette nearly as wide as long.
+Camera: True orthographic SIDE PROFILE, nose faces LEFT, rear nozzle RIGHT. Horizontal spacecraft seen from its flank; foreshortened wings. Do not show dorsal top-down view.
+Single complete hull centered within 80% square with transparent margin.

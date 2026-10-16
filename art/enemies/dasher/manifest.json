@@ -1,0 +1,152 @@
+{
+  "subject": "dasher",
+  "logicalSize": 44,
+  "tint": "#ff4d6d",
+  "views": {
+    "top": {
+      "source": "art/enemies/dasher/sources/top-v1.png",
+      "sourceSha256": "3190f611c95f25f2e27d214f7b8b0f0d01010062e3fc83e0950d51433c095b33",
+      "output": "src/assets/enemies/dasher/top-v1.png",
+      "outputSha256": "4f9cd91d1a3ae3d89969368e374442132f6717172e5add74432b469d6d12995d",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        31,
+        18,
+        1214,
+        1254
+      ],
+      "resizeSize": [
+        196,
+        205
+      ],
+      "offset": [
+        30,
+        25
+      ],
+      "contentBox": [
+        30,
+        25,
+        226,
+        230
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Direct overhead orthographic; nose faces down-screen (+y).",
+      "prompt": {
+        "path": "art/enemies/dasher/prompts/top-v1.txt",
+        "sha256": "1c5306436fad50bdc4407611f95fdfe220a64727eb892d01a27cacaf280df54b"
+      },
+      "sourceSheet": null,
+      "inputReferences": []
+    },
+    "side": {
+      "source": "art/enemies/dasher/sources/side-v1.png",
+      "sourceSha256": "a6ec74e4fa4c38479a48939bb737cd8160920d69ca218d47cf2614f1ce6ccf12",
+      "output": "src/assets/enemies/dasher/side-v1.png",
+      "outputSha256": "a13430cec270599c9aa5cdcf5f98c04ff09a51944f51a180a8c18a5f71cdc3ef",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        32,
+        117,
+        1236,
+        1181
+      ],
+      "resizeSize": [
+        205,
+        181
+      ],
+      "offset": [
+        25,
+        37
+      ],
+      "contentBox": [
+        25,
+        37,
+        230,
+        218
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "True side profile; nose reads screen-left after the side camera transform.",
+      "prompt": {
+        "path": "art/enemies/dasher/prompts/side-v1.txt",
+        "sha256": "3947db3adfac7a1a8ffb1abf30aba9fd11b791dcdd5376c087fdbf544ec34e90"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/dasher/sources/top-v1.png",
+          "sha256": "3190f611c95f25f2e27d214f7b8b0f0d01010062e3fc83e0950d51433c095b33"
+        }
+      ]
+    },
+    "chase": {
+      "source": "art/enemies/dasher/sources/chase-v2.png",
+      "sourceSha256": "d6d99f8565366e62c21d9b33577baddf1c12d90b33c446821889bc8e80677de9",
+      "output": "src/assets/enemies/dasher/chase-v2.png",
+      "outputSha256": "8475ca9112a939227a4d11270990acc5c7ce5d2901c15b5e2f9ce564bf2a8ecb",
+      "sourceSize": {
+        "width": 1774,
+        "height": 887
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        17,
+        34,
+        1773,
+        871
+      ],
+      "resizeSize": [
+        205,
+        98
+      ],
+      "offset": [
+        25,
+        79
+      ],
+      "contentBox": [
+        25,
+        79,
+        230,
+        177
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/dasher/prompts/chase-v2.txt",
+        "sha256": "152187f15bb2b28ff23107c092b1122b56500d09df026c84a8292c7377b45764"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/dasher/sources/top-v1.png",
+          "sha256": "3190f611c95f25f2e27d214f7b8b0f0d01010062e3fc83e0950d51433c095b33"
+        }
+      ]
+    }
+  },
+  "prompts": {
+    "top": "art/enemies/dasher/prompts/top-v1.txt",
+    "side": "art/enemies/dasher/prompts/side-v1.txt",
+    "chase": "art/enemies/dasher/prompts/chase-v2.txt"
+  },
+  "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
+}

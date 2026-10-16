@@ -1,0 +1,12 @@
+Use case: stylized-concept
+Asset type: transparent static base sprite for a 2D shooter enemy, side camera
+Primary request: create a clean side-view static tank base by removing the complete paired-barrel weapon carriage from Image 1 while preserving the same camera, identity and hull.
+Input images: Image 1 is the exact side-view target for view, scale and hull identity. Image 2 is a top-view identity and material reference only.
+Edit requirements: preserve the broad low tracked hull, all side armor panels, gold reactor, lighting, color, orientation, and full outline from Image 1. Remove the entire raised rotating carriage, housing, and both barrels. Continue the underlying upper hull naturally, leaving only a low empty round mounting socket. Do not add any weapon, barrels or replacement turret.
+Camera: exact true side profile; enemy nose along local +y so game quarter-turn presents it facing screen-left. Do not change perspective or framing.
+Composition: preserve the same wide horizontal canvas and the same full-hull scale and placement as Image 1; the entire tank hull must remain fully inside the transparent canvas with margin at both ends. Genuine alpha transparency.
+Style: polished 3D game sprite with beveled dark graphite gunmetal, subtle yellow-gold seams, restrained central gold reactor glow.
+Constraints: this is a static base; there must be no visible weapon carriage or barrel assembly anywhere on it. Keep all other hull features and identity unchanged.
+Avoid: crop, truncated left or right hull, top view, top-down perspective, camera shift, scale change, extra vehicle, weapon, barrels, firing, background, ground shadow, text, border, checkerboard, watermark.
+
+Registered moving carriage source: cropped from the retained original full side-v1 master, using source rectangle [30,150,1010,480] and translated to [80,110] on the unchanged 1774x887 canvas. This keeps the original carriage visible at source scale over the replacement empty mount; no repainting or resampling was applied.

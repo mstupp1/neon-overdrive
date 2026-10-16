@@ -1,0 +1,552 @@
+{
+  "subject": "tank",
+  "logicalSize": 78,
+  "tint": "#ffe14d",
+  "views": {
+    "top": {
+      "source": "art/enemies/tank/sources/top-v4.png",
+      "sourceSha256": "762853b60c2e8b0877a25d67d053dac1d639ab5378cd7e0efd1e9fc728777365",
+      "output": "src/assets/enemies/tank/top-v4.png",
+      "outputSha256": "d08582469c6207175c835d66d332e5a688ed34d71eded2e7b2ab4fd0d6e16db3",
+      "sourceSize": {
+        "width": 887,
+        "height": 887
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        15,
+        9,
+        872,
+        887
+      ],
+      "resizeSize": [
+        200,
+        205
+      ],
+      "offset": [
+        28,
+        25
+      ],
+      "contentBox": [
+        28,
+        25,
+        228,
+        230
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Direct overhead orthographic; nose faces down-screen (+y).",
+      "prompt": {
+        "path": "art/enemies/tank/prompts/top-v4.txt",
+        "sha256": "6c049bffa22220e1ed56f622e462b7bd1097dd0e682e5fa2f121c614a9b36504"
+      },
+      "sourceSheet": {
+        "path": "art/enemies/tank/sheets/top-v4.png",
+        "size": [
+          1774,
+          887
+        ],
+        "layout": "two equal horizontal cells",
+        "cells": {
+          "base": [
+            0,
+            0,
+            887,
+            887
+          ],
+          "carriage": [
+            887,
+            0,
+            1774,
+            887
+          ]
+        },
+        "identityReferences": [
+          "art/enemies/tank/sources/top-v1.png"
+        ],
+        "sourceHashes": {
+          "path": "d7cd16806964e70866421ef1aec570829387f11e71190fcd55ea0e8e37226a5a"
+        }
+      },
+      "inputReferences": [
+        {
+          "path": "art/enemies/tank/sources/top-v1.png",
+          "sha256": "a95726e5b9c1636c9b152453b3079fa24b1f74eff8b59287df7f2452252301a3"
+        }
+      ],
+      "layers": {
+        "carriage": {
+          "source": "art/enemies/tank/layers/top/carriage-v4.png",
+          "sourceSha256": "838670a1e7e0c8c090ef321774d7aa62dc254ed17a899c0a0cf2158e1badff9c",
+          "output": "src/assets/enemies/tank/layers/top/carriage-v4.png",
+          "outputSha256": "cd471bb24858d06745c94a7cd8ff4125e42944e949f7fc1118e9fe30bfc38f78",
+          "sourceSize": {
+            "width": 887,
+            "height": 887
+          },
+          "exportSize": {
+            "width": 256,
+            "height": 256
+          },
+          "cropRect": [
+            15,
+            9,
+            872,
+            887
+          ],
+          "resizeSize": [
+            200,
+            205
+          ],
+          "offset": [
+            28,
+            25
+          ],
+          "contentBox": [
+            28,
+            25,
+            228,
+            230
+          ],
+          "alpha": true,
+          "operation": "apply base view crop/scale/offset to registered full-canvas layer; Lanczos resize",
+          "inputReferences": [
+            {
+              "path": "art/enemies/tank/sources/top-v1.png",
+              "sha256": "a95726e5b9c1636c9b152453b3079fa24b1f74eff8b59287df7f2452252301a3"
+            },
+            {
+              "path": "art/enemies/tank/sources/top-v4.png",
+              "sha256": "762853b60c2e8b0877a25d67d053dac1d639ab5378cd7e0efd1e9fc728777365"
+            }
+          ],
+          "sourceSheet": {
+            "path": "art/enemies/tank/sheets/top-v4.png",
+            "size": [
+              1774,
+              887
+            ],
+            "layout": "two equal horizontal cells",
+            "cells": {
+              "base": [
+                0,
+                0,
+                887,
+                887
+              ],
+              "carriage": [
+                887,
+                0,
+                1774,
+                887
+              ]
+            },
+            "identityReferences": [
+              "art/enemies/tank/sources/top-v1.png"
+            ],
+            "sourceHashes": {
+              "path": "d7cd16806964e70866421ef1aec570829387f11e71190fcd55ea0e8e37226a5a"
+            }
+          },
+          "prompt": {
+            "path": "art/enemies/tank/prompts/top-v4.txt",
+            "sha256": "6c049bffa22220e1ed56f622e462b7bd1097dd0e682e5fa2f121c614a9b36504"
+          },
+          "measuredPivotSourcePx": null,
+          "measuredPivotExportNormalized": [
+            0.5,
+            0.482086
+          ]
+        }
+      }
+    },
+    "side": {
+      "source": "art/enemies/tank/sources/side-v3.png",
+      "sourceSha256": "1b9e416d1c1351ddf8209cb55a22bcd29880da18d9a0c59186c36d84196e5b7a",
+      "output": "src/assets/enemies/tank/side-v3.png",
+      "outputSha256": "21713a45799689b318f657ec2ec82e00eb7253bbfc3742e6712295831d299812",
+      "sourceSize": {
+        "width": 1774,
+        "height": 887
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        41,
+        64,
+        1732,
+        871
+      ],
+      "resizeSize": [
+        205,
+        98
+      ],
+      "offset": [
+        25,
+        79
+      ],
+      "contentBox": [
+        25,
+        79,
+        230,
+        177
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "True side profile; nose reads screen-left after the side camera transform.",
+      "prompt": {
+        "path": "art/enemies/tank/prompts/side-v3.txt",
+        "sha256": "91f71ca373ae94106827b8a6d54a07e35f13685d7f3c742952e4782a51f7468f"
+      },
+      "sourceSheet": {
+        "path": "art/enemies/tank/sources/side-v3.png",
+        "size": [
+          1774,
+          887
+        ],
+        "layout": "full-canvas generated static base; isolated carriage generated separately and registered to the mount",
+        "identityReferences": [
+          "art/enemies/tank/sources/side-v1.png",
+          "art/enemies/tank/sources/top-v1.png"
+        ],
+        "baseSourceRect": [
+          0,
+          0,
+          1774,
+          887
+        ],
+        "registration": "art/enemies/tank/registration/side-v3.json",
+        "baseSource": "art/enemies/tank/sources/side-v3.png",
+        "carriageSource": "art/enemies/tank/layers/side/sources/carriage-v3-generated.png",
+        "carriageOperation": {
+          "cropRect": [
+            43,
+            213,
+            1664,
+            727
+          ],
+          "alphaThreshold": 4,
+          "resizedSize": [
+            1000,
+            317
+          ],
+          "resizeScale": 0.6169031462,
+          "canvasOffset": [
+            104,
+            124
+          ],
+          "registeredPivot": [
+            820,
+            405
+          ]
+        },
+        "sourceHashes": {
+          "path": "1b9e416d1c1351ddf8209cb55a22bcd29880da18d9a0c59186c36d84196e5b7a"
+        },
+        "registrationSha256": "941ff1f40f74aeaf5cca5406affa984ac33f82eafb32b929a3536727e9731c35"
+      },
+      "inputReferences": [
+        {
+          "path": "art/enemies/tank/sources/side-v1.png",
+          "sha256": "d9e4e20fcbb7c730bc324a9f91f0b7b64aac5269f488642585192f6fc5d0277f"
+        },
+        {
+          "path": "art/enemies/tank/sources/top-v1.png",
+          "sha256": "a95726e5b9c1636c9b152453b3079fa24b1f74eff8b59287df7f2452252301a3"
+        }
+      ],
+      "layers": {
+        "carriage": {
+          "source": "art/enemies/tank/layers/side/carriage-v3.png",
+          "sourceSha256": "731e03926b5538722fd6b36c7a3122c5f03aa65552e5aa687e47729d9e803b2b",
+          "output": "src/assets/enemies/tank/layers/side/carriage-v3.png",
+          "outputSha256": "5dbdb2aacfcfd6bbf65d6e1b933761be9222d7214dcbb129a77b3831bda303c9",
+          "sourceSize": {
+            "width": 1774,
+            "height": 887
+          },
+          "exportSize": {
+            "width": 256,
+            "height": 256
+          },
+          "cropRect": [
+            41,
+            64,
+            1732,
+            871
+          ],
+          "resizeSize": [
+            205,
+            98
+          ],
+          "offset": [
+            25,
+            79
+          ],
+          "contentBox": [
+            25,
+            79,
+            230,
+            177
+          ],
+          "alpha": true,
+          "operation": "apply base view crop/scale/offset to registered full-canvas layer; Lanczos resize",
+          "inputReferences": [
+            {
+              "path": "art/enemies/tank/sources/side-v1.png",
+              "sha256": "d9e4e20fcbb7c730bc324a9f91f0b7b64aac5269f488642585192f6fc5d0277f"
+            },
+            {
+              "path": "art/enemies/tank/sources/top-v1.png",
+              "sha256": "a95726e5b9c1636c9b152453b3079fa24b1f74eff8b59287df7f2452252301a3"
+            },
+            {
+              "path": "art/enemies/tank/sources/side-v3.png",
+              "sha256": "1b9e416d1c1351ddf8209cb55a22bcd29880da18d9a0c59186c36d84196e5b7a"
+            }
+          ],
+          "sourceSheet": {
+            "path": "art/enemies/tank/sources/side-v3.png",
+            "size": [
+              1774,
+              887
+            ],
+            "layout": "full-canvas generated static base; isolated carriage generated separately and registered to the mount",
+            "identityReferences": [
+              "art/enemies/tank/sources/side-v1.png",
+              "art/enemies/tank/sources/top-v1.png"
+            ],
+            "baseSourceRect": [
+              0,
+              0,
+              1774,
+              887
+            ],
+            "registration": "art/enemies/tank/registration/side-v3.json",
+            "baseSource": "art/enemies/tank/sources/side-v3.png",
+            "carriageSource": "art/enemies/tank/layers/side/sources/carriage-v3-generated.png",
+            "carriageOperation": {
+              "cropRect": [
+                43,
+                213,
+                1664,
+                727
+              ],
+              "alphaThreshold": 4,
+              "resizedSize": [
+                1000,
+                317
+              ],
+              "resizeScale": 0.6169031462,
+              "canvasOffset": [
+                104,
+                124
+              ],
+              "registeredPivot": [
+                820,
+                405
+              ]
+            },
+            "sourceHashes": {
+              "path": "1b9e416d1c1351ddf8209cb55a22bcd29880da18d9a0c59186c36d84196e5b7a"
+            },
+            "registrationSha256": "941ff1f40f74aeaf5cca5406affa984ac33f82eafb32b929a3536727e9731c35"
+          },
+          "prompt": {
+            "path": "art/enemies/tank/prompts/side-v3.txt",
+            "sha256": "91f71ca373ae94106827b8a6d54a07e35f13685d7f3c742952e4782a51f7468f"
+          },
+          "measuredPivotSourcePx": [
+            820,
+            405
+          ],
+          "measuredPivotExportNormalized": [
+            0.466555,
+            0.470352
+          ]
+        }
+      }
+    },
+    "chase": {
+      "source": "art/enemies/tank/sources/chase-v3.png",
+      "sourceSha256": "f1a974d9710ad9c24cf60fdd29a50db62a5b75c3cc5e29ce91ea8a2f02d3ea1a",
+      "output": "src/assets/enemies/tank/chase-v3.png",
+      "outputSha256": "4bc87a1db7805e757dcefd24f2b0af13080b95266693e4d66fe001afa6f14118",
+      "sourceSize": {
+        "width": 887,
+        "height": 887
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        0,
+        17,
+        887,
+        887
+      ],
+      "resizeSize": [
+        205,
+        201
+      ],
+      "offset": [
+        25,
+        27
+      ],
+      "contentBox": [
+        25,
+        27,
+        230,
+        228
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/tank/prompts/chase-v3.txt",
+        "sha256": "a1ed94bfa7ef4998e3a18c581265ffd4a763d253276f331621bd8f2a1d1bbdbf"
+      },
+      "sourceSheet": {
+        "path": "art/enemies/tank/sheets/chase-v3.png",
+        "size": [
+          1774,
+          887
+        ],
+        "layout": "two equal horizontal cells",
+        "cells": {
+          "base": [
+            0,
+            0,
+            887,
+            887
+          ],
+          "carriage": [
+            887,
+            0,
+            1774,
+            887
+          ]
+        },
+        "identityReferences": [
+          "art/enemies/tank/sources/top-v1.png",
+          "art/enemies/tank/sources/chase-v2.png"
+        ],
+        "sourceHashes": {
+          "path": "be71d5334931575e1845fd52b821f735e388b38ea5d5745ee21cb142739e6cfd"
+        }
+      },
+      "inputReferences": [
+        {
+          "path": "art/enemies/tank/sources/top-v1.png",
+          "sha256": "a95726e5b9c1636c9b152453b3079fa24b1f74eff8b59287df7f2452252301a3"
+        },
+        {
+          "path": "art/enemies/tank/sources/chase-v2.png",
+          "sha256": "9f2d7381b4ebc7d083cfa2f156be517de6d84cc5429e016f21cd94710dbfb612"
+        }
+      ],
+      "layers": {
+        "carriage": {
+          "source": "art/enemies/tank/layers/chase/carriage-v3.png",
+          "sourceSha256": "6737ad4a6f1a452052d081614e377e0bc7f788912f92874cb8702646d11e9dda",
+          "output": "src/assets/enemies/tank/layers/chase/carriage-v3.png",
+          "outputSha256": "a239a05dda0bf3e8273b36f38b5c9d931e715263e64b7cc8be9612ae29079ea3",
+          "sourceSize": {
+            "width": 887,
+            "height": 887
+          },
+          "exportSize": {
+            "width": 256,
+            "height": 256
+          },
+          "cropRect": [
+            0,
+            17,
+            887,
+            887
+          ],
+          "resizeSize": [
+            205,
+            201
+          ],
+          "offset": [
+            25,
+            27
+          ],
+          "contentBox": [
+            25,
+            27,
+            230,
+            228
+          ],
+          "alpha": true,
+          "operation": "apply base view crop/scale/offset to registered full-canvas layer; Lanczos resize",
+          "inputReferences": [
+            {
+              "path": "art/enemies/tank/sources/top-v1.png",
+              "sha256": "a95726e5b9c1636c9b152453b3079fa24b1f74eff8b59287df7f2452252301a3"
+            },
+            {
+              "path": "art/enemies/tank/sources/chase-v2.png",
+              "sha256": "9f2d7381b4ebc7d083cfa2f156be517de6d84cc5429e016f21cd94710dbfb612"
+            },
+            {
+              "path": "art/enemies/tank/sources/chase-v3.png",
+              "sha256": "f1a974d9710ad9c24cf60fdd29a50db62a5b75c3cc5e29ce91ea8a2f02d3ea1a"
+            }
+          ],
+          "sourceSheet": {
+            "path": "art/enemies/tank/sheets/chase-v3.png",
+            "size": [
+              1774,
+              887
+            ],
+            "layout": "two equal horizontal cells",
+            "cells": {
+              "base": [
+                0,
+                0,
+                887,
+                887
+              ],
+              "carriage": [
+                887,
+                0,
+                1774,
+                887
+              ]
+            },
+            "identityReferences": [
+              "art/enemies/tank/sources/top-v1.png",
+              "art/enemies/tank/sources/chase-v2.png"
+            ],
+            "sourceHashes": {
+              "path": "be71d5334931575e1845fd52b821f735e388b38ea5d5745ee21cb142739e6cfd"
+            }
+          },
+          "prompt": {
+            "path": "art/enemies/tank/prompts/chase-v3.txt",
+            "sha256": "a1ed94bfa7ef4998e3a18c581265ffd4a763d253276f331621bd8f2a1d1bbdbf"
+          },
+          "measuredPivotSourcePx": null,
+          "measuredPivotExportNormalized": [
+            0.491276,
+            0.502559
+          ]
+        }
+      }
+    }
+  },
+  "prompts": {
+    "top": "art/enemies/tank/prompts/top-v4.txt",
+    "side": "art/enemies/tank/prompts/side-v3.txt",
+    "chase": "art/enemies/tank/prompts/chase-v3.txt"
+  },
+  "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
+}

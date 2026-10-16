@@ -1,0 +1,74 @@
+[
+  {
+    "output": "art/enemies/spinner/sources/chase-v3.png",
+    "sourceSheet": "art/enemies/spinner/sheets/chase-components-v3.png",
+    "sourceSheetSha256": "3fcf971712192dd74f526517b9495216c82a5b68950d495c5c46ce380d22d6be",
+    "cropRect": [
+      40,
+      220,
+      660,
+      600
+    ],
+    "measuredAssemblyPivot": [
+      347,
+      355
+    ],
+    "registeredPivot": [
+      627,
+      627
+    ],
+    "translation": [
+      320,
+      492
+    ],
+    "operation": "crop generated component; translate unchanged RGBA pixels onto common1254px canvas; no painting or masking"
+  },
+  {
+    "output": "art/enemies/spinner/layers/chase/rotor-v3.png",
+    "sourceSheet": "art/enemies/spinner/sheets/chase-components-v3.png",
+    "sourceSheetSha256": "3fcf971712192dd74f526517b9495216c82a5b68950d495c5c46ce380d22d6be",
+    "cropRect": [
+      640,
+      180,
+      1660,
+      660
+    ],
+    "measuredAssemblyPivot": [
+      1138,
+      378
+    ],
+    "registeredPivot": [
+      627,
+      627
+    ],
+    "translation": [
+      129,
+      429
+    ],
+    "operation": "crop generated component; translate unchanged RGBA pixels onto common1254px canvas; no painting or masking"
+  },
+  {
+    "output": "art/enemies/spinner/layers/chase/core-v3.png",
+    "sourceSheet": "art/enemies/spinner/sheets/chase-components-v3.png",
+    "sourceSheetSha256": "3fcf971712192dd74f526517b9495216c82a5b68950d495c5c46ce380d22d6be",
+    "cropRect": [
+      1740,
+      200,
+      2050,
+      620
+    ],
+    "measuredAssemblyPivot": [
+      1885,
+      380
+    ],
+    "registeredPivot": [
+      627,
+      627
+    ],
+    "translation": [
+      482,
+      447
+    ],
+    "operation": "crop generated component; translate unchanged RGBA pixels onto common1254px canvas; no painting or masking"
+  }
+]

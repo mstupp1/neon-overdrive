@@ -1,0 +1,13 @@
+Use case: stylized-concept
+Asset type: transparent 2D game enemy sprite master for NEON OVERDRIVE
+Primary request: Make a true front-on chase-camera view of the same four-blade spinner drone in Image 1, approaching the player/camera. Preserve its violet identity, four swept armored blades, and central reactor. This is viewed from the front as the enemy comes toward the lens; show front-facing armor with the rotor and hub clearly readable.
+Input images: Image 1: selected overhead design reference; preserve exact blade shape, violet palette and materials.
+Scene/backdrop: isolated on genuinely transparent background.
+Subject: radial spinner hostile, approaching front view, symmetric left/right.
+Style/medium: polished crisp dimensional 2D game sprite, beveled graphite gunmetal panels and restrained violet light.
+Composition/framing: centered square, whole silhouette visible, safe transparent padding; camera directly in front and slightly above enough to reveal the four-blade rotor.
+Lighting/mood: restrained violet-magenta emissive edges, cool pale metal reflections, no broad white bloom.
+Color palette: near-black navy, gunmetal, violet reactor, matching Image 1.
+Materials/textures: layered armor and narrow seams.
+Constraints: genuine alpha, no floor shadow, front-facing approach orientation.
+Avoid: text, labels, logo, watermark, background, checkerboard, extra objects, projectile effects, explosions, rear view, fake rotation of overhead image.

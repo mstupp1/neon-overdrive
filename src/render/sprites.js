@@ -6,6 +6,7 @@ import { withAlpha, poly, regular, glowStroke, shade } from './ink.js';
 import { drawShip } from './shipArt.js';
 import { withShipImages } from './shipImages.js';
 import { buildEnemyArt } from './enemyArt.js';
+import { withEnemyImages } from './enemyImages.js';
 import { shotStyle, superKi, moduleShot, withTrail } from './shots.js';
 
 export { withAlpha };
@@ -516,6 +517,9 @@ export function buildSprites(ships) {
 export function buildEnemySpritesV2() {
   const E = ENEMY_COLORS;
   buildEnemyArt(S, makeSprite, E);
+  for (const id of ['dart', 'swarm', 'spinner', 'dasher', 'snakeHead', 'snakeSeg', 'sniper', 'tank', 'splitter', 'mine', 'carrier', 'shielder', 'weaver', 'blinker', 'eclipseDrone']) {
+    if (S[id]) S[id] = withEnemyImages(id, S[id]);
+  }
   S.shieldRing = makeSprite(64, (g) => {
     g.save();
     g.globalAlpha = 0.16; g.fillStyle = E.shielder; g.beginPath(); g.arc(0, 0, 28, 0, TAU); g.fill();

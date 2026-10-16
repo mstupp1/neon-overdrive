@@ -1,0 +1,152 @@
+{
+  "subject": "snakeHead",
+  "logicalSize": 40,
+  "tint": "#6dff4d",
+  "views": {
+    "top": {
+      "source": "art/enemies/snakeHead/sources/top-v1.png",
+      "sourceSha256": "baf45f2e7b96c9f7eca8333954c4bbf4494d07e1a03639f1a8576f7e45d2f50a",
+      "output": "src/assets/enemies/snakeHead/top-v1.png",
+      "outputSha256": "4d078f018895539bfcc4d38465f660ab71b26360a21a35f02499adc97384cab6",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        0,
+        13,
+        1220,
+        1254
+      ],
+      "resizeSize": [
+        202,
+        205
+      ],
+      "offset": [
+        27,
+        25
+      ],
+      "contentBox": [
+        27,
+        25,
+        229,
+        230
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Direct overhead orthographic; nose faces down-screen (+y).",
+      "prompt": {
+        "path": "art/enemies/snakeHead/prompts/top-v1.txt",
+        "sha256": "2cb93770e170a575537e7efc764a0c0183d18b83c28b9cfbe3dcf068612e6b30"
+      },
+      "sourceSheet": null,
+      "inputReferences": []
+    },
+    "side": {
+      "source": "art/enemies/snakeHead/sources/side-v1.png",
+      "sourceSha256": "43f9c5dbc2ce57aea23c41ff091722ec736993ca4cc4433cffd0fe9a2b93aee1",
+      "output": "src/assets/enemies/snakeHead/side-v1.png",
+      "outputSha256": "b42b862b57664e5ddf21e29b048aa9cb57b98fdd2d8b261071897100b3c727e6",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        18,
+        0,
+        1238,
+        1254
+      ],
+      "resizeSize": [
+        199,
+        205
+      ],
+      "offset": [
+        28,
+        25
+      ],
+      "contentBox": [
+        28,
+        25,
+        227,
+        230
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "True side profile; nose reads screen-left after the side camera transform.",
+      "prompt": {
+        "path": "art/enemies/snakeHead/prompts/side-v1.txt",
+        "sha256": "73d0ada840c54b3fc03019e068cf3d3e217a8e237bc5f9d6b4740c47595551b9"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/snakeHead/sources/top-v1.png",
+          "sha256": "baf45f2e7b96c9f7eca8333954c4bbf4494d07e1a03639f1a8576f7e45d2f50a"
+        }
+      ]
+    },
+    "chase": {
+      "source": "art/enemies/snakeHead/sources/chase-v2.png",
+      "sourceSha256": "8061a0e6c146c25d062ee13ddfe3d85126d3b2a9a9a02a8e68cbea87edab8b39",
+      "output": "src/assets/enemies/snakeHead/chase-v2.png",
+      "outputSha256": "102630c75e7a7a1b60c893b92e72dc70a357959b5233c78f7cbe47127b70632c",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        0,
+        23,
+        1223,
+        1238
+      ],
+      "resizeSize": [
+        205,
+        204
+      ],
+      "offset": [
+        25,
+        26
+      ],
+      "contentBox": [
+        25,
+        26,
+        230,
+        230
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/snakeHead/prompts/chase-v2.txt",
+        "sha256": "b7905996269120ddcebe502483c5883569268b5fe880949d64db84ceb0e37aac"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/snakeHead/sources/top-v1.png",
+          "sha256": "baf45f2e7b96c9f7eca8333954c4bbf4494d07e1a03639f1a8576f7e45d2f50a"
+        }
+      ]
+    }
+  },
+  "prompts": {
+    "top": "art/enemies/snakeHead/prompts/top-v1.txt",
+    "side": "art/enemies/snakeHead/prompts/side-v1.txt",
+    "chase": "art/enemies/snakeHead/prompts/chase-v2.txt"
+  },
+  "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
+}

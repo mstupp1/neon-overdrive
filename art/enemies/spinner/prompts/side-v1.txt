@@ -1,0 +1,13 @@
+Use case: stylized-concept
+Asset type: transparent 2D game enemy sprite master, NEON OVERDRIVE browser shooter
+Primary request: Create a true side/profile view of the same four-blade radial spinner drone shown in Image 1. Preserve its exact violet identity, blade count, swept armored blade shape, and central circular reactor. This is a genuine side view with the rotor foreshortened into a compact horizontal profile, showing thickness and beveled dorsal armor; do not rotate the overhead image.
+Input images: Image 1: selected top-view design reference; preserve identity, palette and materials.
+Scene/backdrop: isolated single sprite on transparent background.
+Subject: four-blade armored rotor enemy, side profile. Orient its forward/nose direction along local +y (which the game camera transforms to screen-left).
+Style/medium: crisp polished dimensional 2D game sprite, gunmetal plates, narrow seams, dark navy shadows, restrained violet edge lights.
+Composition/framing: centered square canvas, entire silhouette visible with safe transparent padding, side-on profile with only enough top surface visible to identify rotor thickness.
+Lighting/mood: restrained violet-magenta emission and cool metal highlights.
+Color palette: near-black navy, dark graphite, violet reactor, matching Image 1.
+Materials/textures: layered beveled armor and compact central hub, no broad white areas.
+Constraints: genuine alpha; coherent side profile; no ground shadow; maintain same design identity.
+Avoid: text, logos, watermark, background, checkerboard, extra objects, projectile effects, explosion, perspective top-down view, fake rotation of Image 1.

@@ -1,0 +1,12 @@
+Use case: stylized-concept
+Asset type: registered transparent component sprite sheet for a 2D shooter enemy
+Primary request: make a two-cell side-camera sheet separating the static heavy tank hull from the visible rotating weapon carriage.
+Input images: Image 1 is the tank's selected top identity reference. Image 2 is its selected true side-view camera reference and determines the view, scale, and profile proportions.
+Layout: a 2:1 horizontal transparent sheet of exactly two equal square cells side by side, no gap or divider. Both cells show the same low side-profile vehicle at identical scale, camera and center.
+LEFT CELL, static base: the same broad gunmetal tank chassis in a true low side profile with its gold reactor visible behind the weapon mount. Remove the complete visible rotating paired-barrel weapon carriage, including its housing and barrels. Leave only a low fixed socket integrated into the chassis; no raised weapon carriage or barrel remains.
+RIGHT CELL, moving layer: only the complete paired-barrel weapon carriage removed from the left cell, on transparent pixels, exactly registered over its socket in the left cell. No chassis or gold reactor in this cell. Do not duplicate the carriage.
+Camera: true side profile; the enemy's nose points local +y so stageview presents it facing screen-left. The wide hull is strongly foreshortened vertically into a compact horizontal vehicle profile. Do not use top-down perspective.
+Style: polished 3D game sprite, dark navy and graphite gunmetal, beveled armor, restrained gold reactor light and narrow yellow-gold accents.
+Composition: same square cell size and registration for both components, complete vehicle and carriage visible, transparent margin around each cell.
+Constraints: genuine alpha; static base contains no rotating carriage or barrels; carriage cell contains the isolated matching carriage at the exact scale and location needed to overlay.
+Avoid: top view, fake rotation of Image 1, perspective change, base with a duplicate turret, carriage with chassis behind it, extra weapons, shadows, firing effects, text, dividers, borders, checkerboard, background, watermark.

@@ -1,0 +1,152 @@
+{
+  "subject": "mine",
+  "logicalSize": 34,
+  "tint": "#ff8a3d",
+  "views": {
+    "top": {
+      "source": "art/enemies/mine/sources/top-v1.png",
+      "sourceSha256": "89c13103e21a4a52c7434be8b134277c37d8d952d60754b3bc4314cb099cbccb",
+      "output": "src/assets/enemies/mine/top-v1.png",
+      "outputSha256": "60c311bba515bcd955ce89b2fea5771da0cf9cb1bbf64e74b77e37a6f5ef26ea",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        0,
+        51,
+        1226,
+        1230
+      ],
+      "resizeSize": [
+        205,
+        197
+      ],
+      "offset": [
+        25,
+        29
+      ],
+      "contentBox": [
+        25,
+        29,
+        230,
+        226
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Direct overhead orthographic; nose faces down-screen (+y).",
+      "prompt": {
+        "path": "art/enemies/mine/prompts/top-v1.txt",
+        "sha256": "c2213197fa63fac2be2b748f92c813f02488b66e931da985000b5a26577da991"
+      },
+      "sourceSheet": null,
+      "inputReferences": []
+    },
+    "side": {
+      "source": "art/enemies/mine/sources/side-v1.png",
+      "sourceSha256": "886928ef831f513dc1a1eb29f0e41e0c8d855e30b0028f0520b54cdc14b00d04",
+      "output": "src/assets/enemies/mine/side-v1.png",
+      "outputSha256": "f457fa24f93b78cbc9299e9d48fb474037c98f6afab79ef929a2da565e5c3dcc",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        25,
+        21,
+        1218,
+        1254
+      ],
+      "resizeSize": [
+        198,
+        205
+      ],
+      "offset": [
+        29,
+        25
+      ],
+      "contentBox": [
+        29,
+        25,
+        227,
+        230
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "True side profile; nose reads screen-left after the side camera transform.",
+      "prompt": {
+        "path": "art/enemies/mine/prompts/side-v1.txt",
+        "sha256": "c68828b2d3b631912ccbb429751d3e73d24ddd277c5c19b2f54bd7d9b6f97713"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/mine/sources/top-v1.png",
+          "sha256": "89c13103e21a4a52c7434be8b134277c37d8d952d60754b3bc4314cb099cbccb"
+        }
+      ]
+    },
+    "chase": {
+      "source": "art/enemies/mine/sources/chase-v1.png",
+      "sourceSha256": "4c3a8b63067788f9af2dc74cfeb1c3f1691a1cb98ae813607e6aa218f55e8baa",
+      "output": "src/assets/enemies/mine/chase-v1.png",
+      "outputSha256": "0c90c66f5e2297a6e9be91aa60347d9c7b00296d64c100dd01d8a7e7c0e15837",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        0,
+        23,
+        1224,
+        1230
+      ],
+      "resizeSize": [
+        205,
+        202
+      ],
+      "offset": [
+        25,
+        27
+      ],
+      "contentBox": [
+        25,
+        27,
+        230,
+        229
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/mine/prompts/chase-v1.txt",
+        "sha256": "0b5e79a4ac13b6d36152cde6b01ada160bae72490e48cc7bad2221575448bd40"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/mine/sources/top-v1.png",
+          "sha256": "89c13103e21a4a52c7434be8b134277c37d8d952d60754b3bc4314cb099cbccb"
+        }
+      ]
+    }
+  },
+  "prompts": {
+    "top": "art/enemies/mine/prompts/top-v1.txt",
+    "side": "art/enemies/mine/prompts/side-v1.txt",
+    "chase": "art/enemies/mine/prompts/chase-v1.txt"
+  },
+  "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
+}

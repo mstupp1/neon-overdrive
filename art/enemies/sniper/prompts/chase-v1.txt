@@ -1,0 +1,6 @@
+Use case: stylized-concept
+Asset type: NEON OVERDRIVE enemy combat sprite, rendered at only 30–48 logical pixels. One isolated subject, genuine transparent background. High-quality illustrated industrial sci-fi sprite with broad readable dark gunmetal armor, beveled panels, dark glass, restrained emissive accent, crisp silhouette; avoid broad white areas, excessive bloom, tiny busy detail, text, floor/shadow, labels, exhaust flames, projectiles, background, checkerboard. Preserve strong silhouette and generous transparent margin, centered mechanical pivot. Not a scene or poster.
+Input image 1: selected overhead identity reference; preserve this EXACT enemy design, panels, materials, color and anatomy.
+Subject: orange #ffa62b stationary hostile scope drone: low hexagonal armored central disk, three equally spaced slim outriggers ending in foot pads, prominent concentric central scope lens and crosshair. Triangular overall silhouette. No long cannon.
+Camera: FRONT slightly elevated pursuit combat view of approaching enemy, looking directly toward its front/nose apertures, symmetric balanced geometry and foreshortened depth. NOT rear engine view, not overhead. Show the SAME design as a three dimensional object from front.
+Single complete hull centered within 80% square with transparent margin.

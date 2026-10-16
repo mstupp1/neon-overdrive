@@ -1,0 +1,9 @@
+Use case: stylized-concept
+Asset type: transparent layered game sprite COMPONENT SHEET, one SPINNER enemy in three separate component cells.
+Reference image: design identity reference ONLY, not layout.
+CRITICAL LAYOUT: one wide horizontal canvas with EXACTLY THREE equal square cells, no dividing lines or labels, genuine transparent background throughout. Each cell uses the SAME physical scale, SAME camera, SAME central assembly pivot at exact cell center. Think three registered animation layers laid side by side, ready to overlay.
+LEFT CELL: ONLY dark metallic small underlying bearing axle/chassis (unlit underside mount), NO blades, NO glowing reactor core.
+MIDDLE CELL: ONLY full four-blade swept gunmetal ROTOR, connecting outer ring, EMPTY center hole for separate core; four broad curved scythe blades with restrained violet #b56cff edge lights. NO central glowing reactor pupil. Full blade tips inside cell with15% clear margins.
+RIGHT CELL: ONLY small central circular REACTOR CORE insert, metallic rim and glowing violet pupil, same size as the center hole in middle cell, at same local center. NOT enlarged to fill cell; about22% of rotor diameter.
+Camera for ALL three components: Strict directly OVERHEAD orthographic view, four blades equally spaced in plane, circular hub.
+Style: same polished industrial gunmetal/graphite beveled panels as reference, crisp illustrated combat sprite readable at60 logical units. No text, logo, checkerboard, background, explosions, shots, flames, shadows or extra objects. Components must NOT overlap across cells. Correct relative scale rather than each component separately filling its cell. Render into 3:1 aspect ratio canvas.

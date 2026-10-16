@@ -1,0 +1,13 @@
+Use case: stylized-concept
+Asset type: registered transparent component sprite sheet for a 2D shooter enemy
+Primary request: create a two-cell top-down sprite sheet separating a static tank chassis from its complete rotating weapon-carriage layer.
+Input images: Image 1 is the selected top-down tank design reference.
+Layout: a 2:1 horizontal sheet of exactly two equal square transparent cells side by side with no gutter or divider. Both cells use the same direct overhead camera, object scale, and center.
+LEFT CELL: static broad octagonal tank chassis with central gold reactor, fixed armor, vents and seams. Remove all three complete weapon-carriage assemblies, including every turret body, barrel, muzzle and raised rotating plate. Leave three shallow fixed empty mounting rings only.
+RIGHT CELL: only the three removed weapon-carriage assemblies, all their paired barrels and rotating turret bodies, matching their exact positions and directions in Image 1. Transparent space between all three. No chassis, reactor or fixed mounting rings.
+Registration: cells are exactly the same pixel dimensions. The component layer is meant to overlay the left base at 50% opacity with all three carriages aligned over their empty rings. Do not duplicate any part between cells.
+Safe framing: in BOTH cells, the complete visible object must fit inside the central 76% of the square cell, leaving at least 12% clear transparent padding at top, bottom, left and right. Nothing touches or crosses a cell edge. Keep both layers at the same size and center.
+Camera: direct overhead orthographic, nose down-screen (+y), matching Image 1.
+Style: polished game art, dark navy and graphite gunmetal, crisp beveled panels, restrained golden reactor light and small gold emissive seams.
+Constraints: genuine alpha transparency; separate base and all three rotating assemblies cleanly; retain the recognizable design.
+Avoid: any turret or barrel in the left cell, any hull or reactor in the right cell, clipped silhouette, full-cell scale, perspective camera, text, captions, borders, grid, checkerboard, background, shadows, firing, smoke, watermark.

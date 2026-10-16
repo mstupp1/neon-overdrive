@@ -1,0 +1,152 @@
+{
+  "subject": "swarm",
+  "logicalSize": 30,
+  "tint": "#7dffb0",
+  "views": {
+    "top": {
+      "source": "art/enemies/swarm/sources/top-v1.png",
+      "sourceSha256": "7d74f357444821d0b26944df874b5cf0e022964f099480e34dfb99482021f428",
+      "output": "src/assets/enemies/swarm/top-v1.png",
+      "outputSha256": "193f242de6aa4c8a223dc3ad6e9de84480a6759b728050897c87f7dc29c7e3dd",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        0,
+        23,
+        1234,
+        1254
+      ],
+      "resizeSize": [
+        205,
+        205
+      ],
+      "offset": [
+        25,
+        25
+      ],
+      "contentBox": [
+        25,
+        25,
+        230,
+        230
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Direct overhead orthographic; nose faces down-screen (+y).",
+      "prompt": {
+        "path": "art/enemies/swarm/prompts/top-v1.txt",
+        "sha256": "fe1a40e48fe21a9bfb814b64a592fd69859e68fad772cc9e0456d5761b555fc6"
+      },
+      "sourceSheet": null,
+      "inputReferences": []
+    },
+    "side": {
+      "source": "art/enemies/swarm/sources/side-v1.png",
+      "sourceSha256": "6c1f22f77ab05f76c97cd1387a44a0e558617195f476d6a75bd49c411a40b34a",
+      "output": "src/assets/enemies/swarm/side-v1.png",
+      "outputSha256": "e1d25af52f584bcc1aa3be98e0ec5f43589c0cdc0ab18c91e11c68c2a3052f6a",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        0,
+        0,
+        1238,
+        1230
+      ],
+      "resizeSize": [
+        205,
+        204
+      ],
+      "offset": [
+        25,
+        26
+      ],
+      "contentBox": [
+        25,
+        26,
+        230,
+        230
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "True side profile; nose reads screen-left after the side camera transform.",
+      "prompt": {
+        "path": "art/enemies/swarm/prompts/side-v1.txt",
+        "sha256": "b133fbe29dd53d8091d7303d9173d4a75a727c59141e2cff4c475b7926687303"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/swarm/sources/top-v1.png",
+          "sha256": "7d74f357444821d0b26944df874b5cf0e022964f099480e34dfb99482021f428"
+        }
+      ]
+    },
+    "chase": {
+      "source": "art/enemies/swarm/sources/chase-v2.png",
+      "sourceSha256": "9185494b60ea545f3fe662596b3ec23f22bdd09e67ba2a722844f206ad3eb2ec",
+      "output": "src/assets/enemies/swarm/chase-v2.png",
+      "outputSha256": "4503a1c4b74ce2b5587ef2b177bafef143748a633c15b3ecc98c89b10b5fc952",
+      "sourceSize": {
+        "width": 1536,
+        "height": 1024
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        0,
+        22,
+        1527,
+        992
+      ],
+      "resizeSize": [
+        205,
+        130
+      ],
+      "offset": [
+        25,
+        63
+      ],
+      "contentBox": [
+        25,
+        63,
+        230,
+        193
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/swarm/prompts/chase-v2.txt",
+        "sha256": "2677aec1ac97618b5ed3d60ddb48018707580855a81eaf9c0dffec879edfcc8b"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/swarm/sources/top-v1.png",
+          "sha256": "7d74f357444821d0b26944df874b5cf0e022964f099480e34dfb99482021f428"
+        }
+      ]
+    }
+  },
+  "prompts": {
+    "top": "art/enemies/swarm/prompts/top-v1.txt",
+    "side": "art/enemies/swarm/prompts/side-v1.txt",
+    "chase": "art/enemies/swarm/prompts/chase-v2.txt"
+  },
+  "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
+}

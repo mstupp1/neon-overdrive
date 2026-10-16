@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: transparent body-segment combat sprite for a neon browser shooter
+Primary request: create a true pursuit-camera front view of the exact armored mechanical serpent body segment in Image 1, approaching the player. Image 1 is a top-down identity and material reference, not a view to rotate.
+Input images: Image 1: reference for the segment's radial armor panels, dark gunmetal material, central acid-green core, and green light bars.
+Subject: one armored serpent body segment viewed from directly in front as it comes toward the camera. Show a compact symmetrical armored front face with the bright green core centered, and foreshortened armored sides receding away behind it so the segment has clear volume. This is a body segment, not a head: no eyes, mouth, snout, or face.
+Style/medium: polished 3D game illustration with beveled gunmetal plates, fine mechanical seams, restrained emissive glow.
+Composition/framing: single centered subject on a square transparent canvas, full silhouette with clear margin, readable at a small 30-unit game-sprite footprint.
+Lighting/mood: crisp metal highlights, luminous but controlled green core, readable on dark and light backgrounds.
+Color palette: near-black navy and gunmetal with acid-green core and accents matching Image 1.
+Constraints: genuine transparent background; front-facing approach view from the enemy's direction of travel; preserve the same segment identity and central core.
+Avoid: overhead view, rotated top view, rear view, side profile, three-quarter view, any head/face features, extra segments, chain, ground, shadow, text, border, checkerboard, watermark.

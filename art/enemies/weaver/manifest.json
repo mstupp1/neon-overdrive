@@ -1,0 +1,152 @@
+{
+  "subject": "weaver",
+  "logicalSize": 40,
+  "tint": "#d6ff3a",
+  "views": {
+    "top": {
+      "source": "art/enemies/weaver/sources/top-v1.png",
+      "sourceSha256": "baccb27bede433c44655808011d1db8d270b84cf74c89a2191f7405badebd523",
+      "output": "src/assets/enemies/weaver/top-v1.png",
+      "outputSha256": "bec34a50c1b57a71b62fa83c42e2218d5b10a0ce2df19e8e3c9bb4c07869db87",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        33,
+        31,
+        1190,
+        1234
+      ],
+      "resizeSize": [
+        197,
+        205
+      ],
+      "offset": [
+        29,
+        25
+      ],
+      "contentBox": [
+        29,
+        25,
+        226,
+        230
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Direct overhead orthographic; nose faces down-screen (+y).",
+      "prompt": {
+        "path": "art/enemies/weaver/prompts/top-v1.txt",
+        "sha256": "d8fa73bf6009d107bc21493adea6c5195238aab0744608a83d48db10cba94b74"
+      },
+      "sourceSheet": null,
+      "inputReferences": []
+    },
+    "side": {
+      "source": "art/enemies/weaver/sources/side-v1.png",
+      "sourceSha256": "75904a3a3cdd829e7f572f8def31d382a02812a0d61a91331e83cfb68b804ba6",
+      "output": "src/assets/enemies/weaver/side-v1.png",
+      "outputSha256": "1d437cb1d6cb96507f1e65dfc8aad213d5d64dbccb1a18d3ec8b377beabb4b95",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        57,
+        85,
+        1226,
+        1140
+      ],
+      "resizeSize": [
+        205,
+        185
+      ],
+      "offset": [
+        25,
+        35
+      ],
+      "contentBox": [
+        25,
+        35,
+        230,
+        220
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "True side profile; nose reads screen-left after the side camera transform.",
+      "prompt": {
+        "path": "art/enemies/weaver/prompts/side-v1.txt",
+        "sha256": "8340ffc744b36f5824ff7d882a426b8aba8720f926e1fe7c929bbbd7265fb88d"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/weaver/sources/top-v1.png",
+          "sha256": "baccb27bede433c44655808011d1db8d270b84cf74c89a2191f7405badebd523"
+        }
+      ]
+    },
+    "chase": {
+      "source": "art/enemies/weaver/sources/chase-v2.png",
+      "sourceSha256": "41540eadac20ce658abc4ec3e39fb4a438c485a135284435c98d62ca0f7e9f4a",
+      "output": "src/assets/enemies/weaver/chase-v2.png",
+      "outputSha256": "98d0435c3599f12a308fc318f3d25051c9238c101bb4da776d54f31ff0e05922",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        33,
+        63,
+        1236,
+        1204
+      ],
+      "resizeSize": [
+        205,
+        194
+      ],
+      "offset": [
+        25,
+        31
+      ],
+      "contentBox": [
+        25,
+        31,
+        230,
+        225
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/weaver/prompts/chase-v2.txt",
+        "sha256": "6b9d4274752b19740b3a3ab92a21972e2313c79a03822fb4dfc507409d60479f"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/weaver/sources/top-v1.png",
+          "sha256": "baccb27bede433c44655808011d1db8d270b84cf74c89a2191f7405badebd523"
+        }
+      ]
+    }
+  },
+  "prompts": {
+    "top": "art/enemies/weaver/prompts/top-v1.txt",
+    "side": "art/enemies/weaver/prompts/side-v1.txt",
+    "chase": "art/enemies/weaver/prompts/chase-v2.txt"
+  },
+  "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
+}

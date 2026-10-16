@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: transparent low-profile enemy combat sprite for the 2D pursuit camera
+Primary request: make a physically head-on view of the same serpent head from Images 1 and 2, approaching the camera along its long fore-aft axis. This is camera alignment work, not a top view variant.
+Input images: Image 1 is identity/color reference only. Image 2 is the true side-profile reference for actual depth and low hull thickness.
+Camera geometry: the long axis runs INTO the image directly toward the camera. Put the camera at the center of the hull, with exactly 5 degrees of elevation and optical axis PARALLEL to the enemy's fore-aft axis. Look straight toward the nose, at eye level. Do not look down onto its dorsal shell.
+Subject: a broad, low front silhouette of the armored serpent head. Show the front-facing brow, both acid-green eyes side-by-side, and two forward fangs. The long dorsal armor continues AWAY from the camera behind the face and must foreshorten to only a narrow strip above it; most top panels must be hidden. Preserve dark gunmetal segmented cheek armor and green seams from the references.
+Composition/framing: centered symmetrical head-on hull with a wide, low silhouette, about twice as wide as tall, on a square transparent source canvas; full outline, no crop, margin around it. At the intended 40-unit game size the eyes and twin fangs remain legible.
+Style/medium: polished 3D game illustration, beveled near-black gunmetal plating, restrained bright acid-green emissives.
+Lighting/mood: clean directional edge light, controlled green glow, no broad white bloom.
+Constraints: genuine alpha transparency; approaching front only; broad facial width, shallow vertical height; maintain same identity.
+Avoid: top-down or near-overhead angle, visible full dorsal surface, camera above the armor, rotated top image, vertical spear silhouette, rear view, side profile, three-quarter angle, extra creatures, background, shadow, text, border, checkerboard, watermark.

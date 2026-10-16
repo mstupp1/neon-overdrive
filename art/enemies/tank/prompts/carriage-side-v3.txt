@@ -1,0 +1,10 @@
+Use case: stylized-concept
+Asset type: isolated transparent rotating weapon carriage sprite layer for a 2D shooter tank
+Primary request: generate only the paired-barrel carriage from Image 1 as a clean isolated sprite layer, with no tank hull, reactor, ground or background.
+Input images: Image 1 is the exact original side-view tank; identify the raised paired-barrel rotating carriage above the hull and preserve its design, materials, proportions and local side-profile orientation. Image 2 shows the replacement empty-mount base; use it only to match the carriage attachment scale and height.
+Subject: the full moving turret assembly only: two parallel long barrels, armored gun housing, and its lower rotating turntable. Include the visible lower ring as part of the turret, but exclude the fixed tank hull and reactor below it.
+Camera: exact side-profile view, no perspective change; barrels point screen-left and are horizontal. Preserve original scale relative to the 1774 by 887 source canvas.
+Composition: carriage centered around the same source-space location as in Image 1, full silhouette entirely within the transparent wide canvas with margin; retain original size and placement. Genuine transparent background.
+Style: polished 3D game sprite, beveled dark graphite gunmetal with restrained yellow-gold seams and muzzle detail.
+Constraints: isolated turret only, no base chassis, no hull panels, no reactor, no stray vehicle fragments; no repainting of the full tank.
+Avoid: complete tank, hull fragments below turret, reactor, ground, shadow, top-down view, perspective shift, crop, weapons other than the paired barrels, background, text, border, checkerboard, watermark.

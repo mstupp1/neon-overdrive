@@ -1,0 +1,12 @@
+Use case: stylized-concept
+Asset type: registered transparent component sprite sheet for a 2D shooter enemy
+Primary request: make one two-cell sprite sheet that separates the static top-down tank hull from its three moving weapon-carriage assemblies.
+Input images: Image 1 is the selected top-down tank design reference.
+Layout: a transparent sheet of two equal square cells placed directly side by side, no gap, no line. Both cells show the same object at exactly the same overhead camera, scale, and center.
+LEFT CELL, static base: the broad octagonal armored tank chassis, reactor, fixed armor, vents, and seams only. Remove the complete rotating weapon turrets and all barrels from all three mount positions. At each mount position leave only a simple low, flat fixed socket/ring integrated into the chassis; absolutely no turret housing, barrel, muzzle, or raised weapon assembly remains in this cell.
+RIGHT CELL, moving layer: show ONLY the three complete rotating weapon carriages that were removed from the left cell, with their paired barrels. Keep the three isolated assemblies in the exact corresponding positions and orientations they occupy in Image 1, with no chassis, reactor, sockets, or extra parts behind them. Use transparency between the three assemblies. The left and right cells must align when stacked at 50% opacity.
+Camera: exact direct overhead orthographic view, tank nose down-screen (+y), matching Image 1.
+Style: polished dark navy/gunmetal game art with beveled armor, restrained golden reactor lights, crisp panel seams and small metal highlights.
+Composition: both equal square cells fully visible, generous transparent margin, game sprite component sheet. The component layer may contain multiple separated parts as one layer.
+Constraints: genuine alpha; no parts duplicated between cells; base is visibly missing all three turrets and barrels; carriage layer has all three assemblies.
+Avoid: any weapon turret, weapon pod or barrel in the LEFT base cell, any hull or reactor in the RIGHT layer cell, perspective, alternate camera, text, annotations, borders, grid, checkerboard, background, shadows, firing, muzzle flash, projectiles, watermark.

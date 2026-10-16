@@ -1,0 +1,152 @@
+{
+  "subject": "dart",
+  "logicalSize": 40,
+  "tint": "#35e0ff",
+  "views": {
+    "top": {
+      "source": "art/enemies/dart/sources/top-v1.png",
+      "sourceSha256": "d3d4b1705c0b5db60ce37adc64683a6befe35d4336ed43198eddd467d197645a",
+      "output": "src/assets/enemies/dart/top-v1.png",
+      "outputSha256": "c8c4a43a4ba3d46b6d87a7f42b8cf0866d3e0ee255a5c9cc2bd14438d1485edd",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        23,
+        63,
+        1228,
+        1254
+      ],
+      "resizeSize": [
+        205,
+        203
+      ],
+      "offset": [
+        25,
+        26
+      ],
+      "contentBox": [
+        25,
+        26,
+        230,
+        229
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Direct overhead orthographic; nose faces down-screen (+y).",
+      "prompt": {
+        "path": "art/enemies/dart/prompts/top-v1.txt",
+        "sha256": "5a8afc0f6be487ab24d66fdc11db1d9a8a04a2a9df380b4ccb5332c3bfe5de4b"
+      },
+      "sourceSheet": null,
+      "inputReferences": []
+    },
+    "side": {
+      "source": "art/enemies/dart/sources/side-v1.png",
+      "sourceSha256": "b4a6df72de98fbf2652d4236dd1f1cf0aacb3e09e84474fe5f68ceb2878d0fed",
+      "output": "src/assets/enemies/dart/side-v1.png",
+      "outputSha256": "d2d5c6b40d46fa56a8fbb99701442245dfc4c691a12a5901f2b28d5e31f1f8c7",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        56,
+        33,
+        1208,
+        1230
+      ],
+      "resizeSize": [
+        197,
+        205
+      ],
+      "offset": [
+        29,
+        25
+      ],
+      "contentBox": [
+        29,
+        25,
+        226,
+        230
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "True side profile; nose reads screen-left after the side camera transform.",
+      "prompt": {
+        "path": "art/enemies/dart/prompts/side-v1.txt",
+        "sha256": "164bc781ba9d6a3d1589bd04bc7914ebb55053fab33934b3de3ffb1e0ef9aeef"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/dart/sources/top-v1.png",
+          "sha256": "d3d4b1705c0b5db60ce37adc64683a6befe35d4336ed43198eddd467d197645a"
+        }
+      ]
+    },
+    "chase": {
+      "source": "art/enemies/dart/sources/chase-v2.png",
+      "sourceSha256": "7e76d9cc6fa27965e29903637f311f36880fe57caff03284e53cf264e75543bc",
+      "output": "src/assets/enemies/dart/chase-v2.png",
+      "outputSha256": "78e9e3006fdbb3a548cce6616717fca81896c0dc26ff21560fa887135cad9db8",
+      "sourceSize": {
+        "width": 1774,
+        "height": 887
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        21,
+        21,
+        1754,
+        855
+      ],
+      "resizeSize": [
+        205,
+        99
+      ],
+      "offset": [
+        25,
+        78
+      ],
+      "contentBox": [
+        25,
+        78,
+        230,
+        177
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/dart/prompts/chase-v2.txt",
+        "sha256": "7dc00e23223b7c4e9b31ba4658cd378a9739dc8d3bdab2ec2fa131ece25b6836"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/dart/sources/top-v1.png",
+          "sha256": "d3d4b1705c0b5db60ce37adc64683a6befe35d4336ed43198eddd467d197645a"
+        }
+      ]
+    }
+  },
+  "prompts": {
+    "top": "art/enemies/dart/prompts/top-v1.txt",
+    "side": "art/enemies/dart/prompts/side-v1.txt",
+    "chase": "art/enemies/dart/prompts/chase-v2.txt"
+  },
+  "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
+}

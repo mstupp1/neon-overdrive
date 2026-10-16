@@ -1,0 +1,152 @@
+{
+  "subject": "sniper",
+  "logicalSize": 46,
+  "tint": "#ffa62b",
+  "views": {
+    "top": {
+      "source": "art/enemies/sniper/sources/top-v1.png",
+      "sourceSha256": "e1921fd23ac43f2db785ae2ebf869679d91394fd50c26911930b322725bb4712",
+      "output": "src/assets/enemies/sniper/top-v1.png",
+      "outputSha256": "957c7c608800cef873cee9445a59c77727eeb1d028350c8c742096f3ce02d66c",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        0,
+        55,
+        1224,
+        1204
+      ],
+      "resizeSize": [
+        205,
+        192
+      ],
+      "offset": [
+        25,
+        32
+      ],
+      "contentBox": [
+        25,
+        32,
+        230,
+        224
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Direct overhead orthographic; nose faces down-screen (+y).",
+      "prompt": {
+        "path": "art/enemies/sniper/prompts/top-v1.txt",
+        "sha256": "e9a0e8ae6c114950f615f766d42b9f202a38bbec929d0b25a34b7f7c5c898cf6"
+      },
+      "sourceSheet": null,
+      "inputReferences": []
+    },
+    "side": {
+      "source": "art/enemies/sniper/sources/side-v1.png",
+      "sourceSha256": "8a911796a5a813c6f8ba934cf5e4cc47deee2bbf1299c62f6c5e41e010ecc39e",
+      "output": "src/assets/enemies/sniper/side-v1.png",
+      "outputSha256": "c0fd0aee59999d43dc9ff59602d90c8294d5e608a302890fc6210b392392b93c",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        41,
+        45,
+        1234,
+        1226
+      ],
+      "resizeSize": [
+        205,
+        203
+      ],
+      "offset": [
+        25,
+        26
+      ],
+      "contentBox": [
+        25,
+        26,
+        230,
+        229
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "True side profile; nose reads screen-left after the side camera transform.",
+      "prompt": {
+        "path": "art/enemies/sniper/prompts/side-v1.txt",
+        "sha256": "87de0b352092ebbb42870f3e7d68f22647039a9b0845d635c9d1cd881c5a0cc5"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/sniper/sources/top-v1.png",
+          "sha256": "e1921fd23ac43f2db785ae2ebf869679d91394fd50c26911930b322725bb4712"
+        }
+      ]
+    },
+    "chase": {
+      "source": "art/enemies/sniper/sources/chase-v2.png",
+      "sourceSha256": "099e5f135874e22cb7b756b8703fa3384ee7efeefe603976b972af65d977d7cf",
+      "output": "src/assets/enemies/sniper/chase-v2.png",
+      "outputSha256": "661c59b6453c2ab6f06a3160d248306ceff106fa99883d2096800b6ac0830755",
+      "sourceSize": {
+        "width": 1774,
+        "height": 887
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        32,
+        36,
+        1754,
+        879
+      ],
+      "resizeSize": [
+        205,
+        100
+      ],
+      "offset": [
+        25,
+        78
+      ],
+      "contentBox": [
+        25,
+        78,
+        230,
+        178
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/sniper/prompts/chase-v2.txt",
+        "sha256": "04fa09fedf0f486324afe9dc9577dfe4dbe0df95ef5fdbaa41eb352becf7f5b6"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/sniper/sources/top-v1.png",
+          "sha256": "e1921fd23ac43f2db785ae2ebf869679d91394fd50c26911930b322725bb4712"
+        }
+      ]
+    }
+  },
+  "prompts": {
+    "top": "art/enemies/sniper/prompts/top-v1.txt",
+    "side": "art/enemies/sniper/prompts/side-v1.txt",
+    "chase": "art/enemies/sniper/prompts/chase-v2.txt"
+  },
+  "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
+}

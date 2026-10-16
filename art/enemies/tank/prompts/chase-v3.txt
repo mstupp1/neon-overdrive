@@ -1,0 +1,12 @@
+Use case: stylized-concept
+Asset type: registered transparent component sprite sheet for a 2D shooter enemy
+Primary request: make a two-cell front-facing pursuit-camera sheet separating the static heavy tank hull from its rotating paired-barrel weapon carriage.
+Input images: Image 1 is the tank's selected identity and top-view component reference. Image 2 is the selected front-approach chase camera reference and determines the camera, front silhouette, scale, materials and reactor placement.
+Layout: one 2:1 horizontal transparent sheet of exactly two equal square cells side by side, no gap or divider; both cells have identical camera, scale, center and registration.
+LEFT CELL, static base: same heavy dark gunmetal tank viewed straight-on from the front as it approaches the player. Keep the broad low hull, central gold reactor and fixed socket, but remove the complete raised rotating paired-barrel weapon carriage including housing and barrels. Leave no raised gun or duplicate weapon.
+RIGHT CELL, moving layer: only the complete paired-barrel weapon carriage removed from the left cell, isolated on transparent pixels, positioned at the exact same location and scale it occupied in the complete vehicle. Show only the matching housing and twin barrels. No hull, reactor, or second carriage.
+Camera geometry: true head-on chase view toward the tank nose, front silhouette broad and low, dorsal surface reduced to a narrow strip. Keep identical camera angle in both cells.
+Style: polished 3D game sprite, beveled graphite and navy gunmetal, restrained yellow-gold reactor light and accents.
+Composition: each cell square, vehicle centered with transparent margins; both parts fit fully in their own cell, no clipping. Genuine alpha.
+Constraints: base has no weapon carriage/barrels; layer has only the detached carriage; exact shared coordinate registration and scale; maintain tank identity from references.
+Avoid: top-down view, side view, perspective mismatch, duplicated carriage, carriage still on base, hull in right cell, extra guns, firing effects, cast shadow, text, dividers, border, checkerboard, background, watermark.

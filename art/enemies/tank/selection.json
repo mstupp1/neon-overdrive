@@ -1,0 +1,101 @@
+{
+  "top": "top-v4.png",
+  "side": "side-v3.png",
+  "chase": "chase-v3.png",
+  "sourceSheets": {
+    "top": {
+      "path": "art/enemies/tank/sheets/top-v4.png",
+      "size": [
+        1774,
+        887
+      ],
+      "layout": "two equal horizontal cells",
+      "cells": {
+        "base": [
+          0,
+          0,
+          887,
+          887
+        ],
+        "carriage": [
+          887,
+          0,
+          1774,
+          887
+        ]
+      },
+      "identityReferences": [
+        "art/enemies/tank/sources/top-v1.png"
+      ]
+    },
+    "side": {
+      "path": "art/enemies/tank/sources/side-v3.png",
+      "size": [
+        1774,
+        887
+      ],
+      "layout": "full-canvas generated static base; isolated carriage generated separately and registered to the mount",
+      "identityReferences": [
+        "art/enemies/tank/sources/side-v1.png",
+        "art/enemies/tank/sources/top-v1.png"
+      ],
+      "baseSourceRect": [
+        0,
+        0,
+        1774,
+        887
+      ],
+      "registration": "art/enemies/tank/registration/side-v3.json",
+      "baseSource": "art/enemies/tank/sources/side-v3.png",
+      "carriageSource": "art/enemies/tank/layers/side/sources/carriage-v3-generated.png",
+      "carriageOperation": {
+        "cropRect": [
+          43,
+          213,
+          1664,
+          727
+        ],
+        "alphaThreshold": 4,
+        "resizedSize": [
+          1000,
+          317
+        ],
+        "resizeScale": 0.6169031462,
+        "canvasOffset": [
+          104,
+          124
+        ],
+        "registeredPivot": [
+          820,
+          405
+        ]
+      }
+    },
+    "chase": {
+      "path": "art/enemies/tank/sheets/chase-v3.png",
+      "size": [
+        1774,
+        887
+      ],
+      "layout": "two equal horizontal cells",
+      "cells": {
+        "base": [
+          0,
+          0,
+          887,
+          887
+        ],
+        "carriage": [
+          887,
+          0,
+          1774,
+          887
+        ]
+      },
+      "identityReferences": [
+        "art/enemies/tank/sources/top-v1.png",
+        "art/enemies/tank/sources/chase-v2.png"
+      ]
+    }
+  }
+}

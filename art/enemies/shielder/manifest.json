@@ -1,0 +1,152 @@
+{
+  "subject": "shielder",
+  "logicalSize": 52,
+  "tint": "#7aa7ff",
+  "views": {
+    "top": {
+      "source": "art/enemies/shielder/sources/top-v1.png",
+      "sourceSha256": "fe8cd177ad43f11e06c9794d71bee4badcac84af0837d37aecbff60d92134d40",
+      "output": "src/assets/enemies/shielder/top-v1.png",
+      "outputSha256": "b69162e3b5b0eec9fb6deb4399c7cea0fa96aa9af7a5a1de7f85646cc2500f71",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        0,
+        41,
+        1234,
+        1254
+      ],
+      "resizeSize": [
+        205,
+        202
+      ],
+      "offset": [
+        25,
+        27
+      ],
+      "contentBox": [
+        25,
+        27,
+        230,
+        229
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Direct overhead orthographic; nose faces down-screen (+y).",
+      "prompt": {
+        "path": "art/enemies/shielder/prompts/top-v1.txt",
+        "sha256": "0600a81e942be12abfbd09e76c975b1494cf735cecdb815567374b4ef05fcfb9"
+      },
+      "sourceSheet": null,
+      "inputReferences": []
+    },
+    "side": {
+      "source": "art/enemies/shielder/sources/side-v1.png",
+      "sourceSha256": "08091e9c17e43c355671d409908bbec8031cd96c801605cf1e24f2ed683df844",
+      "output": "src/assets/enemies/shielder/side-v1.png",
+      "outputSha256": "83aa3849de1bf1af8efad4f61ff1db99e3df265bc68d59bc8f44859de59913ec",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        0,
+        65,
+        1176,
+        1254
+      ],
+      "resizeSize": [
+        203,
+        205
+      ],
+      "offset": [
+        26,
+        25
+      ],
+      "contentBox": [
+        26,
+        25,
+        229,
+        230
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "True side profile; nose reads screen-left after the side camera transform.",
+      "prompt": {
+        "path": "art/enemies/shielder/prompts/side-v1.txt",
+        "sha256": "0ceab748e0ce9ef76c2633f3e0e02c4f82527f9b818ddb922e9b2683669e79f3"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/shielder/sources/top-v1.png",
+          "sha256": "fe8cd177ad43f11e06c9794d71bee4badcac84af0837d37aecbff60d92134d40"
+        }
+      ]
+    },
+    "chase": {
+      "source": "art/enemies/shielder/sources/chase-v1.png",
+      "sourceSha256": "f51f4572dbaace0e880eeea78f23d34e6ddfe445aae9ee0d5fba76e46681ccc6",
+      "output": "src/assets/enemies/shielder/chase-v1.png",
+      "outputSha256": "2cde8a486f36856d7cb5a4e78bb25f945e49c1c30f566f37a7e6fc3fdd518f72",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        0,
+        21,
+        1224,
+        1254
+      ],
+      "resizeSize": [
+        204,
+        205
+      ],
+      "offset": [
+        26,
+        25
+      ],
+      "contentBox": [
+        26,
+        25,
+        230,
+        230
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/shielder/prompts/chase-v1.txt",
+        "sha256": "63dc2490dde195fdadfd2a22b7672193657372cf2db53c89a7c5022407553fb8"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/shielder/sources/top-v1.png",
+          "sha256": "fe8cd177ad43f11e06c9794d71bee4badcac84af0837d37aecbff60d92134d40"
+        }
+      ]
+    }
+  },
+  "prompts": {
+    "top": "art/enemies/shielder/prompts/top-v1.txt",
+    "side": "art/enemies/shielder/prompts/side-v1.txt",
+    "chase": "art/enemies/shielder/prompts/chase-v1.txt"
+  },
+  "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
+}

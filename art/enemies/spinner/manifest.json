@@ -1,0 +1,610 @@
+{
+  "subject": "spinner",
+  "logicalSize": 60,
+  "tint": "#b56cff",
+  "views": {
+    "top": {
+      "source": "art/enemies/spinner/sources/top-v3.png",
+      "sourceSha256": "07dbd3e127647df89f5862829059e4a2356d186d98d6b9d8a571e91adfe22f5d",
+      "output": "src/assets/enemies/spinner/top-v3.png",
+      "outputSha256": "b9419b419e59c65d8a84335a09c541a82c4e10da863c063ec9f948785686706d",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        265,
+        265,
+        1001,
+        989
+      ],
+      "resizeSize": [
+        205,
+        202
+      ],
+      "offset": [
+        25,
+        27
+      ],
+      "contentBox": [
+        25,
+        27,
+        230,
+        229
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Direct overhead orthographic; nose faces down-screen (+y).",
+      "prompt": {
+        "path": "art/enemies/spinner/prompts/top-v3.txt",
+        "sha256": "03214e6ece420f19c6717b27cd473689b98acb2ca1cc93438090a1e9aa07173f"
+      },
+      "sourceSheet": {
+        "path": "art/enemies/spinner/sheets/top-components-v3.png",
+        "registration": "art/enemies/spinner/sheets/top-registration-v3.json",
+        "identityReferences": [
+          "art/enemies/spinner/sources/top-v1.png"
+        ],
+        "sourceHashes": {
+          "path": "e9bcf0b64af841b6f00ee31c724444b9a9a0d244a79409665fcf9b4c25bd0e7c"
+        },
+        "registrationSha256": "959ee38bbd6ebba86a0fcecd6726fa2cd94abd26e21bce799d4b014cdb49cb7d"
+      },
+      "inputReferences": [
+        {
+          "path": "art/enemies/spinner/sources/top-v1.png",
+          "sha256": "192a5b8e34e6b921906c9668338611eceb114e5cf29227cd77ba1cfea098e25a"
+        }
+      ],
+      "layers": {
+        "core": {
+          "source": "art/enemies/spinner/layers/top/core-v3.png",
+          "sourceSha256": "5bb9f4bd693c8620f74ce2706f921667dd6152a0ab8827f8f887698d01a217ff",
+          "output": "src/assets/enemies/spinner/layers/top/core-v3.png",
+          "outputSha256": "f563135613bd2b3c2de7370ce2905f917a06f79bd4eedf5b4664fd2bb3527471",
+          "sourceSize": {
+            "width": 1254,
+            "height": 1254
+          },
+          "exportSize": {
+            "width": 256,
+            "height": 256
+          },
+          "cropRect": [
+            265,
+            265,
+            1001,
+            989
+          ],
+          "resizeSize": [
+            205,
+            202
+          ],
+          "offset": [
+            25,
+            27
+          ],
+          "contentBox": [
+            25,
+            27,
+            230,
+            229
+          ],
+          "alpha": true,
+          "operation": "apply base view crop/scale/offset to registered full-canvas layer; Lanczos resize",
+          "inputReferences": [
+            {
+              "path": "art/enemies/spinner/sources/top-v1.png",
+              "sha256": "192a5b8e34e6b921906c9668338611eceb114e5cf29227cd77ba1cfea098e25a"
+            },
+            {
+              "path": "art/enemies/spinner/sources/top-v3.png",
+              "sha256": "07dbd3e127647df89f5862829059e4a2356d186d98d6b9d8a571e91adfe22f5d"
+            }
+          ],
+          "sourceSheet": {
+            "path": "art/enemies/spinner/sheets/top-components-v3.png",
+            "registration": "art/enemies/spinner/sheets/top-registration-v3.json",
+            "identityReferences": [
+              "art/enemies/spinner/sources/top-v1.png"
+            ],
+            "sourceHashes": {
+              "path": "e9bcf0b64af841b6f00ee31c724444b9a9a0d244a79409665fcf9b4c25bd0e7c"
+            },
+            "registrationSha256": "959ee38bbd6ebba86a0fcecd6726fa2cd94abd26e21bce799d4b014cdb49cb7d"
+          },
+          "prompt": {
+            "path": "art/enemies/spinner/prompts/layers/top/core-v3.txt",
+            "sha256": "03214e6ece420f19c6717b27cd473689b98acb2ca1cc93438090a1e9aa07173f"
+          },
+          "measuredPivotSourcePx": [
+            627,
+            627
+          ],
+          "measuredPivotExportNormalized": [
+            0.491519,
+            0.5
+          ]
+        },
+        "rotor": {
+          "source": "art/enemies/spinner/layers/top/rotor-v3.png",
+          "sourceSha256": "826984fe69b8bae9999048b92e3f597f48d1e02fa497cc754a3520d469c072e3",
+          "output": "src/assets/enemies/spinner/layers/top/rotor-v3.png",
+          "outputSha256": "12c732112721202a84efcb0f69c397a5cddac98378d3e4b45362308b4e81ac6b",
+          "sourceSize": {
+            "width": 1254,
+            "height": 1254
+          },
+          "exportSize": {
+            "width": 256,
+            "height": 256
+          },
+          "cropRect": [
+            265,
+            265,
+            1001,
+            989
+          ],
+          "resizeSize": [
+            205,
+            202
+          ],
+          "offset": [
+            25,
+            27
+          ],
+          "contentBox": [
+            25,
+            27,
+            230,
+            229
+          ],
+          "alpha": true,
+          "operation": "apply base view crop/scale/offset to registered full-canvas layer; Lanczos resize",
+          "inputReferences": [
+            {
+              "path": "art/enemies/spinner/sources/top-v1.png",
+              "sha256": "192a5b8e34e6b921906c9668338611eceb114e5cf29227cd77ba1cfea098e25a"
+            },
+            {
+              "path": "art/enemies/spinner/sources/top-v3.png",
+              "sha256": "07dbd3e127647df89f5862829059e4a2356d186d98d6b9d8a571e91adfe22f5d"
+            }
+          ],
+          "sourceSheet": {
+            "path": "art/enemies/spinner/sheets/top-components-v3.png",
+            "registration": "art/enemies/spinner/sheets/top-registration-v3.json",
+            "identityReferences": [
+              "art/enemies/spinner/sources/top-v1.png"
+            ],
+            "sourceHashes": {
+              "path": "e9bcf0b64af841b6f00ee31c724444b9a9a0d244a79409665fcf9b4c25bd0e7c"
+            },
+            "registrationSha256": "959ee38bbd6ebba86a0fcecd6726fa2cd94abd26e21bce799d4b014cdb49cb7d"
+          },
+          "prompt": {
+            "path": "art/enemies/spinner/prompts/layers/top/rotor-v3.txt",
+            "sha256": "03214e6ece420f19c6717b27cd473689b98acb2ca1cc93438090a1e9aa07173f"
+          },
+          "measuredPivotSourcePx": [
+            627,
+            627
+          ],
+          "measuredPivotExportNormalized": [
+            0.491519,
+            0.5
+          ],
+          "spinAspectHeightOverWidth": 0.983696
+        }
+      }
+    },
+    "side": {
+      "source": "art/enemies/spinner/sources/side-v3.png",
+      "sourceSha256": "6124ae293d9927af1fa4106b95473a88686cb74c131987b7bfad6177faa4c7d6",
+      "output": "src/assets/enemies/spinner/side-v3.png",
+      "outputSha256": "7e7568940c5d8e71f98735d8ce443de3ec1635abde053d96800daf25ce921fc9",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        135,
+        465,
+        1183,
+        862
+      ],
+      "resizeSize": [
+        205,
+        78
+      ],
+      "offset": [
+        25,
+        89
+      ],
+      "contentBox": [
+        25,
+        89,
+        230,
+        167
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "True side profile; nose reads screen-left after the side camera transform.",
+      "prompt": {
+        "path": "art/enemies/spinner/prompts/side-v3.txt",
+        "sha256": "fe2944f4e2e9309d3c17657f0dc0dc64204bd839c697cfddb7d949c6198e3b25"
+      },
+      "sourceSheet": {
+        "path": "art/enemies/spinner/sheets/side-components-v3.png",
+        "registration": "art/enemies/spinner/sheets/side-registration-v3.json",
+        "identityReferences": [
+          "art/enemies/spinner/sources/side-v1.png"
+        ],
+        "sourceHashes": {
+          "path": "c9acd0022eb4edb66afe421818b5141c05a90dd8952be03bdc3880d24aa6c7da"
+        },
+        "registrationSha256": "94b8684acff8b2fae2121c0fc2872024e6ad599c0717d6b5a14ef5092c12a1ae"
+      },
+      "inputReferences": [
+        {
+          "path": "art/enemies/spinner/sources/side-v1.png",
+          "sha256": "beb69ea039cef70da54591ce27c3048753c7b7825e4f2dd8f3c385a1384069f6"
+        }
+      ],
+      "layers": {
+        "core": {
+          "source": "art/enemies/spinner/layers/side/core-v3.png",
+          "sourceSha256": "0cc462393945403d71e88021aa9c36bb0b21a73be70583a8af04090442a10a60",
+          "output": "src/assets/enemies/spinner/layers/side/core-v3.png",
+          "outputSha256": "b85edb3d847c795e37988dbaa7e517ad5ab9bffef0606382086b64047c728313",
+          "sourceSize": {
+            "width": 1254,
+            "height": 1254
+          },
+          "exportSize": {
+            "width": 256,
+            "height": 256
+          },
+          "cropRect": [
+            135,
+            465,
+            1183,
+            862
+          ],
+          "resizeSize": [
+            205,
+            78
+          ],
+          "offset": [
+            25,
+            89
+          ],
+          "contentBox": [
+            25,
+            89,
+            230,
+            167
+          ],
+          "alpha": true,
+          "operation": "apply base view crop/scale/offset to registered full-canvas layer; Lanczos resize",
+          "inputReferences": [
+            {
+              "path": "art/enemies/spinner/sources/side-v1.png",
+              "sha256": "beb69ea039cef70da54591ce27c3048753c7b7825e4f2dd8f3c385a1384069f6"
+            },
+            {
+              "path": "art/enemies/spinner/sources/side-v3.png",
+              "sha256": "6124ae293d9927af1fa4106b95473a88686cb74c131987b7bfad6177faa4c7d6"
+            }
+          ],
+          "sourceSheet": {
+            "path": "art/enemies/spinner/sheets/side-components-v3.png",
+            "registration": "art/enemies/spinner/sheets/side-registration-v3.json",
+            "identityReferences": [
+              "art/enemies/spinner/sources/side-v1.png"
+            ],
+            "sourceHashes": {
+              "path": "c9acd0022eb4edb66afe421818b5141c05a90dd8952be03bdc3880d24aa6c7da"
+            },
+            "registrationSha256": "94b8684acff8b2fae2121c0fc2872024e6ad599c0717d6b5a14ef5092c12a1ae"
+          },
+          "prompt": {
+            "path": "art/enemies/spinner/prompts/layers/side/core-v3.txt",
+            "sha256": "fe2944f4e2e9309d3c17657f0dc0dc64204bd839c697cfddb7d949c6198e3b25"
+          },
+          "measuredPivotSourcePx": [
+            627,
+            627
+          ],
+          "measuredPivotExportNormalized": [
+            0.473596,
+            0.471987
+          ]
+        },
+        "rotor": {
+          "source": "art/enemies/spinner/layers/side/rotor-v3.png",
+          "sourceSha256": "b30f6104827362203b6a3a90f059db2ba61cc1b505132274d5fbb5b243200b80",
+          "output": "src/assets/enemies/spinner/layers/side/rotor-v3.png",
+          "outputSha256": "b9544f8e5b02764f09a9be61516fdcb447593428b578c9f546f6f1d0dd137742",
+          "sourceSize": {
+            "width": 1254,
+            "height": 1254
+          },
+          "exportSize": {
+            "width": 256,
+            "height": 256
+          },
+          "cropRect": [
+            135,
+            465,
+            1183,
+            862
+          ],
+          "resizeSize": [
+            205,
+            78
+          ],
+          "offset": [
+            25,
+            89
+          ],
+          "contentBox": [
+            25,
+            89,
+            230,
+            167
+          ],
+          "alpha": true,
+          "operation": "apply base view crop/scale/offset to registered full-canvas layer; Lanczos resize",
+          "inputReferences": [
+            {
+              "path": "art/enemies/spinner/sources/side-v1.png",
+              "sha256": "beb69ea039cef70da54591ce27c3048753c7b7825e4f2dd8f3c385a1384069f6"
+            },
+            {
+              "path": "art/enemies/spinner/sources/side-v3.png",
+              "sha256": "6124ae293d9927af1fa4106b95473a88686cb74c131987b7bfad6177faa4c7d6"
+            }
+          ],
+          "sourceSheet": {
+            "path": "art/enemies/spinner/sheets/side-components-v3.png",
+            "registration": "art/enemies/spinner/sheets/side-registration-v3.json",
+            "identityReferences": [
+              "art/enemies/spinner/sources/side-v1.png"
+            ],
+            "sourceHashes": {
+              "path": "c9acd0022eb4edb66afe421818b5141c05a90dd8952be03bdc3880d24aa6c7da"
+            },
+            "registrationSha256": "94b8684acff8b2fae2121c0fc2872024e6ad599c0717d6b5a14ef5092c12a1ae"
+          },
+          "prompt": {
+            "path": "art/enemies/spinner/prompts/layers/side/rotor-v3.txt",
+            "sha256": "fe2944f4e2e9309d3c17657f0dc0dc64204bd839c697cfddb7d949c6198e3b25"
+          },
+          "measuredPivotSourcePx": [
+            627,
+            627
+          ],
+          "measuredPivotExportNormalized": [
+            0.473596,
+            0.471987
+          ],
+          "spinAspectHeightOverWidth": 0.369275
+        }
+      }
+    },
+    "chase": {
+      "source": "art/enemies/spinner/sources/chase-v3.png",
+      "sourceSha256": "c1044cb9feee74069ce693906f5e4e0411aeb53e5badee2dc657f28ba634c8b5",
+      "output": "src/assets/enemies/spinner/chase-v3.png",
+      "outputSha256": "2835e38ab46525da9e5f0bdef675dbd6cf6e5aceb931850e5f2d2df29e99be76",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        163,
+        458,
+        1117,
+        893
+      ],
+      "resizeSize": [
+        205,
+        93
+      ],
+      "offset": [
+        25,
+        81
+      ],
+      "contentBox": [
+        25,
+        81,
+        230,
+        174
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/spinner/prompts/chase-v3.txt",
+        "sha256": "27004382de36124aaba75717e86fddd9dd0b975d925fb7e959bc37611f95e78b"
+      },
+      "sourceSheet": {
+        "path": "art/enemies/spinner/sheets/chase-components-v3.png",
+        "registration": "art/enemies/spinner/sheets/chase-registration-v3.json",
+        "identityReferences": [
+          "art/enemies/spinner/sources/side-v1.png"
+        ],
+        "sourceHashes": {
+          "path": "3fcf971712192dd74f526517b9495216c82a5b68950d495c5c46ce380d22d6be"
+        },
+        "registrationSha256": "bc1b01c88255e498c8b9d6176f52c2449a067c3f5afaa22df1e5962665ee19aa"
+      },
+      "inputReferences": [
+        {
+          "path": "art/enemies/spinner/sources/side-v1.png",
+          "sha256": "beb69ea039cef70da54591ce27c3048753c7b7825e4f2dd8f3c385a1384069f6"
+        }
+      ],
+      "layers": {
+        "core": {
+          "source": "art/enemies/spinner/layers/chase/core-v3.png",
+          "sourceSha256": "322a9d6f35eb50de896fb4857aee1abb55bad77763ae78fadf3b89c4d63a9adc",
+          "output": "src/assets/enemies/spinner/layers/chase/core-v3.png",
+          "outputSha256": "0862b44090f03c46388422f2c1ca42a482d5a189b96fd9d09ded45264488c91f",
+          "sourceSize": {
+            "width": 1254,
+            "height": 1254
+          },
+          "exportSize": {
+            "width": 256,
+            "height": 256
+          },
+          "cropRect": [
+            163,
+            458,
+            1117,
+            893
+          ],
+          "resizeSize": [
+            205,
+            93
+          ],
+          "offset": [
+            25,
+            81
+          ],
+          "contentBox": [
+            25,
+            81,
+            230,
+            174
+          ],
+          "alpha": true,
+          "operation": "apply base view crop/scale/offset to registered full-canvas layer; Lanczos resize",
+          "inputReferences": [
+            {
+              "path": "art/enemies/spinner/sources/side-v1.png",
+              "sha256": "beb69ea039cef70da54591ce27c3048753c7b7825e4f2dd8f3c385a1384069f6"
+            },
+            {
+              "path": "art/enemies/spinner/sources/chase-v3.png",
+              "sha256": "c1044cb9feee74069ce693906f5e4e0411aeb53e5badee2dc657f28ba634c8b5"
+            }
+          ],
+          "sourceSheet": {
+            "path": "art/enemies/spinner/sheets/chase-components-v3.png",
+            "registration": "art/enemies/spinner/sheets/chase-registration-v3.json",
+            "identityReferences": [
+              "art/enemies/spinner/sources/side-v1.png"
+            ],
+            "sourceHashes": {
+              "path": "3fcf971712192dd74f526517b9495216c82a5b68950d495c5c46ce380d22d6be"
+            },
+            "registrationSha256": "bc1b01c88255e498c8b9d6176f52c2449a067c3f5afaa22df1e5962665ee19aa"
+          },
+          "prompt": {
+            "path": "art/enemies/spinner/prompts/layers/chase/core-v3.txt",
+            "sha256": "27004382de36124aaba75717e86fddd9dd0b975d925fb7e959bc37611f95e78b"
+          },
+          "measuredPivotSourcePx": [
+            627,
+            627
+          ],
+          "measuredPivotExportNormalized": [
+            0.487135,
+            0.457543
+          ]
+        },
+        "rotor": {
+          "source": "art/enemies/spinner/layers/chase/rotor-v3.png",
+          "sourceSha256": "51d04959b7db9755b4f01dcd0b4f102eb2164e219d8a0be056737c7ad41e78e2",
+          "output": "src/assets/enemies/spinner/layers/chase/rotor-v3.png",
+          "outputSha256": "c3d366c6462889f3e8388e5f0763c3e29b8e723e7c4e903f78aca71003f851e3",
+          "sourceSize": {
+            "width": 1254,
+            "height": 1254
+          },
+          "exportSize": {
+            "width": 256,
+            "height": 256
+          },
+          "cropRect": [
+            163,
+            458,
+            1117,
+            893
+          ],
+          "resizeSize": [
+            205,
+            93
+          ],
+          "offset": [
+            25,
+            81
+          ],
+          "contentBox": [
+            25,
+            81,
+            230,
+            174
+          ],
+          "alpha": true,
+          "operation": "apply base view crop/scale/offset to registered full-canvas layer; Lanczos resize",
+          "inputReferences": [
+            {
+              "path": "art/enemies/spinner/sources/side-v1.png",
+              "sha256": "beb69ea039cef70da54591ce27c3048753c7b7825e4f2dd8f3c385a1384069f6"
+            },
+            {
+              "path": "art/enemies/spinner/sources/chase-v3.png",
+              "sha256": "c1044cb9feee74069ce693906f5e4e0411aeb53e5badee2dc657f28ba634c8b5"
+            }
+          ],
+          "sourceSheet": {
+            "path": "art/enemies/spinner/sheets/chase-components-v3.png",
+            "registration": "art/enemies/spinner/sheets/chase-registration-v3.json",
+            "identityReferences": [
+              "art/enemies/spinner/sources/side-v1.png"
+            ],
+            "sourceHashes": {
+              "path": "3fcf971712192dd74f526517b9495216c82a5b68950d495c5c46ce380d22d6be"
+            },
+            "registrationSha256": "bc1b01c88255e498c8b9d6176f52c2449a067c3f5afaa22df1e5962665ee19aa"
+          },
+          "prompt": {
+            "path": "art/enemies/spinner/prompts/layers/chase/rotor-v3.txt",
+            "sha256": "27004382de36124aaba75717e86fddd9dd0b975d925fb7e959bc37611f95e78b"
+          },
+          "measuredPivotSourcePx": [
+            627,
+            627
+          ],
+          "measuredPivotExportNormalized": [
+            0.487135,
+            0.457543
+          ],
+          "spinAspectHeightOverWidth": 0.455975
+        }
+      }
+    }
+  },
+  "prompts": {
+    "top": "art/enemies/spinner/prompts/top-v3.txt",
+    "side": "art/enemies/spinner/prompts/side-v3.txt",
+    "chase": "art/enemies/spinner/prompts/chase-v3.txt"
+  },
+  "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
+}

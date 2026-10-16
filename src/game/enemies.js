@@ -334,6 +334,7 @@ const BEHAVIOR = {
       if (e.fireT <= 0) {
         e.fireT = 0.11;
         e.burst = (e.burst || 0) + 1;
+        e.lastShotAt = G.time; // visual carriage recoil only; projectile origins stay fixed
         const a = e.t * 2.2;
         const arms = e.elite ? 4 : 3;
         for (let i = 0; i < arms; i++) shoot(e.x, e.y, a + (i / arms) * TAU, 120, 'orb');
@@ -390,8 +391,10 @@ BEHAVIOR.carrier = function carrier(e, dt) {
   } else if (e.state === 'hold') {
     e.x = clamp(e.x + Math.sin(e.t * 0.6 + e.ph) * 16 * dt, 40, view.W - 40);
     e.fireT -= dt * fr;
+    e.carrierDoors = e.fireT < 0.5 ? clamp(1 - e.fireT / 0.5, 0, 1) : 0;
     if (e.fireT < 0.5) e.flash = Math.sin(e.t * 45) > 0 ? 0.05 : 0; // bay-open warning
     if (e.fireT <= 0) {
+      e.carrierDoors = 0; // doors close as the pods launch
       e.fireT = 3.8;
       e.launches++;
       for (let i = -1; i <= 1; i++) {

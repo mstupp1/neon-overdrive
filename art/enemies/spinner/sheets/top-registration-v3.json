@@ -1,0 +1,74 @@
+[
+  {
+    "output": "art/enemies/spinner/sources/top-v3.png",
+    "sourceSheet": "art/enemies/spinner/sheets/top-components-v3.png",
+    "sourceSheetSha256": "e9bcf0b64af841b6f00ee31c724444b9a9a0d244a79409665fcf9b4c25bd0e7c",
+    "cropRect": [
+      145,
+      145,
+      590,
+      585
+    ],
+    "measuredAssemblyPivot": [
+      361,
+      362
+    ],
+    "registeredPivot": [
+      627,
+      627
+    ],
+    "translation": [
+      411,
+      410
+    ],
+    "operation": "crop generated component; translate unchanged RGBA pixels onto common1254px canvas; no painting or masking"
+  },
+  {
+    "output": "art/enemies/spinner/layers/top/rotor-v3.png",
+    "sourceSheet": "art/enemies/spinner/sheets/top-components-v3.png",
+    "sourceSheetSha256": "e9bcf0b64af841b6f00ee31c724444b9a9a0d244a79409665fcf9b4c25bd0e7c",
+    "cropRect": [
+      715,
+      0,
+      1465,
+      724
+    ],
+    "measuredAssemblyPivot": [
+      1086,
+      362
+    ],
+    "registeredPivot": [
+      627,
+      627
+    ],
+    "translation": [
+      256,
+      265
+    ],
+    "operation": "crop generated component; translate unchanged RGBA pixels onto common1254px canvas; no painting or masking"
+  },
+  {
+    "output": "art/enemies/spinner/layers/top/core-v3.png",
+    "sourceSheet": "art/enemies/spinner/sheets/top-components-v3.png",
+    "sourceSheetSha256": "e9bcf0b64af841b6f00ee31c724444b9a9a0d244a79409665fcf9b4c25bd0e7c",
+    "cropRect": [
+      1690,
+      240,
+      1950,
+      490
+    ],
+    "measuredAssemblyPivot": [
+      1819,
+      363
+    ],
+    "registeredPivot": [
+      627,
+      627
+    ],
+    "translation": [
+      498,
+      504
+    ],
+    "operation": "crop generated component; translate unchanged RGBA pixels onto common1254px canvas; no painting or masking"
+  }
+]

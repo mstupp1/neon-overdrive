@@ -1,0 +1,28 @@
+{
+  "top": "top-v3.png",
+  "side": "side-v3.png",
+  "chase": "chase-v3.png",
+  "sourceSheets": {
+    "top": {
+      "path": "art/enemies/spinner/sheets/top-components-v3.png",
+      "registration": "art/enemies/spinner/sheets/top-registration-v3.json",
+      "identityReferences": [
+        "art/enemies/spinner/sources/top-v1.png"
+      ]
+    },
+    "side": {
+      "path": "art/enemies/spinner/sheets/side-components-v3.png",
+      "registration": "art/enemies/spinner/sheets/side-registration-v3.json",
+      "identityReferences": [
+        "art/enemies/spinner/sources/side-v1.png"
+      ]
+    },
+    "chase": {
+      "path": "art/enemies/spinner/sheets/chase-components-v3.png",
+      "registration": "art/enemies/spinner/sheets/chase-registration-v3.json",
+      "identityReferences": [
+        "art/enemies/spinner/sources/side-v1.png"
+      ]
+    }
+  }
+}
