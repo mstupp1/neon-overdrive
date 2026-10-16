@@ -37,7 +37,7 @@ import { hub, hubExit } from './ui/hub.js';
 import { initToasts, notifyBacklog } from './ui/toasts.js';
 import { achInit, achTick } from './game/achievements.js';
 import { rollRelicDrop } from './game/collectables.js';
-import { setClass, setPassives, initPilotProfile, findClass, findPassive, activeClass } from './game/pilot.js';
+import { setClass, setPassives, initPilotProfile, grantFirstAbilities, findClass, findPassive, activeClass } from './game/pilot.js';
 import { buyShip, equipPart, unequipSlot, setPaint, selectShip, applyAllPaints, rollGear, sellGear, sellJunk, initGear } from './game/hangar.js';
 import { SYSTEMS, systemById, generateRoute, nodeSpec, reachableNodes, routeNode, REWARDS, isFight } from './game/campaign.js';
 import { rand, pick, lerp, easeInOut } from './core/math.js';
@@ -632,6 +632,14 @@ function finishExtract(final) {
   pauseBtn.hidden = true;
   touchUi.hidden = true;
   music.setDuck(0.5);
+  firstRunTip(reward);
+}
+
+// After a new pilot's first run: what just unlocked, and where the Hangar and Pilot screens are. Returns true if shown.
+function firstRunTip(reward) {
+  if (!reward.first.length) return false;
+  beat('tip:firstrun', STORY.firstRun(reward.first.join(' · ')));
+  return true;
 }
 
 // Folds the finished run into the profile records and banks credits / rank XP.
@@ -644,6 +652,9 @@ function bankRun() {
   profile.bestCombo = Math.max(profile.bestCombo, G.maxCombo);
   profile.bossKills += G.bossKills;
   const reward = settleRun(!!(G.run && G.run.victory));
+  // A new pilot's first run unlocks their class's default ability (before rank-up finds, so those roll something else).
+  reward.first = grantFirstAbilities().map((ps) => ps.name);
+  if (reward.first.length && G.run) (G.run.found ||= []).unshift(...reward.first);
   rankUpFinds(reward.rankBefore.rank, reward.rankAfter.rank); // each rank gained finds an ability (lands in run.found)
   reward.loot = (G.run && G.run.loot) || [];
   reward.found = (G.run && G.run.found) || [];
@@ -964,7 +975,7 @@ function gameOver() {
   pauseBtn.hidden = true;
   touchUi.hidden = true;
   music.setDuck(0.5);
-  if (campaign && !G.run.victory) tip('death');
+  if (!firstRunTip(reward) && campaign && !G.run.victory) tip('death');
 }
 
 // Back to the title menu without restarting the attract demo.
@@ -992,8 +1003,9 @@ function toTitle(slam = false, demo = true) {
 }
 
 // Boot intro (src/game/intro.js): plays on a fresh attract world, then lands on the title with the logo slam.
-// attract: the PRESS START idle loop (one press ends it).
-function playIntro(attract = false) {
+// attract: the PRESS START idle loop (one press ends it). first: the first-boot intro, which drops a pilot with no
+// runs straight into their first run (the prologue is skipped: the intro already woke ECHO up).
+function playIntro(attract = false, first = false) {
   ui.hide();
   pauseBtn.hidden = true;
   touchUi.hidden = true;
@@ -1003,6 +1015,12 @@ function playIntro(attract = false) {
     setup: () => newWorld('attract', curShip()),
     done: () => {
       profile.seenIntro = true;
+      if (first && !profile.runs) {
+        profile.campaign.seenStory.prologue = true;
+        saveProfile();
+        music.setSet('normal');
+        return launchRun();
+      }
       saveProfile();
       showPressStart(true);
     },
@@ -1099,14 +1117,17 @@ ui.init({
   hangar() {
     hub.exit = ui.current === 'campaign' ? () => showCampaign('ship-btn') : () => titleMenu('[data-act=hangar]');
     openHangar();
+    tip('hangar');
   },
   // A hub tab: 'hangar:pilot', 'collect:ach', ...
   hub(btn) {
     const [, tab] = btn.dataset.hubTab.split(':');
     if (tab === 'ship') openHangar();
     else if (tab === 'fab') openFab('hub');
-    else if (tab === 'pilot') openPilot();
-    else if (tab === 'tree') {
+    else if (tab === 'pilot') {
+      openPilot();
+      tip('pilot');
+    } else if (tab === 'tree') {
       openTree(null, hubExit);
       tip('tree');
     } else if (tab === 'core') openCore(hubExit);
@@ -1535,7 +1556,7 @@ function boot() {
   const past = achInit(); // achievements older saves already earned
   if (past) setTimeout(() => notifyBacklog(past), 1200);
   if (profile.seenIntro) showPressStart();
-  else playIntro();
+  else playIntro(false, true);
   requestAnimationFrame((t) => {
     last = t;
     frame(t);

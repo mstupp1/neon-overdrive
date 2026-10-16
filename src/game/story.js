@@ -162,7 +162,14 @@ export const STORY = {
     view_side: [L('MAG', 'Side run. You\'re flying flat out to the right now: up and down steer. Don\'t scrape the walls, they take hull.')],
     view_chase: [L('MAG', 'Pursuit. I\'m behind you, and everything comes out of the distance. Fly the gaps in the laser gates. They\'re solid: a dash won\'t get you through, so line up early. Threading one charges your ult.')],
     tier: [L('MAG', 'OVERDRIVE tiers are open. Launch at a higher tier for a meaner Signal, better pay and FLUX.')],
+    hangar: [L('MAG', 'The Hangar. Pick your ship, buy new hulls, and fit the gear you bring home to CORE, PLATING and THRUSTERS.')],
+    pilot: [L('MAG', 'Your pilot. Pick a class for its ultimate, and equip abilities from its grid. Rank opens more slots and rarer picks.')],
   },
+  // A new pilot's first run is over: their first ability just unlocked (main.js gameOver / finishExtract).
+  firstRun: (names) => [
+    L('MAG', `First flight logged, ECHO. You've unlocked your first ability: ${names}. It's already equipped.`),
+    L('MAG', 'From the campaign screen, the HANGAR fits ships with the gear you find, and its PILOT tab is where you equip abilities. Then launch again.'),
+  ],
 };
 
 // --- Anomaly events ------------------------------------------------------------------

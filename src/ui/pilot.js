@@ -6,7 +6,7 @@ import { profile } from '../core/storage.js';
 import { sfx } from '../core/audio.js';
 import { portraitArtwork } from './portraits.js';
 import { rankFor } from '../game/economy.js';
-import { CLASSES, classById, activeClass, classUnlocked, passiveUnlocked, passiveFound, equippedPassives, setClass, togglePassive, abilitySlots, rarityCap, rankForRarity, nextSlotRank } from '../game/pilot.js';
+import { CLASSES, classById, activeClass, classUnlocked, passiveUnlocked, passiveFound, defaultPassive, equippedPassives, setClass, togglePassive, abilitySlots, rarityCap, rankForRarity, nextSlotRank } from '../game/pilot.js';
 import { RARITY } from '../game/rarity.js';
 import { ui, $ } from './screens.js';
 
@@ -79,7 +79,7 @@ function renderDetail() {
   const open = passiveUnlocked(view, ps);
   const on = equippedPassives(view.id).some((x) => x.id === ps.id);
   const state = on ? '<b class="ok">EQUIPPED · SELECT TO REMOVE</b>' : open ? '<b>SELECT TO EQUIP</b>'
-    : !owned ? '<i>FIND THIS CLASS FIRST</i>' : !passiveFound(ps) ? '<i>NOT FOUND · DROPS FROM BOSSES AND RANK-UPS</i>' : `<i>NEEDS RANK ${rankForRarity(ps.r)}</i>`;
+    : !owned ? '<i>FIND THIS CLASS FIRST</i>' : !passiveFound(ps) ? (!profile.pilot.dflt && defaultPassive(view) === ps ? '<i>UNLOCKS AFTER YOUR FIRST RUN</i>' : '<i>NOT FOUND · DROPS FROM BOSSES AND RANK-UPS</i>') : `<i>NEEDS RANK ${rankForRarity(ps.r)}</i>`;
   el.style.setProperty('--rc', RARITY[ps.r].color);
   el.innerHTML = `<span class="ad-art">${ps.icon}</span><div><div class="ad-top"><span class="ad-name">${ps.name}</span><span class="pass-rar">${RARITY[ps.r].name}</span></div><p>${ps.desc}</p><div class="ad-state">${state}</div></div>`;
 }

@@ -54,9 +54,8 @@ export function worldShipMount(point, player, mode, freeFlight, camera, chaseFra
     const screenY = player.y * z + oy;
     const q = camera.toScreen(screenX, screenY);
     // stageview renders player cutouts after the world camera transform. Their local scale includes
-    // that zoom plus the near/far fog scale, so invert those same transforms for the firing origin.
-    const fog = Math.max(0, Math.min(1, (screenY + 20) / 260));
-    const cutoutScale = z * (0.4 + 0.6 * fog);
+    // that zoom plus the grow-in scale out of the haze, so invert those same transforms for the firing origin.
+    const cutoutScale = z * (camera.cutoutGrow ? camera.cutoutGrow(screenY) : 1);
     const virtual = camera.toVirtual(q.x + x * q.s * cutoutScale, q.y + y * q.s * cutoutScale);
     return { x: (virtual.x - ox) / z, y: (virtual.y - oy) / z };
   }

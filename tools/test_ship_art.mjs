@@ -119,10 +119,11 @@ test('pursuit muzzle inversion follows cinematic zoom, translation and near/far 
   const camera = {
     toScreen(x, y) { const s = 600 / (1300 - y); return { x: 225 + (x - 225) * s, y: 100 + 90000 / (1300 - y), s }; },
     toVirtual(x, y) { const d = 90000 / (y - 100); return { x: 225 + (x - 225) * d / 600, y: 1300 - d }; },
+    cutoutGrow: (vy) => 0.55 + 0.45 * Math.max(0, Math.min(1, (vy + 20) / 110)),
   };
   const scenarios = [
     { frame: { z: 1.28, x: -71, y: 58 }, y: 80 }, // far cutout
-    { frame: { z: 1.16, x: -35, y: 22 }, y: 520 }, // fog transition
+    { frame: { z: 1.16, x: -35, y: 22 }, y: 30 }, // grow-in transition
     { frame: { z: 1.34, x: -91, y: 104 }, y: 980 }, // near cutout
   ];
   for (const { frame, y } of scenarios) {
@@ -132,8 +133,7 @@ test('pursuit muzzle inversion follows cinematic zoom, translation and near/far 
       const projected = camera.toScreen(result.x * frame.z + frame.x, result.y * frame.z + frame.y);
       const center = camera.toScreen(p.x * frame.z + frame.x, p.y * frame.z + frame.y);
       const stageY = p.y * frame.z + frame.y;
-      const fog = Math.max(0, Math.min(1, (stageY + 20) / 260));
-      const scale = frame.z * (0.4 + 0.6 * fog);
+      const scale = frame.z * camera.cutoutGrow(stageY);
       const posed = posedShipPoint(mount, p.bank, p.pitch, null, true);
       close(projected.x, center.x + posed[0] * center.s * scale);
       close(projected.y, center.y + posed[1] * center.s * scale);
