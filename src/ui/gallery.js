@@ -40,7 +40,7 @@ function renderGallery() {
   const done = have === set.length;
   const setEl = $('#gl-set');
   setEl.style.setProperty('--c', t.color);
-  setEl.innerHTML = `<div class="gl-set-top"><h4>${t.name}</h4><span class="${done ? 'ok' : ''}">${done ? 'SET COMPLETE' : `SET BONUS ${coin}${SET_BONUS}`}</span></div><p>${t.blurb}</p><div class="gl-bar"><i style="width:${(have / set.length) * 100}%"></i></div>`;
+  setEl.innerHTML = `<div class="gl-set-top"><h4 class="clip">${t.name}</h4><span class="${done ? 'ok' : ''}">${done ? 'SET COMPLETE' : `SET BONUS ${coin}${SET_BONUS}`}</span></div><p class="well">${t.blurb}</p><div class="gl-bar"><i style="width:${(have / set.length) * 100}%"></i></div>`;
 
   $('#gl-grid').innerHTML = set.map((r) => {
     const own = ownsRelic(r.id);
@@ -64,7 +64,7 @@ function renderDetail() {
   const r = relicById(sel);
   const el = $('#gl-detail');
   if (!r) {
-    el.innerHTML = `<div class="gl-cap"><span class="gl-cap-ico">${CAPSULE_ICON}</span><p>Pick a relic to inspect it. Commons and rares can be bought here; every relic can also drop in the field around <b>${fieldName(theme())}</b>. Legendaries are field finds only.</p></div>`;
+    el.innerHTML = `<div class="gl-cap"><span class="gl-cap-ico">${CAPSULE_ICON}</span><p class="well">Pick a relic to inspect it. Commons and rares can be bought here; every relic can also drop in the field around <b>${fieldName(theme())}</b>. Legendaries are field finds only.</p></div>`;
     return;
   }
   const own = ownsRelic(r.id);
@@ -82,7 +82,7 @@ function renderDetail() {
   const text = own ? r.text : legend ? 'Something rare drifts out there. You will know it when you see it.' : 'Not in your collection yet.';
   el.style.setProperty('--c', theme().color);
   el.style.setProperty('--r', rar.color);
-  el.innerHTML = `<div class="gl-big${own ? ' own' : ''}">${own || !legend ? r.icon : '<i>?</i>'}</div><div class="gl-info"><em>${rar.name}</em><h4>${name}</h4><p>${text}</p>${act}</div>`;
+  el.innerHTML = `<div class="gl-big${own ? ' own' : ''}">${own || !legend ? r.icon : '<i>?</i>'}</div><div class="gl-info"><em>${rar.name}</em><h4 class="clip">${name}</h4><p class="well">${text}</p><div class="gl-act">${act}</div></div>`;
 }
 
 function show(focus) {

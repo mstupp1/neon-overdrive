@@ -8,6 +8,7 @@ import { TAGS } from '../game/parts.js';
 import { formatScore, formatTime } from '../core/math.js';
 import { SYSTEMS } from '../game/campaign.js';
 import { tip, initTips, hideTip } from './tips.js';
+import { initWells, tickWells } from './wells.js';
 
 export const $ = (sel) => document.querySelector(sel);
 
@@ -205,6 +206,7 @@ export const ui = {
 
   init(h) {
     handlers = h;
+    initWells(document.getElementById('app'));
     document.querySelectorAll('.screen').forEach((el) => {
       screens[el.id.replace('scr-', '')] = el;
       el.addEventListener('click', (e) => {
@@ -301,6 +303,7 @@ export const ui = {
       const el = screens[current];
       if (overflow(el) > 1 || el.clientHeight !== el._fitH || el.clientWidth !== el._fitW) fit(el);
     }
+    tickWells(screens[current]);
     if (guarded) {
       if (input.anyHeld() || performance.now() < guardUntil) {
         input.clear();
@@ -473,10 +476,10 @@ export const ui = {
       // Reward cards: rarity, bonus levels and a reserved two-line modifier block (rerolls never change the card height).
       // Level-up cards are plain and compact: just the path line.
       const rar = info.r != null
-        ? `<div class="card-rar"><b>${RARITY[info.r].name}</b>${info.levels > 1 ? `<span>+${info.levels} LEVELS</span>` : ''}${pn}</div><div class="card-mods">${info.mods.map((m) => `<i>${m}</i>`).join('')}</div>`
-        : pn ? `<div class="card-rar plain">${pn}</div>` : '';
+        ? `<div class="card-rar"><b>${RARITY[info.r].name}</b>${info.levels > 1 ? `<span>+${info.levels} LEVELS</span>` : ''}${pn}</div><div class="card-mods well">${info.mods.map((m) => `<i>${m}</i>`).join('')}</div>`
+        : `<div class="card-rar plain">${pn}</div>`; // always present: every card in a draft is the same height
       const flag = fresh ? `<span class="card-flag disc">${STAR}NEW DISCOVERY</span>` : runNew ? '<span class="card-flag run">NEW THIS RUN</span>' : '';
-      b.innerHTML = `${flag}<div class="card-hold-wash"></div><div class="card-icon">${info.icon}</div><div><div class="card-top"><span class="card-name">${info.name}</span><span class="card-tag">${tag}</span></div><div class="card-desc">${info.desc}</div>${rar}${pips ? `<div class="pips">${pips}</div>` : ''}</div>${input.device === 'touch' ? '' : `<kbd>${i + 1}</kbd>`}<span class="card-lock" title="Lock: keep this card through a reroll">${LOCK_SVG}</span><span class="card-sel"></span><div class="card-hold-track"><div class="card-hold-bar"></div></div>`;
+      b.innerHTML = `${flag}<div class="card-hold-wash"></div><div class="card-icon">${info.icon}</div><div><div class="card-top"><span class="card-name clip">${info.name}</span><span class="card-tag">${tag}</span></div><div class="card-desc well">${info.desc}</div>${rar}<div class="pips">${pips}</div></div>${input.device === 'touch' ? '' : `<kbd>${i + 1}</kbd>`}<span class="card-lock" title="Lock: keep this card through a reroll">${LOCK_SVG}</span><span class="card-sel"></span><div class="card-hold-track"><div class="card-hold-bar"></div></div>`;
       b.querySelector('.card-lock').addEventListener('click', (e) => {
         e.stopPropagation();
         if (onLock && onLock(i)) syncLocks(locks, rerolls);

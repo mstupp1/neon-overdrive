@@ -111,9 +111,9 @@ function render() {
   const card = $('#hs-card');
   card.style.setProperty('--c', paint.color);
   card.classList.toggle('locked', !owned);
-  const legacy = ship.unlock ? `<p class="hs-or clip">OR ${ship.unlock.text.toUpperCase()}</p>` : '';
+  const legacy = ship.unlock ? `<span class="hs-or">OR ${ship.unlock.text.toUpperCase()}</span>` : '';
   const path = ship.path ? `<span class="hs-path" style="--t:${TAGS[ship.path].color}">${TAGS[ship.path].name}</span>` : '';
-  const trait = ship.trait ? `<p class="hs-trait clip">${ship.trait.text}</p>` : '';
+  const trait = ship.trait ? `<span class="hs-trait">${ship.trait.text}</span>` : '';
   let actLine;
   card.removeAttribute('aria-disabled');
   if (!owned) {
@@ -127,7 +127,7 @@ function render() {
     card.dataset.mode = 'select';
     actLine = '<span class="hs-buy">SELECT</span>';
   }
-  card.innerHTML = `<div class="hs-art"></div><div class="hs-info"><div class="role clip">${ship.role}${path}</div><h4 class="clip">${ship.name}</h4><p class="hs-desc">${ship.desc}</p>${trait}${owned ? '' : legacy}</div><div class="hs-actline"><span class="hs-n">${viewIdx + 1}/${SHIPS.length}</span>${actLine}</div>`;
+  card.innerHTML = `<div class="hs-art"></div><div class="hs-info"><div class="role clip">${ship.role}${path}</div><h4 class="clip">${ship.name}</h4><p class="hs-desc well">${ship.desc}${trait}${owned ? '' : legacy}</p></div><div class="hs-actline"><span class="hs-n">${viewIdx + 1}/${SHIPS.length}</span>${actLine}</div>`;
   card.querySelector('.hs-art').appendChild(shipArt(ship, owned));
   card.setAttribute('aria-label', `${ship.name}: ${owned ? (selShip ? 'active ship' : 'select') : 'buy'}. Left and right browse ships.`);
   $('#hs-dots').innerHTML = SHIPS.map((s, i) => `<i class="${i === viewIdx ? 'on' : ''}${ownsShip(profile, s) ? ' own' : ''}"></i>`).join('');

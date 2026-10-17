@@ -198,7 +198,7 @@ function renderDetail() {
     go = owned() && pointsLeft(cls) > 0;
     line = !owned() ? 'FIND THIS CLASS TO USE ITS TREE' : go ? `${verb()} TO ALLOCATE · 1 POINT` : 'NO POINTS LEFT · RANK UP OR EXPAND THE FLUX CORE';
   } else line = 'NOT LINKED YET · ALLOCATE A NEIGHBOUR FIRST';
-  el.innerHTML = `<div class="td-top"><b>${name}</b><em>${tag}</em></div><span>${desc}</span><i class="${go ? 'go' : ''}">${line}</i>`;
+  el.innerHTML = `<div class="td-top"><b>${name}</b><em>${tag}</em></div><span class="well">${desc}</span><i class="${go ? 'go' : ''}">${line}</i>`;
 }
 
 // --- Canvas ------------------------------------------------------------------------------------------------------------
