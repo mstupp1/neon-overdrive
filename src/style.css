@@ -5941,3 +5941,9 @@ button.hs-card:hover {
 .draft-head { max-width: 100%; min-width: 0; }
 #draft-sub { max-width: 100%; }
 .card-flag { box-sizing: border-box; height: 1.6em; }
+
+/* Hangar loadout: three stat rows and two path lines, always (gear that adds stats or paths scrolls in the well). */
+.hs-stats.well { display: grid; grid-auto-rows: calc(var(--lh) * 1em); row-gap: 0; --lines: 3; --lh: 1.3; }
+.hs-stats.well div { align-items: center; }
+.hs-stats.well .blank { visibility: hidden; }
+.hs-paths.well { display: flex; align-content: flex-start; row-gap: 0; min-height: 0; --lines: 2; --lh: 1.35; }

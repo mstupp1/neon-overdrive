@@ -5,6 +5,7 @@
 //   python3 -m http.server 8000          (in the repo root, in another terminal)
 //   node tools/menu_layout_audit.mjs [menu,menu…] [--url http://localhost:8000/]
 //
+// The hub tab checks cycle pages with E and compare the shared header and text scale across them.
 // Needs Playwright with Chromium (npm i -g playwright, or set PLAYWRIGHT_MODULE to its index.mjs). Exit code 1 on a shift.
 
 import { existsSync } from 'node:fs';
@@ -24,7 +25,7 @@ try {
 const chromium = pw.chromium || pw.default.chromium;
 
 const VIEWS = { desktop: { width: 1280, height: 800 }, phone: { width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 2 } };
-const PROFILE = { seenIntro: true, seenHelp: true, seenRunInfo: true, credits: 2500, rankXp: 40000, runs: 5, best: 123456, flux: 300, campaign: { cleared: ['genesis'], seenStory: { prologue: 1 }, bestSys: 1, bestRow: 3 } };
+const PROFILE = { ownedShips: ['vector', 'needle', 'phantom'], lastShip: 'phantom', seenIntro: true, seenHelp: true, seenRunInfo: true, credits: 2500, rankXp: 40000, runs: 5, best: 123456, flux: 300, campaign: { cleared: ['genesis'], seenStory: { prologue: 1 }, bestSys: 1, bestRow: 3 } };
 const PROFILE_KEY = 'neon-overdrive/profile/v3';
 
 // Per menu: `open` (page JS), the item count `n` (page JS), and per item either a key press or `step` (page JS, I = index).
@@ -35,7 +36,11 @@ const menuFocus = (sel) => `document.querySelectorAll('${sel}')[I]?.dispatchEven
 const MENUS = {
   title: { open: `NEON.toTitle()`, n: focusCount, step: focusEach },
   campaign: { open: `NEON.toTitle(); document.querySelector('#scr-title [data-act=play]').click()`, n: focusCount, step: focusEach },
-  ships: { open: `NEON.openHangar()`, n: `12`, key: 'ArrowRight' },
+  // The active ship wears gear (extra stats and paths), the others don't.
+  ships: { open: `for (const [sl, r] of [['core', 4], ['plating', 3], ['thrusters', 2]]) NEON.equip('phantom', NEON.giveGear(sl, r, 30).uid); NEON.openHangar()`, n: `12`, key: 'ArrowRight' },
+  // Hub tabs are separate screens: only the shared header and the text scale must hold still.
+  hangarTabs: { open: `NEON.toTitle(); document.querySelector('#scr-title [data-act=hangar]').click()`, n: `10`, key: 'KeyE', across: 'header.hub-head' },
+  collectionTabs: { open: `NEON.toTitle(); document.querySelector('#scr-title [data-act=gallery]').click()`, n: `4`, key: 'KeyE', across: 'header.hub-head' },
   parts: { open: `NEON.openHangar(); document.querySelector('#hs-slots button')?.click()`, n: `document.querySelectorAll('#parts-list button').length`, step: menuFocus('#parts-list button') },
   fab: { open: `NEON.openFab()`, n: `document.querySelectorAll('#scr-fab button').length`, step: menuFocus('#scr-fab button') },
   classes: { open: `NEON.openPilot()`, n: `document.querySelectorAll('#pl-tabs .cls-tab').length`, step: `document.querySelectorAll('#pl-tabs .cls-tab')[I].click()` },
@@ -114,8 +119,8 @@ for (const [view, vp] of Object.entries(VIEWS)) {
     }
     await ctx.close();
 
-    const ok = snaps.filter((s) => s && s.id === snaps[0]?.id);
-    const keys = Object.keys(ok[0]?.els || {}).filter((k) => ok.every((s) => s.els[k]));
+    const ok = snaps.filter((s) => s && (m.across || s.id === snaps[0]?.id));
+    const keys = Object.keys(ok[0]?.els || {}).filter((k) => ok.every((s) => s.els[k]) && (!m.across || k.startsWith(m.across)));
     const moved = keys.filter((k) => {
       const range = (j) => Math.max(...ok.map((s) => s.els[k][j])) - Math.min(...ok.map((s) => s.els[k][j]));
       return range(1) > TOL || range(3) > TOL; // top or height (a line of text getting wider is fine)
