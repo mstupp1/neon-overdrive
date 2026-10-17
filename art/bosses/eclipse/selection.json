@@ -1,0 +1,52 @@
+{
+  "views": {
+    "top": {
+      "source": "art/bosses/eclipse/sources/top-v1.png",
+      "prompt": "art/bosses/eclipse/prompts/top-v1.txt",
+      "sourceAnchor": [
+        627,
+        582
+      ],
+      "logicalScale": 0.14,
+      "logicalAnchor": [
+        0,
+        -2
+      ],
+      "references": [
+        "art/ships/vector/sources/top-v1.png"
+      ]
+    },
+    "side": {
+      "source": "art/bosses/eclipse/sources/side-v2.png",
+      "prompt": "art/bosses/eclipse/prompts/side-v2.txt",
+      "sourceAnchor": [
+        631,
+        642
+      ],
+      "logicalScale": 0.14,
+      "logicalAnchor": [
+        2,
+        0
+      ],
+      "references": [
+        "art/bosses/eclipse/sources/top-v1.png"
+      ]
+    },
+    "chase": {
+      "source": "art/bosses/eclipse/sources/chase-v1.png",
+      "prompt": "art/bosses/eclipse/prompts/chase-v1.txt",
+      "sourceAnchor": [
+        627,
+        669
+      ],
+      "logicalScale": 0.14,
+      "logicalAnchor": [
+        0,
+        -2
+      ],
+      "references": [
+        "art/bosses/eclipse/sources/top-v1.png"
+      ]
+    }
+  }
+}

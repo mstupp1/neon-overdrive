@@ -4,6 +4,7 @@
 import { G, view } from './state.js';
 import { glow, S, flame } from '../render/sprites.js';
 import { wardenBody, wardenLegs, hydraBody, hydraPod, omegaCore, omegaRing, omegaNode, omegaShard } from '../render/bossArt.js';
+import { bossImage, bossVisualPoints } from '../render/bossImages.js';
 import { TAU, damp, rand, clamp } from '../core/math.js';
 import { shoot, ring, fan, aimAt, clearBullets } from './bullets.js';
 import { explosion, addShake, flash, floatText, slowmo, hitstop, sparks } from './fx.js';
@@ -850,27 +851,31 @@ function coreGlow(ctx, x, y, color, pulse, size, r) {
 function drawWarden(ctx, e, hot) {
   const { x, y } = e;
   const c = e.phase === 3 ? '#ff3b3b' : e.color;
+  const body = wardenBody(c, sv.mode);
   wardenLegs(ctx, x, y, c, G.time, e.state === 'enter');
   // exhaust plumes from the rear stacks
   const fl = flame(c);
+  const engines = bossVisualPoints('warden', sv.mode, 'engines', [[-24, -44], [24, -44]], body);
   ctx.globalCompositeOperation = 'lighter';
-  for (const s of [-1, 1]) {
-    const h = 26 + Math.sin(G.time * 31 + s) * 4;
+  for (let i = 0; i < engines.length; i++) {
+    const h = 26 + Math.sin(G.time * 31 + (i ? 1 : -1)) * 4;
+    const [ex, ey] = engines[i];
     ctx.globalAlpha = 0.55;
     ctx.save();
-    ctx.translate(x + s * 24, y - 44);
+    ctx.translate(x + ex, y + ey);
     ctx.scale(1, -1);
     ctx.drawImage(fl.img, -7, 0, 14, h);
     ctx.restore();
   }
   ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = 'source-over';
-  blit(ctx, wardenBody(c), x, y, hot);
+  blit(ctx, body, x, y, hot);
   // missile rack launch lights
-  for (const s of [-1, 1]) {
+  const rackLights = bossVisualPoints('warden', sv.mode, 'rackLights', [[-62, 33], [62, 33]], body);
+  for (const [rx, ry] of rackLights) {
     ctx.fillStyle = c;
-    ctx.globalAlpha = 0.6 + 0.4 * Math.sin(G.time * 8 + s);
-    ctx.fillRect(x + s * 62 - 8, y + 33, 16, 3);
+    ctx.globalAlpha = 0.6 + 0.4 * Math.sin(G.time * 8 + rx);
+    ctx.fillRect(x + rx - 8, y + ry, 16, 3);
     ctx.globalAlpha = 1;
   }
   // Reactor: pulsing core and a spinning ring of charge cells
@@ -890,9 +895,10 @@ function drawWarden(ctx, e, hot) {
   // Twin-barrel turrets tracking the player
   const p = G.player;
   const fill = hot ? '#3a1a22' : '#160a10';
-  for (const s of [-1, 1]) {
-    const tx = x + s * 36;
-    const ty = y - 16;
+  const turrets = bossVisualPoints('warden', sv.mode, 'turrets', [[-36, -16], [36, -16]], body);
+  for (const [tx0, ty0] of turrets) {
+    const tx = x + tx0;
+    const ty = y + ty0;
     const a = p ? Math.atan2(p.y - ty, p.x - tx) : Math.PI / 2;
     ctx.save();
     ctx.translate(tx, ty);
@@ -925,7 +931,7 @@ function drawHydra(ctx, e, hot) {
   if (e.tentacles) {
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    const pod = hydraPod();
+    const pod = hydraPod(sv.mode);
     e.tentacles.forEach((j, i) => {
       const n = j.length / 2 - 1;
       const rim = hot ? `hsl(${110 + i * 12},90%,75%)` : `hsl(${110 + i * 12},90%,55%)`;
@@ -964,7 +970,7 @@ function drawHydra(ctx, e, hot) {
       blit(ctx, pod, tx, ty, hot, a);
     });
   }
-  blit(ctx, hydraBody(), e.x, e.y, hot);
+  blit(ctx, hydraBody(sv.mode), e.x, e.y, hot);
   // Eye tracks the player: a slit pupil in a glowing iris
   const p = G.player;
   const a = p ? Math.atan2(p.y - e.y, p.x - e.x) : Math.PI / 2;
@@ -995,7 +1001,7 @@ function drawOmega(ctx, e, hot) {
   const c = e.phase === 3 ? '#ff3df2' : e.color;
   const { x, y } = e;
   // Outer shard ring
-  const sh = omegaShard();
+  const sh = omegaShard(sv.mode);
   for (let i = 0; i < 12; i++) {
     const a = -e.anim * 0.7 + (i / 12) * TAU;
     blit(ctx, sh, x + Math.cos(a) * 96, y + Math.sin(a) * 96, false, a + Math.PI / 2);
@@ -1018,19 +1024,25 @@ function drawOmega(ctx, e, hot) {
   ctx.stroke();
   ctx.restore();
   // Inner ring nodes (hittable)
-  const node = omegaNode(c);
+  const node = omegaNode(c, sv.mode);
   for (let i = 0; i < 6; i++) {
     const a = e.anim + (i / 6) * TAU;
     blit(ctx, node, x + Math.cos(a) * 66, y + Math.sin(a) * 66, hot, e.anim + a);
   }
   // Core
-  blit(ctx, omegaCore(c), x, y, hot, -e.anim * 0.5);
+  // The alternate-camera core artwork already carries its perspective; keep
+  // that full image level while the radial ring and nodes continue animating.
+  const core = omegaCore(c, sv.mode);
+  // Generated side/chase views already include camera perspective, while the
+  // procedural fallback retains its original rotation in every camera.
+  const coreAngle = core.generated && sv.mode !== 'top' ? 0 : -e.anim * 0.5;
+  blit(ctx, core, x, y, hot, coreAngle);
   const pulse = 0.6 + 0.4 * Math.sin(G.time * 5);
   coreGlow(ctx, x, y, c, pulse, 80, 6 + pulse * 3);
 }
 
 function drawEclipse(ctx, e, hot) {
-  const spr = S.eclipse;
+  const spr = bossImage('eclipse', sv.mode, S.eclipse);
   const sz = spr.size;
   const p3 = e.phase === 3;
   // Lane telegraphs (before the lethal beam takes over).
@@ -1065,12 +1077,14 @@ function drawEclipse(ctx, e, hot) {
   }
   // Engine plumes (it flies nose down, so they burn upward)
   const fl = flame(p3 ? '#ffffff' : '#ff3df2');
+  const engines = bossVisualPoints('eclipse', sv.mode, 'engines', [[-33.6, -72], [33.6, -72]], spr);
   ctx.globalCompositeOperation = 'lighter';
-  for (const s of [-1, 1]) {
-    const h = 40 + Math.sin(G.time * 29 + s) * 6 + (e.frenzy ? 16 : 0);
+  for (let i = 0; i < engines.length; i++) {
+    const [ex, ey] = engines[i];
+    const h = 40 + Math.sin(G.time * 29 + (i ? 1 : -1)) * 6 + (e.frenzy ? 16 : 0);
     ctx.globalAlpha = 0.7 * (e.alpha ?? 1);
     ctx.save();
-    ctx.translate(e.x + s * 33.6, e.y - 72);
+    ctx.translate(e.x + ex, e.y + ey);
     ctx.scale(1, -1);
     ctx.drawImage(fl.img, -8, 0, 16, h);
     ctx.restore();

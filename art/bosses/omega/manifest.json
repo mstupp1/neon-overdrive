@@ -1,0 +1,135 @@
+{
+  "method": "built-in imagegen; deterministic Pillow export",
+  "logicalSize": 120,
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/bosses/omega/sources/top-v1.png",
+      "source_sha256": "7b30d7450fb9c0dad078404a81f63f11a3fec39ee6d1a6bffc94097873fa4a59",
+      "runtime": "src/assets/bosses/omega/top-v1.png",
+      "runtime_sha256": "62565292112c11931316156cbaaf700116bb8dbbccede827b9601b1f68004426",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "operation": "uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "logicalScale": 0.0675,
+      "sourceAnchor": [
+        627,
+        620
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        361,
+        361
+      ],
+      "offset": [
+        75,
+        77
+      ],
+      "alphaBounds": [
+        84,
+        77,
+        427,
+        429
+      ],
+      "prompt": "art/bosses/omega/prompts/top-v1.txt",
+      "prompt_sha256": "406cb04ee40d8c12f0bfac64fdd793de3760bbdd0adf962dce4cc9eb1557cb7d",
+      "references": [
+        {
+          "path": "art/ships/vector/sources/top-v1.png",
+          "sha256": "f2c2564e878485c04b19522de9fb6317a485ddeeb4560fd410d7a01e217c8e3a"
+        }
+      ]
+    },
+    {
+      "camera": "side",
+      "source": "art/bosses/omega/sources/side-v1.png",
+      "source_sha256": "31018b88a6ad10a0cbdd3b67a259e58aeb2161ab3caac4ab919e063f04466bf4",
+      "runtime": "src/assets/bosses/omega/side-v1.png",
+      "runtime_sha256": "cb1bece041263e5161fb81036f7afdbce4ee7c8679d2ac56b5fd35693d38ee58",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "operation": "uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "logicalScale": 0.0675,
+      "sourceAnchor": [
+        624,
+        569
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        361,
+        361
+      ],
+      "offset": [
+        76,
+        92
+      ],
+      "alphaBounds": [
+        82,
+        134,
+        431,
+        374
+      ],
+      "prompt": "art/bosses/omega/prompts/side-v1.txt",
+      "prompt_sha256": "ce767e9a6e400921f494543c393f4c408228a97b0b13cb86e1c6c886d8ac0776",
+      "references": [
+        {
+          "path": "art/bosses/omega/sources/top-v1.png",
+          "sha256": "7b30d7450fb9c0dad078404a81f63f11a3fec39ee6d1a6bffc94097873fa4a59"
+        }
+      ]
+    },
+    {
+      "camera": "chase",
+      "source": "art/bosses/omega/sources/chase-v1.png",
+      "source_sha256": "a84f629cbc380bb288ea6381f67dcfb44207c2ffffe65259f1eb1a0e19c0e2a1",
+      "runtime": "src/assets/bosses/omega/chase-v1.png",
+      "runtime_sha256": "01341cca6530b9a0249488c9c12721dd8cc456f25f2f4502455dd6fc0803b19e",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "operation": "uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "logicalScale": 0.0675,
+      "sourceAnchor": [
+        629,
+        560
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        361,
+        361
+      ],
+      "offset": [
+        75,
+        95
+      ],
+      "alphaBounds": [
+        77,
+        106,
+        434,
+        444
+      ],
+      "prompt": "art/bosses/omega/prompts/chase-v1.txt",
+      "prompt_sha256": "edc086f2f334e992ab4c4c0d537a84ba05b9c5a1fd4decacfa24bb51f49e183d",
+      "references": [
+        {
+          "path": "art/bosses/omega/sources/top-v1.png",
+          "sha256": "7b30d7450fb9c0dad078404a81f63f11a3fec39ee6d1a6bffc94097873fa4a59"
+        }
+      ]
+    }
+  ]
+}

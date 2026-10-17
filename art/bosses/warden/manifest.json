@@ -1,0 +1,135 @@
+{
+  "method": "built-in imagegen; deterministic Pillow export",
+  "logicalSize": 230,
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/bosses/warden/sources/top-v1.png",
+      "source_sha256": "73d6892785e0d513be36035b5a1ef8836950d033499df352bc09c318daa71d67",
+      "runtime": "src/assets/bosses/warden/top-v1.png",
+      "runtime_sha256": "900e9f417997496e98b3906abac604e14825bc621430f4b5d7354964af71578c",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "operation": "uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "logicalScale": 0.145,
+      "sourceAnchor": [
+        627,
+        588
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        405,
+        405
+      ],
+      "offset": [
+        54,
+        66
+      ],
+      "alphaBounds": [
+        83,
+        81,
+        430,
+        450
+      ],
+      "prompt": "art/bosses/warden/prompts/top-v1.txt",
+      "prompt_sha256": "bb068dfdbb1f2eddcdd7ded90620930a1afebaf9d007651c475ee61ad3618ce2",
+      "references": [
+        {
+          "path": "art/ships/vector/sources/top-v1.png",
+          "sha256": "f2c2564e878485c04b19522de9fb6317a485ddeeb4560fd410d7a01e217c8e3a"
+        }
+      ]
+    },
+    {
+      "camera": "side",
+      "source": "art/bosses/warden/sources/side-v1.png",
+      "source_sha256": "be6bcde4e33192839978e61fd42366c00aeffd3b90d8001d550e9f6ae94e1e3a",
+      "runtime": "src/assets/bosses/warden/side-v1.png",
+      "runtime_sha256": "4c115544adae60d85eff1ee64a7896fc3de3e9fa70fd787a53a02d4bb0927732",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "operation": "uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "logicalScale": 0.145,
+      "sourceAnchor": [
+        600,
+        635
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        405,
+        405
+      ],
+      "offset": [
+        62,
+        51
+      ],
+      "alphaBounds": [
+        62,
+        101,
+        453,
+        427
+      ],
+      "prompt": "art/bosses/warden/prompts/side-v1.txt",
+      "prompt_sha256": "e758bd74f0826c8708c1ff01e4538f5c0a39bf3e2fce820090fbf101dcebce02",
+      "references": [
+        {
+          "path": "art/bosses/warden/sources/top-v1.png",
+          "sha256": "73d6892785e0d513be36035b5a1ef8836950d033499df352bc09c318daa71d67"
+        }
+      ]
+    },
+    {
+      "camera": "chase",
+      "source": "art/bosses/warden/sources/chase-v2.png",
+      "source_sha256": "91fd9d3aa9e4eb9b2b1f9e273a959bef02c5c3a99cc5e7b4ea0f5fccc6d13e66",
+      "runtime": "src/assets/bosses/warden/chase-v1.png",
+      "runtime_sha256": "c5300d070a5bab7d4ad2dff6c1a52741ab693c4f324307c8194792a697ef5bd3",
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "operation": "uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "logicalScale": 0.095,
+      "sourceAnchor": [
+        887,
+        455
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        375,
+        188
+      ],
+      "offset": [
+        68,
+        160
+      ],
+      "alphaBounds": [
+        72,
+        172,
+        439,
+        344
+      ],
+      "prompt": "art/bosses/warden/prompts/chase-v2.txt",
+      "prompt_sha256": "0e9e5213993535a2dcd8f778ee439b39ead23a660c9d38a77d4f8a0bc8a92ebd",
+      "references": [
+        {
+          "path": "art/bosses/warden/sources/top-v1.png",
+          "sha256": "73d6892785e0d513be36035b5a1ef8836950d033499df352bc09c318daa71d67"
+        }
+      ]
+    }
+  ]
+}

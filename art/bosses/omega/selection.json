@@ -1,0 +1,52 @@
+{
+  "views": {
+    "top": {
+      "source": "art/bosses/omega/sources/top-v1.png",
+      "prompt": "art/bosses/omega/prompts/top-v1.txt",
+      "sourceAnchor": [
+        627,
+        620
+      ],
+      "logicalScale": 0.0675,
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "references": [
+        "art/ships/vector/sources/top-v1.png"
+      ]
+    },
+    "side": {
+      "source": "art/bosses/omega/sources/side-v1.png",
+      "prompt": "art/bosses/omega/prompts/side-v1.txt",
+      "sourceAnchor": [
+        624,
+        569
+      ],
+      "logicalScale": 0.0675,
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "references": [
+        "art/bosses/omega/sources/top-v1.png"
+      ]
+    },
+    "chase": {
+      "source": "art/bosses/omega/sources/chase-v1.png",
+      "prompt": "art/bosses/omega/prompts/chase-v1.txt",
+      "sourceAnchor": [
+        629,
+        560
+      ],
+      "logicalScale": 0.0675,
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "references": [
+        "art/bosses/omega/sources/top-v1.png"
+      ]
+    }
+  }
+}

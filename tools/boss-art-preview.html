@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Boss artwork preview · NEON OVERDRIVE</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#070b16;color:#c6d8e4;font:14px system-ui}main{max-width:1320px;margin:auto;padding:24px}h1{color:#3ff6ff;font-size:24px;margin:0}p{line-height:1.55;color:#94adbc}.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:16px 0}button,select{font:inherit;background:#102434;color:#b9f8ff;border:1px solid #376473;padding:8px 12px}button{cursor:pointer}label{display:inline-flex;gap:7px;align-items:center}input{accent-color:#3ff6ff}output{color:#8cecbf}.views{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.view{margin:0;border:1px solid #253d4c;background:#0a1422;padding:10px;min-width:0}.view canvas{display:block;width:100%;height:auto}.view figcaption{display:flex;justify-content:space-between;padding-top:7px;color:#89dce6;font-size:12px}.status{color:#9de8f0}details{margin:20px 0}summary{cursor:pointer;color:#9de8f0}iframe{display:block;width:100%;height:620px;border:1px solid #253d4c;background:#070b16}.checker{background-color:#18222a;background-image:linear-gradient(45deg,#222f38 25%,transparent 25%),linear-gradient(-45deg,#222f38 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#222f38 75%),linear-gradient(-45deg,transparent 75%,#222f38 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0}@media(max-width:760px){main{padding:12px}.views{grid-template-columns:1fr}iframe{height:75vh}}
+</style>
+<main>
+<h1>Boss art / Live composition study</h1>
+<p>Four main bosses across overhead, side-scroll and pursuit cameras. Every sample is drawn by the game’s <code>drawBoss</code> routine, including the moving parts around the body. Compare native and enlarged views against light and dark backdrops.</p>
+<div class="controls"><label>Boss <select id="boss"></select></label><label>Phase <select id="phase"><option value="1">Phase 1</option><option value="2">Phase 2</option><option value="3">Phase 3</option></select></label><label>Backdrop <select id="background"><option value="dark">Dark navy</option><option value="light">Light</option><option value="checker">Checker</option></select></label><label><input id="pixel" type="checkbox"> Pixel look</label><label><input id="flash" type="checkbox"> Hit flash</label><label><input id="attack" type="checkbox" checked> Attack state</label><output id="asset-status">Loading boss art…</output></div>
+<div class="views" id="views"></div>
+<details open><summary>Live game preview · isolated save</summary><p>The embedded game starts with an invulnerable boss in the selected camera and phase. Settings and progression changes stay in the iframe’s in-memory storage.</p><div class="controls"><label>Camera <select id="live-camera"><option value="top">Overhead</option><option value="side">Side-scroll</option><option value="chase">Pursuit</option></select></label><button id="restart" disabled>Restart encounter</button><button id="pixel-game" disabled>Toggle game pixel look</button><output id="game-status">Loading isolated game…</output></div><iframe title="Isolated live boss art preview"></iframe></details>
+</main>
+<script type="module" src="boss-art-preview.js"></script>
+</html>

@@ -1,0 +1,135 @@
+{
+  "method": "built-in imagegen; deterministic Pillow export",
+  "logicalSize": 250,
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/bosses/hydra/sources/top-v1.png",
+      "source_sha256": "b7beccedd1e8e35db795983122965bebc22e526be6a21ad65b6ec0b4e2b571c9",
+      "runtime": "src/assets/bosses/hydra/top-v1.png",
+      "runtime_sha256": "380bf0f40cd666e532b929105880873a9e3e5789eedaae5301fe6a96cb8669d4",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "operation": "uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "logicalScale": 0.14,
+      "sourceAnchor": [
+        628,
+        728
+      ],
+      "logicalAnchor": [
+        0,
+        -8
+      ],
+      "resizeSize": [
+        360,
+        360
+      ],
+      "offset": [
+        76,
+        31
+      ],
+      "alphaBounds": [
+        102,
+        42,
+        417,
+        385
+      ],
+      "prompt": "art/bosses/hydra/prompts/top-v1.txt",
+      "prompt_sha256": "4a81deb513932db5bc0dfe5f833a7aa6753423d43d7bbdba4e2c22df6cb78225",
+      "references": [
+        {
+          "path": "art/ships/vector/sources/top-v1.png",
+          "sha256": "f2c2564e878485c04b19522de9fb6317a485ddeeb4560fd410d7a01e217c8e3a"
+        }
+      ]
+    },
+    {
+      "camera": "side",
+      "source": "art/bosses/hydra/sources/side-v1.png",
+      "source_sha256": "a5f91dddab1f22335359f16a02a10ff458ac34b928a3302be32a7c8bafd66cf9",
+      "runtime": "src/assets/bosses/hydra/side-v1.png",
+      "runtime_sha256": "ceedfddd7fd47cd2ee14faaf6e61b313c56ee4a8368a775369c96fa758ec5740",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "operation": "uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "logicalScale": 0.07,
+      "sourceAnchor": [
+        389,
+        682
+      ],
+      "logicalAnchor": [
+        8,
+        0
+      ],
+      "resizeSize": [
+        180,
+        180
+      ],
+      "offset": [
+        217,
+        158
+      ],
+      "alphaBounds": [
+        228,
+        161,
+        397,
+        335
+      ],
+      "prompt": "art/bosses/hydra/prompts/side-v1.txt",
+      "prompt_sha256": "d38a5fa65b9d21d81c5265c2d03e399569c69b786cffffc4705eac18da9424fb",
+      "references": [
+        {
+          "path": "art/bosses/hydra/sources/top-v1.png",
+          "sha256": "b7beccedd1e8e35db795983122965bebc22e526be6a21ad65b6ec0b4e2b571c9"
+        }
+      ]
+    },
+    {
+      "camera": "chase",
+      "source": "art/bosses/hydra/sources/chase-v3.png",
+      "source_sha256": "8baf689beb464a458da7d4af9b820f5b1853bebde2548297ed8e46dc36f17a95",
+      "runtime": "src/assets/bosses/hydra/chase-v1.png",
+      "runtime_sha256": "a52ddc7047dffd5b250a6855f99fea4637bba8808a3b331cec3eb012c938287b",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "operation": "uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "logicalScale": 0.12,
+      "sourceAnchor": [
+        628,
+        657
+      ],
+      "logicalAnchor": [
+        0,
+        -8
+      ],
+      "resizeSize": [
+        308,
+        308
+      ],
+      "offset": [
+        102,
+        78
+      ],
+      "alphaBounds": [
+        106,
+        110,
+        406,
+        370
+      ],
+      "prompt": "art/bosses/hydra/prompts/chase-v3.txt",
+      "prompt_sha256": "0a2a8d020da40deb421eebc5933d407147b3eead5bbf688d8f15e392749f99e0",
+      "references": [
+        {
+          "path": "art/bosses/hydra/sources/chase-v2.png",
+          "sha256": "36ef515f39626c270fb7cf63eed681bdb90903cd91323b8653860ba622138f26"
+        }
+      ]
+    }
+  ]
+}

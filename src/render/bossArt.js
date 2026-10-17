@@ -5,6 +5,7 @@
 
 import { TAU } from '../core/math.js';
 import { makeSprite, S } from './sprites.js';
+import { bossImage, bossPart, prewarmBossImages } from './bossImages.js';
 import {
   poly, mirror, flipX, regular, part, halo, seams, seamsM, vents, rivets, lit, nozzle, barrel, canopy, dashRing,
   glowStroke, shade, rgba,
@@ -24,7 +25,7 @@ function pair(g, half, color, o = {}) {
 
 // --- WARDEN: siege mech. Hull r42 at the centre, missile pods (r20) at ±62, 4; it faces down at the player. ------
 
-export function wardenBody(c) {
+function wardenProceduralBody(c) {
   return cached('warden' + c, () => makeSprite(230, (g) => {
     const hull = mirror([[0, -48], [20, -48], [40, -40], [54, -18], [54, 6], [42, 34], [26, 46], [0, 50]]);
     const plate = mirror([[0, -36], [16, -36], [30, -30], [40, -14], [40, 4], [30, 26], [18, 34], [0, 37]]);
@@ -68,6 +69,10 @@ export function wardenBody(c) {
       rivets(g, [[s * 46, -20], [s * 78, -20], [s * 46, 32], [s * 78, 32]], c, 0.9);
     }
   }, true));
+}
+
+export function wardenBody(c, mode = 'top') {
+  return bossImage('warden', mode, wardenProceduralBody(c), c);
 }
 
 // Four walker legs, stepping in diagonal pairs (drawn per frame behind the hull).
@@ -117,7 +122,7 @@ export function wardenLegs(ctx, x, y, c, t, moving) {
 
 // --- HYDRA: bio-leviathan. Body r48, six tentacles with r12 tip pods (drawn per frame). ------------------------------
 
-export function hydraBody() {
+function hydraProceduralBody() {
   return cached('hydra', () => makeSprite(250, (g) => {
     const G = '#6dff4d';
     const P = '#c04dff';
@@ -218,8 +223,12 @@ export function hydraBody() {
   }, true));
 }
 
+export function hydraBody(mode = 'top') {
+  return bossImage('hydra', mode, hydraProceduralBody());
+}
+
 // Tentacle tip pod: a petalled bulb (points up its own -y, rotated along the tentacle per frame).
-export function hydraPod() {
+function hydraProceduralPod() {
   return cached('hydraPod', () => makeSprite(40, (g) => {
     const P = '#c04dff';
     for (let i = 0; i < 5; i++) {
@@ -234,9 +243,13 @@ export function hydraPod() {
   }, true, 3));
 }
 
+export function hydraPod(mode = 'top') {
+  return bossPart('hydra', 'pod', mode, hydraProceduralPod());
+}
+
 // --- OMEGA: core intelligence. Core r38, six node pods (r11) orbiting at r66, shard ring at r96. ---------------------
 
-export function omegaCore(c) {
+function omegaProceduralCore(c) {
   return cached('omegaCore' + c, () => makeSprite(120, (g) => {
     const oct = regular(8, 40, Math.PI / 8);
     halo(g, c, poly(oct), 22, 0.2);
@@ -269,6 +282,10 @@ export function omegaCore(c) {
   }, true));
 }
 
+export function omegaCore(c, mode = 'top') {
+  return bossImage('omega', mode, omegaProceduralCore(c), c);
+}
+
 export function omegaRing(c) {
   return cached('omegaRing' + c, () => makeSprite(200, (g) => {
     glowStroke(g, c, 1.2, 6, (k) => k.arc(0, 0, 66, 0, TAU), 1, 0.25);
@@ -285,7 +302,7 @@ export function omegaRing(c) {
   }));
 }
 
-export function omegaNode(c) {
+function omegaProceduralNode(c) {
   return cached('omegaNode' + c, () => makeSprite(36, (g) => {
     const hex = poly(regular(6, 11.4, 0));
     halo(g, c, hex, 10, 0.25);
@@ -296,12 +313,20 @@ export function omegaNode(c) {
   }, true, 3));
 }
 
-export function omegaShard() {
+export function omegaNode(c, mode = 'top') {
+  return bossPart('omega', 'node', mode, omegaProceduralNode(c), c);
+}
+
+function omegaProceduralShard() {
   return cached('omegaShard', () => makeSprite(18, (g) => {
     const d = poly([[0, -6.4], [2.6, 0], [0, 6.4], [-2.6, 0]]);
     part(g, d, '#ff3df2', { tint: 0.7, lw: 1.1, blur: 6, passes: 1, sheen: 0.4, y0: -6, y1: 6, sx: -1, sy: -2, sr: 5 });
     lit(g, 0, 0, 0.7, '#fff', 3);
   }, false, 3));
+}
+
+export function omegaShard(mode = 'top') {
+  return bossPart('omega', 'shard', mode, omegaProceduralShard());
 }
 
 // --- ECLIPSE: a black-hulled dark mirror of the VECTOR, nose down. Core r34, wing pods (r17) at ±52, -30. --------
@@ -361,6 +386,7 @@ export function buildEclipse() {
 }
 
 export function prewarmBossArt() {
+  prewarmBossImages();
   buildEclipse();
   for (const c of ['#ff7a18', '#ff3b3b']) wardenBody(c);
   hydraBody();

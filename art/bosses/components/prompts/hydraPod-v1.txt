@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: NEON OVERDRIVE 2D boss component sprite
+Primary request: Create one isolated Hydra tentacle-tip pod, a spherical biomechanical bulb with five distinct petal-like green tendrils pointing outward from the tip. It should feel organic and alien, suitable as an animated endpoint attached to a larger boss tentacle.
+Scene/backdrop: genuinely transparent background, no ground or environment.
+Subject: one centered radial bulb pod only, frontal overhead game-sprite view, broad rounded purple core with five visible tapered green petals arranged like a compact flower. Keep whole silhouette inside a square canvas with generous transparent padding; target visible footprint about 65 percent of the canvas.
+Style/medium: polished hand-painted game sprite with readable broad shapes, crisp dark gunmetal-like contour accents, restrained luminous edges and subtle internal biomechanical grooves, coherent NEON OVERDRIVE art language.
+Lighting/mood: restrained green and violet emissive highlights, no large bloom.
+Color palette: deep violet/purple central pod and vivid acidic green petals, tiny pale magenta highlights.
+Materials/textures: smooth armored organic shell, layered petal plates, a few clear veins or seams, softly glossy.
+Constraints: square transparent RGBA output; one component, centered, isolated, fully visible, no connection stem, no shadow; target 40-unit master proportions and approximately 24-unit silhouette.
+Avoid: text, labels, borders, checkerboard, background color, extra objects, multiple views, detached fragments, excessive glow, thin details that vanish at small size, cropped petals, photorealism.

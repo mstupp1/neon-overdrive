@@ -1,0 +1,7 @@
+# HYDRA
+
+Green/purple chitin head with gold horns. Selected top-v1, side-v1 and chase-v3. Chase-v2 achieved the front camera but clipped the horn sides; chase-v3 reconstructs the outline. The eye socket registers to virtual (0,-8), including the side quarter-turn. Six articulated tentacles, tracking pupil and generated tip pods remain independent. The side shell has a smaller export scale to keep the crown closer to the existing edge arena footprint. Reviewed all three views in live encounters, pursuit foreshortening, pixel look and hit flash.
+
+Created with built-in imagegen. Full originals: `sources/`; exact prompts: `prompts/`; selected registration: `selection.json`; source/prompt/reference/output hashes and uniform export transforms: `manifest.json`. Runtime images: `src/assets/bosses/hydra/`.
+
+Validation on 2026-10-16: body export completed; the combined rendering suite passed 46 tests. Browser review used the isolated-save boss preview, with all 12 boss/camera combinations loading, phase controls and keyboard-operable selectors, light/dark backgrounds, normal/pixel look, and a 390×844 responsive check. A stale cache on the old port and an iframe postMessage origin error were resolved before the final pass. No new browser warnings/errors appeared in the corrected preview. This was a visual and encounter smoke check, not a complete campaign playthrough or verification of every attack permutation.

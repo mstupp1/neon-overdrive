@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: NEON OVERDRIVE 2D boss component sprite
+Primary request: Create one isolated Omega shard, a single small floating crystalline diamond projectile fragment with a pointed top and bottom, distinct from the round orbiting node.
+Scene/backdrop: genuinely transparent background, no ground or environment.
+Subject: one vertically oriented pointed diamond shard, centered on a square transparent canvas. Four clean tapered facets converge to sharp top and bottom points; compact 2:1 silhouette, with a dark magenta-purple outer bevel and brilliant hot magenta luminous inner face, a tiny pale pink glint.
+Style/medium: polished hand-painted game sprite, broad crisp crystal facets, controlled dark outlines and glow, consistent with NEON OVERDRIVE boss artwork.
+Lighting/mood: restrained hot-magenta emissive core, no bloom halo.
+Color palette: vivid magenta and violet with dark navy facet edges and a tiny pale pink highlight.
+Materials/textures: polished faceted crystal-metal, simple readable planes, no extra surface noise.
+Constraints: genuine transparent RGBA; one isolated, centered, fully visible component; generous transparent padding; target 18-unit master with about 13-unit visible footprint; clearly legible at very small display size.
+Avoid: text, labels, border, checkerboard, background, extra objects, multiples, trails, detached fragments, glow haze, photorealism, cropped tips.

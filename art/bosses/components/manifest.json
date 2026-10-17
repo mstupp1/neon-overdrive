@@ -1,0 +1,147 @@
+{
+  "formatVersion": 1,
+  "category": "NEON OVERDRIVE boss components",
+  "generationMethod": "built-in image_gen, one generation per distinct asset",
+  "export": {
+    "runtimeCanvasPx": [
+      128,
+      128
+    ],
+    "placement": "threshold-alpha crop, aspect-preserving Lanczos resize to 83px maximum visible dimension, centered on transparent RGBA canvas",
+    "alphaHandling": "preserved source alpha; premultiplied-alpha resize; no matte background"
+  },
+  "assets": {
+    "hydraPod": {
+      "source": "art/bosses/components/sources/hydraPod-v1.png",
+      "sourceSha256": "b77cfc6db39302027b68c450fb18ff68c5efdbe1c41f20ac45feeaa7fb52b44f",
+      "prompt": "art/bosses/components/prompts/hydraPod-v1.txt",
+      "promptSha256": "8edbf69d0c4c08587309b9f8beaedaaf46199c5d812212747eb3d499b0288fbb",
+      "generationOutput": "/Users/mylesstupp/.codex/generated_images/01a146db-82c6-7382-b532-58a69ec16767/exec-1e5adbe9-8927-4c33-bf87-c96ae6519295.png",
+      "camera": "radial/spherical overhead component; shared across boss cameras",
+      "targetCanvasUnits": 40,
+      "targetVisibleFootprintUnits": 24,
+      "runtime": "src/assets/bosses/components/hydraPod-v1.png",
+      "runtimeSha256": "976be82903f671351327b65829cdb461318f2fa51b4067ab0cb7272e1f680aff",
+      "measurements": {
+        "sourceSize": [
+          1254,
+          1254
+        ],
+        "sourceContentBoxAlphaGt2": [
+          53,
+          61,
+          1202,
+          1193
+        ],
+        "runtimeSize": [
+          128,
+          128
+        ],
+        "runtimeContentBoxAlphaGt8": [
+          22,
+          23,
+          105,
+          105
+        ],
+        "runtimeContentBoxAlphaGt127": [
+          22,
+          23,
+          105,
+          104
+        ],
+        "runtimeFootprintPx": [
+          83,
+          82
+        ]
+      }
+    },
+    "omegaNode": {
+      "source": "art/bosses/components/sources/omegaNode-v1.png",
+      "sourceSha256": "2ff8a831e3138d24520f5eea7254bb0672cc1962934a3594d3263ff9f0028a34",
+      "prompt": "art/bosses/components/prompts/omegaNode-v1.txt",
+      "promptSha256": "ecc5738a3174cae72a2272ec781c9bd6e39b2a81a8961d8361b32740d7cea102",
+      "generationOutput": "/Users/mylesstupp/.codex/generated_images/01a146db-82c6-7382-b532-58a69ec16767/exec-3a11fe14-4cfb-4876-8e5c-66eb70f41e66.png",
+      "camera": "radial/spherical overhead component; shared across boss cameras",
+      "targetCanvasUnits": 36,
+      "targetVisibleFootprintUnits": 23,
+      "runtime": "src/assets/bosses/components/omegaNode-v1.png",
+      "runtimeSha256": "b0cc14867d3b65c58dca1fa197f738d8226c748d3de1faee1e595c98dd074241",
+      "measurements": {
+        "sourceSize": [
+          1254,
+          1254
+        ],
+        "sourceContentBoxAlphaGt2": [
+          121,
+          87,
+          1133,
+          1173
+        ],
+        "runtimeSize": [
+          128,
+          128
+        ],
+        "runtimeContentBoxAlphaGt8": [
+          25,
+          22,
+          102,
+          105
+        ],
+        "runtimeContentBoxAlphaGt127": [
+          25,
+          22,
+          102,
+          105
+        ],
+        "runtimeFootprintPx": [
+          77,
+          83
+        ]
+      }
+    },
+    "omegaShard": {
+      "source": "art/bosses/components/sources/omegaShard-v1.png",
+      "sourceSha256": "a37ed54dc084b139d64851869c899d5aeb6f9438361ded5211e099d142141759",
+      "prompt": "art/bosses/components/prompts/omegaShard-v1.txt",
+      "promptSha256": "ebb48a35e8f2cf156c54e471486998b20705d276a54fa31f0d33eeb4fcef670a",
+      "generationOutput": "/Users/mylesstupp/.codex/generated_images/01a146db-82c6-7382-b532-58a69ec16767/exec-10aa089b-b6ae-45a7-8344-addb85e28b85.png",
+      "camera": "radial/spherical overhead component; shared across boss cameras",
+      "targetCanvasUnits": 18,
+      "targetVisibleFootprintUnits": 13,
+      "runtime": "src/assets/bosses/components/omegaShard-v1.png",
+      "runtimeSha256": "b3199eccb85885edc7ec930fd61e23e598479707082896dc92a6800677bafac5",
+      "measurements": {
+        "sourceSize": [
+          1254,
+          1254
+        ],
+        "sourceContentBoxAlphaGt2": [
+          415,
+          112,
+          838,
+          1032
+        ],
+        "runtimeSize": [
+          128,
+          128
+        ],
+        "runtimeContentBoxAlphaGt8": [
+          45,
+          22,
+          83,
+          105
+        ],
+        "runtimeContentBoxAlphaGt127": [
+          45,
+          23,
+          83,
+          104
+        ],
+        "runtimeFootprintPx": [
+          38,
+          83
+        ]
+      }
+    }
+  }
+}

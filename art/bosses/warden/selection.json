@@ -1,0 +1,52 @@
+{
+  "views": {
+    "top": {
+      "source": "art/bosses/warden/sources/top-v1.png",
+      "prompt": "art/bosses/warden/prompts/top-v1.txt",
+      "sourceAnchor": [
+        627,
+        588
+      ],
+      "logicalScale": 0.145,
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "references": [
+        "art/ships/vector/sources/top-v1.png"
+      ]
+    },
+    "side": {
+      "source": "art/bosses/warden/sources/side-v1.png",
+      "prompt": "art/bosses/warden/prompts/side-v1.txt",
+      "sourceAnchor": [
+        600,
+        635
+      ],
+      "logicalScale": 0.145,
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "references": [
+        "art/bosses/warden/sources/top-v1.png"
+      ]
+    },
+    "chase": {
+      "source": "art/bosses/warden/sources/chase-v2.png",
+      "prompt": "art/bosses/warden/prompts/chase-v2.txt",
+      "sourceAnchor": [
+        887,
+        455
+      ],
+      "logicalScale": 0.095,
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "references": [
+        "art/bosses/warden/sources/top-v1.png"
+      ]
+    }
+  }
+}

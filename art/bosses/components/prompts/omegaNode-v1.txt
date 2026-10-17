@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: NEON OVERDRIVE 2D boss component sprite
+Primary request: Create one isolated Omega orbiting node, a compact cyan hexagonal biomechanical energy pod with a small magenta triangular circuit mark at its center.
+Scene/backdrop: genuinely transparent background, no ground or environment.
+Subject: one centered radial node viewed directly overhead, like a small spherical armored hex gem with six clear facets, cyan shell, dark navy bevel seams, a luminous cyan inner ring and a tiny magenta triangle mark. Square canvas, generous transparent padding, target visible footprint about 65 percent of the canvas.
+Style/medium: polished hand-painted game sprite with crisp readable broad facets, deep navy industrial metal, restrained emissive edges, consistent with NEON OVERDRIVE boss artwork.
+Lighting/mood: controlled cyan glow with a small magenta accent, no broad bloom.
+Color palette: bright cyan/turquoise over near-black navy metal with a small vivid magenta center mark.
+Materials/textures: smooth armored crystal-metal, clean facet planes and a few etched seams.
+Constraints: transparent RGBA, one isolated component, centered and fully visible; target 36-unit master proportions and approximately 23-unit silhouette; image must remain legible at small game size.
+Avoid: text, labels, border, checkerboard, background, additional objects, multiple views, detached fragments, photorealism, excessive bloom, overly intricate micro-detail, cropped edges.

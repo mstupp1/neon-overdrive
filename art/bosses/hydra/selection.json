@@ -1,0 +1,52 @@
+{
+  "views": {
+    "top": {
+      "source": "art/bosses/hydra/sources/top-v1.png",
+      "prompt": "art/bosses/hydra/prompts/top-v1.txt",
+      "sourceAnchor": [
+        628,
+        728
+      ],
+      "logicalScale": 0.14,
+      "logicalAnchor": [
+        0,
+        -8
+      ],
+      "references": [
+        "art/ships/vector/sources/top-v1.png"
+      ]
+    },
+    "side": {
+      "source": "art/bosses/hydra/sources/side-v1.png",
+      "prompt": "art/bosses/hydra/prompts/side-v1.txt",
+      "sourceAnchor": [
+        389,
+        682
+      ],
+      "logicalScale": 0.07,
+      "logicalAnchor": [
+        8,
+        0
+      ],
+      "references": [
+        "art/bosses/hydra/sources/top-v1.png"
+      ]
+    },
+    "chase": {
+      "source": "art/bosses/hydra/sources/chase-v3.png",
+      "prompt": "art/bosses/hydra/prompts/chase-v3.txt",
+      "sourceAnchor": [
+        628,
+        657
+      ],
+      "logicalScale": 0.12,
+      "logicalAnchor": [
+        0,
+        -8
+      ],
+      "references": [
+        "art/bosses/hydra/sources/chase-v2.png"
+      ]
+    }
+  }
+}

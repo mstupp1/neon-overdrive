@@ -1,0 +1,7 @@
+# ECLIPSE
+
+Black Vector-derived hull with magenta/violet accents. Selected top-v1, side-v2 and chase-v1. The first side generation exposed too much dorsal wing surface; side-v2 has a low left-facing profile. The rejected overhead pursuit attempt is retained separately. Core socket registration and measured top/side engine outlets drive dynamic glow/exhaust; rear exhaust is occluded in the frontal view. Trails, mirrors, cloak opacity, lane warnings and other abilities still use the original combat renderer. Reviewed all three views and live phase-three attacks, normal/pixel looks, and the corrected side exhaust.
+
+Created with built-in imagegen. Full originals: `sources/`; exact prompts: `prompts/`; selected registration: `selection.json`; source/prompt/reference/output hashes and uniform export transforms: `manifest.json`. Runtime images: `src/assets/bosses/eclipse/`.
+
+Validation on 2026-10-16: body export completed; the combined rendering suite passed 46 tests. Browser review used the isolated-save boss preview, with all 12 boss/camera combinations loading, phase controls and keyboard-operable selectors, light/dark backgrounds, normal/pixel look, and a 390×844 responsive check. A stale cache on the old port and an iframe postMessage origin error were resolved before the final pass. No new browser warnings/errors appeared in the corrected preview. This was a visual and encounter smoke check, not a complete campaign playthrough or verification of every attack permutation.
