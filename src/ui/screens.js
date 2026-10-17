@@ -203,6 +203,7 @@ export const ui = {
   },
 
   badges: null, // () → {'hub:tab': count | true}: marks on hub tabs (unspent points, new gear / relics)
+  hubPages: null, // (hub, 'hub:tab' being opened) → opens every other page of the hub once, for measuring
 
   init(h) {
     handlers = h;
@@ -264,7 +265,27 @@ export const ui = {
   },
 
   show(name, { lock = 0, focus = 0, guard = false } = {}) {
+    if (measuring) {
+      // A hub page opened only to be measured (hubFit): record its natural scale, show nothing.
+      const el = name && screens[name];
+      if (el && hubOf(el)) {
+        renderHubHead(el);
+        hubRecord(hubOf(el)).k[el.id] = natural(el);
+      }
+      return;
+    }
     cancelDraftHold();
+    // First time a hub opens at this window size: measure all of its pages so they share one scale.
+    const hub = name && hubOf(screens[name]);
+    if (hub && this.hubPages && !hubRecord(hub).done) {
+      hubRecord(hub).done = true;
+      measuring = true;
+      try {
+        this.hubPages(hub, screens[name].dataset.hub);
+      } finally {
+        measuring = false;
+      }
+    }
     const same = !!name && name === current; // re-render of the open screen (carousel, purchase, result...)
     for (const [k, el] of Object.entries(screens)) el.classList.toggle('active', k === name);
     current = name || null;
@@ -692,8 +713,8 @@ function overflow(el) {
   return Math.max(el.scrollHeight - el.clientHeight, bottom + pb - el.clientHeight);
 }
 
-function fit(el, keep = false) {
-  if (keep && el._pinned && overflow(el) <= 1) return;
+// The largest scale (≤ 1) at which the screen's content fits; leaves the screen at that scale, unpinned.
+function natural(el) {
   el.style.fontSize = '';
   el.style.justifyContent = '';
   el.style.paddingTop = '';
@@ -703,6 +724,33 @@ function fit(el, keep = false) {
     if (over <= 1) break;
     k = Math.max(MIN_FIT, k * Math.min(0.97, el.clientHeight / (el.clientHeight + over)));
     el.style.fontSize = `${k}em`;
+  }
+  return k;
+}
+
+// Hub pages (Hangar, Collection) share one scale: the smallest any page of the hub needs at this window size, so
+// switching tabs never resizes the header, tabs or text. Pages are measured together when the hub opens (hubFit).
+const hubScale = {}; // hub → {key: window size, k: {screen id: natural scale}}
+let measuring = false;
+const hubOf = (el) => el.dataset.hub && el.dataset.hub.split(':')[0];
+function hubRecord(hub) {
+  const key = `${innerWidth}x${innerHeight}`;
+  if (!hubScale[hub] || hubScale[hub].key !== key) hubScale[hub] = { key, k: {} };
+  return hubScale[hub];
+}
+
+function fit(el, keep = false) {
+  if (keep && el._pinned && overflow(el) <= 1) return;
+  let k = natural(el);
+  const hub = hubOf(el);
+  if (hub) {
+    const rec = hubRecord(hub);
+    rec.k[el.id] = k;
+    const shared = Math.min(...Object.values(rec.k));
+    if (shared < k) {
+      k = shared;
+      el.style.fontSize = `${k}em`;
+    }
   }
   pin(el);
   // Pinning can add a pixel or two of padding to a screen that only just fit: shrink a hair more so it can't scroll.

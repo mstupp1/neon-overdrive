@@ -1050,6 +1050,25 @@ function showTab(scr, tab) {
 
 // --- UI handlers ---------------------------------------------------------------------
 
+// Hub pages by tab (src/ui/screens.js HUBS). Opening one renders it; ui.hubPages opens the rest of a hub once so all
+// of its pages can be measured and share one scale.
+const HUB_PAGES = {
+  ship: () => openHangar(),
+  fab: () => openFab('hub'),
+  pilot: () => openPilot(),
+  tree: () => openTree(null, hubExit),
+  core: () => openCore(hubExit),
+  gallery: () => openGallery(hubExit),
+  ach: () => openAchievements(hubExit),
+};
+const HUB_TABS = { hangar: ['ship', 'fab', 'pilot', 'tree', 'core'], collect: ['gallery', 'ach'] };
+ui.hubPages = (hubId, opening) => {
+  const screen = G.screen;
+  const [, cur] = opening.split(':');
+  for (const tab of HUB_TABS[hubId]) if (tab !== cur) HUB_PAGES[tab]();
+  G.screen = screen;
+};
+
 ui.init({
   play() {
     if (!profile.seenHelp) {
@@ -1122,17 +1141,8 @@ ui.init({
   // A hub tab: 'hangar:pilot', 'collect:ach', ...
   hub(btn) {
     const [, tab] = btn.dataset.hubTab.split(':');
-    if (tab === 'ship') openHangar();
-    else if (tab === 'fab') openFab('hub');
-    else if (tab === 'pilot') {
-      openPilot();
-      tip('pilot');
-    } else if (tab === 'tree') {
-      openTree(null, hubExit);
-      tip('tree');
-    } else if (tab === 'core') openCore(hubExit);
-    else if (tab === 'gallery') openGallery(hubExit);
-    else if (tab === 'ach') openAchievements(hubExit);
+    HUB_PAGES[tab]();
+    if (tab === 'pilot' || tab === 'tree') tip(tab);
   },
   ...coreActs,
   // Overdrive tier for the next launch: confirm cycles through the unlocked tiers, left / right step it.
