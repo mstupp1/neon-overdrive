@@ -34,7 +34,9 @@ Use Context7 for version-specific documentation and code examples.
 
 - Preserve responsive menu fitting and keyboard, gamepad, mouse, and touch input.
   Check narrow portrait layouts and safe-area insets when changing screens.
-- Reserve space for conditional text so menus do not jump as content changes.
+- Reserve space for conditional text so menus do not jump as content changes:
+  variable-length copy goes in a fixed `.well` (`src/ui/wells.js`) or a `.clip` line.
+  After menu changes, run `node tools/menu_layout_audit.mjs` against the served game.
 - Keep thin neon borders and nearly square corners. Do not add corner brackets
   or `clip-path` cut corners to containers.
 - Reuse existing focus, navigation, and tooltip behavior for new controls.

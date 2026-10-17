@@ -147,7 +147,7 @@ export const meta = {
       b.dataset.i = i;
       b.style.setProperty('--c', c.tag === 'RISKY' ? '#ff3df2' : c.tag === 'SAFE' ? '#7dff6b' : ev.color);
       b.disabled = !!why;
-      b.innerHTML = `<div><div class="card-top"><span class="card-name">${c.label}</span>${c.tag ? `<span class="card-tag">${c.tag}</span>` : ''}</div><div class="card-desc">${c.desc}</div></div>${c.cost ? `<div class="price"><span>${coin}<b>${c.cost}</b></span>${why && why.startsWith('NEED') ? `<i>${why}</i>` : ''}</div>` : why ? `<div class="price"><i>${why}</i></div>` : ''}`;
+      b.innerHTML = `<div><div class="card-top"><span class="card-name clip">${c.label}</span>${c.tag ? `<span class="card-tag">${c.tag}</span>` : ''}</div><div class="card-desc well">${c.desc}</div></div>${c.cost ? `<div class="price"><span>${coin}<b>${c.cost}</b></span>${why && why.startsWith('NEED') ? `<i>${why}</i>` : ''}</div>` : why ? `<div class="price"><i>${why}</i></div>` : ''}`;
       wrap.appendChild(b);
     });
     $('#event-result').hidden = true;
@@ -192,7 +192,7 @@ export const meta = {
       b.disabled = o.sold || !!o.blocked;
       if (cant) b.setAttribute('aria-disabled', 'true');
       const status = o.sold ? 'SOLD' : o.blocked || (w < o.price ? 'NEED ' + (o.price - w) : '');
-      b.innerHTML = `<div class="card-icon">${o.icon}</div><div><div class="card-top"><span class="card-name">${o.name}</span><span class="card-tag">${o.tag}</span></div><div class="card-desc">${o.desc}</div></div><div class="price${dis ? ' dim' : ''}"><span>${o.sold ? '' : coin}<b>${o.sold ? 'SOLD' : o.price}</b></span>${status && !o.sold ? `<i>${status}</i>` : ''}</div>`;
+      b.innerHTML = `<div class="card-icon">${o.icon}</div><div><div class="card-top"><span class="card-name clip">${o.name}</span><span class="card-tag">${o.tag}</span></div><div class="card-desc well">${o.desc}</div></div><div class="price${dis ? ' dim' : ''}"><span>${o.sold ? '' : coin}<b>${o.sold ? 'SOLD' : o.price}</b></span>${status && !o.sold ? `<i>${status}</i>` : ''}</div>`;
       wrap.appendChild(b);
     });
     renderBuild($('#market-build'), G.player);
@@ -203,11 +203,11 @@ export const meta = {
   renderDock(p, canBoost = true) {
     $('#dock-hull').textContent = `HULL ${p.hp}/${p.maxHp}`;
     const full = p.hp >= p.maxHp;
-    $('#dock-repair').innerHTML = `<div class="card-icon">${ECON_ICONS.repairFull}</div><div><div class="card-top"><span class="card-name">Full Repair</span><span class="card-tag">HEAL</span></div><div class="card-desc">${full ? 'Hull is already full.' : `Restore hull to ${p.maxHp}/${p.maxHp}.`}</div></div>`;
-    $('#dock-reinforce').innerHTML = `<div class="card-icon">${ECON_ICONS.reinforce}</div><div><div class="card-top"><span class="card-name">Hull Reinforcement</span><span class="card-tag">+1 MAX</span></div><div class="card-desc">+1 max hull for this run. No repair.</div></div>`;
+    $('#dock-repair').innerHTML = `<div class="card-icon">${ECON_ICONS.repairFull}</div><div><div class="card-top"><span class="card-name clip">Full Repair</span><span class="card-tag">HEAL</span></div><div class="card-desc well">${full ? 'Hull is already full.' : `Restore hull to ${p.maxHp}/${p.maxHp}.`}</div></div>`;
+    $('#dock-reinforce').innerHTML = `<div class="card-icon">${ECON_ICONS.reinforce}</div><div><div class="card-top"><span class="card-name clip">Hull Reinforcement</span><span class="card-tag">+1 MAX</span></div><div class="card-desc well">+1 max hull for this run. No repair.</div></div>`;
     const oc = $('#dock-overclock');
     oc.disabled = !canBoost;
-    oc.innerHTML = `<div class="card-icon">${ICONS.rate}</div><div><div class="card-top"><span class="card-name">Overclock</span><span class="card-tag">+1 LV</span></div><div class="card-desc">${canBoost ? 'Pick an upgrade you own and push it one level higher.' : 'Nothing left to overclock.'}</div></div>`;
+    oc.innerHTML = `<div class="card-icon">${ICONS.rate}</div><div><div class="card-top"><span class="card-name clip">Overclock</span><span class="card-tag">+1 LV</span></div><div class="card-desc well">${canBoost ? 'Pick an upgrade you own and push it one level higher.' : 'Nothing left to overclock.'}</div></div>`;
   },
 
   // --- Rewards block (extraction + game over) -------------------------------------

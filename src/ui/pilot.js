@@ -44,7 +44,7 @@ function render() {
   const info = $('#pl-info');
   info.style.setProperty('--c', view.color);
   info.classList.toggle('locked', !owned);
-  info.innerHTML = `<div class="ci-top"><span class="role">${view.role.toUpperCase()}${owned ? '' : ' · NOT FOUND · DROPS FROM BOSSES'}</span></div><p>${view.desc}</p><div class="ci-ult"><em>ULTIMATE</em><b>${view.ult.name}</b><span>${view.ult.desc}</span><span class="ci-lv" title="${view.ult.levels}">${view.ult.levels}</span></div>`;
+  info.innerHTML = `<div class="ci-top"><span class="role clip">${view.role.toUpperCase()}${owned ? '' : ' · NOT FOUND · DROPS FROM BOSSES'}</span></div><p class="well">${view.desc}</p><div class="ci-ult"><em>ULTIMATE</em><b>${view.ult.name}</b><span class="well">${view.ult.desc}</span><span class="ci-lv" title="${view.ult.levels}">${view.ult.levels}</span></div>`;
 
   // Abilities: found ones equip into rank-gated slots; rarity above the rank cap stays locked.
   const eq = equippedPassives(view.id).map((x) => x.id);
@@ -81,7 +81,7 @@ function renderDetail() {
   const state = on ? '<b class="ok">EQUIPPED · SELECT TO REMOVE</b>' : open ? '<b>SELECT TO EQUIP</b>'
     : !owned ? '<i>FIND THIS CLASS FIRST</i>' : !passiveFound(ps) ? (!profile.pilot.dflt && defaultPassive(view) === ps ? '<i>UNLOCKS AFTER YOUR FIRST RUN</i>' : '<i>NOT FOUND · DROPS FROM BOSSES AND RANK-UPS</i>') : `<i>NEEDS RANK ${rankForRarity(ps.r)}</i>`;
   el.style.setProperty('--rc', RARITY[ps.r].color);
-  el.innerHTML = `<span class="ad-art">${ps.icon}</span><div><div class="ad-top"><span class="ad-name">${ps.name}</span><span class="pass-rar">${RARITY[ps.r].name}</span></div><p>${ps.desc}</p><div class="ad-state">${state}</div></div>`;
+  el.innerHTML = `<span class="ad-art">${ps.icon}</span><div><div class="ad-top"><span class="ad-name clip">${ps.name}</span><span class="pass-rar">${RARITY[ps.r].name}</span></div><p class="well">${ps.desc}</p><div class="ad-state clip">${state}</div></div>`;
 }
 
 // Tile focus (keys / pad / hover) picks what the detail panel shows.

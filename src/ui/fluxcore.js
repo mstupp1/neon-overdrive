@@ -43,7 +43,7 @@ function renderDetail() {
   const cost = coreCost(n, lv);
   const cant = profile.flux < cost;
   el.style.setProperty('--c', n.color);
-  el.innerHTML = `<span class="cd-ico">${n.icon}</span><div><div class="cd-top"><b>${n.name}</b><em>LV ${lv}</em></div><p>${n.desc(lv)}</p><div class="cd-buy${cant ? ' dim' : ''}"><span class="flux">${FLUX_ICON}${fmt(cost)}</span>${cant ? `<i>NEED ${fmt(cost - profile.flux)}</i>` : '<b>SELECT TO UPGRADE</b>'}</div></div>`;
+  el.innerHTML = `<span class="cd-ico">${n.icon}</span><div><div class="cd-top"><b class="clip">${n.name}</b><em>LV ${lv}</em></div><p class="well">${n.desc(lv)}</p><div class="cd-buy${cant ? ' dim' : ''}"><span class="flux">${FLUX_ICON}${fmt(cost)}</span>${cant ? `<i>NEED ${fmt(cost - profile.flux)}</i>` : '<b>SELECT TO UPGRADE</b>'}</div></div>`;
 }
 
 function onTileFocus(e) {

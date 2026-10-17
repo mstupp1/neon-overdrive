@@ -25,7 +25,7 @@ It deploys as-is to any static host (itch.io, GitHub Pages, Netlify...). Fonts a
 
 On touch, the DASH and ULT buttons (and BOOST above DASH) sit together in one bottom corner so one thumb works them while the other hand steers; **Settings → Touch buttons** picks the corner (RIGHT by default, or LEFT).
 
-Menus: up / down (arrows, d-pad, stick) always step one row, landing in the column you came from; left / right step along a row, and on a `‹ value ›` selector (ship card, Overdrive tier, settings toggles) change the value. Enter / Space / A to select, Esc / B to go back (or skip dialogue), Q / E or LB / RB to switch the screen's tabs. A footer under every menu shows the buttons for the current device and can be clicked or tapped (BACK is how touch leaves a screen). `1`-`3` to pick an upgrade, `R` to reroll (or retry on the game-over screen), `F` to lock the focused draft card. Items you cannot afford stay focusable and show their price. Names that don't fit end in an ellipsis; hovering or focusing them shows the full text.
+Menus: up / down (arrows, d-pad, stick) always step one row, landing in the column you came from; left / right step along a row, and on a `‹ value ›` selector (ship card, Overdrive tier, settings toggles) change the value. Enter / Space / A to select, Esc / B to go back (or skip dialogue), Q / E or LB / RB to switch the screen's tabs. A footer under every menu shows the buttons for the current device and can be clicked or tapped (BACK is how touch leaves a screen). `1`-`3` to pick an upgrade, `R` to reroll (or retry on the game-over screen), `F` to lock the focused draft card. Items you cannot afford stay focusable and show their price. Names that don't fit end in an ellipsis; hovering or focusing them shows the full text. Descriptions sit in fixed-height boxes, so browsing ships, abilities, relics or cards never resizes anything; copy too long for its box fades at the edge and scrolls itself slowly (mouse wheel, touch drag or the right stick scroll it by hand).
 
 The title menu is PLAY, HANGAR, COLLECTION, HOW TO PLAY and SETTINGS. **HANGAR** (also on the campaign map) is one hub with SHIP · FAB · PILOT · TREE · FLUX tabs; **COLLECTION** holds GALLERY and ACHIEVEMENTS.
 
@@ -229,6 +229,7 @@ src/ui/screens.js     menu navigation (rows, tabs, button prompts, hub headers),
 src/ui/meta.js        campaign / route / market / dock / event / extraction screens
 src/ui/hangar.js      Hangar (ships, paint), inventory, Fabricator
 src/ui/hub.js         where the HANGAR / COLLECTION hubs return on BACK
+src/ui/wells.js       fixed-height description boxes that scroll long copy (tools/menu_layout_audit.mjs checks every menu for shifts)
 src/ui/pilot.js       Pilot screen (class, abilities)
 src/ui/tree.js        Passive tree screen (pan / zoom canvas)
 src/ui/comms.js       dialogue overlay
