@@ -2,11 +2,11 @@
 
 import { G, view, field, inField } from './state.js';
 import { S, glow } from '../render/sprites.js';
-import { drawEnemyHull, enemySpriteForView } from '../render/enemyImages.js';
+import { drawEnemyHull, drawEliteAura, enemySpriteForView } from '../render/enemyImages.js';
 import { TAU, segDist2, dist2 } from '../core/math.js';
 import { bg } from '../render/background.js';
 import { updateDirector } from './director.js';
-import { updatePlayer, drawPlayer, hurtPlayer, gainOverdrive, addScore } from './player.js';
+import { updatePlayer, drawPlayer, hurtPlayer, gainOverdrive, addScore, grazeFeedback } from './player.js';
 import { pilotTimeScale, domeErase, onGraze, intangible, ultGraze } from './pilot.js';
 import { treeOnGraze, forcedCrit } from './tree.js';
 import { updateModules, updateBeams, drawModules, drawBeams, onBeam } from './modules.js';
@@ -219,6 +219,7 @@ function collide(p) {
       gainOverdrive(2.4 * p.st.grazeOd);
       addScore(25);
       sparks(p.x + dx * 0.5, p.y + dy * 0.5, '#ffffff', 2, 140);
+      grazeFeedback(p, Math.atan2(dy, dx), grazeR);
       sfx.graze();
       onGraze(p);
       treeOnGraze(p);
@@ -360,14 +361,14 @@ function drawEnemies(ctx, k, list = G.enemies, solo = false) {
         ctx.drawImage(e.flash > 0 ? seg.flash : seg.img, pt.x - sz / 2, pt.y - sz / 2, sz, sz);
       }
     }
+    const s = e.spr;
+    const viewSprite = enemySpriteForView(s, mode);
     if (e.elite) {
-      ctx.globalAlpha = 0.8;
-      drawRot(ctx, S.eliteRing.img, e.x, e.y, G.time * 1.5, (e.r / 30) * 96 * 1.1, k);
+      if (e.alpha !== undefined) ctx.globalAlpha = e.alpha;
+      drawEliteAura(ctx, s, e, mode, k, view.ox, view.oy, scale, G.time);
       ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
       ctx.globalAlpha = 1;
     }
-    const s = e.spr;
-    const viewSprite = enemySpriteForView(s, mode);
     const img = e.flash > 0 ? viewSprite.flash : viewSprite.img;
     if (dark && e.color) {
       // Blackout: a soft halo so enemies stay readable on the dark field.

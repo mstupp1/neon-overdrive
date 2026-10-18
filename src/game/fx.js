@@ -255,7 +255,8 @@ export function floatText(x, y, text, color = '#fff', size = 12, life = 0.7) {
 
 // Damage numbers (Settings → Damage numbers). Every hit on one enemy within NUM_MERGE s of its last adds into one
 // rising number (the running total, for up to NUM_SPAN s, then a fresh one starts), so a stream of small hits reads at
-// its real size. The number grows with the amount, and turns gold with a "!" once a crit lands in it.
+// its real size. The number grows with the amount, and turns gold with a "!" once a crit lands in it. It rides along
+// with the enemy it hit (rising from where the hit landed) and stays put once that enemy dies.
 const NUM_MERGE = 0.32;
 const NUM_SPAN = 1.1;
 const fmtDmg = (v) => (v >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : v >= 1e4 ? `${Math.round(v / 1e3)}K` : v >= 1e3 ? `${(v / 1e3).toFixed(1)}K` : v >= 10 ? `${Math.round(v)}` : `${Math.round(v * 10) / 10}`);
@@ -275,12 +276,36 @@ export function damageNumber(x, y, amount, crit, target = null) {
     t.crit = crit;
     t.vy = -38;
     t.bornAt = G.time;
-    if (target) target.dmgNum = t;
+    if (target) {
+      target.dmgNum = t;
+      t.follow = target;
+      t.ox = t.x - target.x;
+      t.oy = t.y - target.y;
+      t.rise = 0;
+    }
   }
   t.hitAt = G.time;
   t.text = fmtDmg(t.sum) + (t.crit ? '!' : '');
   t.color = t.crit ? '#ffe14d' : '#ffffff';
   t.size = dmgSize(t.sum) / z;
+}
+
+// Graze streak label: one small "GRAZE xN" that rides under the ship and updates in place while the streak lasts.
+export function grazeLabel(p, n) {
+  if (G.mode === 'attract') return;
+  let t = p.grazeTxt;
+  if (!(t && t.life > 0 && G.texts.includes(t))) {
+    t = floatText(p.x, p.y, '', '#c9b8ff', 8, 0.9);
+    t.vy = 0;
+    t.follow = p;
+    t.ox = 0;
+    t.oy = (p.r || 6) + 26;
+    t.rise = 0;
+    p.grazeTxt = t;
+  }
+  t.text = n > 1 ? `GRAZE x${n}` : 'GRAZE';
+  t.size = (n >= 10 ? 11 : 10) / (field.ow ? field.z : 1);
+  t.life = t.max;
 }
 
 export function updateTexts(dt) {
@@ -289,7 +314,14 @@ export function updateTexts(dt) {
   for (const t of arr) {
     t.life -= dt;
     if (t.life <= 0) continue;
-    t.y += t.vy * dt;
+    if (t.follow) {
+      t.rise += t.vy * dt;
+      if (t.follow.dead) t.follow = null; // stays where its enemy died
+      else {
+        t.x = t.follow.x + t.ox;
+        t.y = t.follow.y + t.oy + t.rise;
+      }
+    } else t.y += t.vy * dt;
     t.vy *= 1 - 3 * dt;
     arr[w++] = t;
   }

@@ -264,11 +264,6 @@ export function buildSprites(ships) {
   } }, 18, 7);
 
   // Enemies: see enemyArt.js (baked in buildEnemySpritesV2).
-  S.eliteRing = makeSprite(96, (g) => {
-    g.strokeStyle = '#ffd84d'; g.shadowColor = '#ffd84d'; g.shadowBlur = 12; g.lineWidth = 2;
-    g.setLineDash([6, 5]);
-    g.beginPath(); g.arc(0, 0, 36, 0, TAU); g.stroke();
-  });
 
   // Enemy bullets: hard, solid pellets. A dark halo and outline, a hot rim and a white core, never a trail, so they
   // read against the additive, trailing player ki on any background. Shootable projectiles (torpedo, shell) are

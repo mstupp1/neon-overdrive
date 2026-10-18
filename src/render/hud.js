@@ -334,6 +334,17 @@ function drawGauge(ctx, x, y, p, kind, sx = p.x, sy = p.y) {
       ctx.arc(x, y, r, a0, a0 + (a1 - a0) * fill);
       ctx.stroke();
     }
+    if (p.grazeFx > 0 && !active) {
+      // Grazes charge the ult: its rim glints in the graze colour as they land.
+      const a0 = ctx.globalAlpha;
+      ctx.globalAlpha = a0 * p.grazeFx * 0.8;
+      ctx.strokeStyle = '#c9b8ff';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(x, y, r + 5, 0, TAU);
+      ctx.stroke();
+      ctx.globalAlpha = a0;
+    }
     if (active) {
       ctx.strokeStyle = col;
       ctx.lineWidth = 3;
