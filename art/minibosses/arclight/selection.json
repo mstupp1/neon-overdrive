@@ -1,0 +1,42 @@
+{
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/minibosses/arclight/sources/top-v1.png",
+      "prompt": "art/minibosses/arclight/prompts/top-v1.txt",
+      "runtime": "src/assets/minibosses/arclight/top-v1.png",
+      "logicalSize": 130,
+      "visibleExtent": 72,
+      "references": [
+        "art/ships/vector/sources/top-v1.png"
+      ],
+      "sourceAnchor": [
+        627,
+        620
+      ]
+    },
+    {
+      "camera": "side",
+      "source": "art/minibosses/arclight/sources/side-v2.png",
+      "prompt": "art/minibosses/arclight/prompts/side-v2.txt",
+      "runtime": "src/assets/minibosses/arclight/side-v2.png",
+      "logicalSize": 130,
+      "visibleExtent": 72,
+      "references": [
+        "art/minibosses/arclight/sources/top-v1.png",
+        "art/bosses/eclipse/sources/side-v2.png"
+      ]
+    },
+    {
+      "camera": "chase",
+      "source": "art/minibosses/arclight/sources/chase-v1.png",
+      "prompt": "art/minibosses/arclight/prompts/chase-v1.txt",
+      "runtime": "src/assets/minibosses/arclight/chase-v1.png",
+      "logicalSize": 130,
+      "visibleExtent": 72,
+      "references": [
+        "art/minibosses/arclight/sources/top-v1.png"
+      ]
+    }
+  ]
+}

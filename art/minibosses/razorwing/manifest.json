@@ -1,0 +1,214 @@
+{
+  "method": "built-in imagegen; deterministic Pillow export",
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/minibosses/razorwing/sources/top-v1.png",
+      "prompt": "art/minibosses/razorwing/prompts/top-v1.txt",
+      "runtime": "src/assets/minibosses/razorwing/top-v1.png",
+      "logicalSize": 150,
+      "visibleExtent": 104,
+      "references": [
+        {
+          "path": "art/ships/vector/sources/top-v1.png",
+          "sha256": "f2c2564e878485c04b19522de9fb6317a485ddeeb4560fd410d7a01e217c8e3a"
+        }
+      ],
+      "sourceVisualPoints": {
+        "engines": [
+          [
+            625,
+            110
+          ],
+          [
+            802,
+            110
+          ]
+        ]
+      },
+      "sourceSize": [
+        1430,
+        1100
+      ],
+      "orientedSourceSize": [
+        1430,
+        1100
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        715.0,
+        558.0
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        377,
+        290
+      ],
+      "offset": [
+        68,
+        109
+      ],
+      "visualAnchors": {
+        "engines": [
+          [
+            -6.8,
+            -34.57
+          ],
+          [
+            6.87,
+            -34.57
+          ]
+        ]
+      },
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "13d61fca907bae29d3766f9484196c079b5582708c86746c3da0951685af192c",
+      "runtime_sha256": "ebef9b02ed4201cf3c30fba290dfd3398d597d691d14f33d1a367b43ab8284b9",
+      "prompt_sha256": "1bb1454567611087956316e8ff2d443e2ae74c61f96a66d65f6cda78a010d4e0",
+      "alphaBounds": [
+        76,
+        134,
+        437,
+        378
+      ]
+    },
+    {
+      "camera": "side",
+      "source": "art/minibosses/razorwing/sources/side-v2.png",
+      "prompt": "art/minibosses/razorwing/prompts/side-v2.txt",
+      "runtime": "src/assets/minibosses/razorwing/side-v2.png",
+      "logicalSize": 150,
+      "visibleExtent": 80,
+      "references": [
+        {
+          "path": "art/minibosses/razorwing/sources/top-v1.png",
+          "sha256": "13d61fca907bae29d3766f9484196c079b5582708c86746c3da0951685af192c"
+        },
+        {
+          "path": "art/bosses/eclipse/sources/side-v2.png",
+          "sha256": "a7380437bac00aee306200fd77f8e150b89ed6bed30bf0773dba81250bea3c6a"
+        }
+      ],
+      "sourceVisualPoints": {
+        "engines": [
+          [
+            1190,
+            568
+          ],
+          [
+            1194,
+            686
+          ]
+        ]
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        628.5,
+        642.5
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        286,
+        286
+      ],
+      "offset": [
+        113,
+        110
+      ],
+      "visualAnchors": {
+        "engines": [
+          [
+            -4.82,
+            -37.62
+          ],
+          [
+            3.06,
+            -37.89
+          ]
+        ]
+      },
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "217862699c50af5080d641988cc5838a32b910b6f7b81bd8eb41110929a5cc85",
+      "runtime_sha256": "5222fce47be5ea6fe2b492fd3453af1fa2afc19a3cc8655da88a32289b1505fc",
+      "prompt_sha256": "064ed2288a571b25c90aa54b456f15b43e3d75adce22f624a03206a06f3a62bf",
+      "alphaBounds": [
+        117,
+        195,
+        396,
+        311
+      ]
+    },
+    {
+      "camera": "chase",
+      "source": "art/minibosses/razorwing/sources/chase-v2.png",
+      "prompt": "art/minibosses/razorwing/prompts/chase-v2.txt",
+      "runtime": "src/assets/minibosses/razorwing/chase-v2.png",
+      "logicalSize": 150,
+      "visibleExtent": 104,
+      "references": [
+        {
+          "path": "art/minibosses/razorwing/sources/top-v1.png",
+          "sha256": "13d61fca907bae29d3766f9484196c079b5582708c86746c3da0951685af192c"
+        },
+        {
+          "path": "art/bosses/eclipse/sources/chase-v1.png",
+          "sha256": "7dcf7f44ae276bf9718f59310dc237366ca3e02fc68debf9013ce6c1c32309f0"
+        }
+      ],
+      "sourceVisualPoints": {
+        "engines": []
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        626.5,
+        646.0
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        366,
+        366
+      ],
+      "offset": [
+        73,
+        68
+      ],
+      "visualAnchors": {
+        "engines": []
+      },
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "2ab73701dc3cf10cdfffbe291a519568dbb7be1f053c26af0184b2f858b710b3",
+      "runtime_sha256": "abc889d201af6aebf8df6053ada57c090735bf36bfd066b245bafdef621008c3",
+      "prompt_sha256": "741764e559d1e9ef2cb4c36eb78de56ac76f1b1f709e3160cb2b05ee1718c298",
+      "alphaBounds": [
+        76,
+        95,
+        436,
+        357
+      ]
+    }
+  ]
+}

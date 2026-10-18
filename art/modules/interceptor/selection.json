@@ -1,0 +1,41 @@
+{
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/modules/interceptor/sources/top-v1.png",
+      "prompt": "art/modules/interceptor/prompts/top-v1.txt",
+      "runtime": "src/assets/modules/interceptor/top-v1.png",
+      "logicalSize": 22,
+      "visibleExtent": 16,
+      "references": [
+        "art/ships/vector/sources/top-v1.png"
+      ]
+    },
+    {
+      "camera": "side",
+      "cameraIntent": "True side source normalized from up-facing profile to right-facing",
+      "source": "art/modules/interceptor/sources/side-v1.png",
+      "prompt": "art/modules/interceptor/prompts/side-v1.txt",
+      "runtime": "src/assets/modules/interceptor/side-v1.png",
+      "logicalSize": 22,
+      "visibleExtent": 16,
+      "references": [
+        "art/modules/interceptor/sources/top-v1.png"
+      ],
+      "sourceRotation": 90
+    },
+    {
+      "camera": "chase",
+      "cameraIntent": "Player rear pursuit, single engine faces toward viewer",
+      "source": "art/modules/interceptor/sources/chase-v2.png",
+      "prompt": "art/modules/interceptor/prompts/chase-v2.txt",
+      "runtime": "src/assets/modules/interceptor/chase-v2.png",
+      "logicalSize": 22,
+      "visibleExtent": 16,
+      "references": [
+        "art/modules/interceptor/sources/top-v1.png",
+        "art/ships/vector/sources/pursuit-v1.png"
+      ]
+    }
+  ]
+}

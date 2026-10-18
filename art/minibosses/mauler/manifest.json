@@ -1,0 +1,274 @@
+{
+  "method": "built-in imagegen; deterministic Pillow export",
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/minibosses/mauler/sources/top-v1.png",
+      "prompt": "art/minibosses/mauler/prompts/top-v1.txt",
+      "runtime": "src/assets/minibosses/mauler/top-v1.png",
+      "logicalSize": 170,
+      "visibleExtent": 105,
+      "references": [
+        {
+          "path": "art/ships/vector/sources/top-v1.png",
+          "sha256": "f2c2564e878485c04b19522de9fb6317a485ddeeb4560fd410d7a01e217c8e3a"
+        }
+      ],
+      "sourceAnchor": [
+        627,
+        647
+      ],
+      "sourceVisualPoints": {
+        "engines": [
+          [
+            540,
+            98
+          ],
+          [
+            714,
+            98
+          ]
+        ],
+        "muzzles": [
+          [
+            157,
+            1067
+          ],
+          [
+            1108,
+            1067
+          ]
+        ]
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        361,
+        361
+      ],
+      "offset": [
+        75,
+        69
+      ],
+      "visualAnchors": {
+        "engines": [
+          [
+            -8.48,
+            -52.72
+          ],
+          [
+            8.15,
+            -52.72
+          ]
+        ],
+        "muzzles": [
+          [
+            -45.09,
+            39.9
+          ],
+          [
+            45.81,
+            39.9
+          ]
+        ]
+      },
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "a356a77a0255a8de31dc5d1f5856a4bab729be8fb7b784f76937b2a535ce9126",
+      "runtime_sha256": "73248b1bbbfe68477fd1fe72a35eb0191419be4baece204b7be5233f60e48e8c",
+      "prompt_sha256": "112aea76e37089188a78d11a7406fc6ca47cf79764c42d74d41cb4a4f92301d5",
+      "alphaBounds": [
+        97,
+        94,
+        418,
+        407
+      ]
+    },
+    {
+      "camera": "side",
+      "source": "art/minibosses/mauler/sources/side-v2.png",
+      "prompt": "art/minibosses/mauler/prompts/side-v2.txt",
+      "runtime": "src/assets/minibosses/mauler/side-v2.png",
+      "logicalSize": 170,
+      "visibleExtent": 90,
+      "references": [
+        {
+          "path": "art/minibosses/mauler/sources/top-v1.png",
+          "sha256": "a356a77a0255a8de31dc5d1f5856a4bab729be8fb7b784f76937b2a535ce9126"
+        },
+        {
+          "path": "art/bosses/eclipse/sources/side-v2.png",
+          "sha256": "a7380437bac00aee306200fd77f8e150b89ed6bed30bf0773dba81250bea3c6a"
+        }
+      ],
+      "sourceVisualPoints": {
+        "engines": [
+          [
+            1191,
+            526
+          ],
+          [
+            1193,
+            727
+          ]
+        ],
+        "muzzles": [
+          [
+            256,
+            655
+          ],
+          [
+            359,
+            765
+          ]
+        ]
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        629.0,
+        631.5
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        283,
+        283
+      ],
+      "offset": [
+        114,
+        114
+      ],
+      "visualAnchors": {
+        "engines": [
+          [
+            -7.73,
+            -42.1
+          ],
+          [
+            7.33,
+            -42.25
+          ]
+        ],
+        "muzzles": [
+          [
+            1.93,
+            27.97
+          ],
+          [
+            10.17,
+            20.25
+          ]
+        ]
+      },
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "17ca6570b89ec7aa83a510e343c1180c0745d453117a63c330a9906afc691b8c",
+      "runtime_sha256": "abe0cf4e8639d89a32ac8193be9f2c9262412bce21ff7fe3786cb83da77343af",
+      "prompt_sha256": "47bd87a828b411f8d6a8e5f22d134df9aa6b45a5aa0ef3018a7efa4f1f41bf2f",
+      "alphaBounds": [
+        118,
+        211,
+        394,
+        338
+      ]
+    },
+    {
+      "camera": "chase",
+      "source": "art/minibosses/mauler/sources/chase-v2.png",
+      "prompt": "art/minibosses/mauler/prompts/chase-v2.txt",
+      "runtime": "src/assets/minibosses/mauler/chase-v2.png",
+      "logicalSize": 170,
+      "visibleExtent": 105,
+      "references": [
+        {
+          "path": "art/minibosses/mauler/sources/top-v1.png",
+          "sha256": "a356a77a0255a8de31dc5d1f5856a4bab729be8fb7b784f76937b2a535ce9126"
+        },
+        {
+          "path": "art/bosses/eclipse/sources/chase-v1.png",
+          "sha256": "7dcf7f44ae276bf9718f59310dc237366ca3e02fc68debf9013ce6c1c32309f0"
+        }
+      ],
+      "sourceVisualPoints": {
+        "engines": [],
+        "muzzles": [
+          [
+            140,
+            860
+          ],
+          [
+            1117,
+            860
+          ]
+        ]
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        627.0,
+        647.5
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        341,
+        341
+      ],
+      "offset": [
+        86,
+        80
+      ],
+      "visualAnchors": {
+        "engines": [],
+        "muzzles": [
+          [
+            -43.8,
+            19.21
+          ],
+          [
+            44.41,
+            19.21
+          ]
+        ]
+      },
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "0cdfefd0346d6b21136ac9cd100ea4efbcdd69197968735996307583f06a563a",
+      "runtime_sha256": "ac8852bf10afbef99fd507d429e11658ebc8f719b6a239a9749fa3a2fdd93333",
+      "prompt_sha256": "525a361f28c3ef95d933d2d620245a735fbcfcd34634797b901fd016c2185926",
+      "alphaBounds": [
+        96,
+        116,
+        417,
+        347
+      ]
+    }
+  ]
+}

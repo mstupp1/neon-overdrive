@@ -1,0 +1,158 @@
+{
+  "method": "built-in imagegen; deterministic Pillow export",
+  "assets": [
+    {
+      "camera": "component",
+      "part": "specter-scythe",
+      "source": "art/minibosses/components/sources/specter-scythe-v1.png",
+      "prompt": "art/minibosses/components/prompts/specter-scythe-v1.txt",
+      "runtime": "src/assets/minibosses/components/specter-scythe-v1.png",
+      "logicalSize": 48,
+      "visibleExtent": 32,
+      "sourceAnchor": [
+        652,
+        650
+      ],
+      "references": [
+        {
+          "path": "art/ships/vector/sources/top-v1.png",
+          "sha256": "f2c2564e878485c04b19522de9fb6317a485ddeeb4560fd410d7a01e217c8e3a"
+        }
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        414,
+        414
+      ],
+      "offset": [
+        41,
+        42
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "64a9cb541987817b54e8f94cb3170c76ca647d29f7bbf426751c9cfd9ed901d3",
+      "runtime_sha256": "70e0c1d5276e31e0c9ab6d85ba51189b68b0e80f451eb314e293fa31c290b643",
+      "prompt_sha256": "8c5e66f6c1630f506db37891da98efe1fb46d9ff551d81957074113a44329ed9",
+      "alphaBounds": [
+        143,
+        73,
+        410,
+        420
+      ]
+    },
+    {
+      "camera": "component",
+      "part": "arclight-node",
+      "source": "art/minibosses/components/sources/arclight-node-v1.png",
+      "prompt": "art/minibosses/components/prompts/arclight-node-v1.txt",
+      "runtime": "src/assets/minibosses/components/arclight-node-v1.png",
+      "logicalSize": 50,
+      "visibleExtent": 28,
+      "sourceAnchor": [
+        627,
+        620
+      ],
+      "references": [
+        {
+          "path": "art/ships/vector/sources/top-v1.png",
+          "sha256": "f2c2564e878485c04b19522de9fb6317a485ddeeb4560fd410d7a01e217c8e3a"
+        }
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        318,
+        318
+      ],
+      "offset": [
+        97,
+        99
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "63a82a7411fbbd2edfa221bea9efb55a94c10f436e37031d1e231def16b9f67f",
+      "runtime_sha256": "b05a0656193f6c7693dc952fa697afeca6e0677fa081b161929a38cf8589795d",
+      "prompt_sha256": "5900565288a29133de4bf4caa7977d03e6b0674e455816b8c99e89c4fcf5b7e9",
+      "alphaBounds": [
+        184,
+        111,
+        328,
+        403
+      ]
+    },
+    {
+      "camera": "component",
+      "part": "citadel-turret",
+      "source": "art/minibosses/components/sources/citadel-turret-v1.png",
+      "prompt": "art/minibosses/components/prompts/citadel-turret-v1.txt",
+      "runtime": "src/assets/minibosses/components/citadel-turret-v1.png",
+      "logicalSize": 34,
+      "visibleExtent": 8,
+      "sourceAnchor": [
+        627,
+        870
+      ],
+      "references": [
+        {
+          "path": "art/ships/vector/sources/top-v1.png",
+          "sha256": "f2c2564e878485c04b19522de9fb6317a485ddeeb4560fd410d7a01e217c8e3a"
+        }
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        173,
+        173
+      ],
+      "offset": [
+        169,
+        136
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "87a7c48b04fe1ca95df8e757bdb89d83ff4c3a0f8350b113958b78a767b61289",
+      "runtime_sha256": "4b28fb47bc8d1ed3275b2c406b75a019b9632a2e88f9f6ff91a2686a31351969",
+      "prompt_sha256": "c903ef4a26f335ea3d5efb65619dda75787cbcb7b24fe0fc8a8db5be15218353",
+      "alphaBounds": [
+        225,
+        155,
+        286,
+        281
+      ]
+    }
+  ]
+}

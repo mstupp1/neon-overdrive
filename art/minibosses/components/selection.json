@@ -1,0 +1,52 @@
+{
+  "assets": [
+    {
+      "camera": "component",
+      "part": "specter-scythe",
+      "source": "art/minibosses/components/sources/specter-scythe-v1.png",
+      "prompt": "art/minibosses/components/prompts/specter-scythe-v1.txt",
+      "runtime": "src/assets/minibosses/components/specter-scythe-v1.png",
+      "logicalSize": 48,
+      "visibleExtent": 32,
+      "sourceAnchor": [
+        652,
+        650
+      ],
+      "references": [
+        "art/ships/vector/sources/top-v1.png"
+      ]
+    },
+    {
+      "camera": "component",
+      "part": "arclight-node",
+      "source": "art/minibosses/components/sources/arclight-node-v1.png",
+      "prompt": "art/minibosses/components/prompts/arclight-node-v1.txt",
+      "runtime": "src/assets/minibosses/components/arclight-node-v1.png",
+      "logicalSize": 50,
+      "visibleExtent": 28,
+      "sourceAnchor": [
+        627,
+        620
+      ],
+      "references": [
+        "art/ships/vector/sources/top-v1.png"
+      ]
+    },
+    {
+      "camera": "component",
+      "part": "citadel-turret",
+      "source": "art/minibosses/components/sources/citadel-turret-v1.png",
+      "prompt": "art/minibosses/components/prompts/citadel-turret-v1.txt",
+      "runtime": "src/assets/minibosses/components/citadel-turret-v1.png",
+      "logicalSize": 34,
+      "visibleExtent": 8,
+      "sourceAnchor": [
+        627,
+        870
+      ],
+      "references": [
+        "art/ships/vector/sources/top-v1.png"
+      ]
+    }
+  ]
+}

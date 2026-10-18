@@ -1,0 +1,196 @@
+{
+  "method": "built-in imagegen; deterministic Pillow export",
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/minibosses/broodmother/sources/top-v1.png",
+      "prompt": "art/minibosses/broodmother/prompts/top-v1.txt",
+      "runtime": "src/assets/minibosses/broodmother/top-v1.png",
+      "logicalSize": 170,
+      "visibleExtent": 86,
+      "references": [
+        {
+          "path": "art/ships/vector/sources/top-v1.png",
+          "sha256": "f2c2564e878485c04b19522de9fb6317a485ddeeb4560fd410d7a01e217c8e3a"
+        }
+      ],
+      "sourceAnchor": [
+        627,
+        480
+      ],
+      "sourceVisualPoints": {
+        "sac": [
+          627,
+          800
+        ]
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        283,
+        283
+      ],
+      "offset": [
+        114,
+        148
+      ],
+      "visualAnchors": {
+        "sac": [
+          -0.17,
+          24.09
+        ]
+      },
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "b03d130a3c40309452cd8609062d1129cec53fbfa7e0a837b24cf0258de96a3f",
+      "runtime_sha256": "10664192eb2ac077d633fa7f99b13c9b0cadd2c64ac70aa90da5abb16a58afb7",
+      "prompt_sha256": "f0a7262acd32af89b3eeebfe0f0129e897ea72aab50442bfe45a696ac6575d77",
+      "alphaBounds": [
+        141,
+        152,
+        353,
+        419
+      ]
+    },
+    {
+      "camera": "side",
+      "source": "art/minibosses/broodmother/sources/side-v2.png",
+      "prompt": "art/minibosses/broodmother/prompts/side-v2.txt",
+      "runtime": "src/assets/minibosses/broodmother/side-v2.png",
+      "logicalSize": 170,
+      "visibleExtent": 86,
+      "references": [
+        {
+          "path": "art/minibosses/broodmother/sources/top-v1.png",
+          "sha256": "b03d130a3c40309452cd8609062d1129cec53fbfa7e0a837b24cf0258de96a3f"
+        },
+        {
+          "path": "art/bosses/eclipse/sources/side-v2.png",
+          "sha256": "a7380437bac00aee306200fd77f8e150b89ed6bed30bf0773dba81250bea3c6a"
+        }
+      ],
+      "sourceVisualPoints": {
+        "sac": [
+          655,
+          850
+        ]
+      },
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        627.5,
+        644.5
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        273,
+        273
+      ],
+      "offset": [
+        119,
+        116
+      ],
+      "visualAnchors": {
+        "sac": [
+          14.96,
+          -1.86
+        ]
+      },
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "f3d895134556829c28540468dd0a0374e4e3b41e367fc4a235ed240349241ce1",
+      "runtime_sha256": "ae62a49117d7a00c6745fcc7a7720926fee2b1b734d9de11a5997619ff4d18c1",
+      "prompt_sha256": "92e85781d13a77a4044e8fcec3a4344fbab9be76fd35a611a746150b077aea07",
+      "alphaBounds": [
+        124,
+        183,
+        388,
+        353
+      ]
+    },
+    {
+      "camera": "chase",
+      "source": "art/minibosses/broodmother/sources/chase-v2.png",
+      "prompt": "art/minibosses/broodmother/prompts/chase-v2.txt",
+      "runtime": "src/assets/minibosses/broodmother/chase-v2.png",
+      "logicalSize": 170,
+      "visibleExtent": 76,
+      "references": [
+        {
+          "path": "art/minibosses/broodmother/sources/top-v1.png",
+          "sha256": "b03d130a3c40309452cd8609062d1129cec53fbfa7e0a837b24cf0258de96a3f"
+        },
+        {
+          "path": "art/bosses/eclipse/sources/chase-v1.png",
+          "sha256": "7dcf7f44ae276bf9718f59310dc237366ca3e02fc68debf9013ce6c1c32309f0"
+        }
+      ],
+      "sourceVisualPoints": {
+        "sac": [
+          887,
+          745
+        ]
+      },
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "orientedSourceSize": [
+        1774,
+        887
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        887.0,
+        434.5
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        233,
+        117
+      ],
+      "offset": [
+        139,
+        199
+      ],
+      "visualAnchors": {
+        "sac": [
+          -0.17,
+          13.7
+        ]
+      },
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "9f468ae504a52ac50e9ab4d6738906f2953458a7b10777ba389f2d9cbbecd785",
+      "runtime_sha256": "3929460f038fd6aa899044a6c696fbb7591fc75036ab91d9fb1ebef8ac07d7ae",
+      "prompt_sha256": "6663c77ae9ce114052d49cf39a4a8843c0d7bac4ea48bacee76b957d7e05a31d",
+      "alphaBounds": [
+        139,
+        199,
+        372,
+        316
+      ]
+    }
+  ]
+}

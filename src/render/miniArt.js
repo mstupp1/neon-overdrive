@@ -8,6 +8,8 @@ import { makeSprite, flame, glow } from './sprites.js';
 import { poly, mirror, flipX, regular, part, halo, seams, seamsM, vents, rivets, lit, nozzle, barrel, canopy, dashRing, glowStroke, shade, rgba } from './ink.js';
 import { G } from '../game/state.js';
 import { SHIELD_SPAN, SHIELD_R } from '../game/minibosses.js';
+import { sv } from '../game/stageview.js';
+import { miniImage, miniPart, miniVisualPoints, prewarmMiniImages } from './miniImages.js';
 
 const cache = new Map();
 function cached(key, build) {
@@ -73,21 +75,23 @@ function drawRazor(ctx, e, hot) {
   ctx.save();
   ctx.translate(e.x, e.y);
   if (e.rot) ctx.rotate(e.rot);
+  const body = miniImage('razorwing', sv.mode, razorBody(c), c);
+  const engines = miniVisualPoints('razorwing', sv.mode, 'engines', [[-6, -37], [6, -37]], body);
   const fl = flame(c);
   ctx.globalCompositeOperation = 'lighter';
   const boost = e.hold ? 1.8 : 1;
-  for (const s of [-1, 1]) {
-    const h = (20 + Math.sin(G.time * 37 + s) * 4) * boost;
+  for (const [i, [x, y]] of engines.entries()) {
+    const h = (20 + Math.sin(G.time * 37 + (i ? 1 : -1)) * 4) * boost;
     ctx.globalAlpha = 0.6;
     ctx.save();
-    ctx.translate(s * 6, -37);
+    ctx.translate(x, y);
     ctx.scale(1, -1);
     ctx.drawImage(fl.img, -5, 0, 10, h);
     ctx.restore();
   }
   ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = 'source-over';
-  blitAt(ctx, razorBody(c), hot);
+  blitAt(ctx, body, hot);
   ctx.restore();
 }
 
@@ -127,25 +131,28 @@ function maulerBody(c) {
 
 function drawMauler(ctx, e, hot) {
   const c = e.phase > 1 ? '#ff2e55' : e.color;
+  const body = miniImage('mauler', sv.mode, maulerBody(c), c);
+  const engines = miniVisualPoints('mauler', sv.mode, 'engines', [[-16, -40], [16, -40]], body);
+  const muzzles = miniVisualPoints('mauler', sv.mode, 'muzzles', [[-46, 46], [46, 46]], body);
   const fl = flame(c);
   ctx.globalCompositeOperation = 'lighter';
-  for (const s of [-1, 1]) {
-    const h = 22 + Math.sin(G.time * 29 + s) * 4;
+  for (const [i, [x, y]] of engines.entries()) {
+    const h = 22 + Math.sin(G.time * 29 + (i ? 1 : -1)) * 4;
     ctx.globalAlpha = 0.55;
     ctx.save();
-    ctx.translate(e.x + s * 16, e.y - 40);
+    ctx.translate(e.x + x, e.y + y);
     ctx.scale(1, -1);
     ctx.drawImage(fl.img, -6, 0, 12, h);
     ctx.restore();
   }
   ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = 'source-over';
-  blit(ctx, maulerBody(c), e.x, e.y, hot);
+  blit(ctx, body, e.x, e.y, hot);
   if (e.muz > 0) {
     const gl = glow('#ffffff', 64);
     ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = 0.8;
-    for (const s of [-1, 1]) ctx.drawImage(gl.img, e.x + s * 46 - 12, e.y + 46 - 12, 24, 24);
+    for (const [x, y] of muzzles) ctx.drawImage(gl.img, e.x + x - 12, e.y + y - 12, 24, 24);
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
   }
@@ -192,38 +199,77 @@ function broodBody(c) {
 
 function drawBrood(ctx, e, hot) {
   const c = e.phase > 1 ? '#ff2e9a' : e.color;
-  // legs: three a side, stepping
+  const body = miniImage('broodmother', sv.mode, broodBody(c), c);
+  // Generated side art is viewed along the flight axis, so both leg sets sit
+  // along virtual X and step downscreen; the far set is shaded through the hull.
+  // Chase art keeps the lateral spread and compresses only fore-aft leg depth.
   ctx.lineCap = 'round';
-  for (const s of [-1, 1]) {
-    for (let i = 0; i < 3; i++) {
-      const ph = G.time * 3.2 + i * 2.1 + (s > 0 ? Math.PI : 0);
-      const hx = e.x + s * 24;
-      const hy = e.y - 14 + i * 12;
-      const kx = hx + s * (24 + Math.sin(ph) * 4);
-      const ky = hy - 10 + i * 4;
-      const fx = kx + s * (12 + Math.cos(ph) * 3);
-      const fy = ky + 24 + Math.sin(ph) * 5;
-      ctx.beginPath();
-      ctx.moveTo(hx, hy);
-      ctx.lineTo(kx, ky);
-      ctx.lineTo(fx, fy);
-      ctx.strokeStyle = rgba(c, 0.3);
-      ctx.lineWidth = 6;
-      ctx.stroke();
-      ctx.strokeStyle = '#14060f';
-      ctx.lineWidth = 3.4;
-      ctx.stroke();
-      ctx.strokeStyle = c;
-      ctx.lineWidth = 1.1;
-      ctx.stroke();
+  const leg = (hx, hy, kx, ky, fx, fy, alpha = 1) => {
+    ctx.save();
+    ctx.globalAlpha *= alpha;
+    ctx.beginPath();
+    ctx.moveTo(hx, hy);
+    ctx.lineTo(kx, ky);
+    ctx.lineTo(fx, fy);
+    ctx.strokeStyle = rgba(c, 0.3);
+    ctx.lineWidth = 6;
+    ctx.stroke();
+    ctx.strokeStyle = '#14060f';
+    ctx.lineWidth = 3.4;
+    ctx.stroke();
+    ctx.strokeStyle = c;
+    ctx.lineWidth = 1.1;
+    ctx.stroke();
+    ctx.restore();
+  };
+  if (body.generated && sv.mode === 'side') {
+    for (const s of [-1, 1]) {
+      for (let i = 0; i < 3; i++) {
+        const ph = G.time * 3.2 + i * 2.1 + (s > 0 ? Math.PI : 0);
+        const hx = e.x + 6 + s * 2;
+        const hy = e.y - 22 + i * 18;
+        const kx = hx + 18 + Math.sin(ph) * 4;
+        const ky = hy + s * 3 + Math.cos(ph) * 2;
+        const fx = kx + 12 + Math.cos(ph) * 3;
+        const fy = ky + s * 5 + Math.sin(ph) * 3;
+        leg(hx, hy, kx, ky, fx, fy, s < 0 ? 0.48 : 1);
+      }
+    }
+  } else if (body.generated && sv.mode === 'chase') {
+    for (const s of [-1, 1]) {
+      for (let i = 0; i < 3; i++) {
+        const ph = G.time * 3.2 + i * 2.1 + (s > 0 ? Math.PI : 0);
+        const hx = e.x + s * 24;
+        const hy = e.y - 7 + (i - 1) * 6;
+        const kx = hx + s * (24 + Math.sin(ph) * 4);
+        const ky = hy - 5 + i * 2;
+        const fx = kx + s * (12 + Math.cos(ph) * 3);
+        const fy = ky + 12 + Math.sin(ph) * 2.5;
+        leg(hx, hy, kx, ky, fx, fy);
+      }
+    }
+  } else {
+    // Preserve the established top-camera gait and procedural fallback.
+    for (const s of [-1, 1]) {
+      for (let i = 0; i < 3; i++) {
+        const ph = G.time * 3.2 + i * 2.1 + (s > 0 ? Math.PI : 0);
+        const hx = e.x + s * 24;
+        const hy = e.y - 14 + i * 12;
+        const kx = hx + s * (24 + Math.sin(ph) * 4);
+        const ky = hy - 10 + i * 4;
+        const fx = kx + s * (12 + Math.cos(ph) * 3);
+        const fy = ky + 24 + Math.sin(ph) * 5;
+        leg(hx, hy, kx, ky, fx, fy);
+      }
     }
   }
-  blit(ctx, broodBody(c), e.x, e.y, hot);
+  blit(ctx, body, e.x, e.y, hot);
   // sac pulse (brighter when it pumps out eggs or swarms)
   const gl = glow('#ffb3f0', 64);
+  const [sacX, sacY] = miniVisualPoints('broodmother', sv.mode, 'sac', [0, 26], body);
   ctx.globalCompositeOperation = 'lighter';
   ctx.globalAlpha = 0.35 + 0.15 * Math.sin(G.time * 5) + (e.pump > 0 ? 0.5 : 0);
-  ctx.drawImage(gl.img, e.x - 20, e.y + 6, 40, 40);
+  ctx.drawImage(gl.img, e.x + sacX - 20, e.y + sacY - 20, 40, 40);
   ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = 'source-over';
 }
@@ -255,7 +301,7 @@ function scythe(c) {
 
 function drawSpecter(ctx, e, hot) {
   const c = e.phase > 1 ? '#c23bff' : e.color;
-  const body = specterBody(c);
+  const body = miniImage('specter', sv.mode, specterBody(c), c);
   if (e.ghost) {
     // after-image left where it blinked out
     ctx.globalAlpha = Math.max(0, e.ghost.t * 0.9);
@@ -263,13 +309,12 @@ function drawSpecter(ctx, e, hot) {
   }
   const a = e.alpha ?? 1;
   ctx.globalAlpha = a;
-  const sc = scythe(c);
+  const sc = miniPart('specter', 'scythe', sv.mode, scythe(c), c);
   for (let i = 0; i < 2; i++) {
     const ang = G.time * 2.4 + i * Math.PI;
     ctx.save();
     ctx.translate(e.x + Math.cos(ang) * 34, e.y + Math.sin(ang) * 28);
-    ctx.rotate(ang + Math.PI / 2);
-    ctx.drawImage(sc.img, -sc.half, -sc.half, sc.size, sc.size);
+    blitRotatingPart(ctx, sc, hot, ang + Math.PI / 2);
     ctx.restore();
   }
   ctx.drawImage(body.img, e.x - body.half, e.y - body.half + Math.sin(G.time * 2) * 2, body.size, body.size);
@@ -341,9 +386,14 @@ function drawArc(ctx, e, hot) {
   for (const n of ns) zap(ctx, e.x, e.y, n.x, n.y, c, 2.2);
   ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = 'source-over';
-  blit(ctx, arcCore(c), e.x, e.y, hot, e.anim * -0.4);
-  const nd = arcNode(c);
-  for (const n of ns) blit(ctx, nd, n.x, n.y, hot, G.time * 3);
+  const core = miniImage('arclight', sv.mode, arcCore(c), c);
+  blit(ctx, core, e.x, e.y, hot, core.generated && sv.mode !== 'top' ? 0 : e.anim * -0.4);
+  const nd = miniPart('arclight', 'node', sv.mode, arcNode(c), c);
+  for (const n of ns) {
+    if (nd.generated && sv.mode !== 'top') {
+      ctx.save(); ctx.translate(n.x, n.y); blitRotatingPart(ctx, nd, hot, G.time * 3); ctx.restore();
+    } else blit(ctx, nd, n.x, n.y, hot, G.time * 3);
+  }
 }
 
 // --- CITADEL: octagonal bastion r30, a central mortar, a rotating turret ring and a turning shield arc. -----------------
@@ -371,14 +421,21 @@ function citadelBody(c) {
 
 function drawCitadel(ctx, e, hot) {
   const c = e.phase > 1 ? '#ff9e3d' : e.color;
-  blit(ctx, citadelBody(c), e.x, e.y, hot);
+  const body = miniImage('citadel', sv.mode, citadelBody(c), c);
+  blit(ctx, body, e.x, e.y, hot);
   // turret ring: four short barrels turning with the shield's gap
   const ta = (e.shA ?? Math.PI / 2) + Math.PI;
   ctx.strokeStyle = c;
   ctx.lineWidth = 3;
   ctx.lineCap = 'round';
+  const turret = miniPart('citadel', 'turret', sv.mode, null, c);
   for (let i = 0; i < 4; i++) {
     const a = ta + (i / 4) * TAU + Math.PI / 4;
+    if (turret?.generated) {
+      ctx.save(); ctx.translate(e.x + Math.cos(a) * 18, e.y + Math.sin(a) * 18);
+      blitRotatingPart(ctx, turret, hot, a + Math.PI / 2); ctx.restore();
+      continue;
+    }
     ctx.beginPath();
     ctx.moveTo(e.x + Math.cos(a) * 14, e.y + Math.sin(a) * 14);
     ctx.lineTo(e.x + Math.cos(a) * 22, e.y + Math.sin(a) * 22);
@@ -425,10 +482,22 @@ function blitAt(ctx, spr, hot) {
   const h = spr.half;
   ctx.drawImage(spr.img, -h, -h, spr.size, spr.size);
   if (hot && spr.flash) {
-    ctx.globalAlpha = 0.2;
+    const alpha = ctx.globalAlpha;
+    ctx.globalAlpha = alpha * 0.2;
     ctx.drawImage(spr.flash, -h, -h, spr.size, spr.size);
-    ctx.globalAlpha = 1;
+    ctx.globalAlpha = alpha;
   }
+}
+// Apply camera projection after the part's rotation (P × R). Side compresses
+// virtual X, while chase compresses virtual Y. Fallback parts keep their
+// established unprojected rotation.
+function blitRotatingPart(ctx, spr, hot, angle) {
+  if (spr.generated) {
+    if (sv.mode === 'side') ctx.scale(0.46, 1);
+    else if (sv.mode === 'chase') ctx.scale(1, 0.72);
+  }
+  ctx.rotate(angle);
+  blitAt(ctx, spr, hot);
 }
 
 const DRAW = { razorwing: drawRazor, mauler: drawMauler, broodmother: drawBrood, specter: drawSpecter, arclight: drawArc, citadel: drawCitadel };
@@ -444,4 +513,5 @@ export function prewarmMiniArt() {
   specterBody('#9b7bff'); specterBody('#c23bff'); scythe('#9b7bff'); scythe('#c23bff');
   arcCore('#4fd6ff'); arcCore('#9ffcff'); arcNode('#4fd6ff'); arcNode('#9ffcff');
   citadelBody('#ffe14d'); citadelBody('#ff9e3d');
+  prewarmMiniImages();
 }

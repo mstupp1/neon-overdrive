@@ -1,0 +1,37 @@
+{
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/minibosses/specter/sources/top-v2.png",
+      "prompt": "art/minibosses/specter/prompts/top-v2.txt",
+      "runtime": "src/assets/minibosses/specter/top-v2.png",
+      "logicalSize": 140,
+      "visibleExtent": 68,
+      "references": [
+        "art/minibosses/specter/sources/top-v1.png"
+      ]
+    },
+    {
+      "camera": "side",
+      "source": "art/minibosses/specter/sources/side-v1.png",
+      "prompt": "art/minibosses/specter/prompts/side-v1.txt",
+      "runtime": "src/assets/minibosses/specter/side-v1.png",
+      "logicalSize": 140,
+      "visibleExtent": 68,
+      "references": [
+        "art/minibosses/specter/sources/top-v2.png"
+      ]
+    },
+    {
+      "camera": "chase",
+      "source": "art/minibosses/specter/sources/chase-v1.png",
+      "prompt": "art/minibosses/specter/prompts/chase-v1.txt",
+      "runtime": "src/assets/minibosses/specter/chase-v1.png",
+      "logicalSize": 140,
+      "visibleExtent": 68,
+      "references": [
+        "art/minibosses/specter/sources/top-v2.png"
+      ]
+    }
+  ]
+}

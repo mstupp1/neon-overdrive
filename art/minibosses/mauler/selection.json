@@ -1,0 +1,100 @@
+{
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/minibosses/mauler/sources/top-v1.png",
+      "prompt": "art/minibosses/mauler/prompts/top-v1.txt",
+      "runtime": "src/assets/minibosses/mauler/top-v1.png",
+      "logicalSize": 170,
+      "visibleExtent": 105,
+      "references": [
+        "art/ships/vector/sources/top-v1.png"
+      ],
+      "sourceAnchor": [
+        627,
+        647
+      ],
+      "sourceVisualPoints": {
+        "engines": [
+          [
+            540,
+            98
+          ],
+          [
+            714,
+            98
+          ]
+        ],
+        "muzzles": [
+          [
+            157,
+            1067
+          ],
+          [
+            1108,
+            1067
+          ]
+        ]
+      }
+    },
+    {
+      "camera": "side",
+      "source": "art/minibosses/mauler/sources/side-v2.png",
+      "prompt": "art/minibosses/mauler/prompts/side-v2.txt",
+      "runtime": "src/assets/minibosses/mauler/side-v2.png",
+      "logicalSize": 170,
+      "visibleExtent": 90,
+      "references": [
+        "art/minibosses/mauler/sources/top-v1.png",
+        "art/bosses/eclipse/sources/side-v2.png"
+      ],
+      "sourceVisualPoints": {
+        "engines": [
+          [
+            1191,
+            526
+          ],
+          [
+            1193,
+            727
+          ]
+        ],
+        "muzzles": [
+          [
+            256,
+            655
+          ],
+          [
+            359,
+            765
+          ]
+        ]
+      }
+    },
+    {
+      "camera": "chase",
+      "source": "art/minibosses/mauler/sources/chase-v2.png",
+      "prompt": "art/minibosses/mauler/prompts/chase-v2.txt",
+      "runtime": "src/assets/minibosses/mauler/chase-v2.png",
+      "logicalSize": 170,
+      "visibleExtent": 105,
+      "references": [
+        "art/minibosses/mauler/sources/top-v1.png",
+        "art/bosses/eclipse/sources/chase-v1.png"
+      ],
+      "sourceVisualPoints": {
+        "engines": [],
+        "muzzles": [
+          [
+            140,
+            860
+          ],
+          [
+            1117,
+            860
+          ]
+        ]
+      }
+    }
+  ]
+}

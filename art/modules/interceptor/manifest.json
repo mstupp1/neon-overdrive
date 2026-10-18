@@ -1,0 +1,162 @@
+{
+  "method": "built-in imagegen; deterministic Pillow export",
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/modules/interceptor/sources/top-v1.png",
+      "prompt": "art/modules/interceptor/prompts/top-v1.txt",
+      "runtime": "src/assets/modules/interceptor/top-v1.png",
+      "logicalSize": 22,
+      "visibleExtent": 16,
+      "references": [
+        {
+          "path": "art/ships/vector/sources/top-v1.png",
+          "sha256": "f2c2564e878485c04b19522de9fb6317a485ddeeb4560fd410d7a01e217c8e3a"
+        }
+      ],
+      "sourceSize": [
+        992,
+        1586
+      ],
+      "orientedSourceSize": [
+        992,
+        1586
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        496.0,
+        802.0
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        282,
+        451
+      ],
+      "offset": [
+        115,
+        28
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "f103153f82b9550f56cc8441aa94082faaa1b05b97da2c758195f384d0f78eaa",
+      "runtime_sha256": "6c4bd3fdadbc1f2b5bcdbc15f2c81f654c63ca8592d8641478e1bc0592e3ebbd",
+      "prompt_sha256": "ac19d4641a8832cd68b8f40bd5d7ab45ee11c57f06fe24fdb43c25db4b2194ac",
+      "alphaBounds": [
+        124,
+        67,
+        388,
+        445
+      ]
+    },
+    {
+      "camera": "side",
+      "cameraIntent": "True side source normalized from up-facing profile to right-facing",
+      "source": "art/modules/interceptor/sources/side-v1.png",
+      "prompt": "art/modules/interceptor/prompts/side-v1.txt",
+      "runtime": "src/assets/modules/interceptor/side-v1.png",
+      "logicalSize": 22,
+      "visibleExtent": 16,
+      "references": [
+        {
+          "path": "art/modules/interceptor/sources/top-v1.png",
+          "sha256": "f103153f82b9550f56cc8441aa94082faaa1b05b97da2c758195f384d0f78eaa"
+        }
+      ],
+      "sourceRotation": 90,
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        626.0,
+        609.5
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        406,
+        406
+      ],
+      "offset": [
+        53,
+        59
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "ddf5b3b5d0570b04a24d6e7246e5308e1a5471e7140d0f9317ae7f84f6fc2847",
+      "runtime_sha256": "2700e6bd4bbeb6140dc00b7aea98fd5ecc1107e13b478b2b1a333513b9c3ba91",
+      "prompt_sha256": "d274787aaff3bd127ea88f3dad0d9265152d60ccbe471907cb91561b4f9ffbb0",
+      "alphaBounds": [
+        63,
+        70,
+        444,
+        443
+      ]
+    },
+    {
+      "camera": "chase",
+      "cameraIntent": "Player rear pursuit, single engine faces toward viewer",
+      "source": "art/modules/interceptor/sources/chase-v2.png",
+      "prompt": "art/modules/interceptor/prompts/chase-v2.txt",
+      "runtime": "src/assets/modules/interceptor/chase-v2.png",
+      "logicalSize": 22,
+      "visibleExtent": 16,
+      "references": [
+        {
+          "path": "art/modules/interceptor/sources/top-v1.png",
+          "sha256": "f103153f82b9550f56cc8441aa94082faaa1b05b97da2c758195f384d0f78eaa"
+        },
+        {
+          "path": "art/ships/vector/sources/pursuit-v1.png",
+          "sha256": "2f370f75c14fcb7053baa945a3b4343845edcd6ddab67a5920a62c25a478ea07"
+        }
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        627.0,
+        681.5
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        382,
+        382
+      ],
+      "offset": [
+        65,
+        48
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "447d59724c417b682696e79d45187fb3a39c815de36f4dbd1ff8e3c939a64a7a",
+      "runtime_sha256": "8063d786bd943e4efcf26923d2ffca75d0eee4e366b62049673332872cb302fc",
+      "prompt_sha256": "7ea1aa7d407ad4dbe2bdde2b8facef9aafddb29a7444a8f9eab596bb642489ae",
+      "alphaBounds": [
+        67,
+        113,
+        445,
+        364
+      ]
+    }
+  ]
+}

@@ -1,0 +1,155 @@
+{
+  "method": "built-in imagegen; deterministic Pillow export",
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/minibosses/specter/sources/top-v2.png",
+      "prompt": "art/minibosses/specter/prompts/top-v2.txt",
+      "runtime": "src/assets/minibosses/specter/top-v2.png",
+      "logicalSize": 140,
+      "visibleExtent": 68,
+      "references": [
+        {
+          "path": "art/minibosses/specter/sources/top-v1.png",
+          "sha256": "0e7330deadb8ef545b3c666c68bea1127f9bb9e784eb52aeb818462c4f9d1a7d"
+        }
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        627.5,
+        619.0
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        276,
+        276
+      ],
+      "offset": [
+        118,
+        120
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "f18765398b5ace4057ea304b08344ffab84856ad295dd1edbde54715bc6378a7",
+      "runtime_sha256": "3695aa03eafef1c299df526ec4fdb86591f97a0c66807ca79903cc7983ca7a2b",
+      "prompt_sha256": "144c008aebd3992c47a098c81255cc3f75f98b928cb14843c9b659643b142965",
+      "alphaBounds": [
+        141,
+        130,
+        358,
+        396
+      ]
+    },
+    {
+      "camera": "side",
+      "source": "art/minibosses/specter/sources/side-v1.png",
+      "prompt": "art/minibosses/specter/prompts/side-v1.txt",
+      "runtime": "src/assets/minibosses/specter/side-v1.png",
+      "logicalSize": 140,
+      "visibleExtent": 68,
+      "references": [
+        {
+          "path": "art/minibosses/specter/sources/top-v2.png",
+          "sha256": "f18765398b5ace4057ea304b08344ffab84856ad295dd1edbde54715bc6378a7"
+        }
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        667.0,
+        617.0
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        268,
+        268
+      ],
+      "offset": [
+        113,
+        124
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "90bd0f301b1d066eabb1e3faf6a1bf7a4957aadfd78acd2585cd0977a2956c74",
+      "runtime_sha256": "4ae5c3670dcbce4db899b35a2fef89e6b70d62e4792d78851cac441f3a9594b2",
+      "prompt_sha256": "b7b0fe7e013a518b262dfc72621af60e8c10f22207956ab5beea4971e2a69c16",
+      "alphaBounds": [
+        139,
+        129,
+        339,
+        381
+      ]
+    },
+    {
+      "camera": "chase",
+      "source": "art/minibosses/specter/sources/chase-v1.png",
+      "prompt": "art/minibosses/specter/prompts/chase-v1.txt",
+      "runtime": "src/assets/minibosses/specter/chase-v1.png",
+      "logicalSize": 140,
+      "visibleExtent": 68,
+      "references": [
+        {
+          "path": "art/minibosses/specter/sources/top-v2.png",
+          "sha256": "f18765398b5ace4057ea304b08344ffab84856ad295dd1edbde54715bc6378a7"
+        }
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        627.0,
+        605.5
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        272,
+        272
+      ],
+      "offset": [
+        120,
+        125
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "9edae8ae16b89a08e71c8cd5916064c8fae698419baa5bfe4cf6e8a01508b13e",
+      "runtime_sha256": "a390608e3c3d341f6900870db46e7da0f0264d53e30ab48addd423b96090b5d8",
+      "prompt_sha256": "43d4f94e77ef7465f836ce56ba8375c1b48e9dee27c1414f1c41e2fa8cdad759",
+      "alphaBounds": [
+        129,
+        144,
+        383,
+        369
+      ]
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/minibosses/broodmother/sources/top-v1.png",
+      "prompt": "art/minibosses/broodmother/prompts/top-v1.txt",
+      "runtime": "src/assets/minibosses/broodmother/top-v1.png",
+      "logicalSize": 170,
+      "visibleExtent": 86,
+      "references": [
+        "art/ships/vector/sources/top-v1.png"
+      ],
+      "sourceAnchor": [
+        627,
+        480
+      ],
+      "sourceVisualPoints": {
+        "sac": [
+          627,
+          800
+        ]
+      }
+    },
+    {
+      "camera": "side",
+      "source": "art/minibosses/broodmother/sources/side-v2.png",
+      "prompt": "art/minibosses/broodmother/prompts/side-v2.txt",
+      "runtime": "src/assets/minibosses/broodmother/side-v2.png",
+      "logicalSize": 170,
+      "visibleExtent": 86,
+      "references": [
+        "art/minibosses/broodmother/sources/top-v1.png",
+        "art/bosses/eclipse/sources/side-v2.png"
+      ],
+      "sourceVisualPoints": {
+        "sac": [
+          655,
+          850
+        ]
+      }
+    },
+    {
+      "camera": "chase",
+      "source": "art/minibosses/broodmother/sources/chase-v2.png",
+      "prompt": "art/minibosses/broodmother/prompts/chase-v2.txt",
+      "runtime": "src/assets/minibosses/broodmother/chase-v2.png",
+      "logicalSize": 170,
+      "visibleExtent": 76,
+      "references": [
+        "art/minibosses/broodmother/sources/top-v1.png",
+        "art/bosses/eclipse/sources/chase-v1.png"
+      ],
+      "sourceVisualPoints": {
+        "sac": [
+          887,
+          745
+        ]
+      }
+    }
+  ]
+}

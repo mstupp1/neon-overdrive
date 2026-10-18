@@ -1,0 +1,47 @@
+{
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/modules/blade/sources/top-v1.png",
+      "prompt": "art/modules/blade/prompts/top-v1.txt",
+      "runtime": "src/assets/modules/blade/top-v1.png",
+      "logicalSize": 30,
+      "visibleExtent": 22,
+      "references": [
+        "art/ships/vector/sources/top-v1.png"
+      ],
+      "sourceAnchor": [
+        627,
+        627
+      ]
+    },
+    {
+      "camera": "side",
+      "cameraIntent": "Low horizontal plane shared by camera-neutral radial geometry; side bake compensates stage quarter-turn",
+      "source": "art/modules/blade/sources/plane-v2.png",
+      "prompt": "art/modules/blade/prompts/plane-v2.txt",
+      "runtime": "src/assets/modules/blade/side-v1.png",
+      "logicalSize": 30,
+      "visibleExtent": 22,
+      "references": [
+        "art/modules/blade/sources/top-v1.png",
+        "art/minibosses/citadel/sources/side-v1.png"
+      ],
+      "spinAspect": 0.212
+    },
+    {
+      "camera": "chase",
+      "cameraIntent": "Low horizontal plane shared by camera-neutral radial geometry; side bake compensates stage quarter-turn",
+      "source": "art/modules/blade/sources/plane-v2.png",
+      "prompt": "art/modules/blade/prompts/plane-v2.txt",
+      "runtime": "src/assets/modules/blade/chase-v1.png",
+      "logicalSize": 30,
+      "visibleExtent": 22,
+      "references": [
+        "art/modules/blade/sources/top-v1.png",
+        "art/minibosses/citadel/sources/side-v1.png"
+      ],
+      "spinAspect": 0.212
+    }
+  ]
+}

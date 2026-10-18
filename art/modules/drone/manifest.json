@@ -1,0 +1,165 @@
+{
+  "method": "built-in imagegen; deterministic Pillow export",
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/modules/drone/sources/top-v1.png",
+      "prompt": "art/modules/drone/prompts/top-v1.txt",
+      "runtime": "src/assets/modules/drone/top-v1.png",
+      "logicalSize": 26,
+      "visibleExtent": 16,
+      "references": [
+        {
+          "path": "art/ships/vector/sources/top-v1.png",
+          "sha256": "f2c2564e878485c04b19522de9fb6317a485ddeeb4560fd410d7a01e217c8e3a"
+        }
+      ],
+      "sourceSize": [
+        1086,
+        1448
+      ],
+      "orientedSourceSize": [
+        1086,
+        1448
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        543.0,
+        735.5
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        305,
+        406
+      ],
+      "offset": [
+        104,
+        50
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "8497dcf32378c124586eefdc31714822eb597c7af82fce81e068d2a65baaaac0",
+      "runtime_sha256": "d243158a8cf775443c06815787b8c2b601b114a5801d7909df06ab14c81d8ae2",
+      "prompt_sha256": "cc27009a4f77dee175df10d2df1bf590a26c1c6479a05e747f3f979608a3776f",
+      "alphaBounds": [
+        122,
+        58,
+        391,
+        451
+      ]
+    },
+    {
+      "camera": "side",
+      "cameraIntent": "Player right-facing profile",
+      "source": "art/modules/drone/sources/side-v2.png",
+      "prompt": "art/modules/drone/prompts/side-v2.txt",
+      "runtime": "src/assets/modules/drone/side-v1.png",
+      "logicalSize": 26,
+      "visibleExtent": 16,
+      "references": [
+        {
+          "path": "art/modules/drone/sources/top-v1.png",
+          "sha256": "8497dcf32378c124586eefdc31714822eb597c7af82fce81e068d2a65baaaac0"
+        },
+        {
+          "path": "art/ships/vector/sources/side-v1.png",
+          "sha256": "6136c47e9a56c84df737dc7161039d9f055a2ba00b2d849dbeed926166e05e15"
+        }
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        634.5,
+        641.5
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        337,
+        337
+      ],
+      "offset": [
+        86,
+        84
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "4b3d5a9c690326f6561798f984d4889822ea3b5307d4f16d70de6a2f6809195b",
+      "runtime_sha256": "25dbe85b1378f256615cae991da121724a28d8108ab5c57534e22cd0209e3e22",
+      "prompt_sha256": "faced3edd8f950c27aa90dc187e436d4b783a309830cd66e1a2af38de4d934f8",
+      "alphaBounds": [
+        96,
+        163,
+        416,
+        321
+      ]
+    },
+    {
+      "camera": "chase",
+      "cameraIntent": "Player rear pursuit, twin engine faces toward viewer",
+      "source": "art/modules/drone/sources/chase-v2.png",
+      "prompt": "art/modules/drone/prompts/chase-v2.txt",
+      "runtime": "src/assets/modules/drone/chase-v1.png",
+      "logicalSize": 26,
+      "visibleExtent": 16,
+      "references": [
+        {
+          "path": "art/modules/drone/sources/top-v1.png",
+          "sha256": "8497dcf32378c124586eefdc31714822eb597c7af82fce81e068d2a65baaaac0"
+        },
+        {
+          "path": "art/ships/vector/sources/pursuit-v1.png",
+          "sha256": "2f370f75c14fcb7053baa945a3b4343845edcd6ddab67a5920a62c25a478ea07"
+        }
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        627.5,
+        691.5
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        331,
+        331
+      ],
+      "offset": [
+        90,
+        73
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "0825a3c320d5289046ec417069e0e662882ea75b1e2352bbefd3512916df16b9",
+      "runtime_sha256": "ec1866c9d4103fd249e2f595ad6ba01192783adf21e3dba48a33b2c4270e2943",
+      "prompt_sha256": "05377ef703415de9621e4f0a6490d3b290fd8dacaa3498126883c60ba4e3bd75",
+      "alphaBounds": [
+        95,
+        149,
+        416,
+        334
+      ]
+    }
+  ]
+}

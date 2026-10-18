@@ -1,0 +1,41 @@
+{
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/modules/drone/sources/top-v1.png",
+      "prompt": "art/modules/drone/prompts/top-v1.txt",
+      "runtime": "src/assets/modules/drone/top-v1.png",
+      "logicalSize": 26,
+      "visibleExtent": 16,
+      "references": [
+        "art/ships/vector/sources/top-v1.png"
+      ]
+    },
+    {
+      "camera": "side",
+      "cameraIntent": "Player right-facing profile",
+      "source": "art/modules/drone/sources/side-v2.png",
+      "prompt": "art/modules/drone/prompts/side-v2.txt",
+      "runtime": "src/assets/modules/drone/side-v1.png",
+      "logicalSize": 26,
+      "visibleExtent": 16,
+      "references": [
+        "art/modules/drone/sources/top-v1.png",
+        "art/ships/vector/sources/side-v1.png"
+      ]
+    },
+    {
+      "camera": "chase",
+      "cameraIntent": "Player rear pursuit, twin engine faces toward viewer",
+      "source": "art/modules/drone/sources/chase-v2.png",
+      "prompt": "art/modules/drone/prompts/chase-v2.txt",
+      "runtime": "src/assets/modules/drone/chase-v1.png",
+      "logicalSize": 26,
+      "visibleExtent": 16,
+      "references": [
+        "art/modules/drone/sources/top-v1.png",
+        "art/ships/vector/sources/pursuit-v1.png"
+      ]
+    }
+  ]
+}

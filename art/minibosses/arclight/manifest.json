@@ -1,0 +1,159 @@
+{
+  "method": "built-in imagegen; deterministic Pillow export",
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/minibosses/arclight/sources/top-v1.png",
+      "prompt": "art/minibosses/arclight/prompts/top-v1.txt",
+      "runtime": "src/assets/minibosses/arclight/top-v1.png",
+      "logicalSize": 130,
+      "visibleExtent": 72,
+      "references": [
+        {
+          "path": "art/ships/vector/sources/top-v1.png",
+          "sha256": "f2c2564e878485c04b19522de9fb6317a485ddeeb4560fd410d7a01e217c8e3a"
+        }
+      ],
+      "sourceAnchor": [
+        627,
+        620
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        309,
+        309
+      ],
+      "offset": [
+        101,
+        103
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "6fb60bf964ec9826de11f8f1e1794516bf8450df8b12e81d65c80c92b2976dc5",
+      "runtime_sha256": "02d5c22bc0ef83aea81b75eb38a764aa358c39190ec73230e080212a52fbc3c4",
+      "prompt_sha256": "742c0ef6790eb67d4a05b8a4266fcb0cda8a2f1caa3ec571bc8ce9ee2f6ac03b",
+      "alphaBounds": [
+        123,
+        111,
+        399,
+        399
+      ]
+    },
+    {
+      "camera": "side",
+      "source": "art/minibosses/arclight/sources/side-v2.png",
+      "prompt": "art/minibosses/arclight/prompts/side-v2.txt",
+      "runtime": "src/assets/minibosses/arclight/side-v2.png",
+      "logicalSize": 130,
+      "visibleExtent": 72,
+      "references": [
+        {
+          "path": "art/minibosses/arclight/sources/top-v1.png",
+          "sha256": "6fb60bf964ec9826de11f8f1e1794516bf8450df8b12e81d65c80c92b2976dc5"
+        },
+        {
+          "path": "art/bosses/eclipse/sources/side-v2.png",
+          "sha256": "a7380437bac00aee306200fd77f8e150b89ed6bed30bf0773dba81250bea3c6a"
+        }
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        627.0,
+        641.5
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        294,
+        294
+      ],
+      "offset": [
+        109,
+        105
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "2d3a7c56b0d92dec5eb22bceea7cba805349f3055db2cc83747f5985768d6b41",
+      "runtime_sha256": "911c29b20b9da27be0a17a7386c2896c2f9e1837b8e4011f958d8c592d7d1ceb",
+      "prompt_sha256": "9dfd5f4c91b347b4546ab3632a64a13380da480a593b584e8618e33e79d9ae41",
+      "alphaBounds": [
+        112,
+        199,
+        400,
+        311
+      ]
+    },
+    {
+      "camera": "chase",
+      "source": "art/minibosses/arclight/sources/chase-v1.png",
+      "prompt": "art/minibosses/arclight/prompts/chase-v1.txt",
+      "runtime": "src/assets/minibosses/arclight/chase-v1.png",
+      "logicalSize": 130,
+      "visibleExtent": 72,
+      "references": [
+        {
+          "path": "art/minibosses/arclight/sources/top-v1.png",
+          "sha256": "6fb60bf964ec9826de11f8f1e1794516bf8450df8b12e81d65c80c92b2976dc5"
+        }
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        627.0,
+        635.5
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        317,
+        317
+      ],
+      "offset": [
+        97,
+        95
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "25d828318bc7abbd42997f8a3e68de4a79549b5a74c882558308e816fc43b334",
+      "runtime_sha256": "1122e5411593670725122e704eef3a07ba500b515fedc9511de7fdf051f9acd9",
+      "prompt_sha256": "2a0f85658152d439738bb31fbf09007c0bc7db250637f4ed4316a268151cee77",
+      "alphaBounds": [
+        97,
+        120,
+        400,
+        375
+      ]
+    }
+  ]
+}

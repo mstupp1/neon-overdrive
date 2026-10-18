@@ -1,0 +1,155 @@
+{
+  "method": "built-in imagegen; deterministic Pillow export",
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/minibosses/citadel/sources/top-v1.png",
+      "prompt": "art/minibosses/citadel/prompts/top-v1.txt",
+      "runtime": "src/assets/minibosses/citadel/top-v1.png",
+      "logicalSize": 150,
+      "visibleExtent": 84,
+      "references": [
+        {
+          "path": "art/ships/vector/sources/top-v1.png",
+          "sha256": "f2c2564e878485c04b19522de9fb6317a485ddeeb4560fd410d7a01e217c8e3a"
+        }
+      ],
+      "sourceAnchor": [
+        627,
+        627
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        317,
+        317
+      ],
+      "offset": [
+        97,
+        97
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "ec7a4475d87e2ad96a8d69f639f0b85489d8e441ac42d0df4cabe2117559986d",
+      "runtime_sha256": "1fdc712234b0f85d362561a204dc471467f3bbde5129087aad83f21305098bea",
+      "prompt_sha256": "81b40ab77358e4bde197deca31af623d8aa17576b638504f19c69366549ec8f6",
+      "alphaBounds": [
+        109,
+        102,
+        412,
+        414
+      ]
+    },
+    {
+      "camera": "side",
+      "source": "art/minibosses/citadel/sources/side-v1.png",
+      "prompt": "art/minibosses/citadel/prompts/side-v1.txt",
+      "runtime": "src/assets/minibosses/citadel/side-v1.png",
+      "logicalSize": 150,
+      "visibleExtent": 84,
+      "references": [
+        {
+          "path": "art/minibosses/citadel/sources/top-v1.png",
+          "sha256": "ec7a4475d87e2ad96a8d69f639f0b85489d8e441ac42d0df4cabe2117559986d"
+        }
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        627.5,
+        626.0
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        330,
+        330
+      ],
+      "offset": [
+        91,
+        91
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "be541afb80dcb736b69569534699b1032afd0005bd26d39cd36c1406359ea0ab",
+      "runtime_sha256": "b4820cfffd5e6e65002fb8ec60b037c30a3bd66f2902bcd224e17755b516842c",
+      "prompt_sha256": "13fe6a16f5240692f1c1b864fb9428ef5dc7c9ab4ffac86508291181660ddbc4",
+      "alphaBounds": [
+        110,
+        144,
+        402,
+        419
+      ]
+    },
+    {
+      "camera": "chase",
+      "source": "art/minibosses/citadel/sources/chase-v1.png",
+      "prompt": "art/minibosses/citadel/prompts/chase-v1.txt",
+      "runtime": "src/assets/minibosses/citadel/chase-v1.png",
+      "logicalSize": 150,
+      "visibleExtent": 84,
+      "references": [
+        {
+          "path": "art/minibosses/citadel/sources/top-v1.png",
+          "sha256": "ec7a4475d87e2ad96a8d69f639f0b85489d8e441ac42d0df4cabe2117559986d"
+        }
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        626.5,
+        663.0
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        309,
+        309
+      ],
+      "offset": [
+        102,
+        93
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "9d7055f22e4e8403d1c52c04ae3b5d8bcbdb988849f280376452dcbc21a55135",
+      "runtime_sha256": "ca5448b0599864d1b8d4dfc12210fb29ce5a91ec8a7bb79ffc5d001d4b6d2897",
+      "prompt_sha256": "5cecf1a12d1aa092111f2247204be5c4b2ce8f20057d589020f0fac051e5b687",
+      "alphaBounds": [
+        111,
+        127,
+        402,
+        371
+      ]
+    }
+  ]
+}

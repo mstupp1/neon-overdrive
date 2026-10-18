@@ -1,0 +1,66 @@
+{
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/minibosses/razorwing/sources/top-v1.png",
+      "prompt": "art/minibosses/razorwing/prompts/top-v1.txt",
+      "runtime": "src/assets/minibosses/razorwing/top-v1.png",
+      "logicalSize": 150,
+      "visibleExtent": 104,
+      "references": [
+        "art/ships/vector/sources/top-v1.png"
+      ],
+      "sourceVisualPoints": {
+        "engines": [
+          [
+            625,
+            110
+          ],
+          [
+            802,
+            110
+          ]
+        ]
+      }
+    },
+    {
+      "camera": "side",
+      "source": "art/minibosses/razorwing/sources/side-v2.png",
+      "prompt": "art/minibosses/razorwing/prompts/side-v2.txt",
+      "runtime": "src/assets/minibosses/razorwing/side-v2.png",
+      "logicalSize": 150,
+      "visibleExtent": 80,
+      "references": [
+        "art/minibosses/razorwing/sources/top-v1.png",
+        "art/bosses/eclipse/sources/side-v2.png"
+      ],
+      "sourceVisualPoints": {
+        "engines": [
+          [
+            1190,
+            568
+          ],
+          [
+            1194,
+            686
+          ]
+        ]
+      }
+    },
+    {
+      "camera": "chase",
+      "source": "art/minibosses/razorwing/sources/chase-v2.png",
+      "prompt": "art/minibosses/razorwing/prompts/chase-v2.txt",
+      "runtime": "src/assets/minibosses/razorwing/chase-v2.png",
+      "logicalSize": 150,
+      "visibleExtent": 104,
+      "references": [
+        "art/minibosses/razorwing/sources/top-v1.png",
+        "art/bosses/eclipse/sources/chase-v1.png"
+      ],
+      "sourceVisualPoints": {
+        "engines": []
+      }
+    }
+  ]
+}

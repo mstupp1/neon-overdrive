@@ -1,0 +1,19 @@
+# SPECTER artwork
+
+Violet hooded phase stalker with separate scythes. The initial fighter-like source was rejected; top-v2 establishes the hooded identity. Side and foreshortened front variants reference that selection. Scythe pivot is measured at its generated hub; afterimages, cloak alpha and flashes remain dynamic.
+
+Method: built-in imagegen for originals and visual revisions; deterministic Pillow export via `tools/physical_art_assets.py`. Exact prompts are under `prompts/`; reference files, SHA256 hashes and all transforms are in `manifest.json`. Unselected originals remain in `sources/`.
+
+| Camera | Selected source | Runtime export |
+| --- | --- | --- |
+| top | `top-v2.png` | `top-v2.png` |
+| side | `side-v1.png` | `side-v1.png` |
+| chase | `chase-v1.png` | `chase-v1.png` |
+
+## Validation
+
+Three live camera encounters advanced through real attacks for 3 simulated seconds each. All cameras loaded generated bodies and required parts; both phase colors loaded. Light-background/flash checks covered the roster, with detailed Broodmother alpha and Arclight pixel checks. Generated-only leg adjustment was visually rechecked after integration.
+
+The combined art regression run passed 62 tests, including manifests, alpha, loader failures, atomic layers, cache reuse and projection matrices. Both preview pages were checked at approximately 391 CSS pixels with no horizontal overflow. Browser console checks showed no errors or warnings during the smoke flows.
+
+These checks cover isolated encounters and representative visual states; a full campaign, every free-flight heading and physical gamepad/touch hardware were not exhaustively replayed. Gameplay collision geometry, damage, timings, progression and save formats are unchanged.

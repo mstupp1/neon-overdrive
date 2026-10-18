@@ -1,0 +1,167 @@
+{
+  "method": "built-in imagegen; deterministic Pillow export",
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/modules/blade/sources/top-v1.png",
+      "prompt": "art/modules/blade/prompts/top-v1.txt",
+      "runtime": "src/assets/modules/blade/top-v1.png",
+      "logicalSize": 30,
+      "visibleExtent": 22,
+      "references": [
+        {
+          "path": "art/ships/vector/sources/top-v1.png",
+          "sha256": "f2c2564e878485c04b19522de9fb6317a485ddeeb4560fd410d7a01e217c8e3a"
+        }
+      ],
+      "sourceAnchor": [
+        627,
+        627
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        422,
+        422
+      ],
+      "offset": [
+        45,
+        45
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "0d662df74e342392a3625c8be5a303ef950efe56a2cd8b6fe3e8e7e4c541bd40",
+      "runtime_sha256": "a904e6e2a7dc9e1e3a5a3f7016dcc156b075659fc346f474861c217feba95b9d",
+      "prompt_sha256": "d9c0d784836946d6f00226d0bc71c071e4c95ad096a56985abbfb387e64bc35b",
+      "alphaBounds": [
+        64,
+        67,
+        463,
+        443
+      ]
+    },
+    {
+      "camera": "side",
+      "cameraIntent": "Low horizontal plane shared by camera-neutral radial geometry; side bake compensates stage quarter-turn",
+      "source": "art/modules/blade/sources/plane-v2.png",
+      "prompt": "art/modules/blade/prompts/plane-v2.txt",
+      "runtime": "src/assets/modules/blade/side-v1.png",
+      "logicalSize": 30,
+      "visibleExtent": 22,
+      "references": [
+        {
+          "path": "art/modules/blade/sources/top-v1.png",
+          "sha256": "0d662df74e342392a3625c8be5a303ef950efe56a2cd8b6fe3e8e7e4c541bd40"
+        },
+        {
+          "path": "art/minibosses/citadel/sources/side-v1.png",
+          "sha256": "be541afb80dcb736b69569534699b1032afd0005bd26d39cd36c1406359ea0ab"
+        }
+      ],
+      "spinAspect": 0.212,
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        625.5,
+        663.0
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        384,
+        384
+      ],
+      "offset": [
+        65,
+        53
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "6d5373d4102336d2e324057cf98077e9cced540f4b1e6519a2bfb4df6a684b13",
+      "runtime_sha256": "81f21467accdd471605d37066851446f3e09120d9ed215c0011a3fd28d50d857",
+      "prompt_sha256": "139628eb421d7b09d998e5476c671e75f6c1d1faedb8fa689af63175ae709a6d",
+      "alphaBounds": [
+        66,
+        214,
+        447,
+        403
+      ]
+    },
+    {
+      "camera": "chase",
+      "cameraIntent": "Low horizontal plane shared by camera-neutral radial geometry; side bake compensates stage quarter-turn",
+      "source": "art/modules/blade/sources/plane-v2.png",
+      "prompt": "art/modules/blade/prompts/plane-v2.txt",
+      "runtime": "src/assets/modules/blade/chase-v1.png",
+      "logicalSize": 30,
+      "visibleExtent": 22,
+      "references": [
+        {
+          "path": "art/modules/blade/sources/top-v1.png",
+          "sha256": "0d662df74e342392a3625c8be5a303ef950efe56a2cd8b6fe3e8e7e4c541bd40"
+        },
+        {
+          "path": "art/minibosses/citadel/sources/side-v1.png",
+          "sha256": "be541afb80dcb736b69569534699b1032afd0005bd26d39cd36c1406359ea0ab"
+        }
+      ],
+      "spinAspect": 0.212,
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        625.5,
+        663.0
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        384,
+        384
+      ],
+      "offset": [
+        65,
+        53
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "6d5373d4102336d2e324057cf98077e9cced540f4b1e6519a2bfb4df6a684b13",
+      "runtime_sha256": "81f21467accdd471605d37066851446f3e09120d9ed215c0011a3fd28d50d857",
+      "prompt_sha256": "139628eb421d7b09d998e5476c671e75f6c1d1faedb8fa689af63175ae709a6d",
+      "alphaBounds": [
+        66,
+        214,
+        447,
+        403
+      ]
+    }
+  ]
+}

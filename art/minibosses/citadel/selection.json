@@ -1,0 +1,41 @@
+{
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/minibosses/citadel/sources/top-v1.png",
+      "prompt": "art/minibosses/citadel/prompts/top-v1.txt",
+      "runtime": "src/assets/minibosses/citadel/top-v1.png",
+      "logicalSize": 150,
+      "visibleExtent": 84,
+      "references": [
+        "art/ships/vector/sources/top-v1.png"
+      ],
+      "sourceAnchor": [
+        627,
+        627
+      ]
+    },
+    {
+      "camera": "side",
+      "source": "art/minibosses/citadel/sources/side-v1.png",
+      "prompt": "art/minibosses/citadel/prompts/side-v1.txt",
+      "runtime": "src/assets/minibosses/citadel/side-v1.png",
+      "logicalSize": 150,
+      "visibleExtent": 84,
+      "references": [
+        "art/minibosses/citadel/sources/top-v1.png"
+      ]
+    },
+    {
+      "camera": "chase",
+      "source": "art/minibosses/citadel/sources/chase-v1.png",
+      "prompt": "art/minibosses/citadel/prompts/chase-v1.txt",
+      "runtime": "src/assets/minibosses/citadel/chase-v1.png",
+      "logicalSize": 150,
+      "visibleExtent": 84,
+      "references": [
+        "art/minibosses/citadel/sources/top-v1.png"
+      ]
+    }
+  ]
+}

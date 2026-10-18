@@ -9,6 +9,8 @@ import { applyStatus } from './status.js';
 import { ring, sparks, explosion } from './fx.js';
 import { sfx } from '../core/audio.js';
 import { fortressOn, ultDmg, ultModRate, ultWingmen } from './pilot.js';
+import { moduleImage, moduleSpinMatrix, prewarmModuleImages } from '../render/moduleImages.js';
+import { sv } from './stageview.js';
 
 const lvl = (arr, lv) => arr[Math.min(arr.length, lv) - 1];
 const UP = -Math.PI / 2;
@@ -24,6 +26,8 @@ function local(p, x, y) {
 const TEMP_SLOTS = { 2: [[-62, 30], [62, 30]], 3: [[-62, 30], [62, 30], [0, 56]], 4: [[-62, 30], [62, 30], [-34, 54], [34, 54]] };
 
 export function resetModules(p) {
+  // Start decoding module art during the reset/startup path, never from a frame renderer.
+  prewarmModuleImages();
   p.mod = {
     missT: 1, arcT: 1.2, novaT: 2, railT: 2, orbA: 0, droneT: 0.2, gravT: 2.5, reflT: 3, flakT: 0.6, wells: [], flaks: [], refl: 0, reflMax: 0,
     mineT: 0.8, mines: [], sawT: 1, saws: [], stasisT: 2, stasisFx: 0, prismT: 0, prism: [], starT: 1.5,
@@ -949,16 +953,15 @@ export function drawModules(ctx, k) {
     const n = orbitBlades(p);
     const radius = orbitRadius(p);
     const bs = evo(p, 'stormhalo') ? 1.3 : 1;
-    const s = S.blade;
-    ctx.globalCompositeOperation = 'lighter';
+    const s = moduleImage('blade', sv.mode, S.blade);
+    ctx.globalCompositeOperation = s.generated ? 'source-over' : 'lighter';
     for (let i = 0; i < n; i++) {
       const a = p.mod.orbA + (i / n) * TAU;
       const x = p.x + Math.cos(a) * radius;
       const y = p.y + Math.sin(a) * radius;
       const r = G.time * 12;
-      const c = Math.cos(r) * k;
-      const sn = Math.sin(r) * k;
-      ctx.setTransform(c, sn, -sn, c, x * k + view.ox, y * k + view.oy);
+      const [ma, mb, mc, md] = moduleSpinMatrix(r, s.generated ? sv.mode : 'top', s.spinAspect);
+      ctx.setTransform(ma * k, mb * k, mc * k, md * k, x * k + view.ox, y * k + view.oy);
       ctx.drawImage(s.img, -s.half * bs, -s.half * bs, s.size * bs, s.size * bs);
     }
     ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
@@ -967,22 +970,26 @@ export function drawModules(ctx, k) {
   drawGearV2(ctx, k, p);
   // Drones
   for (const d of p.drones) {
-    const s = S.drone;
+    const s = moduleImage('drone', sv.mode, S.drone);
     const a = (d.ang ?? p.aim) + Math.PI / 2;
     const c = Math.cos(a) * k;
     const sn = Math.sin(a) * k;
     ctx.setTransform(c, sn, -sn, c, d.x * k + view.ox, d.y * k + view.oy);
+    ctx.globalCompositeOperation = 'source-over';
     ctx.drawImage(s.img, -s.half, -s.half, s.size, s.size);
+    ctx.globalCompositeOperation = 'source-over';
   }
   // Swarm Interceptors
   if (p.mod.interceptors) {
     for (const ic of p.mod.interceptors) {
-      const s = S.interceptor;
+      const s = moduleImage('interceptor', sv.mode, S.interceptor);
       const a = (ic.ang ?? p.aim) + Math.PI / 2;
       const c = Math.cos(a) * k;
       const sn = Math.sin(a) * k;
       ctx.setTransform(c, sn, -sn, c, ic.x * k + view.ox, ic.y * k + view.oy);
+      ctx.globalCompositeOperation = 'source-over';
       ctx.drawImage(s.img, -s.half, -s.half, s.size, s.size);
+      ctx.globalCompositeOperation = 'source-over';
     }
   }
   ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
@@ -1163,6 +1170,13 @@ function drawGearV2(ctx, k, p) {
   for (const mn of m.mines) {
     const armed = mn.arm <= 0;
     const blink = armed ? 0.6 + 0.4 * Math.sin(mn.t * 12) : 0.35;
+    const physicalMine = moduleImage('mine', sv.mode, null);
+    if (physicalMine) {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
+      ctx.drawImage(physicalMine.img, mn.x - 12, mn.y - 12, 24, 24);
+      ctx.globalCompositeOperation = 'lighter';
+    }
     ctx.globalAlpha = blink;
     ctx.strokeStyle = '#ff9e3d';
     ctx.lineWidth = 1.5;
@@ -1175,14 +1189,17 @@ function drawGearV2(ctx, k, p) {
   ctx.globalAlpha = 1;
   // Buzzsaws
   for (const sw of m.saws) {
-    const s = S.blade;
-    const c = Math.cos(sw.rot) * k;
-    const sn = Math.sin(sw.rot) * k;
-    ctx.setTransform(c, sn, -sn, c, sw.x * k + view.ox, sw.y * k + view.oy);
+    const s = moduleImage('saw', sv.mode, S.blade);
+    const [a, b, c, d] = moduleSpinMatrix(sw.rot, s.generated ? sv.mode : 'top', s.spinAspect);
+    ctx.setTransform(a * k, b * k, c * k, d * k, sw.x * k + view.ox, sw.y * k + view.oy);
     const sz = s.size * sw.size;
+    ctx.globalCompositeOperation = 'source-over';
     ctx.drawImage(s.img, -sz / 2, -sz / 2, sz, sz);
-    ctx.rotate(Math.PI / 4);
-    ctx.drawImage(s.img, -sz / 2, -sz / 2, sz, sz);
+    if (!s.generated) {
+      ctx.rotate(Math.PI / 4);
+      ctx.drawImage(s.img, -sz / 2, -sz / 2, sz, sz);
+    }
+    ctx.globalCompositeOperation = 'lighter';
   }
   ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
   // Prism beam: a white core with a magenta-cyan sheath, flickering.
