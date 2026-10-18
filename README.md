@@ -31,7 +31,7 @@ The title menu is PLAY, HANGAR, COLLECTION, HOW TO PLAY and SETTINGS. **HANGAR**
 
 ## Campaign
 
-Title **PLAY** opens the campaign map, then LAUNCH. A **run** flies all four systems in order with one ship: beat a system's boss and you warp straight into the next one with your build, level, hull (half the missing hull is patched) and wallet. **Die anywhere and the next run starts again at Genesis**, so the Hangar, Pilot and banked credits are how you get further each time. Each system is a map of 8 rows plus a boss. The campaign map shows the furthest point any run has reached.
+Title **PLAY** opens the campaign map, then LAUNCH. A **run** flies all four systems in order with one ship: beat a system's boss and you warp straight into the next one with your build, level, hull (no free repairs: hearts drop only from bosses, usually from mini bosses and sometimes from elites) and wallet. **Die anywhere and the next run starts again at Genesis**, so the Hangar, Pilot and banked credits are how you get further each time. Each system is a map of 8 rows plus a boss. The campaign map shows the furthest point any run has reached.
 
 | # | System | Boss | Sectors | Notes |
 |---|---|---|---|---|
