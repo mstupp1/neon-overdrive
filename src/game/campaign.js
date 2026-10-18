@@ -6,8 +6,8 @@ import { heatScale } from './core.js';
 
 // level = difficulty at route row 0; each row adds `step` (boss row ≈ level + rows*step). dur = fighting sector seconds;
 // bossHp multiplies the boss's base HP (campaign bosses are tuned per system, the debug sandbox keeps the base);
-// supply = free reward drafts at system start (Genesis: 1, the opening pick of new tech, since level-ups only raise what you own;
-// Deep Grid cycles skip it);
+// supply = free reward drafts at system start (0 everywhere: a run opens straight into gameplay with the bare ship, and the
+// first draft is the first level-up; Deep Grid cycles skip it anyway);
 // warm = level eased off per row short of row 2 (default WARM).
 // minis = the mini bosses that may guard the halfway Vault (one per route, seeded); miniHp multiplies their base HP.
 // One run flies all four systems with one build, so levels form one continuous climb: Genesis opens like the old endless
@@ -15,7 +15,7 @@ import { heatScale } from './core.js';
 // at most as hard as when each system was flown alone (OMEGA x0.5, ECLIPSE x0.22 as before).
 export const SYSTEMS = [
   {
-    id: 'genesis', name: 'NEON GENESIS', short: 'GENESIS', act: 1, hue: 215, level: 1, step: 0.56, warm: 0, rows: 8, dur: 42, bossHp: 1.3, supply: 1, pay: 0.8, boss: 'warden',
+    id: 'genesis', name: 'NEON GENESIS', short: 'GENESIS', act: 1, hue: 215, level: 1, step: 0.56, warm: 0, rows: 8, dur: 42, bossHp: 1.3, supply: 0, pay: 0.8, boss: 'warden',
     minis: ['razorwing', 'mauler'], miniHp: 0.8,
     blurb: 'The Grid\'s outer lattice. A siege mech guards the gate.',
   },
@@ -212,7 +212,7 @@ export function reachableNodes(route, nodeId) {
   return routeNode(route, nodeId).links.map((id) => routeNode(route, id));
 }
 
-// Difficulty level of a route row. The first two rows ease in: a ship that has only its supply drop must not meet
+// Difficulty level of a route row. The first two rows ease in: a ship that has only its starting loadout must not meet
 // full-strength waves at row 0.
 export const nodeLevel = (system, row) => system.level + row * system.step - Math.max(0, 2 - row) * (system.warm ?? WARM);
 
