@@ -294,16 +294,13 @@ function noteProgress() {
   }
 }
 
-// System boss down (not the last): post-boss dialogue, patch up half the missing hull, then warp to the next system.
+// System boss down (not the last): post-boss dialogue, then warp to the next system. Hull carries over as is: no free repair.
 function nextSystem() {
   const r = G.run;
   markCleared(r.system);
   blockingStory('post:' + r.system.id, STORY.systems[r.system.id].postBoss, { once: false, short: 'last' }, () => {
     comms.clear();
     hideBossCard();
-    const p = G.player;
-    const heal = Math.ceil((p.maxHp - p.hp) / 2);
-    if (heal > 0) p.hp += heal;
     music.setSet('normal');
     enterSystem(r.sysIdx + 1);
   });
@@ -321,8 +318,6 @@ function diveDeeper() {
   const go = () => {
     comms.clear();
     hideBossCard();
-    const p = G.player;
-    p.hp += Math.ceil((p.maxHp - p.hp) / 2);
     r.deep = (r.deep || 0) + 1;
     profile.bestDeep = Math.max(profile.bestDeep, r.deep);
     saveProfile();

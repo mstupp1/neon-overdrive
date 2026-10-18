@@ -5,7 +5,7 @@ import { G, view } from './state.js';
 import { glow, S, flame } from '../render/sprites.js';
 import { wardenBody, wardenLegs, hydraBody, hydraPod, omegaCore, omegaRing, omegaNode, omegaShard } from '../render/bossArt.js';
 import { bossImage, bossVisualPoints } from '../render/bossImages.js';
-import { TAU, damp, rand, clamp } from '../core/math.js';
+import { TAU, damp, rand, clamp, chance } from '../core/math.js';
 import { shoot, ring, fan, aimAt, clearBullets } from './bullets.js';
 import { explosion, addShake, flash, floatText, slowmo, hitstop, sparks } from './fx.js';
 import { cine } from './cinematic.js';
@@ -769,7 +769,8 @@ function finishBoss(e) {
   if (bp) floatText(e.x, e.y + 24, `+${bp} CREDITS`, '#ffd24a', 12, 2);
 }
 
-// A mini boss pays like a big Hunter (XP, a heart, a relic / gear chance); the Vault it guards is the real prize.
+// A mini boss pays like a big Hunter (XP, usually a heart, a relic / gear chance); the Vault it guards is the real prize.
+const HEART_MINI = 0.75;
 function finishMini(e) {
   G.miniKills = (G.miniKills || 0) + 1;
   miniBurst(e);
@@ -778,7 +779,7 @@ function finishMini(e) {
   sfx.explode(2.5);
   addScore(e.score * (1 + G.loop));
   dropXp(e.x, e.y, Math.round(e.xp * G.director.diff.xp));
-  dropPickup(e.x, e.y, 'heart');
+  if (chance(HEART_MINI)) dropPickup(e.x, e.y, 'heart');
   const loot = { x: e.x, y: e.y, hunter: true };
   rollRelicDrop(loot);
   rollGearDrop(loot);

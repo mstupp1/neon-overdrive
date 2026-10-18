@@ -566,6 +566,9 @@ BEHAVIOR.blinker = function blinker(e, dt) {
 };
 
 // Hunter attack patterns (boss-style: return true when finished).
+const HEART_ELITE = 0.15; // heart chance on an elite kill (else magnet / cell)
+const HEART_HUNTER = 0.25;
+
 const HUNTER_ATK = {
   needles(e, a, dt, fr) {
     every(a, dt, 0.42 / fr, () => fan(e.x, e.y + 16, aimAt(e.x, e.y + 16), 3, 0.26, 235, 'needle', { acc: 150, maxSpeed: 380 }));
@@ -717,17 +720,18 @@ export function killEnemy(e, silent = false) {
   dropKillCredits(e);
   rollRelicDrop(e);
   rollGearDrop(e);
+  // Hearts are earned: bosses always drop them, mini bosses usually (bosses.js), Hunters and elites only sometimes,
+  // regular enemies never.
   if (e.hunter) {
-    dropPickup(e.x - 10, e.y, 'heart');
+    if (chance(HEART_HUNTER)) dropPickup(e.x - 10, e.y, 'heart');
     dropPickup(e.x + 10, e.y, chance(0.5) ? 'magnet' : 'cell');
     floatText(e.x, e.y - 24, 'HUNTER DOWN', '#ff3b3b', 16, 1.6);
     addShake(0.4);
     if (G.player) onEliteKilled(G.player);
   } else if (e.elite) {
-    dropPickup(e.x, e.y, chance(0.3) ? 'heart' : chance(0.5) ? 'magnet' : 'cell');
+    dropPickup(e.x, e.y, chance(HEART_ELITE) ? 'heart' : chance(0.5) ? 'magnet' : 'cell');
     floatText(e.x, e.y - 20, 'ELITE DOWN', '#ffd84d', 12, 1);
-  } else if (chance(0.006)) dropPickup(e.x, e.y, 'heart');
-  else if (chance(0.006)) dropPickup(e.x, e.y, 'magnet');
+  } else if (chance(0.006)) dropPickup(e.x, e.y, 'magnet');
   else if (chance(0.01)) dropPickup(e.x, e.y, 'cell');
 
   if (e.type === 'splitter') {
