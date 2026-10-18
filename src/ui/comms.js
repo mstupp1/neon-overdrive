@@ -3,6 +3,9 @@
 //    While blocking, main.js does not run ui.update, so menu navigation never sees these key presses.
 //  - non-blocking (in play): auto-advances on a timer near the top of the field, steals no input and never pauses.
 // play(lines, { blocking, onDone }) runs onDone exactly once (also when skipped or cleared). clear() drops silently.
+// The box never changes size: the text area holds a fixed number of lines (3 blocking, 2 live), and a line too long
+// for it is split into pages, preferably at a sentence end, else at a clause break, else between words. Each page
+// types out and advances like a line of its own.
 
 import { input } from '../core/input.js';
 import { portraitArtwork } from './portraits.js';
@@ -19,7 +22,7 @@ let face = null;
 let nameEl = null;
 let lineEl = null;
 let hintEl = null;
-let q = null; // { lines, i, chars, shown, blocking, onDone, hold, age }
+let q = null; // { lines, i, pages, p, chars, shown, blocking, onDone, hold, age }
 
 function init() {
   if (el) return;
@@ -44,6 +47,12 @@ function showLine() {
   portrait.classList.add('comms-face');
   face.replaceWith(portrait);
   face = portrait;
+  q.pages = paginate(ln.text);
+  q.p = 0;
+  showPage();
+}
+
+function showPage() {
   q.chars = 0;
   q.shown = -1;
   q.hold = 0;
@@ -51,7 +60,40 @@ function showLine() {
   hintEl.hidden = true;
 }
 
-const typed = () => q.chars >= q.lines[q.i].text.length;
+const page = () => q.pages[q.p];
+const typed = () => q.chars >= page().length;
+
+function fits(text) {
+  lineEl.textContent = text;
+  return lineEl.scrollHeight <= lineEl.clientHeight + 1;
+}
+
+const SENTENCE = /[.!?…]["'”’)\]]*$/;
+const CLAUSE = /[,;:—–]["'”’)\]]*$/;
+
+// Splits text into pages that each fit the fixed text area.
+function paginate(text) {
+  const pages = [];
+  let words = text.trim().split(/\s+/);
+  while (words.length) {
+    if (fits(words.join(' '))) {
+      pages.push(words.join(' '));
+      break;
+    }
+    let n = 1; // most words that fit (at least one, even if it alone overflows)
+    while (n < words.length && fits(words.slice(0, n + 1).join(' '))) n++;
+    // End the page on a sentence, else a clause, as long as that keeps at least half of it.
+    const at = (re) => {
+      for (let k = n; k >= Math.ceil(n / 2); k--) if (re.test(words[k - 1])) return k;
+      return 0;
+    };
+    const k = (n < words.length && (at(SENTENCE) || at(CLAUSE))) || n;
+    pages.push(words.slice(0, k).join(' '));
+    words = words.slice(k);
+  }
+  lineEl.textContent = '';
+  return pages;
+}
 
 function hintText() {
   const go = input.device === 'touch' ? 'TAP' : input.device === 'pad' ? 'A' : 'ENTER';
@@ -90,11 +132,14 @@ export const comms = {
   advance() {
     if (!q) return;
     if (!typed()) {
-      q.chars = q.lines[q.i].text.length;
+      q.chars = page().length;
       return;
     }
     if (q.blocking) sfx.ui();
-    if (q.i + 1 < q.lines.length) {
+    if (q.p + 1 < q.pages.length) {
+      q.p++;
+      showPage();
+    } else if (q.i + 1 < q.lines.length) {
       q.i++;
       showLine();
     } else this.finish(true);
@@ -134,12 +179,12 @@ export const comms = {
       el.classList.toggle('hold', !playing); // hidden while paused / in menus
       if (!playing) return;
     }
-    const ln = q.lines[q.i];
-    if (!typed()) q.chars = Math.min(ln.text.length, q.chars + CPS * dt);
+    const text = page();
+    if (!typed()) q.chars = Math.min(text.length, q.chars + CPS * dt);
     const n = Math.floor(q.chars);
     if (n !== q.shown) {
       q.shown = n;
-      lineEl.textContent = ln.text.slice(0, n);
+      lineEl.textContent = text.slice(0, n);
     }
     if (typed()) {
       if (q.blocking) {
@@ -149,7 +194,7 @@ export const comms = {
         }
       } else {
         q.hold += dt;
-        if (q.hold > HOLD + ln.text.length * 0.025) this.advance();
+        if (q.hold > HOLD + text.length * 0.025) this.advance();
       }
     }
   },
