@@ -95,7 +95,8 @@ export function enemySpriteForView(sprite, mode = 'top') {
 
 // Draw the base image and its separately animated generated details. Angles
 // stay in virtual-world coordinates; stageview applies the side quarter-turn.
-export function drawEnemyHull(ctx, sprite, enemy, mode = 'top', k = 1, ox = 0, oy = 0, scale = enemy.elite ? 1.2 : 1, visualTime) {
+// aura: draw each piece's baked elite rim (eliteAura) in place of the piece itself, under the same transforms.
+export function drawEnemyHull(ctx, sprite, enemy, mode = 'top', k = 1, ox = 0, oy = 0, scale = enemy.elite ? 1.2 : 1, visualTime, aura = false) {
   const spr = enemySpriteForView(sprite, mode);
   const projectedSpinner = spr.generated && spr.enemyImageId === 'spinner' && mode !== 'top';
   const angle = spr.generated && (mode === 'chase' || projectedSpinner) ? 0 : (enemy.rot || 0);
@@ -103,8 +104,12 @@ export function drawEnemyHull(ctx, sprite, enemy, mode = 'top', k = 1, ox = 0, o
   const size = (spr.size || sprite.size) * scale;
   const c = Math.cos(angle), s = Math.sin(angle);
   ctx.setTransform(c * k, s * k, -s * k, c * k, enemy.x * k + ox, enemy.y * k + oy);
-  const base = enemy.flash > 0 ? spr.flash : spr.img;
-  ctx.drawImage(base, -size / 2, -size / 2, size, size);
+  const piece = (img, w) => {
+    if (!aura) return ctx.drawImage(img, -w / 2, -w / 2, w, w);
+    const a = eliteAura(img, spr.size || sprite.size);
+    ctx.drawImage(a.img, -w * a.k / 2, -w * a.k / 2, w * a.k, w * a.k);
+  };
+  piece(aura || !(enemy.flash > 0) ? spr.img : spr.flash, size);
   if (spr.layers) {
     for (const [name, layer] of (spr.layerList || Object.entries(spr.layers))) {
       let a = 0;
@@ -132,8 +137,89 @@ export function drawEnemyHull(ctx, sprite, enemy, mode = 'top', k = 1, ox = 0, o
       if (name === 'doorLeft') ctx.translate(-opening, 0);
       else if (name === 'doorRight') ctx.translate(opening, 0);
       ctx.translate(0, recoil * scale);
-      ctx.drawImage(enemy.flash > 0 ? layer.flash : layer.img, -w / 2, -w / 2, w, w);
+      piece(aura || !(enemy.flash > 0) ? layer.img : layer.flash, w);
       ctx.restore();
     }
   }
+}
+
+// Elite marker: a gold rim traced around the hull's own silhouette (plus a soft outer glow), baked once per hull
+// image and drawn under the enemy with a slow pulse. Pixels under ~35% alpha count as outside so baked glow halos
+// don't bloat the outline.
+const auras = new WeakMap();
+const ELITE_PAD = 9; // logical units of margin per side for the rim and its glow
+function eliteAura(img, size) {
+  let a = auras.get(img);
+  if (a) return a;
+  const w = img.width, h = img.height;
+  const res = w / size; // canvas pixels per logical unit
+  const pad = Math.ceil(ELITE_PAD * res);
+  const src = document.createElement('canvas');
+  src.width = w; src.height = h;
+  const sg = src.getContext('2d', { willReadFrequently: true });
+  sg.drawImage(img, 0, 0);
+  const alpha = sg.getImageData(0, 0, w, h).data;
+  // Solid silhouette: everything not reachable from the border through faint pixels, so line-art hulls with glassy,
+  // see-through bodies still get one outline around the outside instead of rims along every inner stroke.
+  const out = new Uint8Array(w * h);
+  const stack = [];
+  const seed = (i) => { if (!out[i] && alpha[i * 4 + 3] <= 90) { out[i] = 1; stack.push(i); } };
+  for (let x = 0; x < w; x++) { seed(x); seed((h - 1) * w + x); }
+  for (let y = 0; y < h; y++) { seed(y * w); seed(y * w + w - 1); }
+  while (stack.length) {
+    const i = stack.pop();
+    const x = i % w;
+    if (x > 0) seed(i - 1);
+    if (x < w - 1) seed(i + 1);
+    if (i >= w) seed(i - w);
+    if (i < w * (h - 1)) seed(i + w);
+  }
+  // One flat silhouette per colour: the gold body of the rim and a pale hot line on its inner edge.
+  const silhouette = (r, gr, b) => {
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    const cg = c.getContext('2d');
+    const px = cg.createImageData(w, h);
+    const d = px.data;
+    for (let i = 0; i < d.length; i += 4) {
+      if (out[i >> 2]) continue;
+      d[i] = r; d[i + 1] = gr; d[i + 2] = b; d[i + 3] = 255;
+    }
+    cg.putImageData(px, 0, 0);
+    return c;
+  };
+  const gold = silhouette(255, 200, 60);
+  const pale = silhouette(255, 246, 200);
+  const c = document.createElement('canvas');
+  c.width = w + pad * 2; c.height = h + pad * 2;
+  const g = c.getContext('2d');
+  const rim = (sil, r, blur) => {
+    g.shadowColor = '#ffb31a'; g.shadowBlur = blur;
+    for (let i = 0; i < 16; i++) {
+      const t = (i / 16) * Math.PI * 2;
+      g.drawImage(sil, pad + Math.cos(t) * r, pad + Math.sin(t) * r);
+    }
+    g.shadowBlur = 0;
+  };
+  rim(gold, 2.4 * res, 6 * res);
+  rim(pale, 1 * res, 0);
+  // Cut the hull itself out so only the rim and glow remain around it.
+  g.globalCompositeOperation = 'destination-out';
+  g.drawImage(gold, pad, pad);
+  a = { img: c, k: c.width / w };
+  auras.set(img, a);
+  return a;
+}
+
+// The elite rim, drawn under the enemy with a slow pulse. It reuses drawEnemyHull's placement, so it hugs the hull and
+// every moving part in each camera view.
+export function drawEliteAura(ctx, sprite, enemy, mode = 'top', k = 1, ox = 0, oy = 0, scale = 1.2, time = 0) {
+  if (!enemySpriteForView(sprite, mode)?.img) return;
+  const prevA = ctx.globalAlpha;
+  const prevOp = ctx.globalCompositeOperation;
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.globalAlpha = prevA * (0.8 + 0.2 * Math.sin(time * 4.2 + (enemy.ph || 0)));
+  drawEnemyHull(ctx, sprite, enemy, mode, k, ox, oy, scale, time, true);
+  ctx.globalAlpha = prevA;
+  ctx.globalCompositeOperation = prevOp;
 }

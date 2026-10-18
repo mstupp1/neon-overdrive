@@ -12,7 +12,7 @@ import { profile } from '../core/storage.js';
 import { recomputeStats } from './upgrades.js';
 import { playerBullet, clearBullets } from './bullets.js';
 import { gainCredits } from './economy.js';
-import { particle, explosion, ring, sparks, floatText, addShake, flash, hitstop, slowmo } from './fx.js';
+import { particle, explosion, ring, sparks, floatText, addShake, flash, hitstop, slowmo, grazeLabel } from './fx.js';
 import { sfx } from '../core/audio.js';
 import { input, readDirection } from '../core/input.js';
 import { botControl } from './bot.js';
@@ -79,6 +79,11 @@ export function createPlayer(ship, gear = true) {
     up: {},
     st: {},
     ghosts: [],
+    grazeArcs: [], // graze feedback: bright arcs on the graze ring where a bullet scraped by (world.js)
+    grazeFx: 0,
+    grazeRad: 24,
+    grazeChain: 0,
+    grazeChainT: 0,
     ghostT: 0,
     pitch: 0,
     trailT: 0,
@@ -287,6 +292,11 @@ export function updatePlayer(p, dt) {
   }
   while (p.ghosts.length && p.ghosts[0].life <= 0) p.ghosts.shift();
 
+  for (const a of p.grazeArcs) a.t -= dt;
+  while (p.grazeArcs.length && p.grazeArcs[0].t <= 0) p.grazeArcs.shift();
+  if (p.grazeFx > 0) p.grazeFx = Math.max(0, p.grazeFx - dt * 2.5);
+  if (p.grazeChainT > 0 && (p.grazeChainT -= dt) <= 0) p.grazeChain = 0;
+
   // --- Timers ---
   if (p.iframes > 0) p.iframes -= dt;
   if (p.hurtT > 0) p.hurtT -= dt;
@@ -438,6 +448,18 @@ function firePrimary(p, w) {
   }
   p.muzzle = 0.05;
   sfx.shoot();
+}
+
+// Grazing a bullet (world.js): light the arc of the graze ring it scraped, and count the streak under the ship.
+export const GRAZE_COL = '#c9b8ff';
+const GRAZE_ARC_T = 0.35;
+export function grazeFeedback(p, angle, rad) {
+  p.grazeRad = rad;
+  p.grazeFx = 1;
+  if (p.grazeArcs.length < 8) p.grazeArcs.push({ a: angle, t: GRAZE_ARC_T });
+  p.grazeChain = p.grazeChainT > 0 ? p.grazeChain + 1 : 1;
+  p.grazeChainT = 1;
+  grazeLabel(p, p.grazeChain);
 }
 
 const ultOf = (p) => CLASSES.find((x) => x.id === p.cls).ult;
@@ -704,6 +726,24 @@ export function drawPlayer(ctx, k) {
   ctx.globalAlpha = od ? 0.55 + Math.sin(G.time * 20) * 0.15 : 0.28;
   const gs = od ? 70 : 42;
   ctx.drawImage(gl.img, p.x - gs / 2, p.y - gs / 2 + 4, gs, gs);
+  if (p.grazeFx > 0) {
+    // Graze: the graze ring shows faintly for a moment, with a bright arc where each bullet scraped past.
+    ctx.strokeStyle = GRAZE_COL;
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.22 * p.grazeFx;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.grazeRad, 0, TAU);
+    ctx.stroke();
+    ctx.strokeStyle = '#efe8ff';
+    ctx.lineWidth = 2.2;
+    for (const a of p.grazeArcs) {
+      const t = a.t / GRAZE_ARC_T;
+      ctx.globalAlpha = 0.95 * t;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.grazeRad + (1 - t) * 4, a.a - 0.5, a.a + 0.5);
+      ctx.stroke();
+    }
+  }
   const nx = Math.cos(p.aim); // nose direction
   const ny = Math.sin(p.aim);
   if (p.muzzle > 0 && !spr.muzzles) {
