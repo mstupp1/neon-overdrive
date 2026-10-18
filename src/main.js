@@ -343,7 +343,7 @@ function markCleared(sys) {
   saveProfile();
 }
 
-// Optional supply drop at system start (SYSTEMS[].supply; 0 everywhere now that the build carries over).
+// Optional supply drop at system start (SYSTEMS[].supply; 0 everywhere, so runs open straight into the route).
 function startSupply(n) {
   G.supplyLeft = n;
   rewardTier = 'node';

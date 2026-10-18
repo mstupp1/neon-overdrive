@@ -127,7 +127,7 @@ Each class's Common ability (Killstreak, Salvager, Wide Graze) comes with the cl
 
 ## In a run
 
-- **Level ups vs rewards.** Enemies drop XP shards. Each level offers a small draft that tunes what you already fly: +1 to a stat or defense (owned or new), or a **Tune** (one small run modifier from your build paths). New tech, module levels, rarity and evolutions come from **reward** drafts: clearing a sector (elites a bit luckier), a boss (every card Uncommon or better, rarer rolls), a vault, and the Supply Drop that opens Genesis.
+- **Level ups vs rewards.** Enemies drop XP shards. Each level offers a small draft that tunes what you already fly: +1 to a stat or defense (owned or new), or a **Tune** (one small run modifier from your build paths). New tech, module levels, rarity and evolutions come from **reward** drafts: clearing a sector (elites a bit luckier), a boss (every card Uncommon or better, rarer rolls), and a vault. A run has no opening draft: you launch with the bare ship, and the first draft is your first level-up.
 - **Main Cannon.** Never drafted: it gains a level for each system's halfway mini boss and each boss, reaching its max at the Void's mini boss.
 - **Mini bosses.** Each system's halfway Vault is guarded by one of six mini bosses (Razorwing, Mauler, Broodmother, Specter, Arclight, Citadel). Beat it for the Main Cannon level, then the Vault opens.
 - **Specialization.** Every upgrade level counts toward its build path. The first two paths to reach 5 levels lock in as your specializations, with a mastery bonus at 5, 10 and 15 levels; after that the other paths share 10 splash levels.
