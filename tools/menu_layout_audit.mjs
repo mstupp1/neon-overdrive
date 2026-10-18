@@ -33,11 +33,23 @@ const focusEach = `{const b=[...document.querySelectorAll('.screen.active button
 const focusCount = `document.querySelectorAll('.screen.active button').length`;
 const tabEach = `{const t=document.querySelectorAll('.screen.active .tabbar.primary .tab'); t[I%t.length]?.click();}`;
 const menuFocus = (sel) => `document.querySelectorAll('${sel}')[I]?.dispatchEvent(new CustomEvent('menufocus',{bubbles:true}))`;
+function dialogueLines() {
+  return [
+    { who: 'MAG', text: 'Short line.' },
+    { who: 'MAG', text: 'From the campaign screen, the HANGAR fits ships with the gear you find, and its PILOT tab is where you equip abilities. Then launch again, and this time bring back more than scrap; every relic you recover tells us something about the Signal.' },
+    { who: 'ECHO', text: 'Nobody had the right pilot.' },
+    { who: 'SIGNAL', text: 'Averylongtokenwithoutanyspacesatalltotesttheworstcaseforwrapping and then some normal words follow it to the end.' },
+  ];
+}
+
 const MENUS = {
   title: { open: `NEON.toTitle()`, n: focusCount, step: focusEach },
   campaign: { open: `NEON.toTitle(); document.querySelector('#scr-title [data-act=play]').click()`, n: focusCount, step: focusEach },
   // The active ship wears gear (extra stats and paths), the others don't.
   ships: { open: `for (const [sl, r] of [['core', 4], ['plating', 3], ['thrusters', 2]]) NEON.equip('phantom', NEON.giveGear(sl, r, 30).uid); NEON.openHangar()`, n: `12`, key: 'ArrowRight' },
+  // Dialogue (src/ui/comms.js): short, long and unbroken lines; the box keeps its size, long lines page.
+  dialogue: { root: '#comms', open: `NEON.comms.play(${JSON.stringify(dialogueLines())}, { blocking: true })`, n: `24`, step: `NEON.comms.advance()` },
+  liveDialogue: { root: '#comms', open: `NEON.startRun('vector'); NEON.comms.skipAll(); NEON.comms.play(${JSON.stringify(dialogueLines())}, { blocking: false })`, n: `24`, step: `NEON.comms.advance()` },
   // Hub tabs are separate screens: only the shared header and the text scale must hold still.
   hangarTabs: { open: `NEON.toTitle(); document.querySelector('#scr-title [data-act=hangar]').click()`, n: `10`, key: 'KeyE', across: 'header.hub-head' },
   collectionTabs: { open: `NEON.toTitle(); document.querySelector('#scr-title [data-act=gallery]').click()`, n: `4`, key: 'KeyE', across: 'header.hub-head' },
@@ -60,9 +72,9 @@ const MENUS = {
 };
 
 // Box of every visible element in the open screen, keyed by its path.
-function snapshot() {
-  const scr = document.querySelector('.screen.active');
-  if (!scr) return null;
+function snapshot(root) {
+  const scr = document.querySelector(root || '.screen.active');
+  if (!scr || scr.hidden) return null; // e.g. the dialogue finished
   const path = (el) => {
     const p = [];
     while (el && el !== scr) {
@@ -104,18 +116,18 @@ for (const [view, vp] of Object.entries(VIEWS)) {
       await page.waitForTimeout(400);
     }
     const settle = async (ms) => {
-      await page.evaluate(() => NEON.comms?.skipAll?.());
+      if (!m.root) await page.evaluate(() => NEON.comms?.skipAll?.()); // dialogue in the way of a menu
       await page.waitForTimeout(ms);
     };
     await page.evaluate(m.open).catch((e) => errors.push('open: ' + e.message));
     await settle(700);
     const n = Math.min(40, (await page.evaluate(m.n).catch(() => 8)) || 0);
-    const snaps = [await page.evaluate(snapshot)];
+    const snaps = [await page.evaluate(snapshot, m.root)];
     for (let i = 0; i < n; i++) {
       if (m.key) await page.keyboard.press(Array.isArray(m.key) ? m.key[i % m.key.length] : m.key);
       else await page.evaluate(m.step.replaceAll('I', String(i))).catch((e) => errors.push('step: ' + e.message.slice(0, 80)));
       await settle(150);
-      snaps.push(await page.evaluate(snapshot));
+      snaps.push(await page.evaluate(snapshot, m.root));
     }
     await ctx.close();
 

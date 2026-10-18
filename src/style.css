@@ -2693,17 +2693,25 @@ input[type='range']::-moz-range-thumb {
 }
 
 .comms-line {
+    /* A fixed text area: long lines are paged by comms.js (paginate), never grow the box. */
+    --lines: 3;
+    --lh: 1.22;
     margin-top: 0.25em;
-    min-height: 3.7em; /* three lines */
+    height: calc(var(--lines) * var(--lh) * 1em);
+    overflow: hidden;
     font-size: 1.05em;
-    line-height: 1.22;
+    line-height: var(--lh) !important;
     color: #fff;
 }
 
 .comms.live .comms-line {
-    min-height: 2.4em;
+    --lines: 2;
+    --lh: 1.15;
     font-size: 0.95em;
-    line-height: 1.15;
+}
+
+.retro-pixel .comms-line {
+    --lh: 1.35;
 }
 
 /* The continue hint keeps its line while hidden, so the box doesn't grow when it appears. */
