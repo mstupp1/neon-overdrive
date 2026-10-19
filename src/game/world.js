@@ -228,7 +228,7 @@ function collide(p) {
 
   // Enemy bodies → player
   for (const e of enemies) {
-    if (e.dead || !e.entered || e.state === 'dying') continue;
+    if (e.dead || !e.entered || e.state === 'dying' || e.retreat) continue; // withdrawing stragglers fly past
     if (e.parts) {
       for (const pt of e.parts) {
         const rr = pt.r * 0.8 + p.r;
