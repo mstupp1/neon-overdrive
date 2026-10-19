@@ -8,6 +8,7 @@ import { profile, saveProfile } from '../core/storage.js';
 import { sfx } from '../core/audio.js';
 import { S } from '../render/sprites.js';
 import { menuArtwork } from './menu-art.js';
+import { initServiceArt, showFabricatorArt, playFabricatorRoll } from './service-art.js';
 import { SHIPS, ownsShip, paintsFor, activePaint } from '../game/ships.js';
 import { SLOTS, SLOT_INFO, SLOT_CAP, TAGS, gearDef, gearByUid, gearInSlot, equippedParts, equippedOn, itemName, itemLines, itemTags, sellValue, itemScore } from '../game/parts.js';
 import { RARITY, rarityOdds } from '../game/rarity.js';
@@ -24,6 +25,7 @@ let slot = 'core'; // slot open in the inventory / Fabricator
 let sel = null; // inventory: uid shown in the detail panel
 let confirmSell = null; // uid waiting for a second SELL press (Epic / Legendary)
 let lastRoll = null; // Fabricator: the last rolled item (shown in its result panel)
+let fabRolling = false; // Presentation lock; a paid roll is already saved before the reel starts.
 let fabFrom = 'hub'; // where the Fabricator's BACK goes: 'hub' (out of the hangar) | 'parts' (its inventory)
 const viewShip = () => SHIPS[viewIdx];
 
@@ -294,15 +296,17 @@ function showFab(focus) {
     <div class="fo-note">ITEM LEVEL ${fabItemLevel()} · LUCK ${luck.toFixed(1)}${find ? ` · FIND +${Math.round(find * 100)}%` : ''}</div>`;
   $('#fab-slots').innerHTML = SLOTS.map((sl) => {
     const n = gearInSlot(profile, sl).length;
-    return `<button class="fab-slot${sl === slot ? ' on' : ''}" data-act="fslot" data-slot="${sl}" style="--c:${SLOT_INFO[sl].color}" aria-pressed="${sl === slot}"><b>${SLOT_INFO[sl].name}</b><i>${n}/${SLOT_CAP}</i></button>`;
+    return `<button class="fab-slot${sl === slot ? ' on' : ''}" data-act="fslot" data-slot="${sl}" style="--c:${SLOT_INFO[sl].color}" aria-pressed="${sl === slot}" aria-disabled="${fabRolling}"><b>${SLOT_INFO[sl].name}</b><i>${n}/${SLOT_CAP}</i></button>`;
   }).join('');
   for (const b of document.querySelectorAll('#scr-fab [data-act=froll]')) {
     const cost = ROLL_COST[b.dataset.kind];
-    b.setAttribute('aria-disabled', profile.credits >= cost ? 'false' : 'true');
+    b.setAttribute('aria-disabled', !fabRolling && profile.credits >= cost ? 'false' : 'true');
     b.querySelector('.cost').innerHTML = `${coin}${cost}`;
   }
-  const item = lastRoll && gearByUid(profile, lastRoll.uid) ? lastRoll : null;
+  const item = !fabRolling && lastRoll && gearByUid(profile, lastRoll.uid) ? lastRoll : null;
   setDetail($('#fab-result'), item, { empty: 'Pick a slot and roll. A full slot salvages its weakest spare piece for credits.' });
+  $('#fab-workbench').setAttribute('aria-busy', String(fabRolling));
+  if (!fabRolling) showFabricatorArt(slot, lastRoll, !!lastRoll && !item);
   let el = typeof focus === 'string' ? document.querySelector('#scr-fab ' + focus) : focus;
   if (!el) el = document.querySelector('#scr-fab [data-act=froll]');
   ui.show('fab', { focus: el });
@@ -310,6 +314,7 @@ function showFab(focus) {
 
 export function openFab(from = 'hub') {
   fabFrom = from;
+  fabRolling = false;
   lastRoll = null;
   showFab();
 }
@@ -385,20 +390,30 @@ export const hangarActs = {
     openFab('parts');
   },
   fslot(btn) {
+    if (fabRolling) return;
     slot = btn.dataset.slot;
     showFab(`[data-act=fslot][data-slot="${slot}"]`);
   },
   froll(btn) {
+    if (fabRolling) return;
     const res = rollGear(slot, btn.dataset.kind, shipFind());
     if (res.err) return sfx.ui();
     lastRoll = res.item;
-    bought();
-    if (res.item.r >= 3) sfx.achieve(res.item.r === 4);
-    showFab(`[data-act=froll][data-kind="${btn.dataset.kind}"]`);
-    const el = $('#fab-result');
-    el.classList.remove('reveal');
-    void el.offsetWidth;
-    el.classList.add('reveal');
+    fabRolling = true;
+    sfx.coin();
+    const focus = `[data-act=froll][data-kind="${btn.dataset.kind}"]`;
+    showFab(focus);
+    playFabricatorRoll(res.item, () => {
+      fabRolling = false;
+      if (G.screen !== 'fab' || ui.current !== 'fab') return;
+      sfx.levelUp();
+      if (res.item.r >= 3) sfx.achieve(res.item.r === 4);
+      showFab(focus);
+      const el = $('#fab-result');
+      el.classList.remove('reveal');
+      void el.offsetWidth;
+      el.classList.add('reveal');
+    });
   },
   finv() {
     sel = lastRoll ? lastRoll.uid : null;
@@ -423,6 +438,7 @@ export const hangarActs = {
 };
 
 export function initHangarUi() {
+  initServiceArt();
   for (const id of ['#parts-list']) $(id).addEventListener('menufocus', onTileFocus);
   $('#parts-list').addEventListener('pointerover', onTileFocus);
 }

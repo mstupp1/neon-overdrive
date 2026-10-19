@@ -1,0 +1,45 @@
+{
+  "subject": "black-market",
+  "generationMethod": "built-in image_gen",
+  "selectedRevision": "v1",
+  "source": "art/locations/black-market/sources/scene-v1.png",
+  "sourceSize": [
+    1536,
+    1024
+  ],
+  "sourceSha256": "ee69ebba150b39c0939c1807adfca26a60260fc41a6e26a210040a9be6f762d3",
+  "prompt": "art/locations/black-market/prompts/scene-v1.txt",
+  "references": [
+    {
+      "role": "materials and finish reference",
+      "source": "art/locations/fabricator/sources/scene-v1.png",
+      "sha256": "1788a9cbf45716eb9e20eaf6a8c7668cd6526fa9ce34e1ca6c7636af7783e198"
+    }
+  ],
+  "export": {
+    "crop": [
+      0,
+      224,
+      1536,
+      736
+    ],
+    "resample": "Pillow LANCZOS",
+    "mode": "RGBA"
+  },
+  "runtime": {
+    "path": "src/assets/locations/black-market/scene-v1.png",
+    "size": [
+      768,
+      256
+    ],
+    "sha256": "879adaab219994224c917686a1ce23fb1c58d33cef3b4d8b007f68786a2ebe8f"
+  },
+  "pixel": {
+    "path": "src/assets/locations/black-market/scene-pixel-v1.png",
+    "size": [
+      192,
+      64
+    ],
+    "sha256": "ba15cb87b8ebd796eb7b489593e296eb6214b574a1f3286bc88e7275cd665d4e"
+  }
+}
