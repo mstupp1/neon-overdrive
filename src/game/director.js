@@ -4,7 +4,7 @@ import { G, view, field, sectorDifficulty, sectorInfo, isBossSector } from './st
 import { applyModifiers, patternMul, MODIFIERS } from './modifiers.js';
 import { applyHeat } from './core.js';
 import { rand, chance, weightedPick, randInt } from '../core/math.js';
-import { spawnEnemy, spawnWeavers, blinkSpot, killEnemy } from './enemies.js';
+import { spawnEnemy, spawnWeavers, blinkSpot, killEnemy, withdrawEnemy } from './enemies.js';
 import { spawnBoss, bossVariant, bossIndex, BOSS_IDS } from './bosses.js';
 import { miniById } from './minibosses.js';
 import { banner, floatText, flash, addShake } from './fx.js';
@@ -302,6 +302,7 @@ export function startSector(spec) {
   d.hunter = null;
   d.hunterSpawned = false;
   d.finished = false; // the node's finisher shot has played (or been ruled out)
+  d.mopping = false;
   d.zones = zoneCount(spec);
   d.zoneBase = randInt(0, 3);
   d.zone = null;
@@ -348,6 +349,52 @@ function aliveEnemies() {
   return n;
 }
 
+// Mop-up: when a zone's or node's wave clock runs out, whatever is still on screen has to be fought. Only after MOPUP
+// seconds of actual fighting (real time: boost cruise doesn't speed it up) do the stragglers give up and withdraw
+// (enemies.js), and the fight moves on once they are off screen. The Hunter never withdraws.
+const MOPUP = { break: 9, clearing: 12, mini: 8 };
+const WITHDRAW = 3; // s the withdrawing stragglers get to leave before any left are dropped quietly
+
+function startMopUp(d) {
+  d.mopT = 0;
+  d.withdraw = -1;
+  d.mopping = true; // boost.js: boost costs meter again until the stragglers are dealt with
+}
+
+function strays() {
+  let n = 0;
+  for (const e of G.enemies) if (!e.dead && !e.boss && !e.hunter) n++;
+  return n;
+}
+
+// True once the zone / node can move on: everything is dead, or the stragglers have withdrawn (and the Hunter is dead).
+function mopUp(d, dt, limit) {
+  const done = mopDone(d, dt, limit);
+  d.mopping = !done;
+  return done;
+}
+
+function mopDone(d, dt, limit) {
+  if (aliveEnemies() === 0 && !d.queue.length) return true;
+  d.mopT += dt;
+  if (d.withdraw < 0 && d.mopT >= limit) {
+    d.withdraw = d.mopT;
+    d.queue.length = 0;
+    let n = 0;
+    for (const e of G.enemies) {
+      if (!e.dead && !e.boss && !e.hunter) {
+        withdrawEnemy(e);
+        n++;
+      }
+    }
+    if (n && G.mode === 'run') banner('HOSTILES WITHDRAWING', 'SHOOT THEM DOWN BEFORE THEY ESCAPE', '#9fb8ff', 1.6);
+  }
+  if (d.withdraw < 0) return false;
+  if (strays() && d.mopT - d.withdraw < WITHDRAW) return false;
+  for (const e of G.enemies) if (!e.dead && !e.boss && !e.hunter) e.dead = true; // stuck off screen: just gone
+  return !(d.hunter && !d.hunter.dead);
+}
+
 // Elite nodes: one Hunter mini-boss late in the sector (HUD draws its compact bar from d.hunter).
 function spawnHunter() {
   const d = G.director;
@@ -361,6 +408,7 @@ function spawnHunter() {
 
 export function updateDirector(dt) {
   const d = G.director;
+  const realDt = dt;
   d.t += dt * (cruising() ? G.player.flow : 1); // boost cruises through transitions (boost.js)
 
   // Run delayed spawns.
@@ -408,16 +456,18 @@ export function updateDirector(dt) {
       if (d.zone && d.zone.i < d.zones - 1 && d.sectorT >= (d.duration * (d.zone.i + 1)) / d.zones) {
         d.state = 'break'; // zone done: no new spawns, finish what's left, then fly on
         d.t = 0;
+        startMopUp(d);
       } else if (d.sectorT >= d.duration) {
         d.state = 'clearing';
         d.t = 0;
+        startMopUp(d);
       }
       break;
     }
     case 'break':
-      // Like clearing, but stragglers burn out after 3.5 s (the Hunter still has to die).
+      // Like clearing: fight what's left; stragglers withdraw after a while (the Hunter still has to die).
       if (cine.busy) break;
-      if ((aliveEnemies() === 0 && !d.queue.length) || (d.t > 3.5 && !(d.hunter && !d.hunter.dead))) {
+      if (mopUp(d, realDt, MOPUP.break)) {
         d.queue.length = 0;
         for (const e of G.enemies) if (!e.dead && !e.boss && !e.hunter) killEnemy(e, true);
         clearObstacles(true);
@@ -448,7 +498,7 @@ export function updateDirector(dt) {
       d.progress = 1;
       if (cine.busy) break; // the finisher shot plays out before the clear
       // The Hunter never times out: the sector only clears once it is dead.
-      if ((aliveEnemies() === 0 && !d.queue.length) || (d.t > (spec.mini ? 3.5 : 7) && !(d.hunter && !d.hunter.dead))) {
+      if (mopUp(d, realDt, spec.mini ? MOPUP.mini : MOPUP.clearing)) {
         if (lateFinisher()) break;
         // Boss node (campaign): fly into the arena first.
         if (spec.boss && !d.arena && G.mode === 'run' && G.run && G.run.mode === 'campaign') {
@@ -477,7 +527,7 @@ export function updateDirector(dt) {
             music.bossTrack(bossIndex(spec.boss));
           }
         } else if (spec.mini) {
-          // Guarded Vault: its mini boss drops in (no arena fly-through, no boss track). Stragglers burn out.
+          // Guarded Vault: its mini boss drops in (no arena fly-through, no boss track).
           d.state = 'warn';
           d.queue.length = 0;
           for (const e of G.enemies) if (!e.dead && !e.boss) killEnemy(e, true);

@@ -645,7 +645,8 @@ export function updateEnemies(dt) {
       owAI(e, dt); // sets e.entered (on camera) and handles its own despawning
       dt = real;
       continue;
-    } else BEHAVIOR[e.type](e, dt);
+    } else if (e.retreat) retreat(e, dt);
+    else BEHAVIOR[e.type](e, dt);
     dt = real;
     if (!e.entered && inBounds(e, -e.r * 0.5)) e.entered = true;
     // Despawn once they leave the play area (after having entered), or if stuck off-screen.
@@ -656,6 +657,39 @@ export function updateEnemies(dt) {
     if (!e.dead) arr[w++] = e;
   }
   arr.length = w;
+}
+
+// Withdraw (director.js mop-up): a straggler that outlasted the fight stops attacking and climbs back out the way it
+// came in (virtual -y: the top, the far right in the side view, the horizon in the chase view). It can still be shot
+// down for its bounty on the way out; one that escapes leaves nothing.
+export function withdrawEnemy(e) {
+  if (e.dead || e.boss || e.hunter || e.retreat) return;
+  e.retreat = true;
+  if (e.beam) {
+    e.beam.tele = 0;
+    e.beam.life = 0; // updateBeams drops it
+    e.beam = null;
+  }
+  e.cut = true;
+  e.vx = e.vx || 0;
+  e.vy = Math.min(e.vy || 0, 60);
+}
+
+const NO_TURN = new Set(['spinner', 'weaver', 'mine']);
+function retreat(e, dt) {
+  e.vx = damp(e.vx, (e.x < view.W / 2 ? -1 : 1) * 70, 2, dt);
+  e.vy = damp(e.vy, -420, 2.2, dt);
+  e.x += e.vx * dt;
+  e.y += e.vy * dt;
+  if (e.alpha !== undefined) e.alpha = Math.min(1, e.alpha + dt * 4); // a blinker shows itself to leave
+  e.invuln = false;
+  if (e.parts) snakeBody(e);
+  else if (NO_TURN.has(e.type)) e.rot += dt * 2;
+  else {
+    const da = ((((Math.atan2(e.vy, e.vx) - Math.PI / 2 - (e.rot || 0) + Math.PI) % TAU) + TAU) % TAU) - Math.PI;
+    e.rot = (e.rot || 0) + da * Math.min(1, 6 * dt); // turn the short way round toward the exit
+  }
+  if (e.y < -e.r - (e.parts ? 150 : 30)) e.dead = true; // gone: no explosion, no drops
 }
 
 // --- Damage & death -----------------------------------------------------------------

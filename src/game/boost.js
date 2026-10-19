@@ -33,10 +33,12 @@ export const BOOST = {
 };
 
 // Director states between the fighting where boost cruises (free) through the transition.
+// A zone / node end with stragglers still fighting (director.js mop-up) is a fight, not a transition.
 const CRUISE = new Set(['intro', 'break', 'transit', 'clearing', 'bossDown', 'clear']);
+const transition = (d) => CRUISE.has(d.state) && !d.mopping;
 export function cruising(p = G.player) {
   const d = G.director;
-  return !!(!field.ow && p && p.boosting && d && CRUISE.has(d.state));
+  return !!(!field.ow && p && p.boosting && d && transition(d));
 }
 
 export const boostCap = (p) => BOOST.cap * (p.st.boostCap || 1);
@@ -48,11 +50,11 @@ export function boostAllowed(p) {
   if (p.dead || G.mode !== 'run') return false;
   if (field.ow) return true;
   const d = G.director;
-  return !!(d && (d.state === 'waves' ? !p.auto : CRUISE.has(d.state)));
+  return !!(d && (d.state === 'waves' || d.mopping ? !p.auto : CRUISE.has(d.state)));
 }
 
 // Is boost free right now (a transition between fights)?
-export const freeBoost = (p) => !field.ow && boostAllowed(p) && CRUISE.has(G.director.state);
+export const freeBoost = (p) => !field.ow && boostAllowed(p) && transition(G.director);
 
 export function resetBoost(p) {
   p.boost = boostCap(p);
