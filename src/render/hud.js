@@ -252,8 +252,8 @@ function drawBothGauges(ctx, p, sx, sy, boost = false) {
   if (boost) drawBoostGauge(ctx, g.boost.x, g.boost.y, p, sx, sy);
 }
 
-// Boost meter: a ring that drains while boosting and refills after a pause. Dim when boost can't run (boss fights,
-// fly-throughs), red while it is locked after burning empty. While boosting the centre shows the score bonus.
+// Boost meter: a ring that drains while boosting and refills after a pause. Dim when boost can't run (scripted
+// moves, menus), red while it is locked after burning empty. While boosting the centre shows the score bonus.
 function drawBoostGauge(ctx, x, y, p, sx, sy) {
   const near = Math.hypot(sx - x, sy - y) < 90;
   const ok = boostAllowed(p);
