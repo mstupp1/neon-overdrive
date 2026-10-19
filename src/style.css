@@ -2227,112 +2227,7 @@ input[type='range']::-moz-range-thumb {
     opacity: 0.55;
 }
 
-.paints {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.4em;
-    width: 100%;
-    max-width: 24em;
-}
-
-.swatch {
-    --c: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.15em;
-    padding: 0.45em 0.2em;
-    color: var(--text);
-    font-family: inherit;
-    background: var(--panel);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 2px;
-    cursor: pointer;
-    outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.sw-dot {
-    width: 1.5em;
-    height: 1.5em;
-    border-radius: 50%;
-    background: var(--c);
-    box-shadow: 0 0 0.7em var(--c);
-}
-
-.swatch b {
-    font-size: 0.8em;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    white-space: nowrap;
-}
-
-.swatch i {
-    font-style: normal;
-    font-size: 0.74em;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    color: var(--dim);
-    white-space: nowrap;
-}
-
-.swatch.buy i {
-    color: #ffd24a;
-}
-
-.swatch.on {
-    border-color: var(--c);
-    box-shadow: inset 0 0 1em color-mix(in srgb, var(--c) 25%, transparent);
-}
-
-.swatch.on i {
-    color: var(--green);
-}
-
-.swatch:focus-visible,
-.swatch.focus,
-.swatch:hover {
-    border-color: var(--c);
-    box-shadow: 0 0 1.2em color-mix(in srgb, var(--c) 55%, transparent);
-}
-
-.hs-stats {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.3em 0.6em;
-    width: 100%;
-    max-width: 24em;
-    padding: 0.5em 0.7em;
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 2px;
-}
-
-.hs-stats div {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 0.3em;
-    font-size: 0.8em;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    color: var(--dim);
-}
-
-.hs-stats b {
-    font-family: Orbitron, sans-serif;
-    font-size: 1em;
-    color: #fff;
-}
-
-.hs-stats .up b {
-    color: var(--green);
-}
-
-.hs-stats .dn b {
-    color: var(--red);
-}
+/* Paint chips and stat bars: see "Hangar: ship select / loadout" below. */
 
 #scr-parts .card.offer.on {
     border-color: var(--c);
@@ -3916,10 +3811,6 @@ input[type='range']::-moz-range-thumb {
     color: #fff;
 }
 
-.hs-stats div {
-    min-height: 1.25em;
-}
-
 /* Boot intro (src/game/intro.js). Every line is absolutely placed, so nothing shifts as text types on. */
 .intro {
     position: absolute;
@@ -5286,7 +5177,7 @@ input[type='range']::-moz-range-thumb {
 .retro-pixel :is(.card-desc, .hs-info p, .pl-desc, .ad-art + div p, .gd-desc, .comms-line) {
     line-height: 1.35;
 }
-.retro-pixel :is(.hs-stats b, .run-stats b, .pl-xp, .pl-rank, .gd-stats b) {
+.retro-pixel :is(.hs-stats .sb > b, .lo-extra b, .run-stats b, .pl-xp, .pl-rank, .gd-stats b) {
     font-family: Rajdhani, 'Segoe UI', system-ui, sans-serif;
 }
 
@@ -5805,10 +5696,6 @@ button.hs-card:hover {
     min-width: 0;
 }
 
-.swatch b.clip {
-    max-width: 100%;
-}
-
 /* --- Flux Core: tile grid + detail ------------------------------------------------------------------------------ */
 .core-grid {
     display: grid;
@@ -6138,8 +6025,373 @@ button.hs-card:hover {
 #draft-sub { max-width: 100%; }
 .card-flag { box-sizing: border-box; height: 1.6em; }
 
-/* Hangar loadout: three stat rows and two path lines, always (gear that adds stats or paths scrolls in the well). */
-.hs-stats.well { display: grid; grid-auto-rows: calc(var(--lh) * 1em); row-gap: 0; --lines: 3; --lh: 1.3; }
-.hs-stats.well div { align-items: center; }
-.hs-stats.well .blank { visibility: hidden; }
-.hs-paths.well { display: flex; align-content: flex-start; row-gap: 0; min-height: 0; --lines: 2; --lh: 1.35; }
+
+/* --- Hangar: ship select / loadout ---------------------------------------------------------------------------------
+   SHIP and LOADOUT share the card, fleet strip and stat bars at the same height, so the stats sit in one place on both
+   tabs: base stats on SHIP, the gear's gain (green) or loss (red) marked on LOADOUT. */
+button.hs-card {
+    grid-template-columns: 7.2em minmax(0, 1fr);
+    column-gap: 0.9em;
+    min-height: 11.4em;
+    background:
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 4px),
+        linear-gradient(100deg, color-mix(in srgb, var(--c) 18%, var(--panel)) 0%, var(--panel) 70%);
+}
+
+/* Hull on a holo pad: a lit floor ellipse and a soft column of the paint colour behind the ship. */
+.hs-art {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 7.2em;
+    height: 7.2em;
+}
+
+.hs-art .menu-art {
+    position: relative;
+    width: 7.2em;
+    height: 7.2em;
+    filter: drop-shadow(0 0 0.5em color-mix(in srgb, var(--c) 55%, transparent));
+}
+
+.hs-pad {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(50% 9% at 50% 88%, color-mix(in srgb, var(--c) 70%, transparent), transparent 100%),
+        radial-gradient(42% 50% at 50% 55%, color-mix(in srgb, var(--c) 22%, transparent), transparent 100%);
+}
+
+.hs-card.locked .hs-pad {
+    opacity: 0.4;
+}
+
+.hs-info h4 {
+    font-size: 1.35em;
+    text-shadow: 0 0 0.5em color-mix(in srgb, var(--c) 60%, transparent);
+}
+
+.hs-card .hs-desc {
+    --lines: 4;
+}
+
+.hs-nav.ghost {
+    visibility: hidden;
+}
+
+/* Fleet strip: one mini hull per ship (replaces the dots). Pointer-only; left / right on the card browse. */
+.hs-roster {
+    display: grid;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    gap: 0.25em;
+    width: 100%;
+    max-width: 24em;
+    height: 2.3em;
+}
+
+.hs-roster.ghost {
+    visibility: hidden;
+}
+
+.hr-ship {
+    --c: var(--cyan);
+    display: grid;
+    place-items: center;
+    padding: 0.1em;
+    background: var(--panel);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 2px;
+    cursor: pointer;
+    outline: none;
+}
+
+.hr-ship .menu-art {
+    width: 1.9em;
+    height: 1.9em;
+    filter: grayscale(1) brightness(0.4);
+}
+
+.hr-ship.own .menu-art {
+    filter: none;
+    opacity: 0.75;
+}
+
+.hr-ship.act {
+    border-bottom: 2px solid var(--green);
+}
+
+.hr-ship.on {
+    border-color: var(--c);
+    background: color-mix(in srgb, var(--c) 16%, var(--panel));
+    box-shadow: 0 0 0.8em color-mix(in srgb, var(--c) 45%, transparent);
+}
+
+.hr-ship.on .menu-art {
+    opacity: 1;
+}
+
+.hr-ship:hover {
+    border-color: color-mix(in srgb, var(--c) 70%, transparent);
+}
+
+/* Stat bars: two columns of three; ten segments each. */
+.hs-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45em 1.1em;
+    width: 100%;
+    max-width: 24em;
+    padding: 0.6em 0.8em;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+}
+
+.hs-stats .sb {
+    display: grid;
+    grid-template-columns: 3.9em minmax(0, 1fr) 2.6em;
+    align-items: center;
+    gap: 0.5em;
+    font-size: 0.8em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--dim);
+}
+
+.sb-bar {
+    position: relative;
+    height: 0.6em;
+    background: rgba(255, 255, 255, 0.07);
+    -webkit-mask: repeating-linear-gradient(90deg, #000 0 calc(10% - 2px), transparent calc(10% - 2px) 10%);
+    mask: repeating-linear-gradient(90deg, #000 0 calc(10% - 2px), transparent calc(10% - 2px) 10%);
+}
+
+.sb-bar i {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+}
+
+.sb-f {
+    background: var(--cyan);
+    box-shadow: 0 0 0.6em var(--cyan);
+}
+
+.sb.up .sb-d {
+    background: var(--green);
+}
+
+.sb.dn .sb-d {
+    background: repeating-linear-gradient(135deg, var(--red) 0 2px, transparent 2px 4px);
+}
+
+.hs-stats .sb > b {
+    font-family: Orbitron, sans-serif;
+    text-align: right;
+    color: #fff;
+}
+
+.hs-stats .sb.up > b {
+    color: var(--green);
+}
+
+.hs-stats .sb.dn > b {
+    color: var(--red);
+}
+
+/* Paint: label, a row of chips, and a caption for the chip under focus (name + equipped / owned / price). */
+.hs-paint {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.8em;
+    width: 100%;
+    max-width: 24em;
+}
+
+.hs-paint .hs-label {
+    width: auto;
+    margin: 0;
+}
+
+.paints {
+    display: flex;
+    gap: 0.4em;
+}
+
+.swatch {
+    --c: #fff;
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 2.3em;
+    height: 2.3em;
+    padding: 0;
+    background: var(--panel);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 2px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.sw-dot {
+    width: 1.3em;
+    height: 1.3em;
+    background: var(--c);
+    box-shadow: 0 0 0.6em var(--c);
+}
+
+.swatch.buy .sw-dot {
+    opacity: 0.55;
+}
+
+.swatch i {
+    position: absolute;
+    right: -0.35em;
+    bottom: -0.35em;
+    display: grid;
+    place-items: center;
+    width: 1.05em;
+    height: 1.05em;
+    background: #05030d;
+    color: #ffd24a;
+}
+
+.swatch i .coin {
+    width: 0.95em;
+    height: 0.95em;
+    margin: 0;
+    vertical-align: 0;
+}
+
+.swatch.on {
+    border-color: var(--c);
+    box-shadow: inset 0 0 0.8em color-mix(in srgb, var(--c) 35%, transparent);
+}
+
+.swatch.on::after {
+    content: "";
+    position: absolute;
+    left: 0.25em;
+    right: 0.25em;
+    bottom: -0.45em;
+    height: 2px;
+    background: var(--green);
+}
+
+.swatch:focus-visible,
+.swatch.focus,
+.swatch:hover {
+    border-color: var(--c);
+    box-shadow: 0 0 1em color-mix(in srgb, var(--c) 60%, transparent);
+}
+
+.hs-pcap {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    font-size: 0.8em;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.hs-pcap b {
+    font-family: Orbitron, sans-serif;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hs-pcap em {
+    font-style: normal;
+    color: var(--dim);
+}
+
+.hs-pcap em.ok {
+    color: var(--green);
+}
+
+.hs-pcap em.gold {
+    color: #ffd24a;
+}
+
+.hs-pcap em.short {
+    color: var(--red);
+}
+
+.hs-pcap .coin {
+    width: 1.05em;
+    height: 1.05em;
+    vertical-align: -0.18em;
+    margin-right: 0.25em;
+}
+
+/* LOADOUT: build paths in the card (where SHIP shows the blurb), and the other stats the gear moves. */
+.hs-card .hs-paths.well {
+    --lines: 4;
+    --lh: 1.4;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: calc(var(--lh) * 1em);
+    align-items: center;
+    gap: 0 0.9em;
+    max-width: none;
+    min-height: 0;
+    margin-top: 0.3em;
+}
+
+.lo-extra.well {
+    --lines: 3;
+    --lh: 1.45;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: calc(var(--lh) * 1em);
+    gap: 0 0.9em;
+    width: 100%;
+    max-width: 30em; /* 24em at this font size */
+    font-size: 0.8em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--dim);
+}
+
+.lo-extra div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.lo-extra b {
+    font-family: Orbitron, sans-serif;
+}
+
+.lo-extra .up b {
+    color: var(--green);
+}
+
+.lo-extra .dn b {
+    color: var(--red);
+}
+
+.lo-extra.none {
+    display: block;
+    text-align: center;
+}
+
+.lo-extra em {
+    font-style: normal;
+}
+
+.hs-card .hs-paths span {
+    display: flex;
+    justify-content: space-between;
+    max-width: 12em;
+}
+
+.hs-card .hs-paths em {
+    grid-column: 1 / -1;
+}

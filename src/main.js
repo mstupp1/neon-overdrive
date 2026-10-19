@@ -27,7 +27,7 @@ import { debugDrawer, initDebugDrawer } from './ui/debug.js';
 import { renderRunDetails, setRunTab } from './ui/rundetails.js';
 import { comms } from './ui/comms.js';
 import { meta } from './ui/meta.js';
-import { hangarActs, openHangar, openFab, initHangarUi } from './ui/hangar.js';
+import { hangarActs, openHangar, openLoadout, openFab, initHangarUi } from './ui/hangar.js';
 import { coreActs, openCore } from './ui/fluxcore.js';
 import { pilotActs, openPilot, showPilot, initPilotUi } from './ui/pilot.js';
 import { treeActs, openTree, treeView } from './ui/tree.js';
@@ -1049,6 +1049,7 @@ function showTab(scr, tab) {
 // of its pages can be measured and share one scale.
 const HUB_PAGES = {
   ship: () => openHangar(),
+  loadout: () => openLoadout(),
   fab: () => openFab('hub'),
   pilot: () => openPilot(),
   tree: () => openTree(null, hubExit),
@@ -1056,7 +1057,7 @@ const HUB_PAGES = {
   gallery: () => openGallery(hubExit),
   ach: () => openAchievements(hubExit),
 };
-const HUB_TABS = { hangar: ['ship', 'fab', 'pilot', 'tree', 'core'], collect: ['gallery', 'ach'] };
+const HUB_TABS = { hangar: ['ship', 'loadout', 'fab', 'pilot', 'tree', 'core'], collect: ['gallery', 'ach'] };
 ui.hubPages = (hubId, opening) => {
   const screen = G.screen;
   const [, cur] = opening.split(':');
@@ -1127,7 +1128,7 @@ ui.init({
     }
     (box.hidden ? document.querySelector('#sys-detail .info-btn') : box.querySelector('.btn')).focus();
   },
-  // HANGAR hub (SHIP · FABRICATOR · PILOT · TREE · FLUX CORE) from the title menu or the campaign map.
+  // HANGAR hub (SHIP · LOADOUT · FABRICATOR · PILOT · TREE · FLUX CORE) from the title menu or the campaign map.
   hangar() {
     hub.exit = ui.current === 'campaign' ? () => showCampaign('ship-btn') : () => titleMenu('[data-act=hangar]');
     openHangar();
@@ -1290,7 +1291,7 @@ for (const [id, action] of [['touch-od', 'od'], ['touch-dash', 'dash']]) {
 // Marks on the hub tabs: unspent tree points, gear and relics not yet looked at.
 ui.badges = () => ({
   'hangar:tree': passiveTree.pointsLeft(activeClass().id),
-  'hangar:ship': profile.gearNew.length > 0,
+  'hangar:loadout': profile.gearNew.length > 0,
   'collect:gallery': profile.relicNew.length > 0,
 });
 
@@ -1329,7 +1330,7 @@ let slowFrames = 0;
 
 function simulating() {
   const s = G.screen;
-  return s === 'play' || s === 'intro' || s === 'press' || s === 'gameover' || s === 'title' || s === 'campaign' || s === 'hangar' || s === 'parts' || s === 'fab' || s === 'pilot' || s === 'settings' || s === 'help' || s === 'gallery' || s === 'achievements' || s === 'core' || s === 'tree';
+  return s === 'play' || s === 'intro' || s === 'press' || s === 'gameover' || s === 'title' || s === 'campaign' || s === 'hangar' || s === 'loadout' || s === 'parts' || s === 'fab' || s === 'pilot' || s === 'settings' || s === 'help' || s === 'gallery' || s === 'achievements' || s === 'core' || s === 'tree';
 }
 
 function frame(now) {
@@ -1666,6 +1667,7 @@ window.NEON = {
   openDraft: (kind = 'level') => openDraft(kind),
   // Menus (debug / screenshots): open the Hangar, Fabricator or Pilot screen over the campaign map.
   openHangar: () => (showCampaign(), (hub.exit = () => showCampaign()), openHangar()),
+  openLoadout: () => (showCampaign(), (hub.exit = () => showCampaign()), openLoadout()),
   openFab: () => (showCampaign(), (hub.exit = () => showCampaign()), openFab('hub')),
   openPilot: () => (showCampaign(), (hub.exit = () => showCampaign()), openPilot()),
   openGallery: () => (toTitle(), (hub.exit = () => toTitle()), openGallery(hubExit)),

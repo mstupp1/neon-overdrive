@@ -1,15 +1,16 @@
-// Hangar screens (campaign map only): ship carousel, 3 gear slots, paint row, live stats; the per-slot inventory
-// (8-tile grid + a fixed detail panel); and the Fabricator (roll new gear). Rendering + handlers; the rules live in
-// game/hangar.js (rolls, equip, sell), game/parts.js (items) and game/rarity.js (odds).
+// Hangar screens (campaign map only): SHIP (ship select: browse hulls, base stats, buy / pick paint), LOADOUT (the
+// active ship's 3 gear slots and its stats with that gear on), the per-slot inventory (8-tile grid + a fixed detail
+// panel) and the Fabricator (roll new gear). Rendering + handlers; the rules live in game/hangar.js (rolls, equip,
+// sell), game/parts.js (items) and game/rarity.js (odds).
 
 import { tip } from './tips.js';
 import { G } from '../game/state.js';
 import { profile, saveProfile } from '../core/storage.js';
 import { sfx } from '../core/audio.js';
-import { S } from '../render/sprites.js';
+import { S, previewShipSprite } from '../render/sprites.js';
 import { menuArtwork } from './menu-art.js';
 import { initServiceArt, showFabricatorArt, playFabricatorRoll } from './service-art.js';
-import { SHIPS, ownsShip, paintsFor, activePaint } from '../game/ships.js';
+import { SHIPS, WEAPONS, weaponStreams, ownsShip, paintsFor, activePaint, shipById } from '../game/ships.js';
 import { SLOTS, SLOT_INFO, SLOT_CAP, TAGS, gearDef, gearByUid, gearInSlot, equippedParts, equippedOn, itemName, itemLines, itemTags, sellValue, itemScore } from '../game/parts.js';
 import { RARITY, rarityOdds } from '../game/rarity.js';
 import { recomputeStats } from '../game/upgrades.js';
@@ -20,7 +21,8 @@ import { hubExit } from './hub.js';
 const coin = '<svg class="coin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5l3.5 4.5-3.5 4.5-3.5-4.5z"/></svg>';
 const fmt = (n) => Math.floor(n).toLocaleString();
 
-let viewIdx = 0; // ship being previewed in the carousel
+let viewIdx = 0; // SHIP: hull being previewed
+let preview = null; // SHIP: paint index previewed on the hull (focused / hovered swatch), null = the equipped one
 let slot = 'core'; // slot open in the inventory / Fabricator
 let sel = null; // inventory: uid shown in the detail panel
 let confirmSell = null; // uid waiting for a second SELL press (Epic / Legendary)
@@ -28,6 +30,7 @@ let lastRoll = null; // Fabricator: the last rolled item (shown in its result pa
 let fabRolling = false; // Presentation lock; a paid roll is already saved before the reel starts.
 let fabFrom = 'hub'; // where the Fabricator's BACK goes: 'hub' (out of the hangar) | 'parts' (its inventory)
 const viewShip = () => SHIPS[viewIdx];
+const gearShip = () => shipById(profile.lastShip); // LOADOUT, inventory and Fabricator fit the active ship
 
 // Derived stats for a ship wearing `parts` (stock kit upgrades included).
 function statsFor(ship, parts) {
@@ -37,51 +40,65 @@ function statsFor(ship, parts) {
   return p.st;
 }
 
-const STAT_ROWS = [
-  ['HULL', (st) => st.maxHp, (v) => v],
-  ['DASH', (st) => st.maxCharges, (v) => v],
-  ['SPEED', (st) => st.speed, (v) => Math.round(v * 100) + '%'],
-  ['DAMAGE', (st) => st.dmg, (v) => Math.round(v * 100) + '%'],
-  ['FIRE', (st) => st.rate, (v) => Math.round(v * 100) + '%'],
-  ['CRIT', (st) => st.crit, (v) => Math.round(v * 100) + '%'],
-  ['CRIT DMG', (st) => st.critMul, (v) => v.toFixed(1) + 'x'],
-  ['MODULES', (st) => st.modDmg, (v) => Math.round(v * 100) + '%'],
-  ['SLOTS', (st) => st.maxModules, (v) => v],
-  ['ULT', (st) => st.odGain, (v) => Math.round(v * 100) + '%'],
-  ['ULT TIME', (st) => st.odDur, (v) => v.toFixed(1) + 's'],
-  ['PICKUP', (st) => st.magnet / 80, (v) => Math.round(v * 100) + '%'],
-  ['DASH TIME', (st) => st.dashDur, (v) => Math.round(v * 100) + '%'],
-  ['XP', (st) => st.xpMul, (v) => Math.round(v * 100) + '%'],
-  ['CREDITS', (st) => st.creditMul, (v) => Math.round(v * 100) + '%'],
-  ['GRAZE', (st) => st.grazeR, (v) => Math.round(v * 100) + '%'],
-  ['RECHARGE', (st) => 1.5 / st.dashRecharge, (v) => Math.round(v * 100) + '%'],
-  ['BOSS DMG', (st) => 1 + st.bounty, (v) => Math.round(v * 100) + '%'],
-  ['FIND', (st) => 1 + st.find, (v) => Math.round(v * 100) + '%'],
-];
-const STAT_SLOTS = 9; // fixed cells so equipping never changes the panel's height
+// Gun output at weapon level 1 against Vector's twin pulse (= 100): damage x volley size x rate, piercing counted once.
+function gunRating(ship) {
+  const dps = (s) => {
+    const w = WEAPONS[s.weapon];
+    return (w.dmg * (w.burst || 1) * weaponStreams(s.weapon, 1).length * (1 + 0.4 * Math.min(1, w.pierce || 0))) / w.interval;
+  };
+  return dps(ship) / dps(SHIPS[0]);
+}
 
-function renderStats(ship, owned) {
+const pct = (v) => Math.round(v * 100) + '%';
+// Stat bars, the same six on SHIP (base) and LOADOUT (with gear): [label, value, text, bar full at, what it means].
+const BARS = [
+  ['HULL', (st) => st.maxHp, (v) => v, 6, 'Hits you can take.'],
+  ['DASH', (st) => st.maxCharges, (v) => v, 4, 'Dash charges.'],
+  ['SPEED', (st) => st.speed, pct, 1.35, 'Movement speed.'],
+  ['POWER', (st, ship) => gunRating(ship) * st.dmg * st.rate, (v) => Math.round(v * 100), 2.2, 'Main gun output (VECTOR = 100): damage and fire rate.'],
+  ['CRIT', (st) => st.crit, pct, 0.5, 'Critical hit chance.'],
+  ['ULT', (st) => st.odGain, pct, 2, 'Ult charge rate.'],
+];
+// LOADOUT also lists the other stats its gear moves.
+const EXTRAS = [
+  ['DAMAGE', (st) => st.dmg, pct],
+  ['FIRE', (st) => st.rate, pct],
+  ['CRIT DMG', (st) => st.critMul, (v) => v.toFixed(1) + 'x'],
+  ['MODULES', (st) => st.modDmg, pct],
+  ['SLOTS', (st) => st.maxModules, (v) => v],
+  ['ULT TIME', (st) => st.odDur, (v) => v.toFixed(1) + 's'],
+  ['PICKUP', (st) => st.magnet / 80, pct],
+  ['DASH TIME', (st) => st.dashDur, pct],
+  ['XP', (st) => st.xpMul, pct],
+  ['CREDITS', (st) => st.creditMul, pct],
+  ['GRAZE', (st) => st.grazeR, pct],
+  ['RECHARGE', (st) => 1.5 / st.dashRecharge, pct],
+  ['BOSS DMG', (st) => 1 + st.bounty, pct],
+  ['FIND', (st) => 1 + st.find, pct],
+];
+
+// Six segmented bars. `parts` = null: base stats; else the gain (green) or loss (red) over base is marked.
+function statBars(ship, parts) {
   const base = statsFor(ship, []);
-  const parts = owned ? equippedParts(profile, ship.id) : [];
-  const cur = owned ? statsFor(ship, parts) : base;
-  const cells = [];
-  STAT_ROWS.forEach(([label, get, f], i) => {
-    const a = get(base);
-    const b = get(cur);
-    const moved = Math.abs(b - a) > 1e-6;
-    if (i >= 6 && !moved) return; // extras only when gear changes them
-    cells.push(`<div class="${moved ? (b > a ? 'up' : 'dn') : ''}">${label}<b>${f(b)}</b></div>`);
-  });
-  while (cells.length % 3 || cells.length < STAT_SLOTS) cells.push('<div class="blank"></div>');
-  $('#hs-stats').innerHTML = cells.slice(0, Math.max(STAT_SLOTS, Math.ceil(cells.length / 3) * 3)).join('');
-  // Build paths of the equipped gear (they steer level-up drafts)
+  const cur = parts ? statsFor(ship, parts) : base;
+  return BARS.map(([label, get, f, full, what]) => {
+    const a = get(base, ship);
+    const b = get(cur, ship);
+    const w = (v) => Math.max(0, Math.min(100, (v / full) * 100));
+    const moved = Math.abs(b - a) > 1e-6 ? (b > a ? 'up' : 'dn') : '';
+    const delta = moved ? `<i class="sb-d" style="left:${w(Math.min(a, b))}%;width:${w(Math.max(a, b)) - w(Math.min(a, b))}%"></i>` : '';
+    const tipBody = moved ? [what, `Base ${f(a)}, with gear ${f(b)}.`] : what;
+    return `<div class="sb ${moved}"${tip(label, tipBody)}><span class="sb-l">${label}</span><span class="sb-bar"><i class="sb-f" style="width:${w(Math.min(a, b))}%"></i>${delta}</span><b>${f(b)}</b></div>`;
+  }).join('');
+}
+
+// Build paths of the equipped gear and the hull (they steer level-up drafts).
+function pathsHtml(ship, parts) {
   const tags = {};
   for (const pt of parts) for (const [t, n] of Object.entries(itemTags(pt.item))) tags[t] = (tags[t] || 0) + n;
   if (ship.path) tags[ship.path] = (tags[ship.path] || 0) + 1;
-  const list = Object.entries(tags).sort((a, b) => b[1] - a[1]);
-  $('#hs-paths').innerHTML = list.length
-    ? list.map(([t, n]) => `<span style="--t:${TAGS[t].color}"${tip(TAGS[t].name, [`Weight ${n} from this ship and its gear.`, 'Drafts lean toward your heaviest paths, and tunes roll from them.'], TAGS[t].color)}>${TAGS[t].name}<b>${n}</b></span>`).join('')
-    : '<em>Equip gear to set your build paths</em>';
+  return Object.entries(tags).sort((a, b) => b[1] - a[1])
+    .map(([t, n]) => `<span style="--t:${TAGS[t].color}"${tip(TAGS[t].name, [`Weight ${n} from this ship and its gear.`, 'Drafts lean toward your heaviest paths, and tunes roll from them.'], TAGS[t].color)}>${TAGS[t].name}<b>${n}</b></span>`).join('');
 }
 
 // Generated hulls bake into a roomier box than the procedural 64-unit sprite; frame the card on
@@ -95,68 +112,94 @@ function hullImage(sprite) {
   return c;
 }
 
-function shipArt(ship, owned) {
-  const sprite = S['ship_' + ship.id];
-  const art = menuArtwork(hullImage(sprite), 112, 64, sprite.img, sprite.ready?.then(() => hullImage(sprite)));
+function shipArt(ship, owned, color = null, full = 112, pixel = 64) {
+  const sprite = color ? previewShipSprite(ship, color) : S['ship_' + ship.id];
+  const art = menuArtwork(hullImage(sprite), full, pixel, sprite.img, sprite.ready?.then(() => hullImage(sprite)));
   if (!owned) art.classList.add('dim');
   return art;
 }
 
-// Rebuilds the main hangar screen.
+// --- SHIP (ship select) ----------------------------------------------------------------------------------------
+
+// The paint on show: the previewed swatch, else the equipped paint (stock on hulls not owned yet).
+function shownPaint(ship, owned) {
+  const list = paintsFor(ship);
+  if (preview !== null && list[preview]) return { i: preview, paint: list[preview] };
+  const eq = (profile.paint && profile.paint[ship.id]) || 0;
+  const i = owned && list[eq] && ownsPaint(ship.id, eq) ? eq : 0;
+  return { i, paint: list[i] };
+}
+
+// Hull art + the paint caption: follows the swatch under focus without rebuilding the screen.
+function renderPaintView() {
+  const ship = viewShip();
+  const owned = ownsShip(profile, ship);
+  const { i, paint } = shownPaint(ship, owned);
+  const card = $('#hs-card');
+  card.style.setProperty('--c', paint.color);
+  const art = card.querySelector('.hs-art');
+  art.querySelector('.menu-art')?.remove();
+  art.appendChild(shipArt(ship, owned, i ? paint.color : null, 160, 64));
+  const on = owned && (profile.paint[ship.id] || 0) === i && ownsPaint(ship.id, i);
+  const has = ownsPaint(ship.id, i);
+  let state;
+  if (!owned) state = '<em>BUY THE SHIP FIRST</em>';
+  else if (on) state = '<em class="ok">EQUIPPED</em>';
+  else if (has) state = '<em>OWNED</em>';
+  else state = `<em class="gold${profile.credits >= paint.price ? '' : ' short'}">${coin}${paint.price}</em>`;
+  $('#hs-pcap').innerHTML = `<b style="color:${paint.color}">${paint.name}</b>${state}`;
+}
+
 function render() {
   const ship = viewShip();
   const owned = ownsShip(profile, ship);
   const selShip = profile.lastShip === ship.id;
-  const paint = activePaint(profile, ship);
 
   // The card is the ship selector: left / right (or the arrows) browse, confirm buys / selects.
   const card = $('#hs-card');
-  card.style.setProperty('--c', paint.color);
   card.classList.toggle('locked', !owned);
   const legacy = ship.unlock ? `<span class="hs-or">OR ${ship.unlock.text.toUpperCase()}</span>` : '';
   const path = ship.path ? `<span class="hs-path" style="--t:${TAGS[ship.path].color}">${TAGS[ship.path].name}</span>` : '';
   const trait = ship.trait ? `<span class="hs-trait">${ship.trait.text}</span>` : '';
   let actLine;
-  card.removeAttribute('aria-disabled');
   if (!owned) {
     const afford = profile.credits >= ship.price;
     card.dataset.mode = 'buy';
     actLine = `<span class="hs-buy">BUY ${coin}${fmt(ship.price)}</span>${afford ? '' : `<small>NEED ${fmt(ship.price - profile.credits)}</small>`}`;
   } else if (selShip) {
     card.dataset.mode = 'none';
-    actLine = '<span class="hs-on">ACTIVE SHIP</span>';
+    actLine = '<span class="hs-on">ACTIVE · LOADOUT ›</span>';
   } else {
     card.dataset.mode = 'select';
     actLine = '<span class="hs-buy">SELECT</span>';
   }
-  card.innerHTML = `<div class="hs-art"></div><div class="hs-info"><div class="role clip">${ship.role}${path}</div><h4 class="clip">${ship.name}</h4><p class="hs-desc well">${ship.desc}${trait}${owned ? '' : legacy}</p></div><div class="hs-actline"><span class="hs-n">${viewIdx + 1}/${SHIPS.length}</span>${actLine}</div>`;
-  card.querySelector('.hs-art').appendChild(shipArt(ship, owned));
-  card.setAttribute('aria-label', `${ship.name}: ${owned ? (selShip ? 'active ship' : 'select') : 'buy'}. Left and right browse ships.`);
-  $('#hs-dots').innerHTML = SHIPS.map((s, i) => `<i class="${i === viewIdx ? 'on' : ''}${ownsShip(profile, s) ? ' own' : ''}"></i>`).join('');
+  card.innerHTML = `<div class="hs-art"><i class="hs-pad"></i></div><div class="hs-info"><div class="role clip">${ship.role}${path}</div><h4 class="clip">${ship.name}</h4><p class="hs-desc well">${ship.desc}${trait}${owned ? '' : legacy}</p></div><div class="hs-actline"><span class="hs-n">${viewIdx + 1}/${SHIPS.length}</span>${actLine}</div>`;
+  card.setAttribute('aria-label', `${ship.name}: ${owned ? (selShip ? 'active ship, open loadout' : 'select') : 'buy'}. Left and right browse ships.`);
 
-  // Slots
-  const eq = profile.equip[ship.id] || {};
-  $('#hs-slots').innerHTML = SLOTS.map((sl) => {
-    const item = owned ? gearByUid(profile, eq[sl]) : null;
-    const info = SLOT_INFO[sl];
-    const fresh = gearInSlot(profile, sl).some((g) => profile.gearNew.includes(g.uid));
-    const c = item ? RARITY[item.r].color : info.color;
-    const name = item ? `<b class="clip" style="color:${item.r ? c : ''}">${itemName(item)}</b>` : '<b>EMPTY</b>';
-    const sub = item ? `${info.name} · ${RARITY[item.r].name} · IL ${item.il}` : `${info.name} · ${gearInSlot(profile, sl).length}/${SLOT_CAP}`;
-    return `<button class="slot${item ? ' filled' : ''}" data-act="hslot" data-slot="${sl}" ${owned ? '' : 'disabled'} style="--c:${c}"><span class="slot-ico">${item ? gearDef(item.base).icon : '<i>+</i>'}</span><span class="slot-txt"><em class="clip">${sub}</em>${name}</span><span class="slot-go">${fresh ? '<i class="newdot">NEW</i>' : ''}›</span></button>`;
-  }).join('');
+  // Fleet strip: every hull at a glance (owned lit, the active one marked); tapping one jumps to it.
+  $('#hs-roster').innerHTML = '';
+  SHIPS.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.className = `hr-ship${i === viewIdx ? ' on' : ''}${ownsShip(profile, s) ? ' own' : ''}${profile.lastShip === s.id ? ' act' : ''}`;
+    b.dataset.act = 'hpick';
+    b.dataset.i = i;
+    b.tabIndex = -1;
+    b.setAttribute('aria-label', s.name);
+    b.style.setProperty('--c', ownsShip(profile, s) ? activePaint(profile, s).color : s.color);
+    b.appendChild(shipArt(s, true, null, 48, 32));
+    $('#hs-roster').appendChild(b);
+  });
 
-  // Paints
+  $('#hs-stats').innerHTML = statBars(ship, null);
+
+  // Paint: one row of chips; the focused chip previews on the hull, confirm equips (buying it first if needed).
   $('#hs-paints').innerHTML = paintsFor(ship).map((pt, i) => {
     const has = ownsPaint(ship.id, i);
     const on = owned && has && (profile.paint[ship.id] || 0) === i;
-    const afford = profile.credits >= pt.price;
-    const dis = !owned;
-    const cant = owned && !has && !afford;
-    return `<button class="swatch${on ? ' on' : ''}${has ? '' : ' buy'}" data-act="hpaint" data-i="${i}" ${dis ? 'disabled' : ''}${cant ? ' aria-disabled="true"' : ''} style="--c:${pt.color}" aria-label="${pt.name}"><span class="sw-dot"></span><b class="clip">${pt.name}</b><i>${on ? 'EQUIPPED' : has ? 'OWNED' : coin + pt.price}</i></button>`;
+    const cant = owned && !has && profile.credits < pt.price;
+    return `<button class="swatch${on ? ' on' : ''}${has ? '' : ' buy'}" data-act="hpaint" data-i="${i}" ${owned ? '' : 'aria-disabled="true"'}${cant ? ' aria-disabled="true"' : ''} style="--c:${pt.color}" aria-label="${pt.name} paint"><span class="sw-dot"></span>${has ? '' : `<i>${coin}</i>`}</button>`;
   }).join('');
-
-  renderStats(ship, owned);
+  renderPaintView();
 }
 
 function focusEl(sel) {
@@ -165,6 +208,7 @@ function focusEl(sel) {
 
 export function showHangar(focus) {
   G.screen = 'hangar';
+  preview = null;
   render();
   let el = typeof focus === 'string' ? focusEl(focus) : focus;
   if (!el || el.disabled) el = $('#hs-card');
@@ -176,6 +220,60 @@ export function openHangar() {
   showHangar('#hs-card');
 }
 
+// Focus moving onto a paint chip previews it; anywhere else shows the equipped paint again.
+function onPaintFocus(e) {
+  const sw = e.target.closest && e.target.closest('.swatch');
+  const i = sw ? +sw.dataset.i : null;
+  if (i === preview) return;
+  preview = i;
+  renderPaintView();
+}
+
+// --- LOADOUT (the active ship's gear) ---------------------------------------------------------------------------
+
+function renderLoadout() {
+  const ship = gearShip();
+  const paint = activePaint(profile, ship);
+  const parts = equippedParts(profile, ship.id);
+  const card = $('#lo-card');
+  card.style.setProperty('--c', paint.color);
+  const paths = pathsHtml(ship, parts);
+  card.innerHTML = `<div class="hs-art"><i class="hs-pad"></i></div><div class="hs-info"><div class="role clip">ACTIVE SHIP</div><h4 class="clip">${ship.name}</h4><div class="hs-paths well">${paths || '<em>Equip gear to set your build paths</em>'}</div></div><div class="hs-actline"><span class="hs-n">BUILD PATHS</span><span class="hs-buy">‹ CHANGE SHIP</span></div>`;
+  card.querySelector('.hs-art').appendChild(shipArt(ship, true, null, 160, 64));
+  card.setAttribute('aria-label', `${ship.name}: change ship`);
+
+  $('#lo-stats').innerHTML = statBars(ship, parts);
+
+  const eq = profile.equip[ship.id] || {};
+  $('#lo-slots').innerHTML = SLOTS.map((sl) => {
+    const item = gearByUid(profile, eq[sl]);
+    const info = SLOT_INFO[sl];
+    const fresh = gearInSlot(profile, sl).some((g) => profile.gearNew.includes(g.uid));
+    const c = item ? RARITY[item.r].color : info.color;
+    const name = item ? `<b class="clip" style="color:${item.r ? c : ''}">${itemName(item)}</b>` : '<b>EMPTY</b>';
+    const sub = item ? `${info.name} · ${RARITY[item.r].name} · IL ${item.il}` : `${info.name} · ${gearInSlot(profile, sl).length}/${SLOT_CAP}`;
+    return `<button class="slot${item ? ' filled' : ''}" data-act="hslot" data-slot="${sl}" style="--c:${c}"><span class="slot-ico">${item ? gearDef(item.base).icon : '<i>+</i>'}</span><span class="slot-txt"><em class="clip">${sub}</em>${name}</span><span class="slot-go">${fresh ? '<i class="newdot">NEW</i>' : ''}›</span></button>`;
+  }).join('');
+
+  // Everything else the gear moves, in a fixed well under the slots.
+  const base = statsFor(ship, []);
+  const cur = statsFor(ship, parts);
+  const cells = EXTRAS.filter(([, get]) => Math.abs(get(cur) - get(base)) > 1e-6)
+    .map(([label, get, f]) => `<div class="${get(cur) > get(base) ? 'up' : 'dn'}">${label}<b>${f(get(cur))}</b></div>`);
+  $('#lo-extra').innerHTML = cells.length ? cells.join('') : '<em>Other bonuses from your gear show here.</em>';
+  $('#lo-extra').classList.toggle('none', !cells.length);
+}
+
+export function showLoadout(focus) {
+  G.screen = 'loadout';
+  renderLoadout();
+  let el = typeof focus === 'string' ? document.querySelector('#scr-loadout ' + focus) : focus;
+  if (!el || el.disabled) el = document.querySelector('#lo-slots .slot');
+  ui.show('loadout', { focus: el });
+}
+
+export const openLoadout = () => showLoadout();
+
 // --- Item detail panel (inventory and Fabricator) -----------------------------------------------
 
 function detailHtml(item, { compare = null, empty = '' } = {}) {
@@ -183,7 +281,7 @@ function detailHtml(item, { compare = null, empty = '' } = {}) {
   const rc = RARITY[item.r].color;
   const def = gearDef(item.base);
   const on = equippedOn(profile, item.uid);
-  const state = on.includes(viewShip().id) ? 'EQUIPPED' : on.length ? `ON ${on.length} SHIP${on.length > 1 ? 'S' : ''}` : '';
+  const state = on.includes(gearShip().id) ? 'EQUIPPED' : on.length ? `ON ${on.length} SHIP${on.length > 1 ? 'S' : ''}` : '';
   const lines = itemLines(item).map((l) => `<li class="${l.kind}"${l.tag ? ` style="--t:${TAGS[l.tag].color}"` : ''}>${l.text}</li>`).join('');
   const tags = Object.entries(itemTags(item)).sort((a, b) => b[1] - a[1]).map(([t]) => `<span style="--t:${TAGS[t].color}">${TAGS[t].name}</span>`).join('');
   const cmp = compare && compare.uid !== item.uid ? `<span class="gd-cmp">REPLACES <b style="color:${RARITY[compare.r].color}">${itemName(compare)}</b></span>` : '';
@@ -203,7 +301,7 @@ function setDetail(el, item, opts) {
 const sorted = (list) => [...list].sort((a, b) => itemScore(b) - itemScore(a));
 
 function showParts(focus) {
-  const ship = viewShip();
+  const ship = gearShip();
   const info = SLOT_INFO[slot];
   G.screen = 'parts';
   const items = sorted(gearInSlot(profile, slot));
@@ -245,7 +343,7 @@ function showParts(focus) {
 }
 
 function renderDetail() {
-  const ship = viewShip();
+  const ship = gearShip();
   const item = sel ? gearByUid(profile, sel) : null;
   const cur = gearByUid(profile, (profile.equip[ship.id] || {})[slot]);
   setDetail($('#parts-detail'), item, { compare: cur, empty: `No ${SLOT_INFO[slot].name} gear yet. Roll some in the FABRICATOR, or find it on elites and bosses.` });
@@ -337,9 +435,15 @@ export const hangarActs = {
     viewIdx = (viewIdx + d + SHIPS.length) % SHIPS.length;
     showHangar('#hs-card');
   },
+  // Fleet strip: jump straight to a hull.
+  hpick(btn) {
+    viewIdx = +btn.dataset.i;
+    showHangar('#hs-card');
+  },
+  // Confirm on the card: buy, then select; on the active ship it opens its LOADOUT.
   hact(btn) {
     const ship = viewShip();
-    if (btn.dataset.mode === 'none') return showHangar('#hs-slots .slot');
+    if (btn.dataset.mode === 'none') return showLoadout();
     if (btn.dataset.mode === 'buy') {
       if (buyShip(ship.id)) return sfx.ui();
       bought();
@@ -355,7 +459,7 @@ export const hangarActs = {
   },
   // Inventory tile: equip on the viewed ship, or unequip when it is already on.
   hpart(btn) {
-    const ship = viewShip();
+    const ship = gearShip();
     const uid = btn.dataset.id;
     sel = uid;
     confirmSell = null;
@@ -426,6 +530,7 @@ export const hangarActs = {
   hpaint(btn) {
     const ship = viewShip();
     const i = +btn.dataset.i;
+    if (!ownsShip(profile, ship)) return sfx.ui();
     const had = ownsPaint(ship.id, i);
     if (setPaint(ship.id, i)) return sfx.ui();
     if (!had) bought();
@@ -433,7 +538,11 @@ export const hangarActs = {
   },
   partsBack() {
     confirmSell = null;
-    showHangar(`#hs-slots [data-slot="${slot}"]`);
+    showLoadout(`#lo-slots [data-slot="${slot}"]`);
+  },
+  // LOADOUT's ship card: back to SHIP to pick another hull.
+  loShip() {
+    openHangar();
   },
 };
 
@@ -441,4 +550,5 @@ export function initHangarUi() {
   initServiceArt();
   for (const id of ['#parts-list']) $(id).addEventListener('menufocus', onTileFocus);
   $('#parts-list').addEventListener('pointerover', onTileFocus);
+  $('#scr-hangar').addEventListener('menufocus', onPaintFocus);
 }

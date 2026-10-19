@@ -47,13 +47,17 @@ const MENUS = {
   campaign: { open: `NEON.toTitle(); document.querySelector('#scr-title [data-act=play]').click()`, n: focusCount, step: focusEach },
   // The active ship wears gear (extra stats and paths), the others don't.
   ships: { open: `for (const [sl, r] of [['core', 4], ['plating', 3], ['thrusters', 2]]) NEON.equip('phantom', NEON.giveGear(sl, r, 30).uid); NEON.openHangar()`, n: `12`, key: 'ArrowRight' },
+  // Paint chips preview on the hull; the caption and art swap in place.
+  paints: { open: `NEON.openHangar()`, n: `8`, step: `document.querySelectorAll('#hs-paints .swatch')[I%4]?.dispatchEvent(new CustomEvent('menufocus',{bubbles:true}))` },
+  // LOADOUT: the active ship's gear; equipping changes the bars, extras and paths, never the layout.
+  loadout: { open: `for (const [sl, r] of [['core', 4], ['plating', 3]]) NEON.equip('phantom', NEON.giveGear(sl, r, 30).uid); NEON.openLoadout()`, n: `6`, step: `{const sl=['core','plating','thrusters'][I%3]; const g=NEON.giveGear(sl, I%5, 10+I*5); NEON.equip('phantom', g.uid); NEON.openLoadout();}` },
   // Dialogue (src/ui/comms.js): short, long and unbroken lines; the box keeps its size, long lines page.
   dialogue: { root: '#comms', open: `NEON.comms.play(${JSON.stringify(dialogueLines())}, { blocking: true })`, n: `24`, step: `NEON.comms.advance()` },
   liveDialogue: { root: '#comms', open: `NEON.startRun('vector'); NEON.comms.skipAll(); NEON.comms.play(${JSON.stringify(dialogueLines())}, { blocking: false })`, n: `24`, step: `NEON.comms.advance()` },
   // Hub tabs are separate screens: only the shared header and the text scale must hold still.
-  hangarTabs: { open: `NEON.toTitle(); document.querySelector('#scr-title [data-act=hangar]').click()`, n: `10`, key: 'KeyE', across: 'header.hub-head' },
+  hangarTabs: { open: `NEON.toTitle(); document.querySelector('#scr-title [data-act=hangar]').click()`, n: `12`, key: 'KeyE', across: 'header.hub-head' },
   collectionTabs: { open: `NEON.toTitle(); document.querySelector('#scr-title [data-act=gallery]').click()`, n: `4`, key: 'KeyE', across: 'header.hub-head' },
-  parts: { open: `NEON.openHangar(); document.querySelector('#hs-slots button')?.click()`, n: `document.querySelectorAll('#parts-list button').length`, step: menuFocus('#parts-list button') },
+  parts: { open: `NEON.openLoadout(); document.querySelector('#lo-slots button')?.click()`, n: `document.querySelectorAll('#parts-list button').length`, step: menuFocus('#parts-list button') },
   fab: { open: `NEON.openFab()`, n: `document.querySelectorAll('#scr-fab button').length`, step: menuFocus('#scr-fab button') },
   classes: { open: `NEON.openPilot()`, n: `document.querySelectorAll('#pl-tabs .cls-tab').length`, step: `document.querySelectorAll('#pl-tabs .cls-tab')[I].click()` },
   abilities: { open: `NEON.openPilot()`, n: `document.querySelectorAll('#pl-passives button').length`, step: menuFocus('#pl-passives button') },

@@ -120,21 +120,36 @@
 
         <!-- SHIP SELECT -->
         <!-- HANGAR (reachable from the campaign map only) -->
-                <!-- HANGAR hub (title menu or campaign): SHIP · FABRICATOR · PILOT · TREE · FLUX CORE tabs (screens.js initHubs) -->
+                <!-- HANGAR hub (title menu or campaign): SHIP · LOADOUT · FABRICATOR · PILOT · TREE · FLUX CORE tabs (screens.js initHubs) -->
         <section class="screen hub" id="scr-hangar" data-hub="hangar:ship" data-back="leaveHangar">
             <div class="hs-ship">
                 <button class="hs-nav" data-act="hprev" data-nofocus tabindex="-1" aria-label="Previous ship">&#8249;</button>
                 <button class="hs-card" id="hs-card" data-act="hact" data-cycle="hship"></button>
                 <button class="hs-nav" data-act="hnext" data-nofocus tabindex="-1" aria-label="Next ship">&#8250;</button>
             </div>
-            <div class="hs-dots" id="hs-dots"></div>
+            <div class="hs-roster" id="hs-roster" data-nofocus></div>
+            <div class="hs-label">BASE STATS</div>
+            <div class="hs-stats" id="hs-stats"></div>
+            <div class="hs-paint">
+                <span class="hs-label">PAINT</span>
+                <div class="paints" id="hs-paints" data-row></div>
+                <span class="hs-pcap" id="hs-pcap"></span>
+            </div>
+        </section>
+
+        <!-- LOADOUT: the active ship's gear; the stats panel sits where SHIP's does, with the gear applied -->
+        <section class="screen hub" id="scr-loadout" data-hub="hangar:loadout" data-back="leaveHangar">
+            <div class="hs-ship">
+                <span class="hs-nav ghost" aria-hidden="true"></span>
+                <button class="hs-card" id="lo-card" data-act="loShip"></button>
+                <span class="hs-nav ghost" aria-hidden="true"></span>
+            </div>
+            <div class="hs-roster ghost" aria-hidden="true"></div>
+            <div class="hs-label">STATS WITH GEAR</div>
+            <div class="hs-stats" id="lo-stats"></div>
             <div class="hs-label">GEAR</div>
-            <div class="slots" id="hs-slots"></div>
-            <div class="hs-label">PAINT</div>
-            <div class="paints" id="hs-paints"></div>
-            <div class="hs-label">LOADOUT</div>
-            <div class="hs-stats well" id="hs-stats"></div>
-            <div class="hs-paths well" id="hs-paths"></div>
+            <div class="slots" id="lo-slots"></div>
+            <div class="lo-extra well" id="lo-extra"></div>
         </section>
 
         <!-- PILOT (reachable from the campaign map only) -->
@@ -166,7 +181,7 @@
         </section>
 
         <!-- HANGAR PART LIST -->
-                <section class="screen hub" id="scr-parts" data-hub="hangar:ship" data-back="partsBack" data-back-label="SHIP">
+                <section class="screen hub" id="scr-parts" data-hub="hangar:loadout" data-back="partsBack" data-back-label="LOADOUT">
             <div class="sub-head"><b id="parts-title">CORE</b><span id="parts-sub"></span></div>
             <div class="gear-detail" id="parts-detail"></div>
             <div class="inv-grid" id="parts-list"></div>
