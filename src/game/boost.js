@@ -3,8 +3,8 @@
 // node timer, the wave timer, enemies, their bullets and beams, the side terrain and the chase gates all run
 // `p.flow` times faster (folded into G.enemyTimeScale by pilot.js pilotTimeScale). The player keeps real time (and gets
 // a little extra top speed), so a boost clears a node sooner and scores more (scoreMul) at the price of everything
-// arriving faster. In fights it works while the director is in `waves` (never in boss fights). Between the fighting
-// (node opening, zone breaks, fly-throughs, the clear beat) it is a free "cruise": no meter cost, no score bonus, and
+// arriving faster. In fights it burns the meter while the director is in `waves` or a boss / mini boss fight (`boss`).
+// Between the fighting (node opening, zone breaks, fly-throughs, the boss warning, the clear beat) it is a free "cruise": no meter cost, no score bonus, and
 // the transition's clocks (director d.t, the fly-through) run at `CRUISE` speed, so holding it skips the waiting.
 // In the overworld, flow increases travel speed directly; the same meter and enemy pace apply.
 // Meter: p.boost (0..cap). It drains while boosting, refills after a short pause, and needs `MIN` to ignite; burning it
@@ -33,7 +33,9 @@ export const BOOST = {
 };
 
 // Director states between the fighting where boost cruises (free) through the transition.
-const CRUISE = new Set(['intro', 'break', 'transit', 'clearing', 'bossDown', 'clear']);
+const CRUISE = new Set(['intro', 'break', 'transit', 'clearing', 'warn', 'bossDown', 'clear']);
+// Director states where boost burns the meter (the fighting).
+const FIGHT = new Set(['waves', 'boss']);
 export function cruising(p = G.player) {
   const d = G.director;
   return !!(!field.ow && p && p.boosting && d && CRUISE.has(d.state));
@@ -43,12 +45,12 @@ export const boostCap = (p) => BOOST.cap * (p.st.boostCap || 1);
 export const boostScore = (p) => (p && p.boosting && !cruising(p) ? 1 + BOOST.score * ((p.st.boostFlow || BOOST.flow) - 1) : 1);
 export const boostSpeed = (p) => field.ow ? (p.flow || 1) : 1 + BOOST.speed * Math.max(0, (p.flow || 1) - 1);
 
-// Can a boost run right now? Free flight, fight waves and fight transitions.
+// Can a boost run right now? Free flight, fight waves, boss fights and fight transitions.
 export function boostAllowed(p) {
   if (p.dead || G.mode !== 'run') return false;
   if (field.ow) return true;
   const d = G.director;
-  return !!(d && (d.state === 'waves' ? !p.auto : CRUISE.has(d.state)));
+  return !!(d && (FIGHT.has(d.state) ? !p.auto : CRUISE.has(d.state)));
 }
 
 // Is boost free right now (a transition between fights)?
