@@ -184,7 +184,7 @@ export function initDebugDrawer(api) {
   button(progression, 'Grant 5,000 run credits', () => { api.grant({ wallet: 5000 }); }, { enabled: live });
 
   const screens = section('Screen previews', 'Opening a progression screen leaves the current run.');
-  for (const [label, action] of [['Hangar', api.openHangar], ['Fabricator', api.openFab], ['Pilot & trees', api.openPilot], ['Relic gallery', api.openGallery], ['Achievements', api.openAchievements], ['Flux Core', api.openCore]]) button(screens, label, action, { leave: true });
+  for (const [label, action] of [['Hangar', api.openHangar], ['Loadout', api.openLoadout], ['Fabricator', api.openFab], ['Pilot & trees', api.openPilot], ['Relic gallery', api.openGallery], ['Achievements', api.openAchievements], ['Flux Core', api.openCore]]) button(screens, label, action, { leave: true });
   const previews = section('Art & layout tools');
   for (const [name, path] of [['Ships & firing', 'ship-art-preview.html'], ['Campaign', 'campaign-preview.html'], ['Background layers', 'background-preview.html'], ['Icons', 'icon-preview.html'], ['Live icons', 'icon-live-preview.html'], ['Icon layouts', 'icon-ui-preview.html']]) {
     const link = document.createElement('a');

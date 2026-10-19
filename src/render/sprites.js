@@ -206,6 +206,14 @@ export function rebuildShipSprite(ship, color, bullet = color) {
   S['pb_' + ship.id] = bulletSprite(ship, bullet);
 }
 
+// A ship baked in another paint for the Hangar's paint preview; S keeps the equipped paint.
+const previews = new Map();
+export function previewShipSprite(ship, color) {
+  const key = ship.id + color;
+  if (!previews.has(key)) previews.set(key, shipSprite(ship.id, color));
+  return previews.get(key);
+}
+
 export function buildSprites(ships) {
   for (const sh of ships) S['ship_' + sh.id] = shipSprite(sh.id, sh.color);
 

@@ -117,7 +117,7 @@ export function keyCap(k) {
 // currencies and the hub's tab bar (Q / E or LB / RB step it; clicking a tab opens it through the 'hub' handler).
 const HUBS = {
   // [id, tab label, page name in the header]
-  hangar: { title: 'HANGAR', tabs: [['ship', 'SHIP', 'SHIP & GEAR'], ['fab', 'FAB', 'FABRICATOR'], ['pilot', 'PILOT', 'PILOT'], ['tree', 'TREE', 'PASSIVE TREE'], ['core', 'FLUX', 'FLUX CORE']] },
+  hangar: { title: 'HANGAR', tabs: [['ship', 'SHIP', 'SHIP SELECT'], ['loadout', 'LOADOUT', 'LOADOUT'], ['fab', 'FAB', 'FABRICATOR'], ['pilot', 'PILOT', 'PILOT'], ['tree', 'TREE', 'PASSIVE TREE'], ['core', 'FLUX', 'FLUX CORE']] },
   collect: { title: 'COLLECTION', tabs: [['gallery', 'GALLERY', 'RELICS'], ['ach', 'ACHIEVEMENTS', 'ACHIEVEMENTS']] },
 };
 const COIN = '<svg class="coin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5l3.5 4.5-3.5 4.5-3.5-4.5z"/></svg>';
