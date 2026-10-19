@@ -54,7 +54,7 @@ const MENUS = {
   // Dialogue (src/ui/comms.js): short, long and unbroken lines; the box keeps its size, long lines page.
   dialogue: { root: '#comms', open: `NEON.comms.play(${JSON.stringify(dialogueLines())}, { blocking: true })`, n: `24`, step: `NEON.comms.advance()` },
   liveDialogue: { root: '#comms', open: `NEON.startRun('vector'); NEON.comms.skipAll(); NEON.comms.play(${JSON.stringify(dialogueLines())}, { blocking: false })`, n: `24`, step: `NEON.comms.advance()` },
-  // Hub tabs are separate screens: only the shared header and the text scale must hold still.
+  // Hub tabs are separate pages under one shared header: the header and the text scale must hold still.
   hangarTabs: { open: `NEON.toTitle(); document.querySelector('#scr-title [data-act=hangar]').click()`, n: `12`, key: 'KeyE', across: 'header.hub-head' },
   collectionTabs: { open: `NEON.toTitle(); document.querySelector('#scr-title [data-act=gallery]').click()`, n: `4`, key: 'KeyE', across: 'header.hub-head' },
   parts: { open: `NEON.openLoadout(); document.querySelector('#lo-slots button')?.click()`, n: `document.querySelectorAll('#parts-list button').length`, step: menuFocus('#parts-list button') },
