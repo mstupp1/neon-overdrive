@@ -1,5 +1,11 @@
 # Campaign parallax art
 
+## Named combat zones
+
+Crimson's **Spore Fields** and **Hive Trench**, and Void's **Shattered Orbit**, each have a dedicated near skyline and near deck. Named campaign zones select these pairs automatically; other zones, boss arenas, and guarded Vaults use their system defaults. The original landmarks and far layers remain shared. A pair becomes visible only after both images decode; loading or failed pairs retain the base system art.
+
+Use the **Zone variant** selector in `/tools/background-preview.html` to review each pair across top-down, side-scroll, and pursuit, or open `?theme=crimson&zone=spore-fields&view=chase`. Overworld art continues to use the system set. Zone briefs, original generations, prompts, tile previews and live captures are under `crimson/zones/` and `void/zones/`; each system manifest records their exports and hashes.
+
 ## Free-flight overworlds
 
 Each system also has two transparent overhead scenery layers and four solid obstacle sprites generated with built-in imagegen. Genesis uses orbital salvage, Crimson uses bio-corrupted refinery wreckage, Cyclone uses storm collectors and turbines, and Void uses fractured monoliths and alien relics. The existing landmarks sit at a distant camera depth; far/near scenery travels at separate parallax rates below the reactive grid. Solid sprites follow the original collision geometry and rotation.

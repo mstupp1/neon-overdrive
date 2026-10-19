@@ -261,6 +261,7 @@ function setZone(d, i) {
   d.zone = { i, name: names[(d.zoneBase + i) % (names.length - 1)], focus, hue: spec.hue + HUE_SHIFT[i % HUE_SHIFT.length] };
   d.obst = d.fields[i] || null;
   d.obstT = 2.5;
+  bg.setZone(d.zone.name);
   bg.setHue(d.zone.hue);
 }
 
@@ -313,12 +314,12 @@ export function startSector(spec) {
   sv.reset();
   if (spec.view && spec.view !== 'top') sv.enter(spec.view);
   bg.setHue(spec.hue);
+  bg.setTheme(G.run && G.run.mode === 'campaign' ? G.run.system.id : null);
   clearObstacles();
   rollFields(d, spec);
   d.obst = d.fields[0] || null;
   d.obstT = 2.5;
   if (d.zones > 1) setZone(d, 0);
-  bg.setTheme(G.run && G.run.mode === 'campaign' ? G.run.system.id : null);
   G.vacuum = false;
   if (G.mode === 'run') {
     const camp = G.run && G.run.mode === 'campaign' && spec.row != null;

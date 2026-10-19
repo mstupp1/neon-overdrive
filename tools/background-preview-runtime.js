@@ -1,6 +1,6 @@
 // Runs inside the preview iframe so imports share the live game's module state.
 import { bg } from '../src/render/background.js';
-import { loadThemeLayers, themeLayersReady, setThemeLayersEnabled } from '../src/render/backgroundLayers.js';
+import { loadThemeLayers, themeLayersReady, loadZoneLayers, zoneLayersReady, setThemeLayersEnabled } from '../src/render/backgroundLayers.js';
 import { loadOverworldLayers, overworldLayersReady, setOverworldLayersEnabled } from '../src/render/overworldLayers.js';
 import { SYSTEMS } from '../src/game/campaign.js';
 
@@ -11,24 +11,49 @@ let frozen = false;
 let frozenScreen = 'play';
 let currentTheme = 'genesis';
 let currentView = 'top';
+let currentZone = '';
+let configurationRevision = 0;
+let zoneLoading = false;
+const zonesFor = (theme) => ({crimson:['spore-fields','hive-trench'],void:['shattered-orbit']})[theme] || [];
+const zoneLabel = (slug) => ({'spore-fields':'Spore Fields','hive-trench':'Hive Trench','shattered-orbit':'Shattered Orbit'})[slug] || 'System default';
 const systemFor = (id) => SYSTEMS.find((system) => system.id === id) || SYSTEMS[0];
 const bossFor = (id) => systemFor(id).boss;
 const bossName = (id) => ({warden:'Warden',hydra:'Hydra',omega:'Omega',eclipse:'Eclipse'})[bossFor(id)];
 const emit = (status) => parent.postMessage({kind:'background-preview', ready:true, status}, parent.location.origin);
 
-function configure(theme = currentTheme, view = currentView) {
+function applyZone() {
+  bg.setZone(currentView === 'overworld' ? '' : currentZone || null);
+}
+
+function zoneStatus(theme = currentTheme) {
+  if (currentView === 'overworld' || !currentZone) return `${currentView === 'overworld' ? 'Zone base' : 'Zone system default'} · ready`;
+  return `Zone ${zoneLabel(currentZone)} · ${zoneLayersReady(theme, currentZone) ? 'ready' : zoneLoading ? 'loading' : 'unavailable: procedural fallback'}`;
+}
+
+function configure(theme = currentTheme, view = currentView, zone = currentZone) {
+  const revision = ++configurationRevision;
   if (SYSTEMS.some((system) => system.id === theme)) currentTheme = theme;
   if (['top','side','chase','overworld'].includes(view)) currentView = view;
+  currentZone = currentView === 'overworld' || !zonesFor(currentTheme).includes(zone) ? '' : zone;
+  zoneLoading = Boolean(currentZone && !zoneLayersReady(currentTheme, currentZone));
   bg.setTheme(currentTheme);
+  applyZone();
   const requestedTheme = currentTheme;
+  const requestedView = currentView;
+  const requestedZone = currentZone;
   setThemeLayersEnabled(requestedTheme, generated);
   const layered = currentView === 'overworld'
     ? (setOverworldLayersEnabled(requestedTheme, generated), loadOverworldLayers(requestedTheme))
-    : loadThemeLayers(requestedTheme);
+    : Promise.all([loadThemeLayers(requestedTheme), requestedZone ? loadZoneLayers(requestedTheme, requestedZone) : Promise.resolve()]);
   layered.then(() => {
-    if (currentTheme !== requestedTheme) return;
+    if (revision !== configurationRevision || currentTheme !== requestedTheme || currentView !== requestedView || currentZone !== requestedZone) return;
+    zoneLoading = false;
     const ready = currentView === 'overworld' ? overworldLayersReady(requestedTheme) : themeLayersReady(requestedTheme);
-    emit(`${systemFor(requestedTheme).name} · ${currentView}\n${generated ? 'Generated' : 'Procedural'} background\nImages ${ready ? 'ready' : 'unavailable: procedural fallback'}`);
+    emit(`${systemFor(requestedTheme).name} · ${currentView}\n${generated ? 'Generated' : 'Procedural'} background\nImages ${ready ? 'ready' : 'unavailable: procedural fallback'}\n${zoneStatus(requestedTheme)}`);
+  }).catch(() => {
+    if (revision !== configurationRevision || currentTheme !== requestedTheme || currentView !== requestedView || currentZone !== requestedZone) return;
+    zoneLoading = false;
+    emit(`${systemFor(requestedTheme).name} · ${requestedView}\n${generated ? 'Generated' : 'Procedural'} background\nImages unavailable: procedural fallback\n${zoneStatus(requestedTheme)}`);
   });
 }
 
@@ -54,8 +79,9 @@ function start(boss = false) {
     N.G.player.xp = -100000;
     frozenScreen = 'overworld';
     bg.setTheme(currentTheme);
+    applyZone();
     frozen = false;
-    emit(`${system.name} · overworld\n${generated ? 'Generated' : 'Procedural'} background\nFree flight and combat`);
+    emit(`${system.name} · overworld\n${generated ? 'Generated' : 'Procedural'} background\nFree flight and combat\nZone base · ready`);
     return;
   }
   N.G.scriptCtrl = null;
@@ -68,8 +94,9 @@ function start(boss = false) {
   N.G.player.god = true;
   N.G.player.xp = -100000; // keep drafts out of the comparison
   bg.setTheme(currentTheme);
+  applyZone();
   frozen = false;
-  emit(`${system.name} · ${currentView}\n${generated ? 'Generated' : 'Procedural'} background\n${boss ? `${bossName(currentTheme)} arena` : 'Wave fight'}`);
+  emit(`${system.name} · ${currentView}\n${generated ? 'Generated' : 'Procedural'} background\n${boss ? `${bossName(currentTheme)} arena` : 'Wave fight'}\n${zoneStatus()}`);
 }
 
 async function benchmark() {
@@ -115,13 +142,15 @@ async function benchmark() {
 window.addEventListener('message', ({source,data}) => {
   if(source!==parent || data?.kind!=='background-preview-action') return;
   const action=data.action;
-  configure(data.theme,data.view);
+  if (action === 'configure' || data.theme !== currentTheme || data.view !== currentView || data.zone !== currentZone) {
+    configure(data.theme,data.view,data.zone);
+  }
   if(action==='configure') start();
   if(action==='baseline'||action==='generated') {
     generated=action==='generated'; setThemeLayersEnabled(currentTheme,generated);
     if (currentView === 'overworld') setOverworldLayersEnabled(currentTheme, generated);
     const ready = currentView === 'overworld' ? overworldLayersReady(currentTheme) : themeLayersReady(currentTheme);
-    emit(`${systemFor(currentTheme).name} · ${currentView}\n${generated?'Generated':'Procedural'} background\nImages ${ready?'ready':'loading / fallback'}`);
+    emit(`${systemFor(currentTheme).name} · ${currentView}\n${generated?'Generated':'Procedural'} background\nImages ${ready?'ready':'loading / fallback'}\n${zoneStatus()}`);
   } else if(action==='waves') start();
   else if(action==='boss') start(true);
   else if(action==='dense') {
@@ -130,22 +159,22 @@ window.addEventListener('message', ({source,data}) => {
     if (currentView === 'overworld') {
       const p=N.G.player;
       ['spinner','sniper','tank','carrier','shielder','weaver'].forEach((type,i)=>N.spawn(type,p.x+(i-2.5)*115,p.y-250,{elite:true}));
-      emit(`${systemFor(currentTheme).name} · overworld\nDense free-flight combat contrast check`);
+      emit(`${systemFor(currentTheme).name} · overworld\nDense free-flight combat contrast check\nZone base · ready`);
     } else {
       ['spinner','sniper','tank','carrier','shielder','weaver'].forEach((type,i)=>N.spawn(type,W*(i+1)/7,160,{elite:true}));
-      emit(`${systemFor(currentTheme).name} · ${currentView}\nDense wave and fire contrast check`);
+      emit(`${systemFor(currentTheme).name} · ${currentView}\nDense wave and fire contrast check\n${zoneStatus()}`);
     }
   } else if(action==='boost') {
     boosted=!boosted;
     if (currentView === 'overworld') N.input.hold('focus', boosted);
     else N.G.scriptCtrl=boosted ? ()=>({mode:'dir',dx:0,dy:0,dash:false,od:false,boost:true}) : null;
-    emit(`Boost ${boosted?'on':'off'} · ${currentView}`);
+    emit(`Boost ${boosted?'on':'off'} · ${currentView}\n${zoneStatus()}`);
   } else if(action==='freeze') {
     frozen=!frozen;
     N.G.screen=frozen?'pause':frozenScreen;
-    emit(frozen?'Frozen scene':'Running scene');
+    emit(`${frozen?'Frozen scene':'Running scene'} · ${currentView}\n${zoneStatus()}`);
   } else if(action==='benchmark') benchmark();
 });
 const initial = new URLSearchParams(parent.location.search);
-configure(initial.get('theme') || 'genesis', initial.get('view') || 'top');
+configure(initial.get('theme') || 'genesis', initial.get('view') || 'top', initial.get('zone') || '');
 start();

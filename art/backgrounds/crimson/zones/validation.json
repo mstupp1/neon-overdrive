@@ -1,0 +1,127 @@
+{
+  "date": "2026-10-18",
+  "assets": [
+    {
+      "path": "src/assets/backgrounds/crimson/spore-fields/skyline-near-v1.png",
+      "format": "PNG",
+      "width": 720,
+      "height": 480,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        254
+      ],
+      "transparent_percent": 85.28,
+      "partial_alpha_percent": 14.72,
+      "visible_bbox": [
+        0,
+        47,
+        720,
+        473
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 37103
+    },
+    {
+      "path": "src/assets/backgrounds/crimson/spore-fields/deck-near-v1.png",
+      "format": "PNG",
+      "width": 360,
+      "height": 360,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 79.103,
+      "partial_alpha_percent": 20.873,
+      "visible_bbox": [
+        20,
+        26,
+        340,
+        340
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 18278
+    },
+    {
+      "path": "src/assets/backgrounds/crimson/hive-trench/skyline-near-v1.png",
+      "format": "PNG",
+      "width": 720,
+      "height": 480,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        254
+      ],
+      "transparent_percent": 80.316,
+      "partial_alpha_percent": 19.684,
+      "visible_bbox": [
+        0,
+        137,
+        720,
+        466
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 43779
+    },
+    {
+      "path": "src/assets/backgrounds/crimson/hive-trench/deck-near-v1.png",
+      "format": "PNG",
+      "width": 360,
+      "height": 360,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 75.256,
+      "partial_alpha_percent": 24.712,
+      "visible_bbox": [
+        26,
+        25,
+        334,
+        336
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 21451
+    }
+  ],
+  "liveReview": {
+    "storage": "isolated in-memory preview",
+    "views": [
+      "top",
+      "side",
+      "chase"
+    ],
+    "pixelLook": "reviewed all zone/camera combinations",
+    "normalLook": "Shattered Orbit top-down reviewed without pixel pass; other normal-view combinations not separately checked",
+    "contrast": "Spore Fields and Shattered Orbit dense preview; Hive Trench pursuit combat and boost",
+    "transitions": "Crimson zones, Crimson to Void, zone selection across combat cameras, Void overworld resets to base",
+    "console": "no warnings/errors observed in preview"
+  },
+  "automated": "22 background + overworld renderer tests pass (15 background, 7 overworld)",
+  "limitations": [
+    "Menu layout audit could not run: Playwright module unavailable. Game menus are unchanged.",
+    "Narrow viewport and whole-game/GPU performance were not measured."
+  ]
+}

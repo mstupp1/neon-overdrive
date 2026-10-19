@@ -5,12 +5,14 @@
 <title>Campaign background preview</title>
 <style>
   *{box-sizing:border-box}body{margin:0;background:#090b17;color:#b6cedb;font:14px system-ui;display:flex;height:100vh}
-  aside{width:250px;padding:18px;flex-shrink:0;overflow:auto}h1{font-size:19px;color:#5ddbe3}p{line-height:1.5}label{display:block;margin:12px 0 4px;color:#83a5bb;font-size:12px;text-transform:uppercase;letter-spacing:.08em}select,button{display:block;width:100%;margin:6px 0 10px;padding:10px;background:#172238;color:#b9e8ee;border:1px solid #375270}button{cursor:pointer}button:disabled{opacity:.4}iframe{border:0;flex:1;height:100vh;min-width:0}output{display:block;white-space:pre-wrap;font:12px monospace;line-height:1.6;margin-top:12px}
+  aside{width:250px;padding:18px;flex-shrink:0;overflow:auto}h1{font-size:19px;color:#5ddbe3}p{line-height:1.5}label{display:block;margin:12px 0 4px;color:#83a5bb;font-size:12px;text-transform:uppercase;letter-spacing:.08em}select,button{display:block;width:100%;margin:6px 0 10px;padding:10px;background:#172238;color:#b9e8ee;border:1px solid #375270}button{cursor:pointer}button:disabled,select:disabled{opacity:.4}iframe{border:0;flex:1;height:100vh;min-width:0}output{display:block;white-space:pre-wrap;font:12px monospace;line-height:1.6;margin-top:12px}
+  @media(max-width:640px){body{flex-direction:column;height:100dvh}aside{width:100%;max-height:48dvh;padding:10px 14px;display:grid;grid-template-columns:1fr 1fr;gap:0 10px}h1,p,output{grid-column:1/-1}h1{margin:2px 0;font-size:17px}p{margin:2px 0 6px;font-size:12px}label{margin:5px 0 0}select,button{margin:3px 0 5px;padding:7px;font-size:12px}iframe{width:100%;height:52dvh;flex:none}}
 </style>
 <aside>
   <h1>Campaign backgrounds</h1>
   <p>Live, invulnerable test run. Steer with WASD or click to fly; Shift boosts. Uses the game's debug hook. These controls never save the test loadout.</p>
   <label for="theme">System theme</label><select id="theme" disabled><option value="genesis">Genesis</option><option value="crimson">Crimson</option><option value="cyclone">Cyclone</option><option value="void">Void</option></select>
+  <label for="zone">Zone variant</label><select id="zone" disabled><option value="">System default</option></select>
   <label for="view">Stage view</label><select id="view" disabled><option value="top">Top-down</option><option value="side">Side-scroll</option><option value="chase">Pursuit</option><option value="overworld">Overworld</option></select>
   <button data-action="baseline" disabled>Procedural baseline</button>
   <button data-action="generated" disabled>Generated layers</button>
@@ -28,6 +30,15 @@ const frame = document.querySelector('iframe');
 const params = new URLSearchParams(location.search);
 if(['genesis','crimson','cyclone','void'].includes(params.get('theme'))) document.querySelector('#theme').value=params.get('theme');
 if(['top','side','chase','overworld'].includes(params.get('view'))) document.querySelector('#view').value=params.get('view');
+const zoneChoices={crimson:[['spore-fields','Spore Fields'],['hive-trench','Hive Trench']],void:[['shattered-orbit','Shattered Orbit']]};
+const zoneSelect=document.querySelector('#zone');
+function updateZones(theme, requested='', view=document.querySelector('#view').value){
+  const choices=zoneChoices[theme]||[];
+  zoneSelect.replaceChildren(new Option('System default',''),...choices.map(([slug,name])=>new Option(name,slug)));
+  zoneSelect.disabled=!choices.length||view==='overworld';
+  zoneSelect.value=view==='overworld'||!choices.some(([slug])=>slug===requested)?'':requested;
+}
+updateZones(document.querySelector('#theme').value,params.get('zone')||'');
 frame.addEventListener('load', () => {
   if(!frame.contentDocument.querySelector('#game')) return;
   const script = frame.contentDocument.createElement('script');
@@ -46,12 +57,13 @@ window.addEventListener('message', ({source, data}) => {
   if(source !== frame.contentWindow || data?.kind !== 'background-preview') return;
   document.querySelector('#status').textContent = data.status;
   if(data.ready) {
-    document.querySelectorAll('button,select').forEach(control => control.disabled=false);
+    document.querySelectorAll('button,select').forEach(control => {if(control.id!=='zone'||(zoneChoices[document.querySelector('#theme').value]?.length&&document.querySelector('#view').value!=='overworld'))control.disabled=false;});
   }
 });
-document.querySelectorAll('button').forEach(button => button.addEventListener('click', () => {
-  frame.contentWindow.postMessage({kind:'background-preview-action',action:button.dataset.action,theme:document.querySelector('#theme').value,view:document.querySelector('#view').value},location.origin);
-}));
-for(const select of document.querySelectorAll('select')) select.addEventListener('change',()=>frame.contentWindow.postMessage({kind:'background-preview-action',action:'configure',theme:document.querySelector('#theme').value,view:document.querySelector('#view').value},location.origin));
+function send(action){frame.contentWindow.postMessage({kind:'background-preview-action',action,theme:document.querySelector('#theme').value,view:document.querySelector('#view').value,zone:zoneSelect.value},location.origin);}
+document.querySelectorAll('button').forEach(button => button.addEventListener('click', () => send(button.dataset.action)));
+document.querySelector('#theme').addEventListener('change',()=>{updateZones(document.querySelector('#theme').value);send('configure');});
+document.querySelector('#view').addEventListener('change',()=>{const requested=document.querySelector('#view').value==='overworld'?'':zoneSelect.value;updateZones(document.querySelector('#theme').value,requested,document.querySelector('#view').value);send('configure');});
+zoneSelect.addEventListener('change',()=>send('configure'));
 </script>
 </html>

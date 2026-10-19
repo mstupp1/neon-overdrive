@@ -4,7 +4,7 @@ import { view, G } from '../game/state.js';
 import { glow } from './sprites.js';
 import { rand, damp, wrapAngle, mulberry32, TAU } from '../core/math.js';
 import { beat } from '../core/beat.js';
-import { loadThemeLayers, drawThemeHorizon, drawThemeDeck } from './backgroundLayers.js';
+import { loadThemeLayers, setThemeZone, drawThemeHorizon, drawThemeDeck } from './backgroundLayers.js';
 import { topdownHorizon } from '../game/topdownGeometry.js';
 
 // --- Per-system themes (campaign) ---------------------------------------------------
@@ -414,9 +414,15 @@ export const bg = {
   // Campaign system id (genesis | crimson | cyclone | void) or null. Layers bake lazily, once per theme.
   setTheme(id) {
     this.theme = THEMES[id] ? id : null;
+    setThemeZone(this.theme, null);
     const T = THEMES[this.theme];
     if (T && !baked[this.theme]) baked[this.theme] = bake(T.h, (g) => T.bake(g, T.h));
     if (this.theme) loadThemeLayers(this.theme);
+  },
+
+  setZone(zone) {
+    const slug = String(zone || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    setThemeZone(this.theme, slug || null);
   },
 
   // Blackout modifier: darken the sky and grid (enemies and bullets are drawn afterwards, so they stay bright).

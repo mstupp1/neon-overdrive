@@ -577,6 +577,222 @@
       "sourceSha256": "00b400fd38aedea53fa73eb357697316ea4cafda7521a32bc6074a87e5f80730",
       "runtimeSha256": "dd3c6994d82d8d727bfffbe83d247cb139d6a4e8d2aa97995872a6f3f0c698d6",
       "runtimeBytes": 525798
+    },
+    {
+      "id": "spore-fields/skyline-near",
+      "zone": "spore-fields",
+      "added": "2026-10-18",
+      "source": "zones/spore-fields/sources/skyline-near-v1.png",
+      "runtime": "../../../src/assets/backgrounds/crimson/spore-fields/skyline-near-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a15221-23cd-7932-a44e-b39b3d92376c/exec-9264e2fa-b84d-44df-897c-17be41b7fee3.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster background layer for NEON OVERDRIVE, crimson spore-fields, skyline-near. Subject: Sparse asymmetric fungal caps, hanging egglike spore sacs on thin stalks, and infected refinery roots. Organic silhouette; no rib arches. Landscape 1536x1024 composition, bottom-aligned shallow skyline band, baseline near bottom, structures only in lower 55 percent, top 45 percent entirely transparent. Broad low silhouette across width, low at left/right edges, no giant central landmark, no perspective convergence. Runtime 720x480 squeezed into a shallow 510x90 distant horizon band. Fine crisp pixel art with deliberate clusters that read at 360 virtual pixels across, no chunky pixel blocks, not photorealistic. Palette: near-black burgundy/navy with sparse dull rose and crimson rims. Almost-black surfaces, very restrained thin highlights. Scenery much darker than arcade ships and projectiles. Genuine alpha transparency outside objects, no opaque black matte, no painted checkerboard. No sky, stars, floor, grid, fog, bloom, HUD, text, logo, watermarks, ships, characters, bullets, pickups, white lights or green/lime. Keep ample negative space.",
+      "promptFile": "zones/spore-fields/skyline-near-prompt-v1.txt",
+      "referenceImages": [],
+      "artDirection": "zones/brief.md",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "exportSize": [
+        720,
+        480
+      ],
+      "export": {
+        "resampling": "nearest",
+        "padding": 0
+      },
+      "sourceSha256": "3771ded67d4deb679f4b2831713764a9f462a6230be2e8e228ba954c83890ee3",
+      "runtimeSha256": "8c649d20487049b738672370514e310d4e68f4b43c5d0477d1392301d8967567",
+      "runtimeBytes": 276379,
+      "alpha": {
+        "path": "src/assets/backgrounds/crimson/spore-fields/skyline-near-v1.png",
+        "format": "PNG",
+        "width": 720,
+        "height": 480,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          254
+        ],
+        "transparent_percent": 85.28,
+        "partial_alpha_percent": 14.72,
+        "visible_bbox": [
+          0,
+          47,
+          720,
+          473
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 37103
+      }
+    },
+    {
+      "id": "spore-fields/deck-near",
+      "zone": "spore-fields",
+      "added": "2026-10-18",
+      "source": "zones/spore-fields/sources/deck-near-v1.png",
+      "runtime": "../../../src/assets/backgrounds/crimson/spore-fields/deck-near-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a15221-23cd-7932-a44e-b39b3d92376c/exec-d240cc3d-7f42-4bf4-8818-6f3190bff11f.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster background layer for NEON OVERDRIVE, crimson spore-fields, deck-near. Subject: Sparse asymmetric fungal caps, hanging egglike spore sacs on thin stalks, and infected refinery roots. Organic silhouette; no rib arches. Square 1024x1024 composition, directly overhead isolated SMALL separated scenery clusters only along left and right side lanes. Center 50 percent is completely empty transparent aisle. All geometry ends inside canvas: TOP AND BOTTOM 18 PERCENT ENTIRELY TRANSPARENT, side 8 percent clear. No continuous lines reaching edges, no floor plane. Runtime 360x360 repeating vertical tile projected under a reactive grid. Sparse decorative fragments, not collision walls. Fine crisp pixel art with deliberate clusters that read at 360 virtual pixels across, no chunky pixel blocks, not photorealistic. Palette: near-black burgundy/navy with sparse dull rose and crimson rims. Almost-black surfaces, very restrained thin highlights. Scenery much darker than arcade ships and projectiles. Genuine alpha transparency outside objects, no opaque black matte, no painted checkerboard. No sky, stars, floor, grid, fog, bloom, HUD, text, logo, watermarks, ships, characters, bullets, pickups, white lights or green/lime. Keep ample negative space.",
+      "promptFile": "zones/spore-fields/deck-near-prompt-v1.txt",
+      "referenceImages": [],
+      "artDirection": "zones/brief.md",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "exportSize": [
+        360,
+        360
+      ],
+      "export": {
+        "resampling": "nearest",
+        "padding": 20
+      },
+      "sourceSha256": "8e182c51f99d697b8e6e8d6c694354983b7a4fb0ada972ab968c5cb6d49cd371",
+      "runtimeSha256": "d4113844765499b55098f1f522177de0ca9394fd14be323ccc915c15f09861d4",
+      "runtimeBytes": 87654,
+      "alpha": {
+        "path": "src/assets/backgrounds/crimson/spore-fields/deck-near-v1.png",
+        "format": "PNG",
+        "width": 360,
+        "height": 360,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 79.103,
+        "partial_alpha_percent": 20.873,
+        "visible_bbox": [
+          20,
+          26,
+          340,
+          340
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 18278
+      }
+    },
+    {
+      "id": "hive-trench/skyline-near",
+      "zone": "hive-trench",
+      "added": "2026-10-18",
+      "source": "zones/hive-trench/sources/skyline-near-v1.png",
+      "runtime": "../../../src/assets/backgrounds/crimson/hive-trench/skyline-near-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a15221-23cd-7932-a44e-b39b3d92376c/exec-5db7d571-8480-4204-a1df-22b299aa0ae5.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster background layer for NEON OVERDRIVE, crimson hive-trench, skyline-near. Subject: Ribbed chitin buttresses, burrow arches and encased industrial pipes, bony segmented architecture. No mushrooms. Landscape 1536x1024 composition, bottom-aligned shallow skyline band, baseline near bottom, structures only in lower 55 percent, top 45 percent entirely transparent. Broad low silhouette across width, low at left/right edges, no giant central landmark, no perspective convergence. Runtime 720x480 squeezed into a shallow 510x90 distant horizon band. Fine crisp pixel art with deliberate clusters that read at 360 virtual pixels across, no chunky pixel blocks, not photorealistic. Palette: near-black burgundy/navy with sparse dull rose and crimson rims. Almost-black surfaces, very restrained thin highlights. Scenery much darker than arcade ships and projectiles. Genuine alpha transparency outside objects, no opaque black matte, no painted checkerboard. No sky, stars, floor, grid, fog, bloom, HUD, text, logo, watermarks, ships, characters, bullets, pickups, white lights or green/lime. Keep ample negative space.",
+      "promptFile": "zones/hive-trench/skyline-near-prompt-v1.txt",
+      "referenceImages": [],
+      "artDirection": "zones/brief.md",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "exportSize": [
+        720,
+        480
+      ],
+      "export": {
+        "resampling": "nearest",
+        "padding": 0
+      },
+      "sourceSha256": "a536f15eac1aefe1338396a15190bb52299e0620f9de23a37a7080d64dc0a78f",
+      "runtimeSha256": "46f3ba91996c24597c148a9e31acd3c426a3a26660a239fea19af5f6bf07031d",
+      "runtimeBytes": 304774,
+      "alpha": {
+        "path": "src/assets/backgrounds/crimson/hive-trench/skyline-near-v1.png",
+        "format": "PNG",
+        "width": 720,
+        "height": 480,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          254
+        ],
+        "transparent_percent": 80.316,
+        "partial_alpha_percent": 19.684,
+        "visible_bbox": [
+          0,
+          137,
+          720,
+          466
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 43779
+      }
+    },
+    {
+      "id": "hive-trench/deck-near",
+      "zone": "hive-trench",
+      "added": "2026-10-18",
+      "source": "zones/hive-trench/sources/deck-near-v1.png",
+      "runtime": "../../../src/assets/backgrounds/crimson/hive-trench/deck-near-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a15221-23cd-7932-a44e-b39b3d92376c/exec-b706a5b1-2841-4e96-aed7-06393c082a63.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster background layer for NEON OVERDRIVE, crimson hive-trench, deck-near. Subject: Ribbed chitin buttresses, burrow arches and encased industrial pipes, bony segmented architecture. No mushrooms. Square 1024x1024 composition, directly overhead isolated SMALL separated scenery clusters only along left and right side lanes. Center 50 percent is completely empty transparent aisle. All geometry ends inside canvas: TOP AND BOTTOM 18 PERCENT ENTIRELY TRANSPARENT, side 8 percent clear. No continuous lines reaching edges, no floor plane. Runtime 360x360 repeating vertical tile projected under a reactive grid. Sparse decorative fragments, not collision walls. Fine crisp pixel art with deliberate clusters that read at 360 virtual pixels across, no chunky pixel blocks, not photorealistic. Palette: near-black burgundy/navy with sparse dull rose and crimson rims. Almost-black surfaces, very restrained thin highlights. Scenery much darker than arcade ships and projectiles. Genuine alpha transparency outside objects, no opaque black matte, no painted checkerboard. No sky, stars, floor, grid, fog, bloom, HUD, text, logo, watermarks, ships, characters, bullets, pickups, white lights or green/lime. Keep ample negative space.",
+      "promptFile": "zones/hive-trench/deck-near-prompt-v1.txt",
+      "referenceImages": [],
+      "artDirection": "zones/brief.md",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "exportSize": [
+        360,
+        360
+      ],
+      "export": {
+        "resampling": "nearest",
+        "padding": 20
+      },
+      "sourceSha256": "0f73c35b8b15b30f5b61e2de8c7c551b3efe0bbe46adc5179a5802be350ad5c2",
+      "runtimeSha256": "d16aa8b9b64cb715e9f44c9f81970a4df31c602729353f5fdf7547024f8ced30",
+      "runtimeBytes": 97541,
+      "alpha": {
+        "path": "src/assets/backgrounds/crimson/hive-trench/deck-near-v1.png",
+        "format": "PNG",
+        "width": 360,
+        "height": 360,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 75.256,
+        "partial_alpha_percent": 24.712,
+        "visible_bbox": [
+          26,
+          25,
+          334,
+          336
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 21451
+      }
     }
   ],
   "runtimeTotalBytes": 1281497,
@@ -602,5 +818,13 @@
     "capture": "references/masked-top.png"
   },
   "overworldBrief": "overworld-brief.md",
-  "overworldConcept": "../overworld-concept-v1.png"
+  "overworldConcept": "../overworld-concept-v1.png",
+  "zoneConcept": {
+    "source": "zones/concept-v1.png",
+    "promptFile": "zones/concept-prompt-v1.txt",
+    "generator": "built-in imagegen",
+    "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a15221-23cd-7932-a44e-b39b3d92376c/exec-8ed77d0a-3253-4b77-8422-d9c07b401d5f.png",
+    "sha256": "43e2efc67965c792f3fe6847ab5082d15965bb27680688dc930eb1b0951bc3d5",
+    "selectedFor": "art direction study; runtime uses separate transparent generations"
+  }
 }

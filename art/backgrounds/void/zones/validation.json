@@ -1,0 +1,75 @@
+{
+  "date": "2026-10-18",
+  "assets": [
+    {
+      "path": "src/assets/backgrounds/void/shattered-orbit/skyline-near-v1.png",
+      "format": "PNG",
+      "width": 720,
+      "height": 480,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        254
+      ],
+      "transparent_percent": 83.412,
+      "partial_alpha_percent": 16.588,
+      "visible_bbox": [
+        0,
+        60,
+        720,
+        471
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 32850
+    },
+    {
+      "path": "src/assets/backgrounds/void/shattered-orbit/deck-near-v1.png",
+      "format": "PNG",
+      "width": 360,
+      "height": 360,
+      "mode": "RGBA",
+      "has_alpha": true,
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_percent": 80.431,
+      "partial_alpha_percent": 19.539,
+      "visible_bbox": [
+        27,
+        24,
+        336,
+        333
+      ],
+      "edge_alpha_max": {
+        "top": 0,
+        "bottom": 0
+      },
+      "clear_vertical_edges": true,
+      "unique_colors": 16023
+    }
+  ],
+  "liveReview": {
+    "storage": "isolated in-memory preview",
+    "views": [
+      "top",
+      "side",
+      "chase"
+    ],
+    "pixelLook": "reviewed all zone/camera combinations",
+    "normalLook": "Shattered Orbit top-down reviewed without pixel pass; other normal-view combinations not separately checked",
+    "contrast": "Spore Fields and Shattered Orbit dense preview; Hive Trench pursuit combat and boost",
+    "transitions": "Crimson zones, Crimson to Void, zone selection across combat cameras, Void overworld resets to base",
+    "console": "no warnings/errors observed in preview"
+  },
+  "automated": "22 background + overworld renderer tests pass (15 background, 7 overworld)",
+  "limitations": [
+    "Menu layout audit could not run: Playwright module unavailable. Game menus are unchanged.",
+    "Narrow viewport and whole-game/GPU performance were not measured."
+  ]
+}
