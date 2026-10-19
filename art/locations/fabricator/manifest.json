@@ -1,0 +1,46 @@
+{
+  "subject": "fabricator",
+  "generationMethod": "built-in image_gen",
+  "selectedRevision": "v1",
+  "source": "art/locations/fabricator/sources/scene-v1.png",
+  "sourceSize": [
+    1536,
+    1024
+  ],
+  "sourceSha256": "1788a9cbf45716eb9e20eaf6a8c7668cd6526fa9ce34e1ca6c7636af7783e198",
+  "prompt": "art/locations/fabricator/prompts/scene-v1.txt",
+  "references": [],
+  "export": {
+    "crop": [
+      0,
+      80,
+      1536,
+      944
+    ],
+    "resample": "Pillow LANCZOS",
+    "mode": "RGBA"
+  },
+  "runtime": {
+    "path": "src/assets/locations/fabricator/scene-v1.png",
+    "size": [
+      768,
+      432
+    ],
+    "sha256": "4d17ab20d45052c6edc4b0a770f17debf51e824b53afb9ad37021ea2835dd8fe"
+  },
+  "pixel": {
+    "path": "src/assets/locations/fabricator/scene-pixel-v1.png",
+    "size": [
+      192,
+      108
+    ],
+    "sha256": "c46bc3056a8e3dbd2fccfb9f6d536ebe8b2eda3577d88075372a24a94918c65f"
+  },
+  "chamber": {
+    "left": 0.35,
+    "top": 0.14,
+    "width": 0.3,
+    "height": 0.53,
+    "note": "Measured in cropped export; reel is separate, centered inside glass chamber."
+  }
+}

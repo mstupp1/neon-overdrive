@@ -179,13 +179,19 @@
 
         <!-- FABRICATOR (roll new gear) -->
                 <section class="screen hub" id="scr-fab" data-hub="hangar:fab" data-back="fabBack">
-            <div class="fab-odds" id="fab-odds"></div>
+            <div class="fab-workbench" id="fab-workbench" data-state="idle">
+                <div class="service-scene fab-machine" data-location="fabricator" aria-hidden="true">
+                    <div class="fab-aperture"><div class="fab-reel" id="fab-reel"></div></div>
+                </div>
+                <div class="fab-readout clip" id="fab-readout">SHIP PARTS · READY</div>
+                <div class="gear-detail" id="fab-result" aria-live="polite" aria-atomic="true" aria-hidden="true"></div>
+            </div>
             <div class="fab-slots" id="fab-slots"></div>
             <nav class="menu row fab-rolls">
                 <button class="btn primary" data-act="froll" data-kind="standard"><span>ROLL</span><span class="cost"></span></button>
                 <button class="btn primary prem" data-act="froll" data-kind="premium"><span>PREMIUM</span><span class="cost"></span><small>RARE OR BETTER</small></button>
             </nav>
-            <div class="gear-detail" id="fab-result"></div>
+            <div class="fab-odds" id="fab-odds"></div>
             <nav class="menu row">
                 <button class="btn small" data-act="finv" id="fab-inv">INVENTORY</button>
             </nav>
@@ -237,8 +243,11 @@
 
         <!-- BLACK MARKET -->
         <section class="screen" id="scr-market" data-back="nodeDone" data-back-label="LEAVE">
-            <h2 class="screen-title" id="market-title">BLACK MARKET</h2>
-            <div class="wallet" id="market-wallet"></div>
+            <div class="market-arrival">
+                <div class="service-scene market-scene" data-location="black-market" aria-hidden="true"></div>
+                <h2 class="screen-title" id="market-title">BLACK MARKET</h2>
+                <div class="wallet" id="market-wallet"></div>
+            </div>
             <p class="route-hint" id="market-hint"></p>
             <div class="cards" id="market-cards"></div>
             <div class="build" id="market-build"></div>
@@ -250,6 +259,7 @@
         <!-- REPAIR DOCK -->
         <section class="screen" id="scr-dock" data-back="">
             <h2 class="screen-title" id="dock-title">REST STATION</h2>
+            <div class="service-scene dock-scene" data-location="rest-station" aria-hidden="true"></div>
             <p class="screen-sub" id="dock-hull"></p>
             <div class="cards">
                 <button class="card dock-card" data-act="dock" data-opt="repair" id="dock-repair" style="--c:#7dff6b"></button>

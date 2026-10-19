@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NEON OVERDRIVE · Service locations</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;background:#080b18;color:#b6cedb;font:14px system-ui}aside{width:250px;flex-shrink:0;padding:22px;border-right:1px solid #243249}h1{font-size:20px;color:#5ddbe3}p{line-height:1.5;color:#91a9bc}label{display:block;margin-top:18px}select,button{width:100%;margin:7px 0;padding:10px;background:#172238;color:#b9e8ee;border:1px solid #375270;font:inherit}button{cursor:pointer}button:disabled,select:disabled{opacity:.4}.stage{flex:1;display:flex;align-items:center;justify-content:center;overflow:auto;padding:16px;min-width:0}iframe{flex:none;display:block;border:1px solid #243249;background:#05030d}output{display:block;font:12px/1.6 ui-monospace,monospace;white-space:pre-wrap;margin-top:20px}@media(max-width:650px){body{display:block}aside{width:100%;border-right:0}.stage{justify-content:flex-start}}
+</style>
+<aside>
+<h1>Service locations</h1>
+<p>Live Fabricator, Black Market and Rest Station. Preview progress stays in memory; your save is preserved.</p>
+<label for="location">Location</label><select id="location" disabled><option value="fab">Fabricator</option><option value="market">Black Market</option><option value="dock">Rest Station</option></select>
+<label for="viewport">Viewport</label><select id="viewport" disabled><option value="desktop">Desktop</option><option value="390x844">390 × 844 portrait</option><option value="320x568">320 × 568 portrait</option><option value="844x390">844 × 390 landscape</option></select>
+<button id="pixel" disabled>Pixel look OFF</button>
+<button id="credits" disabled>Add preview credits</button>
+<button id="fallback" disabled>Test missing scene art</button>
+<output id="status">Loading game…</output>
+</aside>
+<main class="stage"><iframe title="Live service location preview"></iframe></main>
+<script type="module">
+const frame=document.querySelector('iframe');
+const stage=document.querySelector('.stage');
+const html=await(await fetch('../index.html')).text();
+const root=new URL('../',location.href).href;
+const storage=new URL('background-preview-storage.js',location.href).href;
+let ready=false;
+function send(action='show'){if(ready)frame.contentWindow.postMessage({kind:'location-preview',action,location:document.querySelector('#location').value},location.origin);}
+function resize(){
+ const size=document.querySelector('#viewport').value;
+ const [width,height]=size==='desktop'?[Math.max(360,Math.min(1100,stage.clientWidth-32)),Math.max(520,Math.min(800,innerHeight-32))]:size.split('x').map(Number);
+ frame.style.width=`${width}px`;frame.style.height=`${height}px`;send('resize');
+}
+frame.addEventListener('load',()=>{
+ if(!frame.contentWindow.NEON)return;
+ const script=frame.contentDocument.createElement('script');script.type='module';script.src=new URL('location-preview-runtime.js',location.href).href;frame.contentDocument.body.append(script);
+});
+window.addEventListener('message',({source,data})=>{
+ if(source!==frame.contentWindow||data?.kind!=='location-preview-status')return;
+ document.querySelector('#status').textContent=data.status;
+ if(!ready){ready=true;document.querySelectorAll('select,button').forEach(el=>el.disabled=false);resize();}
+});
+document.querySelector('#location').addEventListener('change',()=>send());
+document.querySelector('#viewport').addEventListener('change',resize);
+document.querySelector('#pixel').addEventListener('click',event=>{const on=event.currentTarget.textContent.endsWith('OFF');event.currentTarget.textContent=`Pixel look ${on?'ON':'OFF'}`;send('pixel');});
+document.querySelector('#credits').addEventListener('click',()=>send('credits'));
+document.querySelector('#fallback').addEventListener('click',()=>send('fallback'));
+window.addEventListener('resize',resize);
+frame.srcdoc=html.replace('<head>',`<head><base href="${root}"><script src="${storage}"><`+'/script>');
+</script>
+</html>

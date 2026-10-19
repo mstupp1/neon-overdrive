@@ -66,6 +66,7 @@ const MENUS = {
   reward: { open: `NEON.launch(); NEON.openDraft('sector')`, n: `8`, step: `NEON.openDraft('sector')` },
   levelup: { open: `NEON.launch(); NEON.openDraft('level')`, n: `8`, step: `NEON.openDraft('level')` },
   market: { open: `NEON.launch(); NEON.simulate(1); NEON.grant({wallet:300}); NEON.visit('market')`, n: `6`, step: `NEON.visit('market')` },
+  dock: { open: `NEON.launch(); NEON.visit('dock')`, n: `3`, step: `NEON.G.player.hp = Math.max(1, NEON.G.player.maxHp - I); NEON.visit('dock')` },
   event: { open: `NEON.launch(); NEON.simulate(1); NEON.event('carrier')`, n: `8`, step: `NEON.event()` },
   pause: { open: `NEON.launch(); NEON.simulate(2); window.dispatchEvent(new KeyboardEvent('keydown',{code:'Escape'}))`, n: focusCount, step: focusEach },
   runDetails: { open: `NEON.launch(); NEON.simulate(2); window.dispatchEvent(new KeyboardEvent('keydown',{code:'Escape'})); setTimeout(()=>document.querySelector('#scr-pause [data-act=runDetails]').click(),300)`, n: `6`, step: tabEach },

@@ -268,6 +268,8 @@ Serve the repository and open `/tools/icon-preview.html` to inspect exported art
 
 Pixel mode keeps menu image icons at 48×48, hangar ship previews at 64×64, and character portraits at 96×96. Headings and buttons use Pixelify Sans; reading text retains Rajdhani. The live artwork preview includes a mode toggle and character dialogue. Generated ECHO, MAG and SIGNAL portrait masters and prompts live in `art/portraits/`; runtime PNGs live in `src/assets/portraits/`. Run `node --test tools/test_menu_art.mjs` to check preview sizing and portrait fallbacks.
 
+The Fabricator, Black Market and Rest Station use generated location scenes with normal/pixel exports. [Location artwork records](art/locations/README.md) preserve originals, exact prompts, crop measurements and hashes. Open `/tools/location-art-preview.html` for isolated live menus and rolling ship-part reveals; all preview save changes stay in memory.
+
 Use the imagegen skill for individual transparent assets, following `art/icons/brief.md`. Export 256px RGBA runtime PNGs; keep labels and rarity frames in the UI. Run `node --test tools/test_icon_images.mjs` for Canvas loading and fallback checks.
 
 ## Debug drawer

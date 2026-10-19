@@ -1892,6 +1892,80 @@ input[type='range']::-moz-range-thumb {
     gap: 0.7em;
 }
 
+/* Location art is decorative, with a fixed footprint even while images load or fail. */
+.service-scene {
+    position: relative;
+    width: 100%;
+    max-width: 24em;
+    height: 7em;
+    flex-shrink: 0;
+    overflow: hidden;
+    background: #060c17;
+    border-radius: 2px;
+    isolation: isolate;
+}
+
+.service-scene > img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.service-scene > .service-art-pixel { display: none; }
+.retro-pixel .service-scene.pixel-ready > .service-art-original { display: none; }
+.retro-pixel .service-scene.pixel-ready > .service-art-pixel {
+    display: block;
+    image-rendering: pixelated;
+}
+
+.service-scene::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent 65%, #05030d 100%);
+}
+
+/* Share the market's arrival space with its heading/wallet: five offers still fit. */
+.market-arrival {
+    position: relative;
+    width: 100%;
+    max-width: 24em;
+    height: 7.5em;
+    flex-shrink: 0;
+    isolation: isolate;
+}
+
+.market-arrival .market-scene { height: 100%; }
+.market-arrival .market-scene::after {
+    background: linear-gradient(180deg, rgba(5, 3, 13, 0.8), transparent 45%, rgba(5, 3, 13, 0.92));
+}
+.market-arrival .screen-title {
+    position: absolute;
+    top: 0.45em;
+    left: 0.6em;
+    font-size: 1.45em;
+    z-index: 1;
+}
+.market-arrival .wallet {
+    position: absolute;
+    bottom: 0.4em;
+    right: 0.65em;
+    font-size: 1.1em;
+    z-index: 1;
+}
+
+.screen.active :is(.market-scene, .dock-scene) {
+    animation: location-in 0.5s ease-out both;
+}
+
+@keyframes location-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
 /* ---------------------------------------------------------------- Hangar */
 #scr-hangar {
     justify-content: safe center;
@@ -3372,6 +3446,120 @@ input[type='range']::-moz-range-thumb {
     background: var(--panel);
     border: 1px solid var(--line);
     border-radius: 2px;
+}
+
+/* The machine occupies the existing result well; rolling never changes menu geometry. */
+.fab-workbench {
+    --part-color: var(--cyan);
+    position: relative;
+    width: 100%;
+    max-width: 24em;
+    height: 11.6em;
+    flex-shrink: 0;
+    overflow: hidden;
+    background: #060c17;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+}
+
+.fab-machine {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.25s;
+}
+
+.fab-aperture {
+    position: absolute;
+    left: 35%;
+    top: 14%;
+    width: 30%;
+    height: 53%;
+    overflow: hidden;
+    z-index: 1;
+    background: radial-gradient(ellipse, color-mix(in srgb, var(--part-color) 9%, transparent), transparent 70%);
+    mask-image: linear-gradient(transparent, #000 20%, #000 80%, transparent);
+}
+
+.fab-reel {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
+.fab-reel-item {
+    display: flex;
+    flex: 0 0 100%;
+    align-items: center;
+    justify-content: center;
+    color: var(--part-color);
+}
+
+.fab-reel-item > .asset-icon {
+    width: 3.8em;
+    height: 3.8em;
+    filter: drop-shadow(0 0 0.45em color-mix(in srgb, var(--part-color) 45%, transparent));
+}
+
+.fab-readout {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 0.6em;
+    font: 700 0.7em Orbitron, sans-serif;
+    text-align: center;
+    letter-spacing: 0.1em;
+    color: var(--part-color);
+    background: rgba(5, 3, 13, 0.9);
+    z-index: 2;
+}
+
+.fab-workbench[data-state='rolling'] .fab-aperture {
+    box-shadow: inset 0 0 1.5em color-mix(in srgb, var(--part-color) 22%, transparent);
+}
+
+.fab-workbench[data-state='landed'] .fab-reel-item {
+    animation: part-lock 0.3s ease-out;
+}
+
+@keyframes part-lock {
+    from { opacity: 0.55; transform: scale(1.12); }
+    to { opacity: 1; transform: none; }
+}
+
+#fab-result {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    min-height: 0;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    border: 0;
+    transition: opacity 0.2s ease-out;
+    z-index: 3;
+}
+
+.screen.active .fab-workbench[data-state='result'] #fab-result {
+    opacity: 1;
+    visibility: visible;
+}
+
+.fab-workbench[data-state='result'] .fab-machine { opacity: 0.2; }
+.fab-workbench[data-state='result'] .fab-readout { visibility: hidden; }
+
+@media (prefers-reduced-motion: reduce) {
+    .screen.active :is(.market-scene, .dock-scene),
+    .fab-workbench[data-state='landed'] .fab-reel-item {
+        animation: none;
+    }
+    .fab-machine, #fab-result { transition: none; }
 }
 
 .fo-row {
