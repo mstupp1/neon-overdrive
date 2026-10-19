@@ -555,6 +555,114 @@
       "sourceSha256": "765496d9c00e8c10b9136d2c950c48093f3cbab0d67e1b65d9cbea3323d78844",
       "runtimeSha256": "8461a49b1f9b709518db778ea4beac721185d90fc1c72cf83c33533ed2f76281",
       "runtimeBytes": 572857
+    },
+    {
+      "id": "shattered-orbit/skyline-near",
+      "zone": "shattered-orbit",
+      "added": "2026-10-18",
+      "source": "zones/shattered-orbit/sources/skyline-near-v1.png",
+      "runtime": "../../../src/assets/backgrounds/void/shattered-orbit/skyline-near-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a15221-23cd-7932-a44e-b39b3d92376c/exec-59c00cbb-0821-46ab-bb1e-960079f91116.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster background layer for NEON OVERDRIVE, void shattered-orbit, skyline-near. Subject: Broken orbital ring arcs, severed angular trusswork and fractured alien megastructure plates, large empty gaps between isolated fragments. Landscape 1536x1024 composition, bottom-aligned shallow skyline band, baseline near bottom, structures only in lower 55 percent, top 45 percent entirely transparent. Broad low silhouette across width, low at left/right edges, no giant central landmark, no perspective convergence. Runtime 720x480 squeezed into a shallow 510x90 distant horizon band. Fine crisp pixel art with deliberate clusters that read at 360 virtual pixels across, no chunky pixel blocks, not photorealistic. Palette: near-black indigo/violet gunmetal with sparse dim purple and dull amber edge accents. Almost-black surfaces, very restrained thin highlights. Scenery much darker than arcade ships and projectiles. Genuine alpha transparency outside objects, no opaque black matte, no painted checkerboard. No sky, stars, floor, grid, fog, bloom, HUD, text, logo, watermarks, ships, characters, bullets, pickups, white lights or green/lime. Keep ample negative space.",
+      "promptFile": "zones/shattered-orbit/skyline-near-prompt-v1.txt",
+      "referenceImages": [],
+      "artDirection": "zones/brief.md",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "exportSize": [
+        720,
+        480
+      ],
+      "export": {
+        "resampling": "nearest",
+        "padding": 0
+      },
+      "sourceSha256": "86e55f7483b354df8491042cfb1f4a28b6ff0514255156c4b007f21b40c238b2",
+      "runtimeSha256": "860d9c90998da0649a3ce577fdeec31d08db08b1162941e8d3335b80275c93a5",
+      "runtimeBytes": 302248,
+      "alpha": {
+        "path": "src/assets/backgrounds/void/shattered-orbit/skyline-near-v1.png",
+        "format": "PNG",
+        "width": 720,
+        "height": 480,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          254
+        ],
+        "transparent_percent": 83.412,
+        "partial_alpha_percent": 16.588,
+        "visible_bbox": [
+          0,
+          60,
+          720,
+          471
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 32850
+      }
+    },
+    {
+      "id": "shattered-orbit/deck-near",
+      "zone": "shattered-orbit",
+      "added": "2026-10-18",
+      "source": "zones/shattered-orbit/sources/deck-near-v1.png",
+      "runtime": "../../../src/assets/backgrounds/void/shattered-orbit/deck-near-v1.png",
+      "generator": "built-in imagegen",
+      "generatorSource": "/Users/mylesstupp/.codex/generated_images/01a15221-23cd-7932-a44e-b39b3d92376c/exec-76cc701c-db86-43cb-8e4d-a2e14c5a67b6.png",
+      "prompt": "Use case: stylized-concept. ONE production transparent raster background layer for NEON OVERDRIVE, void shattered-orbit, deck-near. Subject: Broken orbital ring arcs, severed angular trusswork and fractured alien megastructure plates, large empty gaps between isolated fragments. Square 1024x1024 composition, directly overhead isolated SMALL separated scenery clusters only along left and right side lanes. Center 50 percent is completely empty transparent aisle. All geometry ends inside canvas: TOP AND BOTTOM 18 PERCENT ENTIRELY TRANSPARENT, side 8 percent clear. No continuous lines reaching edges, no floor plane. Runtime 360x360 repeating vertical tile projected under a reactive grid. Sparse decorative fragments, not collision walls. Fine crisp pixel art with deliberate clusters that read at 360 virtual pixels across, no chunky pixel blocks, not photorealistic. Palette: near-black indigo/violet gunmetal with sparse dim purple and dull amber edge accents. Almost-black surfaces, very restrained thin highlights. Scenery much darker than arcade ships and projectiles. Genuine alpha transparency outside objects, no opaque black matte, no painted checkerboard. No sky, stars, floor, grid, fog, bloom, HUD, text, logo, watermarks, ships, characters, bullets, pickups, white lights or green/lime. Keep ample negative space.",
+      "promptFile": "zones/shattered-orbit/deck-near-prompt-v1.txt",
+      "referenceImages": [],
+      "artDirection": "zones/brief.md",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "exportSize": [
+        360,
+        360
+      ],
+      "export": {
+        "resampling": "nearest",
+        "padding": 20
+      },
+      "sourceSha256": "d89ca7666fd95d02a1d6270420dde6affab786da1026e28a827d0424ca848f4f",
+      "runtimeSha256": "f9659728b591338521c46e3063afc34e3e24536d53819ee1eebd4d73c4e59c67",
+      "runtimeBytes": 79042,
+      "alpha": {
+        "path": "src/assets/backgrounds/void/shattered-orbit/deck-near-v1.png",
+        "format": "PNG",
+        "width": 360,
+        "height": 360,
+        "mode": "RGBA",
+        "has_alpha": true,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "transparent_percent": 80.431,
+        "partial_alpha_percent": 19.539,
+        "visible_bbox": [
+          27,
+          24,
+          336,
+          333
+        ],
+        "edge_alpha_max": {
+          "top": 0,
+          "bottom": 0
+        },
+        "clear_vertical_edges": true,
+        "unique_colors": 16023
+      }
     }
   ],
   "runtimeTotalBytes": 1437180,

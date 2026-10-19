@@ -14,6 +14,14 @@ const DECK = [
 ];
 const MAX_STRIPS = 160;
 const sets = Object.fromEntries(THEMES.map((theme) => [theme, { images: null, loading: null, failed: false, enabled: true }]));
+// Zone variants only replace the two near scenery bands. Keep their decoded
+// pairs and merged sets cached so render calls never allocate layer objects.
+const ZONES = {
+  crimson: ['spore-fields', 'hive-trench'],
+  void: ['shattered-orbit'],
+};
+const zoneSets = new Map();
+const selectedZones = Object.fromEntries(THEMES.map((theme) => [theme, null]));
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
 function loadImage(src) {
@@ -44,12 +52,52 @@ export function loadThemeLayers(theme) {
   return set.loading;
 }
 
+const zoneKey = (theme, zone) => `${theme}/${zone}`;
+
+export function loadZoneLayers(theme, zone) {
+  if (!ZONES[theme]?.includes(zone)) return Promise.resolve(null);
+  const key = zoneKey(theme, zone);
+  let zoneSet = zoneSets.get(key);
+  if (!zoneSet) {
+    zoneSet = { images: null, merged: null, loading: null, failed: false };
+    zoneSets.set(key, zoneSet);
+  }
+  if (zoneSet.merged) return Promise.resolve(zoneSet.merged);
+  if (zoneSet.loading) return zoneSet.loading;
+  if (zoneSet.failed) return Promise.resolve(null);
+  zoneSet.loading = Promise.all([
+    loadThemeLayers(theme),
+    ...['skyline-near', 'deck-near'].map((file) => loadImage(
+      new URL(`../assets/backgrounds/${theme}/${zone}/${file}-v1.png`, import.meta.url).href,
+    )),
+  ]).then(([baseImages, skylineNear, deckNear]) => {
+    if (!baseImages) return null;
+    zoneSet.images = { skylineNear, deckNear };
+    zoneSet.merged = { ...baseImages, skylineNear, deckNear };
+    return zoneSet.merged;
+  }).catch(() => { zoneSet.failed = true; return null; })
+    .finally(() => { zoneSet.loading = null; });
+  return zoneSet.loading;
+}
+
+export function setThemeZone(theme, zone = null) {
+  for (const id of THEMES) selectedZones[id] = null;
+  if (!ZONES[theme]?.includes(zone)) return;
+  selectedZones[theme] = zone;
+  loadZoneLayers(theme, zone);
+}
+
+export const zoneLayersReady = (theme, zone) => !!zoneSets.get(zoneKey(theme, zone))?.merged;
+
 // Historical Genesis exports stay available to existing callers and previews.
 export const loadGenesisLayers = () => loadThemeLayers('genesis');
 export const genesisLayersReady = () => sets.genesis.images !== null;
 export const setGenesisLayersEnabled = (on) => { sets.genesis.enabled = !!on; };
 export const themeLayersReady = (theme) => !!sets[theme]?.images;
-export const themeLayerImages = (theme) => sets[theme]?.images || null;
+export const themeLayerImages = (theme) => {
+  const zone = selectedZones[theme];
+  return zoneSets.get(zoneKey(theme, zone))?.merged || sets[theme]?.images || null;
+};
 export const setThemeLayersEnabled = (theme, on) => { if (sets[theme]) sets[theme].enabled = !!on; };
 
 function drawLandmark(ctx, image, x, y, width, height, theme, t) {
@@ -67,11 +115,12 @@ function drawLandmark(ctx, image, x, y, width, height, theme, t) {
 
 export function drawThemeHorizon(ctx, theme, W, horizon, t) {
   const set = sets[theme];
-  if (!set?.enabled || !set.images) return false;
+  const images = themeLayerImages(theme);
+  if (!set?.enabled || !images) return false;
   ctx.save();
   ctx.globalCompositeOperation = 'source-over';
   for (const layer of HORIZON) {
-    const image = set.images[layer.key];
+    const image = images[layer.key];
     // Fit the gate inside its authored frame without stretching it. The
     // skyline bands keep their existing wide framing and deck/grid alignment.
     let width = layer.w;
@@ -118,11 +167,12 @@ export const drawGenesisHorizon = (ctx, W, horizon, t) => drawThemeHorizon(ctx, 
 // and clip every horizon layer at the floor boundary.
 export function drawThemeChaseHorizon(ctx, theme, W, horizon, t) {
   const set = sets[theme];
-  if (!set?.enabled || !set.images || W <= 0 || horizon <= 0) return false;
+  const images = themeLayerImages(theme);
+  if (!set?.enabled || !images || W <= 0 || horizon <= 0) return false;
   ctx.save();
   ctx.globalCompositeOperation = 'source-over';
   ctx.beginPath(); ctx.rect(0, 0, W, horizon); ctx.clip();
-  const gate = set.images.gate;
+  const gate = images.gate;
   const gateH = Math.min(horizon * 0.95, W * gate.height / gate.width);
   const gateW = gateH * gate.width / gate.height;
   const gateX = (W - gateW) * 0.5 + Math.sin(t * 0.025) * W * 0.025;
@@ -132,7 +182,7 @@ export function drawThemeChaseHorizon(ctx, theme, W, horizon, t) {
     ['skylineFar', 0.48, 0.48, 0.012],
     ['skylineNear', 0.3, 0.62, 0.03],
   ]) {
-    const image = set.images[key];
+    const image = images[key];
     const height = Math.min(horizon * targetFrac, horizon - 1);
     const width = height * image.width / image.height;
     const offset = ((t * speed * width) % width + width) % width;
@@ -147,7 +197,8 @@ export function drawThemeChaseHorizon(ctx, theme, W, horizon, t) {
 
 export function drawThemeDeck(ctx, theme, W, H, horizon, scroll = 0) {
   const set = sets[theme];
-  if (!set?.enabled || !set.images) return false;
+  const images = themeLayerImages(theme);
+  if (!set?.enabled || !images) return false;
   const depth = H - horizon;
   if (depth <= 0) return true;
   ctx.save();
@@ -157,7 +208,7 @@ export function drawThemeDeck(ctx, theme, W, H, horizon, scroll = 0) {
   const strips = Math.min(MAX_STRIPS, Math.ceil(depth / 4));
   const travel = (scroll / GRID_ROWS[theme]) % 1;
   for (const layer of DECK) {
-    const image = set.images[layer.key];
+    const image = images[layer.key];
     for (let strip = 0; strip < strips; strip++) {
       let f = Math.sqrt(strip / strips);
       const end = Math.sqrt((strip + 1) / strips);
@@ -186,12 +237,13 @@ export const drawGenesisDeck = (ctx, W, H, horizon, scroll = 0) => drawThemeDeck
 // at a slower rate and is deliberately placed outside the repeat cycle.
 export function drawThemeSideHorizon(ctx, theme, W, H, horizon, scroll = 0, t = 0) {
   const set = sets[theme];
-  if (!set?.enabled || !set.images) return false;
+  const images = themeLayerImages(theme);
+  if (!set?.enabled || !images) return false;
   ctx.save();
   ctx.globalCompositeOperation = 'source-over';
   // Keep expanded parallax scenery above the reciprocal side-view floor.
   ctx.beginPath(); ctx.rect(0, 0, W, horizon); ctx.clip();
-  const gate = set.images.gate;
+  const gate = images.gate;
   const baseGateWidth = 260;
   const gateWidth = 390;
   const gateHeight = gateWidth * gate.height / gate.width;
@@ -202,7 +254,7 @@ export function drawThemeSideHorizon(ctx, theme, W, H, horizon, scroll = 0, t = 
   for (const [key, width, height, baseWidth, speed, alpha] of [
     ['skylineFar', 750, 210, 500, 0.012, 0.46], ['skylineNear', 765, 135, 510, 0.03, 0.56],
   ]) {
-    const image = set.images[key];
+    const image = images[key];
     // scroll is the side view's logical parallax distance (bg.scroll * 140).
     const offset = ((scroll * speed * baseWidth / 140) % width + width) % width;
     ctx.globalAlpha = alpha;
@@ -216,12 +268,13 @@ export function drawThemeSideHorizon(ctx, theme, W, H, horizon, scroll = 0, t = 
 
 export function drawThemeSideDeck(ctx, theme, W, H, horizon, scroll = 0) {
   const set = sets[theme];
-  if (!set?.enabled || !set.images) return false;
+  const images = themeLayerImages(theme);
+  if (!set?.enabled || !images) return false;
   ctx.save();
   ctx.globalCompositeOperation = 'source-over';
   ctx.beginPath(); ctx.rect(0, horizon, W, H - horizon); ctx.clip();
   for (const [key, alpha, scale, speed] of [['deckFar', 0.22, 0.42, 0.12], ['deckNear', 0.3, 0.55, 0.3]]) {
-    const image = set.images[key];
+    const image = images[key];
     const w = W * scale;
     const h = w * image.height / image.width;
     const phase = ((scroll * speed) % w + w) % w;

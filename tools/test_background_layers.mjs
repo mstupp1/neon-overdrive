@@ -230,6 +230,99 @@ test('failed theme falls back without poisoning other themes or retaining stale 
   assert.equal(ctx.calls.length, 0, 'switching back cannot reuse the previously drawn theme');
 });
 
+test('zone pairs merge atomically, select near layers, and fall back across theme switches', async () => {
+  globalThis.Image = MockImage;
+  MockImage.instances = [];
+  const layers = await import(`${moduleUrl.href}?zone-pairs`);
+  const basePending = layers.loadThemeLayers('crimson');
+  const zonePending = layers.loadZoneLayers('crimson', 'spore-fields');
+  assert.equal(MockImage.instances.length, 7, 'two overrides load beside the five base images');
+  const zoneImages = MockImage.instances.slice(5);
+  assert.deepEqual(zoneImages.map((image) => new URL(image.src).pathname.split('/').slice(-3).join('/')),
+    ['crimson/spore-fields/skyline-near-v1.png', 'crimson/spore-fields/deck-near-v1.png']);
+  MockImage.instances.slice(0, 4).forEach((image) => image.succeed());
+  MockImage.instances[5].succeed();
+  await Promise.resolve();
+  assert.equal(layers.zoneLayersReady('crimson', 'spore-fields'), false, 'partial pairs are never ready');
+  assert.equal(layers.themeLayerImages('crimson'), null, 'base is also held until all five images decode');
+  MockImage.instances[4].succeed();
+  MockImage.instances[6].succeed();
+  const [base, merged] = await Promise.all([basePending, zonePending]);
+  assert.equal(layers.zoneLayersReady('crimson', 'spore-fields'), true);
+  assert.equal(merged.skylineNear, zoneImages[0]);
+  assert.equal(merged.deckNear, zoneImages[1]);
+  assert.equal(merged.skylineFar, base.skylineFar, 'far layers remain the base theme art');
+
+  layers.setThemeZone('crimson', 'spore-fields');
+  assert.equal(layers.themeLayerImages('crimson'), merged, 'selected merged set is cached');
+  const ctx = context();
+  assert.equal(layers.drawThemeHorizon(ctx, 'crimson', 450, 96, 3), true);
+  assert.ok(ctx.calls.some((call) => call[0] === zoneImages[0]), 'top-down horizon draws the selected skyline override');
+  ctx.calls.length = 0;
+  assert.equal(layers.drawThemeDeck(ctx, 'crimson', 450, 896, 96), true);
+  assert.ok(ctx.calls.some((call) => call[0] === zoneImages[1]), 'top-down deck draws the selected deck override');
+  ctx.calls.length = 0;
+  assert.equal(layers.drawThemeSideHorizon(ctx, 'crimson', 450, 896, 600), true);
+  assert.ok(ctx.calls.some((call) => call[0] === zoneImages[0]), 'side camera draws the selected skyline override');
+  ctx.calls.length = 0;
+  assert.equal(layers.drawThemeSideDeck(ctx, 'crimson', 450, 896, 600), true);
+  assert.ok(ctx.calls.some((call) => call[0] === zoneImages[1]), 'side camera draws the selected deck override');
+  ctx.calls.length = 0;
+  assert.equal(layers.drawThemeChaseHorizon(ctx, 'crimson', 450, 100, 3), true);
+  assert.ok(ctx.calls.some((call) => call[0] === zoneImages[0]), 'chase camera draws the selected skyline override');
+
+  layers.setThemeZone('void', null);
+  assert.equal(layers.themeLayerImages('crimson'), base, 'changing theme selection cannot leak the prior zone');
+  assert.equal(layers.themeLayerImages('void'), null, 'unloaded theme keeps its procedural fallback');
+});
+
+test('a late zone pair cannot replace the currently selected zone', async () => {
+  globalThis.Image = MockImage;
+  MockImage.instances = [];
+  const layers = await import(`${moduleUrl.href}?zone-selection-race`);
+  layers.setThemeZone('crimson', 'spore-fields');
+  const sporePending = layers.loadZoneLayers('crimson', 'spore-fields');
+  const sporeImages = MockImage.instances.slice(5, 7);
+  layers.setThemeZone('crimson', 'hive-trench');
+  const hivePending = layers.loadZoneLayers('crimson', 'hive-trench');
+  const hiveImages = MockImage.instances.slice(7, 9);
+  assert.equal(MockImage.instances.length, 9);
+
+  MockImage.instances.slice(0, 7).forEach((image) => image.succeed());
+  const [base, spore] = await Promise.all([layers.loadThemeLayers('crimson'), sporePending]);
+  assert.ok(spore);
+  assert.equal(layers.themeLayerImages('crimson'), base, 'late Spore Fields completion leaves Hive Trench on base fallback');
+  const ctx = context();
+  assert.equal(layers.drawThemeHorizon(ctx, 'crimson', 450, 96, 3), true);
+  assert.ok(ctx.calls.every((call) => Object.values(base).includes(call[0])), 'no stale Spore Fields skyline is drawn');
+
+  hiveImages.forEach((image) => image.succeed());
+  const hive = await hivePending;
+  assert.equal(hive.skylineNear, hiveImages[0]);
+  assert.equal(hive.deckNear, hiveImages[1]);
+  assert.equal(layers.themeLayerImages('crimson'), hive, 'the selected pair publishes after both Hive Trench layers decode');
+});
+
+test('failed zone override pair keeps the complete base theme available', async () => {
+  globalThis.Image = MockImage;
+  MockImage.instances = [];
+  const layers = await import(`${moduleUrl.href}?zone-pair-failure`);
+  const basePending = layers.loadThemeLayers('void');
+  const zonePending = layers.loadZoneLayers('void', 'shattered-orbit');
+  MockImage.instances.slice(0, 5).forEach((image) => image.succeed());
+  MockImage.instances[5].succeed();
+  MockImage.instances[6].fail();
+  const [base, zone] = await Promise.all([basePending, zonePending]);
+  assert.ok(base);
+  assert.equal(zone, null);
+  assert.equal(layers.zoneLayersReady('void', 'shattered-orbit'), false);
+  layers.setThemeZone('void', 'shattered-orbit');
+  assert.equal(layers.themeLayerImages('void'), base, 'failed override falls back to base imagery');
+  const ctx = context();
+  assert.equal(layers.drawThemeHorizon(ctx, 'void', 450, 96, 2), true);
+  assert.ok(ctx.calls.every((call) => Object.values(base).includes(call[0])));
+});
+
 test('side and top-down layer draws restore canvas state and bound fractional wrap work', async () => {
   globalThis.Image = MockImage;
   MockImage.instances = [];
