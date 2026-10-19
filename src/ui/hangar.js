@@ -30,6 +30,7 @@ let lastRoll = null; // Fabricator: the last rolled item (shown in its result pa
 let fabRolling = false; // Presentation lock; a paid roll is already saved before the reel starts.
 let fabFrom = 'hub'; // where the Fabricator's BACK goes: 'hub' (out of the hangar) | 'parts' (its inventory)
 const viewShip = () => SHIPS[viewIdx];
+export const hangarHooks = { demo: null }; // main.js: shows a ship in the background title demo
 const gearShip = () => shipById(profile.lastShip); // LOADOUT, inventory and Fabricator fit the active ship
 
 // Derived stats for a ship wearing `parts` (stock kit upgrades included).
@@ -154,6 +155,7 @@ function render() {
   const ship = viewShip();
   const owned = ownsShip(profile, ship);
   const selShip = profile.lastShip === ship.id;
+  hangarHooks.demo?.(ship);
 
   // The card is the ship selector: left / right (or the arrows) browse, confirm buys / selects.
   const card = $('#hs-card');
@@ -235,6 +237,7 @@ function renderLoadout() {
   const ship = gearShip();
   const paint = activePaint(profile, ship);
   const parts = equippedParts(profile, ship.id);
+  hangarHooks.demo?.(ship);
   const card = $('#lo-card');
   card.style.setProperty('--c', paint.color);
   const paths = pathsHtml(ship, parts);

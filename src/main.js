@@ -27,7 +27,7 @@ import { debugDrawer, initDebugDrawer } from './ui/debug.js';
 import { renderRunDetails, setRunTab } from './ui/rundetails.js';
 import { comms } from './ui/comms.js';
 import { meta } from './ui/meta.js';
-import { hangarActs, openHangar, openLoadout, openFab, initHangarUi } from './ui/hangar.js';
+import { hangarActs, hangarHooks, openHangar, openLoadout, openFab, initHangarUi } from './ui/hangar.js';
 import { coreActs, openCore } from './ui/fluxcore.js';
 import { pilotActs, openPilot, showPilot, initPilotUi } from './ui/pilot.js';
 import { treeActs, openTree, treeView } from './ui/tree.js';
@@ -81,6 +81,7 @@ const curShip = () => {
 };
 let settingsReturn = 'title';
 let draftKind = null;
+let demoToys = []; // the title demo ship's upgrades (startAttract), re-applied when the Hangar swaps its hull
 let draftChoices = null;
 let draftRolls = {}; // card id → rarity roll (upgrades.js rollCard) for the open draft
 let marketOffers = null; // current Black Market stock
@@ -229,9 +230,21 @@ function startAttract() {
   bg.setTheme(theme.id);
   bg.setHue(theme.hue);
   // Give the demo ship some toys so the menus look alive.
-  const p = G.player;
-  for (const id of ['main', 'main', 'main', pick(['missiles', 'orbitals', 'drones', 'arc'])]) applyUpgrade(p, id, G);
+  demoToys = ['main', 'main', 'main', pick(['missiles', 'orbitals', 'drones', 'arc'])];
+  for (const id of demoToys) applyUpgrade(G.player, id, G);
 }
+
+// Browsing hulls in the Hangar swaps the title demo's ship in place: same spot, same toys.
+function demoShip(ship) {
+  if (G.mode !== 'attract' || !G.player || G.player.ship.id === ship.id) return;
+  const old = G.player;
+  const p = createPlayer(ship, false);
+  p.x = old.x;
+  p.y = old.y;
+  G.player = p;
+  for (const id of demoToys) applyUpgrade(p, id, G);
+}
+hangarHooks.demo = demoShip;
 
 // Debug sandbox run (NEON.startRun / startSpec / balance sims): the classic endless sector chain. Not reachable from the menus.
 function startRun(s) {
