@@ -2,7 +2,8 @@
 // and data-tip-c (title colour). One floating box over the menus, placed above the item (below when there is no room).
 //  - mouse: hovering an item shows its tip, leaving hides it
 //  - keys / pad: the focused item shows its tip (screens.js dispatches 'menufocus' when focus moves)
-//  - touch: tapping a tip-only item (no data-act) toggles its tip; any other tap hides it
+//  - touch: tapping a tip-only item (no data-act), or an item marked data-tip-tap, toggles its tip; any other tap hides it
+//    (a data-tip-tap item's own action decides what its tap does, e.g. the market arms on the first tap, buys on the second)
 // Truncated text: single-line fields marked .clip end in an ellipsis when they don't fit. An item without a tip of its
 // own whose .clip text is cut shows the full text of its .clip fields as its tip (first one as the title).
 // The box is absolutely positioned outside the screens, so it never moves or resizes anything in the menu.
@@ -48,7 +49,7 @@ export function initTips() {
   app.addEventListener('pointerdown', (e) => {
     if (e.pointerType !== 'touch') return;
     const el = e.target.closest('[data-tip]');
-    if (el && !el.dataset.act && el !== owner) showTip(el);
+    if (el && (!el.dataset.act || el.dataset.tipTap != null) && el !== owner) showTip(el);
     else hideTip();
   });
   // Keyboard / pad focus (and mouse hover, which moves the focus too).

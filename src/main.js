@@ -35,6 +35,7 @@ import * as passiveTree from './game/tree.js';
 import { galleryActs, openGallery, openAchievements } from './ui/gallery.js';
 import { hub, hubExit } from './ui/hub.js';
 import { initToasts, notifyBacklog } from './ui/toasts.js';
+import { showTip, hideTip } from './ui/tips.js';
 import { achInit, achTick } from './game/achievements.js';
 import { rollRelicDrop } from './game/collectables.js';
 import { setClass, setPassives, initPilotProfile, grantFirstAbilities, findClass, findPassive, activeClass } from './game/pilot.js';
@@ -85,6 +86,7 @@ let demoToys = []; // the title demo ship's upgrades (startAttract), re-applied 
 let draftChoices = null;
 let draftRolls = {}; // card id → rarity roll (upgrades.js rollCard) for the open draft
 let marketOffers = null; // current Black Market stock
+let marketArmed = -1; // touch: the tile tapped once (tip showing); a second tap buys it
 let curEvent = null; // open anomaly event session (story.startEvent)
 let bossCardT = 0;
 let draftOnly = null; // category filter for the next 'sector' draft (campaign fight rewards)
@@ -541,6 +543,7 @@ function visitNode(node) {
       marketOffers = rollMarket(G.player, G.run.system);
       discover(marketOffers.filter((o) => o.kind === 'upgrade').map((o) => o.up));
       G.screen = 'market';
+      marketArmed = -1;
       meta.renderMarket(G, marketOffers, true);
       ui.show('market', { lock: 250 });
       tip('market');
@@ -587,13 +590,25 @@ function eventPick(btn) {
 }
 
 function buy(btn) {
-  const o = marketOffers[+btn.dataset.i];
-  if (!o || buyOffer(o, G.player, marketOffers)) return;
+  const i = +btn.dataset.i;
+  const o = marketOffers[i];
+  if (!o) return;
+  // Touch: the first tap reads the item (its tooltip opens), the second buys it.
+  if (input.device === 'touch' && marketArmed !== i) {
+    marketArmed = i;
+    document.querySelectorAll('#market-cards .armed').forEach((c) => c.classList.remove('armed'));
+    btn.classList.add('armed');
+    showTip(btn); // even if this tap closed a tip that was already open on it
+    return;
+  }
+  marketArmed = -1;
+  if (buyOffer(o, G.player, marketOffers)) return;
+  hideTip();
   sfx.coin();
   sfx.levelUp();
   const cards = () => [...document.querySelectorAll('#market-cards .card')];
   meta.renderMarket(G, marketOffers, false);
-  const next = cards().find((c, i) => i >= +btn.dataset.i && !c.disabled && !c.hasAttribute('aria-disabled')) || cards().find((c) => !c.disabled && !c.hasAttribute('aria-disabled')) || document.getElementById('market-leave');
+  const next = cards().find((c, k) => k >= i && !c.disabled && !c.hasAttribute('aria-disabled')) || cards().find((c) => !c.disabled && !c.hasAttribute('aria-disabled')) || document.getElementById('market-leave');
   ui.show('market', { focus: next });
 }
 
