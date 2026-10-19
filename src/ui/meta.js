@@ -173,7 +173,9 @@ export const meta = {
   // --- Route stop (market / dock live in their own screens; anomalies in scr-event) ---
 
   // --- Black Market ------------------------------------------------------------
-  // first = play the card entrance animation; later re-renders (after a purchase) stay still.
+  // A shop grid of compact item tiles (icon, name, price); the description, tag and why an item can't be bought live
+  // in each tile's tooltip. first = play the entrance animation; later re-renders (after a purchase) stay still.
+  // Touch: the first tap on a tile shows its tip and arms it (.armed, set by main.js), a second tap buys.
   renderMarket(G, offers, first) {
     const w = G.run.wallet || 0;
     $('#market-wallet').innerHTML = `${coin}<b>${fmt(w)}</b>`;
@@ -183,16 +185,23 @@ export const meta = {
     wrap.innerHTML = '';
     offers.forEach((o, i) => {
       const b = document.createElement('button');
-      b.className = 'card offer' + (o.sold ? ' sold' : '') + (o.fresh && !o.sold ? ' fresh' : '');
+      b.className = 'card offer shop-item' + (o.sold ? ' sold' : '') + (o.fresh && !o.sold ? ' fresh' : '');
       b.dataset.act = 'buy';
       b.dataset.i = i;
-      b.style.setProperty('--c', CAT_COLORS[o.cat] || '#ffd24a');
-      const cant = !o.sold && !o.blocked && w < o.price; // unaffordable: dimmed but still focusable
-      const dis = o.sold || !!o.blocked || cant;
-      b.disabled = o.sold || !!o.blocked;
-      if (cant) b.setAttribute('aria-disabled', 'true');
-      const status = o.sold ? 'SOLD' : o.blocked || (w < o.price ? 'NEED ' + (o.price - w) : '');
-      b.innerHTML = `<div class="card-icon">${o.icon}</div><div><div class="card-top"><span class="card-name clip">${o.name}</span><span class="card-tag">${o.tag}</span></div><div class="card-desc well">${o.desc}</div></div><div class="price${dis ? ' dim' : ''}"><span>${o.sold ? '' : coin}<b>${o.sold ? 'SOLD' : o.price}</b></span>${status && !o.sold ? `<i>${status}</i>` : ''}</div>`;
+      const color = CAT_COLORS[o.cat] || '#ffd24a';
+      b.style.setProperty('--c', color);
+      // Sold: out of stock, skipped by focus. Blocked or unaffordable: dimmed but focusable, so the tip says why.
+      const status = o.sold ? '' : o.blocked || (w < o.price ? 'NEED ' + (o.price - w) : '');
+      b.disabled = o.sold;
+      if (status) b.setAttribute('aria-disabled', 'true');
+      if (!o.sold) {
+        const why = o.blocked || (status ? `Need ${o.price - w} more credits.` : '');
+        b.dataset.tipT = o.name;
+        b.dataset.tip = [`${o.tag} · ${o.price} CREDITS`, o.desc, why].filter(Boolean).join('\n');
+        b.dataset.tipC = color;
+        b.dataset.tipTap = '';
+      }
+      b.innerHTML = `<span class="card-tag">${o.tag}</span><div class="card-icon">${o.icon}</div><span class="card-name clip">${o.name}</span><div class="price${status || o.sold ? ' dim' : ''}"><span>${o.sold ? '' : coin}<b>${o.sold ? 'SOLD' : o.price}</b></span></div><i class="si-note">${status}</i>`;
       wrap.appendChild(b);
     });
     renderBuild($('#market-build'), G.player);
