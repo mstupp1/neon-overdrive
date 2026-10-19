@@ -129,19 +129,34 @@ export function tabbar(tabs) {
   return `<div class="tabbar primary" data-nofocus><button class="tk" data-k="tabL" tabindex="-1" aria-label="Previous tab"></button><div class="tabs">${t}</div><button class="tk" data-k="tabR" tabindex="-1" aria-label="Next tab"></button></div>`;
 }
 
+// One header per hub, moved into whichever of its pages is open (mountHubHead), so switching tabs keeps the same
+// header and tab bar on screen and only the page under it changes.
+const hubHeads = {}; // hub → its <header>
 function initHubs() {
   for (const el of document.querySelectorAll('.screen[data-hub]')) {
-    const [hub, cur] = el.dataset.hub.split(':');
+    const [hub] = el.dataset.hub.split(':');
+    if (hubHeads[hub]) continue;
     const h = HUBS[hub];
     const head = document.createElement('header');
     head.className = 'hub-head';
-    const page = h.tabs.find(([id]) => id === cur)[2];
-    head.innerHTML = `<div class="hub-top"><h2 class="hub-title">${h.title}<span class="hub-page">${page}</span></h2><div class="hub-res" data-res></div></div>${tabbar(h.tabs.map(([id, label, name]) => ({ label, act: 'hub', attrs: `data-hub-tab="${hub}:${id}" aria-label="${name}"`, on: id === cur })))}`;
-    el.prepend(head);
+    head.innerHTML = `<div class="hub-top"><h2 class="hub-title">${h.title}<span class="hub-page"></span></h2><div class="hub-res" data-res></div></div>${tabbar(h.tabs.map(([id, label, name]) => ({ label, act: 'hub', attrs: `data-hub-tab="${hub}:${id}" aria-label="${name}"` })))}`;
+    hubHeads[hub] = head;
+    mountHubHead(el);
   }
 }
 
+// Put the hub's header at the top of page el and mark its tab.
+function mountHubHead(el) {
+  const [hub, cur] = el.dataset.hub.split(':');
+  const head = hubHeads[hub];
+  if (!head) return;
+  if (el.firstElementChild !== head) el.prepend(head);
+  head.querySelector('.hub-page').textContent = HUBS[hub].tabs.find(([id]) => id === cur)[2];
+  for (const t of head.querySelectorAll('.tab[data-hub-tab]')) t.classList.toggle('on', t.dataset.hubTab === el.dataset.hub);
+}
+
 function renderHubHead(el) {
+  if (el.dataset.hub) mountHubHead(el);
   const res = el.querySelector('[data-res]');
   if (!res) return;
   const fmt = (n) => Math.floor(n).toLocaleString();
@@ -287,7 +302,13 @@ export const ui = {
       }
     }
     const same = !!name && name === current; // re-render of the open screen (carousel, purchase, result...)
-    for (const [k, el] of Object.entries(screens)) el.classList.toggle('active', k === name);
+    // A tab change inside one hub: the header stays put, so the pages swap without the screen fade (the new page's
+    // content fades in under the header instead).
+    const swap = !same && !!hub && !!current && hubOf(screens[current]) === hub;
+    for (const [k, el] of Object.entries(screens)) {
+      el.classList.toggle('hub-swap', swap && (k === name || k === current));
+      el.classList.toggle('active', k === name);
+    }
     current = name || null;
     focusIdx = typeof focus === 'number' ? focus : 0;
     lockUntil = performance.now() + lock;
@@ -301,6 +322,9 @@ export const ui = {
     renderPrompts();
     if (name) renderHubHead(screens[name]);
     if (name) fit(screens[name], same);
+    if (swap) {
+      for (const c of screens[name].children) if (!c.classList.contains('hub-head')) c.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160, easing: 'ease-out' });
+    }
     applyFocus();
   },
 

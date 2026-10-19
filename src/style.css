@@ -5489,6 +5489,11 @@ input[type='range']::-moz-range-thumb {
     padding-top: calc(var(--safe-top) + 1em);
 }
 
+/* Tab changes inside a hub swap pages instantly: the shared header stays still, the page content fades in (ui.show). */
+#app > .screen.hub-swap {
+    transition: none;
+}
+
 /* Hub pages are fitted by type size (ui.fit), never by squashing a panel under its own text. */
 #app > .screen.hub > :not(.tree-view) {
     flex-shrink: 0;
