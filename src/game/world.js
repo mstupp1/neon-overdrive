@@ -41,7 +41,7 @@ function stepWorld(dt, ow) {
   if (!ow) sv.update(dt);
   updateModules(p, dt);
   pilotTimeScale(p, dt);
-  if (!ow) G.enemyTimeScale *= sv.pace; // the chase view runs its threats hotter (stageview.js)
+  if (!ow) G.enemyTimeScale *= sv.pace; // side / chase views run their threats hotter (stageview.js)
   const et = dt * G.enemyTimeScale; // enemy time (Phase Shift slows it)
   updateEnemies(et);
   if (!ow) updateObstacles(dt);
