@@ -50,9 +50,13 @@ const CHASE_DP = 700;
 const PAN = 0.42;
 // Drops are tiny next to ships; in the chase view they stand up this much bigger (pickup reach is unchanged and larger).
 const DROP_SCALE = 1.4;
-// Chase pace. The field is deeper than the top-down one (1100 vs ~800), so at normal enemy time threats took ~1.4x as
-// long to reach you; enemy time (movement, fire, shots, wave timer, gates) runs this much faster to make it urgent.
-const CHASE_PACE = 1.4;
+// Chase pace. The field is deeper than the top-down one (1100 vs ~800) and the far half reads at ~0.5-0.65 scale, so
+// at normal enemy time threats crawled on screen; enemy time (movement, fire, shots, wave timer, gates) runs this much
+// faster to make it urgent.
+const CHASE_PACE = 1.7;
+// Side pace. The side view draws the field at SZ, so at normal enemy time threats and terrain crossed the screen at
+// ~0.8x top-down speed; this brings them a little past top-down on screen.
+const SIDE_PACE = 1.3;
 // And the floor rushes by near fly-through speed (the transit peaks at 12x the old cruise); see floorRun().
 const CHASE_RUSH = 5;
 // Chase depth cues: ships fly at this height over the floor (in virtual units; screen lift = HOVER * local scale),
@@ -210,7 +214,7 @@ export const sv = {
   },
   // Enemy time multiplier for this view (world.js folds it into G.enemyTimeScale).
   get pace() {
-    return this.mode === 'chase' ? CHASE_PACE : 1;
+    return this.mode === 'chase' ? CHASE_PACE : this.mode === 'side' ? SIDE_PACE : 1;
   },
 
   // Swap view.W / H (and the safe insets) to the virtual playfield. Returns true if it swapped.
@@ -410,7 +414,7 @@ export const sv = {
         gateT -= et;
         if (gateT <= 0) {
           spawnGate();
-          gateT = rand(4.4, 5.8);
+          gateT = rand(4.4, 5.8) * (CHASE_PACE / 1.4); // the same real-time spacing as at the old 1.4 pace
         }
       }
       for (const g of gates) {
