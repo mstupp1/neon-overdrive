@@ -32,26 +32,32 @@ const DOME_R = 85;
 export const ULT_CELL = 100 / 3;
 export const ULT_LEVELS = 3; // a cast spends at most this many cells
 export const ULT_CELLS_MAX = 5; // banked cells cap (Reserve Cell, gear, tree)
+export const ULT_DUR_MAX = 10; // full-level ult seconds cap: base 6 + 4 from every bonus together (Bloodrush included)
+const STRIKER_ERASE = 120; // the Striker's opening erase radius at every level (the Engineer's dome is the real erase)
+const GHOST_INTANGIBLE = 2.5; // Phase Shift LV3: seconds of intangibility at the start of the cast, then 50% dodge
 
 // Per class, index = level. dur: x st.odDur. rate / dmg: main gun and modules (modules get 2/3 of the rate bonus).
 // score: score multiplier. speed: move speed. erase / blast: opening radius (Infinity = whole screen), blastDmg: x the
 // full blast. Engineer: wing = temporary wingmen, dome = dome radius, burst = end-of-dome burst scale.
 // Ghost: slow = enemy time scale, dodge = chance a hit misses, graze = graze radius, strike = graze strike scale.
 export const ULT_LV = {
+  // Kill window: the biggest damage and score, a small breathing-room erase, and a blast only from LV2.
   striker: [null,
-    { dur: 0.5, rate: 1.2, dmg: 1.15, score: 1.3, speed: 1.03, erase: 90, blast: 0, pulse: 130 },
-    { dur: 0.75, rate: 1.35, dmg: 1.3, score: 1.6, speed: 1.06, erase: 220, blast: 240, blastDmg: 0.6, pulse: 300 },
-    { dur: 1, rate: 1.6, dmg: 1.5, score: 2, speed: 1.1, erase: Infinity, blast: Infinity, blastDmg: 1, pulse: 1100, vacuum: true },
+    { dur: 0.6, rate: 1.3, dmg: 1.2, score: 1.3, speed: 1.03, erase: STRIKER_ERASE, blast: 0, pulse: 130 },
+    { dur: 0.8, rate: 1.5, dmg: 1.35, score: 1.6, speed: 1.06, erase: STRIKER_ERASE, blast: 240, blastDmg: 0.6, pulse: 300 },
+    { dur: 1, rate: 1.8, dmg: 1.6, score: 2, speed: 1.1, erase: STRIKER_ERASE, blast: Infinity, blastDmg: 1, pulse: 1100, vacuum: true },
   ],
+  // Protect: the only ult that erases (its dome); wingmen and the end-of-dome burst do the damage. No opening blast.
   engineer: [null,
-    { dur: 0.5, rate: 1.1, dmg: 1.08, score: 1.15, speed: 1, wing: 2, dome: 64, burst: 0.7, blast: 0, pulse: 120 },
-    { dur: 0.75, rate: 1.2, dmg: 1.15, score: 1.3, speed: 1, wing: 3, dome: 74, burst: 0.85, blast: 240, blastDmg: 0.6, pulse: 300 },
-    { dur: 1, rate: 1.3, dmg: 1.25, score: 1.5, speed: 1, wing: 4, dome: 85, burst: 1, blast: Infinity, blastDmg: 1, pulse: 1100 },
+    { dur: 0.6, rate: 1.1, dmg: 1.1, score: 1.15, speed: 1, wing: 2, dome: 64, burst: 0.7, blast: 0, pulse: 120 },
+    { dur: 0.8, rate: 1.15, dmg: 1.15, score: 1.3, speed: 1, wing: 3, dome: 74, burst: 0.85, blast: 0, pulse: 300 },
+    { dur: 1, rate: 1.2, dmg: 1.2, score: 1.5, speed: 1, wing: 4, dome: 85, burst: 1, blast: 0, pulse: 1100 },
   ],
+  // Evade and counter: slow time, dodge, and graze strikes as the damage source. LV3 is intangible only at the start.
   ghost: [null,
-    { dur: 0.5, rate: 1.1, dmg: 1.08, score: 1.15, speed: 1.06, slow: 0.8, dodge: 0.25, graze: 1.25, strike: 0.6, pulse: 200 },
-    { dur: 0.75, rate: 1.2, dmg: 1.15, score: 1.3, speed: 1.1, slow: 0.6, dodge: 0.5, graze: 1.4, strike: 0.8, pulse: 360 },
-    { dur: 1, rate: 1.3, dmg: 1.25, score: 1.5, speed: 1.15, slow: 0.4, intangible: true, graze: 1.6, strike: 1, pulse: 520 },
+    { dur: 0.6, rate: 1.1, dmg: 1.08, score: 1.15, speed: 1.06, slow: 0.8, dodge: 0.25, graze: 1.25, strike: 0.8, pulse: 200 },
+    { dur: 0.8, rate: 1.2, dmg: 1.15, score: 1.3, speed: 1.1, slow: 0.6, dodge: 0.5, graze: 1.4, strike: 1.1, pulse: 360 },
+    { dur: 1, rate: 1.3, dmg: 1.25, score: 1.5, speed: 1.15, slow: 0.45, intangible: GHOST_INTANGIBLE, dodge: 0.5, graze: 1.6, strike: 1.5, pulse: 520 },
   ],
 };
 
@@ -60,7 +66,7 @@ export const CLASSES = [
     id: 'striker', name: 'STRIKER', role: 'Assault', color: '#ff3df2', rgb: '255,61,242',
     desc: 'Raw firepower. Chain kills, then burst everything down.',
     icon: assetIcon('pilot', 'striker', svg('<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>')),
-    ult: { id: 'overdrive', name: 'OVERDRIVE', short: 'OVERDRIVE', desc: 'Erase bullets and blast enemies, then boost fire rate, damage and score.', levels: 'LV1 small erase · LV2 wider erase and blast · LV3 clears the screen' },
+    ult: { id: 'overdrive', name: 'OVERDRIVE', short: 'OVERDRIVE', desc: 'A kill window: the biggest fire rate, damage and score boost, with a small erase around you.', levels: 'LV1 boost · LV2 bigger boost and a blast · LV3 full boost, screen-wide blast' },
     passives: [
       { id: 'killstreak', name: 'Killstreak', r: 0, desc: '+2% damage per 10 combo, up to +20%.', icon: assetIcon('pilot', 'killstreak', svg('<path d="M4 20V10M10 20V6M16 20V12M22 20V3"/>')), apply(st) { st.killstreak = true; } },
       { id: 'hairtrigger', name: 'Hair Trigger', r: 1, desc: 'Critical hits deal +0.75x more.', icon: assetIcon('pilot', 'hairtrigger', svg('<circle cx="12" cy="12" r="6"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/>')), apply(st) { st.critMul += 0.75; } },
@@ -74,7 +80,7 @@ export const CLASSES = [
     id: 'engineer', name: 'ENGINEER', role: 'Support', color: '#ffb02e', rgb: '255,176,46',
     desc: 'Fortifies the battlefield. Domes, drones and a deep module bay.',
     icon: assetIcon('pilot', 'engineer', svg('<path d="M4 20v-5a8 8 0 0116 0v5z"/><path d="M12 7v4M9 20v-3h6v3"/>')),
-    ult: { id: 'fortress', name: 'FORTRESS PROTOCOL', short: 'FORTRESS', desc: 'A dome soaks up bullets while extra wingmen fire, then bursts harder the more it absorbed.', levels: 'LV1 2 wingmen · LV2 3 wingmen and blast · LV3 4 wingmen, full blast' },
+    ult: { id: 'fortress', name: 'FORTRESS PROTOCOL', short: 'FORTRESS', desc: 'A dome soaks up bullets while extra wingmen fire, then bursts harder the more it absorbed.', levels: 'LV1 2 wingmen · LV2 3 wingmen, wider dome · LV3 4 wingmen, widest dome' },
     passives: [
       { id: 'salvager', name: 'Salvager', r: 0, desc: '+25% credits from everything.', icon: assetIcon('pilot', 'salvager', svg('<circle cx="12" cy="12" r="9"/><path d="M15 8.5c-.8-1-2-1.5-3-1.5-1.7 0-3 1-3 2.5s1.3 2 3 2.5 3 1 3 2.5-1.3 2.5-3 2.5c-1 0-2.2-.5-3-1.5"/>')), apply(st) { st.creditMul *= 1.25; } },
       { id: 'overflow', name: 'Overflow', r: 2, desc: '+1 weapon module slot.', icon: assetIcon('pilot', 'overflow', svg('<rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><path d="M16.5 14v6M13.5 17h6"/>')), apply(st) { st.maxModules += 1; } },
@@ -88,7 +94,7 @@ export const CLASSES = [
     id: 'ghost', name: 'GHOST', role: 'Evasion', color: '#9d7bff', rgb: '157,123,255',
     desc: 'Lives on the edge of the bullet curtain. Graze, dash, strike.',
     icon: assetIcon('pilot', 'ghost', svg('<path d="M5 21V10a7 7 0 0114 0v11l-3-2-2 2-2-2-2 2-2-2z"/><circle cx="10" cy="11" r="1"/><circle cx="14" cy="11" r="1"/>')),
-    ult: { id: 'phase', name: 'PHASE SHIFT', short: 'PHASE SHIFT', desc: 'Enemies and bullets slow, you move faster with a wider graze, and grazes strike back.', levels: 'LV1 25% dodge · LV2 50% dodge, slower bullets · LV3 intangible' },
+    ult: { id: 'phase', name: 'PHASE SHIFT', short: 'PHASE SHIFT', desc: 'Enemies and bullets slow, you move faster with a wider graze, and grazes strike back.', levels: 'LV1 25% dodge · LV2 50% dodge, slower bullets · LV3 2.5s intangible, harder graze strikes' },
     passives: [
       { id: 'widegraze', name: 'Wide Graze', r: 0, desc: '+50% graze radius.', icon: assetIcon('pilot', 'widegraze', svg('<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/>')), apply(st) { st.grazeR *= 1.5; } },
       { id: 'slipstream', name: 'Slipstream', r: 1, desc: '+15% move speed for 1.5s after a graze.', icon: assetIcon('pilot', 'slipstream', svg('<path d="M3 8h12M3 12h18M3 16h12"/>')), apply(st) { st.slipstream = true; } },
@@ -285,6 +291,7 @@ export function initPilot(p, cls, passives) {
   p.domeSfx = 0;
   p.domeAbs = 0; // bullets the Fortress dome absorbed this cast
   p.ultLv = 0; // level of the running ult
+  p.ultAge = 0; // seconds since the running ult was cast (Phase Shift LV3 intangibility)
   p.echoI = 0;
   p.echoes = [];
   for (let i = 0; i < 6; i++) p.echoes.push({ x: 0, y: 0, t: 0 });
@@ -315,10 +322,10 @@ export const ultSpeed = (p) => { const f = ultFx(p); return f ? f.speed : 1; };
 export const ultGraze = (p) => { const f = ultFx(p); return f && f.graze ? f.graze : 1; };
 export const ultWingmen = (p) => { const f = fortressOn(p) && ultFx(p); return f ? f.wing : 0; };
 export const domeR = (p) => { const f = ultFx(p); return f && f.dome ? f.dome : DOME_R; };
-// Bullets and hits pass straight through (Phase Shift level 3 only).
-export const intangible = (p) => { const f = phasing(p) && ultFx(p); return !!(f && f.intangible); };
-// Chance the ult makes a hit miss (Phase Shift levels 1-2); hurtPlayer folds it into Lucky Dodge.
-export const ultDodge = (p) => { const f = phasing(p) && ultFx(p); return f && f.dodge ? f.dodge : 0; };
+// Bullets and hits pass straight through (Phase Shift level 3, for its first GHOST_INTANGIBLE seconds).
+export const intangible = (p) => { const f = phasing(p) && ultFx(p); return !!(f && f.intangible && (p.ultAge || 0) < f.intangible); };
+// Chance the ult makes a hit miss (Phase Shift); hurtPlayer folds it into Lucky Dodge.
+export const ultDodge = (p) => { const f = phasing(p) && ultFx(p); return f && f.dodge && !intangible(p) ? f.dodge : 0; };
 
 // --- Ultimates ------------------------------------------------------------------------------
 
@@ -363,6 +370,7 @@ const ULTS = {
 // Class-specific part of activateOverdrive (the meter, i-frames, sfx and floatText live in player.js).
 export function castUlt(p) {
   p.odExt = 0;
+  p.ultAge = 0;
   p.domeFlare = 0;
   const f = ultFx(p);
   (ULTS[p.cls] || ULTS.striker)(p, f);
@@ -393,8 +401,10 @@ export function endUlt(p) {
 
 // Extra Overdrive time from Bloodrush kills (called from onEnemyKilled).
 export function bloodrush(p) {
-  if (!p.st.bloodrush || !boosted(p) || p.odExt >= 4) return;
-  const add = Math.min(0.15, 4 - p.odExt);
+  if (!p.st.bloodrush || !boosted(p)) return;
+  const room = Math.min(4 - p.odExt, ULT_DUR_MAX * ultFx(p).dur - p.odDurMax - p.odExt); // shares the ult time cap
+  if (room <= 0) return;
+  const add = Math.min(0.15, room);
   p.odT += add;
   p.odExt += add;
 }
@@ -446,6 +456,7 @@ export function updatePilot(p, dt) {
   if (p.slipT > 0) p.slipT -= dt;
   if (p.ripT > 0) p.ripT -= dt;
   if (p.domeFlare > 0) p.domeFlare -= dt;
+  if (p.odT > 0) p.ultAge = (p.ultAge || 0) + dt;
   if (p.domeSfx > 0) p.domeSfx -= dt;
   for (const e of p.echoes) {
     if (e.t <= 0) continue;

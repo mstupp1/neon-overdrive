@@ -3,7 +3,7 @@
 import { G, view, field, inField } from './state.js';
 import { S, glow, flareSpr } from '../render/sprites.js';
 import { TAU, damp, dist2, rand } from '../core/math.js';
-import { playerBullet, nearestEnemy, clearBullets } from './bullets.js';
+import { playerBullet, nearestEnemy, eraseBullets, isHeavy } from './bullets.js';
 import { damageEnemy } from './enemies.js';
 import { applyStatus } from './status.js';
 import { ring, sparks, explosion } from './fx.js';
@@ -32,6 +32,7 @@ export function resetModules(p) {
     missT: 1, arcT: 1.2, novaT: 2, railT: 2, orbA: 0, droneT: 0.2, gravT: 2.5, reflT: 3, flakT: 0.6, wells: [], flaks: [], refl: 0, reflMax: 0,
     mineT: 0.8, mines: [], sawT: 1, saws: [], stasisT: 2, stasisFx: 0, prismT: 0, prism: [], starT: 1.5,
     flame: null, flameT: 0, spikeT: 0.8, slagT: 1.0, slags: [], acidPools: [], interceptors: [],
+    bladeCd: [], dashEraseT: 0, novaEraseT: 0, reflLeft: 0,
   };
   p.drones = [];
 }
@@ -39,6 +40,14 @@ export function resetModules(p) {
 const MAX_PBULLETS = 520; // new-module spawns respect this cap (reflections just erase the bullet when full)
 const evo = (p, id) => (p.up[id] || 0) > 0;
 const REFL_R = [52, 58, 65, 72, 80];
+// Barrier budget (Razor Orbit, Reflector, Shock Dash, Gravity Well: upgrades.js family 'barrier'). Erasing never speeds
+// up with fire rate, and heavy shots (bullets.js isHeavy) are never erased.
+const BLADE_CD = 0.6; // an orbit blade goes dim this long after eating a bullet
+const REFL_RETURNS = [8, 9, 10, 11, 12]; // bullets one Reflector pulse can turn back; the bubble fades once it is spent
+const REFL_DMG = 0.6; // returned shots, vs the old return damage
+const DASH_ERASE_CD = 1; // Shock Dash erases at most once per this many seconds (its blades still fly every dash)
+const NOVA_ERASE_CD = 3; // Supernova's bullet wipe, at most once per this many seconds
+const WELL_EAT = [8, 10, 12, 14, 16]; // bullets one Gravity Well can crush (Event Horizon: double)
 
 // Razor Orbit geometry (Storm Halo: +3 blades, a pulsing radius, a wider erase field).
 const orbitBlades = (p) => p.up.orbitals + 1 + (evo(p, 'stormhalo') ? 3 : 0);
@@ -47,6 +56,10 @@ const orbitRadius = (p) => 50 + p.up.orbitals * 3 + (evo(p, 'stormhalo') ? 12 + 
 function dmgMul(p) {
   return p.st.dmg * p.pdm * p.st.modDmg * ultDmg(p);
 }
+
+// Elemental modules hit harder when your ammo (upgrades.js family 'ammo') is the same element.
+const AMMO_MATCH = 1.3;
+const ammoMul = (p, rounds) => ((p.up[rounds] || 0) > 0 ? AMMO_MATCH : 1);
 
 function rateMul(p) {
   return p.st.rate * (p.st.modRate || 1) * ultModRate(p);
@@ -58,6 +71,8 @@ export function updateModules(p, dt) {
   const m = p.mod;
   const rate = rateMul(p);
   const dm = dmgMul(p);
+  if (m.dashEraseT > 0) m.dashEraseT -= dt;
+  if (m.novaEraseT > 0) m.novaEraseT -= dt;
 
   // Swarm missiles
   if (up.missiles) {
@@ -86,6 +101,7 @@ export function updateModules(p, dt) {
     const n = orbitBlades(p);
     const radius = orbitRadius(p);
     const erase = evo(p, 'stormhalo') ? 17 : 9;
+    const cd = m.bladeCd;
     m.orbA += dt * (3.2 + lv * 0.2);
     const halo = evo(p, 'stormhalo');
     const dmg = (4 + 1.8 * lv) * dm * (halo ? 1.4 : 1);
@@ -93,6 +109,7 @@ export function updateModules(p, dt) {
       const a = m.orbA + (i / n) * TAU;
       const bx = p.x + Math.cos(a) * radius;
       const by = p.y + Math.sin(a) * radius;
+      if (cd[i] > 0) cd[i] -= dt;
       for (const e of G.enemies) {
         if (e.dead || !e.entered) continue;
         const rr = e.r + (halo ? 14 : 10);
@@ -102,12 +119,15 @@ export function updateModules(p, dt) {
           damageEnemy(e, dmg, bx, by);
         }
       }
+      if (cd[i] > 0) continue; // a blade that just ate a bullet stays dim for BLADE_CD
       for (const b of G.eBullets) {
-        if (b.dead || b.hp > 0 || (b.type === 'big' && lv < 3)) continue;
+        if (b.dead || isHeavy(b)) continue;
         const rr = b.r + erase;
         if (dist2(bx, by, b.x, b.y) < rr * rr) {
           b.dead = true;
           sparks(b.x, b.y, '#ff9ad5', 3, 140);
+          cd[i] = BLADE_CD;
+          break;
         }
       }
     }
@@ -192,7 +212,10 @@ export function updateModules(p, dt) {
       for (let i = 0; i < n; i++) {
         playerBullet(p.x, p.y, off + (i / n) * TAU, 430, (3.4 + 0.9 * lv) * dm * (sn ? 1.25 : 1), S.pb_nova, { life: 0.8, r: 5, pierce: sn ? 4 : 1, alpha: 1 });
       }
-      if (sn) clearBullets(p.x, p.y, 95);
+      if (sn && m.novaEraseT <= 0) {
+        eraseBullets(p.x, p.y, 95);
+        m.novaEraseT = NOVA_ERASE_CD;
+      }
       ring(p.x, p.y, sn ? 95 : 60, '#ff3df2', 0.35);
       sfx.nova();
     }
@@ -225,7 +248,7 @@ export function updateModules(p, dt) {
   const wells = m.wells;
   if (up.gravity) {
     const lv = up.gravity;
-    m.gravT -= dt * rate;
+    m.gravT -= dt; // barrier: no fire-rate scaling
     if (m.gravT <= 0) {
       let tx = field.ow ? p.x + Math.cos(p.aim) * 220 : p.x;
       let ty = field.ow ? p.y + Math.sin(p.aim) * 220 : Math.max(view.safeTop + 120, p.y - 220);
@@ -241,7 +264,7 @@ export function updateModules(p, dt) {
       } else {
         m.gravT = lvl([7.5, 6.6, 5.8, 5.0, 4.3], lv);
         const eh = evo(p, 'eventHorizon'); // Event Horizon: huge, long-lived wells that collapse in a blast
-        wells.push({ x: tx, y: ty, r: lvl([95, 105, 115, 126, 140], lv) * (eh ? 1.5 : 1), life: eh ? 4 : 2.5, max: eh ? 4 : 2.5, tick: 0, eh });
+        wells.push({ x: tx, y: ty, r: lvl([95, 105, 115, 126, 140], lv) * (eh ? 1.5 : 1), life: eh ? 4 : 2.5, max: eh ? 4 : 2.5, tick: 0, eh, eat: lvl(WELL_EAT, lv) * (eh ? 2 : 1) });
         ring(tx, ty, 50, '#b86bff', 0.4);
         sfx.nova();
       }
@@ -276,13 +299,15 @@ export function updateModules(p, dt) {
       const dy = w.y - b.y;
       const d2 = dx * dx + dy * dy;
       if (d2 > r2 * 1.3) continue;
-      if (d2 < 15 * 15 && !b.hp) {
+      const heavy = isHeavy(b);
+      if (d2 < 15 * 15 && !heavy && w.eat > 0) {
+        w.eat--;
         b.dead = true;
         sparks(b.x, b.y, '#d9a8ff', 2, 120);
         continue;
       }
       const d = Math.sqrt(d2) || 1;
-      const a = (b.hp ? 400 : 1000) * (1 - Math.min(1, d / (w.r * 1.15)) * 0.5) * dt;
+      const a = (heavy ? 400 : 1000) * (1 - Math.min(1, d / (w.r * 1.15)) * 0.5) * dt;
       b.vx += (dx / d) * a;
       b.vy += (dy / d) * a;
     }
@@ -302,7 +327,7 @@ export function updateModules(p, dt) {
     if (m.refl > 0) {
       m.refl -= dt;
       const R = lvl(REFL_R, lv);
-      const dmg = lvl([4.5, 5.5, 6.5, 7.6, 9], lv) * dm;
+      const dmg = lvl([4.5, 5.5, 6.5, 7.6, 9], lv) * dm * REFL_DMG;
       // The bubble itself burns whatever drifts inside it (a few ticks per pulse).
       m.reflHit = (m.reflHit || 0) - dt;
       if (m.reflHit <= 0) {
@@ -314,8 +339,13 @@ export function updateModules(p, dt) {
         }
       }
       for (const b of G.eBullets) {
-        if (b.dead || b.delay > 0 || b.hp) continue;
+        if (m.reflLeft <= 0) {
+          m.refl = Math.min(m.refl, 0.12); // spent: the bubble fades out
+          break;
+        }
+        if (b.dead || b.delay > 0 || isHeavy(b)) continue;
         if (dist2(p.x, p.y, b.x, b.y) > (R + b.r) * (R + b.r)) continue;
+        m.reflLeft--;
         b.dead = true;
         sparks(b.x, b.y, '#7fffe6', 3, 160);
         if (G.pBullets.length >= MAX_PBULLETS) continue;
@@ -325,10 +355,11 @@ export function updateModules(p, dt) {
         if (evo(p, 'mirrorstorm')) for (const s of [-0.25, 0.25]) playerBullet(b.x, b.y, a + s, 720, dmg * 0.7, S.pb_refl, { life: 1.1, r: 4, alpha: 1 }); // Mirror Storm
       }
     } else {
-      m.reflT -= dt * rate;
+      m.reflT -= dt; // barrier: no fire-rate scaling
       if (m.reflT <= 0) {
         m.reflT = lvl([8, 7.2, 6.4, 5.6, 4.8], lv) * (evo(p, 'mirrorstorm') ? 0.5 : 1);
         m.refl = m.reflMax = 0.9 + 0.1 * lv;
+        m.reflLeft = lvl(REFL_RETURNS, lv);
         ring(p.x, p.y, lvl(REFL_R, lv), '#7fffe6', 0.3);
         sfx.shield();
       }
@@ -601,7 +632,7 @@ function updateNewModules(p, dt, rate, dm) {
     m.flameT = (m.flameT || 0) - dt;
     if (m.flameT <= 0) {
       m.flameT = 0.065;
-      const dmg = lvl([1.8, 2.3, 2.9, 3.6, 4.4], lv) * dm * 0.65;
+      const dmg = lvl([1.8, 2.3, 2.9, 3.6, 4.4], lv) * dm * 0.65 * ammoMul(p, 'incendiary');
       const c = Math.cos(aim);
       const s = Math.sin(aim);
       for (const e of G.enemies) {
@@ -634,7 +665,7 @@ function updateNewModules(p, dt, rate, dm) {
       for (let i = 0; i < n; i++) {
         const a = p.aim + (n === 1 ? 0 : (i - (n - 1) / 2) * spread);
         const [sx, sy] = local(p, (i - (n - 1) / 2) * 12, -4);
-        playerBullet(sx, sy, a, 860, lvl([15, 20, 26, 33, 42], lv) * dm, S.cryo_spike, {
+        playerBullet(sx, sy, a, 860, lvl([15, 20, 26, 33, 42], lv) * dm * ammoMul(p, 'cryo'), S.cryo_spike, {
           pierce: lvl([2, 3, 3, 4, 5], lv),
           life: 1.4,
           r: 7,
@@ -714,7 +745,7 @@ function updateNewModules(p, dt, rate, dm) {
       pool.tick -= dt;
       if (pool.tick <= 0) {
         pool.tick = 0.16;
-        const dmg = lvl([2.2, 2.9, 3.6, 4.5, 5.5], pool.lv) * dm;
+        const dmg = lvl([2.2, 2.9, 3.6, 4.5, 5.5], pool.lv) * dm * ammoMul(p, 'corrosive');
         const R2 = pool.r * pool.r;
         for (const e of G.enemies) {
           if (e.dead || !e.entered) continue;
@@ -830,7 +861,7 @@ function collapseWell(w, dm) {
     if (e.dead || !e.entered) continue;
     if (dist2(w.x, w.y, e.x, e.y) < (w.r + e.r) * (w.r + e.r)) damageEnemy(e, dmg, e.x, e.y);
   }
-  clearBullets(w.x, w.y, w.r);
+  if (w.eat > 0) eraseBullets(w.x, w.y, w.r, () => w.eat--);
   explosion(w.x, w.y, '#b86bff', 1.4);
   ring(w.x, w.y, w.r * 1.2, '#d9a8ff', 0.5);
   sfx.explode(1.2);
@@ -884,8 +915,11 @@ export function dashNova(p) {
   for (let i = 0; i < n; i++) {
     playerBullet(p.x, p.y, (i / n) * TAU, 480, (3 + 1.2 * lv) * dm, S.blade, { life: 0.5, r: 7, pierce: 2, scale: 0.7, alpha: 1 });
   }
-  clearBullets(p.x, p.y, 55 + 15 * lv);
-  ring(p.x, p.y, 55 + 15 * lv, '#ff3df2', 0.35);
+  if (p.mod.dashEraseT <= 0) {
+    eraseBullets(p.x, p.y, 55 + 15 * lv);
+    p.mod.dashEraseT = DASH_ERASE_CD;
+    ring(p.x, p.y, 55 + 15 * lv, '#ff3df2', 0.35);
+  }
 }
 
 export function updateBeams(rawDt) {
@@ -962,8 +996,10 @@ export function drawModules(ctx, k) {
       const r = G.time * 12;
       const [ma, mb, mc, md] = moduleSpinMatrix(r, s.generated ? sv.mode : 'top', s.spinAspect);
       ctx.setTransform(ma * k, mb * k, mc * k, md * k, x * k + view.ox, y * k + view.oy);
+      ctx.globalAlpha = p.mod.bladeCd[i] > 0 ? 0.35 : 1; // dim while recharging its erase
       ctx.drawImage(s.img, -s.half * bs, -s.half * bs, s.size * bs, s.size * bs);
     }
+    ctx.globalAlpha = 1;
     ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
     ctx.globalCompositeOperation = 'source-over';
   }

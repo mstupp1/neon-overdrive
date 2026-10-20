@@ -4,7 +4,7 @@
 import { weightedPick } from '../core/math.js';
 import { WEAPONS, MAIN_POWER } from './ships.js';
 import { applyParts } from './parts.js';
-import { applyPassives, resetPilotStats, addUltMeter, ULT_LEVELS, ULT_CELLS_MAX } from './pilot.js';
+import { applyPassives, resetPilotStats, addUltMeter, ULT_LEVELS, ULT_CELLS_MAX, ULT_DUR_MAX } from './pilot.js';
 import { STATS, rollMods, itemLevel, TAGS, PATH_KIN, affixTag } from './parts.js';
 import { RARITY, rollRarity } from './rarity.js';
 import { profile, saveProfile } from '../core/storage.js';
@@ -13,6 +13,15 @@ import { REDLINE_MAX } from './state.js';
 import { assetIcon } from '../ui/asset-icons.js';
 
 export const MAX_MODULES = 4;
+export const MODULE_SLOT_CAP = 6; // every slot source together (ship, abilities, tree, gear)
+
+// Exclusive families: once a run owns `limit` different options of a family, the rest leave the draft pool.
+// ammo = elemental rounds (pick one), trick = trick shots (two), barrier = bullet-erasing modules (one).
+export const FAMILIES = {
+  ammo: { name: 'AMMO', limit: 1 },
+  trick: { name: 'TRICK SHOT', limit: 2 },
+  barrier: { name: 'BARRIER', limit: 1 },
+};
 
 const svg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 
@@ -109,7 +118,7 @@ export const UPGRADES = [
   { id: 'power', name: 'Plasma Core', cat: 'stat', max: 6, weight: 1.1, tier: 0, desc: () => '+12% damage for all weapons.' },
   { id: 'rate', name: 'Overclock', cat: 'stat', max: 6, weight: 1.1, tier: 0, desc: () => '+10% fire rate for all weapons.' },
   { id: 'crit', name: 'Targeting AI', cat: 'stat', max: 5, weight: 0.8, tier: 0, desc: (lv) => `+7% critical chance (${pct(0.07 * lv)}). Crits deal 2.5x.` },
-  { id: 'pierce', name: 'Phase Rounds', cat: 'stat', max: 3, weight: 0.7, tier: 0, desc: () => 'Primary shots pierce +1 enemy.' },
+  { id: 'pierce', name: 'Phase Tips', cat: 'stat', max: 3, weight: 0.7, tier: 0, desc: () => 'Primary shots pierce +1 enemy.' },
   { id: 'thrusters', name: 'Thrusters', cat: 'stat', max: 4, weight: 0.8, tier: 0, desc: () => '+8% move speed, dashes recharge 12% faster.' },
   { id: 'magnet', name: 'Tractor Field', cat: 'stat', max: 4, weight: 0.7, tier: 0, desc: () => '+55% pickup range.' },
   { id: 'capacitor', name: 'Capacitor', cat: 'stat', max: 4, weight: 0.8, tier: 0, desc: () => '+25% Overdrive charge, +1s duration.' },
@@ -126,17 +135,17 @@ export const UPGRADES = [
   { id: 'ramScoop', name: 'Ram Scoop', cat: 'stat', max: 3, weight: 0.7, tier: 0, desc: (lv) => `Boost refills 30% faster (${pct(0.3 * lv)}).` },
 
   { id: 'missiles', name: 'Swarm Missiles', cat: 'module', max: 5, weight: 1, tier: 0, desc: (lv) => (lv === 1 ? 'Launch homing missiles that explode on impact.' : 'More missiles, faster launches.') },
-  { id: 'orbitals', name: 'Razor Orbit', cat: 'module', max: 5, weight: 1, tier: 0, desc: (lv) => (lv === 1 ? 'Blades orbit your ship, shredding enemies and bullets.' : '+1 blade, more damage.') },
+  { id: 'orbitals', name: 'Razor Orbit', cat: 'module', family: 'barrier', max: 5, weight: 1, tier: 0, desc: (lv) => (lv === 1 ? 'Blades orbit your ship, shredding enemies and bullets. A blade rests briefly after eating a bullet.' : '+1 blade, more damage.') },
   { id: 'drones', name: 'Wingmen', cat: 'module', max: 5, weight: 1, tier: 0, desc: (lv) => (lv === 1 ? 'Two drones fly escort and fire with you.' : lv === 3 ? 'Drones auto-aim at enemies. Faster fire.' : 'Faster, harder-hitting drones.') },
   { id: 'arc', name: 'Arc Coil', cat: 'module', max: 5, weight: 1, tier: 0, desc: (lv) => (lv === 1 ? 'Lightning periodically chains between enemies.' : '+1 chain, faster, more damage.') },
   { id: 'nova', name: 'Pulse Nova', cat: 'module', max: 5, weight: 0.9, tier: 0, desc: (lv) => (lv === 1 ? 'Emit a ring of energy shots around you.' : 'Denser, more frequent rings.') },
   { id: 'shrapnel', name: 'Shrapnel', cat: 'module', max: 5, weight: 0.8, tier: 0, desc: () => 'Destroyed enemies burst into damaging fragments.' },
-  { id: 'dashNova', name: 'Shock Dash', cat: 'module', max: 5, weight: 0.8, tier: 0, desc: (lv) => (lv === 1 ? 'Dashing unleashes blades and erases nearby bullets.' : 'More blades, larger erase radius.') },
+  { id: 'dashNova', name: 'Shock Dash', cat: 'module', family: 'barrier', max: 5, weight: 0.8, tier: 0, desc: (lv) => (lv === 1 ? 'Dashing unleashes blades and erases nearby bullets (once a second).' : 'More blades, larger erase radius.') },
   { id: 'flak', name: 'Flak Burst', cat: 'module', max: 5, weight: 0.85, tier: 0, desc: (lv) => (lv === 1 ? 'Slow flak shells airburst near enemies into shrapnel rings.' : 'More fragments and damage per burst.') },
 
   // --- Crimson tech ---
-  { id: 'overload', name: 'Overload Rounds', cat: 'stat', max: 3, weight: 0.7, tier: 1, desc: () => 'Critical hits detonate, splashing nearby enemies.' },
-  { id: 'splinter', name: 'Splinter Rounds', cat: 'stat', max: 3, weight: 0.7, tier: 1, desc: (lv) => `${[0, 12, 22, 32][lv]}% of primary hits split into two fragments.` },
+  { id: 'overload', name: 'Overload Primer', family: 'trick', cat: 'stat', max: 3, weight: 0.7, tier: 1, desc: () => 'Critical hits detonate, splashing nearby enemies.' },
+  { id: 'splinter', name: 'Splinter Shells', family: 'trick', cat: 'stat', max: 3, weight: 0.7, tier: 1, desc: (lv) => `${[0, 12, 22, 32][lv]}% of primary hits split into two fragments.` },
   { id: 'redline', name: 'Redline', cat: 'stat', max: 3, weight: 0.6, tier: 1, desc: (lv) => `+${12 * lv}% damage for every missing hull point (up to ${REDLINE_MAX}).` },
   { id: 'bounty', name: 'Bounty Hunter', cat: 'stat', max: 3, weight: 0.6, tier: 1, desc: () => '+15% damage to elites and bosses.' },
   { id: 'blink', name: 'Blink Drive', cat: 'defense', max: 2, weight: 0.6, tier: 1, desc: () => 'Dashes travel 20% further with 20% longer invulnerability.' },
@@ -144,7 +153,7 @@ export const UPGRADES = [
   { id: 'overthrust', name: 'Overthrust', cat: 'stat', max: 3, weight: 0.55, tier: 1, desc: (lv) => `Boost rushes the stage faster (x${(1.6 + 0.15 * lv).toFixed(2)}) for a bigger score bonus (x${(1 + 0.8 * (0.6 + 0.15 * lv)).toFixed(2)}).` },
   { id: 'leech', name: 'Leech Protocol', cat: 'defense', max: 3, weight: 0.6, tier: 1, desc: (lv) => `Repair 1 hull every ${[0, 90, 70, 50][lv]} kills.` },
   { id: 'rail', name: 'Rail Lance', cat: 'module', max: 5, weight: 0.9, tier: 1, desc: (lv) => (lv === 1 ? 'Fire a massive piercing beam forward.' : 'Wider beam, more damage, faster charge.') },
-  { id: 'reflector', name: 'Reflector', cat: 'module', max: 5, weight: 0.85, tier: 1, desc: (lv) => (lv === 1 ? 'A pulsing shield bubble turns enemy bullets back on their owners.' : 'Wider bubble, more frequent, harder-hitting returns.') },
+  { id: 'reflector', name: 'Reflector', cat: 'module', family: 'barrier', max: 5, weight: 0.85, tier: 1, desc: (lv) => (lv === 1 ? 'A pulsing shield bubble turns up to 8 enemy bullets back on their owners.' : 'Wider, more frequent bubbles that return one more bullet.') },
   { id: 'mines', name: 'Proximity Mines', cat: 'module', max: 5, weight: 0.85, tier: 1, desc: (lv) => (lv === 1 ? 'Drop mines in your wake that blow when enemies come close.' : 'More mines, bigger blasts.') },
   { id: 'flamethrower', name: 'Flamethrower', cat: 'module', max: 5, weight: 0.85, tier: 1, desc: (lv) => (lv === 1 ? 'A continuous flame cone extends from your ship, scorching enemies with stacking burn.' : lv === 3 ? 'Wider whip cone, hotter flames and faster burn.' : 'Longer reach, wider cone and scorching burn.') },
   { id: 'cryoSpike', name: 'Glacial Spike', cat: 'module', max: 5, weight: 0.85, tier: 1, desc: (lv) => (lv === 1 ? 'Launch heavy ice spikes that pierce enemies and shatter into chilling shrapnel.' : lv === 3 ? 'Twin spikes per salvo.' : 'Triple barrage of massive spikes that shatter into freezing blasts.') },
@@ -154,7 +163,7 @@ export const UPGRADES = [
   { id: 'echoFire', name: 'Echo Fire', cat: 'stat', max: 3, weight: 0.6, tier: 2, desc: (lv) => `${[0, 10, 18, 25][lv]}% of primary volleys fire a second time.` },
   { id: 'static', name: 'Static Discharge', cat: 'stat', max: 3, weight: 0.6, tier: 2, desc: (lv) => `Kills arc lightning into ${lv} nearby ${lv === 1 ? 'enemy' : 'enemies'}.` },
   { id: 'secondWind', name: 'Second Wind', cat: 'defense', max: 2, weight: 0.5, tier: 2, desc: (lv) => `A killing blow leaves you at 1 hull instead (${lv === 1 ? 'once' : 'twice'} per run).` },
-  { id: 'gravity', name: 'Gravity Well', cat: 'module', max: 5, weight: 0.85, tier: 2, desc: (lv) => (lv === 1 ? 'Drop a singularity that drags enemies and bullets in and crushes them.' : 'Bigger, stronger, more frequent wells.') },
+  { id: 'gravity', name: 'Gravity Well', cat: 'module', family: 'barrier', max: 5, weight: 0.85, tier: 2, desc: (lv) => (lv === 1 ? 'Drop a singularity that drags enemies and bullets in and crushes them.' : 'Bigger, stronger, more frequent wells.') },
   { id: 'saw', name: 'Buzzsaw', cat: 'module', max: 5, weight: 0.85, tier: 2, desc: (lv) => (lv === 1 ? 'Hurl a saw that carves through enemies and boomerangs back.' : lv === 3 ? 'Throw two saws at once.' : 'Bigger, faster, harder-hitting saws.') },
   { id: 'stasis', name: 'Stasis Pulse', cat: 'module', max: 5, weight: 0.8, tier: 2, desc: (lv) => (lv === 1 ? 'A pulse freezes nearby bullets to a crawl and shocks enemies.' : 'Wider, more frequent pulses.') },
   { id: 'droneSwarm', name: 'Drone Swarm', cat: 'module', max: 5, weight: 0.85, tier: 2, desc: (lv) => (lv === 1 ? 'Autonomous interceptors launch from your hull, strafe enemies, and return to recharge.' : lv === 3 ? 'Interceptors fly faster and fire twin bursts.' : '+2 interceptors and faster recharges.') },
@@ -167,26 +176,26 @@ export const UPGRADES = [
   { id: 'starfall', name: 'Starfall', cat: 'module', max: 5, weight: 0.8, tier: 3, desc: (lv) => (lv === 1 ? 'Call down falling stars that blast enemies from above.' : 'More stars, bigger impacts.') },
 
   // --- Shared-system cards (status.js). `req`: only offered once that card is owned. ---
-  { id: 'projSize', name: 'Wide Rounds', cat: 'stat', max: 4, weight: 0.7, tier: 0, desc: () => '+15% projectile size, for every weapon.' },
+  { id: 'projSize', name: 'Wide Bore', cat: 'stat', max: 4, weight: 0.7, tier: 0, desc: () => '+15% projectile size, for every weapon.' },
   { id: 'projSpeed', name: 'Accelerator Coils', cat: 'stat', max: 4, weight: 0.7, tier: 0, desc: () => '+12% projectile speed, for every weapon.' },
   { id: 'gameSpeed', name: 'Hyperflow', cat: 'stat', max: 3, weight: 0.5, tier: 0, desc: () => 'The whole battle runs 8% faster for good. +20% score, +10% credits.' },
   { id: 'dodge', name: 'Lucky Dodge', cat: 'defense', max: 4, weight: 0.6, tier: 0, desc: () => '+6% chance to slip past a shot that would have hit you.' },
   { id: 'armorPierce', name: 'Armor Piercing', cat: 'stat', max: 4, weight: 0.7, tier: 1, desc: () => 'Your shots ignore 8% of enemy armor.' },
   { id: 'burstFire', name: 'Burst Fire', cat: 'stat', max: 4, weight: 0.7, tier: 1, desc: (lv) => (lv === 3 ? '+7% burst chance, and bursts fire one more extra volley.' : '+7% chance for a volley to burst into an extra volley.') },
-  { id: 'cryo', name: 'Cryo Rounds', cat: 'stat', max: 3, weight: 0.6, tier: 1, desc: () => '+12% chance per hit to chill. Chill stacks slow enemies; a full stack freezes them.' },
+  { id: 'cryo', name: 'Cryo Rounds', family: 'ammo', cat: 'stat', max: 3, weight: 0.6, tier: 1, desc: () => '+12% chance per hit to chill. Chill stacks slow enemies; a full stack freezes them.' },
   { id: 'deepFreeze', name: 'Deep Freeze', cat: 'stat', max: 3, weight: 0.5, tier: 1, req: 'cryo', desc: () => '+25% slow from every chill stack.' },
-  { id: 'incendiary', name: 'Incendiary Rounds', cat: 'stat', max: 3, weight: 0.6, tier: 1, desc: () => '+12% chance per hit to ignite. Burn stacks deal damage over time and ignore armor.' },
+  { id: 'incendiary', name: 'Incendiary Rounds', family: 'ammo', cat: 'stat', max: 3, weight: 0.6, tier: 1, desc: () => '+12% chance per hit to ignite. Burn stacks deal damage over time and ignore armor.' },
   { id: 'accelerant', name: 'Accelerant', cat: 'stat', max: 3, weight: 0.5, tier: 1, req: 'incendiary', desc: () => '+25% burn damage per stack.' },
-  { id: 'corrosive', name: 'Corrosive Rounds', cat: 'stat', max: 3, weight: 0.6, tier: 1, desc: () => '+12% chance per hit to corrode. Each stack strips enemy armor (and lowers it below zero).' },
+  { id: 'corrosive', name: 'Corrosive Rounds', family: 'ammo', cat: 'stat', max: 3, weight: 0.6, tier: 1, desc: () => '+12% chance per hit to corrode. Each stack strips enemy armor (and lowers it below zero).' },
   { id: 'acidEtch', name: 'Acid Etch', cat: 'stat', max: 3, weight: 0.5, tier: 1, req: 'corrosive', desc: () => '+25% armor stripped per corrosion stack.' },
-  { id: 'resonance', name: 'Resonance Rounds', cat: 'stat', max: 3, weight: 0.6, tier: 2, desc: (lv) => `Every ${[0, 7, 6, 5][lv]}th hit on an enemy detonates for ${2 + 0.5 * lv}x damage, splashing neighbours.` },
-  { id: 'sundering', name: 'Sundering Rounds', cat: 'stat', max: 3, weight: 0.6, tier: 2, desc: () => "Hits deal +0.3% of the target's max hull. Bosses take a fraction." },
+  { id: 'resonance', name: 'Resonance Coil', family: 'trick', cat: 'stat', max: 3, weight: 0.6, tier: 2, desc: (lv) => `Every ${[0, 7, 6, 5][lv]}th hit on an enemy detonates for ${2 + 0.5 * lv}x damage, splashing neighbours.` },
+  { id: 'sundering', name: 'Sunder Tips', family: 'trick', cat: 'stat', max: 3, weight: 0.6, tier: 2, desc: () => "Hits deal +0.3% of the target's max hull. Bosses take a fraction." },
 
   // Evolutions: cat 'evolution', unlocked by a maxed module plus an owned partner stat (mod / stat). Never sold in the market.
   { id: 'hellfire', name: 'Hellfire Swarm', cat: 'evolution', max: 1, weight: 7, tier: 0, mod: 'missiles', stat: 'crit', desc: () => 'Missiles: double the salvo, bigger blasts, and missile hits always crit.' },
   { id: 'stormhalo', name: 'Storm Halo', cat: 'evolution', max: 1, weight: 7, tier: 0, mod: 'orbitals', stat: 'thrusters', desc: () => 'Orbit: +3 blades, a pulsing orbit radius and a wider bullet-shredding field.' },
   { id: 'teslastorm', name: 'Tesla Storm', cat: 'evolution', max: 1, weight: 7, tier: 0, mod: 'arc', stat: 'capacitor', desc: () => 'Arc: fires twice as often, +3 chains, and never stops during your ultimate.' },
-  { id: 'supernova', name: 'Supernova', cat: 'evolution', max: 1, weight: 7, tier: 1, mod: 'nova', stat: 'power', desc: () => 'Nova: denser rings that pierce deep, and every ring wipes bullets around you.' },
+  { id: 'supernova', name: 'Supernova', cat: 'evolution', max: 1, weight: 7, tier: 1, mod: 'nova', stat: 'power', desc: () => 'Nova: denser rings that pierce deep, and a ring wipes bullets around you every 3s.' },
   { id: 'phalanx', name: 'Phalanx', cat: 'evolution', max: 1, weight: 7, tier: 1, mod: 'drones', stat: 'rate', desc: () => 'Wingmen: five drones in formation, firing faster.' },
   { id: 'annihilator', name: 'Annihilator', cat: 'evolution', max: 1, weight: 7, tier: 1, mod: 'rail', stat: 'pierce', desc: () => 'Rail: a huge beam, twice as often, leaving a burning afterglow.' },
   { id: 'mirrorstorm', name: 'Mirror Storm', cat: 'evolution', max: 1, weight: 7, tier: 2, mod: 'reflector', stat: 'aegis', desc: () => 'Reflector: pulses twice as often and every returned shot splits in three.' },
@@ -230,6 +239,24 @@ export const upgradeById = (id) => byId.get(id);
 // An evolution is offered once its module is maxed, its partner stat is owned and it has not been taken.
 function evolutionReady(p, u) {
   return u.cat === 'evolution' && !p.up[u.id] && (p.up[u.mod] || 0) >= byId.get(u.mod).max && (p.up[u.stat] || 0) >= 1;
+}
+
+// Different options of a family the run owns.
+export function familyOwned(p, fam) {
+  return UPGRADES.filter((u) => u.family === fam && (p.up[u.id] || 0) > 0).map((u) => u.id);
+}
+// True when a family's limit keeps this option out of drafts.
+export function familyLocked(p, u) {
+  if (!u.family || (p.up[u.id] || 0) > 0) return false;
+  return familyOwned(p, u.family).length >= FAMILIES[u.family].limit;
+}
+// The card line for a family option you don't own yet: what picking it rules out.
+function familyNote(p, u) {
+  const fam = FAMILIES[u.family];
+  const owned = familyOwned(p, u.family);
+  const others = UPGRADES.filter((x) => x.family === u.family && x.id !== u.id && !owned.includes(x.id)).map((x) => x.name);
+  if (owned.length + 1 < fam.limit || !others.length) return ` ${fam.name}: ${fam.limit - owned.length - 1} more allowed.`;
+  return ` ${fam.name}: rules out ${others.join(', ')}.`;
 }
 
 function moduleCount(p) {
@@ -324,6 +351,8 @@ export function recomputeStats(p) {
   applyTree(st, p);
   st.maxHp = Math.max(1, st.maxHp);
   st.ultCells = Math.min(ULT_CELLS_MAX, Math.max(ULT_LEVELS, Math.round(st.ultCells)));
+  st.maxModules = Math.min(MODULE_SLOT_CAP, st.maxModules);
+  st.odDur = Math.min(ULT_DUR_MAX, st.odDur);
   st.ultSave = Math.min(0.5, st.ultSave);
   if (st.shieldInterval) st.shieldInterval = Math.max(SHIELD_MIN, st.shieldInterval); // stacked recharge cuts bottom out
   p.maxHp = st.maxHp;
@@ -364,6 +393,7 @@ export function rollUpgradeIds(p, kind, n = 3, rng = Math.random, evo = false, o
     const l = p.up[u.id] || 0;
     if (!l && !available(p, u, k)) return false;
     if (u.req && !p.up[u.req]) return false;
+    if (familyLocked(p, u)) return false;
     if (u.cat === 'evolution') return evo && evolutionReady(p, u);
     if (l >= u.max) return false;
     if (u.cat === 'module' && l === 0 && mods >= p.st.maxModules) return false;
@@ -491,7 +521,7 @@ export function cardInfo(p, id, roll = null) {
   const r = roll ? roll.r : null;
   const levels = roll ? roll.levels : 1;
   return {
-    id, name: u.name, cat: u.cat, icon: ICONS[id], desc: u.desc(lv + 1), lv, max: u.max, evo: u.cat === 'evolution', fresh: !isDiscovered(id),
+    id, name: u.name, cat: u.cat, icon: ICONS[id], desc: u.desc(lv + 1) + (u.family && !lv ? familyNote(p, u) : ''), lv, max: u.max, evo: u.cat === 'evolution', fresh: !isDiscovered(id),
     r, levels, mods: roll ? roll.mods.map(modText) : [], syn, path: pathOf(id), note: u.cat === 'evolution' ? null : pathNote(p, id, levels),
   };
 }

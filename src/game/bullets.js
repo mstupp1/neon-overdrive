@@ -14,7 +14,7 @@ const MAX_ENEMY_BULLETS = 650;
 export function playerBullet(x, y, angle, speed, dmg, spr, opts = {}) {
   const b = pFree.pop() || { hits: [] };
   const st = G.player && G.player.st;
-  const pz = (st && st.projSize) || 1; // Wide Rounds
+  const pz = (st && st.projSize) || 1; // Wide Bore
   speed *= (st && st.projSpeed) || 1; // Accelerator Coils
   b.x = x;
   b.y = y;
@@ -33,7 +33,7 @@ export function playerBullet(x, y, angle, speed, dmg, spr, opts = {}) {
   b.bounce = opts.bounce || 0;
   b.crit = !!opts.crit; // always crits on hit
   b.kind = opts.kind || 'bullet';
-  b.primary = !!opts.primary; // main-gun shot (Splinter Rounds)
+  b.primary = !!opts.primary; // main-gun shot (Splinter Shells)
   b.alpha = opts.alpha || 0.9;
   b.wave = opts.wave || 0; // sine weave amplitude (WRAITH), px
   b.wph = opts.wphase || 0;
@@ -470,6 +470,23 @@ function drawArmored(ctx, k, T, list = G.eBullets) {
 }
 
 // Turn bullets near a point into sparks (and optionally score/XP via callback).
+// Heavy shots (big orbs, torpedoes, fuse shells, shootable shots) shrug off barrier modules: slow them or shoot them.
+export const isHeavy = (b) => b.hp > 0 || b.type === 'big' || b.type === 'torpedo' || b.type === 'shell';
+
+// Barrier-module erase: clearBullets without the heavy shots. Returns how many it erased.
+export function eraseBullets(x, y, radius, onClear) {
+  const r2 = radius * radius;
+  let n = 0;
+  for (const b of G.eBullets) {
+    if (b.dead || b.delay > 0 || isHeavy(b) || dist2(x, y, b.x, b.y) >= r2) continue;
+    b.dead = true;
+    sparks(b.x, b.y, '#ff9ad5', 2, 120);
+    n++;
+    if (onClear) onClear(b);
+  }
+  return n;
+}
+
 export function clearBullets(x, y, radius, onClear) {
   const r2 = radius * radius;
   for (const b of G.eBullets) {
