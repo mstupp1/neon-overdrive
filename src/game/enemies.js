@@ -739,7 +739,11 @@ export function damageEnemy(e, dmg, x, y, crit = false, src = '') {
     if (st.chainDmg) dmg *= 1 + st.chainDmg * Math.min(14, Math.floor(G.combo / 12)); // Chain Link: per x0.5 combo step
     if (st.shatter && (e.frozenT > 0 || (e.fx && e.fx.freeze))) dmg *= 1 + st.shatter; // Cryostasis: +50% vs frozen
   }
-  if (pl && src !== 'dot') dmg *= 1 - armorOf(e, pl.st); // armor (Armor Piercing and Corrosive lower it)
+  if (pl && src !== 'dot') {
+    const arm = armorOf(e, pl.st);
+    if (pl.st.armorBonus && e.armor > 0) dmg *= 1 + pl.st.armorBonus; // MONOLITH: armored targets
+    dmg *= 1 - arm;
+  } // armor (Armor Piercing and Corrosive lower it)
   e.hp -= dmg;
   e.flash = 0.06;
   damageNumber(x ?? e.x, y ?? e.y, dmg, crit, e);

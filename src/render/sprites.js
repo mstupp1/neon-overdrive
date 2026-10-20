@@ -260,6 +260,44 @@ export function buildSprites(ships) {
     g.fillStyle = '#fff4a0'; g.shadowColor = '#ffd24a'; g.shadowBlur = 6;
     g.beginPath(); poly(regular(3, 3, -Math.PI / 2))(g); g.fill();
   } }, 10, 3);
+  // Path modules (modules-ext.js): bodies and shots.
+  S.plate = makeSprite(22, (g) => {
+    const p = poly([[-7, -4], [7, -4], [5, 4], [-5, 4]]);
+    glowFill(g, '#7dff6b', 0, p, 0.35);
+    glowStroke(g, '#7dff6b', 1.5, 6, p);
+  });
+  S.marksman = makeSprite(24, (g) => {
+    const p = poly([[0, -9], [5, 0], [0, 6], [-5, 0]]);
+    glowFill(g, '#ffe14d', 0, p, 0.3);
+    glowStroke(g, '#ffe14d', 1.5, 6, p);
+  });
+  S.pylon = makeSprite(24, (g) => {
+    const p = poly([[0, -9], [6, 7], [-6, 7]]);
+    glowFill(g, '#9fe9ff', 0, p, 0.3);
+    glowStroke(g, '#bff8ff', 1.5, 6, p);
+  });
+  S.sentry = makeSprite(26, (g) => {
+    const p = poly(regular(6, 8, 0));
+    glowFill(g, '#ff8a3d', 0, p, 0.3);
+    glowStroke(g, '#ff8a3d', 1.5, 6, p);
+  });
+  S.salvager = makeSprite(24, (g) => {
+    const p = poly([[0, -7], [7, 0], [0, 7], [-7, 0]]);
+    glowFill(g, '#ffd24a', 0, p, 0.35);
+    glowStroke(g, '#ffd24a', 1.5, 6, p);
+  });
+  S.pb_harpoon = moduleShot('#ff5470', makeSprite, { size: 22, draw: (g) => {
+    g.fillStyle = '#ffd0d8'; g.shadowColor = '#ff5470'; g.shadowBlur = 8;
+    g.beginPath(); poly([[0, -7], [3, 3], [0, 1], [-3, 3]])(g); g.fill();
+  } }, 22, 5);
+  S.pb_sentry = moduleShot('#ff8a3d', makeSprite, { size: 14, draw: (g) => {
+    g.fillStyle = '#ffd0a0'; g.shadowColor = '#ff8a3d'; g.shadowBlur = 6;
+    g.beginPath(); g.arc(0, 0, 2.4, 0, TAU); g.fill();
+  } }, 12, 3);
+  S.pb_bloom = moduleShot('#b48bff', makeSprite, { size: 18, draw: (g) => {
+    g.fillStyle = '#e4d8ff'; g.shadowColor = '#b48bff'; g.shadowBlur = 7;
+    g.beginPath(); g.arc(0, 0, 3, 0, TAU); g.fill();
+  } }, 14, 5);
   S.cryo_spike = moduleShot('#7fe9ff', makeSprite, { size: 24, draw: (g) => {
     const p = poly([[0, -10], [3, -2], [2, 8], [-2, 8], [-3, -2]]);
     glowFill(g, '#7fe9ff', 0, p, 0.5);

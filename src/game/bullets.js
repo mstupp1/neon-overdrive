@@ -31,6 +31,7 @@ export function playerBullet(x, y, angle, speed, dmg, spr, opts = {}) {
   b.target = null;
   b.aoe = opts.aoe || 0;
   b.bounce = opts.bounce || 0;
+  b.bounced = false; // has ricocheted off a wall (CORSAIR trait)
   b.crit = !!opts.crit; // always crits on hit
   b.kind = opts.kind || 'bullet';
   b.primary = !!opts.primary; // main-gun shot (Splinter Shells)
@@ -103,6 +104,7 @@ export function updatePlayerBullets(dt) {
       const R = field.ow ? field.x1 : view.W;
       if (b.bounce > 0 && (b.x < L || b.x > R)) {
         b.bounce--;
+        b.bounced = true;
         b.vx = -b.vx;
         b.x = b.x < L ? 2 * L - b.x : 2 * R - b.x;
         b.hits.length = 0;
