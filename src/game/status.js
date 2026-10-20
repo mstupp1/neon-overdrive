@@ -32,7 +32,10 @@ export const STATUS = {
   freeze: { color: '#7fe9ff', max: 10, dur: 3 },
   burn: { color: '#ff8a2b', max: 10, dur: 3 },
   corrode: { color: '#a6ff3d', max: 10, dur: 4 },
+  shock: { color: '#fff35a', max: 5, dur: 3 }, // Shock Rounds: charges; a full charge discharges (addShock)
 };
+const SHOCK_DMG = 10; // discharge damage = this x player damage x difficulty hull scale x potency (arcs take 60%)
+const SHOCK_R = 170; // arc reach
 const SLOW_PER = 0.06; // movement / fire-rate slow per freeze stack (at potency 1)
 const BOSS_SLOW_CAP = 0.2;
 const FROZEN_T = 1.2; // a full freeze stack locks a non-boss enemy for this long
@@ -85,7 +88,7 @@ export function updateStatus(e, dt, damage) {
   const fx = e.fx;
   if (!fx) return;
   const st = G.player && G.player.st;
-  for (const kind of ['freeze', 'burn', 'corrode']) {
+  for (const kind of ['freeze', 'burn', 'corrode', 'shock']) {
     const s = fx[kind];
     if (!s) continue;
     s.t -= dt;
@@ -118,7 +121,8 @@ export function onPlayerHit(e, dmg, x, y, damage) {
   if (st.freezeChance && Math.random() < st.freezeChance * resist) applyStatus(e, 'freeze');
   if (st.burnChance && Math.random() < st.burnChance * resist) applyStatus(e, 'burn');
   if (st.corrodeChance && Math.random() < st.corrodeChance * resist) applyStatus(e, 'corrode');
-  const any = st.freezeChance || st.burnChance || st.corrodeChance || st.pctHp || st.detHits;
+  if (st.shockChance && Math.random() < st.shockChance * resist) addShock(e, st, damage);
+  const any = st.freezeChance || st.burnChance || st.corrodeChance || st.shockChance || st.pctHp || st.detHits;
   if (!any) return;
   e.procT = G.time + PROC_GAP;
   if (st.pctHp) damage(e, e.maxHp * st.pctHp * (e.boss ? 0.15 : 1), x, y, false, 'pct');
@@ -129,6 +133,49 @@ export function onPlayerHit(e, dmg, x, y, damage) {
       detonate(e, dmg * st.detMul, st.detR, damage);
     }
   }
+}
+
+// Shock Rounds: one charge; at a full charge the enemy discharges into itself and up to st.shockArcs neighbours.
+function addShock(e, st, damage) {
+  if (!applyStatus(e, 'shock')) return;
+  const s = e.fx.shock;
+  const cap = Math.max(3, Math.round(STATUS.shock.max * (1 - resistOf(e))));
+  if (s.n < cap) return;
+  e.fx.shock = null;
+  const dmg = SHOCK_DMG * (st.dmg || 1) * ((G.director && G.director.diff.hp) || 1) * (st.shockPot || 1) * (1 - resistOf(e) * 0.5);
+  sparks(e.x, e.y, STATUS.shock.color, 8, 220);
+  damage(e, dmg, e.x, e.y, false, 'shock');
+  const hit = new Set([e]);
+  let from = e;
+  for (let i = 0; i < (st.shockArcs || 2); i++) {
+    let best = null;
+    let bd = SHOCK_R * SHOCK_R;
+    for (const o of G.enemies) {
+      if (o.dead || !o.entered || hit.has(o)) continue;
+      const d = dist2(from.x, from.y, o.x, o.y);
+      if (d < bd) { bd = d; best = o; }
+    }
+    if (!best) break;
+    hit.add(best);
+    G.bolts.push({ pts: zigzag(from.x, from.y, best.x, best.y), life: 0.16, max: 0.16 });
+    damage(best, dmg * 0.6, best.x, best.y, false, 'shock');
+    from = best;
+  }
+}
+
+// A lightning path between two points for G.bolts.
+function zigzag(x0, y0, x1, y1) {
+  const pts = [x0, y0];
+  const n = 4;
+  const nx = -(y1 - y0);
+  const ny = x1 - x0;
+  const l = Math.hypot(nx, ny) || 1;
+  for (let i = 1; i < n; i++) {
+    const j = (Math.random() - 0.5) * 18;
+    pts.push(x0 + ((x1 - x0) * i) / n + (nx / l) * j, y0 + ((y1 - y0) * i) / n + (ny / l) * j);
+  }
+  pts.push(x1, y1);
+  return pts;
 }
 
 function detonate(e, dmg, R, damage) {

@@ -73,14 +73,16 @@ Title **PLAY** opens the campaign map, then LAUNCH. A **run** flies all four sys
 
 Ships are bought with credits in the **Hangar** (title menu or campaign map -> HANGAR), or granted free when you reach the legacy unlock goal. **SHIP** is the ship select: browse every hull with its base stats, buy or pick it, and preview / buy paint on the hull. **LOADOUT** fits the active ship's CORE, PLATING and THRUSTERS gear, with the same stat bars showing what the gear adds (green) or costs (red).
 
+Every ship spends the same stat budget (roughly: 1 hull = 3 damage/s, 1 dash = 2, +0.1 speed = 2; base damage sits at 20-23/s except HALO, which pays in damage for its module bay) and carries a **trait**.
+
 | Ship | Style | Hull | Price | Free unlock |
 |---|---|---|---|---|
-| VECTOR | Twin pulse cannon, balanced | 3 | owned | - |
-| NEEDLE | Piercing lances, fast, glass cannon | 2 | 600 | Defeat any boss |
-| BULWARK | Short-range homing scatter, starts with a shield | 4 | 900 | Fight 5 sectors in one run |
-| PHANTOM | Seeking crescents, 3 dashes, Shock Dash, quick ultimate | 3 | 1400 | Fight 8 sectors in one run |
-| CORSAIR | Ricochet bolts that bounce off the side walls | 3 | 1100 | - |
-| MONOLITH | Siege: slow, huge piercing charge orbs | 5 | 1600 | - |
+| VECTOR | Twin pulse cannon, balanced. Trait: +1 reroll every run, +10% XP | 3 | owned | - |
+| NEEDLE | Piercing lances, fast, glass cannon. Trait: each enemy pierced adds +20% to that shot | 2 | 600 | Defeat any boss |
+| BULWARK | Short-range homing scatter, starts with a shield. Trait: shield breaks knock enemies back | 4 | 900 | Fight 5 sectors in one run |
+| PHANTOM | Seeking crescents, 3 dashes, quick ultimate. Trait: every dash charges the ultimate | 3 | 1400 | Fight 8 sectors in one run |
+| CORSAIR | Ricochet bolts that bounce off the side walls. Trait: ricocheted bolts +25% | 3 | 1100 | - |
+| MONOLITH | Siege: slow, huge piercing charge orbs. Trait: armored enemies take +30% | 5 | 1600 | - |
 
 ### Gear parts
 
@@ -133,7 +135,7 @@ Each class's Common ability (Killstreak, Salvager, Wide Graze) comes with the cl
 - **Specialization.** Every upgrade level counts toward its build path. The first two paths to reach 5 levels lock in as your specializations, with a mastery bonus at 5, 10 and 15 levels; after that the other paths share 10 splash levels.
 - **Fortune.** SKIP a draft to bank Fortune (+1 for a level-up, +2 for a reward, max 6). The next reward draft spends it all: luckier rolls, and at 2 / 4 / 6 Fortune one card is at least Rare / Epic / Legendary. Rerolls: 3 per run, +1 every 5 levels and +1 per boss kill (more from Greed gear, the Prospector tree notable and the Flux Core). Lock a card (lock icon, `F`, or X on a pad) to keep it through a reroll.
 - **Build.** Main cannon, stats (damage, fire rate, crit, pierce, speed, magnet, capacitor), defenses (hull, regenerating Aegis shield, extra dashes) and up to **4 weapon modules** (more from Overflow, Halo, the tree and gear, never more than 6).
-- **Exclusive families.** Some cards rule others out for the rest of the run, and the card says which. **Ammo** (Cryo / Incendiary / Corrosive Rounds): pick one. **Trick shots** (Overload Primer, Splinter Shells, Resonance Coil, Sunder Tips): two at most. **Barrier** (Razor Orbit, Reflector, Shock Dash, Gravity Well): one bullet-erasing module. Flamethrower, Glacial Spike and Caustic Slag deal +30% when your ammo matches their element.
+- **Exclusive families.** Some cards rule others out for the rest of the run, and the card says which. **Ammo** (Cryo / Incendiary / Corrosive / Shock Rounds): pick one. Shock Rounds builds charges; at 5 an enemy discharges and arcs into 2 neighbours (Overcharge: +1 arc, +25%). **Trick shots** (Overload Primer, Splinter Shells, Resonance Coil, Sunder Tips): two at most. **Barrier** (Razor Orbit, Reflector, Shock Dash, Gravity Well, Shield Plates): one bullet-erasing module. Flamethrower, Glacial Spike, Caustic Slag, Arc Coil and Tesla Pylons deal +30% when your ammo matches their element (Arc Coil and Pylons: Shock).
 - **Barrier budget.** Barrier erases never speed up with fire rate, and heavy shots (big orbs, torpedoes, fuse shells, shootable shots) can't be erased, only slowed or shot down. An orbit blade rests 0.6s after eating a bullet; a Reflector pulse returns 8-12 bullets at 60% of the old damage, then fades; a Gravity Well crushes 8-16; Shock Dash erases once a second; Supernova's ring wipe once every 3s.
 - **Status and effect cards.** Wide Bore / Accelerator Coils (projectile size, speed), Hyperflow (faster battle for score and credits), Lucky Dodge, Armor Piercing, Burst Fire, Cryo / Incendiary / Corrosive Rounds (stacking chill, burn, armor loss; each has a potency follow-up that only appears once you own it), Resonance Coil (every Nth hit detonates) and Sunder Tips (% max hull per hit). Armored enemies (tanks, carriers, hunters, elites, bosses) take less damage until you pierce or corrode it.
 - **Combo.** Kills chain into a score multiplier (up to x8). Getting hit breaks the chain.
@@ -164,8 +166,16 @@ Each class's Common ability (Killstreak, Salvager, Wide Graze) comes with the cl
 | Glacial Spike | Heavy piercing ice spikes that shatter into chilling blasts (Crimson) |
 | Drone Swarm | Autonomous interceptors that sortie from your hull, strafe, and recharge (Cyclone) |
 | Caustic Slag | Volatile acid canisters that detonate into lingering armor-shredding pools (Cyclone) |
+| Shield Plates | Tank barrier: plates orbit you, each blocks one bullet then recharges |
+| Wake Blades | Mobility: a cutting trail behind the ship, twice as sharp while boosting or dashing |
+| Salvage Drone | Greed: fetches drops, rams enemies; its kills drop a credit chip |
+| Marksman Drone | Crit: snipes the toughest enemy, every shot crits (Crimson) |
+| Harpoon | Firepower: heavy homing spear at the toughest enemy (Crimson) |
+| Sentry Turret | Plants turrets that fire for 8s (Crimson) |
+| Tesla Pylons | Pylons linked by lightning beams, the newest to your ship from level 3 (Cyclone) |
+| Capacitor Bloom | Overdrive: a shot ring that grows with your ult meter (Cyclone) |
 
-**Evolutions.** Max a module (level 5) while owning its partner stat and a gold **EVOLVE** card can appear in drafts: Swarm Missiles + Targeting AI = **Hellfire Swarm**, Razor Orbit + Thrusters = **Storm Halo**, Arc Coil + Capacitor = **Tesla Storm**, Pulse Nova + Plasma Core = **Supernova**, Wingmen + Overclock = **Phalanx**, Rail Lance + Phase Tips = **Annihilator**, Reflector + Aegis Shield = **Mirror Storm**, Gravity Well + Tractor Field = **Event Horizon**. Evolutions take no module slot and are never sold in the Black Market.
+**Evolutions.** Max a module (level 5) while owning its partner stat and a gold **EVOLVE** card can appear in drafts: Swarm Missiles + Targeting AI = **Hellfire Swarm**, Razor Orbit + Thrusters = **Storm Halo**, Arc Coil + Capacitor = **Tesla Storm**, Pulse Nova + Plasma Core = **Supernova**, Wingmen + Overclock = **Phalanx**, Rail Lance + Phase Tips = **Annihilator**, Reflector + Aegis Shield = **Mirror Storm**, Gravity Well + Tractor Field = **Event Horizon**, Shield Plates + Reinforced Hull = **Citadel Plates**, Wake Blades + Afterburner = **Comet Trail**, Salvage Drone + Prospector = **Scrapper Swarm**, Marksman Drone + Culling Edge = **Deadshot**, Harpoon + Bounty Hunter = **Leviathan**, Sentry Turret + Accelerator Coils = **Sentry Net**, Tesla Pylons + Static Discharge = **Storm Grid**, Capacitor Bloom + Reserve Cell = **Overbloom**. Evolutions take no module slot and are never sold in the Black Market.
 
 ### Tech tiers and discovery
 

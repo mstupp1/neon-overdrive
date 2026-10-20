@@ -11,6 +11,7 @@ import { sfx } from '../core/audio.js';
 import { fortressOn, ultDmg, ultModRate, ultWingmen } from './pilot.js';
 import { moduleImage, moduleSpinMatrix, prewarmModuleImages } from '../render/moduleImages.js';
 import { sv } from './stageview.js';
+import { resetExtModules, updateExtModules, drawExtModules } from './modules-ext.js';
 
 const lvl = (arr, lv) => arr[Math.min(arr.length, lv) - 1];
 const UP = -Math.PI / 2;
@@ -35,6 +36,7 @@ export function resetModules(p) {
     bladeCd: [], dashEraseT: 0, novaEraseT: 0, reflLeft: 0,
   };
   p.drones = [];
+  resetExtModules(p);
 }
 
 const MAX_PBULLETS = 520; // new-module spawns respect this cap (reflections just erase the bullet when full)
@@ -176,7 +178,7 @@ export function updateModules(p, dt) {
         const storm = tesla && p.odT > 0;
         m.arcT = storm ? 0.2 : lvl([1.6, 1.4, 1.2, 1.0, 0.8], lv) * (tesla ? 0.5 : 1);
         const chains = 2 + lv + (tesla ? 3 : 0);
-        const dmg = (7 + 3 * lv) * dm * (storm ? 0.6 : 1);
+        const dmg = (7 + 3 * lv) * dm * (storm ? 0.6 : 1) * ammoMul(p, 'shock');
         const pts = [p.x, p.y - 6];
         const hit = new Set();
         let cur = first;
@@ -422,6 +424,7 @@ export function updateModules(p, dt) {
   }
 
   updateNewModules(p, dt, rate, dm);
+  updateExtModules(p, dt, rate, dm);
 }
 
 // --- Crimson / Cyclone / Void modules ---------------------------------------------------
@@ -1029,6 +1032,7 @@ export function drawModules(ctx, k) {
     }
   }
   ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
+  drawExtModules(ctx, p);
 }
 
 export function drawBeams(ctx) {

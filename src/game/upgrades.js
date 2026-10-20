@@ -101,6 +101,24 @@ export const ICONS = {
   droneSwarm: assetIcon('upgrades', 'droneSwarm', svg('<path d="M4 10l3-4 3 4-3-1zM14 6l3-4 3 4-3-1zM9 18l3-4 3 4-3-1z"/><path d="M12 12v3M7 8l2 2M17 8l-2 2" stroke-dasharray="2 2"/>')),
   cryoSpike: assetIcon('upgrades', 'cryoSpike', svg('<path d="M12 2l3 9-3 11-3-11z"/><path d="M7 6l2 6-2 7-2-7zM17 6l2 6-2 7-2-7z"/><path d="M3 12h18" stroke-dasharray="2 2"/>')),
   causticSlag: assetIcon('upgrades', 'causticSlag', svg('<path d="M9 3h6v4H9z"/><path d="M8 7h8l-1 8H9z"/><path d="M3 20c3-2 6 2 9 0s6 2 9 0"/><circle cx="12" cy="11" r="1.5"/>')),
+  shock: assetIcon('upgrades', 'shock', svg('<path d="M13 2L6 13h5l-2 9 8-12h-5z"/><circle cx="18" cy="5" r="1.5"/><circle cx="5" cy="19" r="1.5"/>')),
+  overcharge: assetIcon('upgrades', 'overcharge', svg('<path d="M13 2L6 13h5l-2 9 8-12h-5z"/><path d="M3 8l3 1M21 16l-3-1M4 15l3-2M20 9l-3 2"/>')),
+  shieldPlates: assetIcon('upgrades', 'shieldPlates', svg('<circle cx="12" cy="12" r="2"/><path d="M9 3h6l-1 3h-4zM21 9v6l-3-1v-4zM9 21h6l-1-3h-4zM3 9v6l3-1v-4z"/>')),
+  wakeBlades: assetIcon('upgrades', 'wakeBlades', svg('<path d="M12 3l3 6h-6z"/><path d="M12 11c-3 3-5 6-6 10M12 11c3 3 5 6 6 10M12 11v10" stroke-dasharray="2 2"/>')),
+  marksman: assetIcon('upgrades', 'marksman', svg('<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="1.5"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/><path d="M4 4l3 3"/>')),
+  teslaPylons: assetIcon('upgrades', 'teslaPylons', svg('<path d="M5 20l2-8 2 8zM15 20l2-8 2 8z"/><path d="M7 12l3-3 2 3 3-3 2 3" />')),
+  harpoon: assetIcon('upgrades', 'harpoon', svg('<path d="M3 21L17 7"/><path d="M14 4h6v6M17 7l-4-1M17 7l1 4"/><path d="M6 18l-2-2"/>')),
+  sentry: assetIcon('upgrades', 'sentry', svg('<path d="M12 3l7 4v6l-7 4-7-4V7z"/><path d="M12 10V3"/><path d="M8 21h8M12 17v4"/>')),
+  capBloom: assetIcon('upgrades', 'capBloom', svg('<path d="M12 2l8 5v10l-8 5-8-5V7z"/><circle cx="12" cy="12" r="3"/><path d="M12 5v2M12 17v2M6 12h2M16 12h2"/>')),
+  salvageDrone: assetIcon('upgrades', 'salvageDrone', svg('<path d="M12 4l7 7-7 7-7-7z"/><path d="M12 8v6M9 11l3 3 3-3"/>')),
+  citadel: assetIcon('upgrades', 'citadel', svg('<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9" stroke-dasharray="4 2"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/>')),
+  comettrail: assetIcon('upgrades', 'comettrail', svg('<circle cx="17" cy="7" r="3"/><path d="M15 9L4 20M13 7L5 15M17 11l-6 8"/>')),
+  deadshot: assetIcon('upgrades', 'deadshot', svg('<circle cx="12" cy="12" r="8"/><path d="M8 8l8 8M16 8l-8 8"/>')),
+  stormgrid: assetIcon('upgrades', 'stormgrid', svg('<path d="M4 4l16 16M20 4L4 20M4 12h16"/><circle cx="4" cy="4" r="1.5"/><circle cx="20" cy="4" r="1.5"/><circle cx="4" cy="20" r="1.5"/><circle cx="20" cy="20" r="1.5"/>')),
+  leviathan: assetIcon('upgrades', 'leviathan', svg('<path d="M3 21L17 7M7 21L21 7M3 17L17 3"/><path d="M15 3h6v6"/>')),
+  sentrynet: assetIcon('upgrades', 'sentrynet', svg('<path d="M7 4l4 2v4l-4 2-4-2V6zM17 12l4 2v4l-4 2-4-2v-4z"/><path d="M11 8l2 6" stroke-dasharray="2 2"/>')),
+  overbloom: assetIcon('upgrades', 'overbloom', svg('<circle cx="12" cy="12" r="3"/><path d="M12 2c2 3 2 5 0 7-2-2-2-4 0-7zM12 22c-2-3-2-5 0-7 2 2 2 4 0 7zM2 12c3-2 5-2 7 0-2 2-4 2-7 0zM22 12c-3 2-5 2-7 0 2-2 4-2 7 0z"/>')),
+  scrapper: assetIcon('upgrades', 'scrapper', svg('<path d="M12 3l5 5-5 5-5-5z"/><path d="M5 14l3 3-3 3-3-3zM19 14l3 3-3 3-3-3z"/>')),
   credits: assetIcon('upgrades', 'credits', svg('<circle cx="12" cy="12" r="9"/><path d="M15 8.5c-.8-1-2-1.5-3-1.5-1.7 0-3 1-3 2.5s1.3 2 3 2.5 3 1 3 2.5-1.3 2.5-3 2.5c-1 0-2.2-.5-3-1.5M12 5v2M12 17v2"/>')),
   repair: assetIcon('upgrades', 'repair', svg('<path d="M12 5v14M5 12h14"/>')),
 };
@@ -169,6 +187,16 @@ export const UPGRADES = [
   { id: 'droneSwarm', name: 'Drone Swarm', cat: 'module', max: 5, weight: 0.85, tier: 2, desc: (lv) => (lv === 1 ? 'Autonomous interceptors launch from your hull, strafe enemies, and return to recharge.' : lv === 3 ? 'Interceptors fly faster and fire twin bursts.' : '+2 interceptors and faster recharges.') },
   { id: 'causticSlag', name: 'Caustic Slag', cat: 'module', max: 5, weight: 0.85, tier: 2, desc: (lv) => (lv === 1 ? 'Lob volatile acid canisters that detonate into lingering corrosive pools.' : lv === 3 ? 'Lob two canisters per salvo with wider pools.' : 'Three canisters creating massive pools that dissolve enemy armor.') },
 
+  // --- Path modules (modules-ext.js): a module for each build path ---
+  { id: 'shieldPlates', name: 'Shield Plates', cat: 'module', family: 'barrier', max: 5, weight: 0.9, tier: 0, desc: (lv) => (lv === 1 ? 'Three plates orbit you. Each blocks one bullet, then recharges.' : 'More plates, faster recharge.') },
+  { id: 'wakeBlades', name: 'Wake Blades', cat: 'module', max: 5, weight: 0.9, tier: 0, desc: (lv) => (lv === 1 ? 'Your flight path leaves a cutting trail. Twice as sharp while boosting or dashing.' : 'Longer, harder-hitting trail.') },
+  { id: 'salvageDrone', name: 'Salvage Drone', cat: 'module', max: 5, weight: 0.8, tier: 0, desc: (lv) => (lv === 1 ? 'A drone fetches drops for you and rams enemies. Its kills drop a credit chip.' : lv === 4 ? 'A second drone.' : 'Faster drone, harder rams.') },
+  { id: 'marksman', name: 'Marksman Drone', cat: 'module', max: 5, weight: 0.85, tier: 1, desc: (lv) => (lv === 1 ? 'Snipes the toughest enemy every few seconds. Every shot crits.' : 'Faster, deadlier shots.') },
+  { id: 'harpoon', name: 'Harpoon', cat: 'module', max: 5, weight: 0.85, tier: 1, desc: (lv) => (lv === 1 ? 'Spears the toughest enemy with a heavy homing bolt. Made for bosses.' : 'Heavier, more frequent spears.') },
+  { id: 'sentry', name: 'Sentry Turret', cat: 'module', max: 5, weight: 0.85, tier: 1, desc: (lv) => (lv === 1 ? 'Plants a turret where you fly that fires at enemies for 8s.' : lv === 3 || lv === 5 ? 'One more turret at a time.' : 'Faster, harder-hitting turrets.') },
+  { id: 'teslaPylons', name: 'Tesla Pylons', cat: 'module', max: 5, weight: 0.85, tier: 2, desc: (lv) => (lv === 1 ? 'Drops pylons that link with lightning. Enemies crossing a beam get shocked.' : lv === 3 ? 'The newest pylon also links to your ship.' : 'More pylons, hotter beams.') },
+  { id: 'capBloom', name: 'Capacitor Bloom', cat: 'module', max: 5, weight: 0.85, tier: 2, desc: (lv) => (lv === 1 ? 'Bursts a ring of shots that grows with your ult meter, twice as often during your ult.' : 'Faster, stronger blooms.') },
+
   // --- Void tech ---
   { id: 'perpetual', name: 'Perpetual Engine', cat: 'stat', max: 3, weight: 0.55, tier: 3, desc: () => 'Your ultimate meter slowly charges on its own.' },
   { id: 'nullField', name: 'Null Field', cat: 'defense', max: 3, weight: 0.55, tier: 3, desc: () => 'Enemy bullets that come close slow down. Wider each level.' },
@@ -183,6 +211,8 @@ export const UPGRADES = [
   { id: 'armorPierce', name: 'Armor Piercing', cat: 'stat', max: 4, weight: 0.7, tier: 1, desc: () => 'Your shots ignore 8% of enemy armor.' },
   { id: 'burstFire', name: 'Burst Fire', cat: 'stat', max: 4, weight: 0.7, tier: 1, desc: (lv) => (lv === 3 ? '+7% burst chance, and bursts fire one more extra volley.' : '+7% chance for a volley to burst into an extra volley.') },
   { id: 'cryo', name: 'Cryo Rounds', family: 'ammo', cat: 'stat', max: 3, weight: 0.6, tier: 1, desc: () => '+12% chance per hit to chill. Chill stacks slow enemies; a full stack freezes them.' },
+  { id: 'shock', name: 'Shock Rounds', cat: 'stat', family: 'ammo', max: 3, weight: 0.6, tier: 1, desc: () => '+12% chance per hit to charge. At 5 charges the enemy discharges, arcing lightning into nearby enemies.' },
+  { id: 'overcharge', name: 'Overcharge', cat: 'stat', max: 3, weight: 0.5, tier: 1, req: 'shock', desc: () => '+1 arc target and +25% discharge damage.' },
   { id: 'deepFreeze', name: 'Deep Freeze', cat: 'stat', max: 3, weight: 0.5, tier: 1, req: 'cryo', desc: () => '+25% slow from every chill stack.' },
   { id: 'incendiary', name: 'Incendiary Rounds', family: 'ammo', cat: 'stat', max: 3, weight: 0.6, tier: 1, desc: () => '+12% chance per hit to ignite. Burn stacks deal damage over time and ignore armor.' },
   { id: 'accelerant', name: 'Accelerant', cat: 'stat', max: 3, weight: 0.5, tier: 1, req: 'incendiary', desc: () => '+25% burn damage per stack.' },
@@ -199,6 +229,14 @@ export const UPGRADES = [
   { id: 'phalanx', name: 'Phalanx', cat: 'evolution', max: 1, weight: 7, tier: 1, mod: 'drones', stat: 'rate', desc: () => 'Wingmen: five drones in formation, firing faster.' },
   { id: 'annihilator', name: 'Annihilator', cat: 'evolution', max: 1, weight: 7, tier: 1, mod: 'rail', stat: 'pierce', desc: () => 'Rail: a huge beam, twice as often, leaving a burning afterglow.' },
   { id: 'mirrorstorm', name: 'Mirror Storm', cat: 'evolution', max: 1, weight: 7, tier: 2, mod: 'reflector', stat: 'aegis', desc: () => 'Reflector: pulses twice as often and every returned shot splits in three.' },
+  { id: 'citadel', name: 'Citadel Plates', cat: 'evolution', max: 1, weight: 7, tier: 0, mod: 'shieldPlates', stat: 'hull', desc: () => 'Plates: +2 plates, 30% faster recharge, and every block sends out a shockwave.' },
+  { id: 'comettrail', name: 'Comet Trail', cat: 'evolution', max: 1, weight: 7, tier: 0, mod: 'wakeBlades', stat: 'dashes', desc: () => 'Wake: a trail twice as long and much wider.' },
+  { id: 'scrapper', name: 'Scrapper Swarm', cat: 'evolution', max: 1, weight: 7, tier: 0, mod: 'salvageDrone', stat: 'prospector', desc: () => 'Salvage: three drones, harder rams, two chips per kill.' },
+  { id: 'deadshot', name: 'Deadshot', cat: 'evolution', max: 1, weight: 7, tier: 1, mod: 'marksman', stat: 'cull', desc: () => 'Marksman: fires twice as often and finishes any non-boss it leaves under 25% hull.' },
+  { id: 'leviathan', name: 'Leviathan', cat: 'evolution', max: 1, weight: 7, tier: 1, mod: 'harpoon', stat: 'bounty', desc: () => 'Harpoon: three spears a volley, +25% damage.' },
+  { id: 'sentrynet', name: 'Sentry Net', cat: 'evolution', max: 1, weight: 7, tier: 1, mod: 'sentry', stat: 'projSpeed', desc: () => 'Sentries: twin barrels, and they last twice as long.' },
+  { id: 'stormgrid', name: 'Storm Grid', cat: 'evolution', max: 1, weight: 7, tier: 2, mod: 'teslaPylons', stat: 'static', desc: () => 'Pylons: every pylon links to every other, and they last 50% longer.' },
+  { id: 'overbloom', name: 'Overbloom', cat: 'evolution', max: 1, weight: 7, tier: 2, mod: 'capBloom', stat: 'reserveCell', desc: () => 'Bloom: the shots home in on enemies.' },
   { id: 'eventHorizon', name: 'Event Horizon', cat: 'evolution', max: 1, weight: 7, tier: 2, mod: 'gravity', stat: 'magnet', desc: () => 'Gravity: huge, long-lived wells that collapse in a crushing blast.' },
 ];
 
@@ -314,6 +352,9 @@ export function recomputeStats(p) {
   st.freezeChance = 0.12 * lv('cryo'); // chance per hit to add one stack
   st.burnChance = 0.12 * lv('incendiary');
   st.corrodeChance = 0.12 * lv('corrosive');
+  st.shockChance = 0.12 * lv('shock'); // Shock Rounds: chance per hit to add a charge (status.js)
+  st.shockPot = 1 + 0.25 * lv('overcharge');
+  st.shockArcs = 2 + lv('overcharge');
   st.freezePot = 1 + 0.25 * lv('deepFreeze'); // status potency multipliers (slow / burn damage / armor shaved)
   st.burnPot = 1 + 0.25 * lv('accelerant');
   st.corrodePot = 1 + 0.25 * lv('acidEtch');
@@ -328,6 +369,11 @@ export function recomputeStats(p) {
   st.gameSpeed = 1 + 0.08 * lv('gameSpeed'); // battle clock (main.js); paid for with score and credits
   st.scoreMul = 1 + 0.2 * lv('gameSpeed');
   st.dodge = 0.06 * lv('dodge'); // chance to negate a hit (player.js hurtPlayer)
+  st.pierceRamp = 0; // NEEDLE: +damage per enemy a primary shot already pierced (world.js)
+  st.bounceDmg = 0; // CORSAIR: +damage for shots that ricocheted
+  st.shieldKnock = false; // BULWARK: shield breaks shove enemies (player.js)
+  st.armorBonus = 0; // MONOLITH: +damage to armored enemies (enemies.js)
+  st.dashOd = 0; // PHANTOM: ult meter per dash
   st.shatter = 0; // bonus damage against frozen enemies (Cryostasis legendary)
   st.cinder = 0; // death burns spread to nearby enemies (Pyre Mantle legendary)
   st.dodgePulse = false; // dodges emit an erase pulse and extend iframes (Phase Shroud legendary)
@@ -443,6 +489,8 @@ export const UP_TAGS = {
   magnet: 'greed', salvage: 'greed', prospector: 'greed',
   projSize: 'firepower', projSpeed: 'firepower', armorPierce: 'firepower', burstFire: 'firepower', resonance: 'firepower',
   sundering: 'crit', gameSpeed: 'mobility', dodge: 'tank',
+  shieldPlates: 'tank', wakeBlades: 'mobility', marksman: 'crit', harpoon: 'firepower', sentry: 'modules', teslaPylons: 'modules',
+  capBloom: 'overdrive', salvageDrone: 'greed', shock: 'modules', overcharge: 'modules',
   cryo: 'modules', deepFreeze: 'modules', incendiary: 'modules', accelerant: 'modules', corrosive: 'modules', acidEtch: 'modules',
 };
 export const synergy = (p, id) => (p.tags && UP_TAGS[id] ? p.tags[UP_TAGS[id]] || 0 : 0);

@@ -129,7 +129,9 @@ function collide(p) {
       if (!hitTest(e, b.x, b.y, b.r)) continue;
       if (b.hits.includes(e)) continue;
       const isCrit = b.crit || (crit > 0 && Math.random() < crit);
-      const dmg = b.dmg * (isCrit ? p.st.critMul : p.st.nonCrit);
+      let dmg = b.dmg * (isCrit ? p.st.critMul : p.st.nonCrit);
+      if (b.bounced && p.st.bounceDmg) dmg *= 1 + p.st.bounceDmg; // CORSAIR
+      if (b.primary && p.st.pierceRamp && b.hits.length) dmg *= 1 + p.st.pierceRamp * b.hits.length; // NEEDLE
       if (!e.invuln) {
         damageEnemy(e, dmg, b.x, b.y, isCrit);
         sfx.hit();

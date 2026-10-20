@@ -87,6 +87,13 @@ export function dropKillCredits(e) {
   }
 }
 
+// Salvage Drone kills (modules-ext.js): `n` credit chips on top of the usual drops.
+export function dropSalvage(e, n = 1) {
+  if (!G.run || G.mode !== 'run') return;
+  const u = unit() * killScale(level());
+  for (let i = 0; i < n; i++) dropCredit(e.x, e.y, u * 0.7);
+}
+
 // Paid out when a sector is cleared (direct to wallet). Returns the amount gained.
 export function sectorPayout() {
   gainFlux(1);

@@ -224,6 +224,7 @@ export function updatePlayer(p, dt) {
     sfx.dash();
     ring(p.x, p.y, 34, p.color, 0.3);
     if (p.up.dashNova) dashNova(p);
+    if (st.dashOd) gainOverdrive(st.dashOd); // PHANTOM
     if (st.afterimage) spawnEchoes(p, dx, dy);
     treeOnDash(p);
   }
@@ -499,6 +500,20 @@ export function addScore(base) {
   G.score += base * comboMult() * ultScore(p) * boostScore(p) * G.director.diff.score * ((p && p.st.scoreMul) || 1);
 }
 
+// BULWARK: a breaking shield shoves nearby enemies away (bosses and multi-part enemies hold their ground).
+function shieldKnock(p) {
+  for (const e of G.enemies) {
+    if (e.dead || !e.entered || e.boss || e.parts) continue;
+    const dx = e.x - p.x;
+    const dy = e.y - p.y;
+    const d = Math.hypot(dx, dy) || 1;
+    if (d > 150) continue;
+    e.x += (dx / d) * 70;
+    e.y += (dy / d) * 70;
+  }
+  ring(p.x, p.y, 150, '#ffd23f', 0.4);
+}
+
 export function gainOverdrive(amount) {
   const p = G.player;
   if (!p || p.odT > 0 || p.dead) return;
@@ -573,6 +588,7 @@ export function hurtPlayer(p, dmg = hitDamage(), solid = false) {
     ring(p.x, p.y, 70, '#3ff6ff', 0.45);
     sparks(p.x, p.y, '#3ff6ff', 16, 300);
     clearBullets(p.x, p.y, 110);
+    if (p.st.shieldKnock) shieldKnock(p); // BULWARK
     addShake(0.35);
     hitstop(0.06);
     floatText(p.x, p.y - 30, 'SHIELD BROKEN', '#3ff6ff', 11, 0.9);
