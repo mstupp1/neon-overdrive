@@ -162,7 +162,7 @@ function render() {
   card.classList.toggle('locked', !owned);
   const legacy = ship.unlock ? `<span class="hs-or">OR ${ship.unlock.text.toUpperCase()}</span>` : '';
   const path = ship.path ? `<span class="hs-path" style="--t:${TAGS[ship.path].color}">${TAGS[ship.path].name}</span>` : '';
-  const trait = ship.trait ? `<span class="hs-trait">${ship.trait.text}</span>` : '';
+  const trait = `<p class="hs-trait well">${ship.trait ? ship.trait.text : ''}</p>`; // own fixed well, always reserved
   let actLine;
   if (!owned) {
     const afford = profile.credits >= ship.price;
@@ -175,7 +175,7 @@ function render() {
     card.dataset.mode = 'select';
     actLine = '<span class="hs-buy">SELECT</span>';
   }
-  card.innerHTML = `<div class="hs-art"><i class="hs-pad"></i></div><div class="hs-info"><div class="role clip">${ship.role}${path}</div><h4 class="clip">${ship.name}</h4><p class="hs-desc well">${ship.desc}${trait}${owned ? '' : legacy}</p></div><div class="hs-actline"><span class="hs-n">${viewIdx + 1}/${SHIPS.length}</span>${actLine}</div>`;
+  card.innerHTML = `<div class="hs-art"><i class="hs-pad"></i></div><div class="hs-info"><div class="role clip">${ship.role}${path}</div><h4 class="clip">${ship.name}</h4><p class="hs-desc well">${ship.desc}${owned ? '' : legacy}</p>${trait}</div><div class="hs-actline"><span class="hs-n">${viewIdx + 1}/${SHIPS.length}</span>${actLine}</div>`;
   card.setAttribute('aria-label', `${ship.name}: ${owned ? (selShip ? 'active ship, open loadout' : 'select') : 'buy'}. Left and right browse ships.`);
 
   // Fleet strip: every hull at a glance (owned lit, the active one marked); tapping one jumps to it.

@@ -5623,11 +5623,11 @@ button.hs-card:hover {
 }
 
 .hs-card .hs-desc {
-    --lines: 4; /* blurb + its trait / unlock line: a fixed well, so every ship's card is the same size */
+    --lines: 2; /* blurb + its unlock line: a fixed well, so every ship's card is the same size; the trait has its own well */
     --lh: 1.2;
 }
 
-.hs-desc :is(.hs-trait, .hs-or) {
+.hs-desc .hs-or {
     display: block;
 }
 
@@ -6050,7 +6050,12 @@ button.hs-card {
 }
 
 .hs-card .hs-desc {
-    --lines: 4;
+    --lines: 2;
+}
+
+.hs-card .hs-trait {
+    --lines: 2;
+    --lh: 1.2;
 }
 
 .hs-nav.ghost {
