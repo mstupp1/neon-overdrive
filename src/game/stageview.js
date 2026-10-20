@@ -25,6 +25,7 @@ import { hurtPlayer, hitDamage, gainOverdrive, addScore } from './player.js';
 import { intangible } from './pilot.js';
 import { sparks, floatText, flash, addShake, ring } from './fx.js';
 import { sfx } from '../core/audio.js';
+import { drawPlayerBulletsAt, drawEnemyBulletsAt } from './bullets.js';
 
 export const VIEWS = {
   top: { id: 'top', name: 'TOP-DOWN', color: '#3ff6ff' },
@@ -50,6 +51,21 @@ const CHASE_DP = 700;
 const PAN = 0.42;
 // Drops are tiny next to ships; in the chase view they stand up this much bigger (pickup reach is unchanged and larger).
 const DROP_SCALE = 1.4;
+// Far zone: past the depth row FAR_KNEE the chase camera stretches depth (up to FAR_S x as deep, easing in over FAR_L),
+// so arrivals swoop in from near the horizon instead of popping in half way there, and shots fly on into the distance.
+// Visual only: positions and hits are untouched, and things at the same row stay at the same depth, so shots still
+// meet what they hit. FAR_S is the "enemies come from further away" knob.
+const FAR_KNEE = 60;
+const FAR_S = 9;
+const FAR_L = 40;
+// Player shots fly on this far past the far edge before they die (virtual units; bullets.js via view.farReach). The
+// "shots go further into the distance" knob: only arriving enemies are out there, so it barely touches balance.
+const SHOT_REACH = 340;
+// Enemies that arrive from beyond the far edge start this much further out in the chase view (virtual units, sv.entry;
+// enemies.js spawnEnemy), on top of the stretch. Most arrivals ease to their row, so it costs them only a beat.
+const ENTRY = 200;
+// The warped frame (particles, beams, telegraphs) reaches this far past the far edge too, for kills out there.
+const FAR_M = 160;
 // Chase pace. The field is deeper than the top-down one (1100 vs ~800) and the far half reads at ~0.5-0.65 scale, so
 // at normal enemy time threats crawled on screen; enemy time (movement, fire, shots, wave timer, gates) runs this much
 // faster to make it urgent.
@@ -94,6 +110,29 @@ function panStep() {
   PANS.t = t;
   PANS.x += (want - PANS.x) * (1 - Math.exp(-dt * 5));
 }
+// Camera depth of virtual depth row v (chaseProj() current): straight distance, plus the far-zone stretch.
+function farX(v) {
+  const u = FAR_KNEE - v;
+  return u > 0 ? FAR_S * (u - FAR_L * (1 - Math.exp(-u / FAR_L))) : 0;
+}
+function depthOf(v) {
+  return Math.max(30, P.Yc - v + farX(v));
+}
+// Inverse of depthOf (Newton steps in the far zone).
+function rowOf(d) {
+  let v = P.Yc - d;
+  if (v >= FAR_KNEE) return v;
+  v = FAR_KNEE - (FAR_KNEE - v) / (1 + FAR_S);
+  for (let i = 0; i < 8; i++) {
+    const u = FAR_KNEE - v;
+    const g = P.Yc - v + farX(v) - d;
+    v -= g / (-1 - FAR_S * (1 - Math.exp(-u / FAR_L)));
+    if (v > FAR_KNEE) v = FAR_KNEE;
+  }
+  return v;
+}
+// Fade for things far out in the stretch (shots running out of reach, far shadows): 1 near, 0 at the reach limit.
+const farFade = (v) => clamp((v + SHOT_REACH) / (SHOT_REACH * 0.55), 0, 1);
 // Cutout size factor as a thing arrives from the far edge (virtual depth row vy).
 const grow = (vy) => GROW_MIN + (1 - GROW_MIN) * clamp((vy + 20) / GROW, 0, 1);
 
@@ -139,19 +178,29 @@ function chaseProj() {
 const AIR_RISE = 0.06;
 // Height of the air above the floor at virtual depth row v (chaseProj() current): HOVER at the jet, more further out.
 function altitude(v) {
-  const d = Math.max(30, P.Yc - v);
+  const d = depthOf(v);
   return ((P.hy - P.hyA) * d + P.A - P.B) / P.f;
 }
 // Screen y of the air at virtual depth row v (chaseProj() current).
 function airY(v) {
-  return P.hyA + P.B / Math.max(30, P.Yc - v);
+  return P.hyA + P.B / depthOf(v);
 }
 // Inverse of airY.
 function airV(y) {
-  return Math.max(-900, P.Yc - P.B / Math.max(1e-3, y - P.hyA));
+  return Math.max(-900, rowOf(P.B / Math.max(1e-3, y - P.hyA)));
 }
-// A virtual point on the chase floor (shadows, gates, lane furniture) → screen.
+// A virtual point on the chase floor under the action (shadows, gates) → screen.
 function floorPt(x, y, out = {}) {
+  const Pp = chaseProj();
+  const d = depthOf(y);
+  const s = Pp.f / d;
+  out.x = real().W / 2 + (x - PANS.x) * s;
+  out.y = Pp.hy + Pp.A / d;
+  out.s = s;
+  return out;
+}
+// The same for the scenery (grid, track, pylons): plain distance, no far-zone stretch, so it streams evenly.
+function deckPt(x, y, out = {}) {
   const Pp = chaseProj();
   const d = Math.max(30, Pp.Yc - y);
   const s = Pp.f / d;
@@ -212,6 +261,10 @@ export const sv = {
   get active() {
     return this.mode !== 'top';
   },
+  // Extra spawn distance for arrivals from the far edge (enemies.js).
+  get entry() {
+    return this.mode === 'chase' ? ENTRY : 0;
+  },
   // Enemy time multiplier for this view (world.js folds it into G.enemyTimeScale).
   get pace() {
     return this.mode === 'chase' ? CHASE_PACE : this.mode === 'side' ? SIDE_PACE : 1;
@@ -228,6 +281,7 @@ export const sv = {
       chaseProj();
       this.W = CW;
       this.H = CH;
+      view.farReach = SHOT_REACH; // player shots fly on past the far edge (bullets.js)
     }
     this.swapped = true;
     view.W = this.W;
@@ -243,6 +297,7 @@ export const sv = {
     view.H = R.H;
     view.safeTop = R.top;
     view.safeBottom = R.bottom;
+    view.farReach = 0;
   },
 
   // Change view now (mid fly-through, behind its flash). Works inside or outside a swapped step.
@@ -332,7 +387,7 @@ export const sv = {
     } else if (this.mode === 'chase') {
       const r = real();
       const Pp = chaseProj();
-      const d = Math.max(30, Pp.Yc - y);
+      const d = depthOf(y);
       const s = Pp.f / d;
       out.x = r.W / 2 + (x - PANS.x) * s;
       out.y = airY(y); // where ships are drawn (in the air, above their shadows)
@@ -354,7 +409,7 @@ export const sv = {
       const r = real();
       const Pp = chaseProj();
       const v = airV(y);
-      const d = Math.max(30, Pp.Yc - v);
+      const d = depthOf(v);
       out.x = PANS.x + ((x - r.W / 2) * d) / Pp.f;
       out.y = v;
     } else {
@@ -481,8 +536,9 @@ export const sv = {
     const cam = getCam();
     // Chase: the warped frame is drawn up to ~1.3x near the bottom of the screen, so render it that sharp.
     const kk = k * (this.mode === 'side' ? SZ : 1.35);
+    const m = chase ? FAR_M : 0; // the chase frame also holds a band past the far edge
     const w = Math.round(this.W * kk);
-    const h = Math.round(this.H * kk);
+    const h = Math.round((this.H + m) * kk);
     if (off.width !== w || off.height !== h) {
       off.width = w;
       off.height = h;
@@ -496,7 +552,7 @@ export const sv = {
       octx.setTransform(1, 0, 0, 1, 0, 0);
       octx.clearRect(0, 0, w, h);
       view.ox = CAM.x * kk;
-      view.oy = CAM.y * kk;
+      view.oy = (CAM.y + m) * kk;
       octx.setTransform(kk * CAM.z, 0, 0, kk * CAM.z, view.ox, view.oy);
       renderWorld(octx, kk * CAM.z, layer);
       view.ox = shakeX;
@@ -515,6 +571,18 @@ export const sv = {
       drawPylons(ctx, r);
       drawShadows(ctx);
       drawChaseFloor(ctx, k, kk, r, shakeX, shakeY);
+      // Shots are billboards, not decals on the air plane: each one keeps its round head at its own depth's scale
+      // and only its trail is foreshortened along its flight (bullets.js). Player shots fly under the ships.
+      const shotAt = (x, y, out) => {
+        const vy = y * CAM.z + CAM.y;
+        this.toScreen(x * CAM.z + CAM.x, vy, out);
+        out.x = out.x * k + shakeX;
+        out.y = out.y * k + shakeY;
+        out.s *= k * CAM.z;
+        out.a = farFade(vy);
+        return out;
+      };
+      drawPlayerBulletsAt(ctx, shotAt);
       // Ships and pickups stand up off that plane like paper cutouts, each at its own depth and scale, far to near.
       this.push();
       const q = {};
@@ -541,7 +609,7 @@ export const sv = {
           const vx = x * CAM.z + CAM.x;
           const vy = y * CAM.z + CAM.y;
           gatesTo(vy);
-          if (vy < -18) return 0; // still out in the haze
+          if (vy < -ENTRY - 60) return 0; // still out in the haze
           this.toScreen(vx, vy, q);
           // Grow in out of the haze rather than pop; drops stand up bigger than life so they read next to ships.
           const ks = k * q.s * CAM.z * grow(vy) * (ship ? 1 : DROP_SCALE);
@@ -569,6 +637,7 @@ export const sv = {
       frame('over');
       this.pop();
       drawChaseFloor(ctx, k, kk, r, shakeX, shakeY);
+      drawEnemyBulletsAt(ctx, shotAt);
     }
     ctx.setTransform(k, 0, 0, k, shakeX, shakeY);
     // Entry flourish: a bright frame wipe as the new camera settles.
@@ -926,7 +995,7 @@ function drawChaseBack(ctx, r) {
   ctx.strokeStyle = rayFade;
   ctx.beginPath();
   for (let vx = -CW * 2; vx <= CW * 3; vx += 56) {
-    const near = floorPt(vx, CH + 200);
+    const near = deckPt(vx, CH + 200);
     ctx.moveTo(W / 2, hy);
     ctx.lineTo(near.x, near.y);
   }
@@ -956,10 +1025,10 @@ function drawTrack(ctx, r, h, travel) {
   const span = Math.max(40, (H - Pp.hy) * 0.22);
   // Everything on the track fades out toward the horizon over the same screen band, so it melts into the haze.
   const fadeY = (y) => clamp((y - Pp.hy) / span, 0, 1);
-  const L0 = floorPt(0, vFar);
-  const L1 = floorPt(0, vNear);
-  const R0 = floorPt(CW, vFar);
-  const R1 = floorPt(CW, vNear);
+  const L0 = deckPt(0, vFar);
+  const L1 = deckPt(0, vNear);
+  const R0 = deckPt(CW, vFar);
+  const R1 = deckPt(CW, vNear);
   // Dim the floor outside the lane (the lane edges run off the bottom or the sides of the screen).
   const dim = ctx.createLinearGradient(0, Pp.hy, 0, Pp.hy + span);
   dim.addColorStop(0, `hsla(${h},60%,3%,0)`);
@@ -1009,8 +1078,8 @@ function drawTrack(ctx, r, h, travel) {
       ctx.globalAlpha = al * fadeY((ya + yb) / 2) * (0.8 + beat.pulse * 0.2);
       ctx.beginPath();
       for (const vx of [0, CW]) {
-        const ea = floorPt(vx, va);
-        const eb = floorPt(vx, vb);
+        const ea = deckPt(vx, va);
+        const eb = deckPt(vx, vb);
         ctx.moveTo(ea.x, ea.y);
         ctx.lineTo(eb.x, eb.y);
       }
@@ -1028,8 +1097,8 @@ function drawTrack(ctx, r, h, travel) {
       const v0 = v + ph;
       const v1 = v0 + 46;
       if (Yc - v1 < 40) continue;
-      floorPt(vx, v0, a);
-      floorPt(vx, v1, b);
+      deckPt(vx, v0, a);
+      deckPt(vx, v1, b);
       if (a.y > H + 10) continue;
       ctx.globalAlpha = al * fadeY(a.y);
       ctx.lineWidth = Math.max(0.6, wd * b.s);
@@ -1059,7 +1128,7 @@ function drawChaseFloor(ctx, k, kk, r, sx, sy) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const H = r.H;
   const step = 2;
-  let y = Math.max(airY(-20), Pp.hy + 1);
+  let y = Math.max(airY(-FAR_M), Pp.hy + 1);
   const srcW = CW * kk;
   let vNext = airV(y);
   while (y < H) {
@@ -1067,18 +1136,16 @@ function drawChaseFloor(ctx, k, kk, r, sx, sy) {
     let v0 = vNext;
     const v1 = airV(y1);
     vNext = v1;
-    const d0 = Pp.Yc - v0;
-    const d1 = Pp.Yc - v1;
-    if (v1 > 0) {
-      v0 = Math.max(0, v0);
-      const s = Pp.f / ((d0 + d1) / 2);
+    if (v1 > -FAR_M) {
+      v0 = Math.max(-FAR_M, v0);
+      const s = Pp.f / ((depthOf(v0) + depthOf(v1)) / 2);
       const dw = CW * s;
       const dx = r.W / 2 - PANS.x * s;
       // Fog: the far band fades in so things emerge from the distance instead of popping.
-      const fog = clamp((v0 + 20) / FOG, 0, 1);
+      const fog = clamp((v0 + FAR_M) / FOG, 0, 1);
       if (fog > 0.01) {
         ctx.globalAlpha = fog;
-        ctx.drawImage(off, 0, v0 * kk, srcW, Math.max(1, (v1 - v0) * kk), dx * k + sx, y * k + sy, dw * k, (y1 - y) * k + 0.75);
+        ctx.drawImage(off, 0, (v0 + FAR_M) * kk, srcW, Math.max(1, (v1 - v0) * kk), dx * k + sx, y * k + sy, dw * k, (y1 - y) * k + 0.75);
       }
     }
     y = y1;
@@ -1217,7 +1284,7 @@ function drawPylons(ctx, r) {
     const a = clamp((y + 720) / 520, 0, 1) * (0.55 + beat.pulse * 0.2);
     if (a < 0.02) continue;
     for (const vx of [-34, CW + 34]) {
-      floorPt(vx, y, q);
+      deckPt(vx, y, q);
       if (q.y > r.H + 40) continue;
       const s = q.s;
       const top = q.y - 118 * s;
@@ -1244,8 +1311,8 @@ function drawPylons(ctx, r) {
 
 // Under every ship: a dark core shadow and a pool of its own colour lit on the floor. With the ships lifted onto the
 // air plane, the gap between a ship and its shadow is what sells the height. Far ships fly high over the floor, so their
-// shadows fade out rather than sit far below them. Drops get just the light pool, so you can see where they will
-// cross your row. (Projectiles get none.)
+// shadows fade out rather than sit far below them. Drops and enemy shots get just the light pool, so you can see where
+// they will cross your row.
 const DROP_LIGHT = { xp: '#5dffc8', credit: '#ffd84d', heart: '#ff3d7a', relic: '#c77dff' };
 function drawShadows(ctx) {
   const q = {};
@@ -1277,6 +1344,8 @@ function drawShadows(ctx) {
     one(e.x, e.y, Math.min(e.r, 120), e.color || '#ff3d7a', e.r > 40 ? 0.7 : 1);
   }
   for (const pk of G.pickups) one(pk.x, pk.y, 9, DROP_LIGHT[pk.type] || '#ffffff', 1.1, false);
+  // Enemy shots cast a small light pool too: it shows how high they fly and which row they will cross.
+  for (const b of G.eBullets) if (!(b.delay > 0)) one(b.x, b.y, b.r * 1.4, '#ff3d7a', 0.8, false);
   const p = G.player;
   if (p && !p.dead) one(p.x, p.y, Math.max(16, p.r * 1.6), p.color || '#3ff6ff', 1.2);
   ctx.globalAlpha = 1;

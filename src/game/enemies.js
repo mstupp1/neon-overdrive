@@ -38,6 +38,7 @@ export const TYPES = {
 };
 
 export function spawnEnemy(type, x, y, opts = {}) {
+  if (y < 0 && !field.ow) y -= sv.entry; // the chase view's arrivals start further out in the distance
   const def = TYPES[type];
   const d = G.director.diff;
   const e = {};

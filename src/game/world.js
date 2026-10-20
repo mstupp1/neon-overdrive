@@ -402,8 +402,8 @@ function drawEnemies(ctx, k, list = G.enemies, solo = false) {
 }
 
 // layer: omitted draws everything. The chase view (stageview.js) splits it: 'under' is what lies in the flight plane
-// below the ships (telegraphs, beams, player shots), 'over' what stays on top of them (particles, enemy shots, ult
-// effects), and the ships and pickups themselves stand up as cutouts between the two (drawStandees).
+// below the ships (telegraphs, beams), 'over' what stays on top of them (particles, ult effects), and the ships and
+// pickups themselves stand up as cutouts between the two (drawStandees). It draws the shots itself, as billboards.
 export function renderWorld(ctx, k, layer) {
   const ents = !layer;
   if (layer !== 'over') {
@@ -415,7 +415,7 @@ export function renderWorld(ctx, k, layer) {
     if (ents) drawEnemies(ctx, k);
     else drawShieldLinks(ctx);
     drawBeams(ctx);
-    drawPlayerBullets(ctx, k);
+    if (ents) drawPlayerBullets(ctx, k);
     if (ents) {
       drawModules(ctx, k);
       drawPlayer(ctx, k);
@@ -423,7 +423,7 @@ export function renderWorld(ctx, k, layer) {
     if (layer) return;
   }
   drawParticles(ctx);
-  drawEnemyBullets(ctx, k);
+  if (ents) drawEnemyBullets(ctx, k);
   if (!sv.active && !view.textLayer) drawTexts(ctx); // other views (and the pixel look's crisp overlay) draw them after the camera mapping
 
   // Overdrive shockwave

@@ -12,6 +12,7 @@ export const view = {
   safeLeft: 0,
   safeRight: 0,
   quality: 1, // 1 = full, lowered automatically if frames are slow
+  farReach: 0, // chase view: how far player shots fly on past the far edge (set by stageview.js while swapped)
 };
 
 export const G = {
