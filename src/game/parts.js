@@ -162,7 +162,7 @@ export const LEGENDARIES = [
   // --- Core ---
   {
     id: 'hellheart', slot: 'core', name: 'Hellheart Reactor', tag: 'crit', fx: [['crit', 0.1]],
-    unique: 'Every crit detonates (Overload Rounds +2) and crits deal +0.5x.',
+    unique: 'Every crit detonates (Overload Primer +2) and crits deal +0.5x.',
     apply(st) { st.overload += 2; st.critMul += 0.5; },
     icon: svg('<path d="M12 2l7 5v10l-7 5-7-5V7z"/><path d="M12 7c2 2 3 4 0 8-3-4-2-6 0-8z"/>'),
   },

@@ -81,7 +81,7 @@ function hitTest(e, x, y, r) {
   return dx * dx + dy * dy < rr * rr;
 }
 
-// Overload Rounds: a crit splashes the enemies around the one it hit.
+// Overload Primer: a crit splashes the enemies around the one it hit.
 function overloadBlast(p, hit, x, y, dmg) {
   const lv = p.st.overload;
   const R = 34 + 10 * lv;
@@ -140,7 +140,7 @@ function collide(p) {
       if (b.spr.pop) impact(b.x, b.y, b.spr.hit, b.spr.pop * b.scale * (isCrit ? 1.5 : 1), b.kind === 'orb');
       if (isCrit && p.st.overload && !b.aoe) overloadBlast(p, e, b.x, b.y, dmg);
       if (b.primary && p.st.splinter && Math.random() < p.st.splinter && G.pBullets.length < 520) {
-        // Splinter Rounds: two fragments fan out past the target.
+        // Splinter Shells: two fragments fan out past the target.
         const a = Math.atan2(b.vy, b.vx);
         for (const s of [-0.5, 0.5]) playerBullet(b.x, b.y, a + s, 520, b.dmg * 0.45, S.pb_frag, { life: 0.4, r: 4, alpha: 0.9 }).hits.push(e);
       }
