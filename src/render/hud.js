@@ -1,10 +1,14 @@
 // In-canvas HUD: hull, score & combo, XP, sector progress, boss bar, gauges, banners.
 
+import { abilityLayout } from '../ui/ability-layout.js';
+import { gaugeImage } from './gaugeImages.js';
+import { chargeArc, chargeFill, unitFill } from './gaugeGeometry.js';
+
 import { G, view, sectorInfo } from '../game/state.js';
 import { S, withAlpha } from './sprites.js';
 import { TAU, clamp, easeOutCubic } from '../core/math.js';
 import { comboMult } from '../game/player.js';
-import { CLASSES, ULT_CELL, ULT_LEVELS, ultCells } from '../game/pilot.js';
+import { CLASSES, ULT_CELL, ULT_LEVELS, ultCells, ultCap } from '../game/pilot.js';
 import { input } from '../core/input.js';
 import { sv } from '../game/stageview.js';
 import { profile } from '../core/storage.js';
@@ -231,17 +235,25 @@ export function drawGauges(ctx, sx, sy) {
   ctx.globalAlpha = 1;
 }
 
-// Touch buttons side (Settings): both gauges sit in one bottom corner, dash in the corner and the ult beside it,
-// so one thumb works them and the other hand steers. The #touch-ui buttons sit on top (style.css, side-left).
+// Ultimate sits above boost; dash sits inward. Mirror the cluster for left-handed controls.
 export function buttonSide() {
   return profile.settings.touchSide === 'left' ? 'left' : 'right';
 }
 
 export function gaugeSpots() {
-  const y = view.H - view.safeBottom - 46;
-  const left = buttonSide() === 'left';
-  const at = (d) => (left ? d : view.W - d);
-  return { dash: { x: at(44), y }, od: { x: at(120), y }, boost: { x: at(44), y: y - 74 } };
+  return abilityLayout(view, buttonSide());
+}
+
+// Static art is decoded and baked before draw. Live tracks stay legible inside its glass face.
+function gaugeHousing(ctx, x, y, kind) {
+  const image = gaugeImage(kind);
+  if (image) ctx.drawImage(image, x - 34, y - 34, 68, 68);
+  else {
+    ctx.fillStyle = 'rgba(5,3,15,0.75)';
+    ctx.beginPath();
+    ctx.arc(x, y, 30, 0, TAU);
+    ctx.fill();
+  }
 }
 
 // Shared boost, dash and ultimate gauges for fights and free flight.
@@ -260,15 +272,12 @@ function drawBoostGauge(ctx, x, y, p, sx, sy) {
   ctx.globalAlpha = (near ? 0.25 : ok ? 0.9 : 0.4) * hudA;
   const r = 24;
   const cap = boostCap(p);
-  const t = clamp((p.boost ?? cap) / cap, 0, 1);
+  const t = unitFill(p.boost ?? cap, cap);
   const on = p.boosting;
   const free = freeBoost(p); // transitions: boost cruises for free
   const low = !on && !free && (p.boostLock || (p.boost ?? cap) < BOOST.min);
   const col = low ? '#ff4d6d' : '#ffb13d';
-  ctx.fillStyle = on ? 'rgba(40,18,4,0.7)' : 'rgba(5,3,15,0.55)';
-  ctx.beginPath();
-  ctx.arc(x, y, r + 4, 0, TAU);
-  ctx.fill();
+  gaugeHousing(ctx, x, y, 'boost');
   ctx.strokeStyle = withAlpha(col, 0.2);
   ctx.lineWidth = 4;
   ctx.beginPath();
@@ -284,10 +293,6 @@ function drawBoostGauge(ctx, x, y, p, sx, sy) {
   ctx.stroke();
   ctx.strokeStyle = on ? '#fff3d6' : col;
   ctx.lineWidth = on ? 5 + Math.sin(G.realTime * 30) * 1 : 4;
-  if (on) {
-    ctx.shadowColor = '#ffb13d';
-    ctx.shadowBlur = 10;
-  }
   ctx.beginPath();
   ctx.arc(x, y, r, -Math.PI / 2, -Math.PI / 2 + TAU * t);
   ctx.stroke();
@@ -295,7 +300,7 @@ function drawBoostGauge(ctx, x, y, p, sx, sy) {
   const hint = keyHint('boost');
   const label = free ? (on ? 'SKIP' : hint || 'HOLD') : on ? `x${boostScore(p).toFixed(1)}` : hint || 'HOLD';
   text(ctx, label, x, y - 1, fitSize(ctx, label, r * 1.6, 11, 700), on ? '#ffffff' : withAlpha(col, 0.9), 'center', 700);
-  text(ctx, 'BOOST', x, y + r + 13, 9, col, 'center', 700);
+  text(ctx, 'BOOST', x, y + 44, 9, col, 'center', 700);
   ctx.globalAlpha = hudA;
 }
 
@@ -303,30 +308,25 @@ function drawGauge(ctx, x, y, p, kind, sx = p.x, sy = p.y) {
   const near = Math.hypot(sx - x, sy - y) < 90;
   ctx.globalAlpha = (near ? 0.25 : 0.9) * hudA;
   const r = 24;
-  ctx.fillStyle = 'rgba(5,3,15,0.55)';
-  ctx.beginPath();
-  ctx.arc(x, y, r + 4, 0, TAU);
-  ctx.fill();
+  gaugeHousing(ctx, x, y, kind);
   if (kind === 'od') {
     // Banked cells: one ring segment per cell the meter can hold (3 levels, plus reserve cells in white). A cast spends up
     // to 3 and fires at that level; while it runs, an inner ring drains with its time.
     const active = p.odT > 0;
-    const n = (p.st && p.st.ultCells) || ULT_LEVELS;
+    const n = Math.round(ultCap(p) / ULT_CELL);
     const cells = ultCells(p);
     const lv = Math.min(ULT_LEVELS, cells);
     const cls = CLASSES.find((c) => c.id === p.cls) || CLASSES[0];
     const col = cls.color;
-    const gap = n > 3 ? 0.1 : 0.12;
     for (let i = 0; i < n; i++) {
-      const a0 = -Math.PI / 2 + (i / n) * TAU + gap;
-      const a1 = -Math.PI / 2 + ((i + 1) / n) * TAU - gap;
+      const { start: a0, end: a1 } = chargeArc(i, n);
       const c = i < ULT_LEVELS ? col : '#ffffff';
       ctx.strokeStyle = withAlpha(c, 0.18);
       ctx.lineWidth = 4;
       ctx.beginPath();
       ctx.arc(x, y, r, a0, a1);
       ctx.stroke();
-      const fill = i < cells ? 1 : i === cells ? clamp((p.od - cells * ULT_CELL) / ULT_CELL, 0, 1) : 0;
+      const fill = chargeFill(i, cells, (p.od - cells * ULT_CELL) / ULT_CELL);
       if (fill <= 0) continue;
       ctx.strokeStyle = fill >= 1 ? c : withAlpha(c, active ? 0.3 : 0.5);
       ctx.lineWidth = fill >= 1 && !active && lv === ULT_LEVELS ? 5 + Math.sin(G.realTime * 8) * 1.2 : 4;
@@ -357,20 +357,17 @@ function drawGauge(ctx, x, y, p, kind, sx = p.x, sy = p.y) {
       text(ctx, `LV${lv}`, x, y - 5, 11, '#ffffff', 'center', 700);
       text(ctx, hint, x, y + 7, fitSize(ctx, hint, r * 1.2, 8, 700), withAlpha(col, 0.9), 'center', 700);
     } else text(ctx, `${Math.floor((100 * p.od) / ULT_CELL)}%`, x, y - 1, 10, withAlpha(col, 0.85), 'center', 700);
-    text(ctx, cls.ult.short, x, y + r + 13, 9, col, 'center', 700);
+    text(ctx, cls.ult.short, x, y + 44, fitSize(ctx, cls.ult.short, 76, 9), col, 'center', 700);
   } else {
     const n = p.maxCharges;
     for (let i = 0; i < n; i++) {
-      const a0 = -Math.PI / 2 + (i / n) * TAU + 0.12;
-      const a1 = -Math.PI / 2 + ((i + 1) / n) * TAU - 0.12;
+      const { start: a0, end: a1 } = chargeArc(i, n);
       ctx.strokeStyle = 'rgba(63,246,255,0.18)';
       ctx.lineWidth = 4;
       ctx.beginPath();
       ctx.arc(x, y, r, a0, a1);
       ctx.stroke();
-      let fill = 0;
-      if (i < p.charges) fill = 1;
-      else if (i === p.charges) fill = p.rechargeT / p.st.dashRecharge;
+      const fill = chargeFill(i, p.charges, unitFill(p.rechargeT, p.st.dashRecharge));
       if (fill > 0) {
         ctx.strokeStyle = fill >= 1 ? '#3ff6ff' : 'rgba(63,246,255,0.5)';
         ctx.beginPath();
@@ -379,8 +376,10 @@ function drawGauge(ctx, x, y, p, kind, sx = p.x, sy = p.y) {
       }
     }
     const hint = keyHint('dash');
-    text(ctx, hint || 'DASH', x, y - 1, hint.length > 3 ? 9 : 11, p.charges ? '#ffffff' : 'rgba(255,255,255,0.4)', 'center', 700);
-    text(ctx, 'DASH', x, y + r + 13, 9, '#9ffcff', 'center', 700);
+    const label = n > 8 ? `${p.charges}/${n}` : hint || 'DASH';
+    text(ctx, label, x, y - (n > 8 && hint ? 5 : 1), fitSize(ctx, label, 36, 11), p.charges ? '#ffffff' : 'rgba(255,255,255,0.4)', 'center', 700);
+    if (n > 8 && hint) text(ctx, hint, x, y + 8, fitSize(ctx, hint, 34, 8), '#9ffcff', 'center', 700);
+    text(ctx, 'DASH', x, y + 44, 9, '#9ffcff', 'center', 700);
   }
   ctx.globalAlpha = hudA;
 }

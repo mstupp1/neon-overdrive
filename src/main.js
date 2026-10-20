@@ -1,5 +1,8 @@
 // Boot, layout, main loop and top-level game flow.
 
+import { placeAbilityTargets, abilityClusterTop } from './ui/ability-layout.js';
+import { prewarmGaugeImages } from './render/gaugeImages.js';
+
 import { G, view } from './game/state.js';
 import { profile, saveProfile, resetProfile } from './core/storage.js';
 import { TIER_CAP, CORE, coreCost } from './game/core.js';
@@ -12,7 +15,7 @@ import { bg } from './render/background.js';
 import { bloom } from './render/post.js';
 import { pixel, PIXEL_W } from './render/pixel.js';
 import { beat as musicBeat } from './core/beat.js';
-import { drawHud, updateBanner, buttonSide } from './render/hud.js';
+import { drawHud, updateBanner, buttonSide, gaugeSpots } from './render/hud.js';
 import { SHIPS, shipById, ownsShip, isUnlocked } from './game/ships.js';
 import { createPlayer } from './game/player.js';
 import { drawBoostFx } from './game/boost.js';
@@ -148,6 +151,9 @@ function layout() {
   const cs = getComputedStyle(probe);
   view.safeTop = (parseFloat(cs.paddingTop) || 0) / view.scale;
   view.safeBottom = (parseFloat(cs.paddingBottom) || 0) / view.scale;
+  view.safeLeft = (parseFloat(cs.paddingLeft) || 0) / view.scale;
+  view.safeRight = (parseFloat(cs.paddingRight) || 0) / view.scale;
+  placeTouchUi();
 }
 
 window.addEventListener('resize', layout);
@@ -701,6 +707,7 @@ function enterPlay() {
 }
 
 function pause() {
+  releaseTouchBoost();
   if ((G.screen !== 'play' && G.screen !== 'overworld') || G.player.dead) return;
   pauseFrom = G.screen;
   G.screen = 'pause';
@@ -1291,7 +1298,9 @@ mapBtn.addEventListener('pointerdown', (e) => {
 });
 // Touch buttons go in the corner picked in Settings (hud.js gaugeSpots draws the gauges under them).
 function placeTouchUi() {
-  touchUi.classList.toggle('side-left', buttonSide() === 'left');
+  const spots = gaugeSpots();
+  placeAbilityTargets(touchUi, spots, view.scale);
+  app.style.setProperty('--ability-toast-bottom', `${(view.H - abilityClusterTop(spots) + 12) * view.scale}px`);
 }
 placeTouchUi();
 for (const [id, action] of [['touch-od', 'od'], ['touch-dash', 'dash']]) {
@@ -1302,18 +1311,35 @@ for (const [id, action] of [['touch-od', 'od'], ['touch-dash', 'dash']]) {
     input.press(action);
   });
 }
-// Boost is held, not pressed.
+// Capture only the boost finger, leaving the steering finger on the field.
+let boostPointer = null;
+function releaseTouchBoost() {
+  input.hold('focus', false);
+  const el = document.getElementById('touch-boost');
+  const id = boostPointer;
+  boostPointer = null;
+  if (id !== null && el.hasPointerCapture(id)) el.releasePointerCapture(id);
+}
 {
   const el = document.getElementById('touch-boost');
-  const down = (e) => {
+  el.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if (boostPointer !== null || !['play', 'overworld'].includes(G.screen)) return;
     input.setDevice('touch');
+    boostPointer = e.pointerId;
+    el.setPointerCapture(e.pointerId);
     input.hold('focus', true);
-  };
-  const up = () => input.hold('focus', false);
-  el.addEventListener('pointerdown', down);
-  for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) el.addEventListener(ev, up);
+  });
+  for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+    el.addEventListener(ev, (e) => {
+      if (e.pointerId === boostPointer) releaseTouchBoost();
+    });
+  }
+  window.addEventListener('blur', releaseTouchBoost);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) releaseTouchBoost();
+  });
 }
 
 // Marks on the hub tabs: unspent tree points, gear and relics not yet looked at.
@@ -1366,6 +1392,7 @@ function frame(now) {
   const raw = Math.min(0.1, (now - last) / 1000);
   last = now;
   pollGamepads();
+  if (boostPointer !== null && (touchUi.hidden || !['play', 'overworld'].includes(G.screen))) releaseTouchBoost();
   if (debugDrawer.open) debugDrawer.update();
   const worldDt = debugDrawer.frozen && G.mode === 'run' ? 0 : raw;
   G.realTime += worldDt;
@@ -1576,6 +1603,7 @@ function boot() {
   layout();
   buildSprites(SHIPS);
   buildEnemySpritesV2();
+  prewarmGaugeImages();
   prewarmBossArt();
   prewarmMiniArt();
   applyAllPaints();

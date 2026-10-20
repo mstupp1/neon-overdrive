@@ -1,0 +1,96 @@
+{
+  "method": "built-in image_gen",
+  "revision": 1,
+  "logicalSize": 68,
+  "runtimeSize": 256,
+  "references": [
+    "art/icons/pilot/striker-source.png"
+  ],
+  "assets": {
+    "dash": {
+      "source": "art/hud/ability-gauges/dash-source-v1.png",
+      "runtime": "src/assets/hud/dash-gauge-v1.png",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "crop": [
+        82,
+        85,
+        1173,
+        1169
+      ],
+      "squareSize": 1091,
+      "padding": 8,
+      "resize": "Lanczos RGBA",
+      "sourceSha256": "e3e4ca87b3beaab33ecae4b2bc9f29db12434dadd890617ed0583b93109eaa10",
+      "runtimeSha256": "7f99c8b4f1d7f2472b9562778a08046b4d77dcaa7cd75b8e6eac07de48486196",
+      "references": [
+        "art/icons/pilot/striker-source.png"
+      ],
+      "cropOffset": [
+        0,
+        3
+      ],
+      "boundsAlphaThreshold": 4
+    },
+    "boost": {
+      "source": "art/hud/ability-gauges/boost-source-v1.png",
+      "runtime": "src/assets/hud/boost-gauge-v1.png",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "crop": [
+        81,
+        82,
+        1173,
+        1165
+      ],
+      "squareSize": 1092,
+      "padding": 8,
+      "resize": "Lanczos RGBA",
+      "sourceSha256": "23c8e6dec76e98908c918ec77d5404bb28e63f56bb0a7cd4218b3542c2776f2a",
+      "runtimeSha256": "2ab0397952234a625882e4b92da9034054c35274c1f5ed47b5f53ae3b9efc800",
+      "references": [
+        "art/hud/ability-gauges/dash-source-v1.png"
+      ],
+      "cropOffset": [
+        0,
+        4
+      ],
+      "boundsAlphaThreshold": 4
+    },
+    "od": {
+      "source": "art/hud/ability-gauges/od-source-v1.png",
+      "runtime": "src/assets/hud/od-gauge-v1.png",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "crop": [
+        72,
+        68,
+        1181,
+        1175
+      ],
+      "squareSize": 1109,
+      "padding": 8,
+      "resize": "Lanczos RGBA",
+      "sourceSha256": "6f81df90e4f9c11c716a1c448d6c32ae8e261f06ae71e68b473aed01e324ffb2",
+      "runtimeSha256": "949564ac8d51ff6add3bb9fc4f8e82c42f6f9ebfe287eebe9f47173ba1b8feb5",
+      "references": [
+        "art/hud/ability-gauges/dash-source-v1.png"
+      ],
+      "cropOffset": [
+        0,
+        1
+      ],
+      "boundsAlphaThreshold": 4
+    }
+  },
+  "referenceSha256": {
+    "art/hud/ability-gauges/dash-source-v1.png": "e3e4ca87b3beaab33ecae4b2bc9f29db12434dadd890617ed0583b93109eaa10",
+    "art/icons/pilot/striker-source.png": "644cd5aa714548e418480c690afdaf876b1eb42199f0ac0fd6993f876211bc57"
+  }
+}
