@@ -12,6 +12,11 @@ const FALLBACK = {
   interceptor: 'interceptor',
   mine: null,
   saw: 'blade',
+  plate: 'plate',
+  marksman: 'marksman',
+  pylon: 'pylon',
+  sentry: 'sentry',
+  salvager: 'salvager',
 };
 const IDS = Object.keys(MODULE_ART);
 const MODES = ['top', 'side', 'chase'];
@@ -195,6 +200,13 @@ const runtime = `
       player.up.droneSwarm = id === 'interceptor' ? 2 : 0;
       player.up.mines = id === 'mine' ? 4 : 0;
       player.up.saw = id === 'saw' ? 3 : 0;
+      const paths = { plate: ['shieldPlates', 'citadel'], marksman: ['marksman', 'deadshot'],
+        pylon: ['teslaPylons', 'stormgrid'], sentry: ['sentry', 'sentrynet'], salvager: ['salvageDrone', 'scrapper'] };
+      if (paths[id]) {
+        const [upgrade, evolution] = paths[id];
+        player.up[upgrade] = 5;
+        if (event.data.evolution) player.up[evolution] = 1;
+      }
       if (event.data.evolution && id === 'blade') player.up.stormhalo = 1;
       if (event.data.evolution && id === 'drone') player.up.phalanx = 1;
       player.cls = fortress ? 'engineer' : 'striker';
@@ -203,7 +215,7 @@ const runtime = `
 
       // Durable stationary targets let interceptors and saws show their real
       // launch, orbit, and contact behavior without ending the preview.
-      if (id === 'interceptor' || id === 'saw') {
+      if (id === 'interceptor' || id === 'saw' || paths[id]) {
         for (const x of [view.W * 0.38, view.W * 0.62]) {
           const enemy = N.spawn('tank', x, view.H * 0.3, {
             mv: 'hover', speed: 0, stay: 1e6, fireDelay: 1e6, gap: 1e6,
@@ -316,6 +328,11 @@ document.querySelector('#simulate').addEventListener('click', () => {
       interceptors: player.mod.interceptors || [],
       mines: player.mod.mines || [],
       saws: player.mod.saws || [],
+      plates: (player.mod.x?.plates || []).filter(p => p.x !== undefined),
+      pylons: player.mod.x?.pylons || [],
+      sentries: player.mod.x?.sentries || [],
+      salvagers: player.mod.x?.salv || [],
+      marksman: player.up.marksman && player.mod.x?.mpos ? [player.mod.x.mpos] : [],
     };
 
     for (const [name, objects] of Object.entries(groups)) {

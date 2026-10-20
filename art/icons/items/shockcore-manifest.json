@@ -1,0 +1,25 @@
+{
+  "method": "built-in imagegen",
+  "assets": [
+    {
+      "id": "shockcore",
+      "source": "art/icons/items/sources/shockcore-v1.png",
+      "runtime": "src/assets/icons/items/shockcore.png",
+      "prompt": "art/icons/items/prompts/shockcore-v1.txt",
+      "source_sha256": "b765c22f26ebe7fe7227c541df2bfe40b976d75338dbd57682c5de3276303421",
+      "runtime_sha256": "1b397422456d398831a035d8cab5cb262f0667d6d7f2272872969ceec671a22e",
+      "prompt_sha256": "7bebc06c6a15876e0de2f754fdf14b06064fdf36e6c913f7be1bd64e6306da4c",
+      "references": [
+        {
+          "path": "art/icons/items/sources/cryocore.png",
+          "sha256": "3dde77901a3e5efada25ecc691b46d6439427eb70522fc1b851ddb484accb41c"
+        }
+      ],
+      "export": "RGBA; fit entire source within 256px; Pillow Lanczos; preserve alpha",
+      "size": [
+        256,
+        256
+      ]
+    }
+  ]
+}

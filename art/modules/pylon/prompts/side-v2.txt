@@ -1,0 +1,9 @@
+Use case: stylized-concept
+Asset type: physical NEON OVERDRIVE combat module sprite; transparent 512px source master, side view
+Input images: Image 1 establishes Tesla pylon identity and dark machinery materials. Image 2 is only a camera reference for a right-facing side profile.
+Scene/backdrop: fully transparent, empty around the object.
+Subject: the same single compact Tesla pylon in a true right-facing side profile: flat stable circular gunmetal base, one visible insulated cyan vertical emitter rising from its center, one small secondary electrode partly behind it. Keep side view low and horizontal.
+Style/medium: polished navy/gunmetal machinery with beveled plates, dark glass, restrained cyan with tiny magenta/gold details.
+Composition/framing: centered complete object, true level side camera facing right, generous transparent margins.
+Lighting/mood: crisp highlights and contained cyan core only.
+Constraints: preserve genuine fully transparent alpha. Absolutely no floor, cast shadow, ambient haze, glow cloud, backdrop, vignette or gradient. Static hardware only; no text, projectile, beam, lightning arc, flame, detached parts or crop.

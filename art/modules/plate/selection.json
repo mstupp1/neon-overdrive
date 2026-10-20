@@ -1,0 +1,42 @@
+{
+  "assets": [
+    {
+      "camera": "top",
+      "cameraIntent": "Direct overhead shield plate with long axis toward top",
+      "source": "art/modules/plate/sources/top-v1.png",
+      "prompt": "art/modules/plate/prompts/top-v1.txt",
+      "runtime": "src/assets/modules/plate/top-v1.png",
+      "logicalSize": 22,
+      "visibleExtent": 14,
+      "references": [
+        "src/assets/icons/upgrades/shieldPlates.png",
+        "art/modules/drone/sources/top-v1.png"
+      ]
+    },
+    {
+      "camera": "side",
+      "cameraIntent": "Low horizontal side profile facing right; visible armor thickness",
+      "source": "art/modules/plate/sources/side-v1.png",
+      "prompt": "art/modules/plate/prompts/side-v1.txt",
+      "runtime": "src/assets/modules/plate/side-v1.png",
+      "logicalSize": 22,
+      "visibleExtent": 14,
+      "references": [
+        "art/modules/plate/sources/top-v1.png",
+        "art/modules/drone/sources/side-v2.png"
+      ]
+    },
+    {
+      "camera": "chase",
+      "cameraIntent": "Low rear view of the reverse face, foreshortened along the orbit path",
+      "source": "art/modules/plate/sources/chase-v1.png",
+      "prompt": "art/modules/plate/prompts/chase-v1.txt",
+      "runtime": "src/assets/modules/plate/chase-v1.png",
+      "logicalSize": 22,
+      "visibleExtent": 14,
+      "references": [
+        "art/modules/plate/sources/top-v1.png"
+      ]
+    }
+  ]
+}

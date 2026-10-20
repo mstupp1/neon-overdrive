@@ -1,0 +1,166 @@
+{
+  "method": "built-in imagegen; deterministic Pillow export",
+  "assets": [
+    {
+      "camera": "top",
+      "cameraIntent": "Direct overhead shield plate with long axis toward top",
+      "source": "art/modules/plate/sources/top-v1.png",
+      "prompt": "art/modules/plate/prompts/top-v1.txt",
+      "runtime": "src/assets/modules/plate/top-v1.png",
+      "logicalSize": 22,
+      "visibleExtent": 14,
+      "references": [
+        {
+          "path": "src/assets/icons/upgrades/shieldPlates.png",
+          "sha256": "7cd284bb634d2646c5f182518d93aaeec41f15493217b072651ed10981f4d40e"
+        },
+        {
+          "path": "art/modules/drone/sources/top-v1.png",
+          "sha256": "8497dcf32378c124586eefdc31714822eb597c7af82fce81e068d2a65baaaac0"
+        }
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        627.5,
+        631.5
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        367,
+        367
+      ],
+      "offset": [
+        72,
+        71
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "a4283873749a318b5852f2fea3cc031712cdc3ad0703565d13ffc4755cbf1708",
+      "runtime_sha256": "55a98b9478a2cb9f34e997e3ea9aac3b5f50d18d575d6284d71e532c843e33d8",
+      "prompt_sha256": "d90bb987d22dd66afe34c4a68b259774d3339c1a84d3926483369983466f08de",
+      "alphaBounds": [
+        72,
+        86,
+        411,
+        421
+      ]
+    },
+    {
+      "camera": "side",
+      "cameraIntent": "Low horizontal side profile facing right; visible armor thickness",
+      "source": "art/modules/plate/sources/side-v1.png",
+      "prompt": "art/modules/plate/prompts/side-v1.txt",
+      "runtime": "src/assets/modules/plate/side-v1.png",
+      "logicalSize": 22,
+      "visibleExtent": 14,
+      "references": [
+        {
+          "path": "art/modules/plate/sources/top-v1.png",
+          "sha256": "a4283873749a318b5852f2fea3cc031712cdc3ad0703565d13ffc4755cbf1708"
+        },
+        {
+          "path": "art/modules/drone/sources/side-v2.png",
+          "sha256": "4b3d5a9c690326f6561798f984d4889822ea3b5307d4f16d70de6a2f6809195b"
+        }
+      ],
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "orientedSourceSize": [
+        1774,
+        887
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        899.5,
+        516.5
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        374,
+        187
+      ],
+      "offset": [
+        67,
+        147
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "b2dcdaa12da397457c3047f7129932eac7bbac92f03b79126166f02634a5402e",
+      "runtime_sha256": "53304a429b5af3da8810937697ad0f31afcf8b5667b9fbaf3562a8b65e562df9",
+      "prompt_sha256": "f83ae669ddb6d468d00085dc0ac08d94de94a29370e9b1c99ae06ed253e8bbe0",
+      "alphaBounds": [
+        91,
+        179,
+        422,
+        306
+      ]
+    },
+    {
+      "camera": "chase",
+      "cameraIntent": "Low rear view of the reverse face, foreshortened along the orbit path",
+      "source": "art/modules/plate/sources/chase-v1.png",
+      "prompt": "art/modules/plate/prompts/chase-v1.txt",
+      "runtime": "src/assets/modules/plate/chase-v1.png",
+      "logicalSize": 22,
+      "visibleExtent": 14,
+      "references": [
+        {
+          "path": "art/modules/plate/sources/top-v1.png",
+          "sha256": "a4283873749a318b5852f2fea3cc031712cdc3ad0703565d13ffc4755cbf1708"
+        }
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        627.0,
+        621.0
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        343,
+        343
+      ],
+      "offset": [
+        84,
+        86
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "c1c6e74cdc1204540b046b75fe0b9085dd31305ba0f6c4a61f7802ab361933dd",
+      "runtime_sha256": "e45472257ccfffdeded6da1e343e4ce346504dad0cb5d4ea6ab701f42cdadf9b",
+      "prompt_sha256": "ab6d34d51ddecf7b2f34ad5e14012d2d4379c7285d6001522d48943e463d5da0",
+      "alphaBounds": [
+        90,
+        113,
+        421,
+        405
+      ]
+    }
+  ]
+}

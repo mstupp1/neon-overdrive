@@ -1,0 +1,42 @@
+{
+  "assets": [
+    {
+      "camera": "top",
+      "cameraIntent": "Direct overhead; drone nose points up",
+      "source": "art/modules/salvager/sources/top-v1.png",
+      "prompt": "art/modules/salvager/prompts/top-v1.txt",
+      "runtime": "src/assets/modules/salvager/top-v1.png",
+      "logicalSize": 24,
+      "visibleExtent": 16,
+      "references": [
+        "src/assets/icons/upgrades/salvageDrone.png",
+        "art/modules/drone/sources/top-v1.png"
+      ]
+    },
+    {
+      "camera": "side",
+      "cameraIntent": "Right-facing side profile with foreshortened wings",
+      "source": "art/modules/salvager/sources/side-v1.png",
+      "prompt": "art/modules/salvager/prompts/side-v1.txt",
+      "runtime": "src/assets/modules/salvager/side-v1.png",
+      "logicalSize": 24,
+      "visibleExtent": 16,
+      "references": [
+        "art/modules/salvager/sources/top-v1.png",
+        "art/modules/drone/sources/side-v2.png"
+      ]
+    },
+    {
+      "camera": "chase",
+      "cameraIntent": "Direct rear pursuit view, engine apertures nearest camera",
+      "source": "art/modules/salvager/sources/chase-v1.png",
+      "prompt": "art/modules/salvager/prompts/chase-v1.txt",
+      "runtime": "src/assets/modules/salvager/chase-v1.png",
+      "logicalSize": 24,
+      "visibleExtent": 16,
+      "references": [
+        "art/modules/salvager/sources/top-v1.png"
+      ]
+    }
+  ]
+}

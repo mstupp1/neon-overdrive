@@ -1,0 +1,9 @@
+Use case: stylized-concept
+Asset type: physical NEON OVERDRIVE combat module sprite; transparent 512px source master, overhead view
+Input images: Image 1 establishes the compact orange Sentry turret identity: one complete turret and pedestal with one cannon. Image 2 is only a camera/style reference for clean overhead module art.
+Scene/backdrop: transparent.
+Subject: one compact autonomous gun turret viewed directly overhead: a dark beveled circular base, compact central swivel, one short orange cannon barrel pointing toward the top of the image, cyan sensor slit. The cannon and pedestal are one complete centered mechanical unit.
+Style/medium: polished industrial sci-fi game asset, dark navy/gunmetal, dark glass and crisp bevels, restrained orange core with small cyan, magenta and gold accents.
+Composition/framing: orthographic straight-down top view, centered complete turret, generous transparent padding, clear at small gameplay size.
+Lighting/mood: crisp restrained highlights, no haze.
+Constraints: genuine alpha; static turret only. No text, frame, background, projectile, beam, flame, separate barrel or cropped parts.

@@ -2,10 +2,10 @@
   "generator": "built-in imagegen",
   "delegatedModel": "gpt-6-luna",
   "reasoningEffort": "medium",
-  "assetCount": 188,
+  "assetCount": 207,
   "groups": {
-    "upgrades": 75,
-    "items": 78,
+    "upgrades": 93,
+    "items": 79,
     "pilot": 21,
     "choices": 14
   },
@@ -2259,6 +2259,696 @@
       "runtime": "src/assets/icons/choices/expand.png",
       "prompt": "Use case: stylized-concept. Asset type: one isolated game inventory icon, NEON OVERDRIVE Neural Expansion. Subject: a dark glass neural hub with a central violet crystal and six cyan circuit branches reaching small lit hexagonal node terminals, suggesting a growing passive skill tree. A clear symmetrical radial silhouette with broad mechanical branches, navy metal bevels, gold tiny connectors and cyan magenta luminous rims. Centered square isolated item with generous transparent margins, 75% canvas occupancy, readable at32-64px. Genuine transparent background, no checkerboard, no text, no frame, no scene or broad haze.",
       "sha256": "0fc798ad68146fc56a3e6a853dddbc4cf7640bd6b9341ca415629a72532fc8f5",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "shieldPlates",
+      "source": "art/icons/upgrades/path-modules/sources/shieldPlates-v1.png",
+      "prompt": "Use case: stylized-concept. Asset type: isolated transparent game menu icon for NEON OVERDRIVE, read clearly at 32\u201364 px. Input images: Image 1: accepted style reference for the game's three-drone module, preserve its dark navy beveled machinery, vivid cyan core, restrained magenta and gold rim light; Image 2: accepted aegis shield reference for material and protective energy treatment. Scene/backdrop: transparent. Subject: Shield Plates, represented by three compact angular gunmetal armor plates arranged in a clean orbit around a small cyan energy center, each plate clearly a physical plate that blocks bullets. Style/medium: crisp premium 3D sci-fi illustration, high contrast and compact silhouette. Composition/framing: one centered cluster with ample transparent padding, no overlap obscuring the separate plate shapes. Lighting/mood: controlled neon edge light, bright enough to read at icon size without broad bloom. Materials/textures: beveled dark gunmetal, navy glass, cyan emissive seams with small magenta/gold accents. Constraints: genuinely transparent background; no text, letters, badge, card, rarity frame, watermark, or extra objects; no glow halo baked into transparency.",
+      "runtime": "src/assets/icons/upgrades/shieldPlates.png",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256,
+      "export": "uniform aspect fit, LANCZOS, centered on transparent 256x256 canvas",
+      "source_sha256": "38b758ab1c7d007f0167e18cbea91e9b0e87d9aaaf0425a777bfe44c269267ba",
+      "prompt_sha256": "ccdbddf43ba5029bfcea9319c15172b5d5b3c41330796b1c0021f647df34d222",
+      "runtime_sha256": "7cd284bb634d2646c5f182518d93aaeec41f15493217b072651ed10981f4d40e",
+      "sourceSize": [
+        1295,
+        1214
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "references": [
+        {
+          "path": "art/icons/upgrades/sources/droneSwarm.png",
+          "sha256": "c1f8efcfd62626395715711450880c797b757cf072840ffe930a979a39637b95"
+        },
+        {
+          "path": "art/icons/upgrades/sources/aegis.png",
+          "sha256": "b0ec8f569cb7684dfbad621f410b8bb6b5a4bfe87cb57728d4ad931b07e8bf28"
+        }
+      ],
+      "group": "upgrades",
+      "name": "Shield Plates",
+      "promptFile": "art/icons/upgrades/path-modules/prompts/shieldPlates-v1.txt",
+      "sha256": "7cd284bb634d2646c5f182518d93aaeec41f15493217b072651ed10981f4d40e",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "citadel",
+      "source": "art/icons/upgrades/path-modules/sources/citadel-v1.png",
+      "prompt": "Use case: stylized-concept. Asset type: isolated transparent game menu icon for NEON OVERDRIVE, read clearly at 32\u201364 px. Input images: Image 1: accepted style reference for the game's three-drone module, preserve its dark navy beveled machinery, vivid cyan core, restrained magenta and gold rim light; Image 2: accepted aegis shield reference for material and protective energy treatment. Scene/backdrop: transparent. Subject: Citadel Plates, the evolution of Shield Plates, represented by the same recognizable trio of angular gunmetal orbiting armor plates around a cyan energy core, now with two additional smaller plates and a compact outward shockwave ring to communicate stronger protection and retaliation. Style/medium: crisp premium 3D sci-fi illustration, high contrast and compact silhouette. Composition/framing: one centered cluster with ample transparent padding, all five plate silhouettes legible and shockwave ring secondary. Lighting/mood: controlled neon edge light, bright enough to read at icon size without broad bloom. Materials/textures: beveled dark gunmetal, navy glass, cyan emissive seams with small magenta/gold accents. Constraints: genuinely transparent background; no text, letters, badge, card, rarity frame, watermark, or extra objects; no glow halo baked into transparency.",
+      "runtime": "src/assets/icons/upgrades/citadel.png",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256,
+      "export": "uniform aspect fit, LANCZOS, centered on transparent 256x256 canvas",
+      "source_sha256": "b99993df57c7f8f6bd7ba0d4334a538cfb6e69d6d1f80137f6d940810a79ebdf",
+      "prompt_sha256": "e6ea1c1e9c636d5e8919842da6eb0ab6416df2af417c1f67c9413b216fd4ce5a",
+      "runtime_sha256": "bab494bed73209036338533d7b3eef760780ede251a743b56b6124c27fa1f6c1",
+      "sourceSize": [
+        1295,
+        1215
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "references": [
+        {
+          "path": "art/icons/upgrades/path-modules/sources/shieldPlates-v1.png",
+          "sha256": "38b758ab1c7d007f0167e18cbea91e9b0e87d9aaaf0425a777bfe44c269267ba"
+        },
+        {
+          "path": "art/icons/upgrades/sources/droneSwarm.png",
+          "sha256": "c1f8efcfd62626395715711450880c797b757cf072840ffe930a979a39637b95"
+        },
+        {
+          "path": "art/icons/upgrades/sources/aegis.png",
+          "sha256": "b0ec8f569cb7684dfbad621f410b8bb6b5a4bfe87cb57728d4ad931b07e8bf28"
+        }
+      ],
+      "group": "upgrades",
+      "name": "Citadel Plates",
+      "promptFile": "art/icons/upgrades/path-modules/prompts/citadel-v1.txt",
+      "sha256": "bab494bed73209036338533d7b3eef760780ede251a743b56b6124c27fa1f6c1",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "wakeBlades",
+      "source": "art/icons/upgrades/path-modules/sources/wakeBlades-v1.png",
+      "prompt": "Use case: stylized-concept. Asset type: isolated transparent NEON OVERDRIVE game menu icon, readable at 32\u201364 px. Input images: Image 1: accepted three-drone module icon for dark navy beveled metal, cyan core, restrained magenta and gold highlights; Image 2: accepted thruster icon for machinery surfaces and cyan energy. Scene/backdrop: transparent. Subject: Wake Blades, a compact propulsion blade module that leaves a cutting trail behind the player's ship; show a sharp, swept triangular blade with a short cyan wake line as a restrained secondary cue. Style/medium: crisp premium 3D sci-fi machinery illustration, strong single silhouette. Composition/framing: centered single blade and short wake, ample transparent padding, readable at tiny menu size. Lighting/mood: controlled neon rim-light, minimal bloom. Materials/textures: dark gunmetal and navy glass, cyan cutting edge, small magenta/gold accents. Constraints: genuine transparent background; no ship, text, letters, badge, card, rarity frame, watermark, or other objects; keep the wake compact and contained, no matte halo.",
+      "runtime": "src/assets/icons/upgrades/wakeBlades.png",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256,
+      "export": "uniform aspect fit, LANCZOS, centered on transparent 256x256 canvas",
+      "source_sha256": "8dcf9a9867b027a053fa6bfd2d812b7febb611930ef2d71c4d9cf967842c3303",
+      "prompt_sha256": "e5a43e68678f6065b356050ad38045c21ee5aec4415b31f88c4288265304fa03",
+      "runtime_sha256": "4970c112d8a0d591ca23318c6e5a003c8a25d332470f747be206981258699b3e",
+      "sourceSize": [
+        1374,
+        1145
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "references": [
+        {
+          "path": "art/icons/upgrades/sources/droneSwarm.png",
+          "sha256": "c1f8efcfd62626395715711450880c797b757cf072840ffe930a979a39637b95"
+        },
+        {
+          "path": "art/icons/upgrades/sources/thrusters.png",
+          "sha256": "9cf8f0209fc160ea68c32af985252e27c11768666281688277d78a1632312f00"
+        }
+      ],
+      "group": "upgrades",
+      "name": "Wake Blades",
+      "promptFile": "art/icons/upgrades/path-modules/prompts/wakeBlades-v1.txt",
+      "sha256": "4970c112d8a0d591ca23318c6e5a003c8a25d332470f747be206981258699b3e",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "comettrail",
+      "source": "art/icons/upgrades/path-modules/sources/comettrail-v1.png",
+      "prompt": "Use case: stylized-concept. Asset type: isolated transparent NEON OVERDRIVE game menu icon, readable at 32\u201364 px. Input images: Image 1: accepted three-drone module icon for dark navy beveled machinery, cyan core, restrained magenta and gold highlights; Image 2: accepted thruster icon for machinery details; Image 3: accepted Wake Blades base identity, preserve its swept triangular blade silhouette and cyan cutting edge. Scene/backdrop: transparent. Subject: Comet Trail, the evolution of Wake Blades, shown as the same recognizable swept triangular cutting blade, now with a longer, wider luminous cyan comet wake and a few compact sparks. Style/medium: crisp premium 3D sci-fi machinery illustration, strong single silhouette. Composition/framing: centered diagonal blade and broader extended wake, ample transparent padding, blade remains dominant and clear at tiny menu size. Lighting/mood: restrained rim light and controlled cyan glow. Materials/textures: dark gunmetal and navy glass, cyan cutting edge, small magenta/gold accents consistent with the base. Constraints: genuinely transparent background; no ship, text, letters, badge, card, rarity frame, watermark, extra objects, or glow halo baked into transparency.",
+      "runtime": "src/assets/icons/upgrades/comettrail.png",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256,
+      "export": "uniform aspect fit, LANCZOS, centered on transparent 256x256 canvas",
+      "source_sha256": "e281872cbbd59e82daecfd401ab69d59adbcb0bbf575ce05a165a0a2e9d827f3",
+      "prompt_sha256": "ca7dc09d1b32ee32527ecf3462a9273ea9f28068d04fdb8e1504f503c20eb815",
+      "runtime_sha256": "4d369594003ed40bc0bdd41ee6fa07fc45bb4f91542c9668111ce9841b0ca0e2",
+      "sourceSize": [
+        1374,
+        1145
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "references": [
+        {
+          "path": "art/icons/upgrades/path-modules/sources/wakeBlades-v1.png",
+          "sha256": "8dcf9a9867b027a053fa6bfd2d812b7febb611930ef2d71c4d9cf967842c3303"
+        },
+        {
+          "path": "art/icons/upgrades/sources/droneSwarm.png",
+          "sha256": "c1f8efcfd62626395715711450880c797b757cf072840ffe930a979a39637b95"
+        },
+        {
+          "path": "art/icons/upgrades/sources/thrusters.png",
+          "sha256": "9cf8f0209fc160ea68c32af985252e27c11768666281688277d78a1632312f00"
+        }
+      ],
+      "group": "upgrades",
+      "name": "Comet Trail",
+      "promptFile": "art/icons/upgrades/path-modules/prompts/comettrail-v1.txt",
+      "sha256": "4d369594003ed40bc0bdd41ee6fa07fc45bb4f91542c9668111ce9841b0ca0e2",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "salvageDrone",
+      "source": "art/icons/upgrades/path-modules/sources/salvageDrone-v1.png",
+      "prompt": "Use case: stylized-concept. Asset type: isolated transparent NEON OVERDRIVE game menu icon, readable at 32\u201364 px. Input images: Image 1: accepted three-drone module icon for dark navy beveled machinery, vivid cyan core, restrained magenta and gold highlights; Image 2: accepted aegis shield for protective construction; Image 3: accepted thruster icon for compact machinery treatment. Scene/backdrop: transparent. Subject: Salvage Drone, a compact autonomous utility drone that retrieves drops and rams enemies, with a recognizable small armored drone body, gold salvage clamp/grabber, and cyan central lens. Style/medium: crisp premium 3D sci-fi machinery illustration, strong silhouette. Composition/framing: one centered three-quarter drone with a clear clamp and visible sensor, ample transparent padding, no tiny detached debris. Lighting/mood: controlled neon edge light, readable at icon size without broad bloom. Materials/textures: dark gunmetal and navy glass, gold clamp, cyan lens, restrained magenta accents. Constraints: genuine transparent background; no text, letters, badge, card, rarity frame, watermark, or extra objects; no halo baked into transparency.",
+      "runtime": "src/assets/icons/upgrades/salvageDrone.png",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256,
+      "export": "uniform aspect fit, LANCZOS, centered on transparent 256x256 canvas",
+      "source_sha256": "673e624029cb276e62df7cedbdb6b9d2cb4fd94eb18c67869af6ad585dd3bbdd",
+      "prompt_sha256": "32628db2b1650626caec4744200567d293e7ccf55761691b6c7b0eb40979ee52",
+      "runtime_sha256": "31a8c8c774827a1302c1b12da490f3d9076016502b157cc6ed4031f21dc278fd",
+      "sourceSize": [
+        1314,
+        1197
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "references": [
+        {
+          "path": "art/icons/upgrades/sources/droneSwarm.png",
+          "sha256": "c1f8efcfd62626395715711450880c797b757cf072840ffe930a979a39637b95"
+        },
+        {
+          "path": "art/icons/upgrades/sources/aegis.png",
+          "sha256": "b0ec8f569cb7684dfbad621f410b8bb6b5a4bfe87cb57728d4ad931b07e8bf28"
+        },
+        {
+          "path": "art/icons/upgrades/sources/thrusters.png",
+          "sha256": "9cf8f0209fc160ea68c32af985252e27c11768666281688277d78a1632312f00"
+        }
+      ],
+      "group": "upgrades",
+      "name": "Salvage Drone",
+      "promptFile": "art/icons/upgrades/path-modules/prompts/salvageDrone-v1.txt",
+      "sha256": "31a8c8c774827a1302c1b12da490f3d9076016502b157cc6ed4031f21dc278fd",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "scrapper",
+      "source": "art/icons/upgrades/path-modules/sources/scrapper-v1.png",
+      "prompt": "Use case: stylized-concept. Asset type: isolated transparent NEON OVERDRIVE game menu icon, readable at 32\u201364 px. Input images: Image 1: accepted Salvage Drone base identity; keep the same central armored drone body, gold clamp/grabber, and cyan lens; Image 2: accepted three-drone module style reference for dark beveled navy machinery and restrained cyan/magenta/gold light. Scene/backdrop: transparent. Subject: Scrapper Swarm, the evolution of Salvage Drone, shown as three copies of that same compact utility drone in a tight triangular formation, their gold clamps visible and cyan lenses lit, implying a coordinated salvage swarm. Style/medium: crisp premium 3D sci-fi machinery illustration, high contrast and compact. Composition/framing: centered tight triangle of three clearly separate matching drones with ample transparent margin, each drone recognizable at small icon size. Lighting/mood: controlled rim light, no broad bloom. Materials/textures: dark gunmetal and navy glass, gold clamps, cyan lenses, small magenta accents consistent with the base. Constraints: genuine transparent background; no text, letters, badge, card, rarity frame, watermark, extra objects, or halo baked into transparency.",
+      "runtime": "src/assets/icons/upgrades/scrapper.png",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256,
+      "export": "uniform aspect fit, LANCZOS, centered on transparent 256x256 canvas",
+      "source_sha256": "07b573bc33741fa6a2d29d4f3f224e4acf81503f9cc191f892b73e4053b72082",
+      "prompt_sha256": "a1c37ccc70400bfd3194497bce37d88da319280b79d650be1d6539e2423692e2",
+      "runtime_sha256": "e63482b32b468fdc73284a7b34e6546ce595bb3408c8dcd4bee85148654a7077",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "references": [
+        {
+          "path": "art/icons/upgrades/path-modules/sources/salvageDrone-v1.png",
+          "sha256": "673e624029cb276e62df7cedbdb6b9d2cb4fd94eb18c67869af6ad585dd3bbdd"
+        },
+        {
+          "path": "art/icons/upgrades/sources/droneSwarm.png",
+          "sha256": "c1f8efcfd62626395715711450880c797b757cf072840ffe930a979a39637b95"
+        }
+      ],
+      "group": "upgrades",
+      "name": "Scrapper Swarm",
+      "promptFile": "art/icons/upgrades/path-modules/prompts/scrapper-v1.txt",
+      "sha256": "e63482b32b468fdc73284a7b34e6546ce595bb3408c8dcd4bee85148654a7077",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "marksman",
+      "revision": "v1",
+      "source": "art/icons/upgrades/path-modules/sources/marksman-v1.png",
+      "runtime": "src/assets/icons/upgrades/marksman.png",
+      "prompt": "Use case: stylized-concept isolated transparent game upgrade icon: precision marksman sight, compact dark navy beveled gunmetal optic housing with crisp gold central reticle, restrained cyan and magenta accent lights, one centered object, clear silhouette at 32 pixels, transparent alpha, no text, frame or background.",
+      "references": [
+        {
+          "path": "art/icons/upgrades/sources/rail.png",
+          "sha256": "51e46d223115d01b66909e9350ba8a75259538e5f8caf7bfd406f48ec48c48dc"
+        }
+      ],
+      "generator": "built-in imagegen",
+      "format": "PNG RGBA",
+      "sourceSize": [
+        1312,
+        1199
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "runtimeMaxEdge": 256,
+      "export": "alpha>32 bounds crop; uniform Lanczos fit to 224px maximum inside transparent 256px square",
+      "source_sha256": "c0887d6abc34523951c4b956d9f430b4b7a6e98345060717378f99702d447005",
+      "runtime_sha256": "9312d4977796b8fb52109646b13954c486b76c7f6c4f9dbe54791396b004f8e4",
+      "prompt_sha256": "12a50a15662bc937c4913452190d1f58ce651438c0c867aa90753a1d1c093536",
+      "alphaBounds": [
+        16,
+        21,
+        240,
+        235
+      ],
+      "group": "upgrades",
+      "name": "Marksman Drone",
+      "promptFile": "art/icons/upgrades/path-modules/prompts/marksman-v1.txt",
+      "sha256": "9312d4977796b8fb52109646b13954c486b76c7f6c4f9dbe54791396b004f8e4",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "deadshot",
+      "revision": "v1",
+      "source": "art/icons/upgrades/path-modules/sources/deadshot-v1.png",
+      "runtime": "src/assets/icons/upgrades/deadshot.png",
+      "prompt": "Use case: stylized-concept\nAsset type: isolated NEON OVERDRIVE upgrade menu icon, evolution of Marksman\nInput images: Image 1 is the accepted Marksman base identity; preserve its compact rectangular optic housing, dark beveled gunmetal, cyan/magenta accent lights and luminous gold reticle, while making it feel like a more advanced precision targeting module.\nScene/backdrop: fully transparent.\nSubject: DEADSHOT, the evolved Marksman module: the same recognizable optic housing upgraded with a refined gold precision reticle and a small secondary targeting lens integrated into the side.\nStyle/medium: polished compact 3D game illustration in established NEON OVERDRIVE dark glass and industrial metal style.\nComposition/framing: one centered object, isolated silhouette that reads clearly at 32px.\nLighting/mood: crisp machined highlights, controlled glow.\nColor palette: navy and gunmetal, cyan/magenta accents, gold precision marks.\nMaterials/textures: beveled plated housing, dark glass optics, tiny luminous calibration marks.\nConstraints: genuine transparent alpha; no text, letters, numbers, frame, card, badge, watermark or background. Retain the base object's identity and silhouette family; evolution should read as a clear refinement, not a different device.",
+      "references": [
+        {
+          "path": "art/icons/upgrades/path-modules/sources/marksman-v1.png",
+          "sha256": "c0887d6abc34523951c4b956d9f430b4b7a6e98345060717378f99702d447005"
+        }
+      ],
+      "generator": "built-in imagegen",
+      "format": "PNG RGBA",
+      "sourceSize": [
+        1312,
+        1199
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "runtimeMaxEdge": 256,
+      "export": "alpha>32 bounds crop; uniform Lanczos fit to 224px maximum inside transparent 256px square",
+      "source_sha256": "fc8e85253b612804a0b15719854aac09597772c9c0e86501635ebd034ead26ec",
+      "runtime_sha256": "b1c18af46a2f286f13571358407423940b579dacfff27d5ff46dc5a2ddd76889",
+      "prompt_sha256": "93fe3301ebbf55785e23c36851670415605ca9f6e8685b5763f9a22f6135118b",
+      "alphaBounds": [
+        16,
+        24,
+        240,
+        231
+      ],
+      "group": "upgrades",
+      "name": "Deadshot",
+      "promptFile": "art/icons/upgrades/path-modules/prompts/deadshot-v1.txt",
+      "sha256": "b1c18af46a2f286f13571358407423940b579dacfff27d5ff46dc5a2ddd76889",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "teslaPylons",
+      "revision": "v1",
+      "source": "art/icons/upgrades/path-modules/sources/teslaPylons-v1.png",
+      "runtime": "src/assets/icons/upgrades/teslaPylons.png",
+      "prompt": "Use case: stylized-concept\nAsset type: isolated NEON OVERDRIVE upgrade menu icon, base module in an evolution pair\nInput images: Image 1 references the game's established electric energy treatment, dark metal and restrained neon finish; make a new single-device silhouette rather than copying its two pylons.\nScene/backdrop: fully transparent.\nSubject: TESLAPYLONS, one compact paired-emitter apparatus: two short ice-cyan insulated prongs mounted on a single dark gunmetal base, with a tiny contained electrical bridge between their tips. Clearly one coherent module icon, suggesting deployable electric pylons.\nStyle/medium: polished compact 3D game illustration, dark glass and beveled industrial machinery, crisp silhouette.\nComposition/framing: centered, compact, readable as a single icon at 32px; transparent margin all around.\nLighting/mood: controlled internal cyan glow and crisp metal highlights, no broad haze.\nColor palette: navy black and gunmetal, ice cyan as mechanic color, small magenta and gold accents.\nMaterials/textures: beveled casing, ceramic insulators, luminous energy nodes.\nConstraints: genuine transparent alpha, no text, letters, numbers, frame, card, badge, watermark or scenery. One isolated asset only.",
+      "references": [
+        {
+          "path": "art/icons/upgrades/sources/static.png",
+          "sha256": "6150064d6ddb4b7a3ee884236b2443471f2e0df068b84b9f1aa91c8ee9c6b702"
+        }
+      ],
+      "generator": "built-in imagegen",
+      "format": "PNG RGBA",
+      "sourceSize": [
+        1265,
+        1244
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "runtimeMaxEdge": 256,
+      "export": "alpha>32 bounds crop; uniform Lanczos fit to 224px maximum inside transparent 256px square",
+      "source_sha256": "5f250b9d60eefdaf73d8f668418b92cc9564b1d986cf269934246090636f0860",
+      "runtime_sha256": "cb770b8a92e93dcbe23354b6305c092148f18cc8f1bbf51d3a5904d50bc072b3",
+      "prompt_sha256": "e601febd11a6bc3ef4ac9424c78488f8e10ee2c73f60b3ab4231e23af606d4f5",
+      "alphaBounds": [
+        17,
+        16,
+        238,
+        240
+      ],
+      "group": "upgrades",
+      "name": "Tesla Pylons",
+      "promptFile": "art/icons/upgrades/path-modules/prompts/teslaPylons-v1.txt",
+      "sha256": "cb770b8a92e93dcbe23354b6305c092148f18cc8f1bbf51d3a5904d50bc072b3",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "stormgrid",
+      "revision": "v2",
+      "source": "art/icons/upgrades/path-modules/sources/stormgrid-v2.png",
+      "runtime": "src/assets/icons/upgrades/stormgrid.png",
+      "prompt": "Use case: stylized-concept\nAsset type: isolated NEON OVERDRIVE upgrade menu icon, evolved Tesla pylon module\nInput images: Image 1 is the accepted TeslaPylons family identity and dark beveled metal finish. Image 2 references the game's cyan electrical visual language. Evolve the module into a visually distinct square four-node network; do not retain the base icon's triangular three-node arrangement.\nScene/backdrop: transparent.\nSubject: STORMGRID, a compact square device with exactly four distinct cyan electrode towers at the four corners of a square gunmetal platform, connected by two clear diagonal crossing arcs forming an X across a central node. The four-corner square silhouette must remain unmistakable at 32 pixels.\nStyle/medium: polished compact 3D industrial sci-fi game illustration, dark navy glass and gunmetal, crisp bevels and restrained cyan/magenta/gold accents.\nComposition/framing: centered single square-network object, transparent margin, clear silhouette at 32px.\nLighting/mood: controlled cyan arc glow only along the two diagonals, crisp metal highlights; no haze.\nColor palette: ice cyan as mechanic color with small gold and magenta accents.\nMaterials/textures: beveled dark casing, four small insulated electrode housings, bright clean diagonal energy lines.\nConstraints: actual transparent alpha; exactly four corner electrodes and two crossing diagonal arcs; no triangular 3-node arrangement, no text, frame, card, badge, watermark, backdrop or extra device.",
+      "references": [
+        {
+          "path": "art/icons/upgrades/path-modules/sources/teslaPylons-v1.png",
+          "sha256": "5f250b9d60eefdaf73d8f668418b92cc9564b1d986cf269934246090636f0860"
+        },
+        {
+          "path": "art/icons/upgrades/sources/static.png",
+          "sha256": "6150064d6ddb4b7a3ee884236b2443471f2e0df068b84b9f1aa91c8ee9c6b702"
+        }
+      ],
+      "generator": "built-in imagegen",
+      "format": "PNG RGBA",
+      "sourceSize": [
+        1267,
+        1241
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "runtimeMaxEdge": 256,
+      "export": "alpha>32 bounds crop; uniform Lanczos fit to 224px maximum inside transparent 256px square",
+      "source_sha256": "42ea696c681d5dbd635b68a87f9031bbd95353a02375ad4c1f706158c2ced4e2",
+      "runtime_sha256": "c69963bc308bd8e9866967a5ed545f2cd5f57ab5797aacc7c2a50be93d3b7756",
+      "prompt_sha256": "0d2d7c0e897bb5fa0a0b26cfddc8e00308e12fec753a1d2b035828f21800386d",
+      "alphaBounds": [
+        16,
+        26,
+        240,
+        229
+      ],
+      "group": "upgrades",
+      "name": "Storm Grid",
+      "promptFile": "art/icons/upgrades/path-modules/prompts/stormgrid-v2.txt",
+      "sha256": "c69963bc308bd8e9866967a5ed545f2cd5f57ab5797aacc7c2a50be93d3b7756",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "sentry",
+      "revision": "v1",
+      "source": "art/icons/upgrades/path-modules/sources/sentry-v1.png",
+      "runtime": "src/assets/icons/upgrades/sentry.png",
+      "prompt": "Use case: stylized-concept\nAsset type: isolated NEON OVERDRIVE upgrade menu icon, base module in an evolution pair\nInput images: Image 1 references the established compact dark gunmetal weapon-machine finish, bevels, and restrained cyan/magenta/gold highlights; do not copy its twin-barrel silhouette.\nScene/backdrop: fully transparent.\nSubject: SENTRY, a compact automated sentry turret icon: one short, forward-facing orange energy cannon integrated into a sturdy dark mechanical pedestal, a small cyan sensor slit, and tiny magenta/gold trim. The barrel and base form one complete centered object that can rotate as a single sprite.\nStyle/medium: polished compact 3D arcade sci-fi game illustration, dark glass and beveled industrial machinery.\nComposition/framing: centered compact silhouette with transparent margins, distinct at 32px.\nLighting/mood: warm orange core glow and crisp metal highlights, restrained neon.\nColor palette: navy-black and gunmetal, orange as mechanic color, restrained cyan, magenta and gold accents.\nMaterials/textures: beveled plating, dark glass sensor, machined barrel.\nConstraints: genuine transparent alpha; no text, letters, numbers, frame, card, badge, separate projectile, beam, flame, watermark or scenery. Exactly one complete turret with barrel and pedestal as a single coherent sprite.",
+      "references": [
+        {
+          "path": "art/icons/upgrades/sources/rail.png",
+          "sha256": "51e46d223115d01b66909e9350ba8a75259538e5f8caf7bfd406f48ec48c48dc"
+        }
+      ],
+      "generator": "built-in imagegen",
+      "format": "PNG RGBA",
+      "sourceSize": [
+        1312,
+        1199
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "runtimeMaxEdge": 256,
+      "export": "alpha>32 bounds crop; uniform Lanczos fit to 224px maximum inside transparent 256px square",
+      "source_sha256": "a2c379e707a7f21af861be8591f8345281b7f7a347609065acaa1e5b431e8772",
+      "runtime_sha256": "e5a01dbe4137bdaed33a85d30e0d2e0518ba8996c11de4c462b7295c1c18a9f4",
+      "prompt_sha256": "6ccb55239b94044d7b062784a58efe3c99d9185187d411938027bce027f580de",
+      "alphaBounds": [
+        16,
+        42,
+        240,
+        213
+      ],
+      "group": "upgrades",
+      "name": "Sentry Turret",
+      "promptFile": "art/icons/upgrades/path-modules/prompts/sentry-v1.txt",
+      "sha256": "e5a01dbe4137bdaed33a85d30e0d2e0518ba8996c11de4c462b7295c1c18a9f4",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "sentrynet",
+      "revision": "v1",
+      "source": "art/icons/upgrades/path-modules/sources/sentrynet-v1.png",
+      "runtime": "src/assets/icons/upgrades/sentrynet.png",
+      "prompt": "Use case: stylized-concept\nAsset type: isolated NEON OVERDRIVE upgrade menu icon, evolution of Sentry\nInput images: Image 1 is the accepted Sentry base identity; preserve its single short forward-facing orange cannon, compact sturdy pedestal, dark gunmetal bevels and cyan sensor slit, while evolving the same turret.\nScene/backdrop: fully transparent.\nSubject: SENTRYNET, evolved Sentry: the same complete one-piece rotating turret with a slightly refined orange cannon and one small cyan target-link sensor antenna integrated into its upper housing; keep a compact pedestal, no extra turret.\nStyle/medium: polished compact 3D sci-fi game illustration in established dark glass and beveled industrial metal.\nComposition/framing: centered single complete object, clear at 32px with transparent margins; barrel and pedestal remain one sprite.\nLighting/mood: restrained orange core glow, crisp bevel highlights.\nColor palette: navy-black and gunmetal, orange mechanic color, cyan link sensor, small magenta/gold detail.\nMaterials/textures: machined armor plates, dark glass sensor slit.\nConstraints: genuine transparent alpha; no text, letters, numbers, frame, card, badge, separate projectile, beam, flame, watermark or backdrop. Retain Sentry identity and full silhouette; this is a refinement, not a new device.",
+      "references": [
+        {
+          "path": "art/icons/upgrades/path-modules/sources/sentry-v1.png",
+          "sha256": "a2c379e707a7f21af861be8591f8345281b7f7a347609065acaa1e5b431e8772"
+        }
+      ],
+      "generator": "built-in imagegen",
+      "format": "PNG RGBA",
+      "sourceSize": [
+        1312,
+        1199
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "runtimeMaxEdge": 256,
+      "export": "alpha>32 bounds crop; uniform Lanczos fit to 224px maximum inside transparent 256px square",
+      "source_sha256": "d8ca28ed43cae7bbec4011fa9722a79ba853306437e021bbb222eefb5fb21d5b",
+      "runtime_sha256": "00d1f37ff42fdd920dd67ede5966550a097ed282b90c43f73d44d0b9f06eb283",
+      "prompt_sha256": "9ae0e91750985cfc2c047daa4f6d6d3649edd110b41af897cb1c1c7b168f41e3",
+      "alphaBounds": [
+        16,
+        34,
+        240,
+        221
+      ],
+      "group": "upgrades",
+      "name": "Sentry Net",
+      "promptFile": "art/icons/upgrades/path-modules/prompts/sentrynet-v1.txt",
+      "sha256": "00d1f37ff42fdd920dd67ede5966550a097ed282b90c43f73d44d0b9f06eb283",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "harpoon",
+      "source": "art/icons/upgrades/path-modules/sources/harpoon-v1.png",
+      "runtime": "src/assets/icons/upgrades/harpoon.png",
+      "prompt": "Use case: stylized-concept. Asset type: isolated transparent NEON OVERDRIVE upgrade menu icon, 32\u201364 px display, square master. Input image: reference for established dark gunmetal, beveled machinery, glossy dark glass, restrained neon finish only; do not copy its rocket shape. Subject: HARPOON module, one heavy compact homing spear with a sharp mechanical harpoon head, thick armored shaft, tiny guidance fins and a small tether/coil detail. The weapon should read as a boss-hunting spear rather than an ordinary missile. Composition: single centered diagonal object, broad readable silhouette with clear transparent margin, occupies about 78% of square. Materials: dark navy gunmetal and dark glass with crisp bevels. Palette: red-magenta energy channels with restrained cyan/pale metal highlights; controlled glow. No environment, no badge or rarity frame, no text, letters, numbers, UI, shadow plane, particles, watermark, or background. Genuine transparent RGBA background, clean silhouette edges, readable at 32 px.",
+      "generator": "built-in imagegen",
+      "references": [
+        {
+          "path": "art/icons/upgrades/sources/missiles.png",
+          "sha256": "dd4b696943d1115763bf0de934f214e828debb4bbfa91feb0a7ab70c39e0bac3"
+        }
+      ],
+      "source_sha256": "72ddfbc1a3e2f813b618463dbbd389a2182e0a6fc54da044301556ed0b8c39c7",
+      "runtime_sha256": "1ea76f4380ab167128a96af83d115684311bf7cd68ae59637caeaf43557707f5",
+      "prompt_sha256": "51293ec81b7651f026f7a5e05a3997e5d60527ae660ed43e6bf53065bfefd879",
+      "export": "Pillow RGBA, fit within 256x256 preserving aspect ratio, centered transparent canvas, LANCZOS; no cropping or content edits.",
+      "size": [
+        256,
+        256
+      ],
+      "group": "upgrades",
+      "name": "Harpoon",
+      "promptFile": "art/icons/upgrades/path-modules/prompts/harpoon-v1.txt",
+      "sha256": "1ea76f4380ab167128a96af83d115684311bf7cd68ae59637caeaf43557707f5",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "leviathan",
+      "source": "art/icons/upgrades/path-modules/sources/leviathan-v1.png",
+      "runtime": "src/assets/icons/upgrades/leviathan.png",
+      "prompt": "Use case: stylized-concept. Asset type: isolated transparent NEON OVERDRIVE upgrade menu icon, square master readable at 32\u201364 px. Input image: reference only for dark gunmetal, crisp bevels, glossy dark glass and established neon finish; avoid copying missile silhouette. Subject: LEVIATHAN evolution of the Harpoon: three distinct heavy mechanical spears fanned in a tight volley, each with a recognizable piercing harpoon point and compact guidance fins; stronger, more imposing than the single base harpoon but still one unified icon silhouette. Centered, balanced triangular grouping, large spear heads, clear margins. Navy gunmetal, dark glass, red-magenta energy seams, restrained cyan and pale metal glints. No background, badge, frame, text, letters, numbers, UI, effects, shadow plane, particles or watermark. Genuine transparent RGBA, clean alpha, crisp readable silhouette.",
+      "generator": "built-in imagegen",
+      "references": [
+        {
+          "path": "art/icons/upgrades/path-modules/sources/harpoon-v1.png",
+          "sha256": "72ddfbc1a3e2f813b618463dbbd389a2182e0a6fc54da044301556ed0b8c39c7"
+        }
+      ],
+      "source_sha256": "d96f0f84f03755aa6ce662afced2642ea853a3c8f1b8e2af15b32a8d795fb169",
+      "runtime_sha256": "f3db95189faf7979d30f1431d50c2f692976645af08c57500ffcb8167cccefb4",
+      "prompt_sha256": "a2eee0853a376231d008f1ec48d02e548833350f435392a003c203956ade302c",
+      "export": "Pillow RGBA, fit within 256x256 preserving aspect ratio, centered transparent canvas, LANCZOS; no cropping or content edits.",
+      "size": [
+        256,
+        256
+      ],
+      "group": "upgrades",
+      "name": "Leviathan",
+      "promptFile": "art/icons/upgrades/path-modules/prompts/leviathan-v1.txt",
+      "sha256": "f3db95189faf7979d30f1431d50c2f692976645af08c57500ffcb8167cccefb4",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "capBloom",
+      "source": "art/icons/upgrades/path-modules/sources/capBloom-v1.png",
+      "runtime": "src/assets/icons/upgrades/capBloom.png",
+      "prompt": "Use case: stylized-concept. Asset type: isolated transparent NEON OVERDRIVE upgrade menu icon, square master readable at 32\u201364 px. Input image: accepted Capacitor Bloom-family reference for established proportions, materials and neon finish; create a clearly distinct bloom emitter. Subject: CAPACITOR BLOOM base module, a compact dark-gunmetal capacitor core opening into a clean radial ring of six small luminous shot nodes, like a flower made of mechanical prongs and energy apertures. Strong central capacitor, symmetric radial geometry, cohesive single silhouette, dark glass windows and crisp bevels. Palette predominantly deep violet and purple with restrained cyan and pale metal accents, controlled emissive light. No environment, badge, rarity frame, text, letters, numbers, UI, shadow plane, particles or watermark. Genuine transparent RGBA background, crisp clean edges, clear at 32px.",
+      "generator": "built-in imagegen",
+      "references": [
+        {
+          "path": "art/icons/upgrades/sources/capacitor.png",
+          "sha256": "64fa42e04e781e560572f91616fab98ad20a5f87235a32018cd9e1f47c2a72a7"
+        }
+      ],
+      "source_sha256": "fbd289ace08059b84731f5680b2a1b2aec3779d42a386a422144f1f104d5bc51",
+      "runtime_sha256": "94f31bf82599bffe592e5989e398cad3f548218e9b6ac8352daa395e0dd14620",
+      "prompt_sha256": "8c382feefe4421f0c274dd1fa50310f4620b1c134bae8db17bacabb515e08715",
+      "export": "Pillow RGBA, fit within 256x256 preserving aspect ratio, centered transparent canvas, LANCZOS; no cropping or content edits.",
+      "size": [
+        256,
+        256
+      ],
+      "group": "upgrades",
+      "name": "Capacitor Bloom",
+      "promptFile": "art/icons/upgrades/path-modules/prompts/capBloom-v1.txt",
+      "sha256": "94f31bf82599bffe592e5989e398cad3f548218e9b6ac8352daa395e0dd14620",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "overbloom",
+      "source": "art/icons/upgrades/path-modules/sources/overbloom-v2.png",
+      "runtime": "src/assets/icons/upgrades/overbloom.png",
+      "prompt": "Use case: stylized-concept. Asset type: isolated transparent NEON OVERDRIVE evolution menu icon, square master readable at 32\u201364 px. Input image: selected Capacitor Bloom base icon for identity; preserve its central purple capacitor heart, dark gunmetal and glossy dark glass, but make the evolved outline unmistakably different. Subject: OVERBLOOM evolution: same purple capacitor heart surrounded by a broad ring of exactly six large curved inward-facing homing petals or vanes. Each petal is a crescent-shaped armored scoop curving toward the center, with a bright purple targeting lens at its inner tip; the curved vanes dominate the silhouette, replacing the base design's straight radial beams/nodes. Broad six-petal flower silhouette visible even at 32px, with gaps between petals and clear central heart. Preserve restrained cyan/pale-metal highlights, controlled violet emissive accents. No straight radial spokes, no simple symmetric capsule arms, no environment, badge, frame, text, UI, detached projectiles, shadow plane, particles, watermark or background. Genuine transparent RGBA, crisp clean edges.",
+      "generator": "built-in imagegen",
+      "references": [
+        {
+          "path": "art/icons/upgrades/path-modules/sources/capBloom-v1.png",
+          "sha256": "fbd289ace08059b84731f5680b2a1b2aec3779d42a386a422144f1f104d5bc51"
+        }
+      ],
+      "source_sha256": "d9d367df513f102a3cd738f818a4c8abb24a4cf4d81d7238567c4e6dcfccc4a2",
+      "runtime_sha256": "aadd64f77e379f0867c98e949c03656ccd9732e149bd2a5a2f45839ba3198023",
+      "prompt_sha256": "895e6295964686f301313e6cdd2b088e7ae2a56023e3533339a3ee9494f28062",
+      "export": "Pillow RGBA, fit within 256x256 preserving aspect ratio, centered transparent canvas, LANCZOS; no cropping or content edits.",
+      "size": [
+        256,
+        256
+      ],
+      "group": "upgrades",
+      "name": "Overbloom",
+      "promptFile": "art/icons/upgrades/path-modules/prompts/overbloom-v2.txt",
+      "sha256": "aadd64f77e379f0867c98e949c03656ccd9732e149bd2a5a2f45839ba3198023",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "shock",
+      "source": "art/icons/upgrades/path-modules/sources/shock-v1.png",
+      "runtime": "src/assets/icons/upgrades/shock.png",
+      "prompt": "Use case: stylized-concept. Asset type: isolated transparent NEON OVERDRIVE upgrade menu icon, square master readable at 32\u201364 px. Input image: style reference only for beveled navy gunmetal, dark glass, compact high-quality game icon rendering. Subject: SHOCK ROUNDS ammunition upgrade, one oversized armored futuristic projectile cartridge with a blunt conductive nose, visible coil bands and a tiny branching lightning charge glyph worked into the casing (not floating effects). Clear single silhouette and bullet direction. Palette electric cyan and blue-white electrical accents against dark navy metal, restrained glow. No environment, badge, rarity frame, text, letters, numbers, UI, shadow plane, particles, detached lightning, watermark or background. Genuine transparent RGBA, clean edges, readable at 32px.",
+      "generator": "built-in imagegen",
+      "references": [
+        {
+          "path": "art/icons/upgrades/sources/cryo.png",
+          "sha256": "49e37e30b1f63eae54623440f0c997f6957499669dd5d519efef9d5f10d8611e"
+        }
+      ],
+      "source_sha256": "cac35640fa9d307e720bbec5e61ae1c8c9f260392b69f552ca9c97b8fc057f62",
+      "runtime_sha256": "8f12cb81a813c50b7007b3994adc9492f6d0f87231f4d921e74dea2ea62c44b5",
+      "prompt_sha256": "04e94bda577642bc96d5512afd676a20f0191829c26835282021a7b169cf0a68",
+      "export": "Pillow RGBA, fit within 256x256 preserving aspect ratio, centered transparent canvas, LANCZOS; no cropping or content edits.",
+      "size": [
+        256,
+        256
+      ],
+      "group": "upgrades",
+      "name": "Shock Rounds",
+      "promptFile": "art/icons/upgrades/path-modules/prompts/shock-v1.txt",
+      "sha256": "8f12cb81a813c50b7007b3994adc9492f6d0f87231f4d921e74dea2ea62c44b5",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "overcharge",
+      "source": "art/icons/upgrades/path-modules/sources/overcharge-v1.png",
+      "runtime": "src/assets/icons/upgrades/overcharge.png",
+      "prompt": "Use case: stylized-concept. Asset type: isolated transparent NEON OVERDRIVE upgrade menu icon, square master readable at 32\u201364 px. Input image: accepted capacitor reference for established materials and dark polished icon style. Subject: OVERCHARGE evolution of Shock Rounds, a compact charged power cell integrated with an armored ammunition core, distinctly upgraded via a larger multi-ring capacitor and three crisp branching arc channels connecting to small target nodes. One unified, bold silhouette. Dark navy gunmetal and dark glass, high energy electric cyan / blue-white accents, controlled glow; subtle violet details only. No environment, badge, rarity frame, text, letters, numbers, UI, shadow plane, particles, watermark or background. Genuine transparent RGBA, clean alpha edges, readable at 32px.",
+      "generator": "built-in imagegen",
+      "references": [
+        {
+          "path": "art/icons/upgrades/sources/capacitor.png",
+          "sha256": "64fa42e04e781e560572f91616fab98ad20a5f87235a32018cd9e1f47c2a72a7"
+        }
+      ],
+      "source_sha256": "772d1dbd2c6c3276fcd92d68ce73ca9c514f1873e7ffe48ad323cab35b3aad4d",
+      "runtime_sha256": "2c4921496a442054ffe3962e12a1b1df24bb9c4d41b313c9d251546f8ab9c0cd",
+      "prompt_sha256": "fe6034eefd27dce4fac7c0cd87fbad6f7ac3b0974e386a76fdb2940372a6856d",
+      "export": "Pillow RGBA, fit within 256x256 preserving aspect ratio, centered transparent canvas, LANCZOS; no cropping or content edits.",
+      "size": [
+        256,
+        256
+      ],
+      "group": "upgrades",
+      "name": "Overcharge",
+      "promptFile": "art/icons/upgrades/path-modules/prompts/overcharge-v1.txt",
+      "sha256": "2c4921496a442054ffe3962e12a1b1df24bb9c4d41b313c9d251546f8ab9c0cd",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "shockcore",
+      "source": "art/icons/items/sources/shockcore-v1.png",
+      "runtime": "src/assets/icons/items/shockcore.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE Shock Core gear icon, transparent square menu art shown at 32\u201364 pixels, runtime max 256px. Input image 1 is accepted Cryo Core STYLE AND FAMILY reference only. Create a distinct SHOCK CORE in that same sci-fi gear family: a compact upright cylindrical dark navy gunmetal cartridge, crisp broad beveled armor rings, dark glass containment chamber holding a bold branching electric bolt between two electrode poles. No ice or snowflakes. Electric cyan with a pale gold electrical heart, restrained magenta rim glints and gold fasteners. One clearly readable centered object with 8% transparent margins, three-quarter product illustration matching reference materials, restrained luminous edges not huge bloom. True RGBA transparent background. No ground shadow, text, letters, logos, labels, frames, watermark or checkerboard.",
+      "source_sha256": "b765c22f26ebe7fe7227c541df2bfe40b976d75338dbd57682c5de3276303421",
+      "runtime_sha256": "1b397422456d398831a035d8cab5cb262f0667d6d7f2272872969ceec671a22e",
+      "prompt_sha256": "7bebc06c6a15876e0de2f754fdf14b06064fdf36e6c913f7be1bd64e6306da4c",
+      "references": [
+        {
+          "path": "art/icons/items/sources/cryocore.png",
+          "sha256": "3dde77901a3e5efada25ecc691b46d6439427eb70522fc1b851ddb484accb41c"
+        }
+      ],
+      "export": "RGBA; fit entire source within 256px; Pillow Lanczos; preserve alpha",
+      "size": [
+        256,
+        256
+      ],
+      "group": "items",
+      "name": "Shock Core",
+      "promptFile": "art/icons/items/prompts/shockcore-v1.txt",
+      "sha256": "1b397422456d398831a035d8cab5cb262f0667d6d7f2272872969ceec671a22e",
       "width": 256,
       "height": 256
     }

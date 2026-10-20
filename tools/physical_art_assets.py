@@ -26,8 +26,11 @@ def export(selection_path):
             image = image.rotate(-rotation, expand=True)
         alpha = image.getchannel('A')
         bounds = alpha.point(lambda x: 255 if x > 32 else 0).getbbox()
-        if not bounds or alpha.getextrema() != (0, 255):
-            raise ValueError(f'{source}: genuine transparent/opaque pixels required')
+        low, high = alpha.getextrema()
+        # Generated RGBA can peak at 254. Preserve its authored alpha rather
+        # than normalizing the source merely to satisfy an export check.
+        if not bounds or low != 0 or high < 250:
+            raise ValueError(f'{source}: transparent and near-opaque pixels required')
         if min(bounds[0], bounds[1], image.width-bounds[2], image.height-bounds[3]) < 2:
             raise ValueError(f'{source}: source silhouette touches edge')
         size = spec['logicalSize']

@@ -1,6 +1,6 @@
 {
-  "assets": 188,
-  "transparentRgba": 188,
+  "assets": 207,
+  "transparentRgba": 207,
   "runtimeMaxEdge": 256,
   "sizes": {
     "(256, 196)": 1,
@@ -15,7 +15,7 @@
     "(256, 171)": 4,
     "(256, 223)": 1,
     "(256, 244)": 1,
-    "(256, 256)": 150,
+    "(256, 256)": 169,
     "(256, 229)": 1,
     "(256, 205)": 1,
     "(256, 253)": 2,
@@ -26,28 +26,38 @@
     "(256, 243)": 1,
     "(256, 249)": 1
   },
-  "sourceAndPromptPairs": 188,
+  "sourceAndPromptPairs": 207,
   "caseSensitiveFilenames": true,
   "groups": {
-    "upgrades": 75,
-    "items": 78,
+    "upgrades": 93,
+    "items": 79,
     "pilot": 21,
     "choices": 14
   },
-  "uniqueArtworkPixels": 188,
+  "uniqueArtworkPixels": 207,
   "catalogReferences": {
-    "loaded": 196,
-    "total": 196
+    "loaded": 217,
+    "total": 217
   },
   "integrationTests": {
-    "passed": 4,
-    "total": 4
+    "passed": 17,
+    "total": 17
   },
   "liveViewsChecked": [
-    "pilot",
-    "gear-inventory",
-    "gear-detail",
-    "upgrade-draft",
-    "overworld-map"
-  ]
+    "icon catalog normal and pixel",
+    "five physical path modules in top, side and chase cameras; base and evolved forms (30 simulations)"
+  ],
+  "menuLayoutAudit": {
+    "menus": [
+      "parts",
+      "reward",
+      "levelup"
+    ],
+    "viewports": [
+      "desktop 1280x800",
+      "phone 390x844"
+    ],
+    "result": "No layout shift"
+  },
+  "reviewNotes": "art/icons/upgrades/path-modules/review.md"
 }

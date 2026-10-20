@@ -29,7 +29,7 @@ test('module registry loads generated views and bakes the full logical footprint
   MockImage.all = []; MockImage.failUrl = null; const h = harness();
   try {
     const m = await import(`${url.href}?module-footprint`), fallback = { img: { procedural: true }, size: 30 };
-    assert.deepEqual(Object.keys(MODULE_ART).sort(), ['blade', 'drone', 'interceptor', 'mine', 'saw']);
+    assert.deepEqual(Object.keys(MODULE_ART).sort(), ['blade', 'drone', 'interceptor', 'marksman', 'mine', 'plate', 'pylon', 'salvager', 'saw', 'sentry']);
     assert.equal(m.moduleImage('blade', 'top', fallback), fallback);
     assert.equal(m.moduleImage('unknown', 'top', fallback), fallback);
     await m.prewarmModuleImages();
@@ -47,7 +47,7 @@ test('module registry loads generated views and bakes the full logical footprint
       assert.deepEqual(draw.slice(1), [-spec.size / 2, -spec.size / 2, spec.size, spec.size], `${id}/${view} fills its logical box`);
       if (view === 'side') assert.ok(record.transforms.some(call => call[0] === 'rotate' && call[1] === -Math.PI / 2));
     }
-    assert.equal(MockImage.all.length, 15);
+    assert.equal(MockImage.all.length, 30);
   } finally { h.restore(); }
 });
 
@@ -58,19 +58,19 @@ test('module decode failure and bake failure both keep the affected camera fallb
     await m.prewarmModuleImages();
     assert.equal(m.moduleImage('mine', 'side', fallback), fallback);
     assert.equal(m.moduleImage('mine', 'top', fallback).generated, true);
-    assert.equal(MockImage.all.length, 15, 'prewarming caches both successful and failed camera attempts');
+    assert.equal(MockImage.all.length, 30, 'prewarming caches both successful and failed camera attempts');
   } finally { h.restore(); }
   MockImage.all = []; const broken = harness({ noContext: true });
   try {
     MockImage.failUrl = null; const m = await import(`${url.href}?module-bake-failure`), fallback = { img: { procedural: true }, size: 30 };
     await m.prewarmModuleImages();
     assert.equal(m.moduleImage('blade', 'top', fallback), fallback);
-    assert.equal(MockImage.all.length, 15, 'bake failures do not trigger render-loop reloads');
+    assert.equal(MockImage.all.length, 30, 'bake failures do not trigger render-loop reloads');
   } finally { broken.restore(); }
 });
 
 test('module dimensions and mine visible artwork preserve gameplay scale', () => {
-  assert.deepEqual(Object.fromEntries(Object.entries(MODULE_ART).map(([id, spec]) => [id, spec.size])), { blade: 30, drone: 26, interceptor: 22, mine: 24, saw: 30 });
+  assert.deepEqual(Object.fromEntries(Object.entries(MODULE_ART).map(([id, spec]) => [id, spec.size])), { blade: 30, drone: 26, interceptor: 22, mine: 24, saw: 30, plate: 22, marksman: 24, pylon: 24, sentry: 26, salvager: 24 });
   assert.equal(MODULE_ART.mine.visible, 14);
 });
 

@@ -12,6 +12,8 @@ import { ring, sparks } from './fx.js';
 import { sfx } from '../core/audio.js';
 import { ultCap } from './pilot.js';
 import { dropSalvage } from './economy.js';
+import { moduleImage } from '../render/moduleImages.js';
+import { sv } from './stageview.js';
 
 const lvl = (arr, lv) => arr[Math.min(arr.length, lv) - 1];
 const evo = (p, id) => (p.up[id] || 0) > 0;
@@ -313,6 +315,7 @@ function pylonLinks(p, x, lv, grid) {
 }
 
 const spr = (ctx, s, x, y, a = 0, alpha = 1) => {
+  ctx.globalCompositeOperation = s.generated ? 'source-over' : 'lighter';
   ctx.globalAlpha = alpha;
   ctx.save();
   ctx.translate(x, y);
@@ -354,15 +357,19 @@ export function drawExtModules(ctx, p) {
       ctx.lineTo(bx, by);
       ctx.stroke();
     }
-    for (const py of x.pylons) spr(ctx, S.pylon, py.x, py.y, 0, Math.min(1, py.life * 2));
+    const sprite = moduleImage('pylon', sv.mode, S.pylon);
+    for (const py of x.pylons) spr(ctx, sprite, py.x, py.y, 0, Math.min(1, py.life * 2));
   }
   // Sentries
-  for (const s of x.sentries) spr(ctx, S.sentry, s.x, s.y, s.ang + Math.PI / 2, Math.min(1, s.life * 2));
+  const sentry = moduleImage('sentry', sv.mode, S.sentry);
+  for (const s of x.sentries) spr(ctx, sentry, s.x, s.y, s.ang + Math.PI / 2, Math.min(1, s.life * 2));
   // Shield Plates (dim while recharging)
-  for (const pl of x.plates) if (pl.x !== undefined) spr(ctx, S.plate, pl.x, pl.y, Math.atan2(pl.y - p.y, pl.x - p.x) + Math.PI / 2, pl.cd > 0 ? 0.25 : 1);
+  const plate = moduleImage('plate', sv.mode, S.plate);
+  for (const pl of x.plates) if (pl.x !== undefined) spr(ctx, plate, pl.x, pl.y, Math.atan2(pl.y - p.y, pl.x - p.x) + Math.PI / 2, pl.cd > 0 ? 0.25 : 1);
   // Marksman Drone, its sight line and its tracer
   if (p.up.marksman && x.mpos) {
-    spr(ctx, S.marksman, x.mpos.x, x.mpos.y);
+    spr(ctx, moduleImage('marksman', sv.mode, S.marksman), x.mpos.x, x.mpos.y);
+    ctx.globalCompositeOperation = 'lighter';
     if (x.mark && !x.mark.dead) {
       ctx.globalAlpha = 0.35;
       ctx.strokeStyle = '#ffe14d';
@@ -385,7 +392,8 @@ export function drawExtModules(ctx, p) {
     }
   }
   // Salvage Drones
-  for (const d of x.salv) spr(ctx, S.salvager, d.x, d.y, d.ang + Math.PI / 2);
+  const salvager = moduleImage('salvager', sv.mode, S.salvager);
+  for (const d of x.salv) spr(ctx, salvager, d.x, d.y, d.ang + Math.PI / 2);
   ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = 'source-over';
 }

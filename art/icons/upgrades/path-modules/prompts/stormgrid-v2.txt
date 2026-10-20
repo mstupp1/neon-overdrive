@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: isolated NEON OVERDRIVE upgrade menu icon, evolved Tesla pylon module
+Input images: Image 1 is the accepted TeslaPylons family identity and dark beveled metal finish. Image 2 references the game's cyan electrical visual language. Evolve the module into a visually distinct square four-node network; do not retain the base icon's triangular three-node arrangement.
+Scene/backdrop: transparent.
+Subject: STORMGRID, a compact square device with exactly four distinct cyan electrode towers at the four corners of a square gunmetal platform, connected by two clear diagonal crossing arcs forming an X across a central node. The four-corner square silhouette must remain unmistakable at 32 pixels.
+Style/medium: polished compact 3D industrial sci-fi game illustration, dark navy glass and gunmetal, crisp bevels and restrained cyan/magenta/gold accents.
+Composition/framing: centered single square-network object, transparent margin, clear silhouette at 32px.
+Lighting/mood: controlled cyan arc glow only along the two diagonals, crisp metal highlights; no haze.
+Color palette: ice cyan as mechanic color with small gold and magenta accents.
+Materials/textures: beveled dark casing, four small insulated electrode housings, bright clean diagonal energy lines.
+Constraints: actual transparent alpha; exactly four corner electrodes and two crossing diagonal arcs; no triangular 3-node arrangement, no text, frame, card, badge, watermark, backdrop or extra device.

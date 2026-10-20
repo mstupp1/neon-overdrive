@@ -1,0 +1,169 @@
+{
+  "method": "built-in imagegen; deterministic Pillow export",
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/modules/pylon/sources/top-v2.png",
+      "prompt": "art/modules/pylon/prompts/top-v2.txt",
+      "runtime": "src/assets/modules/pylon/top-v1.png",
+      "logicalSize": 24,
+      "visibleExtent": 16,
+      "references": [
+        {
+          "path": "art/modules/pylon/sources/chase-v1.png",
+          "sha256": "febcc7ebaade21d8e51ebfcbba88bc6e933b6db569cb8521aeccb59c0ca9b226"
+        },
+        {
+          "path": "src/assets/modules/drone/top-v1.png",
+          "sha256": "d243158a8cf775443c06815787b8c2b601b114a5801d7909df06ab14c81d8ae2"
+        }
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        627.0,
+        634.5
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        482,
+        482
+      ],
+      "offset": [
+        15,
+        12
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "cd7191fbd6bb60b5b5211a45c7cdc23396d913f69a7a673c7c157b87ecffb075",
+      "runtime_sha256": "5f0fe78ec2be9a5da0f7f0e619ebdfc79f4d16634dad910e6e1ca41e7f0899be",
+      "prompt_sha256": "93a66a98d3c36c581dbebb1c5ae091045c494531af89a68152fb44d3c7ca00af",
+      "alphaBounds": [
+        83,
+        89,
+        458,
+        485
+      ]
+    },
+    {
+      "camera": "side",
+      "cameraIntent": "Stationary compact pylon, true right-facing profile",
+      "source": "art/modules/pylon/sources/side-v2.png",
+      "prompt": "art/modules/pylon/prompts/side-v2.txt",
+      "runtime": "src/assets/modules/pylon/side-v1.png",
+      "logicalSize": 24,
+      "visibleExtent": 16,
+      "references": [
+        {
+          "path": "art/icons/upgrades/path-modules/sources/teslaPylons-v1.png",
+          "sha256": "5f250b9d60eefdaf73d8f668418b92cc9564b1d986cf269934246090636f0860"
+        },
+        {
+          "path": "src/assets/modules/drone/side-v1.png",
+          "sha256": "25dbe85b1378f256615cae991da121724a28d8108ab5c57534e22cd0209e3e22"
+        }
+      ],
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "orientedSourceSize": [
+        1536,
+        1024
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        768.0,
+        533.0
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        558,
+        372
+      ],
+      "offset": [
+        -23,
+        62
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "e2566366dedf14f6e5dc723e6125534249803d70ab823d5d5c118d7639a6acd7",
+      "runtime_sha256": "7bfd005d894c90f849bc51a03c23889567c49b5ae044eb84bbda87d8afeabab1",
+      "prompt_sha256": "97e9e61e7c2df60283c0734576c5f9424e21aaa37a520f85beb6a2ca4619bb7d",
+      "alphaBounds": [
+        3,
+        116,
+        430,
+        434
+      ]
+    },
+    {
+      "camera": "chase",
+      "cameraIntent": "Player rear pursuit, pylon viewed from behind toward battle",
+      "source": "art/modules/pylon/sources/chase-v1.png",
+      "prompt": "art/modules/pylon/prompts/chase-v1.txt",
+      "runtime": "src/assets/modules/pylon/chase-v1.png",
+      "logicalSize": 24,
+      "visibleExtent": 16,
+      "references": [
+        {
+          "path": "art/icons/upgrades/path-modules/sources/teslaPylons-v1.png",
+          "sha256": "5f250b9d60eefdaf73d8f668418b92cc9564b1d986cf269934246090636f0860"
+        },
+        {
+          "path": "src/assets/modules/drone/chase-v1.png",
+          "sha256": "ec1866c9d4103fd249e2f595ad6ba01192783adf21e3dba48a33b2c4270e2943"
+        }
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        627.0,
+        718.5
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        430,
+        430
+      ],
+      "offset": [
+        41,
+        10
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "febcc7ebaade21d8e51ebfcbba88bc6e933b6db569cb8521aeccb59c0ca9b226",
+      "runtime_sha256": "e212309bae8c78f90646c5dfa6467f19126c6b8b39e9fec5cdf0b9e91a3ee7d3",
+      "prompt_sha256": "0a33c0a9d91ad1a28a9b1ad77f55e7bfa29dbc378cb989e15a77f4fc2a401cb0",
+      "alphaBounds": [
+        83,
+        89,
+        434,
+        437
+      ]
+    }
+  ]
+}

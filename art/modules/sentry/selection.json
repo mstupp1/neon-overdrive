@@ -1,0 +1,33 @@
+{
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/modules/sentry/sources/top-v1.png",
+      "prompt": "art/modules/sentry/prompts/top-v1.txt",
+      "runtime": "src/assets/modules/sentry/top-v1.png",
+      "logicalSize": 26,
+      "visibleExtent": 18,
+      "references": ["art/icons/upgrades/path-modules/sources/sentry-v1.png", "src/assets/modules/drone/top-v1.png"]
+    },
+    {
+      "camera": "side",
+      "cameraIntent": "One-piece turret, right-facing profile",
+      "source": "art/modules/sentry/sources/side-v1.png",
+      "prompt": "art/modules/sentry/prompts/side-v1.txt",
+      "runtime": "src/assets/modules/sentry/side-v1.png",
+      "logicalSize": 26,
+      "visibleExtent": 18,
+      "references": ["art/icons/upgrades/path-modules/sources/sentry-v1.png", "src/assets/modules/drone/side-v1.png"]
+    },
+    {
+      "camera": "chase",
+      "cameraIntent": "One-piece turret, rear pursuit view",
+      "source": "art/modules/sentry/sources/chase-v1.png",
+      "prompt": "art/modules/sentry/prompts/chase-v1.txt",
+      "runtime": "src/assets/modules/sentry/chase-v1.png",
+      "logicalSize": 26,
+      "visibleExtent": 18,
+      "references": ["art/icons/upgrades/path-modules/sources/sentry-v1.png", "src/assets/modules/drone/chase-v1.png"]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+# Tesla pylon module artwork
+
+One stationary Tesla pylon uses three camera-specific static images with a shared two-emitter identity. The selected overhead and pursuit images show a round disc with exactly two cyan emitter caps; the side view shows one emitter clearly and the other partly occluded by the true profile. All three use dark beveled gunmetal with small magenta and gold accents. No lightning or projectile is baked into the sprite.
+
+Method: built-in imagegen with accepted drone camera images as view-only references and the TeslaPylons icon as the identity reference. The selected overhead view is `sources/top-v2.png`, the selected side view is `sources/side-v2.png` (original generated alpha preserved, including its near-opaque maximum of 254), and pursuit is `sources/chase-v1.png`. Superseded top-v1 and side-v1 are retained under `sources/`; prompts and reference hashes are recorded in `manifest.json`.
+
+Runtime exports are transparent 512px RGBA images with a 24-unit logical box and 16-unit visible extent. Each selected source was visually reviewed at enlarged size and in the assembled three-camera sheet. Alpha and export bounds are recorded in the manifest. Integration review passed: generated views loaded in all three cameras; base and evolved live simulations passed with finite positions and no console warnings or errors. See [combined review](../../icons/upgrades/path-modules/review.md) for checks and limitations.

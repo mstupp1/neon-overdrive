@@ -1,0 +1,34 @@
+{
+  "assets": [
+    {
+      "camera": "top",
+      "cameraIntent": "Direct overhead, nose up with visible precision muzzle",
+      "source": "art/modules/marksman/sources/top-v1.png",
+      "prompt": "art/modules/marksman/prompts/top-v1.txt",
+      "runtime": "src/assets/modules/marksman/top-v1.png",
+      "logicalSize": 24,
+      "visibleExtent": 16,
+      "references": ["art/modules/drone/sources/top-v1.png", "art/modules/interceptor/sources/top-v1.png"]
+    },
+    {
+      "camera": "side",
+      "cameraIntent": "True right-facing side profile, barrel horizontal",
+      "source": "art/modules/marksman/sources/side-v1.png",
+      "prompt": "art/modules/marksman/prompts/side-v1.txt",
+      "runtime": "src/assets/modules/marksman/side-v1.png",
+      "logicalSize": 24,
+      "visibleExtent": 16,
+      "references": ["art/modules/marksman/sources/top-v1.png", "art/ships/vector/sources/side-v1.png"]
+    },
+    {
+      "camera": "chase",
+      "cameraIntent": "Rear pursuit, engine faces toward viewer and nose recedes",
+      "source": "art/modules/marksman/sources/chase-v2.png",
+      "prompt": "art/modules/marksman/prompts/chase-v2.txt",
+      "runtime": "src/assets/modules/marksman/chase-v1.png",
+      "logicalSize": 24,
+      "visibleExtent": 16,
+      "references": ["art/modules/interceptor/sources/chase-v2.png", "art/modules/marksman/sources/side-v1.png"]
+    }
+  ]
+}

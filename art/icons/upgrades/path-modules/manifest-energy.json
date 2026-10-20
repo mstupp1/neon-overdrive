@@ -1,0 +1,132 @@
+{
+  "group": "path-modules-energy",
+  "generator": "built-in imagegen",
+  "assets": [
+    {
+      "id": "harpoon",
+      "source": "art/icons/upgrades/path-modules/sources/harpoon-v1.png",
+      "runtime": "src/assets/icons/upgrades/harpoon.png",
+      "prompt": "art/icons/upgrades/path-modules/prompts/harpoon-v1.txt",
+      "generator": "built-in imagegen",
+      "references": [
+        {
+          "path": "art/icons/upgrades/sources/missiles.png",
+          "sha256": "dd4b696943d1115763bf0de934f214e828debb4bbfa91feb0a7ab70c39e0bac3"
+        }
+      ],
+      "source_sha256": "72ddfbc1a3e2f813b618463dbbd389a2182e0a6fc54da044301556ed0b8c39c7",
+      "runtime_sha256": "1ea76f4380ab167128a96af83d115684311bf7cd68ae59637caeaf43557707f5",
+      "prompt_sha256": "51293ec81b7651f026f7a5e05a3997e5d60527ae660ed43e6bf53065bfefd879",
+      "export": "Pillow RGBA, fit within 256x256 preserving aspect ratio, centered transparent canvas, LANCZOS; no cropping or content edits.",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "id": "leviathan",
+      "source": "art/icons/upgrades/path-modules/sources/leviathan-v1.png",
+      "runtime": "src/assets/icons/upgrades/leviathan.png",
+      "prompt": "art/icons/upgrades/path-modules/prompts/leviathan-v1.txt",
+      "generator": "built-in imagegen",
+      "references": [
+        {
+          "path": "art/icons/upgrades/path-modules/sources/harpoon-v1.png",
+          "sha256": "72ddfbc1a3e2f813b618463dbbd389a2182e0a6fc54da044301556ed0b8c39c7"
+        }
+      ],
+      "source_sha256": "d96f0f84f03755aa6ce662afced2642ea853a3c8f1b8e2af15b32a8d795fb169",
+      "runtime_sha256": "f3db95189faf7979d30f1431d50c2f692976645af08c57500ffcb8167cccefb4",
+      "prompt_sha256": "a2eee0853a376231d008f1ec48d02e548833350f435392a003c203956ade302c",
+      "export": "Pillow RGBA, fit within 256x256 preserving aspect ratio, centered transparent canvas, LANCZOS; no cropping or content edits.",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "id": "capBloom",
+      "source": "art/icons/upgrades/path-modules/sources/capBloom-v1.png",
+      "runtime": "src/assets/icons/upgrades/capBloom.png",
+      "prompt": "art/icons/upgrades/path-modules/prompts/capBloom-v1.txt",
+      "generator": "built-in imagegen",
+      "references": [
+        {
+          "path": "art/icons/upgrades/sources/capacitor.png",
+          "sha256": "64fa42e04e781e560572f91616fab98ad20a5f87235a32018cd9e1f47c2a72a7"
+        }
+      ],
+      "source_sha256": "fbd289ace08059b84731f5680b2a1b2aec3779d42a386a422144f1f104d5bc51",
+      "runtime_sha256": "94f31bf82599bffe592e5989e398cad3f548218e9b6ac8352daa395e0dd14620",
+      "prompt_sha256": "8c382feefe4421f0c274dd1fa50310f4620b1c134bae8db17bacabb515e08715",
+      "export": "Pillow RGBA, fit within 256x256 preserving aspect ratio, centered transparent canvas, LANCZOS; no cropping or content edits.",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "id": "overbloom",
+      "source": "art/icons/upgrades/path-modules/sources/overbloom-v2.png",
+      "runtime": "src/assets/icons/upgrades/overbloom.png",
+      "prompt": "art/icons/upgrades/path-modules/prompts/overbloom-v2.txt",
+      "generator": "built-in imagegen",
+      "references": [
+        {
+          "path": "art/icons/upgrades/path-modules/sources/capBloom-v1.png",
+          "sha256": "fbd289ace08059b84731f5680b2a1b2aec3779d42a386a422144f1f104d5bc51"
+        }
+      ],
+      "source_sha256": "d9d367df513f102a3cd738f818a4c8abb24a4cf4d81d7238567c4e6dcfccc4a2",
+      "runtime_sha256": "aadd64f77e379f0867c98e949c03656ccd9732e149bd2a5a2f45839ba3198023",
+      "prompt_sha256": "895e6295964686f301313e6cdd2b088e7ae2a56023e3533339a3ee9494f28062",
+      "export": "Pillow RGBA, fit within 256x256 preserving aspect ratio, centered transparent canvas, LANCZOS; no cropping or content edits.",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "id": "shock",
+      "source": "art/icons/upgrades/path-modules/sources/shock-v1.png",
+      "runtime": "src/assets/icons/upgrades/shock.png",
+      "prompt": "art/icons/upgrades/path-modules/prompts/shock-v1.txt",
+      "generator": "built-in imagegen",
+      "references": [
+        {
+          "path": "art/icons/upgrades/sources/cryo.png",
+          "sha256": "49e37e30b1f63eae54623440f0c997f6957499669dd5d519efef9d5f10d8611e"
+        }
+      ],
+      "source_sha256": "cac35640fa9d307e720bbec5e61ae1c8c9f260392b69f552ca9c97b8fc057f62",
+      "runtime_sha256": "8f12cb81a813c50b7007b3994adc9492f6d0f87231f4d921e74dea2ea62c44b5",
+      "prompt_sha256": "04e94bda577642bc96d5512afd676a20f0191829c26835282021a7b169cf0a68",
+      "export": "Pillow RGBA, fit within 256x256 preserving aspect ratio, centered transparent canvas, LANCZOS; no cropping or content edits.",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "id": "overcharge",
+      "source": "art/icons/upgrades/path-modules/sources/overcharge-v1.png",
+      "runtime": "src/assets/icons/upgrades/overcharge.png",
+      "prompt": "art/icons/upgrades/path-modules/prompts/overcharge-v1.txt",
+      "generator": "built-in imagegen",
+      "references": [
+        {
+          "path": "art/icons/upgrades/sources/capacitor.png",
+          "sha256": "64fa42e04e781e560572f91616fab98ad20a5f87235a32018cd9e1f47c2a72a7"
+        }
+      ],
+      "source_sha256": "772d1dbd2c6c3276fcd92d68ce73ca9c514f1873e7ffe48ad323cab35b3aad4d",
+      "runtime_sha256": "2c4921496a442054ffe3962e12a1b1df24bb9c4d41b313c9d251546f8ab9c0cd",
+      "prompt_sha256": "fe6034eefd27dce4fac7c0cd87fbad6f7ac3b0974e386a76fdb2940372a6856d",
+      "export": "Pillow RGBA, fit within 256x256 preserving aspect ratio, centered transparent canvas, LANCZOS; no cropping or content edits.",
+      "size": [
+        256,
+        256
+      ]
+    }
+  ]
+}
