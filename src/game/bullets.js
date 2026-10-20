@@ -108,7 +108,8 @@ export function updatePlayerBullets(dt) {
         b.hits.length = 0;
         sparks(b.x < (L + R) / 2 ? L : R, b.y, '#ffb066', 3, 140);
       }
-      if (b.life <= 0 || !inField(b.x, b.y, 30)) b.dead = true;
+      // The chase view lets shots fly on past the far edge into the distance (view.farReach, stageview.js).
+      if (b.life <= 0 || !inField(b.x, b.y < 0 ? b.y + view.farReach : b.y, 30)) b.dead = true;
     }
     if (b.dead) {
       pFree.push(b);
@@ -164,6 +165,99 @@ export function drawPlayerBullets(ctx, k) {
   ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = 'source-over';
 }
+
+// Chase view (stageview.js): shots stand up as billboards at their own depth instead of lying in the warped flight
+// plane, which squashed them flat. at(x, y, out) gives the device-px anchor, the scale there (out.s) and a fade
+// (out.a). Heads keep their shape at that scale; the trail runs along the projected flight path, foreshortened
+// (never shorter than a share of its width scale, so far shots keep a readable streak).
+const A0 = {};
+const A1 = {};
+// Projected flight direction at b: sets A1.c / A1.sn (screen rotation, local -y along the flight) and A1.L (device px
+// per virtual unit along it). Returns false for a shot at rest.
+function screenHeading(b, at) {
+  const v2 = b.vx * b.vx + b.vy * b.vy;
+  if (v2 === 0) return false;
+  const inv = 6 / Math.sqrt(v2);
+  at(b.x + b.vx * inv, b.y + b.vy * inv, A1);
+  const jx = (A1.x - A0.x) / 6;
+  const jy = (A1.y - A0.y) / 6;
+  const L = Math.hypot(jx, jy);
+  if (L < 1e-4) return false;
+  A1.c = -jy / L;
+  A1.sn = jx / L;
+  A1.L = L;
+  return true;
+}
+export function drawPlayerBulletsAt(ctx, at) {
+  ctx.globalCompositeOperation = 'lighter';
+  const T = G.time;
+  for (const b of G.pBullets) {
+    at(b.x, b.y, A0);
+    if (A0.a <= 0.01) continue;
+    const s = b.spr;
+    const k = A0.s;
+    const sz = s.size * b.scale;
+    ctx.globalAlpha = b.alpha * A0.a;
+    const moving = screenHeading(b, at);
+    const c = moving ? A1.c : 1;
+    const sn = moving ? A1.sn : 0;
+    const fi = s.frames ? (T * s.fps + b.seed) | 0 : 0;
+    if (s.trails && moving) {
+      const len = s.tl * b.scale * Math.min(1, b.age * 12 + 0.2);
+      const w = s.tw * b.scale;
+      const L = Math.max(A1.L, k * 0.35);
+      ctx.setTransform(c * k, sn * k, -sn * L, c * L, A0.x, A0.y);
+      ctx.drawImage(s.trails[fi % s.nt], -w / 2, -1, w, len);
+    }
+    const img = s.frames ? s.frames[fi % s.nf] : s.img;
+    if (s.spin) {
+      const a = T * s.spin + b.seed;
+      const rc = Math.cos(a) * k;
+      const rs = Math.sin(a) * k;
+      ctx.setTransform(rc, rs, -rs, rc, A0.x, A0.y);
+    } else if (!moving || (b.kind === 'orb' && !s.frames)) ctx.setTransform(k, 0, 0, k, A0.x, A0.y);
+    else ctx.setTransform(c * k, sn * k, -sn * k, c * k, A0.x, A0.y);
+    ctx.drawImage(img, -sz / 2, -sz / 2, sz, sz);
+  }
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+}
+export function drawEnemyBulletsAt(ctx, at) {
+  const T = G.time;
+  const ox = view.ox;
+  const oy = view.oy;
+  for (const b of G.eBullets) {
+    if (b.delay > 0) continue;
+    at(b.x, b.y, A0);
+    if (A0.a <= 0.01) continue;
+    const k = A0.s;
+    ctx.globalAlpha = A0.a;
+    if (b.hp > 0) {
+      // Armoured shots: the usual drawing, at this one's anchor and scale.
+      view.ox = A0.x - b.x * k;
+      view.oy = A0.y - b.y * k;
+      ONE[0] = b;
+      drawArmored(ctx, k, T, ONE);
+      continue;
+    }
+    const s = b.spr;
+    if (b.rotate && screenHeading(b, at)) {
+      // Needles / torpedoes point along their projected path, a little foreshortened.
+      const L = Math.max(A1.L, k * 0.6);
+      ctx.setTransform(A1.c * k, A1.sn * k, -A1.sn * L, A1.c * L, A0.x, A0.y);
+      ctx.drawImage(s.img, -s.half, -s.half, s.size, s.size);
+    } else {
+      const grow = b.t < 0.08 ? 0.6 + b.t * 5 : 1 + 0.07 * Math.sin(T * 13 + b.seed);
+      const sz = s.size * grow;
+      ctx.setTransform(k, 0, 0, k, A0.x, A0.y);
+      ctx.drawImage(s.img, -sz / 2, -sz / 2, sz, sz);
+    }
+  }
+  view.ox = ox;
+  view.oy = oy;
+  ctx.globalAlpha = 1;
+}
+const ONE = [null];
 
 // --- Enemy bullets ----------------------------------------------------------------
 
@@ -326,9 +420,9 @@ export function drawEnemyBullets(ctx, k) {
 
 // Shootable projectiles: armoured body (white on a hit), a turning lime target ring, an HP arc, and for shells a fuse
 // light that blinks faster as it runs out.
-function drawArmored(ctx, k, T) {
+function drawArmored(ctx, k, T, list = G.eBullets) {
   const tgt = S.eb_target;
-  for (const b of G.eBullets) {
+  for (const b of list) {
     if (b.delay > 0 || !(b.hp > 0)) continue;
     const flashed = b.flash > 0;
     const s = b.type === 'torpedo' ? (flashed ? S.eb_torpedo_flash : b.spr) : b.spr;
@@ -351,7 +445,7 @@ function drawArmored(ctx, k, T) {
   ctx.setTransform(k, 0, 0, k, view.ox, view.oy);
   // HP arcs and fuse lights in one pass, plain transform.
   ctx.lineCap = 'round';
-  for (const b of G.eBullets) {
+  for (const b of list) {
     if (b.delay > 0 || !(b.hp > 0)) continue;
     const R = b.r + 11;
     const f = Math.max(0, b.hp / b.maxHp);
