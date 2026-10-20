@@ -54,6 +54,28 @@ export function botControl() {
     danger += w;
     if (bm.tele <= 0 && d < bm.w * 0.8 + p.r + 6) dash = true;
   }
+  // Boss artillery marks and the WARDEN ram lane: get out before they land.
+  const boss = G.boss;
+  if (boss && boss.marks) {
+    for (const m of boss.marks) {
+      const dx = p.x - m.x;
+      const dy = p.y - m.y;
+      const d = Math.hypot(dx, dy) || 1;
+      const lim = m.r + 40;
+      if (d > lim) continue;
+      const w = 1 + ((lim - d) / lim) * 2.5;
+      fx += (dx / d) * w;
+      fy += (dy / d) * w;
+      danger += w;
+    }
+  }
+  if (boss && boss.ram && boss.ram.st !== 'back') {
+    const dx = p.x - boss.ram.x;
+    if (Math.abs(dx) < 130 && p.y > boss.y - 40) {
+      fx += Math.sign(dx || 1) * 3;
+      danger += 3;
+    }
+  }
   if (!sv.active) {
     const o = obstacleSteer(p);
     fx += o.fx;

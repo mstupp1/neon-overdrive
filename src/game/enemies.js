@@ -378,7 +378,11 @@ const BEHAVIOR = {
 
 // --- Step 6a behaviours -------------------------------------------------------------
 
-// Carrier: creeps down to a hover, then opens its bays (telegraphed by flashing) and launches 3 swarm pods that dive.
+// Carrier: creeps down to a hover, then works through its deck: bay launches (3 swarm pods that dive, telegraphed by
+// the doors flashing), flak fans from its side guns, and a shootable homing torpedo out of the bay. Leaves after
+// CARRIER_ACTS actions if it is still alive.
+const CARRIER_DECK = ['bay', 'flak', 'torpedo', 'flak'];
+const CARRIER_ACTS = 9;
 BEHAVIOR.carrier = function carrier(e, dt) {
   const fr = Math.sqrt(G.director.diff.fireRate);
   if (e.state === 'enter') {
@@ -386,25 +390,44 @@ BEHAVIOR.carrier = function carrier(e, dt) {
     e.x += Math.sin(e.t * 0.6 + e.ph) * 10 * dt;
     if (e.y >= e.ty) {
       e.state = 'hold';
-      e.fireT = 1.4;
+      e.fireT = 1.2;
     }
   } else if (e.state === 'hold') {
     e.x = clamp(e.x + Math.sin(e.t * 0.6 + e.ph) * 16 * dt, 40, view.W - 40);
     e.fireT -= dt * fr;
-    e.carrierDoors = e.fireT < 0.5 ? clamp(1 - e.fireT / 0.5, 0, 1) : 0;
-    if (e.fireT < 0.5) e.flash = Math.sin(e.t * 45) > 0 ? 0.05 : 0; // bay-open warning
+    const act = CARRIER_DECK[e.launches % CARRIER_DECK.length];
+    const bay = act !== 'flak';
+    e.carrierDoors = bay && e.fireT < 0.5 ? clamp(1 - e.fireT / 0.5, 0, 1) : 0;
+    if (e.fireT < (bay ? 0.5 : 0.3)) e.flash = Math.sin(e.t * 45) > 0 ? 0.05 : 0; // bay-open / guns-hot warning
     if (e.fireT <= 0) {
-      e.carrierDoors = 0; // doors close as the pods launch
-      e.fireT = 3.8;
+      e.carrierDoors = 0; // doors close as the bay fires
       e.launches++;
-      for (let i = -1; i <= 1; i++) {
-        const tx = clamp(e.x + i * 40, 20, view.W - 20);
-        const pod = spawnEnemy('swarm', e.x + i * 10, e.y + 18, { mv: 'dive', tx, ty: e.y + 62 + Math.abs(i) * 10 });
-        pod.entered = true;
+      if (act === 'bay') {
+        e.fireT = 1.7;
+        const n = e.elite ? 2 : 1;
+        for (let i = -n; i <= n; i++) {
+          const tx = clamp(e.x + i * 40, 20, view.W - 20);
+          const pod = spawnEnemy('swarm', e.x + i * 10, e.y + 18, { mv: 'dive', tx, ty: e.y + 62 + Math.abs(i) * 10 });
+          pod.entered = true;
+        }
+        sparks(e.x, e.y + 20, e.color, 10, 190, Math.PI / 2, 1.6);
+        sfx.zap();
+      } else if (act === 'flak') {
+        e.fireT = 1.4;
+        const cnt = e.elite ? 5 : 3;
+        for (const s of [-1, 1]) {
+          const gx = e.x + s * 24;
+          fan(gx, e.y + 8, aimAt(gx, e.y + 8), cnt, 0.34 + cnt * 0.04, 140, 'orb');
+          sparks(gx, e.y + 8, e.color, 4, 140, Math.PI / 2, 0.8);
+        }
+      } else {
+        e.fireT = 1.6;
+        const hp = 6 * Math.sqrt(G.director.diff.hp);
+        shoot(e.x, e.y + 22, aimAt(e.x, e.y + 22), 60, 'torpedo', { hp, turn: 1.5, turnTime: 2.8, acc: 60, maxSpeed: 175 });
+        sparks(e.x, e.y + 22, e.color, 8, 170, Math.PI / 2, 1.2);
+        sfx.zap();
       }
-      sparks(e.x, e.y + 20, e.color, 10, 190, Math.PI / 2, 1.6);
-      sfx.zap();
-      if (e.launches >= (e.elite ? 4 : 3)) e.state = 'leave';
+      if (e.launches >= CARRIER_ACTS + (e.elite ? 4 : 0)) e.state = 'leave';
     }
   } else {
     e.vy += 120 * dt;

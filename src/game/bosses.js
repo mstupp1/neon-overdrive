@@ -15,7 +15,7 @@ import { bossPayout } from './economy.js';
 import { rollRelicDrop } from './collectables.js';
 import { rollGearDrop } from './loot.js';
 import { sfx } from '../core/audio.js';
-import { addScore } from './player.js';
+import { addScore, hurtPlayer } from './player.js';
 import { sv } from './stageview.js';
 import { MINI_ATTACKS, miniById, resetMini, miniBurst } from './minibosses.js';
 import { drawMini } from '../render/miniArt.js';
@@ -201,11 +201,201 @@ const COPY = {
   },
 };
 
+// --- Shared attack mechanics ---------------------------------------------------------
+
+// Artillery marks (WARDEN barrage): a reticle closes on its spot for T seconds, then the shell lands: a hit inside the
+// ring plus a small burst of shots. Ticked every frame so marks still land after the attack that placed them ends.
+function tickMarks(e, dt) {
+  const M = e.marks;
+  if (!M || !M.length) return;
+  const p = G.player;
+  let w = 0;
+  for (const m of M) {
+    m.t += dt;
+    if (m.t < m.T) {
+      M[w++] = m;
+      continue;
+    }
+    explosion(m.x, m.y, e.phase === 3 ? '#ff3b3b' : e.color, 0.9);
+    sparks(m.x, m.y, '#ffffff', 8, 220);
+    addShake(0.12);
+    sfx.explode(0.6);
+    if (p && !p.dead) {
+      const rr = m.r + p.r * 0.5;
+      if ((p.x - m.x) ** 2 + (p.y - m.y) ** 2 < rr * rr) hurtPlayer(p);
+    }
+    ring(m.x, m.y, 5 + e.phase, 95, 'small', rand(0, TAU));
+  }
+  M.length = w;
+}
+
+// WARDEN ram (charge): wind up over the locked lane, stomp down it, land in a shockwave, then climb back home.
+function ram(e, dt) {
+  const r = e.ram;
+  const home = e.homeY + view.safeTop;
+  r.t += dt;
+  if (r.st === 'tele') {
+    e.x = damp(e.x, r.x, 7, dt);
+    e.y = damp(e.y, home - 26, 4, dt);
+    if (r.t >= r.tele) {
+      r.st = 'go';
+      r.t = 0;
+      r.v = 260;
+      sfx.dash();
+    }
+  } else if (r.st === 'go') {
+    r.v = Math.min(1100, r.v + 2600 * dt);
+    e.x = damp(e.x, r.x, 10, dt);
+    e.y = Math.min(r.ty, e.y + r.v * dt);
+    if (e.y >= r.ty) {
+      r.st = 'land';
+      r.t = 0;
+      ring(e.x, e.y + 20, 14 + e.phase * 2, 125, 'orb', rand(0, TAU));
+      if (e.phase >= 3) ring(e.x, e.y + 20, 12, 90, 'small', rand(0, TAU), { delay: 0.2 });
+      explosion(e.x, e.y + 30, e.color, 1.6);
+      sparks(e.x, e.y + 40, '#ffffff', 16, 320);
+      addShake(0.55);
+      flash('255,122,24', 0.15);
+      sfx.explode(2);
+    }
+  } else if (r.st === 'land') {
+    if (r.t > 0.45) {
+      r.st = 'back';
+      r.t = 0;
+    }
+  } else {
+    e.y = damp(e.y, home, 3.2, dt);
+    e.x = damp(e.x, view.W / 2 + Math.sin(e.t * 0.55) * view.W * 0.26, 1.5, dt);
+    if (e.y < home + 10 || r.t > 1.8) e.ram = null;
+  }
+}
+
+// Ground telegraphs drawn under the ships (world.js drawTelegraphs): artillery reticles and the ram lane.
+export function drawBossTelegraphs(ctx, e) {
+  const c = e.phase === 3 && e.kind === 'warden' ? '#ff3b3b' : e.color;
+  const M = e.marks;
+  const r = e.ram;
+  if (!(M && M.length) && !(r && r.st === 'tele')) return;
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.strokeStyle = c;
+  ctx.fillStyle = c;
+  if (M) {
+    for (const m of M) {
+      const k = Math.min(1, m.t / m.T);
+      const late = k > 0.75;
+      ctx.globalAlpha = 0.06 + k * 0.16 + (late && Math.sin(G.time * 44) > 0 ? 0.12 : 0);
+      ctx.beginPath();
+      ctx.arc(m.x, m.y, m.r, 0, TAU);
+      ctx.fill();
+      ctx.globalAlpha = 0.45 + k * 0.45;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      // The closing ring meets the edge when the shell lands.
+      ctx.globalAlpha = 0.3 + k * 0.6;
+      ctx.lineWidth = 1 + k * 1.5;
+      ctx.beginPath();
+      ctx.arc(m.x, m.y, m.r * (1 + 1.4 * (1 - k)), 0, TAU);
+      ctx.stroke();
+      ctx.globalAlpha = 0.6;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(m.x - 8, m.y); ctx.lineTo(m.x + 8, m.y);
+      ctx.moveTo(m.x, m.y - 8); ctx.lineTo(m.x, m.y + 8);
+      ctx.stroke();
+    }
+  }
+  if (r && r.st === 'tele') {
+    const k = Math.min(1, r.t / r.tele);
+    const top = e.y;
+    const bot = view.H;
+    ctx.globalAlpha = 0.05 + k * 0.12 + (k > 0.7 && Math.sin(G.time * 40) > 0 ? 0.08 : 0);
+    ctx.fillRect(r.x - 84, top, 168, bot - top);
+    ctx.globalAlpha = 0.3 + k * 0.5;
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([10, 8]);
+    ctx.lineDashOffset = -G.time * 120;
+    ctx.beginPath();
+    ctx.moveTo(r.x - 84, top); ctx.lineTo(r.x - 84, bot);
+    ctx.moveTo(r.x + 84, top); ctx.lineTo(r.x + 84, bot);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // Chevrons pointing down the lane.
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 3; i++) {
+      const y = top + 90 + ((G.time * 160 + i * 60) % 180);
+      if (y > bot - 10) continue;
+      ctx.beginPath();
+      ctx.moveTo(r.x - 22, y - 12); ctx.lineTo(r.x, y); ctx.lineTo(r.x + 22, y - 12);
+      ctx.stroke();
+    }
+  }
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+}
+
 // --- Attack sets ------------------------------------------------------------------
 
 const ATTACKS = {
   warden: {
-    cycles: [['fan', 'rings', 'torpedo'], ['spiral', 'fan', 'rings', 'torpedo'], ['spiral', 'rings', 'fan', 'torpedo', 'rings']],
+    cycles: [
+      ['fan', 'barrage', 'rings', 'torpedo'],
+      ['charge', 'spiral', 'barrage', 'fan', 'clamp', 'torpedo'],
+      ['charge', 'barrage', 'clamp', 'spiral', 'charge', 'rings', 'torpedo'],
+    ],
+    // Artillery: target reticles land on and around the jet one after another, then each shell hits (see tickMarks).
+    barrage(e, a, dt, sp) {
+      const n = 3 + e.phase * 2;
+      const step = 0.17 / sp;
+      if (!a.started) {
+        a.started = true;
+        a.t2 = 0;
+        e.marks = e.marks || [];
+        sfx.warn();
+      }
+      a.t2 += dt;
+      every(a, dt, step, (k) => {
+        if (k >= n) return;
+        const p = G.player;
+        const j = k === 0 ? 0 : 1; // the first shell is on the jet, the rest bracket it
+        const x = clamp(p.x + clamp(p.vx, -260, 260) * 0.45 * j + rand(-1, 1) * 100 * j, 24, view.W - 24);
+        const y = clamp(p.y + clamp(p.vy, -260, 260) * 0.45 * j + rand(-1, 1) * 100 * j, e.y + 60, view.H - 24);
+        e.marks.push({ x, y, t: 0, T: 1.05, r: 34 });
+        const s = k % 2 ? 1 : -1;
+        sparks(e.x + s * 62, e.y + 30, e.color, 5, 170, -Math.PI / 2, 0.6);
+        sfx.zap();
+      });
+      return a.n >= n && a.t2 > n * step + 1.15;
+    },
+    // Ram: the mech locks onto the jet's lane (telegraphed), stomps down the field and lands in a shockwave, then
+    // climbs back. Phase 3 rams twice.
+    charge(e, a, dt, sp) {
+      if (!a.started) {
+        a.started = true;
+        a.left = e.phase >= 3 ? 2 : 1;
+      }
+      if (!e.ram) {
+        if (a.left <= 0) return true;
+        a.left--;
+        e.ram = { x: clamp(G.player.x, 84, view.W - 84), st: 'tele', t: 0, tele: 0.85 / Math.sqrt(sp), ty: Math.max(e.homeY + view.safeTop + 140, view.H - view.safeBottom - 95) };
+        sfx.warn();
+      }
+      return false;
+    },
+    // Clamp: both shoulder lasers swing in from the flanks and pin you in the channel under the guns while the main
+    // gun fires down it. The sweep stops short of vertical, so the channel never closes.
+    clamp(e, a, dt, sp) {
+      if (!a.started) {
+        a.started = true;
+        a.t2 = 0;
+        for (const s of [-1, 1]) {
+          G.beams.push({ owner: 'enemy', src: e, ox: s * 62, oy: 10, x: e.x + s * 62, y: e.y + 10, ang: Math.PI / 2 - s * 1.3, w: 10, tele: 0.9, life: 2.7, spin: s * 0.4, aimSpin: 0 });
+        }
+        sfx.warn();
+      }
+      a.t2 += dt;
+      if (a.t2 > 1.1) every(a, dt, 0.42 / sp, () => fan(e.x, e.y + 30, aimAt(e.x, e.y + 30), 3, 0.26, 175, 'needle', { acc: 60, maxSpeed: 280 }));
+      return a.t2 > 3.7;
+    },
     fan(e, a, dt, sp) {
       every(a, dt, 0.4 / sp, () => fan(e.x, e.y + 30, aimAt(e.x, e.y + 30), e.phase >= 2 ? 7 : 5, 0.8, 170));
       return a.n >= 5;
@@ -237,6 +427,7 @@ const ATTACKS = {
       return a.t2 > 2.8;
     },
     move(e, dt) {
+      if (e.ram) return ram(e, dt);
       e.x = damp(e.x, view.W / 2 + Math.sin(e.t * 0.55) * view.W * 0.26, 3, dt);
       e.y = damp(e.y, e.homeY + view.safeTop + Math.sin(e.t * 1.1) * 16, 3, dt);
     },
@@ -246,9 +437,50 @@ const ATTACKS = {
   },
 
   hydra: {
-    cycles: [['wobbleFan', 'flower', 'tips'], ['flower', 'brood', 'wobbleFan', 'tips'], ['rain', 'flower', 'tips', 'brood', 'wobbleFan']],
+    cycles: [
+      ['wobbleFan', 'lash', 'flower', 'tips'],
+      ['flower', 'constrict', 'brood', 'lash', 'wobbleFan', 'tips'],
+      ['rain', 'constrict', 'lash', 'flower', 'brood', 'constrict', 'tips'],
+    ],
     views: {
-      side: [['tide', 'wobbleFan', 'geyser', 'tips'], ['flower', 'tide', 'geyser', 'brood', 'tips'], ['geyser', 'tide', 'rain', 'flower', 'geyser', 'brood']],
+      side: [['tide', 'wobbleFan', 'lash', 'geyser', 'tips'], ['flower', 'tide', 'constrict', 'geyser', 'brood', 'lash'], ['geyser', 'constrict', 'tide', 'rain', 'lash', 'geyser', 'brood']],
+    },
+    // Lash: tentacles snap a beam at where the jet is, one after another (aim locks when the line appears).
+    lash(e, a, dt, sp) {
+      const n = 2 + e.phase;
+      const step = 0.34 / sp;
+      a.t2 = (a.t2 || 0) + dt;
+      every(a, dt, step, (k) => {
+        if (k >= n) return;
+        const tip = e.tips[(k * 3 + 1) % e.tips.length];
+        G.beams.push({ owner: 'enemy', boss: e, x: tip.x, y: tip.y, ang: aimAt(tip.x, tip.y), w: 9, tele: 0.72, life: 0.28, spin: 0, aimSpin: 0 });
+        sparks(tip.x, tip.y, '#6dff4d', 6, 150);
+      });
+      return a.n >= n && a.t2 > n * step + 1.1;
+    },
+    // Constrict: a ring of spores closes in around the jet from every side but one; slip out through the gap
+    // (or dash through). Phase 3 follows up with a second ring.
+    constrict(e, a, dt, sp) {
+      const rings = e.phase >= 3 ? 2 : 1;
+      a.t2 = (a.t2 || 0) + dt;
+      a.k = a.k || 0;
+      if (a.k < rings && a.t2 >= a.k * 1.5) {
+        a.k++;
+        // Centred on the jet, nudged in from the walls so the whole ring stays on screen.
+        const R = 190;
+        const cx = clamp(G.player.x, 150, view.W - 150);
+        const cy = clamp(G.player.y, e.y + 60, view.H - 150);
+        const N = 30;
+        const skip = 4;
+        const gap = rand(0, TAU);
+        for (let i = skip; i < N; i++) {
+          const ang = gap + (i / N) * TAU;
+          shoot(cx + Math.cos(ang) * R, cy + Math.sin(ang) * R, ang + Math.PI, 50, 'orb', { delay: (i - skip) * 0.016, acc: 34, maxSpeed: 115 });
+        }
+        sfx.warn();
+      }
+      if (a.t2 > 0.6) every(a, dt, 0.9 / sp, () => fan(e.x, e.y + 40, aimAt(e.x, e.y + 40), 5, 0.9, 120, 'wobble', { wob: 14, wobF: 5 }));
+      return a.t2 > (rings - 1) * 1.5 + 2.6;
     },
     wobbleFan(e, a, dt, sp) {
       every(a, dt, 0.6 / sp, () => fan(e.x, e.y + 40, aimAt(e.x, e.y + 40), 7, 1.15, 130, 'wobble', { wob: 18, wobF: 5 }));
@@ -350,9 +582,68 @@ const ATTACKS = {
   },
 
   omega: {
-    cycles: [['doubleSpiral', 'laser', 'wall', 'burst'], ['laser', 'doubleSpiral', 'wall', 'burst'], ['chaos', 'laser', 'wall', 'doubleSpiral', 'burst']],
+    cycles: [
+      ['doubleSpiral', 'grid', 'laser', 'wall', 'burst'],
+      ['wheel', 'doubleSpiral', 'grid', 'wall', 'galaxy', 'burst'],
+      ['chaos', 'wheel', 'grid', 'galaxy', 'laser', 'grid', 'wall'],
+    ],
     views: {
-      chase: [['gates', 'laser', 'lanes', 'burst'], ['lanes', 'gates', 'doubleSpiral', 'laser', 'burst'], ['chaos', 'gates', 'lanes', 'laser', 'gates']],
+      chase: [['gates', 'laser', 'lanes', 'burst'], ['lanes', 'gates', 'galaxy', 'laser', 'burst'], ['chaos', 'gates', 'lanes', 'galaxy', 'gates']],
+    },
+    // Grid: a lattice of lines (one always through the jet) lights up and fires; each pass re-centres on the jet.
+    grid(e, a, dt, sp) {
+      const passes = e.phase;
+      const every2 = 1.05 / Math.sqrt(sp);
+      a.t2 = (a.t2 || 0) + dt;
+      a.k = a.k || 0;
+      if (a.k < passes && a.t2 >= a.k * every2) {
+        a.k++;
+        const p = G.player;
+        const S = 128;
+        const x0 = p.x + rand(-10, 10);
+        for (let x = x0 - Math.floor(x0 / S) * S; x < view.W; x += S) {
+          G.beams.push({ owner: 'enemy', boss: e, x, y: -20, ang: Math.PI / 2, w: 8, tele: 0.95, life: 0.4, spin: 0, aimSpin: 0 });
+        }
+        const top = e.y + 80;
+        const y0 = p.y + rand(-10, 10);
+        for (let y = y0 - Math.floor((y0 - top) / S) * S; y < view.H; y += S) {
+          if (y < top) continue;
+          G.beams.push({ owner: 'enemy', boss: e, x: -20, y, ang: 0, w: 8, tele: 0.95, life: 0.4, spin: 0, aimSpin: 0 });
+        }
+        sfx.warn();
+      }
+      return a.t2 > (passes - 1) * every2 + 1.5;
+    },
+    // Wheel: spokes of light through the gaps between the nodes turn slowly around the core; ride a gap while rings
+    // pulse out through it. Phase 3 picks the turning direction at random.
+    wheel(e, a, dt, sp) {
+      if (!a.started) {
+        a.started = true;
+        a.t2 = 0;
+        const dir = e.phase >= 3 && Math.random() < 0.5 ? -1 : 1;
+        const base = aimAt(e.x, e.y);
+        for (let i = 0; i < 6; i++) {
+          G.beams.push({ owner: 'enemy', src: e, x: e.x, y: e.y, ang: base + ((i + 0.5) / 6) * TAU, w: 8, tele: 1.0, life: 3.2, spin: dir * 0.42 * sp, aimSpin: 0 });
+        }
+        sfx.warn();
+      }
+      a.t2 += dt;
+      if (a.t2 > 1.1) every(a, dt, 0.7 / sp, (n) => ring(e.x, e.y, 12, 105, 'small', n * 0.26));
+      return a.t2 > 4.3;
+    },
+    // Galaxy: curving spiral arms that bend as they speed up.
+    galaxy(e, a, dt, sp) {
+      a.t2 = (a.t2 || 0) + dt;
+      const arms = e.phase >= 3 ? 5 : 4;
+      every(a, dt, 0.15 / sp, (n) => {
+        for (let i = 0; i < arms; i++) {
+          const ang = a.t2 * 0.7 + (i / arms) * TAU;
+          shoot(e.x, e.y, ang, 85, 'orb', { curve: 0.5, acc: 70, maxSpeed: 240 });
+          // Phase 3: a thinner counter-turning set, every other beat so the crossings stay open.
+          if (e.phase >= 3 && n % 2) shoot(e.x, e.y, -ang + 0.4, 85, 'small', { curve: -0.5, acc: 70, maxSpeed: 240 });
+        }
+      });
+      return a.t2 > 3.3;
     },
     // Chase view (Event Horizon): laser gates launched down the lane at you, each gap a swing away from the last.
     gates(e, a, dt, sp) {
@@ -641,6 +932,7 @@ export function updateBoss(e, dt) {
     }
   } else if (e.state === 'fight') {
     set.move(e, dt);
+    tickMarks(e, dt);
     if (e.kind === 'eclipse') eclipseTick(e, dt);
     if (e.phaseT > 0) {
       e.phaseT -= dt;
@@ -695,6 +987,8 @@ function removeBossBeams(e) {
 
 // Drop any transient attack state (ECLIPSE lanes / dash / dome / warp) on a phase shift or death.
 function resetAttackState(e) {
+  e.ram = null;
+  if (e.marks) e.marks.length = 0;
   if (e.mini) return resetMini(e);
   if (e.kind !== 'eclipse') return;
   e.lanes = null;

@@ -1047,8 +1047,14 @@ function owAI(e, dt) {
       if (e.entered) {
         e.fireT -= dt * Math.sqrt(fr);
         if (e.fireT < 0.5) e.flash = Math.sin(e.t * 45) > 0 ? 0.05 : 0; // bay-open warning
+        if (e.fireT < 2 && !e.flak) {
+          // Flak fans from the side guns between launches.
+          e.flak = true;
+          for (const s of [-1, 1]) fan(e.x + s * 24, e.y, aimAt(e.x + s * 24, e.y), e.elite ? 5 : 3, 0.5, 140, 'orb');
+        }
         if (e.fireT <= 0) {
           e.fireT = 3.8;
+          e.flak = false;
           for (let i = -1; i <= 1; i++) {
             const pod = spawnEnemy('swarm', e.x + i * 12, e.y + 18, { plain: true, vx: i * 120 + dx / d * 160, vy: dy / d * 160 });
             pod.pack = null;
