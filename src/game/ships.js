@@ -289,6 +289,17 @@ export function weaponStreams(weapon, lv) {
   return out;
 }
 
-export function weaponDamageScale(lv) {
-  return 1 + Math.max(0, lv - 5) * 0.14;
+// Main Cannon volley power by level (1..8): one volley's total damage relative to level 1. New barrels share it, so a
+// higher level fires a wider, denser spread without multiplying damage by the barrel count (pulse goes 2 -> 11 barrels).
+export const MAIN_POWER = [1, 1.3, 1.65, 2, 2.4, 2.8, 3.3, 3.9];
+const streamCount = new Map();
+const streamsAt = (weapon, lv) => {
+  const k = `${weapon}:${lv}`;
+  if (!streamCount.has(k)) streamCount.set(k, weaponStreams(weapon, lv).length);
+  return streamCount.get(k);
+};
+// Per-bullet damage multiplier for a weapon level.
+export function weaponDamageScale(weapon, lv) {
+  const l = Math.max(1, Math.min(MAIN_POWER.length, lv));
+  return (MAIN_POWER[l - 1] * streamsAt(weapon, 1)) / streamsAt(weapon, l);
 }

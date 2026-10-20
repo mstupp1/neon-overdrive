@@ -1,6 +1,6 @@
 // Enemy roster: spawning, behaviours, damage and death rewards.
 
-import { G, view, field } from './state.js';
+import { G, view, field, REDLINE_MAX } from './state.js';
 import { S, ENEMY_COLORS } from '../render/sprites.js';
 import { rand, damp, TAU, clamp, chance, dist2 } from '../core/math.js';
 import { shoot, ring, fan, aimAt } from './bullets.js';
@@ -710,7 +710,7 @@ export function damageEnemy(e, dmg, x, y, crit = false, src = '') {
   if (pl) {
     const st = pl.st;
     if (st.exec) dmg *= e.boss ? 1.1 : e.hp < e.maxHp * 0.3 ? 1.4 : 1; // Executioner
-    if (st.redline) dmg *= 1 + st.redline * Math.max(0, pl.maxHp - pl.hp);
+    if (st.redline) dmg *= 1 + st.redline * Math.min(REDLINE_MAX, Math.max(0, pl.maxHp - pl.hp));
     if (st.bounty && (e.boss || e.elite || e.hunter)) dmg *= 1 + st.bounty;
     if (st.chainDmg) dmg *= 1 + st.chainDmg * Math.min(14, Math.floor(G.combo / 12)); // Chain Link: per x0.5 combo step
     if (st.shatter && (e.frozenT > 0 || (e.fx && e.fx.freeze))) dmg *= 1 + st.shatter; // Cryostasis: +50% vs frozen

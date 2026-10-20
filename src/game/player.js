@@ -415,7 +415,7 @@ function firePrimary(p, w) {
   const lv = p.st.mainLv;
   const streams = weaponStreams(p.ship.weapon, lv);
   const od = boosted(p);
-  const dmg = w.dmg * p.st.dmg * p.pdm * weaponDamageScale(lv) * ultDmg(p);
+  const dmg = w.dmg * p.st.dmg * p.pdm * weaponDamageScale(p.ship.weapon, lv) * ultDmg(p);
   const spr = od ? S.pb_od : S['pb_' + p.ship.id];
   const charge = p.ship.weapon === 'charge';
   const grow = charge ? 1 + (lv - 1) * 0.1 : 1; // charge orbs swell with weapon level

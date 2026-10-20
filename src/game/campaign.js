@@ -11,27 +11,27 @@ import { heatScale } from './core.js';
 // warm = level eased off per row short of row 2 (default WARM).
 // minis = the mini bosses that may guard the halfway Vault (one per route, seeded); miniHp multiplies their base HP.
 // One run flies all four systems with one build, so levels form one continuous climb: Genesis opens like the old endless
-// sector 1 and each system starts where the previous boss row left off, never above the old standalone levels. Boss HP stays
-// at most as hard as when each system was flown alone (OMEGA x0.5, ECLIPSE x0.22 as before).
+// sector 1 and each system starts where the previous boss row left off. Boss
+// and mini boss HP are tuned for the build a run has by then (late bosses used to melt in seconds).
 export const SYSTEMS = [
   {
     id: 'genesis', name: 'NEON GENESIS', short: 'GENESIS', act: 1, hue: 215, level: 1, step: 0.56, warm: 0, rows: 8, dur: 42, bossHp: 1.3, supply: 0, pay: 0.8, boss: 'warden',
-    minis: ['razorwing', 'mauler'], miniHp: 0.8,
+    minis: ['razorwing', 'mauler'], miniHp: 0.55,
     blurb: 'The Grid\'s outer lattice. A siege mech guards the gate.',
   },
   {
-    id: 'crimson', name: 'CRIMSON TIDE', short: 'CRIMSON', act: 2, hue: 345, level: 5.8, step: 0.375, warm: 0, rows: 8, dur: 42, bossHp: 1, supply: 0, pay: 0.64, boss: 'hydra',
-    minis: ['broodmother', 'specter'], miniHp: 2.2,
+    id: 'crimson', name: 'CRIMSON TIDE', short: 'CRIMSON', act: 2, hue: 345, level: 5.8, step: 0.375, warm: 0, rows: 8, dur: 42, bossHp: 0.8, supply: 0, pay: 0.64, boss: 'hydra',
+    minis: ['broodmother', 'specter'], miniHp: 1.8,
     blurb: 'Bio-corrupted sectors. Something huge is breeding in the dark.',
   },
   {
-    id: 'cyclone', name: 'CYAN CYCLONE', short: 'CYCLONE', act: 3, hue: 185, level: 9.2, step: 0.45, warm: 0, rows: 8, dur: 42, bossHp: 0.5, supply: 0, pay: 0.68, boss: 'omega',
-    minis: ['arclight', 'citadel'], miniHp: 2.8,
+    id: 'cyclone', name: 'CYAN CYCLONE', short: 'CYCLONE', act: 3, hue: 185, level: 9.2, step: 0.45, warm: 0, rows: 8, dur: 42, bossHp: 0.75, supply: 0, pay: 0.68, boss: 'omega',
+    minis: ['arclight', 'citadel'], miniHp: 4,
     blurb: 'Storm-lit data winds. The core intelligence waits at the eye.',
   },
   {
-    id: 'void', name: 'THE VOID', short: 'VOID', act: 4, hue: 275, level: 10.2, step: 0.825, warm: 0, rows: 8, dur: 42, bossHp: 0.22, supply: 0, pay: 0.82, boss: 'eclipse',
-    minis: ['razorwing', 'mauler', 'broodmother', 'specter', 'arclight', 'citadel'], miniHp: 2.3,
+    id: 'void', name: 'THE VOID', short: 'VOID', act: 4, hue: 275, level: 12.8, step: 0.6, warm: 0, rows: 8, dur: 42, bossHp: 0.9, supply: 0, pay: 0.82, boss: 'eclipse',
+    minis: ['razorwing', 'mauler', 'broodmother', 'specter', 'arclight', 'citadel'], miniHp: 7,
     blurb: 'Beyond the Grid. The Signal\'s source. No one has returned.',
   },
 ];

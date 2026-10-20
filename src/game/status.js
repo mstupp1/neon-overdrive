@@ -147,9 +147,9 @@ function detonate(e, dmg, R, damage) {
 // --- Burst fire ----------------------------------------------------------------------------
 export const BURST_GAP = 0.07;
 
-// How many extra volleys to queue after a weapon fires. Chance scales with attack speed (`st.rate`).
+// How many extra volleys to queue after a weapon fires. One roll per volley, so fire rate already raises how often it bursts.
 // Primary fire uses this in player.js; modules can call it at launch and repeat their shot `BURST_GAP` apart.
 export function rollBurst(st) {
   if (!st.burstChance) return 0;
-  return Math.random() < Math.min(0.9, st.burstChance * (st.rate || 1)) ? st.burstExtra || 1 : 0;
+  return Math.random() < Math.min(0.6, st.burstChance) ? st.burstExtra || 1 : 0;
 }

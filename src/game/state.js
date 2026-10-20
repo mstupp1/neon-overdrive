@@ -74,6 +74,9 @@ export function enemyHit(level, loop = 0, heat = 0) {
   return Math.min(HIT_MAX, base + loop + Math.floor(heat / 3));
 }
 
+// Redline (upgrades.js) counts at most this many missing hull points (enemies.js damageEnemy).
+export const REDLINE_MAX = 5;
+
 export function sectorDifficulty(sector, loop) {
   const s = sector - 1;
   const loopMul = Math.pow(3, loop);
