@@ -1,0 +1,42 @@
+{
+  "assets": [
+    {
+      "camera": "top",
+      "source": "art/modules/pylon/sources/top-v2.png",
+      "prompt": "art/modules/pylon/prompts/top-v2.txt",
+      "runtime": "src/assets/modules/pylon/top-v1.png",
+      "logicalSize": 24,
+      "visibleExtent": 16,
+      "references": [
+        "art/modules/pylon/sources/chase-v1.png",
+        "src/assets/modules/drone/top-v1.png"
+      ]
+    },
+    {
+      "camera": "side",
+      "cameraIntent": "Stationary compact pylon, true right-facing profile",
+      "source": "art/modules/pylon/sources/side-v2.png",
+      "prompt": "art/modules/pylon/prompts/side-v2.txt",
+      "runtime": "src/assets/modules/pylon/side-v1.png",
+      "logicalSize": 24,
+      "visibleExtent": 16,
+      "references": [
+        "art/icons/upgrades/path-modules/sources/teslaPylons-v1.png",
+        "src/assets/modules/drone/side-v1.png"
+      ]
+    },
+    {
+      "camera": "chase",
+      "cameraIntent": "Player rear pursuit, pylon viewed from behind toward battle",
+      "source": "art/modules/pylon/sources/chase-v1.png",
+      "prompt": "art/modules/pylon/prompts/chase-v1.txt",
+      "runtime": "src/assets/modules/pylon/chase-v1.png",
+      "logicalSize": 24,
+      "visibleExtent": 16,
+      "references": [
+        "art/icons/upgrades/path-modules/sources/teslaPylons-v1.png",
+        "src/assets/modules/drone/chase-v1.png"
+      ]
+    }
+  ]
+}

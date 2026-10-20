@@ -877,6 +877,32 @@
       "sha256": "ca4dfbf0db2a1af0ede7acae751dd47527d6ba0507bd4c1bbf325020b6e5f928",
       "width": 256,
       "height": 256
+    },
+    {
+      "id": "shockcore",
+      "source": "art/icons/items/sources/shockcore-v1.png",
+      "runtime": "src/assets/icons/items/shockcore.png",
+      "prompt": "Use case: stylized-concept. Asset type: NEON OVERDRIVE Shock Core gear icon, transparent square menu art shown at 32\u201364 pixels, runtime max 256px. Input image 1 is accepted Cryo Core STYLE AND FAMILY reference only. Create a distinct SHOCK CORE in that same sci-fi gear family: a compact upright cylindrical dark navy gunmetal cartridge, crisp broad beveled armor rings, dark glass containment chamber holding a bold branching electric bolt between two electrode poles. No ice or snowflakes. Electric cyan with a pale gold electrical heart, restrained magenta rim glints and gold fasteners. One clearly readable centered object with 8% transparent margins, three-quarter product illustration matching reference materials, restrained luminous edges not huge bloom. True RGBA transparent background. No ground shadow, text, letters, logos, labels, frames, watermark or checkerboard.",
+      "source_sha256": "b765c22f26ebe7fe7227c541df2bfe40b976d75338dbd57682c5de3276303421",
+      "runtime_sha256": "1b397422456d398831a035d8cab5cb262f0667d6d7f2272872969ceec671a22e",
+      "prompt_sha256": "7bebc06c6a15876e0de2f754fdf14b06064fdf36e6c913f7be1bd64e6306da4c",
+      "references": [
+        {
+          "path": "art/icons/items/sources/cryocore.png",
+          "sha256": "3dde77901a3e5efada25ecc691b46d6439427eb70522fc1b851ddb484accb41c"
+        }
+      ],
+      "export": "RGBA; fit entire source within 256px; Pillow Lanczos; preserve alpha",
+      "size": [
+        256,
+        256
+      ],
+      "group": "items",
+      "name": "Shock Core",
+      "promptFile": "art/icons/items/prompts/shockcore-v1.txt",
+      "sha256": "1b397422456d398831a035d8cab5cb262f0667d6d7f2272872969ceec671a22e",
+      "width": 256,
+      "height": 256
     }
   ]
 }

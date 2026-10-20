@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: isolated NEON OVERDRIVE upgrade menu icon, evolution of Marksman
+Input images: Image 1 is the accepted Marksman base identity; preserve its compact rectangular optic housing, dark beveled gunmetal, cyan/magenta accent lights and luminous gold reticle, while making it feel like a more advanced precision targeting module.
+Scene/backdrop: fully transparent.
+Subject: DEADSHOT, the evolved Marksman module: the same recognizable optic housing upgraded with a refined gold precision reticle and a small secondary targeting lens integrated into the side.
+Style/medium: polished compact 3D game illustration in established NEON OVERDRIVE dark glass and industrial metal style.
+Composition/framing: one centered object, isolated silhouette that reads clearly at 32px.
+Lighting/mood: crisp machined highlights, controlled glow.
+Color palette: navy and gunmetal, cyan/magenta accents, gold precision marks.
+Materials/textures: beveled plated housing, dark glass optics, tiny luminous calibration marks.
+Constraints: genuine transparent alpha; no text, letters, numbers, frame, card, badge, watermark or background. Retain the base object's identity and silhouette family; evolution should read as a clear refinement, not a different device.

@@ -1,0 +1,170 @@
+{
+  "method": "built-in imagegen; deterministic Pillow export",
+  "assets": [
+    {
+      "camera": "top",
+      "cameraIntent": "Direct overhead, nose up with visible precision muzzle",
+      "source": "art/modules/marksman/sources/top-v1.png",
+      "prompt": "art/modules/marksman/prompts/top-v1.txt",
+      "runtime": "src/assets/modules/marksman/top-v1.png",
+      "logicalSize": 24,
+      "visibleExtent": 16,
+      "references": [
+        {
+          "path": "art/modules/drone/sources/top-v1.png",
+          "sha256": "8497dcf32378c124586eefdc31714822eb597c7af82fce81e068d2a65baaaac0"
+        },
+        {
+          "path": "art/modules/interceptor/sources/top-v1.png",
+          "sha256": "f103153f82b9550f56cc8441aa94082faaa1b05b97da2c758195f384d0f78eaa"
+        }
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        627.0,
+        626.0
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        366,
+        366
+      ],
+      "offset": [
+        73,
+        73
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "47c20a05e3f51591d7c3b0d14700e3da7fafc161ea0a9056848a572dd6a00b9a",
+      "runtime_sha256": "56f2d94973dee6eb182330a47c9f33a298df0224301e08d2e9ee07d80a6c26e3",
+      "prompt_sha256": "d3353b152c89aa0a57d7b9bdf62b02bf3714a97a371eed72f7e43553b0794dc7",
+      "alphaBounds": [
+        99,
+        83,
+        412,
+        429
+      ]
+    },
+    {
+      "camera": "side",
+      "cameraIntent": "True right-facing side profile, barrel horizontal",
+      "source": "art/modules/marksman/sources/side-v1.png",
+      "prompt": "art/modules/marksman/prompts/side-v1.txt",
+      "runtime": "src/assets/modules/marksman/side-v1.png",
+      "logicalSize": 24,
+      "visibleExtent": 16,
+      "references": [
+        {
+          "path": "art/modules/marksman/sources/top-v1.png",
+          "sha256": "47c20a05e3f51591d7c3b0d14700e3da7fafc161ea0a9056848a572dd6a00b9a"
+        },
+        {
+          "path": "art/ships/vector/sources/side-v1.png",
+          "sha256": "6136c47e9a56c84df737dc7161039d9f055a2ba00b2d849dbeed926166e05e15"
+        }
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        640.0,
+        620.0
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        369,
+        369
+      ],
+      "offset": [
+        68,
+        74
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "604ead37cb5c48dd535321981795a78176c847a22405a44421c8ddeba9e206e4",
+      "runtime_sha256": "28c73e20bc8138cdab49655447423eb2f59e7c62440812fa177f29c5ce721afa",
+      "prompt_sha256": "02dcfc30d18d52230473c64df407c8a0f9ab9bca91efdc694351a67818805df2",
+      "alphaBounds": [
+        83,
+        175,
+        430,
+        417
+      ]
+    },
+    {
+      "camera": "chase",
+      "cameraIntent": "Rear pursuit, engine faces toward viewer and nose recedes",
+      "source": "art/modules/marksman/sources/chase-v2.png",
+      "prompt": "art/modules/marksman/prompts/chase-v2.txt",
+      "runtime": "src/assets/modules/marksman/chase-v1.png",
+      "logicalSize": 24,
+      "visibleExtent": 16,
+      "references": [
+        {
+          "path": "art/modules/interceptor/sources/chase-v2.png",
+          "sha256": "447d59724c417b682696e79d45187fb3a39c815de36f4dbd1ff8e3c939a64a7a"
+        },
+        {
+          "path": "art/modules/marksman/sources/side-v1.png",
+          "sha256": "604ead37cb5c48dd535321981795a78176c847a22405a44421c8ddeba9e206e4"
+        }
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "orientedSourceSize": [
+        1254,
+        1254
+      ],
+      "registrationSpace": "source after sourceRotation clockwise",
+      "sourceAnchor": [
+        627.0,
+        635.0
+      ],
+      "logicalAnchor": [
+        0,
+        0
+      ],
+      "resizeSize": [
+        351,
+        351
+      ],
+      "offset": [
+        80,
+        78
+      ],
+      "visualAnchors": {},
+      "operation": "optional lossless quarter-turn; uniform Lanczos scale about measured anchor onto transparent 512px square",
+      "source_sha256": "4f8b8168ef0994d7ae7ce833a9dc7aa88e96267d7beb27e3a09c9108179a512f",
+      "runtime_sha256": "1844c09e2d02b2392537fa4c7e80a0ed16941486d0d3832db9e6b5f815cad29f",
+      "prompt_sha256": "33a59e4f60c90dc3df849dc6f5beaec3f7749aee84647c6ed8bb4c783b098822",
+      "alphaBounds": [
+        83,
+        149,
+        428,
+        388
+      ]
+    }
+  ]
+}

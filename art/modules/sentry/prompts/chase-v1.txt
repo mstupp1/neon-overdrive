@@ -1,0 +1,9 @@
+Use case: stylized-concept
+Asset type: physical NEON OVERDRIVE combat module sprite; transparent 512px source master, rear pursuit view
+Input images: Image 1 establishes the one-piece Sentry turret identity and orange accents. Image 2 is only a camera/style reference for the accepted rear pursuit module view.
+Scene/backdrop: transparent.
+Subject: the same autonomous turret viewed from directly behind at low pursuit elevation, looking toward battle: show its single compact cannon aimed away from viewer, dark rear barrel housing, orange rear energy chamber, stable pedestal and cyan sensor slit. Entire turret is one coherent complete object.
+Style/medium: polished dark navy/gunmetal industrial sci-fi, beveled plating, dark glass, restrained orange/cyan with tiny magenta/gold details.
+Composition/framing: centered full turret, rear view, balanced silhouette, generous transparent margin.
+Lighting/mood: crisp metal highlights, controlled orange core glow.
+Constraints: genuine alpha; no text, frame, environment, projectile, beam, flame, extra turret, detached parts or crop.

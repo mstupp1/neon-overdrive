@@ -1,0 +1,7 @@
+# Marksman drone artwork
+
+A compact unmanned precision drone with a long central barrel and restrained gold accents. The top view faces up and keeps the muzzle visible; the side source faces right with a true narrow profile; the rear pursuit view shows both engine faces toward the viewer and the nose receding. The drone occupies a 24-unit logical box with a 16-unit visible extent.
+
+Selected sources and prompts are under `sources/` and `prompts/`. `selection.json` maps them to the runtime files in `src/assets/modules/marksman/`; `manifest.json` records reference and source hashes plus reproducible export transforms. Sources were generated with built-in imagegen using accepted drone/interceptor art for style and camera references. `tools/physical_art_assets.py` exports RGBA 512px sprites, uniformly scaled and centered around the measured silhouette.
+
+Visual review confirmed the top view points up, the side view points right, and the rear view presents twin engine faces toward the viewer. The source and runtime files have genuine transparent and opaque pixels; the exporter also checked alpha bounds and clipping. No exhaust, beams, tracers or projectile effects are baked into the sprites. Integration review passed: generated views loaded in all three cameras; base and evolved live simulations passed with finite positions and no console warnings or errors. See [combined review](../../icons/upgrades/path-modules/review.md) for checks and limitations.

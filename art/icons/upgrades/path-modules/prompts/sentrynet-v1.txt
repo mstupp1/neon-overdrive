@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: isolated NEON OVERDRIVE upgrade menu icon, evolution of Sentry
+Input images: Image 1 is the accepted Sentry base identity; preserve its single short forward-facing orange cannon, compact sturdy pedestal, dark gunmetal bevels and cyan sensor slit, while evolving the same turret.
+Scene/backdrop: fully transparent.
+Subject: SENTRYNET, evolved Sentry: the same complete one-piece rotating turret with a slightly refined orange cannon and one small cyan target-link sensor antenna integrated into its upper housing; keep a compact pedestal, no extra turret.
+Style/medium: polished compact 3D sci-fi game illustration in established dark glass and beveled industrial metal.
+Composition/framing: centered single complete object, clear at 32px with transparent margins; barrel and pedestal remain one sprite.
+Lighting/mood: restrained orange core glow, crisp bevel highlights.
+Color palette: navy-black and gunmetal, orange mechanic color, cyan link sensor, small magenta/gold detail.
+Materials/textures: machined armor plates, dark glass sensor slit.
+Constraints: genuine transparent alpha; no text, letters, numbers, frame, card, badge, separate projectile, beam, flame, watermark or backdrop. Retain Sentry identity and full silhouette; this is a refinement, not a new device.

@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: isolated NEON OVERDRIVE upgrade menu icon, base module in an evolution pair
+Input images: Image 1 references the game's established electric energy treatment, dark metal and restrained neon finish; make a new single-device silhouette rather than copying its two pylons.
+Scene/backdrop: fully transparent.
+Subject: TESLAPYLONS, one compact paired-emitter apparatus: two short ice-cyan insulated prongs mounted on a single dark gunmetal base, with a tiny contained electrical bridge between their tips. Clearly one coherent module icon, suggesting deployable electric pylons.
+Style/medium: polished compact 3D game illustration, dark glass and beveled industrial machinery, crisp silhouette.
+Composition/framing: centered, compact, readable as a single icon at 32px; transparent margin all around.
+Lighting/mood: controlled internal cyan glow and crisp metal highlights, no broad haze.
+Color palette: navy black and gunmetal, ice cyan as mechanic color, small magenta and gold accents.
+Materials/textures: beveled casing, ceramic insulators, luminous energy nodes.
+Constraints: genuine transparent alpha, no text, letters, numbers, frame, card, badge, watermark or scenery. One isolated asset only.

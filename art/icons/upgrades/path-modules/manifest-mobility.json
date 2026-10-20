@@ -1,0 +1,227 @@
+{
+  "method": "built-in imagegen; deterministic Pillow RGBA/LANCZOS export",
+  "assets": [
+    {
+      "id": "shieldPlates",
+      "source": "art/icons/upgrades/path-modules/sources/shieldPlates-v1.png",
+      "prompt": "art/icons/upgrades/path-modules/prompts/shieldPlates-v1.txt",
+      "runtime": "src/assets/icons/upgrades/shieldPlates.png",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256,
+      "export": "uniform aspect fit, LANCZOS, centered on transparent 256x256 canvas",
+      "source_sha256": "38b758ab1c7d007f0167e18cbea91e9b0e87d9aaaf0425a777bfe44c269267ba",
+      "prompt_sha256": "ccdbddf43ba5029bfcea9319c15172b5d5b3c41330796b1c0021f647df34d222",
+      "runtime_sha256": "7cd284bb634d2646c5f182518d93aaeec41f15493217b072651ed10981f4d40e",
+      "sourceSize": [
+        1295,
+        1214
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "references": [
+        {
+          "path": "art/icons/upgrades/sources/droneSwarm.png",
+          "sha256": "c1f8efcfd62626395715711450880c797b757cf072840ffe930a979a39637b95"
+        },
+        {
+          "path": "art/icons/upgrades/sources/aegis.png",
+          "sha256": "b0ec8f569cb7684dfbad621f410b8bb6b5a4bfe87cb57728d4ad931b07e8bf28"
+        }
+      ]
+    },
+    {
+      "id": "citadel",
+      "source": "art/icons/upgrades/path-modules/sources/citadel-v1.png",
+      "prompt": "art/icons/upgrades/path-modules/prompts/citadel-v1.txt",
+      "runtime": "src/assets/icons/upgrades/citadel.png",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256,
+      "export": "uniform aspect fit, LANCZOS, centered on transparent 256x256 canvas",
+      "source_sha256": "b99993df57c7f8f6bd7ba0d4334a538cfb6e69d6d1f80137f6d940810a79ebdf",
+      "prompt_sha256": "e6ea1c1e9c636d5e8919842da6eb0ab6416df2af417c1f67c9413b216fd4ce5a",
+      "runtime_sha256": "bab494bed73209036338533d7b3eef760780ede251a743b56b6124c27fa1f6c1",
+      "sourceSize": [
+        1295,
+        1215
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "references": [
+        {
+          "path": "art/icons/upgrades/path-modules/sources/shieldPlates-v1.png",
+          "sha256": "38b758ab1c7d007f0167e18cbea91e9b0e87d9aaaf0425a777bfe44c269267ba"
+        },
+        {
+          "path": "art/icons/upgrades/sources/droneSwarm.png",
+          "sha256": "c1f8efcfd62626395715711450880c797b757cf072840ffe930a979a39637b95"
+        },
+        {
+          "path": "art/icons/upgrades/sources/aegis.png",
+          "sha256": "b0ec8f569cb7684dfbad621f410b8bb6b5a4bfe87cb57728d4ad931b07e8bf28"
+        }
+      ]
+    },
+    {
+      "id": "wakeBlades",
+      "source": "art/icons/upgrades/path-modules/sources/wakeBlades-v1.png",
+      "prompt": "art/icons/upgrades/path-modules/prompts/wakeBlades-v1.txt",
+      "runtime": "src/assets/icons/upgrades/wakeBlades.png",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256,
+      "export": "uniform aspect fit, LANCZOS, centered on transparent 256x256 canvas",
+      "source_sha256": "8dcf9a9867b027a053fa6bfd2d812b7febb611930ef2d71c4d9cf967842c3303",
+      "prompt_sha256": "e5a43e68678f6065b356050ad38045c21ee5aec4415b31f88c4288265304fa03",
+      "runtime_sha256": "4970c112d8a0d591ca23318c6e5a003c8a25d332470f747be206981258699b3e",
+      "sourceSize": [
+        1374,
+        1145
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "references": [
+        {
+          "path": "art/icons/upgrades/sources/droneSwarm.png",
+          "sha256": "c1f8efcfd62626395715711450880c797b757cf072840ffe930a979a39637b95"
+        },
+        {
+          "path": "art/icons/upgrades/sources/thrusters.png",
+          "sha256": "9cf8f0209fc160ea68c32af985252e27c11768666281688277d78a1632312f00"
+        }
+      ]
+    },
+    {
+      "id": "comettrail",
+      "source": "art/icons/upgrades/path-modules/sources/comettrail-v1.png",
+      "prompt": "art/icons/upgrades/path-modules/prompts/comettrail-v1.txt",
+      "runtime": "src/assets/icons/upgrades/comettrail.png",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256,
+      "export": "uniform aspect fit, LANCZOS, centered on transparent 256x256 canvas",
+      "source_sha256": "e281872cbbd59e82daecfd401ab69d59adbcb0bbf575ce05a165a0a2e9d827f3",
+      "prompt_sha256": "ca7dc09d1b32ee32527ecf3462a9273ea9f28068d04fdb8e1504f503c20eb815",
+      "runtime_sha256": "4d369594003ed40bc0bdd41ee6fa07fc45bb4f91542c9668111ce9841b0ca0e2",
+      "sourceSize": [
+        1374,
+        1145
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "references": [
+        {
+          "path": "art/icons/upgrades/path-modules/sources/wakeBlades-v1.png",
+          "sha256": "8dcf9a9867b027a053fa6bfd2d812b7febb611930ef2d71c4d9cf967842c3303"
+        },
+        {
+          "path": "art/icons/upgrades/sources/droneSwarm.png",
+          "sha256": "c1f8efcfd62626395715711450880c797b757cf072840ffe930a979a39637b95"
+        },
+        {
+          "path": "art/icons/upgrades/sources/thrusters.png",
+          "sha256": "9cf8f0209fc160ea68c32af985252e27c11768666281688277d78a1632312f00"
+        }
+      ]
+    },
+    {
+      "id": "salvageDrone",
+      "source": "art/icons/upgrades/path-modules/sources/salvageDrone-v1.png",
+      "prompt": "art/icons/upgrades/path-modules/prompts/salvageDrone-v1.txt",
+      "runtime": "src/assets/icons/upgrades/salvageDrone.png",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256,
+      "export": "uniform aspect fit, LANCZOS, centered on transparent 256x256 canvas",
+      "source_sha256": "673e624029cb276e62df7cedbdb6b9d2cb4fd94eb18c67869af6ad585dd3bbdd",
+      "prompt_sha256": "32628db2b1650626caec4744200567d293e7ccf55761691b6c7b0eb40979ee52",
+      "runtime_sha256": "31a8c8c774827a1302c1b12da490f3d9076016502b157cc6ed4031f21dc278fd",
+      "sourceSize": [
+        1314,
+        1197
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "references": [
+        {
+          "path": "art/icons/upgrades/sources/droneSwarm.png",
+          "sha256": "c1f8efcfd62626395715711450880c797b757cf072840ffe930a979a39637b95"
+        },
+        {
+          "path": "art/icons/upgrades/sources/aegis.png",
+          "sha256": "b0ec8f569cb7684dfbad621f410b8bb6b5a4bfe87cb57728d4ad931b07e8bf28"
+        },
+        {
+          "path": "art/icons/upgrades/sources/thrusters.png",
+          "sha256": "9cf8f0209fc160ea68c32af985252e27c11768666281688277d78a1632312f00"
+        }
+      ]
+    },
+    {
+      "id": "scrapper",
+      "source": "art/icons/upgrades/path-modules/sources/scrapper-v1.png",
+      "prompt": "art/icons/upgrades/path-modules/prompts/scrapper-v1.txt",
+      "runtime": "src/assets/icons/upgrades/scrapper.png",
+      "generator": "built-in image_gen",
+      "format": "PNG RGBA",
+      "runtimeMaxEdge": 256,
+      "export": "uniform aspect fit, LANCZOS, centered on transparent 256x256 canvas",
+      "source_sha256": "07b573bc33741fa6a2d29d4f3f224e4acf81503f9cc191f892b73e4053b72082",
+      "prompt_sha256": "a1c37ccc70400bfd3194497bce37d88da319280b79d650be1d6539e2423692e2",
+      "runtime_sha256": "e63482b32b468fdc73284a7b34e6546ce595bb3408c8dcd4bee85148654a7077",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "references": [
+        {
+          "path": "art/icons/upgrades/path-modules/sources/salvageDrone-v1.png",
+          "sha256": "673e624029cb276e62df7cedbdb6b9d2cb4fd94eb18c67869af6ad585dd3bbdd"
+        },
+        {
+          "path": "art/icons/upgrades/sources/droneSwarm.png",
+          "sha256": "c1f8efcfd62626395715711450880c797b757cf072840ffe930a979a39637b95"
+        }
+      ]
+    }
+  ]
+}

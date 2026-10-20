@@ -1,0 +1,9 @@
+Use case: stylized-concept
+Asset type: isolated NEON OVERDRIVE upgrade menu icon, evolution of TeslaPylons
+Input images: Image 1 is the TeslaPylons family identity and dark beveled metal finish. Image 2 is a general cyan electrical style reference.
+Scene/backdrop: fully transparent.
+Subject: STORMGRID, the TeslaPylons evolution: the same linked electrode module extended into a more elaborate triangular three-node grid on a dark metal platform, with bright cyan arcs.
+Style/medium: polished compact 3D game illustration, dark navy glass and industrial machinery, cyan glow, small magenta and gold trim.
+Composition/framing: centered one-object icon with clear transparent margin, readable at 32px.
+Lighting/mood: controlled arc glow and crisp bevel highlights.
+Constraints: genuine transparent alpha; no text, frame, badge, watermark, backdrop or unrelated devices.

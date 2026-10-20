@@ -1,0 +1,9 @@
+Use case: stylized-concept
+Asset type: physical NEON OVERDRIVE combat module sprite; transparent 512px source master, directly overhead top view
+Input images: Image 1 is the selected Tesla pylon identity reference: exactly two tall cyan emitter posts on one round disc, with a concentric central hub. Preserve that two-post round-disc hardware design. Image 2 is only a direct overhead camera reference for a compact game module.
+Scene/backdrop: transparent.
+Subject: the same single Tesla pylon viewed from directly overhead, straight down: one round gunmetal disc, exactly two tall emitter caps positioned left and right, a concentric circular central hub, small radial armor panels. Do not add other tall posts or extra devices.
+Style/medium: polished industrial sci-fi game sprite, dark navy/gunmetal, crisp bevels, restrained cyan, tiny magenta/gold details.
+Composition/framing: centered complete round device, exact top-down orthographic view, no tilt or perspective, balanced across the circular base, generous transparent padding.
+Lighting/mood: crisp controlled highlights; no broad bloom.
+Constraints: genuine transparent alpha; exactly two tall emitter caps and one round disc; no square platform, no four-post layout, no text, frame, backdrop, projectile, lightning, beam, detached objects or crop.

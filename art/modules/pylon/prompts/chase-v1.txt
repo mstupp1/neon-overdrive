@@ -1,0 +1,9 @@
+Use case: stylized-concept
+Asset type: physical NEON OVERDRIVE combat module sprite; transparent 512px source master, rear pursuit view
+Input images: Image 1 establishes the Tesla pylon object identity and materials. Image 2 is a camera-only style reference for the accepted rear pursuit camera.
+Scene/backdrop: transparent.
+Subject: the same compact Tesla pylon viewed from directly behind at low pursuit elevation, looking toward the battle. Show the back of its insulated emitter assembly and the broad stable gunmetal base, with cyan core visible at its top; coherent symmetrical structure, no lightning.
+Style/medium: polished dark navy/gunmetal industrial sci-fi, beveled panels, dark glass, restrained cyan with tiny magenta/gold details.
+Composition/framing: centered complete object, direct rear camera, symmetric balanced silhouette, generous transparent margin.
+Lighting/mood: crisp edge highlights; contained cyan light.
+Constraints: genuine alpha; static hardware only; no text, frame, environment, projectile, beam, arc, flame, detached pieces or crop.

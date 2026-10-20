@@ -1,0 +1,214 @@
+{
+  "generator": "built-in imagegen",
+  "method": "deterministic Pillow RGBA export",
+  "assets": [
+    {
+      "id": "marksman",
+      "revision": "v1",
+      "source": "art/icons/upgrades/path-modules/sources/marksman-v1.png",
+      "runtime": "src/assets/icons/upgrades/marksman.png",
+      "prompt": "art/icons/upgrades/path-modules/prompts/marksman-v1.txt",
+      "references": [
+        {
+          "path": "art/icons/upgrades/sources/rail.png",
+          "sha256": "51e46d223115d01b66909e9350ba8a75259538e5f8caf7bfd406f48ec48c48dc"
+        }
+      ],
+      "generator": "built-in imagegen",
+      "format": "PNG RGBA",
+      "sourceSize": [
+        1312,
+        1199
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "runtimeMaxEdge": 256,
+      "export": "alpha>32 bounds crop; uniform Lanczos fit to 224px maximum inside transparent 256px square",
+      "source_sha256": "c0887d6abc34523951c4b956d9f430b4b7a6e98345060717378f99702d447005",
+      "runtime_sha256": "9312d4977796b8fb52109646b13954c486b76c7f6c4f9dbe54791396b004f8e4",
+      "prompt_sha256": "12a50a15662bc937c4913452190d1f58ce651438c0c867aa90753a1d1c093536",
+      "alphaBounds": [
+        16,
+        21,
+        240,
+        235
+      ]
+    },
+    {
+      "id": "deadshot",
+      "revision": "v1",
+      "source": "art/icons/upgrades/path-modules/sources/deadshot-v1.png",
+      "runtime": "src/assets/icons/upgrades/deadshot.png",
+      "prompt": "art/icons/upgrades/path-modules/prompts/deadshot-v1.txt",
+      "references": [
+        {
+          "path": "art/icons/upgrades/path-modules/sources/marksman-v1.png",
+          "sha256": "c0887d6abc34523951c4b956d9f430b4b7a6e98345060717378f99702d447005"
+        }
+      ],
+      "generator": "built-in imagegen",
+      "format": "PNG RGBA",
+      "sourceSize": [
+        1312,
+        1199
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "runtimeMaxEdge": 256,
+      "export": "alpha>32 bounds crop; uniform Lanczos fit to 224px maximum inside transparent 256px square",
+      "source_sha256": "fc8e85253b612804a0b15719854aac09597772c9c0e86501635ebd034ead26ec",
+      "runtime_sha256": "b1c18af46a2f286f13571358407423940b579dacfff27d5ff46dc5a2ddd76889",
+      "prompt_sha256": "93fe3301ebbf55785e23c36851670415605ca9f6e8685b5763f9a22f6135118b",
+      "alphaBounds": [
+        16,
+        24,
+        240,
+        231
+      ]
+    },
+    {
+      "id": "teslaPylons",
+      "revision": "v1",
+      "source": "art/icons/upgrades/path-modules/sources/teslaPylons-v1.png",
+      "runtime": "src/assets/icons/upgrades/teslaPylons.png",
+      "prompt": "art/icons/upgrades/path-modules/prompts/teslaPylons-v1.txt",
+      "references": [
+        {
+          "path": "art/icons/upgrades/sources/static.png",
+          "sha256": "6150064d6ddb4b7a3ee884236b2443471f2e0df068b84b9f1aa91c8ee9c6b702"
+        }
+      ],
+      "generator": "built-in imagegen",
+      "format": "PNG RGBA",
+      "sourceSize": [
+        1265,
+        1244
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "runtimeMaxEdge": 256,
+      "export": "alpha>32 bounds crop; uniform Lanczos fit to 224px maximum inside transparent 256px square",
+      "source_sha256": "5f250b9d60eefdaf73d8f668418b92cc9564b1d986cf269934246090636f0860",
+      "runtime_sha256": "cb770b8a92e93dcbe23354b6305c092148f18cc8f1bbf51d3a5904d50bc072b3",
+      "prompt_sha256": "e601febd11a6bc3ef4ac9424c78488f8e10ee2c73f60b3ab4231e23af606d4f5",
+      "alphaBounds": [
+        17,
+        16,
+        238,
+        240
+      ]
+    },
+    {
+      "id": "stormgrid",
+      "revision": "v2",
+      "source": "art/icons/upgrades/path-modules/sources/stormgrid-v2.png",
+      "runtime": "src/assets/icons/upgrades/stormgrid.png",
+      "prompt": "art/icons/upgrades/path-modules/prompts/stormgrid-v2.txt",
+      "references": [
+        {
+          "path": "art/icons/upgrades/path-modules/sources/teslaPylons-v1.png",
+          "sha256": "5f250b9d60eefdaf73d8f668418b92cc9564b1d986cf269934246090636f0860"
+        },
+        {
+          "path": "art/icons/upgrades/sources/static.png",
+          "sha256": "6150064d6ddb4b7a3ee884236b2443471f2e0df068b84b9f1aa91c8ee9c6b702"
+        }
+      ],
+      "generator": "built-in imagegen",
+      "format": "PNG RGBA",
+      "sourceSize": [
+        1267,
+        1241
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "runtimeMaxEdge": 256,
+      "export": "alpha>32 bounds crop; uniform Lanczos fit to 224px maximum inside transparent 256px square",
+      "source_sha256": "42ea696c681d5dbd635b68a87f9031bbd95353a02375ad4c1f706158c2ced4e2",
+      "runtime_sha256": "c69963bc308bd8e9866967a5ed545f2cd5f57ab5797aacc7c2a50be93d3b7756",
+      "prompt_sha256": "0d2d7c0e897bb5fa0a0b26cfddc8e00308e12fec753a1d2b035828f21800386d",
+      "alphaBounds": [
+        16,
+        26,
+        240,
+        229
+      ]
+    },
+    {
+      "id": "sentry",
+      "revision": "v1",
+      "source": "art/icons/upgrades/path-modules/sources/sentry-v1.png",
+      "runtime": "src/assets/icons/upgrades/sentry.png",
+      "prompt": "art/icons/upgrades/path-modules/prompts/sentry-v1.txt",
+      "references": [
+        {
+          "path": "art/icons/upgrades/sources/rail.png",
+          "sha256": "51e46d223115d01b66909e9350ba8a75259538e5f8caf7bfd406f48ec48c48dc"
+        }
+      ],
+      "generator": "built-in imagegen",
+      "format": "PNG RGBA",
+      "sourceSize": [
+        1312,
+        1199
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "runtimeMaxEdge": 256,
+      "export": "alpha>32 bounds crop; uniform Lanczos fit to 224px maximum inside transparent 256px square",
+      "source_sha256": "a2c379e707a7f21af861be8591f8345281b7f7a347609065acaa1e5b431e8772",
+      "runtime_sha256": "e5a01dbe4137bdaed33a85d30e0d2e0518ba8996c11de4c462b7295c1c18a9f4",
+      "prompt_sha256": "6ccb55239b94044d7b062784a58efe3c99d9185187d411938027bce027f580de",
+      "alphaBounds": [
+        16,
+        42,
+        240,
+        213
+      ]
+    },
+    {
+      "id": "sentrynet",
+      "revision": "v1",
+      "source": "art/icons/upgrades/path-modules/sources/sentrynet-v1.png",
+      "runtime": "src/assets/icons/upgrades/sentrynet.png",
+      "prompt": "art/icons/upgrades/path-modules/prompts/sentrynet-v1.txt",
+      "references": [
+        {
+          "path": "art/icons/upgrades/path-modules/sources/sentry-v1.png",
+          "sha256": "a2c379e707a7f21af861be8591f8345281b7f7a347609065acaa1e5b431e8772"
+        }
+      ],
+      "generator": "built-in imagegen",
+      "format": "PNG RGBA",
+      "sourceSize": [
+        1312,
+        1199
+      ],
+      "runtimeSize": [
+        256,
+        256
+      ],
+      "runtimeMaxEdge": 256,
+      "export": "alpha>32 bounds crop; uniform Lanczos fit to 224px maximum inside transparent 256px square",
+      "source_sha256": "d8ca28ed43cae7bbec4011fa9722a79ba853306437e021bbb222eefb5fb21d5b",
+      "runtime_sha256": "00d1f37ff42fdd920dd67ede5966550a097ed282b90c43f73d44d0b9f06eb283",
+      "prompt_sha256": "9ae0e91750985cfc2c047daa4f6d6d3649edd110b41af897cb1c1c7b168f41e3",
+      "alphaBounds": [
+        16,
+        34,
+        240,
+        221
+      ]
+    }
+  ]
+}
