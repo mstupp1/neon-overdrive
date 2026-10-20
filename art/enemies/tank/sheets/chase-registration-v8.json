@@ -1,0 +1,58 @@
+[
+  {
+    "output": "art/enemies/tank/sources/chase-v8.png",
+    "sourceSheet": "art/enemies/tank/sheets/chase-components-v8.png",
+    "cropRect": [
+      8,
+      197,
+      1115,
+      716
+    ],
+    "resizeSize": [
+      620,
+      291
+    ],
+    "scale": 0.56,
+    "measuredAssemblyPivot": [
+      573,
+      542
+    ],
+    "registeredPivot": [
+      443,
+      410
+    ],
+    "translation": [
+      127,
+      217
+    ],
+    "operation": "alpha-isolate full static hull component; uniformly scale and register paired empty weapon socket center to common 887px source canvas"
+  },
+  {
+    "output": "art/enemies/tank/layers/chase/carriage-v8.png",
+    "sourceSheet": "art/enemies/tank/sheets/chase-components-v8.png",
+    "cropRect": [
+      1197,
+      358,
+      1647,
+      758
+    ],
+    "resizeSize": [
+      252,
+      224
+    ],
+    "scale": 0.56,
+    "measuredAssemblyPivot": [
+      1435,
+      445
+    ],
+    "registeredPivot": [
+      443,
+      410
+    ],
+    "translation": [
+      310,
+      361
+    ],
+    "operation": "alpha-isolate full paired twin-cannon carriage; uniformly scale and register its attachment landmark to the same empty weapon mount"
+  }
+]

@@ -95,10 +95,10 @@
       ]
     },
     "chase": {
-      "source": "art/enemies/blinker/sources/chase-v2.png",
-      "sourceSha256": "48f72d9eb0b95d485020b36ae67e0ba4abe38fa83e620e0eee86f6953c05be15",
-      "output": "src/assets/enemies/blinker/chase-v2.png",
-      "outputSha256": "e82f99b79246c33fc074793a41745943f260ec59afa2230e4f897e80766f054c",
+      "source": "art/enemies/blinker/sources/chase-v5.png",
+      "sourceSha256": "2ec54771c867b0cb2f9d4c0d90c9267962e774d87cd38c8e3b4b97df8700b8ec",
+      "output": "src/assets/enemies/blinker/chase-v5.png",
+      "outputSha256": "d63323e2a29d7bfb464a64bff48ba463b4beea44ea7f947509874be54126f0d4",
       "sourceSize": {
         "width": 1774,
         "height": 887
@@ -108,37 +108,37 @@
         "height": 256
       },
       "cropRect": [
-        27,
-        134,
-        1727,
-        855
+        32,
+        71,
+        1742,
+        887
       ],
       "resizeSize": [
         205,
-        87
+        98
       ],
       "offset": [
         25,
-        84
+        79
       ],
       "contentBox": [
         25,
-        84,
+        79,
         230,
-        171
+        177
       ],
       "alpha": true,
       "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
       "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
       "prompt": {
-        "path": "art/enemies/blinker/prompts/chase-v2.txt",
-        "sha256": "afbdc5601cc36ac1dcd7a6e8c61b06957ad75b5088c1bded1a7b8a5f040dc994"
+        "path": "art/enemies/blinker/prompts/chase-v5.txt",
+        "sha256": "4b5848e2c1de83d72d38bdd5cfb94ad7687b862dda688980fff9513fff164de1"
       },
       "sourceSheet": null,
       "inputReferences": [
         {
-          "path": "art/enemies/blinker/sources/top-v1.png",
-          "sha256": "11495b6f1611a5067f753223ada73f38aeb39725d880b78ae9e8c19c66d32467"
+          "path": "art/enemies/blinker/sources/chase-v2.png",
+          "sha256": "48f72d9eb0b95d485020b36ae67e0ba4abe38fa83e620e0eee86f6953c05be15"
         }
       ]
     }
@@ -146,7 +146,7 @@
   "prompts": {
     "top": "art/enemies/blinker/prompts/top-v1.txt",
     "side": "art/enemies/blinker/prompts/side-v1.txt",
-    "chase": "art/enemies/blinker/prompts/chase-v2.txt"
+    "chase": "art/enemies/blinker/prompts/chase-v5.txt"
   },
   "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
 }

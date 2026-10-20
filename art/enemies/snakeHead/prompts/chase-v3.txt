@@ -1,0 +1,9 @@
+Use case: stylized-concept. Asset type: NEON OVERDRIVE snakeHead pursuit sprite.
+Input image: Image 1 is the selected accepted snakeHead chase sprite. Preserve the serpent's dark gunmetal segmented armor, paired acid-green eyes, green seams, broad head shape and recognizable fangs.
+Scene: one isolated enemy cutout on genuine transparent alpha.
+Camera: re-render this same enemy as a low front elevation, viewed directly head-on as it approaches the camera. Put the optical axis along the enemy's fore-aft direction. Its armored face is a dark vertical plane looking directly at the viewer, with both green eyes visible. The long snout is strongly foreshortened toward camera; the armored crown recedes behind the face and contributes only a narrow top strip. Camera is 15–20 degrees above horizontal.
+Lighting: upper-left key, dark underside, thin restrained green rim, controlled bright eyes.
+Style: crisp polished 3D game art, broad beveled plates legible at 1/5 size.
+Composition: centered full silhouette, roughly 78% of square canvas with transparent margin.
+Constraints: same identity and colors, static hull, genuine transparent alpha, no edge halo.
+Avoid: overhead/top-down camera, camera looking down the back, unchanged top-plane orientation, opaque checkerboard, scene, floor, shadow, aura, combat effects, text, watermark, clipped edges.

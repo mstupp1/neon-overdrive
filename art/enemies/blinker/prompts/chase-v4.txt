@@ -1,0 +1,9 @@
+Use case: stylized-concept. Asset type: NEON OVERDRIVE blinker enemy chase-view sprite.
+Create a new camera view from this identity description: a sharp compact four-point star-shaped attack drone with pale lavender-white armor, dark central visor, one violet eye and narrow violet light strips along the points. Keep its unmistakable four-point identity and palette.
+Scene: one isolated static craft with genuine transparent alpha.
+Camera and form: low front elevation as the craft flies straight toward the viewer. Place camera directly in front on the fore-aft axis, only 15–20 degrees above its dark vertical front face. Aim its small pointed nose toward the viewer; make the central visor and violet eye face forward. Foreshorten the four swept points in depth so the horizontal wings angle backward from the front and the dorsal plane behind the face compresses to a shallow narrow ellipse. The underside is dark and visible. This is a frontal 3D view, not a flat star plan view.
+Composition: whole four-point silhouette centered with generous margin, all four tips visible and uncropped; occupy roughly 68% of the square image.
+Style: polished crisp 3D sci-fi game sprite with broad beveled plates and details readable at 1/5 size.
+Lighting: upper-left pale highlight, dark underside, restrained violet rim, preserve edge contrast against alpha.
+Constraints: maintain pale lavender, charcoal and violet identity; genuine transparent background, clean edges.
+Avoid: overhead/top-down view, broad flat planform, top surface facing camera, cropped tips, checkerboard, background, floor, shadow, teleport flash, projectiles, motion trails, bloom haze, extra craft, text, watermark.

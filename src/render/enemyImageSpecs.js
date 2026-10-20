@@ -31,12 +31,12 @@ export const ENEMY_IMAGE_SPECS = {
         ]
       },
       "chase": {
-        "src": "../assets/enemies/dart/chase-v2.png",
+        "src": "../assets/enemies/dart/chase-v3.png",
         "width": 40,
         "height": 40,
         "sourceSize": {
-          "width": 1774,
-          "height": 887
+          "width": 1254,
+          "height": 1254
         },
         "anchor": [
           0.5,
@@ -75,12 +75,12 @@ export const ENEMY_IMAGE_SPECS = {
         ]
       },
       "chase": {
-        "src": "../assets/enemies/swarm/chase-v2.png",
+        "src": "../assets/enemies/swarm/chase-v4.png",
         "width": 30,
         "height": 30,
         "sourceSize": {
-          "width": 1536,
-          "height": 1024
+          "width": 1774,
+          "height": 887
         },
         "anchor": [
           0.5,
@@ -274,12 +274,12 @@ export const ENEMY_IMAGE_SPECS = {
         ]
       },
       "chase": {
-        "src": "../assets/enemies/dasher/chase-v2.png",
+        "src": "../assets/enemies/dasher/chase-v3.png",
         "width": 44,
         "height": 44,
         "sourceSize": {
-          "width": 1774,
-          "height": 887
+          "width": 1254,
+          "height": 1254
         },
         "anchor": [
           0.5,
@@ -318,7 +318,7 @@ export const ENEMY_IMAGE_SPECS = {
         ]
       },
       "chase": {
-        "src": "../assets/enemies/snakeHead/chase-v2.png",
+        "src": "../assets/enemies/snakeHead/chase-v4.png",
         "width": 40,
         "height": 40,
         "sourceSize": {
@@ -362,7 +362,7 @@ export const ENEMY_IMAGE_SPECS = {
         ]
       },
       "chase": {
-        "src": "../assets/enemies/snakeSeg/chase-v1.png",
+        "src": "../assets/enemies/snakeSeg/chase-v3.png",
         "width": 30,
         "height": 30,
         "sourceSize": {
@@ -406,7 +406,7 @@ export const ENEMY_IMAGE_SPECS = {
         ]
       },
       "chase": {
-        "src": "../assets/enemies/sniper/chase-v2.png",
+        "src": "../assets/enemies/sniper/chase-v3.png",
         "width": 46,
         "height": 46,
         "sourceSize": {
@@ -488,7 +488,7 @@ export const ENEMY_IMAGE_SPECS = {
         }
       },
       "chase": {
-        "src": "../assets/enemies/tank/chase-v3.png",
+        "src": "../assets/enemies/tank/chase-v8.png",
         "width": 78,
         "height": 78,
         "sourceSize": {
@@ -501,7 +501,7 @@ export const ENEMY_IMAGE_SPECS = {
         ],
         "layers": {
           "carriage": {
-            "src": "../assets/enemies/tank/layers/chase/carriage-v3.png",
+            "src": "../assets/enemies/tank/layers/chase/carriage-v8.png",
             "width": 78,
             "height": 78,
             "anchor": [
@@ -509,8 +509,8 @@ export const ENEMY_IMAGE_SPECS = {
               0.5
             ],
             "pivot": [
-              0.491276,
-              0.502559
+              0.505796,
+              0.511655
             ],
             "sourceSize": {
               "width": 887,
@@ -551,12 +551,12 @@ export const ENEMY_IMAGE_SPECS = {
         ]
       },
       "chase": {
-        "src": "../assets/enemies/splitter/chase-v2.png",
+        "src": "../assets/enemies/splitter/chase-v6.png",
         "width": 48,
         "height": 48,
         "sourceSize": {
-          "width": 1536,
-          "height": 1024
+          "width": 1774,
+          "height": 887
         },
         "anchor": [
           0.5,
@@ -595,7 +595,7 @@ export const ENEMY_IMAGE_SPECS = {
         ]
       },
       "chase": {
-        "src": "../assets/enemies/mine/chase-v1.png",
+        "src": "../assets/enemies/mine/chase-v3.png",
         "width": 34,
         "height": 34,
         "sourceSize": {
@@ -711,7 +711,7 @@ export const ENEMY_IMAGE_SPECS = {
         }
       },
       "chase": {
-        "src": "../assets/enemies/carrier/chase-v3.png",
+        "src": "../assets/enemies/carrier/chase-v4.png",
         "width": 84,
         "height": 84,
         "sourceSize": {
@@ -724,7 +724,7 @@ export const ENEMY_IMAGE_SPECS = {
         ],
         "layers": {
           "doorLeft": {
-            "src": "../assets/enemies/carrier/layers/chase/doorLeft-v3.png",
+            "src": "../assets/enemies/carrier/layers/chase/doorLeft-v4.png",
             "width": 84,
             "height": 84,
             "anchor": [
@@ -732,8 +732,8 @@ export const ENEMY_IMAGE_SPECS = {
               0.5
             ],
             "pivot": [
-              0.382602,
-              0.473761
+              0.399489,
+              0.492904
             ],
             "sourceSize": {
               "width": 2172,
@@ -741,7 +741,7 @@ export const ENEMY_IMAGE_SPECS = {
             }
           },
           "doorRight": {
-            "src": "../assets/enemies/carrier/layers/chase/doorRight-v3.png",
+            "src": "../assets/enemies/carrier/layers/chase/doorRight-v4.png",
             "width": 84,
             "height": 84,
             "anchor": [
@@ -749,8 +749,8 @@ export const ENEMY_IMAGE_SPECS = {
               0.5
             ],
             "pivot": [
-              0.613073,
-              0.473761
+              0.592755,
+              0.492904
             ],
             "sourceSize": {
               "width": 2172,
@@ -791,12 +791,12 @@ export const ENEMY_IMAGE_SPECS = {
         ]
       },
       "chase": {
-        "src": "../assets/enemies/shielder/chase-v1.png",
+        "src": "../assets/enemies/shielder/chase-v5.png",
         "width": 52,
         "height": 52,
         "sourceSize": {
-          "width": 1254,
-          "height": 1254
+          "width": 1402,
+          "height": 1122
         },
         "anchor": [
           0.5,
@@ -835,7 +835,7 @@ export const ENEMY_IMAGE_SPECS = {
         ]
       },
       "chase": {
-        "src": "../assets/enemies/weaver/chase-v2.png",
+        "src": "../assets/enemies/weaver/chase-v3.png",
         "width": 40,
         "height": 40,
         "sourceSize": {
@@ -879,7 +879,7 @@ export const ENEMY_IMAGE_SPECS = {
         ]
       },
       "chase": {
-        "src": "../assets/enemies/blinker/chase-v2.png",
+        "src": "../assets/enemies/blinker/chase-v5.png",
         "width": 44,
         "height": 44,
         "sourceSize": {
@@ -923,7 +923,7 @@ export const ENEMY_IMAGE_SPECS = {
         ]
       },
       "chase": {
-        "src": "../assets/enemies/eclipseDrone/chase-v2.png",
+        "src": "../assets/enemies/eclipseDrone/chase-v3.png",
         "width": 36,
         "height": 36,
         "sourceSize": {

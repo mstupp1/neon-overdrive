@@ -1,3 +1,8 @@
 {
-  "chase": "chase-v2.png"
+  "chase": "chase-v4.png",
+  "identityReferences": {
+    "chase": [
+      "art/enemies/swarm/sources/chase-v2.png"
+    ]
+  }
 }

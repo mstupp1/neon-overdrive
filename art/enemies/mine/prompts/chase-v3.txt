@@ -1,0 +1,9 @@
+Use case: stylized-concept. Asset type: NEON OVERDRIVE pursuit-view mine enemy sprite.
+Input image: Image 1 is the accepted full-resolution mine identity reference. Preserve the spherical gunmetal mine, eight radial metal prongs with orange warning lamps, central amber lens and established orange palette.
+Scene: single isolated mine cutout on genuine transparent alpha.
+Camera and pose: camera directly in front along the mine's radial axis, slightly above at 15–20 degrees. The forward-facing central amber lens sits on the dark vertical front face; show all eight prongs as foreshortened radial protrusions, with far-side tips partly occluded by the spherical body. The silhouette may stay radial but should show a narrow top plane and front-facing center.
+Lighting: upper-left key, dark underside, restrained amber rim light, controlled lamp intensity.
+Style: crisp hard-surface 3D game art, readable broad metal forms.
+Composition: centered complete mine, fills about 78% of square transparent canvas.
+Constraints: retain radial mine identity and orange/gunmetal colors; genuine transparent alpha; static sprite only.
+Avoid: overhead flat disk, checkerboard, background, ground plane, baked cast shadow, haze, large bloom, explosion, active sparks, text, watermark, extra objects, clipped prongs.

@@ -1,7 +1,7 @@
 {
   "top": "top-v3.png",
   "side": "side-v3.png",
-  "chase": "chase-v3.png",
+  "chase": "chase-v4.png",
   "sourceSheets": {
     "top": {
       "grid": [
@@ -113,61 +113,22 @@
       "sheetSha256": "10d09300b6a46b227a7384be86619e8d7a353eec43023a686838d276d53c8059"
     },
     "chase": {
+      "path": "art/enemies/carrier/sheets/chase-v4.png",
+      "doorSheet": "art/enemies/carrier/sheets/chase-doors-v4.png",
+      "registration": "art/enemies/carrier/sheets/chase-registration-v4.json",
       "grid": [
         3,
         1
       ],
-      "sheetStatus": "Original three-cell attempt retained for provenance; cell artwork spills across boundaries. Selected frontal hull is a separate direct generation; doors are cropped from chase-doors-v3.png.",
       "doorGrid": [
         2,
         1
       ],
-      "base": "art/enemies/carrier/sources/chase-v3.png",
-      "registration": {
-        "canvas": [
-          2172,
-          724
-        ],
-        "postTransform": {
-          "uniformScale": 0.88,
-          "centered": true
-        },
-        "doorLeftCrop": [
-          65,
-          100,
-          1020,
-          625
-        ],
-        "doorLeftTarget": [
-          700,
-          215,
-          220,
-          185
-        ],
-        "doorRightCrop": [
-          1151,
-          100,
-          2106,
-          625
-        ],
-        "doorRightTarget": [
-          1250,
-          215,
-          220,
-          185
-        ]
-      },
-      "cameraQA": "Near-horizon frontal elevation, broad low wings, direct approach; slight visible top plane remains.",
       "identityReferences": [
-        {
-          "path": "art/enemies/carrier/sources/chase-v2.png",
-          "sha256": "83b725035bfc2a01df064b57969c1c3ec3a350a9cc445c895ef28fcb343cdad8"
-        }
+        "art/enemies/carrier/sources/top-v1.png",
+        "art/enemies/carrier/sources/chase-v3.png"
       ],
-      "path": "art/enemies/carrier/sheets/chase-v3.png",
-      "doorSheetPath": "art/enemies/carrier/sheets/chase-doors-v3.png",
-      "sheetSha256": "08423ad61aada84a269bebbd75bfa3dff9bee235e267061c83a923f6803c538b",
-      "doorSheetSha256": "91dec43104a742d9ca351c1435f9d5da2a94f5f7b0300abd566d234571c8d96c"
+      "cameraQA": "Front-facing approach view with broad wings and visible underside; doors sized and registered to existing forward-bay targets."
     }
   }
 }

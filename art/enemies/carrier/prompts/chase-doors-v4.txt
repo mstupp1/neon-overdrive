@@ -1,0 +1,9 @@
+Use case: stylized-concept
+Asset type: two-piece moving component sheet for NEON OVERDRIVE's front-facing carrier pursuit enemy
+Input images: Image 1 defines exact carrier identity and navy/amber materials. Image 2 is the exact frontal carrier hull; study the two dark forward launch-bay apertures. Make two separate doors that each cover one aperture.
+Camera: same shallow frontal approach view as Image 2, viewing the forward face directly from 18 degrees above the horizon.
+Layout: two equal square transparent cells side by side in a 2:1 sheet. One matching door centered in each cell. Keep each door small: at most 28% of the cell width and 24% of its height. No divider, text, border, shadow, or background.
+Door proportions are essential: each panel is a compact near-square rectangle, width exactly about 1.25 times its height, matching the dark aperture proportions in Image 2. The door should cover one aperture edge-to-edge when placed on the hull. Match the aperture's rectangular beveled frame and front-facing plane. Navy/graphite armor with a restrained thin amber rim and small amber status light. Each has outer hinges on the mirrored outside edge. No excessive wings or long wing shapes.
+Left cell: left-bay door only, centered; right cell: right-bay door only, same scale, mirrored.
+Genuine transparent alpha. Both doors are complete and separated from any hull.
+Avoid: wide 2:1 panels, tall vertical panels, circles, mismatched proportions, cell-filling parts, carrier hull, attached doors, other objects, top-down view, shadows, glow aura, text, watermark, checkerboard.

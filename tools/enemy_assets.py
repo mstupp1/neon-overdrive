@@ -180,7 +180,9 @@ def main() -> None:
             source_image = Image.open(src).convert('RGBA')
             layer_paths = {layer: subject / 'layers' / view / f'{layer}-{source_name.removeprefix(view + "-")}'
                            for layer in LAYERS.get(enemy, ())}
-            common_box = bbox_union([src, *layer_paths.values()], source_image.size)
+            # Optional measured export frame excludes imperceptible stray alpha
+            # outside a complete subject while preserving the original master.
+            common_box = selection.get('exportCrops', {}).get(view) or bbox_union([src, *layer_paths.values()], source_image.size)
             record = export(src, dst, args.size, crop_rect=common_box)
             prompt_path = subject / 'prompts' / Path(source_name).with_suffix('.txt').name
             record['cameraIntent'] = VIEW_INTENT[view]
@@ -194,7 +196,12 @@ def main() -> None:
                 identity_refs = sheet_ref.get('identityReferences', [])
             else:
                 record['sourceSheet'] = None
-            if not identity_refs and view != 'top':
+            # An explicit empty list records a text-only generation, rather than
+            # inventing an overhead image input that was never sent to imagegen.
+            explicit_refs = selection.get('identityReferences', {}).get(view)
+            if explicit_refs is not None:
+                identity_refs = explicit_refs
+            if explicit_refs is None and not identity_refs and view != 'top':
                 top_identity = subject / 'sources' / selection.get('top', 'top-v1.png')
                 identity_refs = [top_identity.relative_to(ROOT).as_posix()] if top_identity.exists() else []
             record['inputReferences'] = []
@@ -243,6 +250,12 @@ def main() -> None:
                     layer_record['spinAspectHeightOverWidth'] = layer_spec['spinAspect']
                 layer_specs[layer] = layer_spec
             if layer_specs:
+                order = selection.get('layerOrder', {}).get(view)
+                if order is not None:
+                    if len(order) != len(layer_specs) or set(order) != set(layer_specs):
+                        raise ValueError(f'{enemy}/{view}: layerOrder must list each required layer once')
+                    layer_specs = {name: layer_specs[name] for name in order}
+                    manifest_views[view]['layerOrder'] = order
                 views[view]['layers'] = layer_specs
         if views:
             registry[enemy] = {'tint': tint, 'views': views}

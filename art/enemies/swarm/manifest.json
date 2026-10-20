@@ -95,13 +95,13 @@
       ]
     },
     "chase": {
-      "source": "art/enemies/swarm/sources/chase-v2.png",
-      "sourceSha256": "9185494b60ea545f3fe662596b3ec23f22bdd09e67ba2a722844f206ad3eb2ec",
-      "output": "src/assets/enemies/swarm/chase-v2.png",
-      "outputSha256": "4503a1c4b74ce2b5587ef2b177bafef143748a633c15b3ecc98c89b10b5fc952",
+      "source": "art/enemies/swarm/sources/chase-v4.png",
+      "sourceSha256": "b08277ccd5c600ab40a9350ddbceb9e8736f8eb274c263b9fe41de178cf6bb10",
+      "output": "src/assets/enemies/swarm/chase-v4.png",
+      "outputSha256": "507fa81553da0e54a7d5ec4d78c8feac789030f79efaa1c7ef706d916e34fdf7",
       "sourceSize": {
-        "width": 1536,
-        "height": 1024
+        "width": 1774,
+        "height": 887
       },
       "exportSize": {
         "width": 256,
@@ -109,36 +109,36 @@
       },
       "cropRect": [
         0,
-        22,
-        1527,
-        992
+        39,
+        1736,
+        855
       ],
       "resizeSize": [
         205,
-        130
+        96
       ],
       "offset": [
         25,
-        63
+        80
       ],
       "contentBox": [
         25,
-        63,
+        80,
         230,
-        193
+        176
       ],
       "alpha": true,
       "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
       "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
       "prompt": {
-        "path": "art/enemies/swarm/prompts/chase-v2.txt",
-        "sha256": "2677aec1ac97618b5ed3d60ddb48018707580855a81eaf9c0dffec879edfcc8b"
+        "path": "art/enemies/swarm/prompts/chase-v4.txt",
+        "sha256": "c915d5fdba8133277117769db0344d7ac1354cb23873dd8cec9cb1300e495e7b"
       },
       "sourceSheet": null,
       "inputReferences": [
         {
-          "path": "art/enemies/swarm/sources/top-v1.png",
-          "sha256": "7d74f357444821d0b26944df874b5cf0e022964f099480e34dfb99482021f428"
+          "path": "art/enemies/swarm/sources/chase-v2.png",
+          "sha256": "9185494b60ea545f3fe662596b3ec23f22bdd09e67ba2a722844f206ad3eb2ec"
         }
       ]
     }
@@ -146,7 +146,7 @@
   "prompts": {
     "top": "art/enemies/swarm/prompts/top-v1.txt",
     "side": "art/enemies/swarm/prompts/side-v1.txt",
-    "chase": "art/enemies/swarm/prompts/chase-v2.txt"
+    "chase": "art/enemies/swarm/prompts/chase-v4.txt"
   },
   "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
 }

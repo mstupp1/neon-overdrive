@@ -1,0 +1,13 @@
+Use case: stylized-concept
+Asset type: transparent registered pursuit-camera sprite sheet for NEON OVERDRIVE's carrier enemy, with two separate moving launch doors
+Input images: Image 1 is the accepted carrier identity reference: dark navy and graphite armored hull, broad wing pods, three orange amber exhaust nacelles, paired forward bays, warm amber accents. Image 2 is a camera hint only.
+Primary request: create a clear front-facing carrier approaching the player, with an open-bay static hull and two precisely registered separate bay-door layers.
+Camera: direct nose-on front elevation, camera 18 degrees above horizontal and aimed along the ship's forward approach axis. Show the broad front face and some dark underside; only a narrow top plane. The silhouette is very wide and low with symmetrical wings, not a top-down planform.
+Layout: exactly three equal square cells in one horizontal 3:1 transparent sheet, no dividers, labels, borders or background. Same scale, center, angle, camera and lighting in every cell. Keep each part fully within its cell.
+LEFT cell, static base: complete frontal carrier hull with wide armored wing pods and central nose. Preserve the accepted identity and two dark rectangular launch-bay apertures clearly visible on the forward-facing surface. Bays are OPEN and empty; no doors covering them.
+MIDDLE cell, moving left door: one complete separate armored door panel for the left launch bay, floating alone and centered at the exact left-bay location in the shared ship assembly. Match the bay dimensions and shape. Use navy gunmetal and restrained amber trim.
+RIGHT cell, moving right door: one complete separate matching panel for the right launch bay, floating alone and centered at the exact right-bay location. Mirror its placement across the ship center; match dimensions and design.
+Style: polished illustrated 3D game sprite, crisp readable beveled armor, bright upper-left key light, deep underside shadows, amber lights restrained to apertures and thin rim lines.
+Composition: entire ship and panels visible with transparent margins; simple broad forms remain recognizable at one-fifth size. Genuine alpha.
+Constraints: preserve identity, symmetry, exact common camera and registration; static hull has open empty bays; doors stay separate for runtime animation.
+Avoid: top-down or rear view, steep perspective, showing tail as the front, doors attached in the base cell, closed or glowing bays in base, extra ships/objects, shadows, floor, text, watermark, checkerboard, projectiles or explosions.

@@ -1,5 +1,10 @@
 {
   "top": "top-v1.png",
   "side": "side-v1.png",
-  "chase": "chase-v2.png"
+  "chase": "chase-v3.png",
+  "identityReferences": {
+    "chase": [
+      "art/enemies/weaver/sources/chase-v2.png"
+    ]
+  }
 }

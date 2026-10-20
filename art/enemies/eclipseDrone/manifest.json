@@ -95,10 +95,10 @@
       ]
     },
     "chase": {
-      "source": "art/enemies/eclipseDrone/sources/chase-v2.png",
-      "sourceSha256": "bb7b5b5e30703e1500e259f6f0bb025408f84d6f2a7663ae8bcb0e49108a8d71",
-      "output": "src/assets/enemies/eclipseDrone/chase-v2.png",
-      "outputSha256": "493c903ab7a180278cf7b0c2d8cb64a361526ef13fdd5b167e5bbe2bc19e0513",
+      "source": "art/enemies/eclipseDrone/sources/chase-v3.png",
+      "sourceSha256": "ced3be75eb4ff5196112ae9f16a09e63851ec88bf85ab600a900660c552d45b4",
+      "output": "src/assets/enemies/eclipseDrone/chase-v3.png",
+      "outputSha256": "9aa3780e1a6058622bddb2d396418a95b81d38621d715031ef0386e1475b88d6",
       "sourceSize": {
         "width": 1254,
         "height": 1254
@@ -108,37 +108,37 @@
         "height": 256
       },
       "cropRect": [
-        20,
-        77,
-        1234,
-        1222
+        0,
+        57,
+        1253,
+        1250
       ],
       "resizeSize": [
         205,
-        193
+        195
       ],
       "offset": [
         25,
-        31
+        30
       ],
       "contentBox": [
         25,
-        31,
+        30,
         230,
-        224
+        225
       ],
       "alpha": true,
       "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
       "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
       "prompt": {
-        "path": "art/enemies/eclipseDrone/prompts/chase-v2.txt",
-        "sha256": "423cd429d0ece4f440129cc6a66d1289527985363d251ba6e8096d09050f5812"
+        "path": "art/enemies/eclipseDrone/prompts/chase-v3.txt",
+        "sha256": "3997c2bee03404b67491e374ef1d2dae5f82587c4ed3f2d19af68777024cc30f"
       },
       "sourceSheet": null,
       "inputReferences": [
         {
-          "path": "art/enemies/eclipseDrone/sources/top-v1.png",
-          "sha256": "2b772ec86a5b0130aa9f60947b65692890cdeda3c1e1a2870fbaaebd2d6e7266"
+          "path": "art/enemies/eclipseDrone/sources/chase-v2.png",
+          "sha256": "bb7b5b5e30703e1500e259f6f0bb025408f84d6f2a7663ae8bcb0e49108a8d71"
         }
       ]
     }
@@ -146,7 +146,7 @@
   "prompts": {
     "top": "art/enemies/eclipseDrone/prompts/top-v1.txt",
     "side": "art/enemies/eclipseDrone/prompts/side-v1.txt",
-    "chase": "art/enemies/eclipseDrone/prompts/chase-v2.txt"
+    "chase": "art/enemies/eclipseDrone/prompts/chase-v3.txt"
   },
   "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
 }

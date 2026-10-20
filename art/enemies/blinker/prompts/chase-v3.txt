@@ -1,0 +1,9 @@
+Use case: stylized-concept. Asset type: NEON OVERDRIVE blinker enemy pursuit sprite.
+Input image: Image 1 is the accepted full-resolution blinker chase identity reference. Preserve its sharp four-point starfighter silhouette, pale lavender-white armor, central black visor, violet eye and narrow violet light strips.
+Scene: one isolated static enemy on genuine transparent alpha.
+Camera and pose: clear front elevation of the fast craft approaching the viewer, camera on the fore-aft optical axis and only 15–20 degrees above horizontal. The narrow pointed nose aims at the camera; show a dark front visor face with violet eye, wings foreshortened back and outward, and only a narrow dorsal plane receding behind the front face.
+Lighting: upper-left soft highlight, dark underside, restrained violet rim; keep pale armor separated from the transparent edge.
+Style: polished crisp 3D sci-fi game sprite; strong silhouette, details readable at 1/5 size.
+Composition: centered complete four-point craft, about 78% of a square transparent canvas.
+Constraints: preserve exact pale lavender, black and violet identity; genuine clean alpha; static hull.
+Avoid: top-down star shape, overhead view, checkerboard, opaque background, floor, cast shadow, teleport flash, projectiles, streaks, bloom halo, text, watermark, clipped wing tips.

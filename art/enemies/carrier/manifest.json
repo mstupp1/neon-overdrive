@@ -688,10 +688,10 @@
       }
     },
     "chase": {
-      "source": "art/enemies/carrier/sources/chase-v3.png",
-      "sourceSha256": "12eba059f43d5c78713577fc1dc02a17dc7f56199566a369d1973f8363c2d8fb",
-      "output": "src/assets/enemies/carrier/chase-v3.png",
-      "outputSha256": "bfb61e84e6df239675fc219bd1ce622f7c23e5074f16fc6be95e6ac9cfa2798d",
+      "source": "art/enemies/carrier/sources/chase-v4.png",
+      "sourceSha256": "5bf60a02a872d9eb14e020f2de8d3d30aac5ed68d04fd5072b85e4d1194a5b56",
+      "output": "src/assets/enemies/carrier/chase-v4.png",
+      "outputSha256": "bd73b1ac1baaa0ee6c04065cddfa250493c7200705bc74168158f17e08e6eb02",
       "sourceSize": {
         "width": 2172,
         "height": 724
@@ -701,106 +701,71 @@
         "height": 256
       },
       "cropRect": [
-        130,
-        61,
-        2041,
-        680
+        46,
+        56,
+        2126,
+        667
       ],
       "resizeSize": [
         205,
-        66
+        60
       ],
       "offset": [
         25,
-        95
+        98
       ],
       "contentBox": [
         25,
-        95,
+        98,
         230,
-        161
+        158
       ],
       "alpha": true,
       "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
       "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
       "prompt": {
-        "path": "art/enemies/carrier/prompts/chase-v3.txt",
-        "sha256": "2a56c78efc9514606acf9e4a1a670dcebb758305059a96ca03a80e9d2e1c409a"
+        "path": "art/enemies/carrier/prompts/chase-v4.txt",
+        "sha256": "d0c6ef1ce561c7f8873cb011952815c6b88d9b30ebe5af1278ae20cb7d242374"
       },
       "sourceSheet": {
+        "path": "art/enemies/carrier/sheets/chase-v4.png",
+        "doorSheet": "art/enemies/carrier/sheets/chase-doors-v4.png",
+        "registration": "art/enemies/carrier/sheets/chase-registration-v4.json",
         "grid": [
           3,
           1
         ],
-        "sheetStatus": "Original three-cell attempt retained for provenance; cell artwork spills across boundaries. Selected frontal hull is a separate direct generation; doors are cropped from chase-doors-v3.png.",
         "doorGrid": [
           2,
           1
         ],
-        "base": "art/enemies/carrier/sources/chase-v3.png",
-        "registration": {
-          "canvas": [
-            2172,
-            724
-          ],
-          "postTransform": {
-            "uniformScale": 0.88,
-            "centered": true
-          },
-          "doorLeftCrop": [
-            65,
-            100,
-            1020,
-            625
-          ],
-          "doorLeftTarget": [
-            700,
-            215,
-            220,
-            185
-          ],
-          "doorRightCrop": [
-            1151,
-            100,
-            2106,
-            625
-          ],
-          "doorRightTarget": [
-            1250,
-            215,
-            220,
-            185
-          ]
-        },
-        "cameraQA": "Near-horizon frontal elevation, broad low wings, direct approach; slight visible top plane remains.",
         "identityReferences": [
-          {
-            "path": "art/enemies/carrier/sources/chase-v2.png",
-            "sha256": "83b725035bfc2a01df064b57969c1c3ec3a350a9cc445c895ef28fcb343cdad8"
-          }
+          "art/enemies/carrier/sources/top-v1.png",
+          "art/enemies/carrier/sources/chase-v3.png"
         ],
-        "path": "art/enemies/carrier/sheets/chase-v3.png",
-        "doorSheetPath": "art/enemies/carrier/sheets/chase-doors-v3.png",
-        "sheetSha256": "08423ad61aada84a269bebbd75bfa3dff9bee235e267061c83a923f6803c538b",
-        "doorSheetSha256": "91dec43104a742d9ca351c1435f9d5da2a94f5f7b0300abd566d234571c8d96c",
+        "cameraQA": "Front-facing approach view with broad wings and visible underside; doors sized and registered to existing forward-bay targets.",
         "sourceHashes": {
-          "path": "08423ad61aada84a269bebbd75bfa3dff9bee235e267061c83a923f6803c538b",
-          "base": "12eba059f43d5c78713577fc1dc02a17dc7f56199566a369d1973f8363c2d8fb"
+          "path": "6effca8eb26d0cc6c92c0632a133394110d0dbf1313b21f7923922e77ecdbde8",
+          "doorSheet": "2bbfd221914d85f9cded0623189823d71d4a56f3f53411b91d6beaa8d2ca11a2"
         },
-        "registrationSha256": "3ed825934c9780763eff184785408ab9ae55940d181f15df53554fdd704cfbcb"
+        "registrationSha256": "2c4aa6d42c0e8fdcdfed091bfed1a76fed65797dd19a441cc8c38c79cfc9cfe2"
       },
       "inputReferences": [
         {
-          "path": "art/enemies/carrier/sources/chase-v2.png",
-          "sha256": "83b725035bfc2a01df064b57969c1c3ec3a350a9cc445c895ef28fcb343cdad8"
+          "path": "art/enemies/carrier/sources/top-v1.png",
+          "sha256": "54c419557ede8f3de5b8d319d0998295635fa27389db0cb21e45c2a9cf6044b0"
+        },
+        {
+          "path": "art/enemies/carrier/sources/chase-v3.png",
+          "sha256": "12eba059f43d5c78713577fc1dc02a17dc7f56199566a369d1973f8363c2d8fb"
         }
       ],
       "layers": {
         "doorLeft": {
-          "source": "art/enemies/carrier/layers/chase/doorLeft-v3.png",
-          "sourceSha256": "fa782e7552abc4a2d496ee0ddbd5f9421f4c1454dcf39e95b10535032cc00642",
-          "output": "src/assets/enemies/carrier/layers/chase/doorLeft-v3.png",
-          "outputSha256": "d73f2752416dc25cab39ad54126f039842adf023ec31519ddbe2e6a1b7b13e43",
+          "source": "art/enemies/carrier/layers/chase/doorLeft-v4.png",
+          "sourceSha256": "010e4597303dc3bec46278fb78bde1d738c65a21434dfbff36be207da46ad28c",
+          "output": "src/assets/enemies/carrier/layers/chase/doorLeft-v4.png",
+          "outputSha256": "7ddbcad092eab9199e8a9c5ddff4153c1c75e28f9c3ad7c10dffeb2be3c7026a",
           "sourceSize": {
             "width": 2172,
             "height": 724
@@ -810,117 +775,82 @@
             "height": 256
           },
           "cropRect": [
-            130,
-            61,
-            2041,
-            680
+            46,
+            56,
+            2126,
+            667
           ],
           "resizeSize": [
             205,
-            66
+            60
           ],
           "offset": [
             25,
-            95
+            98
           ],
           "contentBox": [
             25,
-            95,
+            98,
             230,
-            161
+            158
           ],
           "alpha": true,
           "operation": "apply base view crop/scale/offset to registered full-canvas layer; Lanczos resize",
           "inputReferences": [
             {
-              "path": "art/enemies/carrier/sources/chase-v2.png",
-              "sha256": "83b725035bfc2a01df064b57969c1c3ec3a350a9cc445c895ef28fcb343cdad8"
+              "path": "art/enemies/carrier/sources/top-v1.png",
+              "sha256": "54c419557ede8f3de5b8d319d0998295635fa27389db0cb21e45c2a9cf6044b0"
             },
             {
               "path": "art/enemies/carrier/sources/chase-v3.png",
               "sha256": "12eba059f43d5c78713577fc1dc02a17dc7f56199566a369d1973f8363c2d8fb"
+            },
+            {
+              "path": "art/enemies/carrier/sources/chase-v4.png",
+              "sha256": "5bf60a02a872d9eb14e020f2de8d3d30aac5ed68d04fd5072b85e4d1194a5b56"
             }
           ],
           "sourceSheet": {
+            "path": "art/enemies/carrier/sheets/chase-v4.png",
+            "doorSheet": "art/enemies/carrier/sheets/chase-doors-v4.png",
+            "registration": "art/enemies/carrier/sheets/chase-registration-v4.json",
             "grid": [
               3,
               1
             ],
-            "sheetStatus": "Original three-cell attempt retained for provenance; cell artwork spills across boundaries. Selected frontal hull is a separate direct generation; doors are cropped from chase-doors-v3.png.",
             "doorGrid": [
               2,
               1
             ],
-            "base": "art/enemies/carrier/sources/chase-v3.png",
-            "registration": {
-              "canvas": [
-                2172,
-                724
-              ],
-              "postTransform": {
-                "uniformScale": 0.88,
-                "centered": true
-              },
-              "doorLeftCrop": [
-                65,
-                100,
-                1020,
-                625
-              ],
-              "doorLeftTarget": [
-                700,
-                215,
-                220,
-                185
-              ],
-              "doorRightCrop": [
-                1151,
-                100,
-                2106,
-                625
-              ],
-              "doorRightTarget": [
-                1250,
-                215,
-                220,
-                185
-              ]
-            },
-            "cameraQA": "Near-horizon frontal elevation, broad low wings, direct approach; slight visible top plane remains.",
             "identityReferences": [
-              {
-                "path": "art/enemies/carrier/sources/chase-v2.png",
-                "sha256": "83b725035bfc2a01df064b57969c1c3ec3a350a9cc445c895ef28fcb343cdad8"
-              }
+              "art/enemies/carrier/sources/top-v1.png",
+              "art/enemies/carrier/sources/chase-v3.png"
             ],
-            "path": "art/enemies/carrier/sheets/chase-v3.png",
-            "doorSheetPath": "art/enemies/carrier/sheets/chase-doors-v3.png",
-            "sheetSha256": "08423ad61aada84a269bebbd75bfa3dff9bee235e267061c83a923f6803c538b",
-            "doorSheetSha256": "91dec43104a742d9ca351c1435f9d5da2a94f5f7b0300abd566d234571c8d96c",
+            "cameraQA": "Front-facing approach view with broad wings and visible underside; doors sized and registered to existing forward-bay targets.",
             "sourceHashes": {
-              "path": "08423ad61aada84a269bebbd75bfa3dff9bee235e267061c83a923f6803c538b",
-              "base": "12eba059f43d5c78713577fc1dc02a17dc7f56199566a369d1973f8363c2d8fb"
+              "path": "6effca8eb26d0cc6c92c0632a133394110d0dbf1313b21f7923922e77ecdbde8",
+              "doorSheet": "2bbfd221914d85f9cded0623189823d71d4a56f3f53411b91d6beaa8d2ca11a2"
             },
-            "registrationSha256": "3ed825934c9780763eff184785408ab9ae55940d181f15df53554fdd704cfbcb"
+            "registrationSha256": "2c4aa6d42c0e8fdcdfed091bfed1a76fed65797dd19a441cc8c38c79cfc9cfe2"
           },
           "prompt": {
-            "path": "art/enemies/carrier/prompts/layers/chase/doorLeft-v3.txt",
-            "sha256": "d9d159a598ee69b9b5cba3d863366d8dbbf7987f81ebd706b2c1f27a209eba0c"
+            "path": "art/enemies/carrier/prompts/chase-v4.txt",
+            "sha256": "d0c6ef1ce561c7f8873cb011952815c6b88d9b30ebe5af1278ae20cb7d242374"
           },
           "measuredPivotSourcePx": [
-            810.0,
-            307.5
+            830,
+            343
           ],
           "measuredPivotExportNormalized": [
-            0.382602,
-            0.473761
+            0.399489,
+            0.492904
           ]
         },
         "doorRight": {
-          "source": "art/enemies/carrier/layers/chase/doorRight-v3.png",
-          "sourceSha256": "2e9020852d49246210c539b9efcbb0bb18e2bb4f0eac19b60ba1f7fd5565eaf7",
-          "output": "src/assets/enemies/carrier/layers/chase/doorRight-v3.png",
-          "outputSha256": "390ac98f5f7e1f5cbdd7e3200ee2609fcaf373c88d93eda80f22a361e5d20013",
+          "source": "art/enemies/carrier/layers/chase/doorRight-v4.png",
+          "sourceSha256": "c23f11b516d8c1246db83545f410f3cdc2a1f211f45a84e09ce148923cb2e63f",
+          "output": "src/assets/enemies/carrier/layers/chase/doorRight-v4.png",
+          "outputSha256": "8128608f3ad1381cd426ee51fd75ad03f15f3b4e054356069f54d965c9fb9bd2",
           "sourceSize": {
             "width": 2172,
             "height": 724
@@ -930,110 +860,75 @@
             "height": 256
           },
           "cropRect": [
-            130,
-            61,
-            2041,
-            680
+            46,
+            56,
+            2126,
+            667
           ],
           "resizeSize": [
             205,
-            66
+            60
           ],
           "offset": [
             25,
-            95
+            98
           ],
           "contentBox": [
             25,
-            95,
+            98,
             230,
-            161
+            158
           ],
           "alpha": true,
           "operation": "apply base view crop/scale/offset to registered full-canvas layer; Lanczos resize",
           "inputReferences": [
             {
-              "path": "art/enemies/carrier/sources/chase-v2.png",
-              "sha256": "83b725035bfc2a01df064b57969c1c3ec3a350a9cc445c895ef28fcb343cdad8"
+              "path": "art/enemies/carrier/sources/top-v1.png",
+              "sha256": "54c419557ede8f3de5b8d319d0998295635fa27389db0cb21e45c2a9cf6044b0"
             },
             {
               "path": "art/enemies/carrier/sources/chase-v3.png",
               "sha256": "12eba059f43d5c78713577fc1dc02a17dc7f56199566a369d1973f8363c2d8fb"
+            },
+            {
+              "path": "art/enemies/carrier/sources/chase-v4.png",
+              "sha256": "5bf60a02a872d9eb14e020f2de8d3d30aac5ed68d04fd5072b85e4d1194a5b56"
             }
           ],
           "sourceSheet": {
+            "path": "art/enemies/carrier/sheets/chase-v4.png",
+            "doorSheet": "art/enemies/carrier/sheets/chase-doors-v4.png",
+            "registration": "art/enemies/carrier/sheets/chase-registration-v4.json",
             "grid": [
               3,
               1
             ],
-            "sheetStatus": "Original three-cell attempt retained for provenance; cell artwork spills across boundaries. Selected frontal hull is a separate direct generation; doors are cropped from chase-doors-v3.png.",
             "doorGrid": [
               2,
               1
             ],
-            "base": "art/enemies/carrier/sources/chase-v3.png",
-            "registration": {
-              "canvas": [
-                2172,
-                724
-              ],
-              "postTransform": {
-                "uniformScale": 0.88,
-                "centered": true
-              },
-              "doorLeftCrop": [
-                65,
-                100,
-                1020,
-                625
-              ],
-              "doorLeftTarget": [
-                700,
-                215,
-                220,
-                185
-              ],
-              "doorRightCrop": [
-                1151,
-                100,
-                2106,
-                625
-              ],
-              "doorRightTarget": [
-                1250,
-                215,
-                220,
-                185
-              ]
-            },
-            "cameraQA": "Near-horizon frontal elevation, broad low wings, direct approach; slight visible top plane remains.",
             "identityReferences": [
-              {
-                "path": "art/enemies/carrier/sources/chase-v2.png",
-                "sha256": "83b725035bfc2a01df064b57969c1c3ec3a350a9cc445c895ef28fcb343cdad8"
-              }
+              "art/enemies/carrier/sources/top-v1.png",
+              "art/enemies/carrier/sources/chase-v3.png"
             ],
-            "path": "art/enemies/carrier/sheets/chase-v3.png",
-            "doorSheetPath": "art/enemies/carrier/sheets/chase-doors-v3.png",
-            "sheetSha256": "08423ad61aada84a269bebbd75bfa3dff9bee235e267061c83a923f6803c538b",
-            "doorSheetSha256": "91dec43104a742d9ca351c1435f9d5da2a94f5f7b0300abd566d234571c8d96c",
+            "cameraQA": "Front-facing approach view with broad wings and visible underside; doors sized and registered to existing forward-bay targets.",
             "sourceHashes": {
-              "path": "08423ad61aada84a269bebbd75bfa3dff9bee235e267061c83a923f6803c538b",
-              "base": "12eba059f43d5c78713577fc1dc02a17dc7f56199566a369d1973f8363c2d8fb"
+              "path": "6effca8eb26d0cc6c92c0632a133394110d0dbf1313b21f7923922e77ecdbde8",
+              "doorSheet": "2bbfd221914d85f9cded0623189823d71d4a56f3f53411b91d6beaa8d2ca11a2"
             },
-            "registrationSha256": "3ed825934c9780763eff184785408ab9ae55940d181f15df53554fdd704cfbcb"
+            "registrationSha256": "2c4aa6d42c0e8fdcdfed091bfed1a76fed65797dd19a441cc8c38c79cfc9cfe2"
           },
           "prompt": {
-            "path": "art/enemies/carrier/prompts/layers/chase/doorRight-v3.txt",
-            "sha256": "d9d159a598ee69b9b5cba3d863366d8dbbf7987f81ebd706b2c1f27a209eba0c"
+            "path": "art/enemies/carrier/prompts/chase-v4.txt",
+            "sha256": "d0c6ef1ce561c7f8873cb011952815c6b88d9b30ebe5af1278ae20cb7d242374"
           },
           "measuredPivotSourcePx": [
-            1360.0,
-            307.5
+            1332,
+            343
           ],
           "measuredPivotExportNormalized": [
-            0.613073,
-            0.473761
+            0.592755,
+            0.492904
           ]
         }
       }
@@ -1042,7 +937,7 @@
   "prompts": {
     "top": "art/enemies/carrier/prompts/top-v3.txt",
     "side": "art/enemies/carrier/prompts/side-v3.txt",
-    "chase": "art/enemies/carrier/prompts/chase-v3.txt"
+    "chase": "art/enemies/carrier/prompts/chase-v4.txt"
   },
   "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
 }

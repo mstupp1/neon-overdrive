@@ -95,10 +95,10 @@
       ]
     },
     "chase": {
-      "source": "art/enemies/snakeHead/sources/chase-v2.png",
-      "sourceSha256": "8061a0e6c146c25d062ee13ddfe3d85126d3b2a9a9a02a8e68cbea87edab8b39",
-      "output": "src/assets/enemies/snakeHead/chase-v2.png",
-      "outputSha256": "102630c75e7a7a1b60c893b92e72dc70a357959b5233c78f7cbe47127b70632c",
+      "source": "art/enemies/snakeHead/sources/chase-v4.png",
+      "sourceSha256": "744203b7cda0a37b5b549c23be75f5b835946f83cc3c56928b769483a18f7001",
+      "output": "src/assets/enemies/snakeHead/chase-v4.png",
+      "outputSha256": "a33669687badcf7249e6232bd748f8dbe08e705d4b0540e934650c80aba33621",
       "sourceSize": {
         "width": 1254,
         "height": 1254
@@ -109,36 +109,36 @@
       },
       "cropRect": [
         0,
-        23,
-        1223,
-        1238
+        82,
+        1254,
+        1230
       ],
       "resizeSize": [
         205,
-        204
+        188
       ],
       "offset": [
         25,
-        26
+        34
       ],
       "contentBox": [
         25,
-        26,
+        34,
         230,
-        230
+        222
       ],
       "alpha": true,
       "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
       "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
       "prompt": {
-        "path": "art/enemies/snakeHead/prompts/chase-v2.txt",
-        "sha256": "b7905996269120ddcebe502483c5883569268b5fe880949d64db84ceb0e37aac"
+        "path": "art/enemies/snakeHead/prompts/chase-v4.txt",
+        "sha256": "a0a03864f5da14af8cc5c7cde55afb32b96b61b2639792b67a75a61e2787fe33"
       },
       "sourceSheet": null,
       "inputReferences": [
         {
-          "path": "art/enemies/snakeHead/sources/top-v1.png",
-          "sha256": "baf45f2e7b96c9f7eca8333954c4bbf4494d07e1a03639f1a8576f7e45d2f50a"
+          "path": "art/enemies/snakeHead/sources/chase-v2.png",
+          "sha256": "8061a0e6c146c25d062ee13ddfe3d85126d3b2a9a9a02a8e68cbea87edab8b39"
         }
       ]
     }
@@ -146,7 +146,7 @@
   "prompts": {
     "top": "art/enemies/snakeHead/prompts/top-v1.txt",
     "side": "art/enemies/snakeHead/prompts/side-v1.txt",
-    "chase": "art/enemies/snakeHead/prompts/chase-v2.txt"
+    "chase": "art/enemies/snakeHead/prompts/chase-v4.txt"
   },
   "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
 }

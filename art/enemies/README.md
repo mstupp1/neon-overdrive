@@ -27,3 +27,19 @@ Radially symmetric drones and the round snake segment retain similar silhouettes
 Final export: 45 camera views and 15 moving component PNGs, with all required layers present. The combined enemy/background/icon/ship/geometry suite passed **37/37 tests**, including source and output hashes, transparency, source margins, camera selection, image failure fallback, complete flashes, projected spinner motion and recoil axes.
 
 The browser combat smoke check passed **6/6 encounters** across overhead, side-scroll and pursuit with normal and pixel looks, elite scaling and blackout. It exercised the full regular roster, tank firing, carrier launches and snake segment continuity. The final run produced no new browser warnings or errors. An initial test-harness spawn used straight-down movement for the tank, preventing its hold-state firing; the preview now uses the same hover movement required by that behavior. Independent browser review also checked the responsive 390×844 preview and art controls.
+
+## Pursuit refresh · 2026-10-20
+
+Regenerated all 15 regular-enemy pursuit subjects with built-in imagegen and Luna agents, emphasizing nose-on front faces, shallow dorsal reveal, top-left lighting, dark undersides and clear neon accents. The game continues to draw ground shadows separately. Spinner, tank and carrier retain separate registered moving parts. Overhead and side view records are unchanged. Camera elevations are visually selected rather than calibrated measurements.
+
+Full-resolution selected sources and exact prompts remain in each subject’s `sources/` and `prompts/` directories; `selection.json` and `manifest.json` record selected revisions, actual input references, hashes and deterministic export transforms. Explicit empty identity-reference lists mean text-only generations. Splitter uses a measured export crop to exclude faint alpha specks while retaining its complete master. Spinner pursuit layers draw the rotor before its raised core.
+
+The final strict export and 11/11 enemy-art tests passed. The isolated browser combat smoke passed 6/6 encounters across all three cameras and normal/pixel looks, including elite/blackout, tank firing, carrier launches and snake segments, with no console warnings or errors. Light/dark edges and hit-flash rendering were visually sampled. [Before/after and native-size sheet](references/pursuit-2026-10-20.png) and [browser visual check](references/pursuit-browser-2026-10-20.png) preserve the review.
+
+## Comparative review and retries · 2026-10-20
+
+A second visual review rejected seven first-pass refreshes for weaker silhouette, identity or native-size presence. Six retries are now selected: Swarm v4, SnakeHead v4, Tank v8, Splitter v6, Shielder v5 and Blinker v5. Tank returns to a hovering hull with a visible gold reactor and a separate paired-cannon carriage; ground tracks are gone. The original Spinner chase-v3 was restored because the thicker v5 retry still had a less convincing pursuit angle and blade sweep. The other eight first-pass views remain selected.
+
+[Per-enemy judgments](references/pursuit-review-2026-10-20.md) explain every call; [the three-way comparison](references/pursuit-retries-2026-10-20.png) shows originals, first refreshes and final selections at enlarged and native size. Full sources, exact built-in imagegen prompts and rejected attempts are preserved in each subject folder. Luna agents handled production; the parent performed comparative selection, exports and browser validation.
+
+Final validation: strict export, 11/11 enemy-art tests and 6/6 live combat smoke encounters passed with no console warnings/errors. All 30 overhead/side manifest records remain unchanged. The light/dark and hit-flash checks were repeated on the final set. [Browser visual review](references/pursuit-reviewed-browser-2026-10-20.png).

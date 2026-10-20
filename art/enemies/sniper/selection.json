@@ -1,3 +1,8 @@
 {
-  "chase": "chase-v2.png"
+  "chase": "chase-v3.png",
+  "identityReferences": {
+    "chase": [
+      "art/enemies/sniper/sources/chase-v2.png"
+    ]
+  }
 }

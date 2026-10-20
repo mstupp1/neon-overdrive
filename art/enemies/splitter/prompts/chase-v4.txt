@@ -1,0 +1,9 @@
+Use case: stylized-concept. Asset type: NEON OVERDRIVE splitter enemy chase-view sprite.
+Create a new camera view from this identity description: a compact three-lobed triangular alien-mechanical craft, dark gunmetal beveled armor, three distinct bright hot-magenta plasma cores arranged as a triangle, magenta seam lights. Preserve that exact three-core triangular identity.
+Scene: one isolated static game enemy with genuine transparent alpha.
+Camera and form: an unmistakable low FRONT ELEVATION of the craft coming toward the viewer. Camera centered directly ahead on the craft's fore-aft axis, only 15–20 degrees above the front face. The dark vertical front face points straight at the viewer and carries the three visible forward magenta cores. The horizontal dorsal/top plane recedes behind the face and is compressed to a shallow narrow ellipse. The body must read broad and low in front view, with clear front thickness and a dark underside. This is not a plan view.
+Composition: entire triangular silhouette centered with ample margin; all three side lobes fully visible and uncut, occupy 70% of square canvas.
+Style: polished realistic 3D sci-fi combat sprite, crisp beveled gunmetal panels, broad details legible at 1/5 size.
+Lighting: upper-left key, dark underside, restrained magenta rim; cores luminous but controlled.
+Constraints: preserve dark metal and hot-magenta three-core identity; clean transparent pixels around all edges.
+Avoid: overhead/top-down camera, broad flat top surface, cropped points, left/right side silhouette cut off, checkerboard, background, floor, cast shadow, halo, bloom haze, explosions, projectiles, extra subjects, text, logo, watermark.

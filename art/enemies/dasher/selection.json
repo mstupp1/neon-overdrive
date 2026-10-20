@@ -1,3 +1,6 @@
 {
-  "chase": "chase-v2.png"
+  "chase": "chase-v3.png",
+  "identityReferences": {
+    "chase": []
+  }
 }

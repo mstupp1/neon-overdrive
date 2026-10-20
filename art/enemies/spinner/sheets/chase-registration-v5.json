@@ -1,0 +1,86 @@
+[
+  {
+    "output": "art/enemies/spinner/sources/chase-v5.png",
+    "sourceSheet": "art/enemies/spinner/sheets/chase-components-v5.png",
+    "cropRect": [
+      29,
+      220,
+      724,
+      568
+    ],
+    "resizeSize": [
+      612,
+      306
+    ],
+    "scale": 0.88,
+    "measuredAssemblyPivot": [
+      377,
+      394
+    ],
+    "registeredPivot": [
+      627,
+      627
+    ],
+    "translation": [
+      321,
+      474
+    ],
+    "operation": "alpha-isolate generated component; uniformly scale and register measured bearing/rotor/core center to common 1254px source canvas"
+  },
+  {
+    "output": "art/enemies/spinner/layers/chase/rotor-v5.png",
+    "sourceSheet": "art/enemies/spinner/sheets/chase-components-v5.png",
+    "cropRect": [
+      744,
+      37,
+      1717,
+      679
+    ],
+    "resizeSize": [
+      856,
+      565
+    ],
+    "scale": 0.88,
+    "measuredAssemblyPivot": [
+      1230,
+      358
+    ],
+    "registeredPivot": [
+      627,
+      627
+    ],
+    "translation": [
+      199,
+      345
+    ],
+    "operation": "alpha-isolate generated component; uniformly scale and register measured bearing/rotor/core center to common 1254px source canvas"
+  },
+  {
+    "output": "art/enemies/spinner/layers/chase/core-v5.png",
+    "sourceSheet": "art/enemies/spinner/sheets/chase-components-v5.png",
+    "cropRect": [
+      1785,
+      213,
+      2143,
+      564
+    ],
+    "resizeSize": [
+      215,
+      211
+    ],
+    "scale": 0.6,
+    "measuredAssemblyPivot": [
+      1963,
+      389
+    ],
+    "registeredPivot": [
+      627,
+      627
+    ],
+    "translation": [
+      520,
+      521
+    ],
+    "operation": "alpha-isolate generated component; uniformly scale and register measured bearing/rotor/core center to common 1254px source canvas"
+  }
+]
