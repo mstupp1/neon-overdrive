@@ -3,7 +3,7 @@
 import { G } from '../game/state.js';
 import { profile, saveProfile } from '../core/storage.js';
 import { sfx } from '../core/audio.js';
-import { CORE, coreCost } from '../game/core.js';
+import { CORE, coreCost, coreMaxed } from '../game/core.js';
 import { ui, $ } from './screens.js';
 
 export const FLUX_ICON = '<svg class="coin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 3l7 9-7 9-7-9z"/><path d="M12 8l3 4-3 4-3-4z"/></svg>';
@@ -15,20 +15,21 @@ let detailId = null; // node shown in the detail panel (follows the focus)
 // Grid of compact tiles (icon, name, level, price) + one fixed detail panel for the focused node, so the long text
 // never sizes the tiles and the screen never needs to shrink.
 function render() {
-  $('#core-sub').innerHTML = `<span class="flux">${FLUX_ICON}${fmt(profile.flux)} FLUX</span> · PERMANENT, NO LEVEL CAP`;
+  $('#core-sub').innerHTML = `<span class="flux">${FLUX_ICON}${fmt(profile.flux)} FLUX</span> · PERMANENT LEVELS`;
   const wrap = $('#core-list');
   wrap.innerHTML = '';
   CORE.forEach((n) => {
     const lv = profile.core[n.id] || 0;
     const cost = coreCost(n, lv);
-    const cant = profile.flux < cost;
+    const maxed = coreMaxed(n, lv);
+    const cant = maxed || profile.flux < cost;
     const b = document.createElement('button');
     b.className = 'core-tile' + (cant ? ' cant' : '');
     b.dataset.act = 'coreBuy';
     b.dataset.id = n.id;
     b.style.setProperty('--c', n.color);
     if (cant) b.setAttribute('aria-disabled', 'true');
-    b.innerHTML = `<span class="ct-ico">${n.icon}</span><span class="ct-txt"><b class="clip">${n.name}</b><i><em>LV ${lv}</em><span class="flux">${FLUX_ICON}${fmt(cost)}</span></i></span>`;
+    b.innerHTML = `<span class="ct-ico">${n.icon}</span><span class="ct-txt"><b class="clip">${n.name}</b><i><em>LV ${lv}</em>${maxed ? '<span class="flux">MAX</span>' : `<span class="flux">${FLUX_ICON}${fmt(cost)}</span>`}</i></span>`;
     wrap.appendChild(b);
   });
   if (!CORE.some((n) => n.id === detailId)) detailId = CORE[0].id;
@@ -41,9 +42,10 @@ function renderDetail() {
   if (!n) return;
   const lv = profile.core[n.id] || 0;
   const cost = coreCost(n, lv);
-  const cant = profile.flux < cost;
+  const maxed = coreMaxed(n, lv);
+  const cant = maxed || profile.flux < cost;
   el.style.setProperty('--c', n.color);
-  el.innerHTML = `<span class="cd-ico">${n.icon}</span><div><div class="cd-top"><b class="clip">${n.name}</b><em>LV ${lv}</em></div><p class="well">${n.desc(lv)}</p><div class="cd-buy${cant ? ' dim' : ''}"><span class="flux">${FLUX_ICON}${fmt(cost)}</span>${cant ? `<i>NEED ${fmt(cost - profile.flux)}</i>` : '<b>SELECT TO UPGRADE</b>'}</div></div>`;
+  el.innerHTML = `<span class="cd-ico">${n.icon}</span><div><div class="cd-top"><b class="clip">${n.name}</b><em>LV ${lv}</em></div><p class="well">${n.desc(lv)}</p><div class="cd-buy${cant ? ' dim' : ''}"><span class="flux">${FLUX_ICON}${fmt(cost)}</span>${maxed ? '<i>MAXED</i>' : cant ? `<i>NEED ${fmt(cost - profile.flux)}</i>` : '<b>SELECT TO UPGRADE</b>'}</div></div>`;
 }
 
 function onTileFocus(e) {
@@ -72,7 +74,7 @@ export const coreActs = {
     if (!n) return;
     const lv = profile.core[n.id] || 0;
     const cost = coreCost(n, lv);
-    if (profile.flux < cost) return;
+    if (coreMaxed(n, lv) || profile.flux < cost) return;
     profile.flux -= cost;
     profile.core[n.id] = lv + 1;
     saveProfile();

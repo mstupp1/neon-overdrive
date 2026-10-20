@@ -22,27 +22,27 @@ export const POINTS_PER_RANK = 2;
 export const THEMES = {
   fire: {
     name: 'FIREPOWER', color: '#ff4d6d',
-    small: [{ dmg: 4 }, { rate: 4 }],
-    notables: [{ name: 'Heavy Rounds', mods: { dmg: 12, pierce: 1 } }, { name: 'Rapid Cycle', mods: { rate: 12 } }],
+    small: [{ dmg: 2.5 }, { rate: 2.5 }],
+    notables: [{ name: 'Heavy Rounds', mods: { dmg: 8, pierce: 1 } }, { name: 'Rapid Cycle', mods: { rate: 8, projSpeed: 10 } }],
   },
   crit: {
     name: 'CRIT', color: '#ffe14d',
-    small: [{ crit: 2 }, { critMul: 0.15 }],
-    notables: [{ name: 'Weak Spot', mods: { crit: 5 } }, { name: 'Lethal Precision', mods: { critMul: 0.5 } }],
+    small: [{ crit: 1.5 }, { critMul: 0.1 }],
+    notables: [{ name: 'Weak Spot', mods: { crit: 3.5, bounty: 8 } }, { name: 'Lethal Precision', mods: { critMul: 0.35 } }],
   },
   mods: {
     name: 'MODULES', color: '#ff8a3d',
-    small: [{ mod: 6 }, { mod: 3, dmg: 2 }],
-    notables: [{ name: 'Drone Uplink', mods: { mod: 15 } }, { name: 'Expanded Bay', mods: { slots: 1 } }],
+    small: [{ mod: 4 }, { mod: 2, dmg: 1.5 }],
+    notables: [{ name: 'Drone Uplink', mods: { mod: 10, modRate: 5 } }, { name: 'Expanded Bay', mods: { slots: 1 } }],
   },
   mob: {
     name: 'MOBILITY', color: '#3ff6ff',
-    small: [{ speed: 4, boostRegen: 5 }, { dashCd: 6, boostCap: 5 }],
+    small: [{ speed: 7, boostRegen: 8 }, { dashCd: 8, boostCap: 8 }],
     notables: [{ name: 'Afterburner', mods: { speed: 10, dashLen: 15, boostEff: 15 } }, { name: 'Extra Thruster', mods: { charges: 1, boostCap: 15 } }],
   },
   od: {
     name: 'OVERDRIVE', color: '#ff3df2',
-    small: [{ odGain: 6 }, { odDur: 0.4 }],
+    small: [{ odGain: 8 }, { odDur: 0.4 }],
     notables: [{ name: 'Surge Capacitor', mods: { odGain: 20, ultSave: 10 } }, { name: 'Sustained Burn', mods: { odDur: 1.5 } }],
   },
   graze: {
@@ -52,12 +52,12 @@ export const THEMES = {
   },
   tank: {
     name: 'TANK', color: '#7dff6b',
-    small: [{ hull: 0.5 }, { hitIfr: 10 }],
+    small: [{ hull: 0.5 }, { hitIfr: 15 }],
     notables: [{ name: 'Reinforced Frame', mods: { hull: 1 } }, { name: 'Aegis Lattice', mods: { shield: 22 } }],
   },
   greed: {
     name: 'GREED', color: '#5aa9ff',
-    small: [{ credits: 5 }, { xp: 4 }],
+    small: [{ credits: 8 }, { xp: 7 }],
     notables: [{ name: 'Prospector', mods: { credits: 10, luck: 10, rerolls: 1 } }, { name: 'Scholar', mods: { xp: 12, magnet: 20 } }],
   },
 };
@@ -66,15 +66,15 @@ export const THEMES = {
 const K = (name, desc, mods) => ({ name, desc, mods });
 export const TREES = {
   striker: [
-    { theme: 'fire', big: true, key: K('Glass Cannon', '+40% damage. -2 max hull.', { dmg: 40, hull: -2 }) },
-    { theme: 'crit', big: true, key: K('Deadeye', 'Double crit chance. Shots that do not crit deal 20% less.', { critDouble: 1, nonCrit: -20 }) },
+    { theme: 'fire', big: true, key: K('Glass Cannon', '+30% damage. -2 max hull.', { dmg: 30, hull: -2 }) },
+    { theme: 'crit', big: true, key: K('Deadeye', 'Double crit chance. Shots that do not crit deal 30% less.', { critDouble: 1, nonCrit: -30 }) },
     { theme: 'mob', key: K('Momentum', 'Every kill speeds your next dash charge by 0.1s.', { momentum: 1 }) },
     { theme: 'greed', key: K('High Roller', '+60% credits and +30% rarity find. -1 max hull.', { credits: 60, luck: 30, hull: -1 }) },
     { theme: 'tank', key: K('Juggernaut', '+3 max hull. -15% move speed.', { hull: 3, speed: -15 }) },
-    { theme: 'od', big: true, key: K('Berserker', 'Overdrive lasts 50% longer. The meter charges 25% slower.', { odDurPct: 50, odGain: -25 }) },
+    { theme: 'od', big: true, key: K('Berserker', 'Overdrive lasts 30% longer. The meter charges 25% slower.', { odDurPct: 30, odGain: -25 }) },
   ],
   engineer: [
-    { theme: 'mods', big: true, key: K('Swarm Doctrine', '+2 module slots. Your main gun deals 25% less.', { slots: 2, primary: -25 }) },
+    { theme: 'mods', big: true, key: K('Swarm Doctrine', '+1 module slot and +15% module damage. Your main gun deals 25% less.', { slots: 1, mod: 15, primary: -25 }) },
     { theme: 'fire', key: K('Overclock', '+25% fire rate. -1 max hull.', { rate: 25, hull: -1 }) },
     { theme: 'crit', key: K('Precision Tooling', '+8% crit chance. Crits deal 0.5x less.', { crit: 8, critMul: -0.5 }) },
     { theme: 'greed', big: true, key: K('Salvage Master', '+40% credits and +60% pickup range. -10% damage.', { credits: 40, magnet: 60, dmg: -10 }) },
@@ -86,7 +86,7 @@ export const TREES = {
     { theme: 'graze', big: true, key: K('Edge Runner', 'Every 80 grazes repair 1 hull. -10% damage.', { edgeRunner: 1, dmg: -10 }) },
     { theme: 'od', key: K('Echo Chamber', 'Phase Shift charges 30% faster but lasts 30% shorter.', { odGain: 30, odDurPct: -30 }) },
     { theme: 'greed', key: K('Opportunist', '+25% credits and XP. -1 dash charge.', { credits: 25, xp: 25, charges: -1 }) },
-    { theme: 'fire', key: K('Assassin', '+30% damage. -15% fire rate.', { dmg: 30, rate: -15 }) },
+    { theme: 'fire', key: K('Assassin', '+20% damage. -15% fire rate.', { dmg: 20, rate: -15 }) },
     { theme: 'crit', big: true, key: K('Shadow Strike', 'For 0.6s after a dash every hit crits. Crits deal 0.5x less.', { shadowStrike: 1, critMul: -0.5 }) },
   ],
 };
@@ -182,6 +182,9 @@ const MODS = {
   dmg: (v) => `${pct(v)} damage`,
   rate: (v) => `${pct(v)} fire rate`,
   pierce: (v) => `${num(v)} pierce`,
+  modRate: (v) => `${pct(v)} module fire rate`,
+  projSpeed: (v) => `${pct(v)} projectile speed`,
+  bounty: (v) => `${pct(v)} damage to elites and bosses`,
   crit: (v) => `${pct(v)} crit chance`,
   critMul: (v) => `${num(v)}x crit damage`,
   mod: (v) => `${pct(v)} module damage`,
@@ -327,6 +330,9 @@ export function applyTree(st, p) {
   st.dmg *= inc('dmg') * inc('primary');
   st.modDmg *= inc('mod') / inc('primary'); // module damage reads st.dmg, so Swarm Doctrine's main-gun cut skips modules
   st.rate *= inc('rate');
+  st.modRate *= inc('modRate');
+  st.projSpeed += (m.projSpeed || 0) / 100;
+  st.bounty += (m.bounty || 0) / 100;
   st.pierce += m.pierce || 0;
   st.crit += (m.crit || 0) / 100;
   if (m.critDouble) st.crit *= 2;

@@ -15,6 +15,17 @@ import { assetIcon } from '../ui/asset-icons.js';
 export const MAX_MODULES = 4;
 export const MODULE_SLOT_CAP = 6; // every slot source together (ship, abilities, tree, gear)
 
+// Gear ammo modifiers boost whichever Rounds the run owns (nothing without one).
+const AMMO_STATS = [['freezeChance', 'freezePot'], ['burnChance', 'burnPot'], ['corrodeChance', 'corrodePot'], ['shockChance', 'shockPot']];
+function applyAmmoGear(st) {
+  if (!st.ammoProc && !st.ammoPot) return;
+  for (const [chance, pot] of AMMO_STATS) {
+    if (!st[chance]) continue;
+    st[chance] += st.ammoProc;
+    st[pot] += st.ammoPot;
+  }
+}
+
 // Exclusive families: once a run owns `limit` different options of a family, the rest leave the draft pool.
 // ammo = elemental rounds (pick one), trick = trick shots (two), barrier = bullet-erasing modules (one).
 export const FAMILIES = {
@@ -285,7 +296,7 @@ export function familyOwned(p, fam) {
 }
 // True when a family's limit keeps this option out of drafts.
 export function familyLocked(p, u) {
-  if (!u.family || (p.up[u.id] || 0) > 0) return false;
+  if (!u || !u.family || (p.up[u.id] || 0) > 0) return false;
   return familyOwned(p, u.family).length >= FAMILIES[u.family].limit;
 }
 // The card line for a family option you don't own yet: what picking it rules out.
@@ -374,6 +385,9 @@ export function recomputeStats(p) {
   st.shieldKnock = false; // BULWARK: shield breaks shove enemies (player.js)
   st.armorBonus = 0; // MONOLITH: +damage to armored enemies (enemies.js)
   st.dashOd = 0; // PHANTOM: ult meter per dash
+  st.ammoProc = 0; // gear: extra proc chance for the run's ammo (added to its Rounds below)
+  st.ammoPot = 0; // gear: extra strength for the run's ammo
+  st.ultDmgBonus = 0; // gear: damage while the ultimate runs (pilot.js ultDmg)
   st.shatter = 0; // bonus damage against frozen enemies (Cryostasis legendary)
   st.cinder = 0; // death burns spread to nearby enemies (Pyre Mantle legendary)
   st.dodgePulse = false; // dodges emit an erase pulse and extend iframes (Phase Shroud legendary)
@@ -398,6 +412,7 @@ export function recomputeStats(p) {
   st.maxHp = Math.max(1, st.maxHp);
   st.ultCells = Math.min(ULT_CELLS_MAX, Math.max(ULT_LEVELS, Math.round(st.ultCells)));
   st.maxModules = Math.min(MODULE_SLOT_CAP, st.maxModules);
+  applyAmmoGear(st);
   st.odDur = Math.min(ULT_DUR_MAX, st.odDur);
   st.ultSave = Math.min(0.5, st.ultSave);
   if (st.shieldInterval) st.shieldInterval = Math.max(SHIELD_MIN, st.shieldInterval); // stacked recharge cuts bottom out
@@ -682,7 +697,7 @@ const TUNE_ICONS = {
   boostRegen: 'ramScoop', boostEff: 'injector',
   projSize: 'projSize', projSpeed: 'projSpeed', armorPierce: 'armorPierce', burst: 'burstFire', burstN: 'burstFire',
   freeze: 'cryo', freezePot: 'deepFreeze', burn: 'incendiary', burnPot: 'accelerant', corrode: 'corrosive', corrodePot: 'acidEtch',
-  sunder: 'sundering', dodge: 'dodge',
+  sunder: 'sundering', dodge: 'dodge', ammo: 'shock', ammoPot: 'overcharge', ultDmg: 'capacitor',
 };
 const affixPath = (stat) => affixTag(stat);
 export const isTune = (id) => typeof id === 'string' && id.startsWith('tune:');

@@ -9,7 +9,7 @@ import { clamp, damp, rand, TAU, wrapAngle } from '../core/math.js';
 import { WEAPONS, weaponStreams, weaponDamageScale, activePaint } from './ships.js';
 import { equippedParts, itemTags } from './parts.js';
 import { profile } from '../core/storage.js';
-import { recomputeStats } from './upgrades.js';
+import { recomputeStats, familyLocked, upgradeById } from './upgrades.js';
 import { playerBullet, clearBullets } from './bullets.js';
 import { gainCredits } from './economy.js';
 import { particle, explosion, ring, sparks, floatText, addShake, flash, hitstop, slowmo, grazeLabel } from './fx.js';
@@ -104,7 +104,12 @@ export function createPlayer(ship, gear = true) {
   initPilot(p, cls, gear ? equippedPassives(cls.id).map((x) => x.id) : []);
   p.tree = treeForRun(cls.id, gear); // passive tree node ids (tree.js)
   for (const [id, lv] of Object.entries(ship.start)) p.up[id] = lv;
-  for (const part of p.parts) for (const [id, lv] of Object.entries(part.start || {})) p.up[id] = Math.max(p.up[id] || 0, lv); // free levels (max-capped by the upgrade pool)
+  for (const part of p.parts) {
+    for (const [id, lv] of Object.entries(part.start || {})) {
+      if (familyLocked(p, upgradeById(id))) continue; // e.g. two ammo cores: the first one fitted wins
+      p.up[id] = Math.max(p.up[id] || 0, lv); // free levels (max-capped by the upgrade pool)
+    }
+  }
   for (const id of p.passives) for (const [uid, lv] of Object.entries(passiveById(id).start || {})) p.up[uid] = (p.up[uid] || 0) + lv; // Gunsmith / Field Kit
   p.tags = {}; // build-path weights of the equipped gear (upgrades.js synergy)
   for (const part of p.parts) for (const [t, n] of Object.entries(itemTags(part.item))) p.tags[t] = (p.tags[t] || 0) + n;

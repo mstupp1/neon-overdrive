@@ -3,7 +3,7 @@
 
 import { profile, saveProfile } from '../core/storage.js';
 import { SHIPS, shipById, ownsShip, paintsFor, activePaint } from './ships.js';
-import { SLOTS, makeItem, itemLevel, sellValue, gearByUid, gearInSlot, equippedOn, migrateParts } from './parts.js';
+import { SLOTS, makeItem, itemLevel, sellValue, gearByUid, gearInSlot, equippedOn, migrateParts, migrateGearV2 } from './parts.js';
 import { luckFor, rollRarity } from './rarity.js';
 import { addGear } from './loot.js';
 import { rebuildShipSprite } from '../render/sprites.js';
@@ -101,6 +101,7 @@ export function sellJunk(slot) {
 // Boot: legacy parts become items.
 export function initGear() {
   migrateParts(profile);
+  migrateGearV2(profile);
   saveProfile();
 }
 

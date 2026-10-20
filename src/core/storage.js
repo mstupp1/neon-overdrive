@@ -37,6 +37,7 @@ const DEFAULTS = {
   gear: [], // equipment items {uid, base, slot, r, il, mods} (parts.js)
   gearSeq: 0, // last item uid number
   gearMigrated: false,
+  gearV2: false, // gear slot jobs: removed modifiers mapped (parts.js migrateGearV2)
   gearNew: [], // item uids not yet seen in the inventory
   equip: {}, // shipId → { core, plating, thrusters } item uids
   paint: {}, // shipId → palette index

@@ -314,7 +314,7 @@ export function addUltMeter(p, amount) {
 
 // The running ult's level row (null when no ult is active).
 export const ultFx = (p) => (p && p.odT > 0 ? (ULT_LV[p.cls] || ULT_LV.striker)[p.ultLv || ULT_LEVELS] : null);
-export const ultDmg = (p) => { const f = ultFx(p); return f ? f.dmg : 1; };
+export const ultDmg = (p) => { const f = ultFx(p); return f ? f.dmg * (1 + ((p.st && p.st.ultDmgBonus) || 0)) : 1; };
 export const ultRate = (p) => { const f = ultFx(p); return f ? f.rate : 1; };
 export const ultModRate = (p) => 1 + (ultRate(p) - 1) * (2 / 3);
 export const ultScore = (p) => { const f = ultFx(p); return f ? f.score : 1; };
