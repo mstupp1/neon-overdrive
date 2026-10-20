@@ -1,0 +1,1199 @@
+{
+  "swarm": {
+    "logicalSize": 30,
+    "chase": {
+      "source": "art/enemies/swarm/sources/chase-v3.png",
+      "sourceSha256": "d565e7c7a7877e7141807a59962abc9aa8b38d32fc3bc24045aa2d107f5e4447",
+      "output": "src/assets/enemies/swarm/chase-v3.png",
+      "outputSha256": "b33c74118cea22a399031dfd472894c30a5e0fe057a0893d443c16d4a5928730",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        29,
+        96,
+        1234,
+        1134
+      ],
+      "resizeSize": [
+        205,
+        177
+      ],
+      "offset": [
+        25,
+        39
+      ],
+      "contentBox": [
+        25,
+        39,
+        230,
+        216
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/swarm/prompts/chase-v3.txt",
+        "sha256": "7567cd217976b13e2ff009283f7b01f4588e2a3454af95fb95f2eff4523b36d5"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/swarm/sources/chase-v2.png",
+          "sha256": "9185494b60ea545f3fe662596b3ec23f22bdd09e67ba2a722844f206ad3eb2ec"
+        }
+      ]
+    }
+  },
+  "tank": {
+    "logicalSize": 78,
+    "chase": {
+      "source": "art/enemies/tank/sources/chase-v4.png",
+      "sourceSha256": "f2aa7dcf7182a0936184c76a7833081e3063c2598e0833b39769132bfff3768d",
+      "output": "src/assets/enemies/tank/chase-v4.png",
+      "outputSha256": "f8f1bffaa5c7093c04930963a908a991663a0165bcbc2455feea6ef07bd74d19",
+      "sourceSize": {
+        "width": 887,
+        "height": 887
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        123,
+        326,
+        872,
+        729
+      ],
+      "resizeSize": [
+        205,
+        110
+      ],
+      "offset": [
+        25,
+        73
+      ],
+      "contentBox": [
+        25,
+        73,
+        230,
+        183
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/tank/prompts/chase-v4.txt",
+        "sha256": "77f5f9a75f47065ceb196bea65eef5c5cdc63bb7ef0918c4505f99d423ce3d2a"
+      },
+      "sourceSheet": {
+        "path": "art/enemies/tank/sheets/chase-v4.png",
+        "registration": "art/enemies/tank/sheets/chase-registration-v4.json",
+        "size": [
+          1774,
+          887
+        ],
+        "layout": "two generated components; measured alpha bounds isolated and uniformly scaled to registered 887px canvas",
+        "identityReferences": [
+          "art/enemies/tank/sources/top-v1.png",
+          "art/enemies/tank/sources/chase-v3.png"
+        ],
+        "sourceHashes": {
+          "path": "63878f789f94e70e8885754c8a118d751b3f5cac2e7d75c05df674b8eff49916"
+        },
+        "registrationSha256": "91c0518526360854eb54bdd6b88c8e6c680fd60d37aaed455e488f8fc5b43080"
+      },
+      "inputReferences": [
+        {
+          "path": "art/enemies/tank/sources/top-v1.png",
+          "sha256": "a95726e5b9c1636c9b152453b3079fa24b1f74eff8b59287df7f2452252301a3"
+        },
+        {
+          "path": "art/enemies/tank/sources/chase-v3.png",
+          "sha256": "f1a974d9710ad9c24cf60fdd29a50db62a5b75c3cc5e29ce91ea8a2f02d3ea1a"
+        }
+      ],
+      "layers": {
+        "carriage": {
+          "source": "art/enemies/tank/layers/chase/carriage-v4.png",
+          "sourceSha256": "4322308b8a513cd9ecf91f04e3b41f7fde735dd79ae42ad428fff6ae71314fff",
+          "output": "src/assets/enemies/tank/layers/chase/carriage-v4.png",
+          "outputSha256": "7899b32dcce01554702806fa8b3d0bc7a6b0135d4522477c20508c18d947ca6b",
+          "sourceSize": {
+            "width": 887,
+            "height": 887
+          },
+          "exportSize": {
+            "width": 256,
+            "height": 256
+          },
+          "cropRect": [
+            123,
+            326,
+            872,
+            729
+          ],
+          "resizeSize": [
+            205,
+            110
+          ],
+          "offset": [
+            25,
+            73
+          ],
+          "contentBox": [
+            25,
+            73,
+            230,
+            183
+          ],
+          "alpha": true,
+          "operation": "apply base view crop/scale/offset to registered full-canvas layer; Lanczos resize",
+          "inputReferences": [
+            {
+              "path": "art/enemies/tank/sources/top-v1.png",
+              "sha256": "a95726e5b9c1636c9b152453b3079fa24b1f74eff8b59287df7f2452252301a3"
+            },
+            {
+              "path": "art/enemies/tank/sources/chase-v3.png",
+              "sha256": "f1a974d9710ad9c24cf60fdd29a50db62a5b75c3cc5e29ce91ea8a2f02d3ea1a"
+            },
+            {
+              "path": "art/enemies/tank/sources/chase-v4.png",
+              "sha256": "f2aa7dcf7182a0936184c76a7833081e3063c2598e0833b39769132bfff3768d"
+            }
+          ],
+          "sourceSheet": {
+            "path": "art/enemies/tank/sheets/chase-v4.png",
+            "registration": "art/enemies/tank/sheets/chase-registration-v4.json",
+            "size": [
+              1774,
+              887
+            ],
+            "layout": "two generated components; measured alpha bounds isolated and uniformly scaled to registered 887px canvas",
+            "identityReferences": [
+              "art/enemies/tank/sources/top-v1.png",
+              "art/enemies/tank/sources/chase-v3.png"
+            ],
+            "sourceHashes": {
+              "path": "63878f789f94e70e8885754c8a118d751b3f5cac2e7d75c05df674b8eff49916"
+            },
+            "registrationSha256": "91c0518526360854eb54bdd6b88c8e6c680fd60d37aaed455e488f8fc5b43080"
+          },
+          "prompt": {
+            "path": "art/enemies/tank/prompts/chase-v4.txt",
+            "sha256": "77f5f9a75f47065ceb196bea65eef5c5cdc63bb7ef0918c4505f99d423ce3d2a"
+          },
+          "measuredPivotSourcePx": [
+            443,
+            410
+          ],
+          "measuredPivotExportNormalized": [
+            0.439779,
+            0.374719
+          ]
+        }
+      }
+    }
+  },
+  "dasher": {
+    "logicalSize": 44,
+    "chase": {
+      "source": "art/enemies/dasher/sources/chase-v3.png",
+      "sourceSha256": "440c97ac1fdf1a3df29409eeb8421077a5426b63c3c7494701579de5d1feff4d",
+      "output": "src/assets/enemies/dasher/chase-v3.png",
+      "outputSha256": "6c3cb55e75de5b05b380bdaa649ead92647a2938ae7dac12ccf8197160482881",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        19,
+        39,
+        1235,
+        1206
+      ],
+      "resizeSize": [
+        205,
+        197
+      ],
+      "offset": [
+        25,
+        29
+      ],
+      "contentBox": [
+        25,
+        29,
+        230,
+        226
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/dasher/prompts/chase-v3.txt",
+        "sha256": "012816ecdc5f292357548a2411de757558e5fab03a9324746bc72d993a83549e"
+      },
+      "sourceSheet": null,
+      "inputReferences": []
+    }
+  },
+  "snakeHead": {
+    "logicalSize": 40,
+    "chase": {
+      "source": "art/enemies/snakeHead/sources/chase-v3.png",
+      "sourceSha256": "001ad42255a095c09d8cb336b98f763783d79db254207687aceec6b0e5ce6d1c",
+      "output": "src/assets/enemies/snakeHead/chase-v3.png",
+      "outputSha256": "4d7bdc845740202fb7c19f2288cf5b9c2cf02044cac61f4f8efbb69fd48161e8",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        0,
+        19,
+        1254,
+        1254
+      ],
+      "resizeSize": [
+        205,
+        202
+      ],
+      "offset": [
+        25,
+        27
+      ],
+      "contentBox": [
+        25,
+        27,
+        230,
+        229
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/snakeHead/prompts/chase-v3.txt",
+        "sha256": "5470217b38758743366b6e282dea5fdcbc9466822f8d7738a39b9710b3dc6170"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/snakeHead/sources/chase-v2.png",
+          "sha256": "8061a0e6c146c25d062ee13ddfe3d85126d3b2a9a9a02a8e68cbea87edab8b39"
+        }
+      ]
+    }
+  },
+  "dart": {
+    "logicalSize": 40,
+    "chase": {
+      "source": "art/enemies/dart/sources/chase-v3.png",
+      "sourceSha256": "bcb434d5a727519ee5ee348a9c82aab0470bf135fd22ff128db7ab901167501c",
+      "output": "src/assets/enemies/dart/chase-v3.png",
+      "outputSha256": "196d747cfc58512d656d8cac132adca78486c36ba062ead3a1f61d01b0ad28fc",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        17,
+        39,
+        1234,
+        1204
+      ],
+      "resizeSize": [
+        205,
+        196
+      ],
+      "offset": [
+        25,
+        30
+      ],
+      "contentBox": [
+        25,
+        30,
+        230,
+        226
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/dart/prompts/chase-v3.txt",
+        "sha256": "12b988b2680cead466a4db3b69136031f296fb980b678de0b84766b63533c102"
+      },
+      "sourceSheet": null,
+      "inputReferences": []
+    }
+  },
+  "splitter": {
+    "logicalSize": 48,
+    "chase": {
+      "source": "art/enemies/splitter/sources/chase-v5.png",
+      "sourceSha256": "557c3658f82673d7eab76778214a610b7609ac0a6c0b0bcd0a887e297c4cb432",
+      "output": "src/assets/enemies/splitter/chase-v5.png",
+      "outputSha256": "1836f1447ef71b76d1bc825a06de874c49e32a80db4825b55f6cb8fc12e928bf",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        360,
+        415,
+        895,
+        825
+      ],
+      "resizeSize": [
+        205,
+        157
+      ],
+      "offset": [
+        25,
+        49
+      ],
+      "contentBox": [
+        25,
+        49,
+        230,
+        206
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/splitter/prompts/chase-v5.txt",
+        "sha256": "90b3470246a637d4b1d86419d5f4b866c991a9d3e2c756d243993abd0f0216ba"
+      },
+      "sourceSheet": null,
+      "inputReferences": []
+    }
+  },
+  "spinner": {
+    "logicalSize": 60,
+    "chase": {
+      "source": "art/enemies/spinner/sources/chase-v4.png",
+      "sourceSha256": "ec368811565b52baaa47f056a3c01566d9a555e4ee4e57506b9c04e88109d8e0",
+      "output": "src/assets/enemies/spinner/chase-v4.png",
+      "outputSha256": "39c25446c4ec8d31cc8522562e615586dc86c9ff7948f141f8842a79522cb9ce",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        142,
+        492,
+        1113,
+        762
+      ],
+      "resizeSize": [
+        205,
+        57
+      ],
+      "offset": [
+        25,
+        99
+      ],
+      "contentBox": [
+        25,
+        99,
+        230,
+        156
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/spinner/prompts/chase-v4.txt",
+        "sha256": "8dbca5914a12999bae76e6c09451fe549294b1618643c9b82a30f262dd8a499b"
+      },
+      "sourceSheet": {
+        "path": "art/enemies/spinner/sheets/chase-components-v4.png",
+        "registration": "art/enemies/spinner/sheets/chase-registration-v4.json",
+        "identityReferences": [
+          "art/enemies/spinner/sources/top-v1.png"
+        ],
+        "layout": "three generated components on transparent horizontal sheet; alpha-isolated and uniformly scaled onto common 1254px source canvas",
+        "sourceHashes": {
+          "path": "45aef5f57c16ce8afacedae17bfed7d78d217f640689e22c7d0d95b77632a171"
+        },
+        "registrationSha256": "dd603dec0d582db02f5ec05c7c8bbaf93e8a5fffca7762f08a9c50fa76c6ec42"
+      },
+      "inputReferences": [
+        {
+          "path": "art/enemies/spinner/sources/top-v1.png",
+          "sha256": "192a5b8e34e6b921906c9668338611eceb114e5cf29227cd77ba1cfea098e25a"
+        }
+      ],
+      "layers": {
+        "core": {
+          "source": "art/enemies/spinner/layers/chase/core-v4.png",
+          "sourceSha256": "fc35984ef12ed65b3de2eb1223dde3cc579295da6d4643a258798f7ab2470316",
+          "output": "src/assets/enemies/spinner/layers/chase/core-v4.png",
+          "outputSha256": "4a3311429e3246555b2b463f5e9c56f3f7ed64ad0f49c0f0b76352538321a3b0",
+          "sourceSize": {
+            "width": 1254,
+            "height": 1254
+          },
+          "exportSize": {
+            "width": 256,
+            "height": 256
+          },
+          "cropRect": [
+            142,
+            492,
+            1113,
+            762
+          ],
+          "resizeSize": [
+            205,
+            57
+          ],
+          "offset": [
+            25,
+            99
+          ],
+          "contentBox": [
+            25,
+            99,
+            230,
+            156
+          ],
+          "alpha": true,
+          "operation": "apply base view crop/scale/offset to registered full-canvas layer; Lanczos resize",
+          "inputReferences": [
+            {
+              "path": "art/enemies/spinner/sources/top-v1.png",
+              "sha256": "192a5b8e34e6b921906c9668338611eceb114e5cf29227cd77ba1cfea098e25a"
+            },
+            {
+              "path": "art/enemies/spinner/sources/chase-v4.png",
+              "sha256": "ec368811565b52baaa47f056a3c01566d9a555e4ee4e57506b9c04e88109d8e0"
+            }
+          ],
+          "sourceSheet": {
+            "path": "art/enemies/spinner/sheets/chase-components-v4.png",
+            "registration": "art/enemies/spinner/sheets/chase-registration-v4.json",
+            "identityReferences": [
+              "art/enemies/spinner/sources/top-v1.png"
+            ],
+            "layout": "three generated components on transparent horizontal sheet; alpha-isolated and uniformly scaled onto common 1254px source canvas",
+            "sourceHashes": {
+              "path": "45aef5f57c16ce8afacedae17bfed7d78d217f640689e22c7d0d95b77632a171"
+            },
+            "registrationSha256": "dd603dec0d582db02f5ec05c7c8bbaf93e8a5fffca7762f08a9c50fa76c6ec42"
+          },
+          "prompt": {
+            "path": "art/enemies/spinner/prompts/chase-v4.txt",
+            "sha256": "8dbca5914a12999bae76e6c09451fe549294b1618643c9b82a30f262dd8a499b"
+          },
+          "measuredPivotSourcePx": [
+            627,
+            627
+          ],
+          "measuredPivotExportNormalized": [
+            0.497635,
+            0.498047
+          ]
+        },
+        "rotor": {
+          "source": "art/enemies/spinner/layers/chase/rotor-v4.png",
+          "sourceSha256": "144ac660bd716c2938ed92809d24bfabfbee9aad4e6f43f52330d35e822f9a5b",
+          "output": "src/assets/enemies/spinner/layers/chase/rotor-v4.png",
+          "outputSha256": "92ba34b6aec8c63eb626820dc70236386a419cf124aa8ed3ff5bef25944528fa",
+          "sourceSize": {
+            "width": 1254,
+            "height": 1254
+          },
+          "exportSize": {
+            "width": 256,
+            "height": 256
+          },
+          "cropRect": [
+            142,
+            492,
+            1113,
+            762
+          ],
+          "resizeSize": [
+            205,
+            57
+          ],
+          "offset": [
+            25,
+            99
+          ],
+          "contentBox": [
+            25,
+            99,
+            230,
+            156
+          ],
+          "alpha": true,
+          "operation": "apply base view crop/scale/offset to registered full-canvas layer; Lanczos resize",
+          "inputReferences": [
+            {
+              "path": "art/enemies/spinner/sources/top-v1.png",
+              "sha256": "192a5b8e34e6b921906c9668338611eceb114e5cf29227cd77ba1cfea098e25a"
+            },
+            {
+              "path": "art/enemies/spinner/sources/chase-v4.png",
+              "sha256": "ec368811565b52baaa47f056a3c01566d9a555e4ee4e57506b9c04e88109d8e0"
+            }
+          ],
+          "sourceSheet": {
+            "path": "art/enemies/spinner/sheets/chase-components-v4.png",
+            "registration": "art/enemies/spinner/sheets/chase-registration-v4.json",
+            "identityReferences": [
+              "art/enemies/spinner/sources/top-v1.png"
+            ],
+            "layout": "three generated components on transparent horizontal sheet; alpha-isolated and uniformly scaled onto common 1254px source canvas",
+            "sourceHashes": {
+              "path": "45aef5f57c16ce8afacedae17bfed7d78d217f640689e22c7d0d95b77632a171"
+            },
+            "registrationSha256": "dd603dec0d582db02f5ec05c7c8bbaf93e8a5fffca7762f08a9c50fa76c6ec42"
+          },
+          "prompt": {
+            "path": "art/enemies/spinner/prompts/chase-v4.txt",
+            "sha256": "8dbca5914a12999bae76e6c09451fe549294b1618643c9b82a30f262dd8a499b"
+          },
+          "measuredPivotSourcePx": [
+            627,
+            627
+          ],
+          "measuredPivotExportNormalized": [
+            0.497635,
+            0.498047
+          ],
+          "spinAspectHeightOverWidth": 0.278064
+        }
+      },
+      "layerOrder": [
+        "rotor",
+        "core"
+      ]
+    }
+  },
+  "weaver": {
+    "logicalSize": 40,
+    "chase": {
+      "source": "art/enemies/weaver/sources/chase-v3.png",
+      "sourceSha256": "de05a7745c1cfc90d2863c23f7ff6ba16a40555459c2700d4e3b2d53118b4044",
+      "output": "src/assets/enemies/weaver/chase-v3.png",
+      "outputSha256": "d1a5bb052a086f289a41f035f6327783f850d3a5e06dbf0c2c685b0cee17cc21",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        0,
+        31,
+        1248,
+        1214
+      ],
+      "resizeSize": [
+        205,
+        194
+      ],
+      "offset": [
+        25,
+        31
+      ],
+      "contentBox": [
+        25,
+        31,
+        230,
+        225
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/weaver/prompts/chase-v3.txt",
+        "sha256": "b5bd24e947c5440934621f061aae1cc850cbc463b2d79966e34da4e4b73a1993"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/weaver/sources/chase-v2.png",
+          "sha256": "41540eadac20ce658abc4ec3e39fb4a438c485a135284435c98d62ca0f7e9f4a"
+        }
+      ]
+    }
+  },
+  "mine": {
+    "logicalSize": 34,
+    "chase": {
+      "source": "art/enemies/mine/sources/chase-v3.png",
+      "sourceSha256": "29f9cc954184f1827509f1ed9853b1756b427a976889df49a70c2132f57a6abf",
+      "output": "src/assets/enemies/mine/chase-v3.png",
+      "outputSha256": "7460419a85e2badf7c41ab8919fd4a56d1977a45715d26905953723691022632",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        0,
+        21,
+        1252,
+        1254
+      ],
+      "resizeSize": [
+        205,
+        202
+      ],
+      "offset": [
+        25,
+        27
+      ],
+      "contentBox": [
+        25,
+        27,
+        230,
+        229
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/mine/prompts/chase-v3.txt",
+        "sha256": "539e35f1ad46a52189206ee98fd3ec884cac0f9958527f38ba71cf65aa7ef346"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/mine/sources/chase-v1.png",
+          "sha256": "4c3a8b63067788f9af2dc74cfeb1c3f1691a1cb98ae813607e6aa218f55e8baa"
+        }
+      ]
+    }
+  },
+  "eclipseDrone": {
+    "logicalSize": 36,
+    "chase": {
+      "source": "art/enemies/eclipseDrone/sources/chase-v3.png",
+      "sourceSha256": "ced3be75eb4ff5196112ae9f16a09e63851ec88bf85ab600a900660c552d45b4",
+      "output": "src/assets/enemies/eclipseDrone/chase-v3.png",
+      "outputSha256": "9aa3780e1a6058622bddb2d396418a95b81d38621d715031ef0386e1475b88d6",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        0,
+        57,
+        1253,
+        1250
+      ],
+      "resizeSize": [
+        205,
+        195
+      ],
+      "offset": [
+        25,
+        30
+      ],
+      "contentBox": [
+        25,
+        30,
+        230,
+        225
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/eclipseDrone/prompts/chase-v3.txt",
+        "sha256": "3997c2bee03404b67491e374ef1d2dae5f82587c4ed3f2d19af68777024cc30f"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/eclipseDrone/sources/chase-v2.png",
+          "sha256": "bb7b5b5e30703e1500e259f6f0bb025408f84d6f2a7663ae8bcb0e49108a8d71"
+        }
+      ]
+    }
+  },
+  "snakeSeg": {
+    "logicalSize": 30,
+    "chase": {
+      "source": "art/enemies/snakeSeg/sources/chase-v3.png",
+      "sourceSha256": "1a830c5cdb7ef594c04f79d305e244e4d7cea8853edf89a9d457f9097c22853c",
+      "output": "src/assets/enemies/snakeSeg/chase-v3.png",
+      "outputSha256": "60d0c55a650df13e2b5468d23972ab1c67c6936ddeceb06fbd9f45ad06908c02",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        0,
+        62,
+        1242,
+        1230
+      ],
+      "resizeSize": [
+        205,
+        193
+      ],
+      "offset": [
+        25,
+        31
+      ],
+      "contentBox": [
+        25,
+        31,
+        230,
+        224
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/snakeSeg/prompts/chase-v3.txt",
+        "sha256": "d93535ba6e5077fe5bb5cd03f4c8d204504e610034f5937527aa4ec9f2af38f1"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/snakeSeg/sources/chase-v1.png",
+          "sha256": "a2e8b769bb1c9a9df6f4d6118eab02bbd60da03899d3ee9b4e2f4f621785201f"
+        }
+      ]
+    }
+  },
+  "blinker": {
+    "logicalSize": 44,
+    "chase": {
+      "source": "art/enemies/blinker/sources/chase-v4.png",
+      "sourceSha256": "f8b693660bacd030f9c7183471714c33fbc9df2fef8f1b11d212f8491f7a59a0",
+      "output": "src/assets/enemies/blinker/chase-v4.png",
+      "outputSha256": "9bbea14a7640cc6a698c19740911aa286c35bf223de50802013dd0cc155a8a8b",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        0,
+        150,
+        1241,
+        1230
+      ],
+      "resizeSize": [
+        205,
+        178
+      ],
+      "offset": [
+        25,
+        39
+      ],
+      "contentBox": [
+        25,
+        39,
+        230,
+        217
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/blinker/prompts/chase-v4.txt",
+        "sha256": "40d1cd58c8716f7d448596a8907ee6a199316a7c86cab0ed084060fc28564556"
+      },
+      "sourceSheet": null,
+      "inputReferences": []
+    }
+  },
+  "sniper": {
+    "logicalSize": 46,
+    "chase": {
+      "source": "art/enemies/sniper/sources/chase-v3.png",
+      "sourceSha256": "9edf6e95f391467e1487c02c73f794ee88b4b760ec580a9ae5cd52f823394c2c",
+      "output": "src/assets/enemies/sniper/chase-v3.png",
+      "outputSha256": "8c1f8b08eb89f5ed828ce663ddb8b7f18f5e0bc4db02275dbdd6ae9722685b71",
+      "sourceSize": {
+        "width": 1774,
+        "height": 887
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        31,
+        89,
+        1746,
+        863
+      ],
+      "resizeSize": [
+        205,
+        93
+      ],
+      "offset": [
+        25,
+        81
+      ],
+      "contentBox": [
+        25,
+        81,
+        230,
+        174
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/sniper/prompts/chase-v3.txt",
+        "sha256": "308f346e52ae74838918e5a64750a9fff730867413b8c678fbb08555988cb2e2"
+      },
+      "sourceSheet": null,
+      "inputReferences": [
+        {
+          "path": "art/enemies/sniper/sources/chase-v2.png",
+          "sha256": "099e5f135874e22cb7b756b8703fa3384ee7efeefe603976b972af65d977d7cf"
+        }
+      ]
+    }
+  },
+  "carrier": {
+    "logicalSize": 84,
+    "chase": {
+      "source": "art/enemies/carrier/sources/chase-v4.png",
+      "sourceSha256": "5bf60a02a872d9eb14e020f2de8d3d30aac5ed68d04fd5072b85e4d1194a5b56",
+      "output": "src/assets/enemies/carrier/chase-v4.png",
+      "outputSha256": "bd73b1ac1baaa0ee6c04065cddfa250493c7200705bc74168158f17e08e6eb02",
+      "sourceSize": {
+        "width": 2172,
+        "height": 724
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        46,
+        56,
+        2126,
+        667
+      ],
+      "resizeSize": [
+        205,
+        60
+      ],
+      "offset": [
+        25,
+        98
+      ],
+      "contentBox": [
+        25,
+        98,
+        230,
+        158
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/carrier/prompts/chase-v4.txt",
+        "sha256": "d0c6ef1ce561c7f8873cb011952815c6b88d9b30ebe5af1278ae20cb7d242374"
+      },
+      "sourceSheet": {
+        "path": "art/enemies/carrier/sheets/chase-v4.png",
+        "doorSheet": "art/enemies/carrier/sheets/chase-doors-v4.png",
+        "registration": "art/enemies/carrier/sheets/chase-registration-v4.json",
+        "grid": [
+          3,
+          1
+        ],
+        "doorGrid": [
+          2,
+          1
+        ],
+        "identityReferences": [
+          "art/enemies/carrier/sources/top-v1.png",
+          "art/enemies/carrier/sources/chase-v3.png"
+        ],
+        "cameraQA": "Front-facing approach view with broad wings and visible underside; doors sized and registered to existing forward-bay targets.",
+        "sourceHashes": {
+          "path": "6effca8eb26d0cc6c92c0632a133394110d0dbf1313b21f7923922e77ecdbde8",
+          "doorSheet": "2bbfd221914d85f9cded0623189823d71d4a56f3f53411b91d6beaa8d2ca11a2"
+        },
+        "registrationSha256": "2c4aa6d42c0e8fdcdfed091bfed1a76fed65797dd19a441cc8c38c79cfc9cfe2"
+      },
+      "inputReferences": [
+        {
+          "path": "art/enemies/carrier/sources/top-v1.png",
+          "sha256": "54c419557ede8f3de5b8d319d0998295635fa27389db0cb21e45c2a9cf6044b0"
+        },
+        {
+          "path": "art/enemies/carrier/sources/chase-v3.png",
+          "sha256": "12eba059f43d5c78713577fc1dc02a17dc7f56199566a369d1973f8363c2d8fb"
+        }
+      ],
+      "layers": {
+        "doorLeft": {
+          "source": "art/enemies/carrier/layers/chase/doorLeft-v4.png",
+          "sourceSha256": "010e4597303dc3bec46278fb78bde1d738c65a21434dfbff36be207da46ad28c",
+          "output": "src/assets/enemies/carrier/layers/chase/doorLeft-v4.png",
+          "outputSha256": "7ddbcad092eab9199e8a9c5ddff4153c1c75e28f9c3ad7c10dffeb2be3c7026a",
+          "sourceSize": {
+            "width": 2172,
+            "height": 724
+          },
+          "exportSize": {
+            "width": 256,
+            "height": 256
+          },
+          "cropRect": [
+            46,
+            56,
+            2126,
+            667
+          ],
+          "resizeSize": [
+            205,
+            60
+          ],
+          "offset": [
+            25,
+            98
+          ],
+          "contentBox": [
+            25,
+            98,
+            230,
+            158
+          ],
+          "alpha": true,
+          "operation": "apply base view crop/scale/offset to registered full-canvas layer; Lanczos resize",
+          "inputReferences": [
+            {
+              "path": "art/enemies/carrier/sources/top-v1.png",
+              "sha256": "54c419557ede8f3de5b8d319d0998295635fa27389db0cb21e45c2a9cf6044b0"
+            },
+            {
+              "path": "art/enemies/carrier/sources/chase-v3.png",
+              "sha256": "12eba059f43d5c78713577fc1dc02a17dc7f56199566a369d1973f8363c2d8fb"
+            },
+            {
+              "path": "art/enemies/carrier/sources/chase-v4.png",
+              "sha256": "5bf60a02a872d9eb14e020f2de8d3d30aac5ed68d04fd5072b85e4d1194a5b56"
+            }
+          ],
+          "sourceSheet": {
+            "path": "art/enemies/carrier/sheets/chase-v4.png",
+            "doorSheet": "art/enemies/carrier/sheets/chase-doors-v4.png",
+            "registration": "art/enemies/carrier/sheets/chase-registration-v4.json",
+            "grid": [
+              3,
+              1
+            ],
+            "doorGrid": [
+              2,
+              1
+            ],
+            "identityReferences": [
+              "art/enemies/carrier/sources/top-v1.png",
+              "art/enemies/carrier/sources/chase-v3.png"
+            ],
+            "cameraQA": "Front-facing approach view with broad wings and visible underside; doors sized and registered to existing forward-bay targets.",
+            "sourceHashes": {
+              "path": "6effca8eb26d0cc6c92c0632a133394110d0dbf1313b21f7923922e77ecdbde8",
+              "doorSheet": "2bbfd221914d85f9cded0623189823d71d4a56f3f53411b91d6beaa8d2ca11a2"
+            },
+            "registrationSha256": "2c4aa6d42c0e8fdcdfed091bfed1a76fed65797dd19a441cc8c38c79cfc9cfe2"
+          },
+          "prompt": {
+            "path": "art/enemies/carrier/prompts/chase-v4.txt",
+            "sha256": "d0c6ef1ce561c7f8873cb011952815c6b88d9b30ebe5af1278ae20cb7d242374"
+          },
+          "measuredPivotSourcePx": [
+            830,
+            343
+          ],
+          "measuredPivotExportNormalized": [
+            0.399489,
+            0.492904
+          ]
+        },
+        "doorRight": {
+          "source": "art/enemies/carrier/layers/chase/doorRight-v4.png",
+          "sourceSha256": "c23f11b516d8c1246db83545f410f3cdc2a1f211f45a84e09ce148923cb2e63f",
+          "output": "src/assets/enemies/carrier/layers/chase/doorRight-v4.png",
+          "outputSha256": "8128608f3ad1381cd426ee51fd75ad03f15f3b4e054356069f54d965c9fb9bd2",
+          "sourceSize": {
+            "width": 2172,
+            "height": 724
+          },
+          "exportSize": {
+            "width": 256,
+            "height": 256
+          },
+          "cropRect": [
+            46,
+            56,
+            2126,
+            667
+          ],
+          "resizeSize": [
+            205,
+            60
+          ],
+          "offset": [
+            25,
+            98
+          ],
+          "contentBox": [
+            25,
+            98,
+            230,
+            158
+          ],
+          "alpha": true,
+          "operation": "apply base view crop/scale/offset to registered full-canvas layer; Lanczos resize",
+          "inputReferences": [
+            {
+              "path": "art/enemies/carrier/sources/top-v1.png",
+              "sha256": "54c419557ede8f3de5b8d319d0998295635fa27389db0cb21e45c2a9cf6044b0"
+            },
+            {
+              "path": "art/enemies/carrier/sources/chase-v3.png",
+              "sha256": "12eba059f43d5c78713577fc1dc02a17dc7f56199566a369d1973f8363c2d8fb"
+            },
+            {
+              "path": "art/enemies/carrier/sources/chase-v4.png",
+              "sha256": "5bf60a02a872d9eb14e020f2de8d3d30aac5ed68d04fd5072b85e4d1194a5b56"
+            }
+          ],
+          "sourceSheet": {
+            "path": "art/enemies/carrier/sheets/chase-v4.png",
+            "doorSheet": "art/enemies/carrier/sheets/chase-doors-v4.png",
+            "registration": "art/enemies/carrier/sheets/chase-registration-v4.json",
+            "grid": [
+              3,
+              1
+            ],
+            "doorGrid": [
+              2,
+              1
+            ],
+            "identityReferences": [
+              "art/enemies/carrier/sources/top-v1.png",
+              "art/enemies/carrier/sources/chase-v3.png"
+            ],
+            "cameraQA": "Front-facing approach view with broad wings and visible underside; doors sized and registered to existing forward-bay targets.",
+            "sourceHashes": {
+              "path": "6effca8eb26d0cc6c92c0632a133394110d0dbf1313b21f7923922e77ecdbde8",
+              "doorSheet": "2bbfd221914d85f9cded0623189823d71d4a56f3f53411b91d6beaa8d2ca11a2"
+            },
+            "registrationSha256": "2c4aa6d42c0e8fdcdfed091bfed1a76fed65797dd19a441cc8c38c79cfc9cfe2"
+          },
+          "prompt": {
+            "path": "art/enemies/carrier/prompts/chase-v4.txt",
+            "sha256": "d0c6ef1ce561c7f8873cb011952815c6b88d9b30ebe5af1278ae20cb7d242374"
+          },
+          "measuredPivotSourcePx": [
+            1332,
+            343
+          ],
+          "measuredPivotExportNormalized": [
+            0.592755,
+            0.492904
+          ]
+        }
+      }
+    }
+  },
+  "shielder": {
+    "logicalSize": 52,
+    "chase": {
+      "source": "art/enemies/shielder/sources/chase-v3.png",
+      "sourceSha256": "798d5cdab50c739c1bbd8322e858829a4e298dad850e30cb350f604346bb07b8",
+      "output": "src/assets/enemies/shielder/chase-v3.png",
+      "outputSha256": "4b6ebb959e25293ad3be30c1f3b414be3a0a3be57e94f18fc5d1fe60419fc451",
+      "sourceSize": {
+        "width": 1254,
+        "height": 1254
+      },
+      "exportSize": {
+        "width": 256,
+        "height": 256
+      },
+      "cropRect": [
+        0,
+        19,
+        1251,
+        1238
+      ],
+      "resizeSize": [
+        205,
+        200
+      ],
+      "offset": [
+        25,
+        28
+      ],
+      "contentBox": [
+        25,
+        28,
+        230,
+        228
+      ],
+      "alpha": true,
+      "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
+      "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
+      "prompt": {
+        "path": "art/enemies/shielder/prompts/chase-v3.txt",
+        "sha256": "f687133da7a9940871ae19205460c4808472626bbe88ab7b45e77778dfa21500"
+      },
+      "sourceSheet": null,
+      "inputReferences": []
+    }
+  }
+}

@@ -95,10 +95,10 @@
       ]
     },
     "chase": {
-      "source": "art/enemies/mine/sources/chase-v1.png",
-      "sourceSha256": "4c3a8b63067788f9af2dc74cfeb1c3f1691a1cb98ae813607e6aa218f55e8baa",
-      "output": "src/assets/enemies/mine/chase-v1.png",
-      "outputSha256": "0c90c66f5e2297a6e9be91aa60347d9c7b00296d64c100dd01d8a7e7c0e15837",
+      "source": "art/enemies/mine/sources/chase-v3.png",
+      "sourceSha256": "29f9cc954184f1827509f1ed9853b1756b427a976889df49a70c2132f57a6abf",
+      "output": "src/assets/enemies/mine/chase-v3.png",
+      "outputSha256": "7460419a85e2badf7c41ab8919fd4a56d1977a45715d26905953723691022632",
       "sourceSize": {
         "width": 1254,
         "height": 1254
@@ -109,9 +109,9 @@
       },
       "cropRect": [
         0,
-        23,
-        1224,
-        1230
+        21,
+        1252,
+        1254
       ],
       "resizeSize": [
         205,
@@ -131,14 +131,14 @@
       "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
       "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
       "prompt": {
-        "path": "art/enemies/mine/prompts/chase-v1.txt",
-        "sha256": "0b5e79a4ac13b6d36152cde6b01ada160bae72490e48cc7bad2221575448bd40"
+        "path": "art/enemies/mine/prompts/chase-v3.txt",
+        "sha256": "539e35f1ad46a52189206ee98fd3ec884cac0f9958527f38ba71cf65aa7ef346"
       },
       "sourceSheet": null,
       "inputReferences": [
         {
-          "path": "art/enemies/mine/sources/top-v1.png",
-          "sha256": "89c13103e21a4a52c7434be8b134277c37d8d952d60754b3bc4314cb099cbccb"
+          "path": "art/enemies/mine/sources/chase-v1.png",
+          "sha256": "4c3a8b63067788f9af2dc74cfeb1c3f1691a1cb98ae813607e6aa218f55e8baa"
         }
       ]
     }
@@ -146,7 +146,7 @@
   "prompts": {
     "top": "art/enemies/mine/prompts/top-v1.txt",
     "side": "art/enemies/mine/prompts/side-v1.txt",
-    "chase": "art/enemies/mine/prompts/chase-v1.txt"
+    "chase": "art/enemies/mine/prompts/chase-v3.txt"
   },
   "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
 }

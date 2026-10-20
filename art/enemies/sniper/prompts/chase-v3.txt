@@ -1,0 +1,8 @@
+Use case: stylized-concept.
+Asset type: NEON OVERDRIVE sniper enemy combat sprite, displayed at 46 logical pixels.
+Input image 1 is the accepted sniper chase-view design: a compact charcoal gunmetal sensor drone with orange targeting optics, central circular scope, lateral articulated arms, and a lower stabilizer. Preserve those exact identity cues and #ffa62b accent.
+Primary request: remake the view as a clear front-elevation pursuit image with the sniper aiming directly at the viewer/player.
+Camera: near-level camera directly in front of its flight axis, 15–20 degrees above horizon. The main circular targeting lens must face camera head-on as the dominant front aperture. Show broad front armor cheeks around the lens and the dark underside hanging below it, with arm joints projecting left and right. The body is depth-compressed: a short broad silhouette with only a narrow dorsal/top surface visible, never the large flat upper ring of a top-down view.
+Composition: centered complete subject, at most 72% of canvas width and height, generous even transparent margin around all arm ends and underside.
+Style: polished illustrated industrial sci-fi sprite; charcoal beveled armor, steel highlights, crisp orange #ffa62b sensor rings and tiny accents, broad readable shapes at 1/5 size. Top-left key, darker underside, subtle orange rim.
+Constraints: truly transparent alpha, no background, floor, baked shadow, glow haze, text, extra objects, projectiles, exhaust, rear-facing apertures or overhead planform. Keep a frontal circular scope with visible depth, not a flat top-down target symbol.

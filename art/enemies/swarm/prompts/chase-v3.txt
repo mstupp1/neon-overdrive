@@ -1,0 +1,8 @@
+Use case: stylized-concept.
+Asset type: NEON OVERDRIVE swarm enemy sprite at 30 logical pixels.
+Input image 1 is the swarm's existing chase-view design. Preserve the same compact mechanical beetle, twin luminous green eyes, hooked mandibles, mint armored shell, paired translucent wings and dark gunmetal, but correct its camera and framing.
+Primary request: a clearly front-elevation pursuit sprite of the beetle drone flying directly toward the camera/player.
+Camera: lower the viewpoint to a near-level frontal camera, eye-level at the beetle's forward axis and only 15–20 degrees above the horizon. The eyes and mandible sockets face straight at the camera, with broad dark front armor and a substantial visible dark underside below the eyes. Compress the dorsal shell into a narrow top strip; do not show the broad upper back. Wings project left and right, foreshortened in depth rather than lying flat in a top-down plane. The visible body is short in height and broad in width, with a clear front face.
+Composition: centered complete subject occupying no more than 72% of canvas width or height; leave at least 14% transparent margin on every side, including wing tips and feet. Square canvas, do not clip.
+Style and palette: polished illustrated industrial sci-fi enemy sprite, retain mint green #7dffb0, dark gunmetal and translucent pale green wings, crisp broad details that remain readable at 1/5 size. Top-left key light, darker underside, restrained green rim light.
+Constraints: genuine transparent alpha, single subject. No background, floor, shadow, text, extras, glow cloud, exhaust, projectiles, top-down planform, large dorsal shell facing viewer, or crop touching the frame edges.

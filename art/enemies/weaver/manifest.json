@@ -95,10 +95,10 @@
       ]
     },
     "chase": {
-      "source": "art/enemies/weaver/sources/chase-v2.png",
-      "sourceSha256": "41540eadac20ce658abc4ec3e39fb4a438c485a135284435c98d62ca0f7e9f4a",
-      "output": "src/assets/enemies/weaver/chase-v2.png",
-      "outputSha256": "98d0435c3599f12a308fc318f3d25051c9238c101bb4da776d54f31ff0e05922",
+      "source": "art/enemies/weaver/sources/chase-v3.png",
+      "sourceSha256": "de05a7745c1cfc90d2863c23f7ff6ba16a40555459c2700d4e3b2d53118b4044",
+      "output": "src/assets/enemies/weaver/chase-v3.png",
+      "outputSha256": "d1a5bb052a086f289a41f035f6327783f850d3a5e06dbf0c2c685b0cee17cc21",
       "sourceSize": {
         "width": 1254,
         "height": 1254
@@ -108,10 +108,10 @@
         "height": 256
       },
       "cropRect": [
-        33,
-        63,
-        1236,
-        1204
+        0,
+        31,
+        1248,
+        1214
       ],
       "resizeSize": [
         205,
@@ -131,14 +131,14 @@
       "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
       "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
       "prompt": {
-        "path": "art/enemies/weaver/prompts/chase-v2.txt",
-        "sha256": "6b9d4274752b19740b3a3ab92a21972e2313c79a03822fb4dfc507409d60479f"
+        "path": "art/enemies/weaver/prompts/chase-v3.txt",
+        "sha256": "b5bd24e947c5440934621f061aae1cc850cbc463b2d79966e34da4e4b73a1993"
       },
       "sourceSheet": null,
       "inputReferences": [
         {
-          "path": "art/enemies/weaver/sources/top-v1.png",
-          "sha256": "baccb27bede433c44655808011d1db8d270b84cf74c89a2191f7405badebd523"
+          "path": "art/enemies/weaver/sources/chase-v2.png",
+          "sha256": "41540eadac20ce658abc4ec3e39fb4a438c485a135284435c98d62ca0f7e9f4a"
         }
       ]
     }
@@ -146,7 +146,7 @@
   "prompts": {
     "top": "art/enemies/weaver/prompts/top-v1.txt",
     "side": "art/enemies/weaver/prompts/side-v1.txt",
-    "chase": "art/enemies/weaver/prompts/chase-v2.txt"
+    "chase": "art/enemies/weaver/prompts/chase-v3.txt"
   },
   "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
 }

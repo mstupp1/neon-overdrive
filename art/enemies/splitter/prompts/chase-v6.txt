@@ -1,0 +1,9 @@
+Use case: stylized-concept.
+Asset type: transparent NEON OVERDRIVE splitter pursuit sprite at 48 logical pixels.
+Input image 1 is the original accepted chase-v2 identity reference. Preserve its unified wide horizontal three-lobe gunmetal chassis, three bright round magenta cores across the forward face, steel armor cheeks, and #ff5ce1 details. Do not use later vertical-stack revisions. Ignore source crop and any background lighting.
+Primary request: a low, directly frontal approach of the same triple-core enemy.
+Camera: camera on its approach axis, front elevation 15–20 degrees above horizon. All three circular magenta cores face viewer in one clearly readable left-center-right row. They are housed in one broad compact chassis with shared armor bridges; visible top depth is narrow and a dark underside runs below all three cores.
+Composition: landscape transparent canvas, exact 2:1 aspect ratio. Center one whole sprite at only 62% of canvas width and 76% of canvas height. Leave large clean transparent margins on both sides and clear space above/below. No clipping of either outer lobe or any lower armor.
+Geometry: long and low, around 1.55 times wider than tall. Three lobes are contiguous along the horizontal axis; the middle core is only slightly forward. Do not arrange the lobes vertically, stack them into a tall triangle, separate them into three ships, or let the central lobe dominate.
+Style/lighting: polished industrial sci-fi sprite, broad beveled gunmetal plates, charcoal shadows, silver edge highlights, three contained magenta plasma cores with restrained #ff5ce1 rim. Top-left key light and dark underside. Readable at 1/5 size.
+Constraints: genuine alpha only; no baked shadow, floor, backdrop, glow haze, text, extra ships, weapons, projectiles or exhaust. No overhead view, no vertical stack, no clipped frame edges.

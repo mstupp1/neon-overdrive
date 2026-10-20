@@ -1,3 +1,8 @@
 {
-  "chase": "chase-v2.png"
+  "chase": "chase-v5.png",
+  "identityReferences": {
+    "chase": [
+      "art/enemies/blinker/sources/chase-v2.png"
+    ]
+  }
 }

@@ -1,0 +1,8 @@
+Use case: stylized-concept. Asset type: NEON OVERDRIVE splitter enemy chase-view sprite.
+Create a new transparent game sprite from this identity description: compact three-lobed triangular mechanical enemy with dark gunmetal beveled armor, exactly three hot-magenta plasma cores arranged in a triangle, and magenta seam lights. Keep the established splitter identity and colors.
+Camera: low front elevation of the craft approaching the viewer, directly along its fore-aft axis, 15–20 degrees above the dark vertical front face. All three cores face forward. Show the dark underside. The receding top plane is compressed to a narrow shallow ellipse.
+Scale and framing are the most important requirement: render the entire enemy SMALL in the center of the square canvas. Its complete silhouette must fit inside a centered square that is only 55% of the canvas width and 55% of the canvas height. Keep at least 280 pixels of completely clear transparent margin on every side of the 1254×1254 canvas. Deliberately leave abundant empty transparent space around the sprite; do not zoom in. All three lobes, tips and bottom armor must be comfortably inside this small central area.
+Style: polished realistic 3D sci-fi game sprite, crisp beveled armor, details broad enough to read at small gameplay scale.
+Lighting: upper-left key, dark underside, restrained magenta rim; controlled magenta-core glow.
+Background must be genuinely transparent RGBA.
+Avoid: large subject, close crop, any geometry or glow outside the centered 55% area, clipping, overhead view, flat top-down planform, checkerboard, floor, cast shadow, environmental scene, halo, bloom haze, projectiles, explosion, extra subjects, text, watermark.

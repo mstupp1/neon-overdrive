@@ -1,0 +1,8 @@
+Use case: stylized-concept.
+Asset type: transparent NEON OVERDRIVE swarm pursuit sprite, displayed at 30 logical pixels.
+Input image 1 is the original accepted chase-v2 identity reference. Preserve its broad low flying-drone form: paired wide mint translucent wings, compact armored body, two green eyes, short mandibles, dark gunmetal joints and mint #7dffb0 glow. Ignore the reference's square crop and background lighting.
+Primary request: a front-on approach of the same winged insect drone.
+Camera: aligned with its flight axis at low front elevation, about 15 degrees above the horizon. Show both forward eyes and short face beneath a compact narrow dorsal shell. Include the dark underside. Wings spread horizontally left/right and remain the dominant width; keep the body low and compact.
+Composition: wide landscape canvas, exact 2:1 aspect ratio and true transparent alpha. Center one complete sprite so the wing tips sit around 20% in from both left and right canvas edges. Leave broad empty space above and below. Whole body including all feet is visible. Do not fill the canvas.
+Style: retain the original polished industrial sci-fi illustration, black gunmetal borders, translucent mint segmented wings and paired #7dffb0 eyes. Top-left light, dark underside, restrained thin green rim. Clean broad shapes readable at 1/5 scale.
+Constraints: no shadow, floor, background, halo, glow cloud, text, extra bugs, exhaust or projectiles. No tall beetle/dome, no top-down planform, side or rear view, no clipped edges.

@@ -1,0 +1,9 @@
+Use case: stylized-concept. Asset type: NEON OVERDRIVE eclipseDrone pursuit enemy sprite.
+Input image: Image 1 is the accepted eclipseDrone chase identity reference. Preserve the wide angular dark gunmetal craft, swept wing tips, central magenta sensor and violet-pink light seams.
+Scene: isolated enemy cutout on genuine transparent alpha.
+Camera and pose: front elevation of the drone approaching the player. Centered camera looks directly toward the enemy along its fore-aft optical axis, 15–20 degrees above horizontal. Show a dark vertical face around the magenta sensor, foreshorten the wing depth as they sweep back from the face, leave only a narrow top plane behind the front.
+Lighting: upper-left key, shaded underside, restrained magenta rim, controlled sensor glow.
+Style: crisp hard-surface 3D sci-fi game sprite, broad plates with details visible at 1/5 size.
+Composition: centered complete broad silhouette, fills about 78% of square transparent canvas.
+Constraints: preserve existing dark purple and magenta identity, static hull, true transparent alpha.
+Avoid: overhead view, flat wing planform seen from above, checkerboard, background, floor, shadow, haze, combat effects, text, watermark, clipped wings.

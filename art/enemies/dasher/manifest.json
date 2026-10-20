@@ -95,58 +95,53 @@
       ]
     },
     "chase": {
-      "source": "art/enemies/dasher/sources/chase-v2.png",
-      "sourceSha256": "d6d99f8565366e62c21d9b33577baddf1c12d90b33c446821889bc8e80677de9",
-      "output": "src/assets/enemies/dasher/chase-v2.png",
-      "outputSha256": "8475ca9112a939227a4d11270990acc5c7ce5d2901c15b5e2f9ce564bf2a8ecb",
+      "source": "art/enemies/dasher/sources/chase-v3.png",
+      "sourceSha256": "440c97ac1fdf1a3df29409eeb8421077a5426b63c3c7494701579de5d1feff4d",
+      "output": "src/assets/enemies/dasher/chase-v3.png",
+      "outputSha256": "6c3cb55e75de5b05b380bdaa649ead92647a2938ae7dac12ccf8197160482881",
       "sourceSize": {
-        "width": 1774,
-        "height": 887
+        "width": 1254,
+        "height": 1254
       },
       "exportSize": {
         "width": 256,
         "height": 256
       },
       "cropRect": [
-        17,
-        34,
-        1773,
-        871
+        19,
+        39,
+        1235,
+        1206
       ],
       "resizeSize": [
         205,
-        98
+        197
       ],
       "offset": [
         25,
-        79
+        29
       ],
       "contentBox": [
         25,
-        79,
+        29,
         230,
-        177
+        226
       ],
       "alpha": true,
       "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
       "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
       "prompt": {
-        "path": "art/enemies/dasher/prompts/chase-v2.txt",
-        "sha256": "152187f15bb2b28ff23107c092b1122b56500d09df026c84a8292c7377b45764"
+        "path": "art/enemies/dasher/prompts/chase-v3.txt",
+        "sha256": "012816ecdc5f292357548a2411de757558e5fab03a9324746bc72d993a83549e"
       },
       "sourceSheet": null,
-      "inputReferences": [
-        {
-          "path": "art/enemies/dasher/sources/top-v1.png",
-          "sha256": "3190f611c95f25f2e27d214f7b8b0f0d01010062e3fc83e0950d51433c095b33"
-        }
-      ]
+      "inputReferences": []
     }
   },
   "prompts": {
     "top": "art/enemies/dasher/prompts/top-v1.txt",
     "side": "art/enemies/dasher/prompts/side-v1.txt",
-    "chase": "art/enemies/dasher/prompts/chase-v2.txt"
+    "chase": "art/enemies/dasher/prompts/chase-v3.txt"
   },
   "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
 }

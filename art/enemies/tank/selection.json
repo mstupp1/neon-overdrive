@@ -1,7 +1,7 @@
 {
   "top": "top-v4.png",
   "side": "side-v3.png",
-  "chase": "chase-v3.png",
+  "chase": "chase-v8.png",
   "sourceSheets": {
     "top": {
       "path": "art/enemies/tank/sheets/top-v4.png",
@@ -72,29 +72,17 @@
       }
     },
     "chase": {
-      "path": "art/enemies/tank/sheets/chase-v3.png",
+      "path": "art/enemies/tank/sheets/chase-components-v8.png",
+      "registration": "art/enemies/tank/sheets/chase-registration-v8.json",
       "size": [
         1774,
         887
       ],
-      "layout": "two equal horizontal cells",
-      "cells": {
-        "base": [
-          0,
-          0,
-          887,
-          887
-        ],
-        "carriage": [
-          887,
-          0,
-          1774,
-          887
-        ]
-      },
+      "layout": "two generated components from separated connected alpha bounds; uniformly scaled 0.56 onto shared 887px canvas and registered to paired empty weapon socket",
       "identityReferences": [
+        "art/enemies/tank/sources/chase-v3.png",
         "art/enemies/tank/sources/top-v1.png",
-        "art/enemies/tank/sources/chase-v2.png"
+        "art/enemies/tank/sources/chase-v4.png"
       ]
     }
   }

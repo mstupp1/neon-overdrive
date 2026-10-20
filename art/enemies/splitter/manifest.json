@@ -95,50 +95,50 @@
       ]
     },
     "chase": {
-      "source": "art/enemies/splitter/sources/chase-v2.png",
-      "sourceSha256": "ceec4781b9eadf09e59a803454b8a7d3774a532822ea34b9f539d40e8a574fab",
-      "output": "src/assets/enemies/splitter/chase-v2.png",
-      "outputSha256": "564685261cd9a2d618a9b8bd90ae5ebb371ff3f0c6d20f3c804a7538f8a8b916",
+      "source": "art/enemies/splitter/sources/chase-v6.png",
+      "sourceSha256": "e02a1579e4043189f16d008bd871b9aae406c720ae43d5a2daf5196ffd5ddf8f",
+      "output": "src/assets/enemies/splitter/chase-v6.png",
+      "outputSha256": "64f638227ad13ba527659663aab00b24af2b4797a0b7a4a15b4cfc9c83a42be1",
       "sourceSize": {
-        "width": 1536,
-        "height": 1024
+        "width": 1774,
+        "height": 887
       },
       "exportSize": {
         "width": 256,
         "height": 256
       },
       "cropRect": [
-        0,
-        28,
-        1522,
-        1024
+        62,
+        162,
+        1752,
+        871
       ],
       "resizeSize": [
         205,
-        134
+        86
       ],
       "offset": [
         25,
-        61
+        85
       ],
       "contentBox": [
         25,
-        61,
+        85,
         230,
-        195
+        171
       ],
       "alpha": true,
       "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
       "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
       "prompt": {
-        "path": "art/enemies/splitter/prompts/chase-v2.txt",
-        "sha256": "1178d464439bf45596f9eff10a23d87bdd350b4cf69aac63b0d0de9eb4282c9b"
+        "path": "art/enemies/splitter/prompts/chase-v6.txt",
+        "sha256": "6226a179f604f02d7a0a77e9de0fbd5b14643edfdf5268781f7a1e78146a3338"
       },
       "sourceSheet": null,
       "inputReferences": [
         {
-          "path": "art/enemies/splitter/sources/top-v1.png",
-          "sha256": "12238a405e1ad5c14ceafc9e28aea1c470c3cebab3183fb9fec7192d70dfd42f"
+          "path": "art/enemies/splitter/sources/chase-v2.png",
+          "sha256": "ceec4781b9eadf09e59a803454b8a7d3774a532822ea34b9f539d40e8a574fab"
         }
       ]
     }
@@ -146,7 +146,7 @@
   "prompts": {
     "top": "art/enemies/splitter/prompts/top-v1.txt",
     "side": "art/enemies/splitter/prompts/side-v1.txt",
-    "chase": "art/enemies/splitter/prompts/chase-v2.txt"
+    "chase": "art/enemies/splitter/prompts/chase-v6.txt"
   },
   "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
 }

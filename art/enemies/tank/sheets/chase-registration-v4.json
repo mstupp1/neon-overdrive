@@ -1,0 +1,58 @@
+[
+  {
+    "output": "art/enemies/tank/sources/chase-v4.png",
+    "sourceSheet": "art/enemies/tank/sheets/chase-v4.png",
+    "cropRect": [
+      64,
+      282,
+      1050,
+      784
+    ],
+    "resizeSize": [
+      749,
+      382
+    ],
+    "scale": 0.76,
+    "measuredAssemblyPivot": [
+      485,
+      365
+    ],
+    "registeredPivot": [
+      443,
+      410
+    ],
+    "translation": [
+      123,
+      347
+    ],
+    "operation": "isolate generated alpha component; uniform 0.76 scale; register physical carriage socket"
+  },
+  {
+    "output": "art/enemies/tank/layers/chase/carriage-v4.png",
+    "sourceSheet": "art/enemies/tank/sheets/chase-v4.png",
+    "cropRect": [
+      1206,
+      307,
+      1624,
+      770
+    ],
+    "resizeSize": [
+      318,
+      352
+    ],
+    "scale": 0.76,
+    "measuredAssemblyPivot": [
+      1415,
+      417
+    ],
+    "registeredPivot": [
+      443,
+      410
+    ],
+    "translation": [
+      284,
+      326
+    ],
+    "operation": "isolate generated alpha component; uniform 0.76 scale; register physical carriage socket"
+  }
+]

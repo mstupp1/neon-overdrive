@@ -373,10 +373,10 @@
       }
     },
     "chase": {
-      "source": "art/enemies/tank/sources/chase-v3.png",
-      "sourceSha256": "f1a974d9710ad9c24cf60fdd29a50db62a5b75c3cc5e29ce91ea8a2f02d3ea1a",
-      "output": "src/assets/enemies/tank/chase-v3.png",
-      "outputSha256": "4bc87a1db7805e757dcefd24f2b0af13080b95266693e4d66fe001afa6f14118",
+      "source": "art/enemies/tank/sources/chase-v8.png",
+      "sourceSha256": "b9aabe7a72bccd51861c2b600f0c9c35cbb41eea4c2a9845e969724ce73a84ce",
+      "output": "src/assets/enemies/tank/chase-v8.png",
+      "outputSha256": "b1ac7a1c87adc9e4f433c70c97f21b16ea69ad95fb6d6292c305389e896a2eca",
       "sourceSize": {
         "width": 887,
         "height": 887
@@ -386,77 +386,70 @@
         "height": 256
       },
       "cropRect": [
-        0,
-        17,
-        887,
-        887
+        127,
+        217,
+        747,
+        585
       ],
       "resizeSize": [
         205,
-        201
+        122
       ],
       "offset": [
         25,
-        27
+        67
       ],
       "contentBox": [
         25,
-        27,
+        67,
         230,
-        228
+        189
       ],
       "alpha": true,
       "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
       "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
       "prompt": {
-        "path": "art/enemies/tank/prompts/chase-v3.txt",
-        "sha256": "a1ed94bfa7ef4998e3a18c581265ffd4a763d253276f331621bd8f2a1d1bbdbf"
+        "path": "art/enemies/tank/prompts/chase-v8.txt",
+        "sha256": "06a687010254628b500d0aaf04406856ef136cc82200206df5ef70155cfd7690"
       },
       "sourceSheet": {
-        "path": "art/enemies/tank/sheets/chase-v3.png",
+        "path": "art/enemies/tank/sheets/chase-components-v8.png",
+        "registration": "art/enemies/tank/sheets/chase-registration-v8.json",
         "size": [
           1774,
           887
         ],
-        "layout": "two equal horizontal cells",
-        "cells": {
-          "base": [
-            0,
-            0,
-            887,
-            887
-          ],
-          "carriage": [
-            887,
-            0,
-            1774,
-            887
-          ]
-        },
+        "layout": "two generated components from separated connected alpha bounds; uniformly scaled 0.56 onto shared 887px canvas and registered to paired empty weapon socket",
         "identityReferences": [
+          "art/enemies/tank/sources/chase-v3.png",
           "art/enemies/tank/sources/top-v1.png",
-          "art/enemies/tank/sources/chase-v2.png"
+          "art/enemies/tank/sources/chase-v4.png"
         ],
         "sourceHashes": {
-          "path": "be71d5334931575e1845fd52b821f735e388b38ea5d5745ee21cb142739e6cfd"
-        }
+          "path": "03542d7e87ae158459a13ca1d6d4cfa7615fbcf9eb2796d23b0432fb47727a96"
+        },
+        "registrationSha256": "7394d3a316a5453bad18d46db9256067846a581a0e59a9cd5e1259c182f387d1"
       },
       "inputReferences": [
+        {
+          "path": "art/enemies/tank/sources/chase-v3.png",
+          "sha256": "f1a974d9710ad9c24cf60fdd29a50db62a5b75c3cc5e29ce91ea8a2f02d3ea1a"
+        },
         {
           "path": "art/enemies/tank/sources/top-v1.png",
           "sha256": "a95726e5b9c1636c9b152453b3079fa24b1f74eff8b59287df7f2452252301a3"
         },
         {
-          "path": "art/enemies/tank/sources/chase-v2.png",
-          "sha256": "9f2d7381b4ebc7d083cfa2f156be517de6d84cc5429e016f21cd94710dbfb612"
+          "path": "art/enemies/tank/sources/chase-v4.png",
+          "sha256": "f2aa7dcf7182a0936184c76a7833081e3063c2598e0833b39769132bfff3768d"
         }
       ],
       "layers": {
         "carriage": {
-          "source": "art/enemies/tank/layers/chase/carriage-v3.png",
-          "sourceSha256": "6737ad4a6f1a452052d081614e377e0bc7f788912f92874cb8702646d11e9dda",
-          "output": "src/assets/enemies/tank/layers/chase/carriage-v3.png",
-          "outputSha256": "a239a05dda0bf3e8273b36f38b5c9d931e715263e64b7cc8be9612ae29079ea3",
+          "source": "art/enemies/tank/layers/chase/carriage-v8.png",
+          "sourceSha256": "5d9c3339d89a8949ae55cede4265681904d31e625d1c2c52220868c9a1ed65ed",
+          "output": "src/assets/enemies/tank/layers/chase/carriage-v8.png",
+          "outputSha256": "14d9670c880d7f39ff3bfb7e16cca7957cdb79abc96cf1108dde71bf14fa0b3c",
           "sourceSize": {
             "width": 887,
             "height": 887
@@ -466,78 +459,74 @@
             "height": 256
           },
           "cropRect": [
-            0,
-            17,
-            887,
-            887
+            127,
+            217,
+            747,
+            585
           ],
           "resizeSize": [
             205,
-            201
+            122
           ],
           "offset": [
             25,
-            27
+            67
           ],
           "contentBox": [
             25,
-            27,
+            67,
             230,
-            228
+            189
           ],
           "alpha": true,
           "operation": "apply base view crop/scale/offset to registered full-canvas layer; Lanczos resize",
           "inputReferences": [
             {
+              "path": "art/enemies/tank/sources/chase-v3.png",
+              "sha256": "f1a974d9710ad9c24cf60fdd29a50db62a5b75c3cc5e29ce91ea8a2f02d3ea1a"
+            },
+            {
               "path": "art/enemies/tank/sources/top-v1.png",
               "sha256": "a95726e5b9c1636c9b152453b3079fa24b1f74eff8b59287df7f2452252301a3"
             },
             {
-              "path": "art/enemies/tank/sources/chase-v2.png",
-              "sha256": "9f2d7381b4ebc7d083cfa2f156be517de6d84cc5429e016f21cd94710dbfb612"
+              "path": "art/enemies/tank/sources/chase-v4.png",
+              "sha256": "f2aa7dcf7182a0936184c76a7833081e3063c2598e0833b39769132bfff3768d"
             },
             {
-              "path": "art/enemies/tank/sources/chase-v3.png",
-              "sha256": "f1a974d9710ad9c24cf60fdd29a50db62a5b75c3cc5e29ce91ea8a2f02d3ea1a"
+              "path": "art/enemies/tank/sources/chase-v8.png",
+              "sha256": "b9aabe7a72bccd51861c2b600f0c9c35cbb41eea4c2a9845e969724ce73a84ce"
             }
           ],
           "sourceSheet": {
-            "path": "art/enemies/tank/sheets/chase-v3.png",
+            "path": "art/enemies/tank/sheets/chase-components-v8.png",
+            "registration": "art/enemies/tank/sheets/chase-registration-v8.json",
             "size": [
               1774,
               887
             ],
-            "layout": "two equal horizontal cells",
-            "cells": {
-              "base": [
-                0,
-                0,
-                887,
-                887
-              ],
-              "carriage": [
-                887,
-                0,
-                1774,
-                887
-              ]
-            },
+            "layout": "two generated components from separated connected alpha bounds; uniformly scaled 0.56 onto shared 887px canvas and registered to paired empty weapon socket",
             "identityReferences": [
+              "art/enemies/tank/sources/chase-v3.png",
               "art/enemies/tank/sources/top-v1.png",
-              "art/enemies/tank/sources/chase-v2.png"
+              "art/enemies/tank/sources/chase-v4.png"
             ],
             "sourceHashes": {
-              "path": "be71d5334931575e1845fd52b821f735e388b38ea5d5745ee21cb142739e6cfd"
-            }
+              "path": "03542d7e87ae158459a13ca1d6d4cfa7615fbcf9eb2796d23b0432fb47727a96"
+            },
+            "registrationSha256": "7394d3a316a5453bad18d46db9256067846a581a0e59a9cd5e1259c182f387d1"
           },
           "prompt": {
-            "path": "art/enemies/tank/prompts/chase-v3.txt",
-            "sha256": "a1ed94bfa7ef4998e3a18c581265ffd4a763d253276f331621bd8f2a1d1bbdbf"
+            "path": "art/enemies/tank/prompts/chase-v8.txt",
+            "sha256": "06a687010254628b500d0aaf04406856ef136cc82200206df5ef70155cfd7690"
           },
-          "measuredPivotSourcePx": null,
+          "measuredPivotSourcePx": [
+            443,
+            410
+          ],
           "measuredPivotExportNormalized": [
-            0.491276,
-            0.502559
+            0.505796,
+            0.511655
           ]
         }
       }
@@ -546,7 +535,7 @@
   "prompts": {
     "top": "art/enemies/tank/prompts/top-v4.txt",
     "side": "art/enemies/tank/prompts/side-v3.txt",
-    "chase": "art/enemies/tank/prompts/chase-v3.txt"
+    "chase": "art/enemies/tank/prompts/chase-v8.txt"
   },
   "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
 }

@@ -1,0 +1,8 @@
+Use case: stylized-concept.
+Asset type: NEON OVERDRIVE weaver enemy pursuit sprite, displayed around 40 logical pixels.
+Input image 1 is the accepted weaver chase design. Preserve its four pointed articulated limbs, dark faceted armor, central luminous diamond, chartreuse #d6ff3a accents and angular silhouette. This is a camera correction.
+Primary request: show the weaver moving straight toward the viewer/player in an actual low front view.
+Camera: camera aligned with its approach axis, at the front elevation about 15–20 degrees above the horizon. The bright central diamond is a forward-facing core aperture, nearly perpendicular to camera and framed by thick dark front armor. Reveal a substantial dark lower underside under the core; compress top plates into a thin strip. Four pointed limbs project outward in perspective, with nearer tips slightly larger and symmetrical left/right, while rearward length disappears into depth. Avoid a broad overhead silhouette.
+Composition: one full centered subject, no clipped tips; occupy at most 70% of canvas width and height with clear transparent space around all four limbs.
+Style: polished illustrated industrial sci-fi enemy sprite, gunmetal facets, crisp bevels, restrained chartreuse emissives #d6ff3a, strong broad shapes readable at 1/5 scale. Top-left light, dark underside, subtle neon rim.
+Constraints: genuine transparent background, no floor, shadow, glow cloud, text, other subjects, exhaust, bullets, labels, or scene. Preserve the four-arm weaver identity; do not make a ship or a flat overhead top view.

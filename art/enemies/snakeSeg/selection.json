@@ -1,0 +1,8 @@
+{
+  "chase": "chase-v3.png",
+  "identityReferences": {
+    "chase": [
+      "art/enemies/snakeSeg/sources/chase-v1.png"
+    ]
+  }
+}

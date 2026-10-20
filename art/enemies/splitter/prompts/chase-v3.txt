@@ -1,0 +1,9 @@
+Use case: stylized-concept. Asset type: NEON OVERDRIVE splitter enemy pursuit sprite.
+Input image: Image 1 is the accepted splitter chase identity reference. Preserve the compact three-point armored silhouette, three magenta plasma cores, dark gunmetal plating and hot-pink accent color.
+Scene: isolated enemy hull on genuine transparent alpha.
+Camera and pose: clear front elevation of the approaching craft, camera directly ahead on the fore-aft optical axis and 15–20 degrees above horizontal. Present a dark vertical front face to the viewer; foreshorten the craft's depth into a narrow top strip receding behind that face. Keep all three forward magenta cores visible in a triangular arrangement.
+Lighting: key from upper left, dark underside, restrained magenta edge light; cores bright but not blown out.
+Style: crisp beveled 3D sci-fi game sprite, broad details readable at 1/5 display size.
+Composition: centered complete silhouette, about 78% of square transparent canvas.
+Constraints: same identity, materials and magenta palette; static hull; genuine clean alpha.
+Avoid: overhead view, flat top surface toward camera, opaque checkerboard, environment, floor, cast shadow, giant glow haze, combat effects, extra objects, text, watermark, clipped silhouette.

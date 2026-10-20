@@ -1,0 +1,8 @@
+Use case: stylized-concept.
+Asset type: NEON OVERDRIVE snake-head enemy pursuit sprite, displayed around 40 logical pixels.
+Input image 1 is the original accepted snakeHead chase master and identity reference. Preserve its broad compressed predator head, bright paired green eyes, layered charcoal scales, two forward fangs, paired nostril/weapon openings and #6dff4d accents. Do not use later revisions.
+Primary request: create a low frontal approach image of this same serpent enemy lunging straight toward the viewer/player.
+Camera: directly in front at front elevation, 15–20 degrees above the horizon, optical axis on the snake's forward direction. The wide horizontal head fills the frame across its cheek plates. Both eyes and nostril openings face camera; fangs project down from the jaw. Keep the forehead short and narrow, with only a small amount of dorsal skull surface visible; do not create a large top-down skull. Show a substantial dark jaw underside and throat beneath the eye line.
+Silhouette/composition: retain the original broad predator silhouette, about 1.5 times wider than tall. Center one complete head on a square transparent canvas with clear margins, no clipped horns, cheeks or fangs. Face should read at one-fifth size.
+Style/lighting: crisp illustrated industrial biomechanical armor, dark gunmetal scales, bright green irises and restrained #6dff4d edge accents. Top-left key light; darker underside; thin subtle green rim. Clean bevels and readable broad forms.
+Constraints: genuine alpha only, no shadow, floor, backdrop, glow cloud, body segments, extra heads, text, projectile or exhaust. Avoid tall narrow vertical skull, huge forehead, top-down view, profile or rear view.

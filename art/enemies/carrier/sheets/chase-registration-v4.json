@@ -1,0 +1,72 @@
+[
+  {
+    "output": "art/enemies/carrier/sources/chase-v4.png",
+    "sourceSheet": "art/enemies/carrier/sheets/chase-v4.png",
+    "cropRect": [
+      20,
+      169,
+      1351,
+      560
+    ],
+    "resizeSize": [
+      2080,
+      611
+    ],
+    "uniformScale": 1.5627347858752818,
+    "sourceAssemblyPivot": [
+      685.5,
+      364.5
+    ],
+    "registeredPivot": [
+      1086,
+      362
+    ],
+    "translation": [
+      46,
+      56
+    ],
+    "operation": "isolate largest connected alpha component as static hull; uniformly resize and center on the existing 2172x724 pursuit frame"
+  },
+  {
+    "output": "art/enemies/carrier/layers/chase/doorLeft-v4.png",
+    "sourceSheet": "art/enemies/carrier/sheets/chase-doors-v4.png",
+    "cropRect": [
+      233,
+      204,
+      727,
+      655
+    ],
+    "targetRect": [
+      700,
+      215,
+      220,
+      185
+    ],
+    "registeredPivot": [
+      830,
+      343
+    ],
+    "operation": "crop one generated door; uniformly fit measured aperture registration rectangle; place on 2172x724 hull frame"
+  },
+  {
+    "output": "art/enemies/carrier/layers/chase/doorRight-v4.png",
+    "sourceSheet": "art/enemies/carrier/sheets/chase-doors-v4.png",
+    "cropRect": [
+      1045,
+      204,
+      1539,
+      655
+    ],
+    "targetRect": [
+      1250,
+      215,
+      220,
+      185
+    ],
+    "registeredPivot": [
+      1332,
+      343
+    ],
+    "operation": "crop one generated door; uniformly fit measured aperture registration rectangle; place on 2172x724 hull frame"
+  }
+]

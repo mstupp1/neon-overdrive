@@ -1,0 +1,9 @@
+Use case: stylized-concept. Asset type: NEON OVERDRIVE shielder enemy chase-view sprite.
+Create a new camera view from this identity description: a compact dark navy gunmetal defense drone, large circular cobalt-blue central energy aperture, a smaller blue sensor above it, blue light seams, and two curved protective arms wrapping around the body at left and right. Keep these defining features and colors.
+Scene: isolated static hull, genuine transparent alpha.
+Camera and form: direct low front elevation, camera centered in front along the drone's forward axis, 15–20 degrees above the vertical front face. Present a broad dark vertical front face to the viewer, with the large central blue aperture aimed straight at camera and smaller upper sensor visible. The protective arms frame the body in front view. Show a dark underside. The wide horizontal top/dorsal surface recedes away and compresses to a narrow shallow ellipse behind the front face. Clearly show thickness and front-facing geometry; this must not look like a flat overhead drawing.
+Composition: complete centered hull with margin; all side arms and lower body stay fully in frame, about 70% of square canvas.
+Style: crisp polished 3D sci-fi game sprite, broad beveled plates readable at 1/5 display size.
+Lighting: upper-left highlight, shaded underside, restrained cobalt rim and controlled blue-core glow.
+Constraints: same navy metal and blue identity; no active shield bubble; clean true alpha.
+Avoid: overhead/top-down view, flat planform, top surface facing camera, checkerboard, floor, cast shadow, forcefield, aura, projectile, bloom haze, text, watermark, clipped arms.

@@ -95,58 +95,53 @@
       ]
     },
     "chase": {
-      "source": "art/enemies/dart/sources/chase-v2.png",
-      "sourceSha256": "7e76d9cc6fa27965e29903637f311f36880fe57caff03284e53cf264e75543bc",
-      "output": "src/assets/enemies/dart/chase-v2.png",
-      "outputSha256": "78e9e3006fdbb3a548cce6616717fca81896c0dc26ff21560fa887135cad9db8",
+      "source": "art/enemies/dart/sources/chase-v3.png",
+      "sourceSha256": "bcb434d5a727519ee5ee348a9c82aab0470bf135fd22ff128db7ab901167501c",
+      "output": "src/assets/enemies/dart/chase-v3.png",
+      "outputSha256": "196d747cfc58512d656d8cac132adca78486c36ba062ead3a1f61d01b0ad28fc",
       "sourceSize": {
-        "width": 1774,
-        "height": 887
+        "width": 1254,
+        "height": 1254
       },
       "exportSize": {
         "width": 256,
         "height": 256
       },
       "cropRect": [
-        21,
-        21,
-        1754,
-        855
+        17,
+        39,
+        1234,
+        1204
       ],
       "resizeSize": [
         205,
-        99
+        196
       ],
       "offset": [
         25,
-        78
+        30
       ],
       "contentBox": [
         25,
-        78,
+        30,
         230,
-        177
+        226
       ],
       "alpha": true,
       "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
       "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
       "prompt": {
-        "path": "art/enemies/dart/prompts/chase-v2.txt",
-        "sha256": "7dc00e23223b7c4e9b31ba4658cd378a9739dc8d3bdab2ec2fa131ece25b6836"
+        "path": "art/enemies/dart/prompts/chase-v3.txt",
+        "sha256": "12b988b2680cead466a4db3b69136031f296fb980b678de0b84766b63533c102"
       },
       "sourceSheet": null,
-      "inputReferences": [
-        {
-          "path": "art/enemies/dart/sources/top-v1.png",
-          "sha256": "d3d4b1705c0b5db60ce37adc64683a6befe35d4336ed43198eddd467d197645a"
-        }
-      ]
+      "inputReferences": []
     }
   },
   "prompts": {
     "top": "art/enemies/dart/prompts/top-v1.txt",
     "side": "art/enemies/dart/prompts/side-v1.txt",
-    "chase": "art/enemies/dart/prompts/chase-v2.txt"
+    "chase": "art/enemies/dart/prompts/chase-v3.txt"
   },
   "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
 }

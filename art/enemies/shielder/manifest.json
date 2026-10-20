@@ -95,13 +95,13 @@
       ]
     },
     "chase": {
-      "source": "art/enemies/shielder/sources/chase-v1.png",
-      "sourceSha256": "f51f4572dbaace0e880eeea78f23d34e6ddfe445aae9ee0d5fba76e46681ccc6",
-      "output": "src/assets/enemies/shielder/chase-v1.png",
-      "outputSha256": "2cde8a486f36856d7cb5a4e78bb25f945e49c1c30f566f37a7e6fc3fdd518f72",
+      "source": "art/enemies/shielder/sources/chase-v5.png",
+      "sourceSha256": "ca30b1e27ed176effe7b73b077e36233c6d448842442398300f2bf7e2232d33d",
+      "output": "src/assets/enemies/shielder/chase-v5.png",
+      "outputSha256": "4d283e082ab724f6099c08aee77e473730237abe9cafb1ecf72fa99d28af3da8",
       "sourceSize": {
-        "width": 1254,
-        "height": 1254
+        "width": 1402,
+        "height": 1122
       },
       "exportSize": {
         "width": 256,
@@ -109,44 +109,39 @@
       },
       "cropRect": [
         0,
-        21,
-        1224,
-        1254
+        32,
+        1388,
+        1112
       ],
       "resizeSize": [
-        204,
-        205
+        205,
+        160
       ],
       "offset": [
-        26,
-        25
+        25,
+        48
       ],
       "contentBox": [
-        26,
         25,
+        48,
         230,
-        230
+        208
       ],
       "alpha": true,
       "operation": "crop transparent bounds; Lanczos fit to 80% of export square; center on transparent RGBA canvas",
       "cameraIntent": "Front-facing enemy approach toward the camera/player, viewed near the horizon.",
       "prompt": {
-        "path": "art/enemies/shielder/prompts/chase-v1.txt",
-        "sha256": "63dc2490dde195fdadfd2a22b7672193657372cf2db53c89a7c5022407553fb8"
+        "path": "art/enemies/shielder/prompts/chase-v5.txt",
+        "sha256": "07d5cb8f879da8972d34d0081aea0c75c4457681951427ae0e969d48d2c5a2bb"
       },
       "sourceSheet": null,
-      "inputReferences": [
-        {
-          "path": "art/enemies/shielder/sources/top-v1.png",
-          "sha256": "fe8cd177ad43f11e06c9794d71bee4badcac84af0837d37aecbff60d92134d40"
-        }
-      ]
+      "inputReferences": []
     }
   },
   "prompts": {
     "top": "art/enemies/shielder/prompts/top-v1.txt",
     "side": "art/enemies/shielder/prompts/side-v1.txt",
-    "chase": "art/enemies/shielder/prompts/chase-v1.txt"
+    "chase": "art/enemies/shielder/prompts/chase-v5.txt"
   },
   "generation": "built-in imagegen; original selected transparent PNGs retained under sources/"
 }

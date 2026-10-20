@@ -1,0 +1,9 @@
+Use case: stylized-concept. Asset type: NEON OVERDRIVE segmented snake enemy pursuit sprite.
+Input image: Image 1 is the accepted full-resolution snake segment identity reference. Preserve its round armored segment, dark gunmetal polygon plates and bright lime-green central reactor and inset green lights.
+Scene: isolated single segment on genuine transparent alpha.
+Camera and pose: direct front-facing view of this spherical segment approaching the player. Keep the optical axis aimed at its front reactor; camera 15–20 degrees above horizontal, revealing only a narrow top plane. Make the central green core a clear forward-facing circular aperture and the radial armor ring foreshortened in depth.
+Lighting: upper-left pale highlight, dark lower edge, restrained lime rim, no broad glow.
+Style: crisp beveled industrial sci-fi armor rendered as polished 3D game art; legible at 1/5 display size.
+Composition: centered complete round sprite, fills about 78% of a square canvas.
+Constraints: preserve accepted circular silhouette and lime identity; one static segment; true transparent alpha.
+Avoid: overhead view, flat top-down disk, checkerboard, background, floor, cast shadow, halo, projectiles, extra parts, text, watermark, clipped edge.

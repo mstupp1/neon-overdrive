@@ -1,0 +1,10 @@
+Use case: stylized-concept. Asset type: NEON OVERDRIVE blinker enemy pursuit sprite.
+Input image: Image 1 is the prior accepted full-resolution blinker chase master. Preserve its recognizable broad horizontal four-point ethereal star/diamond body, centered dark visor with one violet eye, pale lavender-white armored surfaces, charcoal framing and thin violet light strips. The image is an identity reference only; redesign the camera angle.
+Scene: isolated static craft on genuine transparent alpha.
+Camera: shallow low front elevation, centered directly ahead along the craft's fore-aft axis, about 15–20 degrees above the front face. Present the dark visor as a forward-facing vertical face with the violet eye looking at the camera. Show the broad horizontal left/right wings sweeping back slightly in depth. Strongly compress the dorsal plane and vertical depth; the silhouette stays low and wide, wings clearly wider than the body's height. This is a head-on craft with a broad wing spread, not a top-down planform.
+Silhouette: retain the old short four-point star/diamond outline and lavender armor. Keep the upper and lower points short and balanced with the side wings. No long vertical tail, no tall top fin, no elongated spear or diamond pointing up/down.
+Composition: centered complete sprite with generous transparent margin; all four tips inside the canvas and no glow spilling outward.
+Style: polished crisp 3D sci-fi combat sprite, broad beveled forms readable at 1/5 scale.
+Lighting: upper-left key, dark underside, restrained violet rim and modest pale armor highlights.
+Constraints: keep the old identity and color palette; true transparent alpha; static hull only.
+Avoid: tall vertical profile, long dorsal fin, vertical tail spike, narrow spear silhouette, broad top plane, overhead/top-down camera, checkerboard, background, floor, cast shadow, teleport flash, projectiles, motion streaks, bloom haze, text, watermark, clipped wings.
