@@ -79,15 +79,28 @@ export const STATS = {
   projSize: { apply: (st, v) => (st.projSize += v), text: (v) => `+${P(v)} projectile size` },
   projSpeed: { apply: (st, v) => (st.projSpeed += v), text: (v) => `+${P(v)} projectile speed` },
   dodge: { apply: (st, v) => (st.dodge = Math.min(0.5, st.dodge + v)), text: (v) => `+${P(v)} chance to dodge a hit` },
+  ammo: { apply: (st, v) => (st.ammoProc += v), text: (v) => `+${P(v)} proc chance for your ammo` }, // added to the run's Rounds (upgrades.js)
+  ammoPot: { apply: (st, v) => (st.ammoPot += v), text: (v) => `+${P(v)} ammo effect strength` },
+  ultDmg: { apply: (st, v) => (st.ultDmgBonus += v), text: (v) => `${sg(v)}${P(v)} damage while your ultimate runs` },
   sunder: { apply: (st, v) => (st.pctHp += v * 0.1), text: (v) => `Hits deal +${+(v * 10).toFixed(1)}% of target max hull` }, // v is x10 of the real fraction (gear values round to 0.01)
 };
+
+// Each slot has a job, and only rolls modifiers for it: Core = how you deal damage, Plating = survival (and loot),
+// Thrusters = movement, graze and the ultimate. Old items keep whatever they rolled.
+const SLOT_STATS = {
+  core: ['dmg', 'rate', 'bounty', 'pierce', 'crit', 'critMul', 'mod', 'modRate', 'projSize', 'projSpeed', 'armorPierce', 'burst', 'burstN', 'ammo', 'ammoPot', 'sunder'],
+  plating: ['hull', 'shield', 'iframes', 'dodge', 'bounty', 'magnet', 'xp', 'credits', 'find', 'rerolls'],
+  thrusters: ['speed', 'dashCd', 'dashLen', 'od', 'odDur', 'grazeR', 'grazeOd', 'ultSave', 'boostCap', 'boostRegen', 'boostEff', 'magnet'],
+};
+const AFFIX_SLOTS = {};
+for (const [slot, list] of Object.entries(SLOT_STATS)) for (const stat of list) (AFFIX_SLOTS[stat] ||= []).push(slot);
 
 // Random modifiers: [stat, tag, lo, hi, minRarity, weight]. Values grow with item level; rarer items roll higher.
 export const AFFIXES = [
   ['dmg', 'firepower', 0.03, 0.08], ['rate', 'firepower', 0.03, 0.07], ['bounty', 'crit', 0.05, 0.12],
   ['pierce', 'firepower', 1, 1, 3, 0.4],
   ['crit', 'crit', 0.02, 0.05], ['critMul', 'crit', 0.15, 0.4],
-  ['mod', 'modules', 0.05, 0.12], ['modRate', 'modules', 0.04, 0.09], ['slots', 'modules', 1, 1, 4, 0.25],
+  ['mod', 'modules', 0.05, 0.12], ['modRate', 'modules', 0.04, 0.09],
   ['speed', 'mobility', 0.03, 0.07], ['dashCd', 'mobility', 0.05, 0.12], ['dashLen', 'mobility', 0.08, 0.18],
   ['od', 'overdrive', 0.06, 0.14], ['grazeR', 'overdrive', 0.1, 0.22], ['odDur', 'overdrive', 0.4, 1],
   ['hull', 'tank', 1, 1, 2, 0.5], ['shield', 'tank', 0.08, 0.18], ['iframes', 'tank', 0.1, 0.25],
@@ -97,10 +110,9 @@ export const AFFIXES = [
   // Shared combat systems (status.js).
   ['projSize', 'firepower', 0.05, 0.12, 0, 0.7], ['projSpeed', 'firepower', 0.05, 0.12, 0, 0.7],
   ['armorPierce', 'firepower', 0.03, 0.07, 1, 0.7], ['burst', 'firepower', 0.02, 0.05, 1, 0.6], ['burstN', 'firepower', 1, 1, 3, 0.25],
-  ['freeze', 'modules', 0.03, 0.07, 1, 0.6], ['burn', 'modules', 0.03, 0.07, 1, 0.6], ['corrode', 'modules', 0.03, 0.07, 1, 0.6],
-  ['freezePot', 'modules', 0.08, 0.18, 2, 0.45], ['burnPot', 'modules', 0.08, 0.18, 2, 0.45], ['corrodePot', 'modules', 0.08, 0.18, 2, 0.45],
+  ['ammo', 'modules', 0.03, 0.07, 1, 0.9], ['ammoPot', 'modules', 0.08, 0.18, 2, 0.6],
   ['sunder', 'crit', 0.01, 0.03, 2, 0.5], ['dodge', 'tank', 0.02, 0.05, 1, 0.7],
-].map(([stat, tag, lo, hi, minR = 0, weight = 1]) => ({ id: stat, stat, tag, lo, hi, minR, weight }));
+].map(([stat, tag, lo, hi, minR = 0, weight = 1]) => ({ id: stat, stat, tag, lo, hi, minR, weight, slots: AFFIX_SLOTS[stat] }));
 const affixById = new Map(AFFIXES.map((a) => [a.id, a]));
 export const affixTag = (id) => (affixById.get(id) || {}).tag;
 
@@ -115,7 +127,7 @@ export const RARITY_GEAR = [
   { k: 1.15, mods: 1, extra: 0.25, q: 0.15, sell: 35 },
   { k: 1.3, mods: 2, extra: 0.3, q: 0.3, sell: 80 },
   { k: 1.5, mods: 3, extra: 0.35, q: 0.45, sell: 180 },
-  { k: 1.6, mods: 3, extra: 0.4, q: 0.6, sell: 400 },
+  { k: 1.4, mods: 3, extra: 0.4, q: 0.6, sell: 400 },
 ];
 
 // Base types. fx: [[stat, v]]: positive values scale with rarity and item level, drawbacks stay fixed.
@@ -126,33 +138,34 @@ export const BASES = [
   { id: 'breach', slot: 'core', name: 'Breach Core', tag: 'firepower', fx: [['pierce', 1], ['bounty', 0.1], ['rate', -0.08]], icon: svg('<path d="M3 12h14M13 6l6 6-6 6"/><path d="M7 8v8"/>') },
   { id: 'optics', slot: 'core', name: 'Hunter Optics', tag: 'crit', fx: [['crit', 0.1], ['critMul', 0.5], ['rate', -0.08]], icon: svg('<circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="9"/>') },
   { id: 'swarmcpu', slot: 'core', name: 'Swarm Processor', tag: 'modules', fx: [['mod', 0.2], ['rate', -0.1]], icon: svg('<rect x="6" y="6" width="12" height="12"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>') },
-  { id: 'fluxcap', slot: 'core', name: 'Flux Capacitor', tag: 'overdrive', fx: [['od', 0.25], ['dmg', -0.05]], icon: svg('<path d="M12 2l8 5v10l-8 5-8-5V7z"/><path d="M13 7l-3 5h4l-3 5"/>') },
-  { id: 'siphon', slot: 'core', name: 'Data Siphon', tag: 'greed', fx: [['xp', 0.25], ['dmg', -0.05]], icon: svg('<path d="M5 4h14l-5 7v8l-4 2v-10z"/>') },
+  { id: 'fluxcap', slot: 'core', name: 'Flux Capacitor', tag: 'overdrive', fx: [['ultDmg', 0.3], ['od', -0.1]], icon: svg('<path d="M12 2l8 5v10l-8 5-8-5V7z"/><path d="M13 7l-3 5h4l-3 5"/>') },
+  { id: 'siphon', slot: 'core', name: 'Data Siphon', tag: 'greed', fx: [['xp', 0.25], ['bounty', 0.08], ['rate', -0.06]], icon: svg('<path d="M5 4h14l-5 7v8l-4 2v-10z"/>') },
   // --- Plating ---
   { id: 'reactive', slot: 'plating', name: 'Reactive Armor', tag: 'tank', fx: [['hull', 1], ['speed', -0.08]], icon: svg('<path d="M4 6l8-3 8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9z"/><path d="M9 12h6M12 9v6"/>') },
   { id: 'aegisPlate', slot: 'plating', name: 'Aegis Emitter', tag: 'tank', fx: [['dashCd', -0.15]], start: { aegis: 1 }, note: 'Start every run with Aegis Shield 1', icon: svg('<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8 11c2-2 6-2 8 0"/>') },
   { id: 'ablative', slot: 'plating', name: 'Ablative Weave', tag: 'tank', fx: [['shield', 0.25], ['dmg', -0.05]], icon: svg('<path d="M4 7h16M4 12h16M4 17h16"/><path d="M8 4v16M16 4v16" stroke-dasharray="2 2"/>') },
-  { id: 'huntplate', slot: 'plating', name: "Hunter's Plating", tag: 'crit', fx: [['bounty', 0.15], ['crit', 0.04], ['magnet', -0.15]], icon: svg('<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><circle cx="12" cy="11" r="3"/>') },
+  { id: 'huntplate', slot: 'plating', name: "Hunter's Plating", tag: 'crit', fx: [['bounty', 0.12], ['iframes', 0.2], ['magnet', -0.15]], icon: svg('<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><circle cx="12" cy="11" r="3"/>') },
   { id: 'baymount', slot: 'plating', name: 'Expanded Bay', tag: 'modules', fx: [['slots', 1], ['mod', 0.05], ['hull', -1]], icon: svg('<rect x="4" y="4" width="7" height="7"/><rect x="13" y="4" width="7" height="7"/><rect x="4" y="13" width="7" height="7"/><path d="M16.5 14v6M13.5 17h6"/>') },
-  { id: 'graze', slot: 'plating', name: 'Graze Mesh', tag: 'overdrive', fx: [['grazeR', 0.4], ['grazeOd', 0.3], ['dmg', -0.06]], icon: svg('<path d="M3 12h18M3 6h18M3 18h18M7 3v18M12 3v18M17 3v18"/>') },
-  { id: 'salvage', slot: 'plating', name: 'Salvage Hull', tag: 'greed', fx: [['credits', 0.3], ['dmg', -0.1]], icon: svg('<circle cx="12" cy="12" r="9"/><path d="M15 8.5c-.8-1-2-1.5-3-1.5-1.7 0-3 1-3 2.5s1.3 2 3 2.5 3 1 3 2.5-1.3 2.5-3 2.5c-1 0-2.2-.5-3-1.5M12 5v2M12 17v2"/>') },
+  { id: 'graze', slot: 'plating', name: 'Graze Mesh', tag: 'overdrive', fx: [['grazeR', 0.3], ['iframes', 0.15], ['speed', -0.05]], icon: svg('<path d="M3 12h18M3 6h18M3 18h18M7 3v18M12 3v18M17 3v18"/>') },
+  { id: 'salvage', slot: 'plating', name: 'Salvage Hull', tag: 'greed', fx: [['credits', 0.25], ['shield', 0.1], ['speed', -0.06]], icon: svg('<circle cx="12" cy="12" r="9"/><path d="M15 8.5c-.8-1-2-1.5-3-1.5-1.7 0-3 1-3 2.5s1.3 2 3 2.5 3 1 3 2.5-1.3 2.5-3 2.5c-1 0-2.2-.5-3-1.5M12 5v2M12 17v2"/>') },
   // --- Thrusters ---
   { id: 'afterburner', slot: 'thrusters', name: 'Afterburner Kit', tag: 'mobility', fx: [['dashes', 1], ['dashCd', -0.2]], icon: svg('<path d="M4 18l6-6-6-6M12 18l6-6-6-6"/><path d="M20 6v12"/>') },
   { id: 'fins', slot: 'thrusters', name: 'Vector Fins', tag: 'mobility', fx: [['speed', 0.12], ['dashCd', -0.15]], icon: svg('<path d="M12 3v18M12 8L5 20M12 8l7 12"/>') },
   { id: 'phase', slot: 'thrusters', name: 'Phase Drive', tag: 'mobility', fx: [['dashLen', 0.4], ['speed', -0.05]], icon: svg('<path d="M3 12h6M11 12h2M15 12h6"/><circle cx="12" cy="12" r="6" stroke-dasharray="3 3"/>') },
   { id: 'iontrail', slot: 'thrusters', name: 'Ion Trail', tag: 'overdrive', fx: [['grazeOd', 0.3], ['grazeR', 0.2], ['speed', -0.05]], icon: svg('<path d="M4 20c4-2 6-6 8-16 2 10 4 14 8 16"/><path d="M8 20h8" stroke-dasharray="2 2"/>') },
   { id: 'surge', slot: 'thrusters', name: 'Surge Thrusters', tag: 'overdrive', fx: [['odDur', 1], ['dashCd', -0.1]], icon: svg('<path d="M6 13l6-6 6 6M6 19l6-6 6 6"/><path d="M12 2v3"/>') },
-  { id: 'tether', slot: 'thrusters', name: 'Drone Tether', tag: 'modules', fx: [['mod', 0.12], ['speed', -0.06]], icon: svg('<circle cx="12" cy="17" r="3"/><path d="M12 14V8"/><path d="M6 8l3-5 3 5-3-1.5zM12 8l3-5 3 5-3-1.5z"/>') },
+  { id: 'tether', slot: 'thrusters', name: 'Drone Tether', tag: 'modules', fx: [['mod', 0.1], ['speed', 0.05], ['dashCd', -0.1]], icon: svg('<circle cx="12" cy="17" r="3"/><path d="M12 14V8"/><path d="M6 8l3-5 3 5-3-1.5zM12 8l3-5 3 5-3-1.5z"/>') },
   { id: 'ramjet', slot: 'thrusters', name: 'Ramjet Tank', tag: 'mobility', fx: [['boostCap', 0.35], ['boostRegen', 0.15], ['speed', -0.04]], icon: svg('<circle cx="12" cy="10" r="6"/><path d="M12 10V6M9 16l-2 5M15 16l2 5M12 16v5"/>') },
   { id: 'nitro', slot: 'thrusters', name: 'Nitro Injector', tag: 'mobility', fx: [['boostFlow', 0.15], ['boostEff', 0.25], ['dashCd', -0.1]], icon: svg('<path d="M10 2h4M12 2v4"/><rect x="8" y="6" width="8" height="10"/><path d="M6 21l6-5 6 5"/>') },
   { id: 'coil', slot: 'thrusters', name: 'Magnet Coil', tag: 'greed', fx: [['magnet', 0.6], ['speed', -0.05]], icon: svg('<path d="M6 4v8a6 6 0 0012 0V4M6 8h4M14 8h4"/>') },
   // --- Shared-system bases (status.js) ---
-  { id: 'cryocore', slot: 'core', name: 'Cryo Core', tag: 'modules', fx: [['freeze', 0.12], ['dmg', -0.05]], icon: svg('<path d="M12 2v20M4 7l16 10M20 7L4 17"/><path d="M9 4l3 2 3-2M9 20l3-2 3 2"/>') },
-  { id: 'embercore', slot: 'core', name: 'Ember Core', tag: 'modules', fx: [['burn', 0.12], ['rate', -0.05]], icon: svg('<path d="M12 2c1 4 6 6 6 12a6 6 0 01-12 0c0-3 2-4 3-7 1 1 2 2 3-5z"/>') },
-  { id: 'acidcore', slot: 'core', name: 'Acid Core', tag: 'modules', fx: [['corrode', 0.12], ['dmg', -0.05]], icon: svg('<path d="M12 3c3 4 6 7 6 11a6 6 0 01-12 0c0-4 3-7 6-11z"/><path d="M9 15h6"/>') },
+  { id: 'cryocore', slot: 'core', name: 'Cryo Core', tag: 'modules', fx: [['ammo', 0.06], ['dmg', -0.05]], start: { cryo: 1 }, note: 'Start every run with Cryo Rounds 1 (locks your ammo)', icon: svg('<path d="M12 2v20M4 7l16 10M20 7L4 17"/><path d="M9 4l3 2 3-2M9 20l3-2 3 2"/>') },
+  { id: 'embercore', slot: 'core', name: 'Ember Core', tag: 'modules', fx: [['ammo', 0.06], ['rate', -0.05]], start: { incendiary: 1 }, note: 'Start every run with Incendiary Rounds 1 (locks your ammo)', icon: svg('<path d="M12 2c1 4 6 6 6 12a6 6 0 01-12 0c0-3 2-4 3-7 1 1 2 2 3-5z"/>') },
+  { id: 'acidcore', slot: 'core', name: 'Acid Core', tag: 'modules', fx: [['ammo', 0.06], ['dmg', -0.05]], start: { corrosive: 1 }, note: 'Start every run with Corrosive Rounds 1 (locks your ammo)', icon: svg('<path d="M12 3c3 4 6 7 6 11a6 6 0 01-12 0c0-4 3-7 6-11z"/><path d="M9 15h6"/>') },
+  { id: 'shockcore', slot: 'core', name: 'Shock Core', tag: 'modules', fx: [['ammo', 0.06], ['rate', -0.05]], start: { shock: 1 }, note: 'Start every run with Shock Rounds 1 (locks your ammo)', icon: svg('<path d="M13 2L6 13h5l-2 9 8-12h-5z"/><circle cx="12" cy="12" r="10" stroke-dasharray="2 3"/>') },
   { id: 'burstcoil', slot: 'core', name: 'Burst Coil', tag: 'firepower', fx: [['burst', 0.12], ['dmg', -0.08]], icon: svg('<path d="M7 3v10M12 3v14M17 3v10"/><path d="M5 20h14" stroke-dasharray="2 2"/>') },
   { id: 'phasecloak', slot: 'plating', name: 'Phase Cloak', tag: 'tank', fx: [['dodge', 0.08], ['hull', -1]], icon: svg('<path d="M14 4a3 3 0 100 6M9 21l2-7 4 3 2-6"/><path d="M3 10l3-2M3 15l4-1" stroke-dasharray="2 2"/>') },
-  { id: 'breaker', slot: 'plating', name: 'Breaker Plating', tag: 'firepower', fx: [['armorPierce', 0.15], ['speed', -0.06]], icon: svg('<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M4 12h16M15 8l5 4-5 4"/>') },
+  { id: 'breaker', slot: 'plating', name: 'Breaker Plating', tag: 'firepower', fx: [['armorPierce', 0.1], ['hull', 1], ['speed', -0.1]], icon: svg('<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M4 12h16M15 8l5 4-5 4"/>') },
   { id: 'massdriver', slot: 'thrusters', name: 'Mass Driver', tag: 'firepower', fx: [['projSize', 0.2], ['speed', -0.05]], icon: svg('<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/><path d="M12 2v3M12 19v3"/>') },
 ];
 
@@ -235,9 +248,9 @@ export const LEGENDARIES = [
   },
   // --- Shared-system legendaries (status.js) ---
   {
-    id: 'cryostasis', slot: 'core', name: 'Cryostasis Core', tag: 'modules', fx: [['freeze', 0.1]],
-    unique: 'Hits chill (+20% chance, +50% slow). Frozen enemies take 50% more damage.',
-    apply(st) { st.freezeChance += 0.2; st.freezePot += 0.5; st.shatter += 0.5; },
+    id: 'cryostasis', slot: 'core', name: 'Cryostasis Core', tag: 'modules', fx: [['ammo', 0.08]], start: { cryo: 1 },
+    unique: 'Start with Cryo Rounds 1. Chill +20% chance and +50% slow. Frozen enemies take 50% more damage.',
+    apply(st) { if (st.freezeChance) { st.freezeChance += 0.2; st.freezePot += 0.5; } st.shatter += 0.5; },
     icon: svg('<path d="M12 2v20M4 7l16 10M20 7L4 17"/><circle cx="12" cy="12" r="9" stroke-dasharray="2 3"/>'),
   },
   {
@@ -247,9 +260,9 @@ export const LEGENDARIES = [
     icon: svg('<path d="M12 2l3 7-3 3 3 3-3 7"/><path d="M5 8h4M15 16h4"/><circle cx="12" cy="12" r="9" stroke-dasharray="2 3"/>'),
   },
   {
-    id: 'pyremantle', slot: 'plating', name: 'Pyre Mantle', tag: 'modules', fx: [['burn', 0.1]],
-    unique: 'Hits ignite (+20% chance). Burning enemies spread their fire to nearby enemies when they die.',
-    apply(st) { st.burnChance += 0.2; st.cinder += 1; },
+    id: 'pyremantle', slot: 'plating', name: 'Pyre Mantle', tag: 'modules', fx: [['iframes', 0.15]], start: { incendiary: 1 },
+    unique: 'Start with Incendiary Rounds 1 (+20% ignite chance). Burning enemies spread their fire when they die.',
+    apply(st) { if (st.burnChance) st.burnChance += 0.2; st.cinder += 1; },
     icon: svg('<path d="M4 6l8-3 8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9z"/><path d="M12 8c1 2 3 3 3 5a3 3 0 01-6 0c0-1.5 1-2 1.5-3.5.7.5 1 1 1.5-1.5z"/>'),
   },
   {
@@ -276,7 +289,9 @@ export const isLegendary = (item) => item && item.r === LEGENDARY;
 export const itemLevel = ({ sys = 0, tier = 0, deep = 0 } = {}) => Math.min(20, 1 + sys + 4 * deep + Math.floor(tier / 2));
 
 // Base-effect multiplier for a rarity / item level.
-const kOf = (r, il) => RARITY_GEAR[r].k * (1 + 0.03 * (il - 1));
+const BASE_IL = 0.015; // base effect per item level above 1
+const MOD_IL = 0.03; // modifier roll per item level above 1
+const kOf = (r, il) => RARITY_GEAR[r].k * (1 + BASE_IL * (il - 1));
 const scaled = (stat, v, k) => (v > 0 && !STATS[stat].flat ? v * k : v);
 
 function weightedPick(list, w, rng) {
@@ -289,11 +304,12 @@ function weightedPick(list, w, rng) {
 
 // Rolls `n` modifiers for rarity r at item level il. `scale` < 1 makes them weaker (level-up card bonuses).
 // tag: build path of the item / card the modifiers roll on (null = any path).
-export function rollMods(r, il, n, rng = Math.random, scale = 1, avoid = [], tag = null) {
+// slot: only that slot's modifiers (gear); null for level-up cards and tunes.
+export function rollMods(r, il, n, rng = Math.random, scale = 1, avoid = [], tag = null, slot = null) {
   const out = [];
   const used = new Set(avoid);
   for (let i = 0; i < n; i++) {
-    const open = AFFIXES.filter((a) => a.minR <= r && !used.has(a.id) && !(scale < 1 && STATS[a.stat].flat));
+    const open = AFFIXES.filter((a) => a.minR <= r && !used.has(a.id) && !(scale < 1 && STATS[a.stat].flat) && (!slot || a.slots.includes(slot)));
     let pool = open.filter((a) => affixFit(a, tag, i === 0) > 0);
     if (!pool.length) pool = open.filter((a) => affixFit(a, tag, false) > 0);
     if (!pool.length) pool = open; // the path and its kin are used up
@@ -303,7 +319,7 @@ export function rollMods(r, il, n, rng = Math.random, scale = 1, avoid = [], tag
     let v = a.lo;
     if (!STATS[a.stat].flat) {
       const q = RARITY_GEAR[r].q + rng() * (1 - RARITY_GEAR[r].q);
-      v = (a.lo + (a.hi - a.lo) * q) * (1 + 0.06 * (il - 1)) * scale;
+      v = (a.lo + (a.hi - a.lo) * q) * (1 + MOD_IL * (il - 1)) * scale;
       v = a.stat === 'odDur' ? Math.round(v * 10) / 10 : Math.round(v * 100) / 100;
       v = Math.max(a.stat === 'odDur' ? 0.1 : 0.01, v);
     }
@@ -321,7 +337,7 @@ export function makeItem(slot, r, il, rng = Math.random, baseId = null) {
   }
   const g = RARITY_GEAR[r];
   const n = g.mods + (rng() < g.extra ? 1 : 0);
-  return { base: def.id, slot: def.slot, r, il, mods: rollMods(r, il, n, rng, 1, [], def.tag) };
+  return { base: def.id, slot: def.slot, r, il, mods: rollMods(r, il, n, rng, 1, [], def.tag, def.slot) };
 }
 
 export function itemName(item) {
@@ -397,6 +413,27 @@ export function equippedOn(profile, uid) {
 export function applyParts(st, p) {
   for (const part of p.parts || []) part.apply(st, p);
   if (p.fluxCore) applyCore(st, p.fluxCore); // Flux Core levels (endgame), real runs only
+}
+
+// Gear v2 (slot jobs): modifiers that left the pool turn into their nearest replacement. Elemental chances become
+// ammo proc (it boosts whichever Rounds the run picks), potencies become ammo strength, a module-slot roll becomes
+// module damage (slots only come from Expanded Bay and Conductor Core).
+const V2_MOD = { freeze: ['ammo', 1], burn: ['ammo', 1], corrode: ['ammo', 1], freezePot: ['ammoPot', 1], burnPot: ['ammoPot', 1], corrodePot: ['ammoPot', 1], slots: ['mod', 0.1] };
+export function migrateGearV2(profile) {
+  if (profile.gearV2) return;
+  profile.gearV2 = true;
+  for (const item of profile.gear) {
+    const seen = new Set();
+    const out = [];
+    for (const [id, v] of item.mods) {
+      const [nid, k] = V2_MOD[id] ? [V2_MOD[id][0], id === 'slots' ? 0 : V2_MOD[id][1]] : [id, 1];
+      const nv = id === 'slots' ? V2_MOD.slots[1] : Math.round(v * k * 100) / 100;
+      if (!affixById.has(nid) || seen.has(nid)) continue; // never two of the same modifier
+      seen.add(nid);
+      out.push([nid, nv]);
+    }
+    item.mods = out;
+  }
 }
 
 // Legacy fixed parts (owned before gear was loot) → one Rare item each, keeping what was equipped.

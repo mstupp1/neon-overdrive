@@ -86,22 +86,17 @@ Every ship spends the same stat budget (roughly: 1 hull = 3 damage/s, 1 dash = 2
 
 ### Gear parts
 
-Three slots per ship: **Core**, **Plating**, **Thrusters**. Parts are bought once and fit any ship; each has a tradeoff. Gear can only be changed from the campaign map, never mid-run. Paint jobs (3 per ship, 120 credits) are cosmetic.
+Three slots per ship: **Core**, **Plating**, **Thrusters**. Gear is loot (Fabricator rolls, elite and boss drops) with a rarity and an item level; each base has one tradeoff. Gear can only be changed from the campaign map, never mid-run. Paint jobs (3 per ship, 120 credits) are cosmetic.
 
-| Slot | Part | Price | Effect |
-|---|---|---|---|
-| Core | Glass Reactor | 300 | +30% damage, -1 max hull |
-| Core | Rapid Cycler | 250 | +20% fire rate, -10% damage |
-| Core | Data Siphon | 200 | +25% XP, -5% damage |
-| Core | Hunter Optics | 350 | +10% crit, crits deal 3x, -8% fire rate |
-| Plating | Reactive Armor | 350 | +1 max hull, -8% speed |
-| Plating | Aegis Emitter | 400 | Start with Aegis Shield 1, dashes recharge 15% slower |
-| Plating | Graze Mesh | 300 | +40% graze radius, +30% graze Overdrive, -6% damage |
-| Plating | Salvage Hull | 250 | +30% credits, -10% damage |
-| Thrusters | Afterburner Kit | 450 | +1 dash charge, 20% slower recharge |
-| Thrusters | Vector Fins | 250 | +12% speed, 15% slower recharge |
-| Thrusters | Phase Drive | 400 | +40% dash length and i-frames, -5% speed |
-| Thrusters | Magnet Coil | 150 | +60% pickup range, -5% speed |
+Each slot has a job, and its random modifiers only roll from that job:
+
+| Slot | Job | Modifiers it rolls |
+|---|---|---|
+| Core | How you deal damage; the **ammo cores** (Cryo, Ember, Acid, Shock) start every run with their Rounds 1, which locks your ammo | damage, fire rate, crit, pierce, module damage and rate, projectile size and speed, armor piercing, burst, ammo proc and strength, % hull |
+| Plating | Survival (and loot) | hull, shield recharge, invulnerability, dodge, elite/boss damage, pickup range, XP, credits, rarity find, rerolls |
+| Thrusters | Movement, graze and the ultimate | speed, dash recharge and length, ult charge and duration, graze, cell save, boost |
+
+**Ammo proc / strength** modifiers boost whichever Rounds your run owns, and do nothing without one. Module slots come only from Expanded Bay and Conductor Core (never a random modifier). Item level adds +1.5% per level to the base effect and +3% to modifiers; Legendary bases are x1.4. Older items keep their rolls; elemental and slot modifiers from before were converted to ammo proc, ammo strength and module damage.
 
 ### Pilot classes
 
@@ -119,7 +114,7 @@ Each class's Common ability (Killstreak, Salvager, Wide Graze) comes with the cl
 
 ### Passive tree
 
-**PILOT → PASSIVE TREE** opens each class's own node wheel (64 nodes). You earn **2 points per Pilot Rank**, plus 1 per level of the Flux Core's **Neural Expansion**. Start at the class core and spend points on linked nodes, working outward through six themed wedges that match the gear build paths (Firepower, Crit, Modules, Mobility, Overdrive, Graze, Tank, Greed). Most nodes are small stat bumps. Each wedge has notables and ends in a class-specific **keystone** that changes the rules (Glass Cannon, Swarm Doctrine, Shadow Strike...), and link nodes join neighbouring wedges for hybrid builds. Refunds are free at any time: click an allocated node (if nothing past it depends on it) or REFUND ALL. Drag to pan; wheel, pinch or +/− to zoom; arrows walk the nodes with keys or a pad.
+**PILOT → PASSIVE TREE** opens each class's own node wheel (64 nodes). You earn **2 points per Pilot Rank**, plus 1 per level of the Flux Core's **Neural Expansion** (up to +10). Start at the class core and spend points on linked nodes, working outward through six themed wedges that match the gear build paths (Firepower, Crit, Modules, Mobility, Overdrive, Graze, Tank, Greed). Most nodes are small stat bumps. Each wedge has notables and ends in a class-specific **keystone** that changes the rules (Glass Cannon, Swarm Doctrine, Shadow Strike...), and link nodes join neighbouring wedges for hybrid builds. Refunds are free at any time: click an allocated node (if nothing past it depends on it) or REFUND ALL. Drag to pan; wheel, pinch or +/− to zoom; arrows walk the nodes with keys or a pad.
 
 | Class | Big wedges | Small wedges |
 |---|---|---|

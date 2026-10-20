@@ -34,7 +34,7 @@ export function applyHeat(diff, spec) {
 
 const svg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 
-// Flux Core nodes: no level cap; cost = base × growth^level.
+// Flux Core nodes: no level cap unless a node sets `max`; cost = base × growth^level.
 export const CORE = [
   { id: 'dmg', name: 'Damage Lattice', base: 8, growth: 1.22, color: '#ff4d6d', icon: svg('<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>'), desc: (lv) => `+5% damage per level (now +${5 * lv}%).`, apply: (st, lv) => (st.dmg *= 1 + 0.05 * lv) },
   { id: 'rate', name: 'Cycle Accelerator', base: 8, growth: 1.22, color: '#3ff6ff', icon: svg('<path d="M3 12h4l3-7 4 14 3-7h4"/>'), desc: (lv) => `+3% fire rate per level (now +${3 * lv}%).`, apply: (st, lv) => (st.rate *= 1 + 0.03 * lv) },
@@ -45,7 +45,7 @@ export const CORE = [
   { id: 'credits', name: 'Salvage Protocol', base: 6, growth: 1.2, color: '#ffd24a', icon: svg('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5l3.5 4.5-3.5 4.5-3.5-4.5z"/>'), desc: (lv) => `+5% credits per level (now +${5 * lv}%).`, apply: (st, lv) => (st.creditMul *= 1 + 0.05 * lv) },
   { id: 'boost', name: 'Boost Reservoir', base: 8, growth: 1.25, color: '#ffb13d', icon: svg('<circle cx="12" cy="12" r="8"/><path d="M8 15l4-7 4 7"/><path d="M12 8v9"/>'), desc: (lv) => `+8% boost capacity and refill speed per level (now +${8 * lv}%).`, apply: (st, lv) => { st.boostCap *= 1 + 0.08 * lv; st.boostRegen *= 1 + 0.08 * lv; } },
   { id: 'reroll', name: 'Probability Engine', base: 15, growth: 1.9, color: '#5dff6a', icon: svg('<path d="M4 12a8 8 0 0114-5.3L20 9M20 4v5h-5M20 12a8 8 0 01-14 5.3L4 15M4 20v-5h5"/>'), desc: (lv) => `+1 starting reroll per level (now +${lv}).`, apply: (st, lv) => (st.rerolls += lv) },
-  { id: 'expand', name: 'Neural Expansion', base: 30, growth: 1.45, color: '#3ff6ff', icon: svg('<circle cx="12" cy="12" r="2.5"/><circle cx="12" cy="4" r="1.6"/><circle cx="19" cy="16" r="1.6"/><circle cx="5" cy="16" r="1.6"/><path d="M12 9.5V5.6M14.2 13.3l3.4 1.9M9.8 13.3l-3.4 1.9"/>'), desc: (lv) => `+1 passive tree point per level (now +${lv}).`, apply: () => {} }, // read by tree.js treePoints
+  { id: 'expand', name: 'Neural Expansion', base: 30, growth: 1.45, color: '#3ff6ff', icon: svg('<circle cx="12" cy="12" r="2.5"/><circle cx="12" cy="4" r="1.6"/><circle cx="19" cy="16" r="1.6"/><circle cx="5" cy="16" r="1.6"/><path d="M12 9.5V5.6M14.2 13.3l3.4 1.9M9.8 13.3l-3.4 1.9"/>'), max: 10, desc: (lv) => `+1 passive tree point per level, up to +10 (now +${lv}).`, apply: () => {} }, // read by tree.js treePoints
 ];
 
 const CORE_ART = { dmg: 'power', rate: 'rate', crit: 'crit', hull: 'hull', od: 'capacitor', credits: 'credits', boost: 'boostTank' };
@@ -56,6 +56,7 @@ for (const node of CORE) {
 }
 
 export const coreCost = (node, lv) => Math.round(node.base * Math.pow(node.growth, lv));
+export const coreMaxed = (node, lv) => node.max !== undefined && lv >= node.max;
 
 // Applied from applyParts (real runs only: the player's `core` is null in attract).
 export function applyCore(st, levels) {
