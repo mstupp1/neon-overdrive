@@ -12,7 +12,7 @@ import { treeOnGraze, forcedCrit } from './tree.js';
 import { updateModules, updateBeams, drawModules, drawBeams, onBeam } from './modules.js';
 import { updateEnemies, damageEnemy } from './enemies.js';
 import { applyStatus } from './status.js';
-import { drawBoss } from './bosses.js';
+import { drawBoss, drawBossTelegraphs } from './bosses.js';
 import { updatePlayerBullets, updateEnemyBullets, drawPlayerBullets, drawEnemyBullets, playerBullet } from './bullets.js';
 import { updatePickups, drawPickups } from './pickups.js';
 import { updateParticles, drawParticles, updateTexts, drawTexts, sparks, explosion, ring, impact } from './fx.js';
@@ -259,7 +259,8 @@ function collide(p) {
 function drawTelegraphs(ctx) {
   for (const e of G.enemies) {
     if (e.dead) continue;
-    if (e.type === 'dasher' && e.state === 'tele') {
+    if (e.boss) drawBossTelegraphs(ctx, e);
+    else if (e.type === 'dasher' && e.state === 'tele') {
       const t = 1 - e.timer / 0.75;
       ctx.globalAlpha = 0.2 + t * 0.5;
       ctx.strokeStyle = '#ff4d6d';
