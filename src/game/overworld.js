@@ -34,7 +34,8 @@ import { sparks, explosion, floatText, flash } from './fx.js';
 import { gainXp, collectPickup } from './player.js';
 import { resetModules } from './modules.js';
 import { gainCredits, payUnit } from './economy.js';
-import { drawGauges, drawHull } from '../render/hud.js';
+import { drawGauges, drawHull, gaugeSpots } from '../render/hud.js';
+import { abilityClusterTop } from '../ui/ability-layout.js';
 import { NODE_ICONS } from '../ui/meta.js';
 import { loadOverworldLayers, drawOverworldBackground, drawOverworldRock, obstacleVariant } from '../render/overworldLayers.js';
 
@@ -1510,14 +1511,16 @@ function threat(n) {
   return clamp(Math.round(t), 1, 5);
 }
 
+const EXIT_CARD_HEIGHT = 108;
+const exitCardTop = () => abilityClusterTop(gaugeSpots()) - 12 - EXIT_CARD_HEIGHT;
+
 // The exit card: what a node holds, shown for the nearest exit found (fixed size, so nothing shifts).
 function drawCard(ctx, live) {
   const W = view.W;
-  const H = view.H;
   const bw = W - 24;
   const bx = 12;
-  const bh = 108;
-  const by = H - view.safeBottom - 84 - bh;
+  const bh = EXIT_CARD_HEIGHT;
+  const by = exitCardTop();
   const e = ow.card;
   const site = !e && nearSite();
   if (!e && !site) {
@@ -1638,7 +1641,7 @@ function drawArrows(ctx) {
   const z = zoom();
   const m = 26;
   const top = view.safeTop + 58;
-  const bottom = view.H - view.safeBottom - 210;
+  const bottom = exitCardTop() - 18;
   const labels = [];
   for (const e of ow.exits) {
     if (!e.seen) continue;

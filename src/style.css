@@ -75,6 +75,8 @@ body {
     height: 0;
     padding-top: var(--safe-top);
     padding-bottom: var(--safe-bottom);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
     visibility: hidden;
     pointer-events: none;
 }
@@ -180,49 +182,15 @@ body {
     text-shadow: 0 0 0.5em var(--cyan);
 }
 
-/* Both buttons in one bottom corner over the canvas gauges (hud.js gaugeSpots: dash 44 and ult 120 units from
-   the edge, 46 up); .side-left mirrors them. */
+/* Positions and sizes come from the same logical layout as the Canvas gauges. */
 #touch-ui .touch-btn {
     position: absolute;
-    bottom: calc(var(--safe-bottom) + 0.1em);
-    width: 4.7em;
-    height: 5.6em;
+    padding: 0;
     border-radius: 50%;
     border: none;
     background: transparent;
     z-index: 4;
     touch-action: none;
-}
-
-#touch-ui .dash {
-    right: 0.4em;
-}
-
-#touch-ui .od {
-    right: 5.15em;
-}
-
-#touch-ui.side-left .dash {
-    right: auto;
-    left: 0.4em;
-}
-
-#touch-ui.side-left .od {
-    right: auto;
-    left: 5.15em;
-}
-
-/* Boost (hold): above the dash button, over the boost gauge (hud.js gaugeSpots: 44 in, 120 up). */
-#touch-ui .boost {
-    right: 0.55em;
-    bottom: calc(var(--safe-bottom) + 5.5em);
-    width: 4.4em;
-    height: 4.4em;
-}
-
-#touch-ui.side-left .boost {
-    right: auto;
-    left: 0.55em;
 }
 
 .toast {
@@ -248,9 +216,14 @@ body {
     z-index: 6;
 }
 
-/* In flight (the pause button is up) it sits above the dash / ult gauges. */
+/* In flight, keep notifications above the complete two-row instrument cluster. */
 #pause-btn:not([hidden]) ~ .toast {
-    bottom: calc(var(--safe-bottom) + 5em);
+    bottom: var(--ability-toast-bottom, calc(var(--safe-bottom) + 12em));
+}
+
+/* Free flight also reserves the fixed exit card above the gauges. */
+#map-btn:not([hidden]) ~ .toast {
+    bottom: calc(var(--ability-toast-bottom, 12em) + 8em);
 }
 
 .toast.show {

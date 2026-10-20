@@ -9,6 +9,8 @@ export const view = {
   rect: { left: 0, top: 0, width: 450, height: 800 },
   safeTop: 0,
   safeBottom: 0,
+  safeLeft: 0,
+  safeRight: 0,
   quality: 1, // 1 = full, lowered automatically if frames are slow
 };
 
