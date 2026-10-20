@@ -1,0 +1,22 @@
+{
+  "tool": "built-in imagegen",
+  "status": "Four unselected favicon concepts; no runtime references changed.",
+  "options": [
+    {
+      "name": "01-overdrive-core",
+      "prompt": "Use case: logo-brand. Asset type: square favicon concept for NEON OVERDRIVE, a neon arcade shooter. Create ONE finished original emblem, centered filling 80% of square canvas, on solid near-black navy #05030d background. Flat vector-like graphic, bold simple silhouette legible at 16 and 32 pixels, crisp edges, restrained neon palette, minimal glow, professional game identity. No words, no labels, no mockup, no tiny detail, no thin outlines, no surrounding frame. Subject: a cyan thick broken circular power core cut by a bold magenta diagonal lightning slash. Strong memorable asymmetric negative space. Only three large visual components maximum. Convey explosive overdrive energy."
+    },
+    {
+      "name": "02-neon-monogram",
+      "prompt": "Use case: logo-brand. Asset type: square favicon concept for NEON OVERDRIVE, a neon arcade shooter. Create ONE finished original emblem, centered filling 80% of square canvas, on solid near-black navy #05030d background. Flat vector-like graphic, bold simple silhouette legible at 16 and 32 pixels, crisp edges, restrained neon palette, minimal glow, professional game identity. No words, no labels, no mockup, no tiny detail, no thin outlines, no surrounding frame. Subject: a custom angular letter N monogram built from two bold cyan vertical blade shapes connected by a magenta diagonal stroke. Ownable futuristic arcade mark, geometric compact proportions and sharp tips; letter remains instantly readable."
+    },
+    {
+      "name": "03-warp-comet",
+      "prompt": "Use case: logo-brand. Asset type: square favicon concept for NEON OVERDRIVE, a neon arcade shooter. Create ONE finished original emblem, centered filling 80% of square canvas, on solid near-black navy #05030d background. Flat vector-like graphic, bold simple silhouette legible at 16 and 32 pixels, crisp edges, restrained neon palette, minimal glow, professional game identity. No words, no labels, no mockup, no tiny detail, no thin outlines, no surrounding frame. Subject: a vivid magenta comet head shaped as a bold forward-leaning diamond, with two chunky cyan speed trails sweeping down-left. Convey blazing velocity. Simple compact dynamic abstract symbol, no stars or small particles."
+    },
+    {
+      "name": "04-reactor-star",
+      "prompt": "Use case: logo-brand. Asset type: square favicon concept for NEON OVERDRIVE, a neon arcade shooter. Create ONE finished original emblem, centered filling 80% of square canvas, on solid near-black navy #05030d background. Flat vector-like graphic, bold simple silhouette legible at 16 and 32 pixels, crisp edges, restrained neon palette, minimal glow, professional game identity. No words, no labels, no mockup, no tiny detail, no thin outlines, no surrounding frame. Subject: a gold four-point reactor star with broad angular points and a dark central diamond aperture, flanked by two small solid cyan chevrons. Iconic arcade power-up energy. Broad chunky geometric shapes, balanced striking silhouette."
+    }
+  ]
+}

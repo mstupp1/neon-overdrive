@@ -1,0 +1,15 @@
+{
+  "selected": "01-overdrive-core",
+  "source": "art/branding/favicon-options-v1/01-overdrive-core.png",
+  "tool": "built-in imagegen",
+  "prompts": "art/branding/favicon-options-v1/prompts.json",
+  "export": "Pillow RGBA conversion; LANCZOS resizing; ICO sizes 16,32,48; PNG sizes 16,32,48,192",
+  "sha256": {
+    "art/branding/favicon-options-v1/01-overdrive-core.png": "8e75aac69e672ac49d6de7f84c4d2ee7d0c11399ac5c812d324383df6de821af",
+    "src/assets/branding/favicon-overdrive-core-v1-16.png": "b96632a85ac622a66b0e09027f28eff4e549c01469ce02add2fd496c574f1e94",
+    "src/assets/branding/favicon-overdrive-core-v1-192.png": "007e978e9ea5bcf7dbaa12be26356ce6961152bd7e4d9baf7c3b50402739b760",
+    "src/assets/branding/favicon-overdrive-core-v1-32.png": "a30c2b60ddcbee4d216a1fc1bfc09e16f74f0c91130db36c7b4f5a942821b958",
+    "src/assets/branding/favicon-overdrive-core-v1-48.png": "d6a004f9b1aa01d7772a0d4970b1f509c554bb85c527978db0ee8ff261d84959",
+    "src/assets/branding/favicon-overdrive-core-v1.ico": "fbabaffc3b1a087fd70a2c28d311c36ea30efafbe554a128273ec94de12abdc4"
+  }
+}
