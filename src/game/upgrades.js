@@ -2,13 +2,14 @@
 // Player stats are always recomputed from upgrade levels (no drift).
 
 import { weightedPick } from '../core/math.js';
-import { WEAPONS } from './ships.js';
+import { WEAPONS, MAIN_POWER } from './ships.js';
 import { applyParts } from './parts.js';
 import { applyPassives, resetPilotStats, addUltMeter, ULT_LEVELS, ULT_CELLS_MAX } from './pilot.js';
 import { STATS, rollMods, itemLevel, TAGS, PATH_KIN, affixTag } from './parts.js';
 import { RARITY, rollRarity } from './rarity.js';
 import { profile, saveProfile } from '../core/storage.js';
 import { applyTree } from './tree.js';
+import { REDLINE_MAX } from './state.js';
 import { assetIcon } from '../ui/asset-icons.js';
 
 export const MAX_MODULES = 4;
@@ -103,10 +104,10 @@ const pct = (v) => `${Math.round(v * 100)}%`;
 export const UPGRADES = [
   {
     id: 'main', name: 'Main Cannon', cat: 'weapon', max: 7, weight: 1.35, tier: 0,
-    desc: (lv) => (lv < 5 ? 'More barrels. Wider, denser primary fire.' : 'Heavier rounds: +14% primary damage & extra barrels.'),
+    desc: (lv) => `More barrels: wider primary fire, ${Math.round((MAIN_POWER[Math.min(lv, MAIN_POWER.length - 1)] - 1) * 100)}% more volley damage than level 1.`,
   },
-  { id: 'power', name: 'Plasma Core', cat: 'stat', max: 6, weight: 1.1, tier: 0, desc: () => '+15% damage for all weapons.' },
-  { id: 'rate', name: 'Overclock', cat: 'stat', max: 6, weight: 1.1, tier: 0, desc: () => '+12% fire rate for all weapons.' },
+  { id: 'power', name: 'Plasma Core', cat: 'stat', max: 6, weight: 1.1, tier: 0, desc: () => '+12% damage for all weapons.' },
+  { id: 'rate', name: 'Overclock', cat: 'stat', max: 6, weight: 1.1, tier: 0, desc: () => '+10% fire rate for all weapons.' },
   { id: 'crit', name: 'Targeting AI', cat: 'stat', max: 5, weight: 0.8, tier: 0, desc: (lv) => `+7% critical chance (${pct(0.07 * lv)}). Crits deal 2.5x.` },
   { id: 'pierce', name: 'Phase Rounds', cat: 'stat', max: 3, weight: 0.7, tier: 0, desc: () => 'Primary shots pierce +1 enemy.' },
   { id: 'thrusters', name: 'Thrusters', cat: 'stat', max: 4, weight: 0.8, tier: 0, desc: () => '+8% move speed, dashes recharge 12% faster.' },
@@ -136,7 +137,7 @@ export const UPGRADES = [
   // --- Crimson tech ---
   { id: 'overload', name: 'Overload Rounds', cat: 'stat', max: 3, weight: 0.7, tier: 1, desc: () => 'Critical hits detonate, splashing nearby enemies.' },
   { id: 'splinter', name: 'Splinter Rounds', cat: 'stat', max: 3, weight: 0.7, tier: 1, desc: (lv) => `${[0, 12, 22, 32][lv]}% of primary hits split into two fragments.` },
-  { id: 'redline', name: 'Redline', cat: 'stat', max: 3, weight: 0.6, tier: 1, desc: (lv) => `+${12 * lv}% damage for every missing hull point.` },
+  { id: 'redline', name: 'Redline', cat: 'stat', max: 3, weight: 0.6, tier: 1, desc: (lv) => `+${12 * lv}% damage for every missing hull point (up to ${REDLINE_MAX}).` },
   { id: 'bounty', name: 'Bounty Hunter', cat: 'stat', max: 3, weight: 0.6, tier: 1, desc: () => '+15% damage to elites and bosses.' },
   { id: 'blink', name: 'Blink Drive', cat: 'defense', max: 2, weight: 0.6, tier: 1, desc: () => 'Dashes travel 20% further with 20% longer invulnerability.' },
   { id: 'injector', name: 'Fuel Injector', cat: 'stat', max: 3, weight: 0.6, tier: 1, desc: (lv) => `Boost drains slower: burns ${pct(0.25 * lv)} longer.` },
@@ -150,7 +151,7 @@ export const UPGRADES = [
 
   // --- Cyclone tech ---
   { id: 'cull', name: 'Culling Edge', cat: 'stat', max: 3, weight: 0.6, tier: 2, desc: (lv) => `Enemies below ${4 + 4 * lv}% hull are destroyed outright. Not bosses.` },
-  { id: 'echoFire', name: 'Echo Fire', cat: 'stat', max: 3, weight: 0.6, tier: 2, desc: (lv) => `${[0, 12, 22, 32][lv]}% of primary volleys fire a second time.` },
+  { id: 'echoFire', name: 'Echo Fire', cat: 'stat', max: 3, weight: 0.6, tier: 2, desc: (lv) => `${[0, 10, 18, 25][lv]}% of primary volleys fire a second time.` },
   { id: 'static', name: 'Static Discharge', cat: 'stat', max: 3, weight: 0.6, tier: 2, desc: (lv) => `Kills arc lightning into ${lv} nearby ${lv === 1 ? 'enemy' : 'enemies'}.` },
   { id: 'secondWind', name: 'Second Wind', cat: 'defense', max: 2, weight: 0.5, tier: 2, desc: (lv) => `A killing blow leaves you at 1 hull instead (${lv === 1 ? 'once' : 'twice'} per run).` },
   { id: 'gravity', name: 'Gravity Well', cat: 'module', max: 5, weight: 0.85, tier: 2, desc: (lv) => (lv === 1 ? 'Drop a singularity that drags enemies and bullets in and crushes them.' : 'Bigger, stronger, more frequent wells.') },
@@ -171,14 +172,14 @@ export const UPGRADES = [
   { id: 'gameSpeed', name: 'Hyperflow', cat: 'stat', max: 3, weight: 0.5, tier: 0, desc: () => 'The whole battle runs 8% faster for good. +20% score, +10% credits.' },
   { id: 'dodge', name: 'Lucky Dodge', cat: 'defense', max: 4, weight: 0.6, tier: 0, desc: () => '+6% chance to slip past a shot that would have hit you.' },
   { id: 'armorPierce', name: 'Armor Piercing', cat: 'stat', max: 4, weight: 0.7, tier: 1, desc: () => 'Your shots ignore 8% of enemy armor.' },
-  { id: 'burstFire', name: 'Burst Fire', cat: 'stat', max: 4, weight: 0.7, tier: 1, desc: (lv) => (lv === 3 ? '+8% burst chance, and bursts fire one more extra volley.' : '+8% chance for a volley to burst. Scales with fire rate.') },
+  { id: 'burstFire', name: 'Burst Fire', cat: 'stat', max: 4, weight: 0.7, tier: 1, desc: (lv) => (lv === 3 ? '+7% burst chance, and bursts fire one more extra volley.' : '+7% chance for a volley to burst into an extra volley.') },
   { id: 'cryo', name: 'Cryo Rounds', cat: 'stat', max: 3, weight: 0.6, tier: 1, desc: () => '+12% chance per hit to chill. Chill stacks slow enemies; a full stack freezes them.' },
   { id: 'deepFreeze', name: 'Deep Freeze', cat: 'stat', max: 3, weight: 0.5, tier: 1, req: 'cryo', desc: () => '+25% slow from every chill stack.' },
   { id: 'incendiary', name: 'Incendiary Rounds', cat: 'stat', max: 3, weight: 0.6, tier: 1, desc: () => '+12% chance per hit to ignite. Burn stacks deal damage over time and ignore armor.' },
   { id: 'accelerant', name: 'Accelerant', cat: 'stat', max: 3, weight: 0.5, tier: 1, req: 'incendiary', desc: () => '+25% burn damage per stack.' },
   { id: 'corrosive', name: 'Corrosive Rounds', cat: 'stat', max: 3, weight: 0.6, tier: 1, desc: () => '+12% chance per hit to corrode. Each stack strips enemy armor (and lowers it below zero).' },
   { id: 'acidEtch', name: 'Acid Etch', cat: 'stat', max: 3, weight: 0.5, tier: 1, req: 'corrosive', desc: () => '+25% armor stripped per corrosion stack.' },
-  { id: 'resonance', name: 'Resonance Rounds', cat: 'stat', max: 3, weight: 0.6, tier: 2, desc: (lv) => `Every ${[0, 6, 5, 4][lv]}th hit on an enemy detonates for ${3 + lv}x damage, splashing neighbours.` },
+  { id: 'resonance', name: 'Resonance Rounds', cat: 'stat', max: 3, weight: 0.6, tier: 2, desc: (lv) => `Every ${[0, 7, 6, 5][lv]}th hit on an enemy detonates for ${2 + 0.5 * lv}x damage, splashing neighbours.` },
   { id: 'sundering', name: 'Sundering Rounds', cat: 'stat', max: 3, weight: 0.6, tier: 2, desc: () => "Hits deal +0.3% of the target's max hull. Bosses take a fraction." },
 
   // Evolutions: cat 'evolution', unlocked by a maxed module plus an owned partner stat (mod / stat). Never sold in the market.
@@ -247,8 +248,8 @@ export function recomputeStats(p) {
   const w = WEAPONS[p.ship.weapon];
   const st = p.st;
   st.mainLv = 1 + lv('main');
-  st.dmg = (1 + 0.15 * lv('power')) * (p.dmgMod || 1); // dmgMod: Overcharged Reactor event
-  st.rate = 1 + 0.12 * lv('rate');
+  st.dmg = (1 + 0.12 * lv('power')) * (p.dmgMod || 1); // dmgMod: Overcharged Reactor event
+  st.rate = 1 + 0.1 * lv('rate');
   st.crit = 0.07 * lv('crit');
   st.pierce = (w.pierce || 0) + lv('pierce');
   st.speed = p.ship.speed * (1 + 0.08 * lv('thrusters'));
@@ -275,7 +276,7 @@ export function recomputeStats(p) {
   st.bounty = 0.15 * lv('bounty');
   st.leech = [0, 90, 70, 50][lv('leech')];
   st.cull = lv('cull') ? 0.04 + 0.04 * lv('cull') : 0;
-  st.echo = [0, 0.12, 0.22, 0.32][lv('echoFire')];
+  st.echo = [0, 0.1, 0.18, 0.25][lv('echoFire')];
   st.static = lv('static');
   st.secondWind = lv('secondWind');
   st.perpetual = 1.2 * lv('perpetual');
@@ -291,9 +292,9 @@ export function recomputeStats(p) {
   st.corrodePot = 1 + 0.25 * lv('acidEtch');
   st.pctHp = 0.003 * lv('sundering'); // % of the target's max hull dealt as extra damage per hit (bosses take 15% of it)
   st.detHits = [0, 6, 5, 4][lv('resonance')]; // every (detHits+1)th hit on an enemy detonates; 0 = off
-  st.detMul = lv('resonance') ? 3 + lv('resonance') : 4; // detonation damage as a multiple of the triggering hit
+  st.detMul = lv('resonance') ? 2 + 0.5 * lv('resonance') : 3; // detonation damage as a multiple of the triggering hit
   st.detR = 70; // detonation radius (neighbours take half)
-  st.burstChance = 0.08 * lv('burstFire'); // chance a volley is followed by extra volleys (scales with fire rate)
+  st.burstChance = 0.07 * lv('burstFire'); // chance a volley is followed by extra volleys
   st.burstExtra = lv('burstFire') >= 3 ? 2 : 1; // how many extra volleys a burst adds
   st.projSize = 1 + 0.15 * lv('projSize'); // player projectile size / speed (bullets.js playerBullet)
   st.projSpeed = 1 + 0.12 * lv('projSpeed');
