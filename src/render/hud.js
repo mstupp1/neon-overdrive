@@ -187,7 +187,7 @@ export function drawHud(ctx, alpha = 1) {
     const bw = W - 32;
     const fill = boss.state === 'enter' ? easeOutCubic(boss.barFill) : boss.hp / boss.maxHp;
     text(ctx, boss.name, 16, by - 8, 12, boss.color, 'left', 900);
-    const ph = boss.mini ? (boss.phase > 1 ? 'MINI BOSS · ENRAGED' : 'MINI BOSS') : boss.phase === 3 ? 'FINAL PHASE' : `PHASE ${boss.phase}`;
+    const ph = boss.kind === 'reactor' ? (boss.phase > 1 ? 'CORE · CRITICAL' : 'CORE EXPOSED') : boss.mini ? (boss.phase > 1 ? 'MINI BOSS · ENRAGED' : 'MINI BOSS') : boss.phase === 3 ? 'FINAL PHASE' : `PHASE ${boss.phase}`;
     text(ctx, ph, W - 16, by - 8, 10, 'rgba(255,255,255,0.8)', 'right', 700);
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
     ctx.fillRect(16, by, bw, 6);
@@ -199,6 +199,15 @@ export function drawHud(ctx, alpha = 1) {
       ctx.fillRect(16 + bw * 0.66, by, 2, 6);
       ctx.fillRect(16 + bw * 0.33, by, 2, 6);
     }
+  }
+
+  // Capital ship assault: the reactor's countdown under its bar (red and blinking in the last 10 s).
+  const core = d.core;
+  if (core && core.state === 'live' && boss && !boss.dead) {
+    const left = Math.max(0, core.t);
+    const hot = left < 10;
+    const on = !hot || Math.sin(G.realTime * 12) > -0.3;
+    text(ctx, `SEALS IN ${left.toFixed(1)}s`, W / 2, y0 + 64 + 20, hot ? 15 : 13, on ? (hot ? '#ff3b3b' : '#ffd24a') : 'rgba(255,59,59,0.35)', 'center', 900);
   }
 
   // Hunter (elite-node mini-boss): compact bar under the sector info

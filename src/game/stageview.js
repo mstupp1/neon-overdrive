@@ -15,7 +15,7 @@
 
 import { G, view } from './state.js';
 import { CHASE_TILT } from '../render/shipMounts.js';
-import { clamp, rand } from '../core/math.js';
+import { clamp, rand, TAU } from '../core/math.js';
 import { glow } from '../render/sprites.js';
 import { bg } from '../render/background.js';
 import { drawThemeSideHorizon, drawThemeSideDeck, drawThemeChaseHorizon, themeLayerImages, drawChaseDeckLayer } from '../render/backgroundLayers.js';
@@ -255,6 +255,8 @@ export const sv = {
   W: 450, // virtual playfield (valid for non-top views)
   H: 800,
   swapped: false,
+  trench: false, // capital ship assault (director.js): pursuit flies a walled trench, the side view runs along a hull
+  blast: -1, // assault escape: seconds since the reactor blew (a fireball swelling on the horizon), -1 = none
   t: 0,
   intro: 0, // seconds since the view came in (entry effect)
 
@@ -345,6 +347,8 @@ export const sv = {
     input.holdTarget();
   },
   reset() {
+    this.trench = false;
+    this.blast = -1;
     if (this.mode === 'top' && !this.swapped) return;
     this.pop();
     this.mode = 'top';
@@ -469,7 +473,7 @@ export const sv = {
         gateT -= et;
         if (gateT <= 0) {
           spawnGate();
-          gateT = rand(4.4, 5.8) * (CHASE_PACE / 1.4); // the same real-time spacing as at the old 1.4 pace
+          gateT = rand(4.4, 5.8) * (CHASE_PACE / 1.4) * (d.gateRate || 1); // the same real-time spacing as at the old 1.4 pace
         }
       }
       for (const g of gates) {
@@ -568,7 +572,8 @@ export const sv = {
       // Depth cues first: lane pylons standing up off the floor, then each ship's shadow and the light it casts on
       // the floor. The flight plane (shots, beams, telegraphs) is laid on the air plane, lifted above those shadows.
       ctx.setTransform(k, 0, 0, k, shakeX, shakeY);
-      drawPylons(ctx, r);
+      if (this.trench) drawTrench(ctx, r);
+      else drawPylons(ctx, r);
       drawShadows(ctx);
       drawChaseFloor(ctx, k, kk, r, shakeX, shakeY);
       // Shots are billboards, not decals on the air plane: each one keeps its round head at its own depth's scale
@@ -804,6 +809,7 @@ function drawSideBack(ctx, r) {
     ctx.fillRect((1 - s.y) * W, s.x * H, len, s.size);
   }
   const hor = H * 0.7;
+  if (sv.trench) drawHull(ctx, r, sc, h);
   const art = bg.theme && drawThemeSideHorizon(ctx, bg.theme, W, H, hor, sc, bg.t);
   if (!art) {
     // Far skyline (two procedural parallax ridges)
@@ -857,6 +863,91 @@ function drawSideBack(ctx, r) {
     ctx.fillRect(-20, -20, W + 40, H + 40);
     ctx.globalAlpha = 1;
   }
+}
+
+// Capital ship assault, side view: the ship's belly fills the sky overhead and slides past, a dark armoured mass with
+// plating seams, window strips, turret blisters and running lights, a little nearer than the far skyline.
+const HULL_SEG = 150; // plating panel length (screen units along the flight)
+function drawHull(ctx, r, sc, h) {
+  const W = r.W;
+  const H = r.H;
+  const run = sc * 0.55;
+  const ph = ((run % HULL_SEG) + HULL_SEG) % HULL_SEG;
+  const i0 = Math.floor(run / HULL_SEG);
+  const base = r.top + H * 0.2; // the hull's lowest line (its keel), varying per panel
+  const col = `hsl(${(h + 30) % 360},100%,62%)`;
+  const keel = (i) => base + (Math.sin(i * 1.7) * 0.5 + Math.sin(i * 0.53) * 0.5) * H * 0.05;
+  // Silhouette: one step per panel, with a bevel down to the next.
+  ctx.globalCompositeOperation = 'source-over';
+  const hull = ctx.createLinearGradient(0, -20, 0, base + H * 0.06);
+  hull.addColorStop(0, `hsl(${h},35%,4%)`);
+  hull.addColorStop(1, `hsl(${(h + 25) % 360},45%,11%)`);
+  ctx.fillStyle = hull;
+  ctx.globalAlpha = 0.96;
+  ctx.beginPath();
+  ctx.moveTo(-20, -20);
+  for (let k = -1; k <= Math.ceil(W / HULL_SEG) + 1; k++) {
+    const x0 = k * HULL_SEG - ph;
+    const y = keel(i0 + k);
+    ctx.lineTo(x0, y);
+    ctx.lineTo(x0 + HULL_SEG - 18, y);
+  }
+  ctx.lineTo(W + 20, -20);
+  ctx.closePath();
+  ctx.fill();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.strokeStyle = col;
+  // Keel rail and panel seams.
+  ctx.globalAlpha = 0.55 + beat.pulse * 0.15;
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  for (let k = -1; k <= Math.ceil(W / HULL_SEG) + 1; k++) {
+    const x0 = k * HULL_SEG - ph;
+    const y = keel(i0 + k);
+    const yn = keel(i0 + k + 1);
+    ctx.moveTo(x0, y);
+    ctx.lineTo(x0 + HULL_SEG - 18, y);
+    ctx.lineTo(x0 + HULL_SEG, yn);
+  }
+  ctx.stroke();
+  ctx.globalAlpha = 0.16;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let k = -1; k <= Math.ceil(W / HULL_SEG) + 1; k++) {
+    const x0 = k * HULL_SEG - ph;
+    const y = keel(i0 + k);
+    ctx.moveTo(x0, r.top);
+    ctx.lineTo(x0, y);
+    ctx.moveTo(x0, y - 22);
+    ctx.lineTo(x0 + HULL_SEG - 18, y - 22);
+  }
+  ctx.stroke();
+  // Window strips and turret blisters (every other panel), and a running light that blinks down the keel.
+  for (let k = -1; k <= Math.ceil(W / HULL_SEG) + 1; k++) {
+    const id = i0 + k;
+    const x0 = k * HULL_SEG - ph;
+    const y = keel(id);
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = `hsl(${(h + 50) % 360},100%,70%)`;
+    for (let w = 0; w < 7; w++) if ((id * 7 + w * 3) % 5) ctx.fillRect(x0 + 14 + w * 16, y - 38, 8, 3);
+    if (id % 2 === 0) {
+      ctx.globalAlpha = 0.7;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.arc(x0 + HULL_SEG * 0.55, y, 11, 0, Math.PI);
+      ctx.moveTo(x0 + HULL_SEG * 0.55, y + 10);
+      ctx.lineTo(x0 + HULL_SEG * 0.55 - 12, y + 20);
+      ctx.stroke();
+    }
+    const on = (G.time * 2 + id * 0.37) % 1 < 0.35;
+    if (on) {
+      const lg = glow('#ff4d6d', 32);
+      ctx.globalAlpha = 0.9;
+      ctx.drawImage(lg.img, x0 + 6 - 9, y - 9, 18, 18);
+    }
+  }
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
 }
 
 // Each ship's light thrown down onto the backdrop's floor grid below it: brighter and tighter the lower it flies,
@@ -941,6 +1032,7 @@ function drawChaseBack(ctx, r) {
   ctx.fillStyle = fl;
   ctx.fillRect(-20, hy, W + 40, H - hy + 20);
   const art = bg.theme && drawThemeChaseHorizon(ctx, bg.theme, W, hy, bg.t);
+  if (sv.blast >= 0) drawBlast(ctx, W, hy, h);
   const travel = floorRun();
   if (art) drawChaseDeckArt(ctx, bg.theme, W, H, Pp, travel);
   ctx.globalCompositeOperation = 'lighter';
@@ -1010,6 +1102,36 @@ function drawChaseBack(ctx, r) {
     ctx.fillRect(-20, -20, W + 40, H + 40);
     ctx.globalAlpha = 1;
   }
+}
+
+// Assault escape: the capital ship going up behind the trench's far end. A white-hot core swells on the vanishing point
+// into an orange fireball, with shock rings racing out, then it all fades as you clear the blast.
+function drawBlast(ctx, W, hy, h) {
+  const t = sv.blast;
+  const grow = clamp(t / 1.6, 0, 1);
+  const fade = 1 - clamp((t - 2.2) / 1.4, 0, 1);
+  if (fade <= 0) return;
+  ctx.globalCompositeOperation = 'lighter';
+  const big = glow('#ff8a2a', 128);
+  const hot = glow('#ffffff', 128);
+  const R = (60 + 360 * grow) * (1 + Math.sin(t * 20) * 0.03);
+  ctx.globalAlpha = 0.9 * fade;
+  ctx.drawImage(big.img, W / 2 - R, hy - R * 0.75, R * 2, R * 1.5);
+  ctx.globalAlpha = (1 - grow * 0.6) * fade;
+  const r2 = R * 0.45;
+  ctx.drawImage(hot.img, W / 2 - r2, hy - r2 * 0.75, r2 * 2, r2 * 1.5);
+  ctx.strokeStyle = '#ffd0a0';
+  for (let k = 0; k < 3; k++) {
+    const u = (t * 0.9 - k * 0.35) % 1.2;
+    if (u < 0) continue;
+    ctx.globalAlpha = (1 - u / 1.2) * 0.7 * fade;
+    ctx.lineWidth = 3 * (1 - u / 1.2) + 0.5;
+    ctx.beginPath();
+    ctx.ellipse(W / 2, hy, 40 + u * W, (40 + u * W) * 0.22, 0, 0, TAU);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
 }
 
 // The track: the lane you fly is a road on the floor. Off-lane floor is dimmed, the lane edges are glowing rails,
@@ -1268,6 +1390,99 @@ function drawGate(ctx, g) {
 // Neon pylons along both lane edges: vertical billboards scrolling with the floor grid, so there is something with
 // height in the scene to measure the ships' hover and speed against.
 const PYLON_GAP = 180;
+// Capital ship assault, pursuit: the lane runs down a trench cut into the hull. Two armoured walls (TRENCH_H high,
+// just outside the lane) replace the pylons, with ribs, window bands and light strips streaming past with the floor.
+const TRENCH_H = 380; // virtual units
+const TRENCH_X = 44; // the walls' feet, this far outside the lane edges
+const RIB_GAP = 140;
+function drawTrench(ctx, r) {
+  const h = Math.round(bg.hue);
+  const col = `hsl(${(h + 30) % 360},100%,62%)`;
+  const P0 = chaseProj();
+  const vFar = -2600;
+  const vNear = CH + 260;
+  const ph = FLOOR.run % RIB_GAP;
+  const span = Math.max(40, (r.H - P0.hy) * 0.22);
+  const fade = (y) => clamp((y - P0.hy) / span, 0, 1);
+  const a = {};
+  const b = {};
+  for (const vx of [-TRENCH_X, CW + TRENCH_X]) {
+    // Face: dark, lit a little from the floor.
+    deckPt(vx, vFar, a);
+    deckPt(vx, vNear, b);
+    const face = ctx.createLinearGradient(0, P0.hy - 40, 0, r.H);
+    face.addColorStop(0, `hsl(${h},40%,4%)`);
+    face.addColorStop(0.4, `hsl(${h},45%,7%)`);
+    face.addColorStop(1, `hsl(${(h + 25) % 360},50%,12%)`);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = face;
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.lineTo(b.x, b.y - TRENCH_H * b.s);
+    ctx.lineTo(a.x, a.y - TRENCH_H * a.s);
+    ctx.closePath();
+    ctx.fill();
+    // Ribs and window bands, far to near.
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.strokeStyle = col;
+    let prev = null;
+    for (let v = vFar - RIB_GAP; v < vNear; v += RIB_GAP) {
+      const y = v + ph;
+      if (P0.Yc - y < 40) continue;
+      deckPt(vx, y, a);
+      if (a.y > r.H + 60) break;
+      const al = fade(a.y) * clamp((y + 2600) / 1400, 0, 1);
+      if (al > 0.02) {
+        ctx.globalAlpha = al * 0.5;
+        ctx.lineWidth = Math.max(0.7, 3 * a.s);
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(a.x, a.y - TRENCH_H * a.s);
+        ctx.stroke();
+        if (prev) {
+          // A window strip between this rib and the last, two thirds of the way up.
+          ctx.globalAlpha = al * 0.4;
+          ctx.fillStyle = `hsl(${(h + 50) % 360},100%,70%)`;
+          const yA = prev.y - TRENCH_H * 0.66 * prev.s;
+          const yB = a.y - TRENCH_H * 0.66 * a.s;
+          ctx.beginPath();
+          ctx.moveTo(prev.x, yA);
+          ctx.lineTo(a.x, yB);
+          ctx.lineTo(a.x, yB + 7 * a.s);
+          ctx.lineTo(prev.x, yA + 7 * prev.s);
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
+      prev = prev || {};
+      prev.x = a.x;
+      prev.y = a.y;
+      prev.s = a.s;
+    }
+    // Rails along the foot, the lip and a light strip in between (screen-even segments, fading into the horizon).
+    for (const [hk, w, al] of [[0, 2.2, 0.8], [0.2, 0.8, 0.18], [0.35, 1.2, 0.35], [0.5, 0.8, 0.18], [0.85, 0.8, 0.18], [1, 2.4, 0.9]]) {
+      ctx.lineWidth = w;
+      const seg = 12;
+      for (let i = 0; i < seg; i++) {
+        const ya = P0.hy + 1 + ((r.H - P0.hy) * i) / seg;
+        const yb = P0.hy + 1 + ((r.H - P0.hy) * (i + 1)) / seg;
+        const va = P0.Yc - P0.A / (ya - P0.hy);
+        const vb = Math.min(vNear, P0.Yc - P0.A / (yb - P0.hy));
+        deckPt(vx, va, a);
+        deckPt(vx, vb, b);
+        ctx.globalAlpha = al * fade((ya + yb) / 2) * (0.8 + beat.pulse * 0.2);
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y - TRENCH_H * hk * a.s);
+        ctx.lineTo(b.x, b.y - TRENCH_H * hk * b.s);
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+}
 function drawPylons(ctx, r) {
   const h = Math.round(bg.hue);
   const col = `hsl(${(h + 30) % 360},100%,66%)`;
