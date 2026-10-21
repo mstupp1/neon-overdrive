@@ -3,7 +3,7 @@
 // pieces drawn per frame (engine flames, gun muzzles, legs, orbiting nodes, the CITADEL shield). Bodies face +y, at
 // the player. Coordinates are logical units around the centre and sit on the hitbox parts in minibosses.js.
 
-import { TAU } from '../core/math.js';
+import { TAU, clamp } from '../core/math.js';
 import { makeSprite, flame, glow } from './sprites.js';
 import { poly, mirror, flipX, regular, part, halo, seams, seamsM, vents, rivets, lit, nozzle, barrel, canopy, dashRing, glowStroke, shade, rgba } from './ink.js';
 import { G } from '../game/state.js';
@@ -469,6 +469,76 @@ function drawCitadel(ctx, e, hot) {
   ctx.globalCompositeOperation = 'source-over';
 }
 
+// --- REACTOR: a capital ship's core r30 in a heavy hex housing with six clamp arms; a plasma heart, two containment
+// rings turning on it and four shutter plates that close in as the countdown runs (drawn per frame). No generated art:
+// it always uses this ink body.
+
+function reactorBody(c) {
+  return bake('reactor' + c, 170, (g) => {
+    const hex = poly(regular(6, 36, 0));
+    halo(g, c, hex, 24, 0.2);
+    // clamp arms out to the trench walls' mounting points
+    for (let i = 0; i < 6; i++) {
+      const a = Math.PI / 6 + (i / 6) * TAU;
+      const arm = poly([[Math.cos(a - 0.2) * 30, Math.sin(a - 0.2) * 30], [Math.cos(a - 0.08) * 54, Math.sin(a - 0.08) * 54], [Math.cos(a + 0.08) * 54, Math.sin(a + 0.08) * 54], [Math.cos(a + 0.2) * 30, Math.sin(a + 0.2) * 30]]);
+      part(g, arm, c, { tint: 0.3, lw: 1.5, blur: 6, passes: 1, sheen: 0, y0: -54, y1: 54 });
+      lit(g, Math.cos(a) * 51, Math.sin(a) * 51, 1.4, '#ffffff', 6);
+    }
+    part(g, hex, c, { y0: -36, y1: 36, tint: 0.3, lw: 2.8, blur: 13, sx: -10, sy: -14, sr: 32 });
+    part(g, poly(regular(6, 26, 0)), c, { tint: 0.16, dark: 0.6, lw: 1.3, blur: 4, passes: 1, sheen: 0, y0: -26, y1: 26 });
+    seams(g, (k) => { for (let i = 0; i < 6; i++) { const a = (i / 6) * TAU; k.moveTo(Math.cos(a) * 26, Math.sin(a) * 26); k.lineTo(Math.cos(a) * 36, Math.sin(a) * 36); } }, c, 0.6, 0.9);
+    rivets(g, regular(6, 31, Math.PI / 6), c, 0.9);
+    // the heart's well
+    part(g, (k) => k.arc(0, 0, 17, 0, TAU), c, { tint: 0.1, dark: 0.95, lw: 1.8, blur: 7, passes: 1, sheen: 0, y0: -17, y1: 17 });
+    dashRing(g, 21, c, [4, 3], 0.7, 1.1);
+  });
+}
+
+function drawReactor(ctx, e, hot) {
+  const c = e.phase > 1 ? '#ff4d2e' : e.color;
+  blit(ctx, reactorBody(c), e.x, e.y, hot);
+  const t = G.time;
+  ctx.globalCompositeOperation = 'lighter';
+  // Plasma heart: a hot white centre in a throbbing colour glow (faster when enraged).
+  const beatK = 0.5 + 0.5 * Math.sin(t * (e.phase > 1 ? 11 : 7));
+  const outer = glow(c, 64);
+  ctx.globalAlpha = 0.55 + 0.3 * beatK;
+  const os = 44 + beatK * 10;
+  ctx.drawImage(outer.img, e.x - os / 2, e.y - os / 2, os, os);
+  const inner = glow('#ffffff', 64);
+  ctx.globalAlpha = 0.8;
+  ctx.drawImage(inner.img, e.x - 10, e.y - 10, 20, 20);
+  // Containment rings: two tilted ellipses turning on the core.
+  ctx.lineWidth = 1.6;
+  for (let i = 0; i < 2; i++) {
+    const a = e.anim * (i ? -1 : 1) + i * 1.1;
+    ctx.globalAlpha = 0.75;
+    ctx.strokeStyle = i ? '#ffffff' : c;
+    ctx.beginPath();
+    ctx.ellipse(e.x, e.y, 30, 11, a, 0, TAU);
+    ctx.stroke();
+  }
+  // Shutter plates closing in as the countdown runs out (e.seal: share of the director's core clock left).
+  const left = clamp(e.seal ?? 1, 0, 1);
+  const r = 20 + 22 * left;
+  ctx.globalCompositeOperation = 'source-over';
+  for (let i = 0; i < 4; i++) {
+    const a = (i / 4) * TAU + Math.PI / 4;
+    const px = e.x + Math.cos(a) * r;
+    const py = e.y + Math.sin(a) * r;
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.rotate(a);
+    ctx.fillStyle = 'rgba(12,6,10,0.9)';
+    ctx.fillRect(-4, -10, 8, 20);
+    ctx.strokeStyle = left < 0.25 && Math.sin(t * 16) > 0 ? '#ffffff' : c;
+    ctx.lineWidth = 1.4;
+    ctx.strokeRect(-4, -10, 8, 20);
+    ctx.restore();
+  }
+  ctx.globalAlpha = 1;
+}
+
 // --- shared ---------------------------------------------------------------------------------------------------------
 
 function blit(ctx, spr, x, y, hot, a = 0) {
@@ -500,7 +570,7 @@ function blitRotatingPart(ctx, spr, hot, angle) {
   blitAt(ctx, spr, hot);
 }
 
-const DRAW = { razorwing: drawRazor, mauler: drawMauler, broodmother: drawBrood, specter: drawSpecter, arclight: drawArc, citadel: drawCitadel };
+const DRAW = { razorwing: drawRazor, mauler: drawMauler, broodmother: drawBrood, specter: drawSpecter, arclight: drawArc, citadel: drawCitadel, reactor: drawReactor };
 export function drawMini(ctx, e, hot) {
   (DRAW[e.kind] || drawRazor)(ctx, e, hot);
 }
@@ -513,5 +583,6 @@ export function prewarmMiniArt() {
   specterBody('#9b7bff'); specterBody('#c23bff'); scythe('#9b7bff'); scythe('#c23bff');
   arcCore('#4fd6ff'); arcCore('#9ffcff'); arcNode('#4fd6ff'); arcNode('#9ffcff');
   citadelBody('#ffe14d'); citadelBody('#ff9e3d');
+  reactorBody('#ff8a2a'); reactorBody('#ff4d2e');
   prewarmMiniImages();
 }

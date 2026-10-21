@@ -7,7 +7,7 @@ import { rand, chance, weightedPick, randInt } from '../core/math.js';
 import { spawnEnemy, spawnWeavers, blinkSpot, killEnemy, withdrawEnemy } from './enemies.js';
 import { spawnBoss, bossVariant, bossIndex, BOSS_IDS } from './bosses.js';
 import { miniById } from './minibosses.js';
-import { banner, floatText, flash, addShake } from './fx.js';
+import { banner, floatText, flash, addShake, explosion, ring } from './fx.js';
 import { vacuumAll } from './pickups.js';
 import { sectorPayout } from './economy.js';
 import { onSectorClear as onPilotSectorClear } from './pilot.js';
@@ -244,8 +244,16 @@ const ZONES = {
   void: ['EVENT HORIZON', 'NULL DRIFT', 'SHATTERED ORBIT', 'DARK TIDE', 'THE ABYSS'],
 };
 const HUE_SHIFT = [0, 16, -14];
+// Capital ship assault (campaign.js nodeSpec): fixed zones, then the reactor arena. CORE_TIME = seconds to crack the
+// core once it opens fire; ASSAULT_GATES = how much sooner the trench's laser gates come than a normal pursuit zone's.
+const ASSAULT_ZONES = ['HULL RUN', 'THE TRENCH'];
+const ASSAULT_ARENA = 'REACTOR CORE';
+const ASSAULT_FOCUS = [['snipers', 'spinner', 'tank', 'carrier'], ['dartDive', 'swarmRain', 'dashers', 'mines']];
+export const CORE_TIME = 45;
+const ASSAULT_GATES = 0.6;
 
 export function zoneCount(spec) {
+  if (spec.assault) return spec.zones || ASSAULT_ZONES.length;
   if (!(G.mode === 'run' && G.run && G.run.mode === 'campaign' && spec.row != null) || spec.boss || spec.mini) return 1;
   if (spec.zones) return spec.zones; // a node type may set its own count
   return spec.elite || spec.row >= 2 ? 3 : 2;
@@ -256,13 +264,21 @@ function setZone(d, i) {
   const names = ZONES[G.run && G.run.system && G.run.system.id] || ZONES.genesis;
   const pool = PATTERNS.filter((p) => p.min <= spec.level + spec.loop * 9).map((p) => p.id);
   const focus = [];
+  // An assault's zones favour its own threats: hull turrets and gunships along the hull, divers and mines in the trench.
+  if (spec.assault) for (const id of ASSAULT_FOCUS[i % ASSAULT_FOCUS.length]) if (focus.length < 2 && pool.includes(id)) focus.push(id);
   while (focus.length < 2 && pool.length) focus.push(pool.splice(randInt(0, pool.length - 1), 1)[0]);
   // The last name of each list is the boss arena; ordinary zones draw from the rest.
-  d.zone = { i, name: names[(d.zoneBase + i) % (names.length - 1)], focus, hue: spec.hue + HUE_SHIFT[i % HUE_SHIFT.length] };
+  d.zone = { i, name: zoneName(d, i), focus, hue: spec.hue + HUE_SHIFT[i % HUE_SHIFT.length] };
   d.obst = d.fields[i] || null;
   d.obstT = 2.5;
   bg.setZone(d.zone.name);
   bg.setHue(d.zone.hue);
+}
+
+function zoneName(d, i) {
+  if (d.spec.assault) return ASSAULT_ZONES[i % ASSAULT_ZONES.length];
+  const names = ZONES[G.run && G.run.system && G.run.system.id] || ZONES.genesis;
+  return names[(d.zoneBase + i) % (names.length - 1)];
 }
 
 // Obstacle fields (obstacles.js), rolled per zone up front so the cards can name them. Top-down zones only.
@@ -312,8 +328,14 @@ export function startSector(spec) {
   // spec.view = the whole sector in one view (debug). Every node opens top-down unless told otherwise.
   d.views = spec.views || null;
   d.swapTo = null;
+  d.core = null; // assault: { t: seconds left, state: 'live' | 'down' | 'sealed' }
+  d.escaped = false;
+  d.gateRate = spec.assault ? ASSAULT_GATES : 1;
   sv.reset();
-  if (spec.view && spec.view !== 'top') sv.enter(spec.view);
+  sv.trench = !!spec.assault;
+  // Assaults open on the hull, side-on; every other node opens top-down.
+  const v0 = spec.view || (d.views && d.views[0]);
+  if (v0 && v0 !== 'top') sv.enter(v0);
   bg.setHue(spec.hue);
   bg.setTheme(G.run && G.run.mode === 'campaign' ? G.run.system.id : null);
   clearObstacles();
@@ -327,12 +349,12 @@ export function startSector(spec) {
     if (camp) {
       // Node opening: the camera settles in, and the card names the node (route row), its type and its modifiers.
       const rows = G.run.route ? G.run.route.rows.length : 0;
-      const type = spec.boss ? 'BOSS NODE' : spec.mini ? 'GUARDED VAULT' : spec.elite ? 'ELITE NODE' : 'COMBAT';
+      const type = spec.boss ? 'BOSS NODE' : spec.assault ? 'CAPITAL SHIP ASSAULT' : spec.mini ? 'GUARDED VAULT' : spec.elite ? 'ELITE NODE' : 'COMBAT';
       const mods = spec.modifiers.map((id) => MODIFIERS[id] && MODIFIERS[id].name).filter(Boolean).join('  ·  ');
-      const col = spec.boss ? '#ff2e55' : spec.mini ? '#ffb300' : spec.elite ? '#ff3df2' : `hsl(${spec.hue},100%,70%)`;
-      const where = d.zone ? `ZONE 1 / ${d.zones}  ·  ${d.zone.name}` : '';
+      const col = spec.boss ? '#ff2e55' : spec.assault ? '#ff8a2a' : spec.mini ? '#ffb300' : spec.elite ? '#ff3df2' : `hsl(${spec.hue},100%,70%)`;
+      const where = d.zone ? `ZONE 1 / ${d.zones}  ·  ${d.zone.name}` + (sv.active ? `  ·  ${viewName(sv.mode)}` : '') : '';
       const debris = d.obst ? FIELD_NAME : '';
-      const guard = spec.mini ? `GUARDED BY ${miniById(spec.mini).name}` : '';
+      const guard = spec.assault ? 'CRACK ITS REACTOR CORE' : spec.mini ? `GUARDED BY ${miniById(spec.mini).name}` : '';
       const heavy = d.diff.hit > 1 ? `HITS COST ${d.diff.hit} HULL` : '';
       banner(`NODE ${spec.row + 1}${rows ? ' / ' + rows : ''}`, [heavy, guard, where, debris, mods].filter(Boolean).join('  ·  ') || 'HOSTILES INBOUND', col, 2.4, 'start', `${G.run.system.short}  ·  ${type}`);
       cine.nodeStart();
@@ -474,8 +496,7 @@ export function updateDirector(dt) {
         G.vacuum = true;
         vacuumAll();
         const next = d.zone.i + 1;
-        const names = ZONES[G.run.system.id] || ZONES.genesis;
-        const nextName = names[(d.zoneBase + next) % (names.length - 1)];
+        const nextName = zoneName(d, next);
         const nv = (d.views && d.views[next]) || 'top';
         const swap = nv !== sv.mode ? nv : null;
         const kicker = `ZONE ${next + 1} / ${d.zones}` + (swap && nv !== 'top' ? `  ·  ${viewName(nv)}` : '') + (d.fields[next] ? `  ·  ${FIELD_NAME}` : '');
@@ -500,8 +521,8 @@ export function updateDirector(dt) {
       // The Hunter never times out: the sector only clears once it is dead.
       if (mopUp(d, realDt, spec.mini ? MOPUP.mini : MOPUP.clearing)) {
         if (lateFinisher()) break;
-        // Boss node (campaign): fly into the arena first.
-        if (spec.boss && !d.arena && G.mode === 'run' && G.run && G.run.mode === 'campaign') {
+        // Boss node (campaign): fly into the arena first. An assault flies on down the trench to its reactor.
+        if ((spec.boss || spec.assault) && !d.arena && G.mode === 'run' && G.run && G.run.mode === 'campaign') {
           d.arena = true;
           const names = ZONES[G.run.system.id] || ZONES.genesis;
           G.vacuum = true;
@@ -509,7 +530,9 @@ export function updateDirector(dt) {
           clearObstacles(true);
           const av = spec.arenaView || 'top';
           const swap = av !== sv.mode ? av : null;
-          if (cine.transit('BOSS ARENA' + (swap && av !== 'top' ? `  ·  ${viewName(av)}` : ''), names[names.length - 1], true, !!swap)) {
+          const kicker = (spec.assault ? 'CORE APPROACH' : 'BOSS ARENA') + (swap && av !== 'top' ? `  ·  ${viewName(av)}` : '');
+          if (spec.assault) for (const e of G.enemies) if (!e.dead && !e.boss) killEnemy(e, true);
+          if (cine.transit(kicker, spec.assault ? ASSAULT_ARENA : names[names.length - 1], true, !!swap)) {
             d.swapTo = swap;
             break;
           }
@@ -536,7 +559,8 @@ export function updateDirector(dt) {
           vacuumAll();
           if (G.mode === 'run') {
             const m = miniById(spec.mini);
-            banner('WARNING', `MINI BOSS  ·  ${m.name}`, m.color, 2.4);
+            if (spec.assault) banner('REACTOR CORE', `DESTROY IT IN ${CORE_TIME}s BEFORE IT SEALS`, m.color, 2.4, 'start', 'CAPITAL SHIP  ·  CORE EXPOSED');
+            else banner('WARNING', `MINI BOSS  ·  ${m.name}`, m.color, 2.4);
             if (d.onWarn) d.onWarn(m, spec);
             sfx.warn();
           }
@@ -550,12 +574,20 @@ export function updateDirector(dt) {
         G.vacuum = false;
         if (spec.mini) spawnBoss(spec.mini, spec.level, spec.loop, spec.miniHp || 1);
         else spawnBoss(spec.boss, spec.level, spec.loop, spec.bossHp || 1);
+        if (spec.assault) d.core = { t: CORE_TIME, state: 'live' };
         d.state = 'boss';
         d.t = 0;
       }
       break;
     case 'boss':
+      // Assault: the countdown runs while the core fights back; at zero its shutters seal it and the bonus is gone.
+      if (d.core && d.core.state === 'live' && G.boss && G.boss.state === 'fight') {
+        d.core.t -= dt;
+        G.boss.seal = d.core.t / CORE_TIME; // miniArt.js closes the shutter plates with it
+        if (d.core.t <= 0) sealCore(d);
+      }
       if (!G.boss) {
+        if (d.core && d.core.state === 'live') d.core.state = 'down';
         d.state = 'bossDown';
         d.t = 0;
       }
@@ -563,8 +595,20 @@ export function updateDirector(dt) {
     case 'bossDown':
       if (d.t > 1.4 && !cine.busy) {
         if (G.mode === 'run' && spec.boss) music.setSet(local >= 6 ? 'late' : 'normal');
+        if (spec.assault && !d.escaped && escape(d)) break;
         sectorClear();
       }
+      break;
+    case 'escape':
+      if (sv.blast >= 0) sv.blast += realDt;
+      // The ship blows behind you while you fly out (the fly-through); the clear comes once you're out.
+      if (d.core && d.core.state === 'down' && d.t < 2.4 && Math.random() < dt * 14) {
+        const x = rand(0, W());
+        const y = rand(0, H() * 0.7);
+        explosion(x, y, chance(0.5) ? '#ff8a2a' : '#ffffff', rand(1, 2.4));
+        addShake(0.15);
+      }
+      if (!cine.busy) sectorClear();
       break;
     case 'clear':
       if (d.t > 2.4) {
@@ -575,6 +619,42 @@ export function updateDirector(dt) {
     default:
       break;
   }
+}
+
+// Assault: the countdown ran out. The core drops behind its shutters (no kill, no bonus) and the run pulls out.
+function sealCore(d) {
+  const e = G.boss;
+  d.core.state = 'sealed';
+  d.core.t = 0;
+  if (!e) return;
+  e.dead = true;
+  G.boss = null;
+  for (const b of G.beams) if (b.owner === 'enemy') b.dead = true;
+  G.eBullets.length = 0;
+  ring(e.x, e.y, 120, '#ff8a2a', 0.5);
+  flash('255,138,42', 0.5);
+  addShake(0.5);
+  sfx.warn();
+  if (G.mode === 'run') banner('CORE SEALED', 'BONUS LOST  ·  PULL OUT', '#ff8a2a', 2);
+}
+
+// Assault: fly out of the capital ship. A destroyed core blows it up behind you. Returns false if no fly-through runs.
+function escape(d) {
+  d.escaped = true;
+  const down = d.core && d.core.state === 'down';
+  for (const e of G.enemies) if (!e.dead && !e.boss) killEnemy(e, true);
+  G.vacuum = true;
+  vacuumAll();
+  if (!cine.transit(down ? 'CORE BREACH  ·  GET OUT' : 'SHUTTERS DOWN', down ? 'ESCAPE' : 'PULL OUT', true, false)) return false;
+  if (down) {
+    flash('255,180,90', 0.9);
+    addShake(1);
+    sfx.explode(3);
+    sv.blast = 0;
+  }
+  d.state = 'escape';
+  d.t = 0;
+  return true;
 }
 
 // Switch the camera to d.swapTo (stageview.js): the jet is moved to the new view's home spot and the fly-through
@@ -614,6 +694,9 @@ function sectorClear() {
       // System boss down: the end of the whole sector gets its own, bigger beat.
       const i = run.system.act;
       banner('SECTOR SECURED', sub, `hsl(${d.spec.hue},100%,72%)`, 2.4, 'secured', `SECTOR ${String(i).padStart(2, '0')}  ·  ${run.system.name}`);
+    } else if (run && d.spec.assault) {
+      const down = d.core && d.core.state === 'down';
+      banner(down ? 'CAPITAL SHIP DOWN' : 'ASSAULT OVER', sub, down ? '#ff8a2a' : '#9fb8ff', 2.4, 'clear', `${run.system.short}  ·  NODE ${(d.spec.row ?? 0) + 1}`);
     } else if (run && d.spec.mini) banner('VAULT UNLOCKED', sub, '#ffb300', 2.2, 'clear', `${run.system.short}  ·  NODE ${(d.spec.row ?? 0) + 1}`);
     else if (run) banner('NODE CLEAR', sub, '#7dff6b', 2.2, 'clear', `${run.system.short}  ·  NODE ${(d.spec.row ?? 0) + 1}`);
     else banner('SECTOR CLEAR', sub, '#7dff6b', 2.2);

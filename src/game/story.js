@@ -146,6 +146,11 @@ export const STORY = {
     market: [L('MAG', 'Black Market. Spend here: a dead pilot only banks half their credits, a finished run banks it all.')],
     dock: [L('MAG', 'Rest Station. Patch the hull, plate on more, or overclock something you already run. One per stop.')],
     vault: [L('MAG', 'A Treasure Vault. Whatever you take from this one installs two levels at once.')],
+    assault: [
+      L('MAG', 'Capital ship, ECHO. Run its hull, drop into the trench, and crack the reactor at the end before its shutters seal.'),
+      L('ECHO', 'And then?'),
+      L('MAG', 'Then you fly very fast. Crack it in time for a jackpot and two drafts.'),
+    ],
     mini: [L('MAG', 'Halfway Vault, and something is guarding it. Drop the MINI BOSS: your main cannon gets an upgrade, then the Vault opens.')],
     anomaly: [L('MAG', 'Anomaly. Could be salvage, could be bait. RISKY choices pay more and bite back.')],
     rift: [

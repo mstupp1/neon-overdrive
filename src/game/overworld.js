@@ -19,11 +19,11 @@ import { sfx } from '../core/audio.js';
 import { beat } from '../core/beat.js';
 import { S, glow } from '../render/sprites.js';
 import { TAU, clamp, lerp, damp, dist2, turnToward, mulberry32, easeOutCubic, rand } from '../core/math.js';
-import { NODE_TYPES, REWARDS, reachableNodes, nodeLevel } from './campaign.js';
+import { NODE_TYPES, REWARDS, reachableNodes, nodeLevel, ASSAULT_VIEWS } from './campaign.js';
 import { miniById } from './minibosses.js';
 import { MODIFIERS } from './modifiers.js';
 import { applyHeat } from './core.js';
-import { foesAt, zoneCount } from './director.js';
+import { foesAt, zoneCount, CORE_TIME } from './director.js';
 import { viewName } from './stageview.js';
 import { bossById } from './bosses.js';
 import { step, renderWorld } from './world.js';
@@ -1513,7 +1513,7 @@ function drawHud(ctx, live) {
 function threat(n) {
   if (n.type === 'boss') return 5;
   const sys = G.run.system;
-  const t = (n.row / Math.max(1, sys.rows - 1)) * 3 + 1 + (n.type === 'elite' || n.mini ? 1 : 0);
+  const t = (n.row / Math.max(1, sys.rows - 1)) * 3 + 1 + (n.type === 'elite' || n.type === 'assault' || n.mini ? 1 : 0);
   return clamp(Math.round(t), 1, 5);
 }
 
@@ -1567,7 +1567,7 @@ function drawCard(ctx, live) {
   // Threat pips (square)
   const pips = threat(n);
   text(ctx, 'THREAT', bx + bw - 12 - 5 * 11 - 6, by + 16, 11, 'rgba(255,255,255,0.6)', 'right', 700, FONT2);
-  const hit = n.type === 'combat' || n.type === 'elite' || boss || n.mini ? enemyHit(nodeLevel(G.run.system, n.row), 0, (G.run.tier || 0) + (G.run.deep || 0)) : 1;
+  const hit = n.type === 'combat' || n.type === 'elite' || n.type === 'assault' || boss || n.mini ? enemyHit(nodeLevel(G.run.system, n.row), 0, (G.run.tier || 0) + (G.run.deep || 0)) : 1;
   if (hit > 1) {
     // Heavy hits: hull per hit, left of the threat label
     ctx.font = `700 11px ${FONT2}`;
@@ -1585,7 +1585,11 @@ function drawCard(ctx, live) {
   }
   const fight = n.type === 'combat' || n.type === 'elite' || boss;
   const lines = [];
-  if (n.mini) {
+  if (n.type === 'assault') {
+    lines.push(['REWARD', `Crack the reactor in ${CORE_TIME}s: credit jackpot + 2 drafts`, '#ffd24a']);
+    lines.push(['HAZARD', 'Hull walls, trench laser gates, a countdown', '#ff8a2a']);
+    lines.push(['HOSTILES', `${viewName(ASSAULT_VIEWS[0])} HULL RUN · ${viewName(ASSAULT_VIEWS[1])} TRENCH · REACTOR CORE`, '#ff8aa0']);
+  } else if (n.mini) {
     const m = miniById(n.mini);
     lines.push(['REWARD', 'MAIN CANNON +1, then a Vault draft: 2 levels a pick', '#3ff6ff']);
     lines.push(['HAZARD', 'None', 'rgba(255,255,255,0.6)']);

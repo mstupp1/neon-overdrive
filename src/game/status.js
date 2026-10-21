@@ -123,9 +123,9 @@ export function onPlayerHit(e, dmg, x, y, damage) {
   e.procT = G.time + PROC_GAP;
   if (st.pctHp) damage(e, e.maxHp * st.pctHp * (e.boss ? 0.15 : 1), x, y, false, 'pct');
   if (st.detHits && !e.dead) {
-    e.marks = (e.marks || 0) + 1;
-    if (e.marks > st.detHits) {
-      e.marks = 0;
+    e.detMarks = (e.detMarks || 0) + 1; // not e.marks: that is the WARDEN's artillery list (bosses.js)
+    if (e.detMarks > st.detHits) {
+      e.detMarks = 0;
       detonate(e, dmg * st.detMul, st.detR, damage);
     }
   }

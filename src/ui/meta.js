@@ -30,6 +30,7 @@ export const NODE_ICONS = {
   vault: svg('<rect x="3" y="6" width="18" height="14" rx="1"/><path d="M3 11h18M10 11v3h4v-3"/>'),
   rift: svg('<path d="M12 2l-3 7 4 2-5 11"/><path d="M15 4l-2 5M7 15l-3 4"/>'),
   boss: svg('<path d="M12 3l9 5-2 12H5L3 8z"/><path d="M9 11v2M15 11v2M10 17h4"/>'),
+  assault: svg('<path d="M2 9h20M2 15h20"/><path d="M5 9v6M19 9v6"/><circle cx="12" cy="12" r="2.5"/>'),
   lock: svg('<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>'),
   check: svg('<path d="M5 12.5l4.5 4.5L19 7"/>'),
 };

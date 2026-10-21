@@ -2,6 +2,8 @@
 // is how the run earns that system's Main Cannon +1 (main.js), then the Vault opens. They run on the boss framework in
 // bosses.js (spawnBoss / updateBoss / parts / phase shift / death) with `e.mini = true`: two phases (ENRAGED below
 // half HP), a compact attack rotation each, and a body drawn by render/miniArt.js.
+// REACTOR is not a vault guard: it is the core at the end of a capital ship assault (campaign.js / director.js), fought
+// on a countdown in the pursuit view.
 
 import { G, view } from './state.js';
 import { TAU, damp, rand, clamp } from '../core/math.js';
@@ -9,6 +11,7 @@ import { shoot, ring, fan, aimAt } from './bullets.js';
 import { sparks, explosion, addShake } from './fx.js';
 import { spawnEnemy } from './enemies.js';
 import { sfx } from '../core/audio.js';
+import { sv } from './stageview.js';
 
 // hp is the base at Genesis (x SYSTEMS[].miniHp per system, x heat).
 export const MINIS = [
@@ -18,6 +21,7 @@ export const MINIS = [
   { id: 'specter', name: 'SPECTER', title: 'Phase Stalker', hp: 750, r: 22, color: '#9b7bff', homeY: 170 },
   { id: 'arclight', name: 'ARCLIGHT', title: 'Tesla Pylon', hp: 1250, r: 24, color: '#4fd6ff', homeY: 165 },
   { id: 'citadel', name: 'CITADEL', title: 'Bastion Turret', hp: 1100, r: 30, color: '#ffe14d', homeY: 150 },
+  { id: 'reactor', name: 'REACTOR CORE', title: 'Capital Ship Heart', hp: 1000, r: 30, color: '#ff8a2a', homeY: 420 },
 ];
 export const MINI_IDS = MINIS.map((m) => m.id);
 export const miniById = (id) => MINIS.find((m) => m.id === id) || null;
@@ -356,6 +360,68 @@ export const MINI_ATTACKS = {
       for (const nd of nodes(e, true)) out.push([nd.x, nd.y, 12]);
       return out;
     },
+  },
+
+  // --- REACTOR: a capital ship's core at the end of the trench. Rotating plasma spokes, blast shutters slammed across
+  // the trench (laser gates in the pursuit view, walls of shells elsewhere), aimed vent bursts and repair drones.
+  reactor: {
+    cycles: [['spokes', 'shutters', 'vent', 'drones'], ['shutters', 'spokes', 'vent', 'shutters', 'drones', 'spokes']],
+    spokes(e, a, dt, sp) {
+      a.t2 = (a.t2 || 0) + dt;
+      if (!a.dir) a.dir = Math.random() < 0.5 ? -1 : 1;
+      const arms = e.phase > 1 ? 5 : 4;
+      every(a, dt, 0.13 / sp, () => {
+        for (let k = 0; k < arms; k++) shoot(e.x, e.y, a.dir * a.t2 * 0.9 + (k / arms) * TAU, 125, 'orb');
+      });
+      return a.t2 > 3;
+    },
+    shutters(e, a, dt, sp) {
+      a.t2 = (a.t2 || 0) + dt;
+      if (!a.st) {
+        a.st = 1;
+        a.side = Math.random() < 0.5 ? -1 : 1;
+        sfx.warn();
+      }
+      const n = e.phase > 1 ? 4 : 3;
+      every(a, dt, 0.85 / sp, (i) => {
+        if (i >= n) return;
+        // Gaps swing from one side of the trench to the other, so every shutter is a dodge.
+        const gx = view.W / 2 + a.side * (i % 2 ? -1 : 1) * view.W * 0.27;
+        if (sv.mode === 'chase') sv.gate(gx, 140 - e.phase * 10, 330);
+        else {
+          for (let x = 18; x < view.W; x += 26) if (Math.abs(x - gx) > 65) shoot(x, e.y + 40, Math.PI / 2, 150, 'small');
+        }
+      });
+      if (a.t2 > 1) every(sub(a, 'r'), dt, 0.9 / sp, (k) => ring(e.x, e.y, 10, 100, 'small', k * 0.4));
+      return a.n >= n && a.t2 > n * 0.85 / sp + 0.6;
+    },
+    vent(e, a, dt, sp) {
+      every(a, dt, 0.42 / sp, (n) => {
+        const ang = aimAt(e.x, e.y);
+        fan(e.x, e.y, ang, e.phase > 1 ? 7 : 5, 0.7, 165, 'big');
+        if (n % 2) ring(e.x, e.y, 12, 90, 'small', n * 0.25);
+      });
+      return a.n >= (e.phase > 1 ? 6 : 5);
+    },
+    drones(e, a, dt) {
+      if (!a.done) {
+        a.done = true;
+        const n = e.phase > 1 ? 4 : 3;
+        for (let i = 0; i < n; i++) {
+          const x = view.W * ((i + 1) / (n + 1));
+          spawnEnemy('dart', x, e.y, { mv: 'dive', tx: x, ty: e.y + 260 + rand(0, 140), shots: 1 }).entered = true;
+        }
+        sparks(e.x, e.y, e.color, 12, 220);
+      }
+      a.t2 = (a.t2 || 0) + dt;
+      return a.t2 > 1.2;
+    },
+    move(e, dt) {
+      e.anim += dt * (e.phase > 1 ? 2.4 : 1.4);
+      e.x = damp(e.x, view.W / 2 + Math.sin(e.t * 0.5) * view.W * 0.16, 2, dt);
+      e.y = damp(e.y, e.homeY + top() + Math.sin(e.t * 1.1) * 12, 2, dt);
+    },
+    parts: () => [[0, 0, 30]],
   },
 
   // --- CITADEL: a bastion turret behind a turning shield arc that eats your shots: hit it through the open side.

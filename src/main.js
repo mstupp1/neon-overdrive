@@ -19,7 +19,7 @@ import { drawHud, updateBanner, buttonSide, gaugeSpots } from './render/hud.js';
 import { SHIPS, shipById, ownsShip, isUnlocked } from './game/ships.js';
 import { createPlayer } from './game/player.js';
 import { drawBoostFx } from './game/boost.js';
-import { createDirector, startSector, nextSector, endlessSpec } from './game/director.js';
+import { createDirector, startSector, nextSector, endlessSpec, CORE_TIME } from './game/director.js';
 import { rollDraft, applyUpgrade, UPGRADES, discover, rollCard, applyCard, rollTune, isTune, pathRoom } from './game/upgrades.js';
 import { runLuck, runItemLevel, rankUpFinds, dropGear, dropAbility, addGear } from './game/loot.js';
 import { makeItem } from './game/parts.js';
@@ -363,7 +363,9 @@ function markCleared(sys) {
 function startSupply(n) {
   G.supplyLeft = n;
   rewardTier = 'node';
-  afterDraft = 'route';
+  // With no supply drop the run opens straight into its first fight, so nothing is owed a trip to the route: a stale
+  // 'route' here sent the first level-up draft of that fight out to the overworld mid-fight.
+  afterDraft = n > 0 ? 'route' : null;
   if (n > 0) openDraft('supply');
   else showRoute();
 }
@@ -416,7 +418,7 @@ function onBossWarn(boss, spec) {
   const r = G.run;
   const camp = r && r.mode === 'campaign';
   const mini = !!(spec && spec.mini);
-  const kick = mini ? `MINI BOSS · VAULT GUARD` : camp ? `ACT ${r.system.act} · ${r.system.name}` : `ENDLESS GRID · SECTOR ${G.sector}`;
+  const kick = spec && spec.assault ? `CAPITAL SHIP · ${CORE_TIME}s TO BREACH` : mini ? `MINI BOSS · VAULT GUARD` : camp ? `ACT ${r.system.act} · ${r.system.name}` : `ENDLESS GRID · SECTOR ${G.sector}`;
   bossCard.style.setProperty('--c', boss.color);
   bossCard.innerHTML = `<div class="bc-kicker">${kick}</div><div class="bc-name" data-text="${boss.name}">${boss.name}</div><div class="bc-title">${boss.title}</div>`;
   bossCard.classList.remove('show');
@@ -534,7 +536,8 @@ function pickRouteNode(node) {
     r.sectors++;
     enterPlay();
     if (G.director.diff.hit > 1) tip('heavy', true); // first node where hits cost more than 1 hull (the others wait)
-    if (spec.mini) tip('mini', true);
+    if (spec.assault) tip('assault', true);
+    else if (spec.mini) tip('mini', true);
     else if (spec.elite) tip('elite', true);
     else if (spec.modifiers.length) tip('hazard', true);
     else tip('boost', true);
@@ -918,6 +921,20 @@ function onSectorClear() {
   }
   if (G.player.dead) return;
   if (G.screen !== 'play') return;
+  if (G.director.spec.assault && G.run.mode === 'campaign') {
+    // Capital ship assault: a destroyed reactor pays a credit jackpot and two drafts at elite rarity; a sealed one
+    // only the sector draft.
+    const down = G.director.core && G.director.core.state === 'down';
+    draftOnly = null;
+    extraDrafts = down ? 1 : 0;
+    rewardTier = down ? 'elite' : 'node';
+    if (down) {
+      const cr = cachePayout() + cachePayout();
+      draftNote = `Reactor destroyed: ${cr ? `+${cr} credit jackpot · ` : ''}2 drafts`;
+    } else draftNote = 'Reactor sealed: no bonus';
+    openDraft('sector');
+    return;
+  }
   if (G.director.spec.mini && G.run.mode === 'campaign') {
     // Guarded Vault: the mini boss is down. The Main Cannon steps up, then the Vault opens.
     const r = G.run;
@@ -1686,6 +1703,16 @@ window.NEON = {
   gameOver: () => gameOver(),
   extract, // debug: end the campaign run now (post-boss dialogue → extraction screen)
   showBossCard: onBossWarn,
+  // Debug / screenshots: fight the first route node of a type now (e.g. 'assault'), reachable or not.
+  fightNode(type = 'assault') {
+    if (!G.run || G.run.mode !== 'campaign') return false;
+    const node = G.run.route.nodes.find((n) => n.type === type);
+    if (!node || !isFight(node)) return false;
+    overworld.leave();
+    ui.hide();
+    pickRouteNode(node);
+    return node.id;
+  },
   // Pick the i-th currently reachable route node.
   pickNode(i = 0) {
     if (G.screen !== 'route' && G.screen !== 'overworld') return false;
@@ -1741,7 +1768,7 @@ window.NEON = {
   simulate(seconds, pickFn = (choices) => pick(choices), opts = {}) {
     const dt = 1 / 60;
     const nodePick = opts.nodePick || ((nodes) => {
-      const fights = nodes.map((n, i) => i).filter((i) => ['combat', 'elite', 'boss'].includes(nodes[i].type));
+      const fights = nodes.map((n, i) => i).filter((i) => ['combat', 'elite', 'assault', 'boss'].includes(nodes[i].type));
       return pick(fights.length ? fights : nodes.map((n, i) => i));
     });
     for (let t = 0; t < seconds; t += dt) {

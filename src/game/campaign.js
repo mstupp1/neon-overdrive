@@ -10,28 +10,29 @@ import { heatScale } from './core.js';
 // first draft is the first level-up; Deep Grid cycles skip it anyway);
 // warm = level eased off per row short of row 2 (default WARM).
 // minis = the mini bosses that may guard the halfway Vault (one per route, seeded); miniHp multiplies their base HP.
+// coreHp = the capital ship assault's reactor HP on top of miniHp (it fights on a countdown, so it is kept lighter).
 // One run flies all four systems with one build, so levels form one continuous climb: Genesis opens like the old endless
 // sector 1 and each system starts where the previous boss row left off. Boss
 // and mini boss HP are tuned for the build a run has by then (late bosses used to melt in seconds).
 export const SYSTEMS = [
   {
     id: 'genesis', name: 'NEON GENESIS', short: 'GENESIS', act: 1, hue: 215, level: 1, step: 0.56, warm: 0, rows: 8, dur: 42, bossHp: 1.3, supply: 0, pay: 0.8, boss: 'warden',
-    minis: ['razorwing', 'mauler'], miniHp: 0.55,
+    minis: ['razorwing', 'mauler'], miniHp: 0.55, coreHp: 0.7,
     blurb: 'The Grid\'s outer lattice. A siege mech guards the gate.',
   },
   {
     id: 'crimson', name: 'CRIMSON TIDE', short: 'CRIMSON', act: 2, hue: 345, level: 5.8, step: 0.375, warm: 0, rows: 8, dur: 42, bossHp: 0.8, supply: 0, pay: 0.64, boss: 'hydra',
-    minis: ['broodmother', 'specter'], miniHp: 1.8,
+    minis: ['broodmother', 'specter'], miniHp: 1.8, coreHp: 0.5,
     blurb: 'Bio-corrupted sectors. Something huge is breeding in the dark.',
   },
   {
     id: 'cyclone', name: 'CYAN CYCLONE', short: 'CYCLONE', act: 3, hue: 185, level: 9.2, step: 0.45, warm: 0, rows: 8, dur: 42, bossHp: 0.75, supply: 0, pay: 0.68, boss: 'omega',
-    minis: ['arclight', 'citadel'], miniHp: 4,
+    minis: ['arclight', 'citadel'], miniHp: 4, coreHp: 0.6,
     blurb: 'Storm-lit data winds. The core intelligence waits at the eye.',
   },
   {
     id: 'void', name: 'THE VOID', short: 'VOID', act: 4, hue: 275, level: 12.8, step: 0.6, warm: 0, rows: 8, dur: 42, bossHp: 0.9, supply: 0, pay: 0.82, boss: 'eclipse',
-    minis: ['razorwing', 'mauler', 'broodmother', 'specter', 'arclight', 'citadel'], miniHp: 7,
+    minis: ['razorwing', 'mauler', 'broodmother', 'specter', 'arclight', 'citadel'], miniHp: 7, coreHp: 0.7,
     blurb: 'Beyond the Grid. The Signal\'s source. No one has returned.',
   },
 ];
@@ -48,6 +49,7 @@ export const NODE_TYPES = {
   anomaly: { name: 'ANOMALY', color: '#b48bff' },
   vault: { name: 'VAULT', color: '#ffb300' },
   rift: { name: 'RIFT', color: '#ff4d6d' },
+  assault: { name: 'ASSAULT', color: '#ff8a2a' },
   boss: { name: 'BOSS', color: '#ff2e55' },
 };
 
@@ -139,6 +141,15 @@ export function generateRoute(system, seed) {
       }
     }
   }
+  // Capital ship assault (the trench run): one per system, on a late row so a run reaches it with a build. Picked on its
+  // own seed from those rows' plain fights (another fight or event when there are none), so the rest never changes.
+  const lateRow = (nd) => nd.row > mid && nd.row < R - 1;
+  let late = nodes.filter((nd) => lateRow(nd) && nd.type === 'combat');
+  if (!late.length) late = nodes.filter((nd) => lateRow(nd) && (nd.type === 'anomaly' || nd.type === 'elite' || nd.type === 'rift'));
+  if (late.length) {
+    const ar = mulberry32(((seed ^ 0x7e2c4a11) >>> 0) + 5);
+    late[Math.floor(ar() * late.length)].type = 'assault';
+  }
   // At least one Market somewhere after row 1 (a place to spend the wallet).
   if (!nodes.some((nd) => nd.type === 'market')) {
     const cand = nodes.filter((nd) => nd.row >= 2 && nd.row < R - 1 && nd.row !== mid && (nd.type === 'combat' || nd.type === 'anomaly'));
@@ -203,8 +214,8 @@ function rollArenaView(seed, boss) {
 
 export const routeNode = (route, id) => route.nodes.find((n) => n.id === id);
 
-// Nodes you fight at: combat, elite, boss and a mini-boss-guarded Vault.
-export const isFight = (node) => node.type === 'combat' || node.type === 'elite' || node.type === 'boss' || (node.type === 'vault' && !!node.mini);
+// Nodes you fight at: combat, elite, assault, boss and a mini-boss-guarded Vault.
+export const isFight = (node) => node.type === 'combat' || node.type === 'elite' || node.type === 'assault' || node.type === 'boss' || (node.type === 'vault' && !!node.mini);
 
 // Nodes the player may pick next: row 0 at the start, else the current node's links.
 export function reachableNodes(route, nodeId) {
@@ -218,6 +229,12 @@ export const nodeLevel = (system, row) => system.level + row * system.step - Mat
 
 const MINI_LEAD = 14; // seconds of waves before a Vault's mini boss shows up
 
+// Capital ship assault (director.js): a HULL RUN along the ship side-on, THE TRENCH flown in pursuit, then a fly-in to
+// its REACTOR CORE (a mini boss on a countdown, minibosses.js) and an escape as it blows. ASSAULT_DUR = wave seconds
+// over both zones; the core's HP is the system's mini boss scale times its coreHp.
+export const ASSAULT_VIEWS = ['side', 'chase'];
+const ASSAULT_DUR = 44;
+
 // Director spec for a fighting node. sectorIndex is 1-based (sectors fought so far + 1). tier / deep: endgame heat (core.js).
 export function nodeSpec(system, node, sectorIndex, tier = 0, deep = 0) {
   const level = nodeLevel(system, node.row);
@@ -229,6 +246,14 @@ export function nodeSpec(system, node, sectorIndex, tier = 0, deep = 0) {
       index: sectorIndex, row: node.row, level, loop: 0, boss: null, mini: node.mini, elite: false, modifiers: node.modifiers.slice(),
       hue: system.hue, name: deep ? `DEEP GRID ${deep} · ${system.name}` : system.name, duration: MINI_LEAD,
       miniHp: (system.miniHp || 1) * heatScale(tier, deep).hp, pay: system.pay, reward: null, tier, deep, views: null, arenaView: null,
+    };
+  }
+  if (node.type === 'assault') {
+    return {
+      index: sectorIndex, row: node.row, level, loop: 0, boss: null, mini: 'reactor', assault: true, elite: false, modifiers: node.modifiers.slice(),
+      hue: system.hue, name: deep ? `DEEP GRID ${deep} · ${system.name}` : system.name, duration: ASSAULT_DUR, zones: ASSAULT_VIEWS.length,
+      miniHp: (system.miniHp || 1) * (system.coreHp || 0.7) * heatScale(tier, deep).hp, pay: system.pay, reward: null, tier, deep,
+      views: ASSAULT_VIEWS.slice(), arenaView: 'chase',
     };
   }
   return {
