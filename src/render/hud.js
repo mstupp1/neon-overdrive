@@ -35,7 +35,6 @@ function keyHint(kind) {
   const d = input.device;
   if (kind === 'boost') return d === 'pad' ? 'LB' : d === 'touch' ? '' : 'SHIFT';
   if (d === 'pad') return kind === 'dash' ? 'A' : 'B';
-  if (d === 'mouse') return kind === 'dash' ? 'LMB' : 'RMB';
   if (d === 'touch') return '';
   return kind === 'dash' ? 'SPACE' : 'E';
 }

@@ -259,9 +259,8 @@ function build(run) {
     fog: new Uint8Array(fc * fr), fc, fr,
     cam: { x: start.x, y: start.y - 160 },
     spawned: false, // enemies are in G.enemies
-    dest: null, // mouse destination (world)
     dwell: 0, dwellId: null, card: null,
-    map: false, mapA: 0, ease: 0, t: 0, legT: 0, ambT: 9, packT: 0, busy: false, levelT: 0, hintT: 0, mouseWas: false,
+    map: false, mapA: 0, ease: 0, t: 0, legT: 0, ambT: 9, packT: 0, busy: false, levelT: 0, hintT: 0,
   };
 }
 
@@ -412,12 +411,7 @@ export const overworld = {
     G.scriptCtrl = ctrlFn;
     ow.busy = false;
     ow.dwell = 0;
-    ow.dest = null;
     ow.levelT = 0.35;
-    ow.mouseWas = input.mouseDown;
-    input.ox = 0;
-    input.oy = 0;
-    input.holding = false;
   },
 
   // Leaving for a fight: the ship goes back to its spot in the fight playfield, facing up, with the field cleared.
@@ -539,7 +533,6 @@ function control(p, dt) {
   if (input.mode === 'dir') {
     dx = input.dx;
     dy = input.dy;
-    ow.dest = null;
   } else if (input.device === 'touch') {
     if (input.touch) {
       const a = toScreen(p.x, p.y);
@@ -552,23 +545,7 @@ function control(p, dt) {
         dy = (vy / d) * m;
       }
     }
-  } else if (input.device === 'mouse') {
-    // Diablo style: click or hold the left button to fly to the cursor. The click itself is not a dash.
-    if (input.mouseDown) ow.dest = toWorld(input.tx, input.ty);
-    if (input.mouseDown && !ow.mouseWas) input.consume('dash');
-    if (ow.dest) {
-      const vx = ow.dest.x - p.x;
-      const vy = ow.dest.y - p.y;
-      const d = Math.hypot(vx, vy);
-      if (d < 10) ow.dest = null;
-      else {
-        const m = Math.min(1, d / 70);
-        dx = (vx / d) * m;
-        dy = (vy / d) * m;
-      }
-    }
   }
-  ow.mouseWas = input.mouseDown;
   // Space / A is both dash and confirm: inside an exit it takes the exit instead of dashing.
   const dash = input.consume('dash');
   ctrl.mode = 'dir';
@@ -1531,7 +1508,7 @@ function drawCard(ctx, live) {
   const site = !e && nearSite();
   if (!e && !site) {
     const a = ow.hintT < 10 ? 0.85 : 0.5;
-    const go = input.device === 'touch' ? 'DRAG TO FLY · HOLD BOOST' : input.device === 'mouse' ? 'CLICK TO FLY · SHIFT BOOSTS' : input.device === 'pad' ? 'AUTO-AIM · HOLD LB TO BOOST' : 'AUTO-AIM · SHIFT BOOSTS';
+    const go = input.device === 'touch' ? 'DRAG TO FLY · HOLD BOOST' : input.device === 'pad' ? 'AUTO-AIM · HOLD LB TO BOOST' : 'AUTO-AIM · SHIFT BOOSTS';
     text(ctx, `FIND AN EXIT  ·  ${go}  ·  ${mapKey()} MAP`, W / 2, by + bh - 8, 12, `rgba(255,255,255,${a})`, 'center', 700, FONT2);
     return;
   }

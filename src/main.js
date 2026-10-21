@@ -907,7 +907,7 @@ function draftDone() {
   if (next === 'deep') return diveDeeper();
   enterPlay();
   resumeEase = RESUME_EASE;
-  input.holdTarget(); // the cursor was on the menu: don't yank the ship toward it
+  input.holdTarget(); // a touch drag started on the menu: don't yank the ship toward it
 }
 
 function onSectorClear() {
@@ -1353,7 +1353,6 @@ input.onAnyGesture = unlockAudio;
 input.getAnchor = () => (G.screen === 'overworld' ? overworld.anchor() : G.player ? (sv.active ? sv.toScreen(G.player.x, G.player.y) : { x: G.player.x, y: G.player.y }) : { x: view.W / 2, y: view.H * 0.8 });
 input.onDeviceChange = (d) => {
   if (G.screen === 'play') touchUi.hidden = d !== 'touch';
-  app.style.cursor = G.screen === 'play' && d === 'mouse' ? 'crosshair' : '';
 };
 document.addEventListener('pointerdown', unlockAudio, { capture: true });
 bindPointer(canvas);

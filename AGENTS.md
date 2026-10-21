@@ -32,7 +32,7 @@ Use Context7 for version-specific documentation and code examples.
 
 ## UI conventions
 
-- Preserve responsive menu fitting and keyboard, gamepad, mouse, and touch input.
+- Preserve responsive menu fitting and keyboard, gamepad, mouse (menus only; it does not steer or fire in play), and touch input.
   Check narrow portrait layouts and safe-area insets when changing screens.
 - Reserve space for conditional text so menus do not jump as content changes:
   variable-length copy goes in a fixed `.well` (`src/ui/wells.js`) or a `.clip` line.
