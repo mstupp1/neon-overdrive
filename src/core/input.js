@@ -1,4 +1,4 @@
-// Unified input: keyboard, mouse, touch (relative drag + buttons) and gamepad.
+// Unified input: keyboard, touch (relative drag + buttons) and gamepad drive play; the mouse only drives menus.
 // Presses are buffered briefly so a dash pressed a hair early still fires.
 
 import { view } from '../game/state.js';
@@ -39,7 +39,7 @@ const pressedAt = new Map(); // action -> timestamp of last press
 
 export const input = {
   device: 'keyboard', // keyboard | mouse | touch | pad
-  // Movement: either a direction vector (keys/pad) or an absolute target (mouse/touch).
+  // Movement: either a direction vector (keys/pad) or an absolute target (touch).
   mode: 'dir',
   dx: 0,
   dy: 0,
@@ -47,12 +47,6 @@ export const input = {
   ty: 0,
   hasTarget: false,
   touch: null, // { id, sx, sy, ax, ay }
-  // Mouse: the target is the cursor plus this offset. A dash shifts it so the ship
-  // doesn't snap back to the cursor; it bleeds off as the mouse moves.
-  ox: 0,
-  oy: 0,
-  holding: false,
-  mouseDown: false, // left mouse button held (overworld click-to-fly)
   padX: 0,
   padY: 0,
   aimX: 0, // right stick (overworld aim)
@@ -79,11 +73,9 @@ export const input = {
     held.clear();
     padHeld.clear();
     touchHeld.clear();
-    this.mouseDown = false;
     this.touch = null;
     this.padX = this.padY = this.aimX = this.aimY = 0;
     this.holdTarget();
-    this.holding = false;
   },
   down(action) {
     return held.has(action) || padHeld.has(action) || touchHeld.has(action);
@@ -104,9 +96,6 @@ export const input = {
     if (this.touch) {
       this.touch.ax += dx;
       this.touch.ay += dy;
-    } else if (this.device === 'mouse') {
-      this.ox += dx;
-      this.oy += dy;
     }
   },
   // Steer toward the ship's current position until the pointer moves again.
@@ -114,9 +103,6 @@ export const input = {
     const a = this.getAnchor();
     this.tx = a.x;
     this.ty = a.y;
-    this.ox = 0;
-    this.oy = 0;
-    this.holding = this.device === 'mouse';
   },
   setDevice(d) {
     if (this.device !== d) {
@@ -154,7 +140,6 @@ window.addEventListener('keyup', (e) => {
 });
 
 window.addEventListener('blur', () => {
-  input.mouseDown = false;
   held.clear();
   touchHeld.clear();
   padHeld.clear();
@@ -165,30 +150,11 @@ window.addEventListener('pointerdown', (e) => {
   if (e.pointerType === 'touch') input.setDevice('touch');
 }, { capture: true });
 
-// --- Pointer (mouse + touch) -------------------------------------------------
+// --- Pointer (touch steers; the mouse only switches prompts) ----------------
 
 function toLogical(clientX, clientY) {
   const r = view.rect;
   return { x: (clientX - r.left) / view.scale, y: (clientY - r.top) / view.scale };
-}
-
-function mouseTarget(e, moved) {
-  const p = toLogical(e.clientX, e.clientY);
-  if (input.holding) {
-    // First move after holdTarget: re-anchor so the ship follows from where it is.
-    input.holding = false;
-    input.ox = input.tx - p.x;
-    input.oy = input.ty - p.y;
-  }
-  const k = Math.exp(-moved / 140);
-  input.ox *= k;
-  input.oy *= k;
-  input.mode = 'target';
-  input.tx = Math.max(0, Math.min(view.W, p.x + input.ox));
-  input.ty = Math.max(0, Math.min(view.H, p.y + input.oy));
-  input.ox = input.tx - p.x;
-  input.oy = input.ty - p.y;
-  input.hasTarget = true;
 }
 
 export function bindPointer(surface) {
@@ -212,13 +178,7 @@ export function bindPointer(surface) {
       }
       e.preventDefault();
     } else {
-      input.setDevice('mouse');
-      if (e.button === 0) {
-        input.press('dash');
-        input.mouseDown = true;
-      }
-      else if (e.button === 2) input.press('od');
-      mouseTarget(e, 0);
+      input.setDevice('mouse'); // menu prompts only: the mouse does not steer or fire in play
     }
   }, { passive: false });
 
@@ -247,12 +207,10 @@ export function bindPointer(surface) {
       if (e.movementX === 0 && e.movementY === 0) return;
       if (input.device !== 'mouse' && Math.abs(e.movementX) + Math.abs(e.movementY) < 3) return;
       input.setDevice('mouse');
-      mouseTarget(e, Math.hypot(e.movementX, e.movementY) / view.scale);
     }
   }, { passive: false });
 
   const end = (e) => {
-    if (e.pointerType !== 'touch' && e.button === 0) input.mouseDown = false;
     if (input.touch && input.touch.id === e.pointerId) {
       input.touch = null;
       // Hold position where the ship is.
@@ -262,9 +220,6 @@ export function bindPointer(surface) {
     }
   };
   surface.addEventListener('pointerup', end);
-  window.addEventListener('pointerup', (e) => {
-    if (e.pointerType !== 'touch' && e.button === 0) input.mouseDown = false; // released off the canvas
-  });
   surface.addEventListener('pointercancel', end);
 }
 
