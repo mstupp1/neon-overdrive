@@ -173,8 +173,10 @@ function moveCommon(e, dt) {
     }
     case 'dive': {
       if (e.state === 'enter') {
+        const ox = e.x, oy = e.y;
         e.x = damp(e.x, e.tx, 3, dt);
         e.y = damp(e.y, e.ty, 3, dt);
+        if (dt > 0) { e.vx = (e.x - ox) / dt; e.vy = (e.y - oy) / dt; } // so the dart faces the way it glides in, not sideways
         if (Math.abs(e.y - e.ty) < 5) {
           e.state = 'aim';
           e.timer = 0.45;
