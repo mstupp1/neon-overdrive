@@ -26,7 +26,6 @@ function render(state=current.state,info=current.info,failed=false){
   profile.campaign.cleared=[...campaign.cleared];
   profile.campaign.bestSys=campaign.bestSys;
   profile.campaign.bestRow=campaign.bestRow;
-  profile.seenRunInfo=info==='hidden';
   window.NEON.G.screen='campaign';
   meta.renderCampaign('VECTOR');
   ui.show('campaign',{focus:document.querySelector('#launch-btn')});
