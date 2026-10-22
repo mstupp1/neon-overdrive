@@ -11,7 +11,7 @@ profile.settings.story = false;
 profile.settings.music = 0;
 profile.settings.sfx = 0;
 profile.settings.retro = 'off';
-profile.seenHelp = profile.seenRunInfo = true;
+profile.seenHelp = true;
 profile.credits = 10000;
 document.querySelector('#notes').hidden = true;
 const emit = (status) => parent.postMessage({kind:'location-preview-status', status}, parent.location.origin);

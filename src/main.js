@@ -1170,16 +1170,6 @@ ui.init({
     showTab('#scr-settings', btn.dataset.tab);
   },
   launch: () => launchRun(),
-  // Campaign "how a run works" box: toggled by the ? button, opens once by itself.
-  runInfo() {
-    const box = document.getElementById('run-info');
-    box.hidden = !box.hidden;
-    if (!profile.seenRunInfo) {
-      profile.seenRunInfo = true;
-      saveProfile();
-    }
-    (box.hidden ? document.querySelector('#sys-detail .info-btn') : box.querySelector('.btn')).focus();
-  },
   // HANGAR hub (SHIP · LOADOUT · FABRICATOR · PILOT · TREE · FLUX CORE) from the title menu or the campaign map.
   hangar() {
     hub.exit = ui.current === 'campaign' ? () => showCampaign('ship-btn') : () => titleMenu('[data-act=hangar]');

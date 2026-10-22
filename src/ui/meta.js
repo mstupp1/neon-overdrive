@@ -72,8 +72,7 @@ export const meta = {
     const k = heatScale(t, 0);
     const heat = t ? `<span style="color:#ff4d6d">OVERDRIVE ${t} · ENEMY HP ×${k.hp.toFixed(1)} · REWARDS +${Math.round((k.reward - 1) * 100)}% · FLUX</span>` : '';
     $('#sys-detail').style.setProperty('--c', hsl(SYSTEMS[0].hue));
-    $('#sys-detail').innerHTML = `<div class="sys-meta"><span>${best}</span>${heat}</div><button class="info-btn" data-act="runInfo" aria-label="How a run works" title="How a run works">?</button>`;
-    $('#run-info').hidden = profile.seenRunInfo;
+    $('#sys-detail').innerHTML = `<div class="sys-meta"><span>${best}</span>${heat}</div>`;
     // Overdrive tier: a ‹ value › selector (left / right step it, confirm cycles); locked until THE VOID falls once.
     const tb = $('#tier-btn');
     tb.innerHTML = profile.tierMax ? `<span>OVERDRIVE</span><span class="opt-v"><i>‹</i><b>${t ? `TIER ${t}` : 'OFF'}</b><i>›</i></span>` : '<span>OVERDRIVE</span><span class="opt-v"><b>LOCKED</b></span>';

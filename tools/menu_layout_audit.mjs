@@ -25,7 +25,7 @@ try {
 const chromium = pw.chromium || pw.default.chromium;
 
 const VIEWS = { desktop: { width: 1280, height: 800 }, phone: { width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 2 } };
-const PROFILE = { ownedShips: ['vector', 'needle', 'phantom'], lastShip: 'phantom', seenIntro: true, seenHelp: true, seenRunInfo: true, credits: 2500, rankXp: 40000, runs: 5, best: 123456, flux: 300, campaign: { cleared: ['genesis'], seenStory: { prologue: 1 }, bestSys: 1, bestRow: 3 } };
+const PROFILE = { ownedShips: ['vector', 'needle', 'phantom'], lastShip: 'phantom', seenIntro: true, seenHelp: true, credits: 2500, rankXp: 40000, runs: 5, best: 123456, flux: 300, campaign: { cleared: ['genesis'], seenStory: { prologue: 1 }, bestSys: 1, bestRow: 3 } };
 const PROFILE_KEY = 'neon-overdrive/profile/v3';
 
 // Per menu: `open` (page JS), the item count `n` (page JS), and per item either a key press or `step` (page JS, I = index).
