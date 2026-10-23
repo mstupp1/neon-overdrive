@@ -1,0 +1,27 @@
+{
+  "group": "fortune",
+  "generator": "built-in imagegen",
+  "assets": [
+    {
+      "id": "fortune",
+      "source": "art/icons/upgrades/fortune/sources/fortune-v1.png",
+      "runtime": "src/assets/icons/upgrades/fortune.png",
+      "prompt": "art/icons/upgrades/fortune/prompts/fortune-v1.txt",
+      "generator": "built-in imagegen",
+      "references": [
+        {
+          "path": "art/icons/upgrades/sources/prospector.png",
+          "sha256": "4e2c05181a6dd6a0dd6e84ddaf39cb27cea1c94df3739581b34343ba826c7e5f"
+        }
+      ],
+      "source_sha256": "1c80b2f5e03717ebfb1b9a1bf515c6c577a90db8d6b9d289ab060ad1047ed505",
+      "runtime_sha256": "f6f061d2de1b08e741af8dfe5a5af0e10e4267a7c0694f9b4e6f76dd93d21a4a",
+      "prompt_sha256": "a33dac3570c07bb4e0bbea8a41fc490fd387ef1f452b2628b22182401a9b2dd6",
+      "export": "Pillow RGBA; fit within 256x256 preserving aspect ratio; centered transparent canvas; LANCZOS; no cropping or content edits.",
+      "size": [
+        256,
+        256
+      ]
+    }
+  ]
+}
