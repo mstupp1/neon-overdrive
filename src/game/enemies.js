@@ -594,8 +594,7 @@ BEHAVIOR.blinker = function blinker(e, dt) {
 };
 
 // Hunter attack patterns (boss-style: return true when finished).
-const HEART_ELITE = 0.15; // heart chance on an elite kill (else magnet / cell)
-const HEART_HUNTER = 0.25;
+const HEART_HUNTER = 0.25; // heart chance on a Hunter kill (elites and regular enemies never drop hearts)
 
 const HUNTER_ATK = {
   needles(e, a, dt, fr) {
@@ -804,8 +803,8 @@ export function killEnemy(e, silent = false) {
   dropKillCredits(e);
   rollRelicDrop(e);
   rollGearDrop(e);
-  // Hearts are earned: bosses always drop them, mini bosses usually (bosses.js), Hunters and elites only sometimes,
-  // regular enemies never.
+  // Hearts are earned: bosses always drop them, mini bosses usually (bosses.js), Hunters only sometimes,
+  // elites and regular enemies never.
   if (e.hunter) {
     if (chance(HEART_HUNTER)) dropPickup(e.x - 10, e.y, 'heart');
     dropPickup(e.x + 10, e.y, chance(0.5) ? 'magnet' : 'cell');
@@ -813,7 +812,7 @@ export function killEnemy(e, silent = false) {
     addShake(0.4);
     if (G.player) onEliteKilled(G.player);
   } else if (e.elite) {
-    dropPickup(e.x, e.y, chance(HEART_ELITE) ? 'heart' : chance(0.5) ? 'magnet' : 'cell');
+    dropPickup(e.x, e.y, chance(0.5) ? 'magnet' : 'cell');
     floatText(e.x, e.y - 20, 'ELITE DOWN', '#ffd84d', 12, 1);
   } else if (chance(0.006)) dropPickup(e.x, e.y, 'magnet');
   else if (chance(0.01)) dropPickup(e.x, e.y, 'cell');
