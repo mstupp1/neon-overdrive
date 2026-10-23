@@ -131,6 +131,7 @@ export const ICONS = {
   overbloom: assetIcon('upgrades', 'overbloom', svg('<circle cx="12" cy="12" r="3"/><path d="M12 2c2 3 2 5 0 7-2-2-2-4 0-7zM12 22c-2-3-2-5 0-7 2 2 2 4 0 7zM2 12c3-2 5-2 7 0-2 2-4 2-7 0zM22 12c-3 2-5 2-7 0 2-2 4-2 7 0z"/>')),
   scrapper: assetIcon('upgrades', 'scrapper', svg('<path d="M12 3l5 5-5 5-5-5z"/><path d="M5 14l3 3-3 3-3-3zM19 14l3 3-3 3-3-3z"/>')),
   credits: assetIcon('upgrades', 'credits', svg('<circle cx="12" cy="12" r="9"/><path d="M15 8.5c-.8-1-2-1.5-3-1.5-1.7 0-3 1-3 2.5s1.3 2 3 2.5 3 1 3 2.5-1.3 2.5-3 2.5c-1 0-2.2-.5-3-1.5M12 5v2M12 17v2"/>')),
+  fortune: assetIcon('upgrades', 'fortune', svg('<path d="M12 12c-1.5-3-5-3.5-5-1s3.5 2.5 5 1zM12 12c3-1.5 3.5-5 1-5s-2.5 3.5-1 5zM12 12c1.5 3 5 3.5 5 1s-3.5-2.5-5-1zM12 12c-3 1.5-3.5 5-1 5s2.5-3.5 1-5z"/><path d="M13 16c1 2 2.5 3.5 4.5 4.5"/>')),
   repair: assetIcon('upgrades', 'repair', svg('<path d="M12 5v14M5 12h14"/>')),
 };
 
@@ -156,6 +157,7 @@ export const UPGRADES = [
   { id: 'reserveCell', name: 'Reserve Cell', cat: 'stat', max: 2, weight: 0.5, tier: 0, desc: () => 'Bank 1 more ultimate cell. A cast still spends up to 3, so the spare fuels a quick follow-up.' },
   { id: 'recycler', name: 'Cell Recycler', cat: 'stat', max: 3, weight: 0.5, tier: 0, desc: (lv) => `+12% chance each ultimate cell you spend is saved (${pct(0.12 * lv)}).` },
   { id: 'grazer', name: 'Graze Field', cat: 'stat', max: 3, weight: 0.6, tier: 0, desc: () => '+30% graze radius, +35% Overdrive from grazes.' },
+  { id: 'fortune', name: 'Fortune', cat: 'stat', max: 3, weight: 0.55, tier: 0, desc: () => '+1 Fortune: every reward draft rolls luckier, and one card in it is rarer.' },
   { id: 'prospector', name: 'Prospector', cat: 'stat', max: 3, weight: 0.5, tier: 0, desc: () => '+20% credits from kills and drops.' },
   { id: 'hull', name: 'Reinforced Hull', cat: 'defense', max: 4, weight: 0.9, tier: 0, desc: () => '+1 max hull and repair 1.' },
   { id: 'aegis', name: 'Aegis Shield', cat: 'defense', max: 4, weight: 0.8, tier: 0, desc: (lv) => `Regenerating shield absorbs a hit. Recharge ${aegisTime(lv)}s.` },
@@ -358,6 +360,7 @@ export function recomputeStats(p) {
   st.perpetual = 1.2 * lv('perpetual');
   st.nullR = lv('nullField') ? 55 + 15 * lv('nullField') : 0;
   st.find = 0; // rarity find (gear / ship traits, rarity.js luckFor)
+  st.fortune = lv('fortune'); // reward draft luck and one-card rarity floor (fortuneLuck / fortuneFloor); also gear, tree, Magnate
   // Shared combat systems (status.js): neutral until a card, gear modifier or passive raises them.
   st.armorPierce = 0.08 * lv('armorPierce'); // armor fraction ignored on enemies
   st.freezeChance = 0.12 * lv('cryo'); // chance per hit to add one stack
@@ -501,7 +504,7 @@ export const UP_TAGS = {
   boostTank: 'mobility', ramScoop: 'mobility', injector: 'mobility', overthrust: 'mobility',
   capacitor: 'overdrive', grazer: 'overdrive', perpetual: 'overdrive', reserveCell: 'overdrive', recycler: 'overdrive', nullField: 'overdrive', chainlink: 'overdrive',
   hull: 'tank', aegis: 'tank', leech: 'tank', secondWind: 'tank',
-  magnet: 'greed', salvage: 'greed', prospector: 'greed',
+  magnet: 'greed', salvage: 'greed', prospector: 'greed', fortune: 'greed',
   projSize: 'firepower', projSpeed: 'firepower', armorPierce: 'firepower', burstFire: 'firepower', resonance: 'firepower',
   sundering: 'crit', gameSpeed: 'mobility', dodge: 'tank',
   shieldPlates: 'tank', wakeBlades: 'mobility', marksman: 'crit', harpoon: 'firepower', sentry: 'modules', teslaPylons: 'modules',
@@ -510,6 +513,20 @@ export const UP_TAGS = {
 };
 export const synergy = (p, id) => (p.tags && UP_TAGS[id] ? p.tags[UP_TAGS[id]] || 0 : 0);
 export const SYNERGY_MIN = 2; // path weight at which a card shows its SYNERGY mark
+
+// --- Fortune ------------------------------------------------------------------------------------
+// A run stat (st.fortune, whole points) from the Fortune card, Rare+ plating, the Prospector tree notable and the
+// Magnate's trait. Every reward draft rolls FORTUNE_LUCK luck per point, and one card in it is at least
+// FORTUNE_FLOOR[points] rarity (Uncommon at 1, Rare at 3, Epic at 5, Legendary at 7). Level-ups are unaffected.
+export const FORTUNE_LUCK = 0.25;
+const FORTUNE_FLOOR = [0, 1, 1, 2, 2, 3, 3, 4];
+export const fortuneOf = (p) => Math.max(0, Math.floor((p && p.st.fortune) || 0));
+export const fortuneFloor = (f) => FORTUNE_FLOOR[Math.min(FORTUNE_FLOOR.length - 1, Math.max(0, f))];
+// The next Fortune total that raises the floor (null at the top).
+export const fortuneNext = (f) => {
+  for (let i = f + 1; i < FORTUNE_FLOOR.length; i++) if (FORTUNE_FLOOR[i] > fortuneFloor(f)) return i;
+  return null;
+};
 
 // --- Card rarity ------------------------------------------------------------------------------
 // Every regular card in a draft rolls a rarity (rarity.js, luck from the run). Rarer cards install more levels and
@@ -693,7 +710,7 @@ const TUNE_NAMES = {
 const TUNE_ICONS = {
   dmg: 'power', rate: 'rate', bounty: 'bounty', crit: 'crit', critMul: 'crit', mod: 'drones', modRate: 'arc', speed: 'thrusters',
   dashCd: 'dashes', dashLen: 'blink', od: 'capacitor', odDur: 'capacitor', ultSave: 'recycler', grazeR: 'grazer', grazeOd: 'grazer', shield: 'aegis',
-  iframes: 'hull', magnet: 'magnet', xp: 'salvage', credits: 'prospector', find: 'prospector', boostCap: 'boostTank',
+  iframes: 'hull', magnet: 'magnet', xp: 'salvage', credits: 'prospector', find: 'prospector', fortune: 'fortune', boostCap: 'boostTank',
   boostRegen: 'ramScoop', boostEff: 'injector',
   projSize: 'projSize', projSpeed: 'projSpeed', armorPierce: 'armorPierce', burst: 'burstFire', burstN: 'burstFire',
   freeze: 'cryo', freezePot: 'deepFreeze', burn: 'incendiary', burnPot: 'accelerant', corrode: 'corrosive', corrodePot: 'acidEtch',

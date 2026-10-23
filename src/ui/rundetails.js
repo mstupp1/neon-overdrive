@@ -2,14 +2,14 @@
 // (TECH, STATS, LOADOUT). All tabs are rendered into the same grid cell and the inactive ones are only hidden, so the
 // panel is always as tall as the tallest tab and switching tabs never moves the buttons. Every entry has a tooltip.
 
-import { UPGRADES, ICONS, CAT_COLORS, pathOf, pathRanks, masteryTier, splashUsed, MASTERY, SPEC_MAX, SPLASH_CAP, modText } from '../game/upgrades.js';
+import { UPGRADES, ICONS, CAT_COLORS, pathOf, pathRanks, masteryTier, splashUsed, MASTERY, SPEC_MAX, SPLASH_CAP, modText, fortuneOf } from '../game/upgrades.js';
 import { TAGS, STATS, itemLines } from '../game/parts.js';
 import { RARITY } from '../game/rarity.js';
 import { CLASSES } from '../game/pilot.js';
 import { sumMods, describe } from '../game/tree.js';
 import { formatTime } from '../core/math.js';
 import { tip } from './tips.js';
-import { pathTip } from './screens.js';
+import { pathTip, fortuneTip } from './screens.js';
 
 const $ = (sel) => document.querySelector(sel);
 const ROMAN = ['', 'I', 'II', 'III'];
@@ -144,7 +144,7 @@ function loadoutTab(G) {
   html += `<div class="rd-row bonus"><span class="rd-lab">BONUSES</span><div class="rd-mods">${bonus.join('') || '<span class="pdim">Rare cards and tunes add bonuses here</span>'}</div></div>`;
 
   const run = G.run || {};
-  html += `<div class="run-stats rd-run"><div>FORTUNE<b>${G.fortune || 0}</b></div><div>REROLLS<b>${G.rerolls || 0}</b></div><div>CREDITS<b class="gold">${run.wallet || 0}</b></div></div>`;
+  html += `<div class="run-stats rd-run"><div${fortuneTip(p)}>FORTUNE<b>${fortuneOf(p)}</b></div><div>REROLLS<b>${G.rerolls || 0}</b></div><div>CREDITS<b class="gold">${run.wallet || 0}</b></div></div>`;
   return html;
 }
 

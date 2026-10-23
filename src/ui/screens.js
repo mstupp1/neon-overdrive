@@ -3,7 +3,7 @@
 import { input } from '../core/input.js';
 import { profile, saveProfile } from '../core/storage.js';
 import { sfx } from '../core/audio.js';
-import { cardInfo, CAT_COLORS, UPGRADES, ICONS, RARITY, pathRanks, splashUsed, SPEC_AT, SPEC_MAX, SPLASH_CAP, MASTERY, MASTERY_AT, masteryTier, modText } from '../game/upgrades.js';
+import { cardInfo, CAT_COLORS, UPGRADES, ICONS, RARITY, pathRanks, splashUsed, SPEC_AT, SPEC_MAX, SPLASH_CAP, MASTERY, MASTERY_AT, masteryTier, modText, fortuneOf, fortuneFloor, fortuneNext } from '../game/upgrades.js';
 import { TAGS } from '../game/parts.js';
 import { formatScore, formatTime } from '../core/math.js';
 import { SYSTEMS } from '../game/campaign.js';
@@ -479,7 +479,7 @@ export const ui = {
   // --- Draft --------------------------------------------------------------------
   // note: an extra line for the subtitle (campaign fight reward, vault haul).
   // locks: indices of locked cards (kept through a reroll); onLock(i) toggles one and returns whether it changed.
-  // fx: Fortune state {fortune, max, spent, floor, base, skip (Fortune a skip adds, -1 = no skip here), next, nextGain, boss}.
+  // fx: reward state {reward (rolls rarity), floor (one card at least this, from Fortune), base (every card), boss}.
   renderDraft(player, choices, kind, rerolls, onPick, left = 0, note = '', rolls = {}, locks = new Set(), onLock = null, fx = {}) {
     const T = {
       sector: fx.boss ? ['SYSTEM CLEAR', '#ffb300', 'Boss reward: every card Uncommon or better'] : ['SECTOR CLEAR', '#7dff6b', 'Claim new tech for the road ahead'],
@@ -551,11 +551,6 @@ export const ui = {
     });
     draftLock = onLock;
     syncLocks(locks, rerolls);
-    const sk = $('#skip-btn');
-    sk.style.visibility = fx.skip < 0 ? 'hidden' : '';
-    sk.disabled = !(fx.skip > 0);
-    sk.textContent = fx.skip > 0 ? `SKIP · +${fx.skip} FORTUNE` : 'FORTUNE FULL';
-    sk.title = 'Take nothing now; your next reward draft rolls rarer';
     renderBuild($('#draft-build'), player);
   },
 
@@ -671,6 +666,19 @@ export function pathTip(p, t, ranks) {
 
 // The draft's build-path and Fortune lines (two fixed lines, so they never shift the cards).
 const RNAME = ['', 'UNCOMMON+', 'RARE+', 'EPIC+', 'LEGENDARY'];
+
+// Tooltip for the run's Fortune (draft header, run details).
+export function fortuneTip(p) {
+  const n = fortuneOf(p);
+  const next = fortuneNext(n);
+  const lines = [
+    `${n} Fortune: every reward draft rolls luckier${fortuneFloor(n) ? `, and one card is at least ${RARITY[fortuneFloor(n)].name[0] + RARITY[fortuneFloor(n)].name.slice(1).toLowerCase()}` : ''}.`,
+    'One card is Uncommon+ at 1, Rare+ at 3, Epic+ at 5, Legendary at 7. Level-ups are unaffected.',
+    'From the Fortune card, Rare+ plating, the Prospector tree notable and the MAGNATE.',
+  ];
+  if (next) lines.push(`Next step at ${next}: one card ${RNAME[fortuneFloor(next)]}.`);
+  return tip('FORTUNE', lines, '#ffd24a');
+}
 function renderPaths(el, p, fx) {
   const ranks = pathRanks(p);
   const spec = p.spec || [];
@@ -686,14 +694,16 @@ function renderPaths(el, p, fx) {
     line += top.map((t) => chip(t, `${TAGS[t].name} ${ranks[t]}`)).join('');
     line += `<span class="pdim">${top.length ? '' : 'BUILD PATHS · '}${SPEC_MAX} lock in at ${SPEC_AT}</span>`;
   }
-  const pips = Array.from({ length: fx.max || 6 }, (_, i) => `<i class="${i < (fx.fortune || 0) ? 'on' : ''}"></i>`).join('');
-  const ft = tip('FORTUNE', ['Skip a draft to bank Fortune: +1 on a level-up, +2 on a reward (max 6).', 'Your next reward draft spends it all: luckier rolls, and one card at least Rare at 2, Epic at 4, Legendary at 6.'], '#ffd24a');
-  let f = `<span class="fortune"${ft}>FORTUNE <span class="fpips">${pips}</span></span>`;
-  if (fx.spent) f = `<span class="fortune spent">FORTUNE ×${fx.spent} SPENT</span><span class="pdim">${fx.floor > fx.base ? `one card ${RNAME[fx.floor]} · ` : ''}luckier rolls</span>`;
-  else if (fx.boss) f += '<span class="pdim">boss reward</span>';
-  else if (fx.next) f += `<span class="pdim">next reward: one card ${RNAME[fx.next]}</span>`;
-  else if (fx.skip > 0 && fx.nextGain) f += `<span class="pdim">skip → next reward: one card ${RNAME[fx.nextGain]}</span>`;
-  else f += '<span class="pdim">skip a draft to roll rarer rewards</span>';
+  const n = fortuneOf(p);
+  const fl = fortuneFloor(n);
+  let f = `<span class="fortune${n ? ' on' : ''}"${fortuneTip(p)}>FORTUNE <b>${n}</b></span>`;
+  if (fx.reward) {
+    const parts = [];
+    if (fx.boss) parts.push('boss reward');
+    if (fx.floor > fx.base) parts.push(`one card ${RNAME[fx.floor]}`);
+    if (n) parts.push('luckier rolls');
+    f += `<span class="pdim">${parts.join(' · ') || 'draft Fortune to roll rarer rewards'}</span>`;
+  } else f += `<span class="pdim">${fl ? `reward drafts: one card ${RNAME[fl]}` : 'Fortune makes reward drafts rarer'}</span>`;
   el.innerHTML = `<div>${line}</div><div>${f}</div>`;
 }
 

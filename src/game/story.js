@@ -140,7 +140,7 @@ export const STORY = {
     ],
     draft: [
       L('MAG', 'Level-ups tune what you already fly, and your main cannon grows when you drop a mini boss or a boss. New tech comes from clearing sectors, and bosses pay rarer. Max a module with its partner stat and it can EVOLVE.'),
-      L('MAG', 'The first two build paths you raise to 5 lock in your specialty. Feeling strong? Skip a pick to bank Fortune for a rarer reward.'),
+      L('MAG', 'The first two build paths you raise to 5 lock in your specialty. Draft Fortune and every reward after it rolls rarer.'),
     ],
     discovery: [L('MAG', 'NEW DISCOVERY means tech you\'ve never seen. From now on it can turn up from Genesis on.')],
     market: [L('MAG', 'Black Market. Spend here: a dead pilot only banks half their credits, a finished run banks it all.')],

@@ -167,7 +167,7 @@ export const SHIPS = [
     speed: 0.95,
     dashes: 1,
     start: { magnet: 1 },
-    trait: { text: 'TRAIT: +25% credits, +25% rarity find, 15% of hits splinter.', apply(st) { st.creditMul *= 1.25; st.find += 0.25; st.splinter += 0.15; } },
+    trait: { text: 'TRAIT: +25% credits and rarity find, +1 Fortune, 15% of hits splinter.', apply(st) { st.creditMul *= 1.25; st.find += 0.25; st.fortune += 1; st.splinter += 0.15; } },
     price: 2000,
     unlock: null,
   },

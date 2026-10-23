@@ -58,7 +58,7 @@ export const THEMES = {
   greed: {
     name: 'GREED', color: '#5aa9ff',
     small: [{ credits: 8 }, { xp: 7 }],
-    notables: [{ name: 'Prospector', mods: { credits: 10, luck: 10, rerolls: 1 } }, { name: 'Scholar', mods: { xp: 12, magnet: 20 } }],
+    notables: [{ name: 'Prospector', mods: { credits: 10, luck: 10, rerolls: 1, fortune: 1 } }, { name: 'Scholar', mods: { xp: 12, magnet: 20 } }],
   },
 };
 
@@ -209,6 +209,7 @@ const MODS = {
   magnet: (v) => `${pct(v)} pickup range`,
   luck: (v) => `${pct(v)} rarity find`,
   rerolls: (v) => `${num(v)} reroll at the start of each run`,
+  fortune: (v) => `${num(v)} Fortune (rarer reward cards)`,
   nonCrit: (v) => `${pct(v)} damage on hits that do not crit`,
   boostCap: (v) => `${pct(v)} boost capacity`,
   boostRegen: (v) => `${pct(v)} boost refill speed`,
@@ -357,6 +358,7 @@ export function applyTree(st, p) {
   st.magnet *= inc('magnet');
   st.find = (st.find || 0) + (m.luck || 0) / 100; // rarity find (loot.js)
   st.rerolls = (st.rerolls || 0) + (m.rerolls || 0);
+  st.fortune = (st.fortune || 0) + (m.fortune || 0);
   st.boostCap *= inc('boostCap');
   st.boostRegen *= inc('boostRegen');
   st.boostEff *= inc('boostEff');

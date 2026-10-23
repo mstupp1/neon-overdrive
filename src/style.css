@@ -4662,28 +4662,13 @@ input[type='range']::-moz-range-thumb {
 .fortune {
     display: inline-flex;
     align-items: center;
-    gap: 0.6em;
+    gap: 0.4em;
+    color: rgba(255, 210, 74, 0.6);
+}
+
+.fortune.on {
     color: #ffd24a;
-}
-
-.fortune.spent {
     text-shadow: 0 0 0.6em rgba(255, 210, 74, 0.6);
-}
-
-.fpips {
-    display: inline-flex;
-    gap: 0.25em;
-}
-
-.fpips i {
-    width: 0.7em;
-    height: 0.7em;
-    border: 1px solid rgba(255, 210, 74, 0.5);
-}
-
-.fpips i.on {
-    background: #ffd24a;
-    box-shadow: 0 0 0.5em #ffd24a;
 }
 
 .card-rar .pnote {
