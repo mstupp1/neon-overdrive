@@ -227,7 +227,7 @@ export const WEAPONS = {
   charge: { interval: 0.5, dmg: 11, speed: 620, r: 9, life: 1.6, pierce: 4 },
   wave: { interval: 0.13, dmg: 1.37, speed: 840, r: 4, life: 1.3, pierce: 1, wave: 16, freq: 13 },
   burst: { interval: 0.42, dmg: 2.8, speed: 1250, r: 3.5, burst: 3, gap: 0.05 },
-  spark: { interval: 0.12, dmg: 0.9, speed: 700, r: 3.5, life: 1.4, homing: 4.2 },
+  spark: { interval: 0.12, dmg: 1.1, speed: 700, r: 3.5, life: 1.4, homing: 4.2 },
   shard: { interval: 0.16, dmg: 1.5, speed: 900, r: 4.5 },
 };
 
@@ -241,29 +241,29 @@ export function weaponStreams(weapon, lv) {
     const gap = 8;
     for (let i = 0; i < straight; i++) out.push([(i - (straight - 1) / 2) * gap, 0]);
     for (let i = 1; i <= pairs; i++) {
-      out.push([-10, -i * 7 * deg]);
-      out.push([10, i * 7 * deg]);
+      out.push([-10, -i * 3.5 * deg]);
+      out.push([10, i * 3.5 * deg]);
     }
   } else if (weapon === 'lance') {
     const straight = [1, 2, 2, 3, 3, 3, 4, 4][lv - 1];
     const pairs = [0, 0, 1, 1, 1, 2, 2, 2][lv - 1];
     for (let i = 0; i < straight; i++) out.push([(i - (straight - 1) / 2) * 9, 0]);
     for (let i = 1; i <= pairs; i++) {
-      out.push([-8, -i * 3.5 * deg]);
-      out.push([8, i * 3.5 * deg]);
+      out.push([-8, -i * 2 * deg]);
+      out.push([8, i * 2 * deg]);
     }
   } else if (weapon === 'scatter') {
     const n = [5, 6, 7, 8, 9, 10, 11, 13][lv - 1];
-    const spread = [30, 33, 37, 41, 45, 49, 53, 58][lv - 1] * deg;
+    const spread = [18, 19, 21, 23, 25, 27, 29, 32][lv - 1] * deg;
     for (let i = 0; i < n; i++) out.push([0, -spread / 2 + (spread * i) / (n - 1)]);
   } else if (weapon === 'phase') {
     const n = [2, 2, 3, 3, 4, 4, 5, 6][lv - 1];
-    const spread = [16, 22, 28, 34, 40, 46, 52, 60][lv - 1] * deg;
+    const spread = [8, 10, 13, 16, 19, 22, 25, 28][lv - 1] * deg;
     for (let i = 0; i < n; i++) out.push([(i - (n - 1) / 2) * 7, n > 1 ? -spread / 2 + (spread * i) / (n - 1) : 0]);
   } else if (weapon === 'ricochet') {
     // Angled bolts only (no straight stream): the fan widens with level and the walls fold it back in.
     const n = [2, 3, 4, 5, 6, 6, 7, 8][lv - 1];
-    const spread = [18, 26, 34, 40, 46, 52, 58, 64][lv - 1] * deg;
+    const spread = [10, 14, 18, 22, 25, 28, 31, 34][lv - 1] * deg;
     for (let i = 0; i < n; i++) out.push([(i - (n - 1) / 2) * 4, -spread / 2 + (spread * i) / (n - 1)]);
   } else if (weapon === 'wave') {
     // Mirrored pairs: [x, angle, wave phase]. Each pair crosses over in a braid.
@@ -273,39 +273,47 @@ export function weaponStreams(weapon, lv) {
       const x = (i - (pairs - 1) / 2) * 14;
       out.push([x - 3, 0, 0], [x + 3, 0, Math.PI]);
     }
-    for (let i = 1; i <= fan; i++) out.push([-8, -i * 6 * deg, 0], [8, i * 6 * deg, Math.PI]);
+    for (let i = 1; i <= fan; i++) out.push([-8, -i * 3 * deg, 0], [8, i * 3 * deg, Math.PI]);
   } else if (weapon === 'burst') {
     const straight = [1, 1, 2, 2, 2, 3, 3, 3][lv - 1];
     const pairs = [0, 1, 0, 1, 1, 1, 2, 2][lv - 1];
     for (let i = 0; i < straight; i++) out.push([(i - (straight - 1) / 2) * 7, 0]);
-    for (let i = 1; i <= pairs; i++) out.push([-6, -i * 4 * deg], [6, i * 4 * deg]);
+    for (let i = 1; i <= pairs; i++) out.push([-6, -i * 2.5 * deg], [6, i * 2.5 * deg]);
   } else if (weapon === 'spark') {
     const n = [2, 3, 3, 4, 4, 5, 6, 6][lv - 1];
-    const spread = [40, 46, 52, 58, 64, 70, 76, 84][lv - 1] * deg;
+    const spread = [22, 25, 28, 31, 34, 37, 40, 44][lv - 1] * deg;
     for (let i = 0; i < n; i++) out.push([(i - (n - 1) / 2) * 5, -spread / 2 + (spread * i) / (n - 1)]);
   } else if (weapon === 'shard') {
     const straight = [2, 2, 3, 3, 3, 4, 4, 5][lv - 1];
     const pairs = [0, 1, 1, 1, 2, 2, 2, 2][lv - 1];
     for (let i = 0; i < straight; i++) out.push([(i - (straight - 1) / 2) * 10, 0]);
-    for (let i = 1; i <= pairs; i++) out.push([-10, -i * 9 * deg], [10, i * 9 * deg]);
+    for (let i = 1; i <= pairs; i++) out.push([-10, -i * 4.5 * deg], [10, i * 4.5 * deg]);
   } else if (weapon === 'charge') {
     const n = [1, 1, 2, 2, 2, 3, 3, 3][lv - 1];
-    for (let i = 0; i < n; i++) out.push([(i - (n - 1) / 2) * 20, (i - (n - 1) / 2) * 0.05]);
+    for (let i = 0; i < n; i++) out.push([(i - (n - 1) / 2) * 20, (i - (n - 1) / 2) * 0.03]);
   }
   return out;
 }
 
+// Angled streams hit softer than the forward ones: full damage straight ahead, falling to SIDE_MIN at SIDE_ANGLE and
+// beyond. Spray ships pay for their coverage, and the outer barrels a Main Cannon level adds are the weakest.
+export const SIDE_MIN = 0.5;
+const SIDE_ANGLE = (20 * Math.PI) / 180;
+export const streamWeight = (a) => 1 - (1 - SIDE_MIN) * Math.min(1, Math.abs(a || 0) / SIDE_ANGLE);
+
 // Main Cannon volley power by level (1..8): one volley's total damage relative to level 1. New barrels share it, so a
 // higher level fires a wider, denser spread without multiplying damage by the barrel count (pulse goes 2 -> 11 barrels).
+// The share is counted in forward-equivalent barrels (streamWeight), so the curve holds whatever the fan looks like.
 export const MAIN_POWER = [1, 1.3, 1.65, 2, 2.4, 2.8, 3.3, 3.9];
 const streamCount = new Map();
-const streamsAt = (weapon, lv) => {
+// Forward-equivalent barrel count of a volley.
+export const volleyWeight = (weapon, lv) => {
   const k = `${weapon}:${lv}`;
-  if (!streamCount.has(k)) streamCount.set(k, weaponStreams(weapon, lv).length);
+  if (!streamCount.has(k)) streamCount.set(k, weaponStreams(weapon, lv).reduce((t, [, a]) => t + streamWeight(a), 0));
   return streamCount.get(k);
 };
-// Per-bullet damage multiplier for a weapon level.
+// Per-bullet damage multiplier for a weapon level, before the stream's own streamWeight.
 export function weaponDamageScale(weapon, lv) {
   const l = Math.max(1, Math.min(MAIN_POWER.length, lv));
-  return (MAIN_POWER[l - 1] * streamsAt(weapon, 1)) / streamsAt(weapon, l);
+  return (MAIN_POWER[l - 1] * volleyWeight(weapon, 1)) / volleyWeight(weapon, l);
 }
