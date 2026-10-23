@@ -37,7 +37,7 @@ import { treeActs, openTree, treeView } from './ui/tree.js';
 import * as passiveTree from './game/tree.js';
 import { galleryActs, openGallery, openAchievements } from './ui/gallery.js';
 import { hub, hubExit } from './ui/hub.js';
-import { initToasts, notifyBacklog } from './ui/toasts.js';
+import { initToasts, notifyBacklog, notifyUpdate } from './ui/toasts.js';
 import { showTip, hideTip } from './ui/tips.js';
 import { achInit, achTick } from './game/achievements.js';
 import { rollRelicDrop } from './game/collectables.js';
@@ -1229,6 +1229,9 @@ ui.init({
     renderRunDetails(G);
     ui.show('run', { focus: document.querySelector('#scr-run [data-tab].on') });
   },
+  exitApp() {
+    window.desktop?.quit();
+  },
   runTab(btn) {
     setRunTab(btn.dataset.tab);
   },
@@ -1265,6 +1268,7 @@ ui.init({
     placeTouchUi();
   },
   fullscreen() {
+    if (window.desktop) return window.desktop.toggleFullscreen(); // desktop app: native window fullscreen
     const d = document;
     if (d.fullscreenElement) d.exitFullscreen?.();
     else d.documentElement.requestFullscreen?.().catch(() => {});
@@ -1619,6 +1623,7 @@ function boot() {
   bg.init();
   setSfxVolume(profile.settings.sfx);
   initToasts();
+  initPlatform();
   initHangarUi();
   initPilotUi();
   const past = achInit(); // achievements older saves already earned
@@ -1631,6 +1636,18 @@ function boot() {
   });
   // Re-measure once web fonts land (HUD metrics / safe areas).
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
+}
+
+// Desktop app (desktop/preload.js exposes window.desktop): show QUIT on the title menu and toast finished updates.
+// In a browser, register the offline service worker instead (sw.js), so phones can install the game from the site.
+function initPlatform() {
+  if (window.desktop) {
+    document.body.classList.add('is-desktop');
+    document.getElementById('quit-btn').hidden = false;
+    window.desktop.onUpdateReady((v) => notifyUpdate(v));
+  } else if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
 }
 
 // Debug / agent hook (see AGENTS.md for a simulation example). `simulate` fast-forwards the game

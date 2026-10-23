@@ -46,6 +46,12 @@ export function notifyBacklog(n) {
   notify({ kicker: 'FROM PAST RUNS', title: `${n} achievement${n > 1 ? 's' : ''} unlocked`, icon: STAR, color: TIERS.g.color, shine: true, sound: () => sfx.achieve(true) });
 }
 
+// Desktop app only (desktop/main.js): a new version finished downloading and installs when the game quits.
+const UPDATE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></svg>';
+export function notifyUpdate(version) {
+  notify({ kicker: 'UPDATE READY', title: `v${version} installs when you quit`, icon: UPDATE, color: '#3ff6ff', shine: true });
+}
+
 export function initToasts() {
   box = document.getElementById('notes');
   onAchievement((a, reward) => {

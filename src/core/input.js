@@ -243,12 +243,27 @@ const PAD_BUTTONS = {
   15: ['right'],
 };
 let stickLatch = { x: 0, y: 0 };
+let rumblePad = null;
+let rumbleUntil = 0;
+
+// Controller rumble for big camera hits (fx.js addShake), only while the pad is the active device. A weaker kick
+// never cuts off a stronger one that is still running.
+export function rumble(amount) {
+  const act = rumblePad && rumblePad.vibrationActuator;
+  if (!act || input.device !== 'pad' || amount < 0.2) return;
+  const now = performance.now();
+  const ms = Math.round(80 + amount * 220);
+  if (now < rumbleUntil && now + ms < rumbleUntil) return;
+  rumbleUntil = now + ms;
+  act.playEffect?.('dual-rumble', { duration: ms, strongMagnitude: Math.min(1, amount), weakMagnitude: Math.min(1, amount * 0.6 + 0.2) })?.catch?.(() => {});
+}
 
 export function pollGamepads() {
   if (!navigator.getGamepads) return;
   const pads = navigator.getGamepads();
   let pad = null;
   for (const p of pads) if (p && p.connected) { pad = p; break; }
+  rumblePad = pad;
   padHeld.clear();
   if (!pad) {
     input.padX = 0;
