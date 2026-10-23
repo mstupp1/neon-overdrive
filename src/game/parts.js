@@ -64,6 +64,7 @@ export const STATS = {
   boostEff: { apply: (st, v) => (st.boostEff *= 1 + v), text: (v) => `${sg(v)}${P(v)} boost burn time` },
   boostFlow: { apply: (st, v) => (st.boostFlow += v), text: (v) => `Boost rushes the stage +${P(v)} faster (more score)` },
   rerolls: { flat: true, apply: (st, v) => (st.rerolls += v), text: (v) => `+${v} reroll at the start of each run` },
+  fortune: { flat: true, apply: (st, v) => (st.fortune += v), text: (v) => `+${v} Fortune (rarer reward cards)` },
   // Shared combat systems (status.js).
   armorPierce: { apply: (st, v) => (st.armorPierce += v), text: (v) => `Shots ignore ${P(v)} of enemy armor` },
   freeze: { apply: (st, v) => (st.freezeChance += v), text: (v) => `${P(v)} chance per hit to chill (stacking slow)` },
@@ -89,7 +90,7 @@ export const STATS = {
 // Thrusters = movement, graze and the ultimate. Old items keep whatever they rolled.
 const SLOT_STATS = {
   core: ['dmg', 'rate', 'bounty', 'pierce', 'crit', 'critMul', 'mod', 'modRate', 'projSize', 'projSpeed', 'armorPierce', 'burst', 'burstN', 'ammo', 'ammoPot', 'sunder'],
-  plating: ['hull', 'shield', 'iframes', 'dodge', 'bounty', 'magnet', 'xp', 'credits', 'find', 'rerolls'],
+  plating: ['hull', 'shield', 'iframes', 'dodge', 'bounty', 'magnet', 'xp', 'credits', 'find', 'rerolls', 'fortune'],
   thrusters: ['speed', 'dashCd', 'dashLen', 'od', 'odDur', 'grazeR', 'grazeOd', 'ultSave', 'boostCap', 'boostRegen', 'boostEff', 'magnet'],
 };
 const AFFIX_SLOTS = {};
@@ -105,7 +106,7 @@ export const AFFIXES = [
   ['od', 'overdrive', 0.06, 0.14], ['grazeR', 'overdrive', 0.1, 0.22], ['odDur', 'overdrive', 0.4, 1],
   ['hull', 'tank', 1, 1, 2, 0.5], ['shield', 'tank', 0.08, 0.18], ['iframes', 'tank', 0.1, 0.25],
   ['magnet', 'greed', 0.15, 0.35], ['xp', 'greed', 0.04, 0.1], ['credits', 'greed', 0.06, 0.15], ['find', 'greed', 0.05, 0.15],
-  ['rerolls', 'greed', 1, 1, 2, 0.35], ['grazeOd', 'overdrive', 0.1, 0.25], ['ultSave', 'overdrive', 0.04, 0.09, 1, 0.6],
+  ['rerolls', 'greed', 1, 1, 2, 0.35], ['fortune', 'greed', 1, 1, 2, 0.3], ['grazeOd', 'overdrive', 0.1, 0.25], ['ultSave', 'overdrive', 0.04, 0.09, 1, 0.6],
   ['boostCap', 'mobility', 0.08, 0.2, 0, 0.7], ['boostRegen', 'mobility', 0.08, 0.2, 0, 0.7], ['boostEff', 'mobility', 0.06, 0.15, 0, 0.7],
   // Shared combat systems (status.js).
   ['projSize', 'firepower', 0.05, 0.12, 0, 0.7], ['projSpeed', 'firepower', 0.05, 0.12, 0, 0.7],

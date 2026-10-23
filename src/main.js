@@ -20,7 +20,7 @@ import { SHIPS, shipById, ownsShip, isUnlocked } from './game/ships.js';
 import { createPlayer } from './game/player.js';
 import { drawBoostFx } from './game/boost.js';
 import { createDirector, startSector, nextSector, endlessSpec, CORE_TIME } from './game/director.js';
-import { rollDraft, applyUpgrade, UPGRADES, discover, rollCard, applyCard, rollTune, isTune, pathRoom } from './game/upgrades.js';
+import { rollDraft, applyUpgrade, UPGRADES, discover, rollCard, applyCard, rollTune, isTune, pathRoom, fortuneOf, fortuneFloor, FORTUNE_LUCK } from './game/upgrades.js';
 import { runLuck, runItemLevel, rankUpFinds, dropGear, dropAbility, addGear } from './game/loot.js';
 import { makeItem } from './game/parts.js';
 import { spawnEnemy, spawnWeavers } from './game/enemies.js';
@@ -105,12 +105,7 @@ let afterDraft = null; // 'route' | 'extract' | 'next': where to go once the sec
 const CARD_LUCK = -0.75;
 const REWARD_LUCK = { node: 0, elite: 0.5, vault: 0.5, boss: 1.5 };
 let rewardTier = 'node'; // the next reward draft's tier (set by onSectorClear / applyFightReward)
-// Fortune: skipping a draft banks Fortune (+1 for a level-up, +2 for a reward), spent in full on the next reward draft:
-// +FORTUNE_LUCK luck per point, and one card is guaranteed at least FORTUNE_FLOOR[fortune] rarity.
-const FORTUNE_MAX = 6;
-const FORTUNE_LUCK = 0.4;
-const FORTUNE_FLOOR = [0, 0, 2, 2, 3, 3, 4];
-let draftFloor = 0; // the open reward draft's guaranteed rarity for one card (kept through rerolls)
+let draftFloor = 0; // the open reward draft's guaranteed rarity for one card, from Fortune (kept through rerolls)
 let draftBase = 0; // the open reward draft's rarity floor for every card (bosses: Uncommon)
 let draftLuck = 0; // the open reward draft's luck
 // Level-up pacing: the world slows into the draft and eases back out of it instead of hard cuts.
@@ -205,7 +200,6 @@ function newWorld(mode, shipDef, run = null) {
   G.miniKills = 0;
   G.pendingLevels = 0;
   G.supplyLeft = 0;
-  G.fortune = 0;
   afterDraft = null;
   levelIntro = -1;
   resumeEase = 0;
@@ -774,14 +768,11 @@ function openDraft(kind, quiet = false) {
   draftFloor = 0;
   draftBase = 0;
   draftLuck = 0;
-  curFortune = 0;
   if (isReward(kind)) {
-    const f = G.fortune || 0;
+    const f = fortuneOf(G.player);
     draftLuck = runLuck() + CARD_LUCK + (REWARD_LUCK[kind === 'vault' ? 'vault' : rewardTier] || 0) + FORTUNE_LUCK * f;
     draftBase = rewardTier === 'boss' && kind === 'sector' ? 1 : 0;
-    draftFloor = Math.max(FORTUNE_FLOOR[f], draftBase);
-    curFortune = f;
-    G.fortune = 0;
+    draftFloor = Math.max(fortuneFloor(f), draftBase);
   }
   rollRarities(kind);
   G.screen = 'draft';
@@ -798,7 +789,6 @@ function openDraft(kind, quiet = false) {
 }
 
 const isReward = (kind) => kind === 'sector' || kind === 'vault' || kind === 'supply';
-let curFortune = 0; // Fortune spent on the open draft (shown in its subtitle)
 
 // Card rolls for the open draft. Rewards roll rarity (one card floored at draftFloor); level-ups roll their tunes;
 // Rest Station boosts stay plain. keep: ids whose roll stays (locked cards through a reroll).
@@ -841,8 +831,7 @@ function toggleLock(i) {
 // Renders the draft (cards flag never-seen tech), then records those options as discovered. Returns the new ids.
 function showDraftCards(kind) {
   ui.renderDraft(G.player, draftChoices, kind, G.rerolls, pickUpgrade, G.supplyLeft, curNote, draftRolls, draftLocks, toggleLock, {
-    fortune: G.fortune || 0, max: FORTUNE_MAX, spent: curFortune, floor: draftFloor, base: draftBase, skip: canSkip(kind) ? skipGain(kind) : -1,
-    next: FORTUNE_FLOOR[G.fortune || 0], nextGain: FORTUNE_FLOOR[Math.min(FORTUNE_MAX, (G.fortune || 0) + (canSkip(kind) ? skipGain(kind) : 0))], boss: draftBase > 0,
+    reward: isReward(kind), floor: draftFloor, base: draftBase, boss: draftBase > 0,
   });
   const fresh = discover(draftChoices);
   if (fresh.length) sfx.achieve(true);
@@ -872,17 +861,6 @@ function pickUpgrade(id) {
   draftRolls = {};
   // Treasure Vault: each pick is worth two levels (where the upgrade has room).
   if (draftKind === 'vault' && p.up[id] && p.up[id] < (UPGRADES.find((u) => u.id === id) || {}).max) applyUpgrade(p, id, G);
-  draftDone();
-}
-
-// Skips the open draft for Fortune (+1 on a level-up, +2 on a reward), spent on the next reward draft.
-const canSkip = (kind) => kind === 'level' || isReward(kind);
-const skipGain = (kind) => Math.min(kind === 'level' ? 1 : 2, FORTUNE_MAX - (G.fortune || 0));
-function skipDraft() {
-  if (G.screen !== 'draft' || !canSkip(draftKind) || skipGain(draftKind) <= 0) return;
-  G.fortune = (G.fortune || 0) + skipGain(draftKind);
-  draftRolls = {};
-  sfx.ui();
   draftDone();
 }
 
@@ -1245,7 +1223,6 @@ ui.init({
   retry: () => (G.run.mode === 'campaign' ? launchRun() : startRun(curShip())),
   title: () => toTitle(),
   intro: () => settingsReturn !== 'pause' && playIntro(),
-  skip: () => skipDraft(),
   reroll() {
     if (G.rerolls <= 0 || draftLocks.size >= draftChoices.length) return;
     G.rerolls--;
@@ -1752,7 +1729,6 @@ window.NEON = {
   findClass, findPassive,
   dropAbility: (luck = 2) => dropAbility(G.player ? G.player.x : 0, 300, luck),
   rolls: () => draftRolls,
-  skip: () => skipDraft(),
   openDraft: (kind = 'level') => openDraft(kind),
   // Menus (debug / screenshots): open the Hangar, Fabricator or Pilot screen over the campaign map.
   openHangar: () => (showCampaign(), (hub.exit = () => showCampaign()), openHangar()),
@@ -1782,8 +1758,7 @@ window.NEON = {
       if (comms.blocking) comms.skipAll(); // dialogue never blocks the simulator
       if (G.screen === 'draft') {
         const id = pickFn(draftChoices, draftKind);
-        if (id === 'skip' && canSkip(draftKind) && skipGain(draftKind) > 0) skipDraft();
-        else pickUpgrade(id === 'skip' ? draftChoices[0] : id);
+        pickUpgrade(id === 'skip' ? draftChoices[0] : id);
       }
       for (let guard = 0; guard < 6 && (G.screen === 'route' || G.screen === 'overworld' || G.screen === 'event' || G.screen === 'market' || G.screen === 'dock'); guard++) {
         if (G.screen === 'event') {

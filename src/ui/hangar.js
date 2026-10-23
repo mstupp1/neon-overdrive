@@ -76,6 +76,7 @@ const EXTRAS = [
   ['RECHARGE', (st) => 1.5 / st.dashRecharge, pct],
   ['BOSS DMG', (st) => 1 + st.bounty, pct],
   ['FIND', (st) => 1 + st.find, pct],
+  ['FORTUNE', (st) => st.fortune, (v) => v],
 ];
 
 // Six segmented bars. `parts` = null: base stats; else the gain (green) or loss (red) over base is marked.

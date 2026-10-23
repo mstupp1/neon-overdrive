@@ -164,7 +164,6 @@ export function initDebugDrawer(api) {
     api.applyUpgrade(def.id);
   }, { enabled: fight });
   for (const kind of ['level', 'sector']) button(rewards, `Open ${kind} draft`, () => api.openDraft(kind), { enabled: fight, leave: true });
-  button(rewards, 'Skip draft', () => api.skip(), { enabled: () => G.mode === 'run' && G.screen === 'draft', leave: true });
   button(rewards, 'Drop relic cache', () => api.dropRelic(), { enabled: fight });
   button(rewards, 'Drop gear', () => api.dropGear(2), { enabled: fight });
   button(rewards, 'Drop ability', () => api.dropAbility(), { enabled: fight });
