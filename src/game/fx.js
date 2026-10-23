@@ -5,6 +5,7 @@ import { rand, clamp, TAU } from '../core/math.js';
 import { glow, shockSpr, flareSpr, glintSpr } from '../render/sprites.js';
 import { profile } from '../core/storage.js';
 import { bg } from '../render/background.js';
+import { rumble } from '../core/input.js';
 
 const free = [];
 const MAX_PARTICLES = 900;
@@ -361,6 +362,7 @@ export function drawTexts(ctx, map = null) {
 export function addShake(amount) {
   if (!profile.settings.shake) return;
   G.shake = Math.min(1, G.shake + amount);
+  if (G.mode !== 'attract') rumble(amount);
 }
 
 export function flash(color = '255,255,255', amount = 0.5) {

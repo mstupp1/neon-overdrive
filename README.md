@@ -282,6 +282,17 @@ The Fabricator, Black Market and Rest Station use generated location scenes with
 
 Use the imagegen skill for individual transparent assets, following `art/icons/brief.md`. Export 256px RGBA runtime PNGs; keep labels and rarity frames in the UI. Run `node --test tools/test_icon_images.mjs` for Canvas loading and fallback checks.
 
+## Desktop app and releases
+
+The web build stays the source of truth; the desktop app wraps it unchanged.
+
+- **Web:** every push to `main` publishes to GitHub Pages (`.github/workflows/pages.yml`). On https the site registers `sw.js`, so phones can "Add to Home Screen" and play fullscreen, offline for whatever they've already loaded.
+- **Desktop:** `desktop/` is a thin Electron shell (bundled Chromium, so WebGL and the Gamepad API behave the same on Windows, macOS, Linux and Steam Deck). It serves `index.html` + `src/` from a private `app://neon-overdrive` origin, so saves persist in the app's own storage (separate from the browser's). It starts fullscreen (F11 or Settings → Fullscreen toggles) and adds QUIT to the title menu.
+- **Release:** `git tag v0.2.0 && git push origin v0.2.0`. `.github/workflows/release.yml` builds the Windows installer, macOS dmg/zip (universal) and Linux AppImage, uploads them to a draft release and publishes it once all three finish. Running the workflow by hand builds test artifacts without publishing.
+- **Updates:** installed apps check GitHub Releases on launch, download in the background, toast "UPDATE READY" and install on quit. Builds are unsigned: Windows shows a SmartScreen prompt on first install and macOS needs right-click → Open; macOS auto-update needs an Apple Developer ID to work.
+
+Run the app locally: `cd desktop && npm install && npm start` (`NEON_WINDOWED=1` for a window). `npm run dist` builds for the current OS into `desktop/dist/`.
+
 ## Debug drawer
 
 On desktop, click the quiet **DEV** tab at the bottom-right edge, or press the backtick key (\`). The game keeps running while the drawer is open; Escape closes it. **Freeze gameplay** stops the world without opening the pause screen, while music and debug controls remain active. It stays frozen after closing the drawer until **Resume gameplay** is pressed; a new run or return to title clears the freeze. Its collapsible groups expose campaign/system launches, endless and encounter tests, camera switching, autopilot and simulation, upgrades and drops, progression grants, screen previews and artwork tools. Keyboard Tab/Shift+Tab navigate controls; gamepad up/down navigates, left/right changes selectors, A activates and B closes.

@@ -1,0 +1,15 @@
+{
+  "name": "Neon Overdrive",
+  "short_name": "Neon Overdrive",
+  "description": "A roguelike neon arcade shooter. Draft upgrades, chain combos, graze bullets and unleash Overdrive.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "background_color": "#05030d",
+  "theme_color": "#05030d",
+  "icons": [
+    { "src": "src/assets/branding/favicon-overdrive-core-v1-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "src/assets/branding/app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

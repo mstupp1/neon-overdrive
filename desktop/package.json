@@ -1,0 +1,48 @@
+{
+  "name": "neon-overdrive",
+  "productName": "Neon Overdrive",
+  "version": "0.1.0",
+  "description": "NEON OVERDRIVE desktop app: the web build in a bundled Chromium, with auto-updates.",
+  "author": "mstupp1",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --publish never",
+    "release": "electron-builder --publish always"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
+  },
+  "devDependencies": {
+    "electron": "^45.0.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "io.github.mstupp1.neonoverdrive",
+    "productName": "Neon Overdrive",
+    "artifactName": "NeonOverdrive-${version}-${os}-${arch}.${ext}",
+    "directories": { "output": "dist", "buildResources": "build" },
+    "files": ["main.js", "preload.js", "package.json"],
+    "extraResources": [
+      { "from": "../index.html", "to": "game/index.html" },
+      { "from": "../manifest.webmanifest", "to": "game/manifest.webmanifest" },
+      { "from": "../src", "to": "game/src" }
+    ],
+    "publish": [{ "provider": "github", "owner": "mstupp1", "repo": "neon-overdrive", "releaseType": "release" }],
+    "win": { "target": [{ "target": "nsis", "arch": ["x64"] }], "icon": "build/icon.png" },
+    "nsis": { "oneClick": true, "perMachine": false },
+    "mac": {
+      "target": [{ "target": "dmg", "arch": ["universal"] }, { "target": "zip", "arch": ["universal"] }],
+      "category": "public.app-category.arcade-games",
+      "icon": "build/icon.png",
+      "identity": null
+    },
+    "linux": {
+      "target": [{ "target": "AppImage", "arch": ["x64"] }],
+      "category": "Game",
+      "icon": "build/icon.png"
+    }
+  }
+}
