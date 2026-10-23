@@ -1,0 +1,8 @@
+Use case: stylized-concept
+Asset type: NEON OVERDRIVE Fortune upgrade icon, displayed at 32–64 px on a draft card.
+Primary request: One isolated futuristic luck module shaped unmistakably like a four-leaf clover, with four broad rounded beveled lobes around a small central gold energy core and a short curved mechanical stem. Fortune makes reward draft cards rarer.
+Input image: accepted Prospector upgrade artwork, used ONLY as a material, rendering and palette reference; do not reproduce its pickaxe or crystals.
+Style/medium: premium illustrated sci-fi game item render, crisp sculpted gunmetal armor and near-black navy glass, gold emissive inlays dominating with subtle cyan and magenta rim accents. Broad readable shapes and restrained bloom.
+Composition/framing: centered single object, front three-quarter product view, all four clover lobes clear, roughly square footprint, generous transparent margins, entire stem visible. Readable silhouette at 48 px.
+Scene/backdrop: genuine transparent alpha background.
+Constraints: no text, numbers, letters, rarity frame, UI border, backdrop, pedestal, loose coins, cards or extra objects. Neutral dark metal remains visible; avoid broad white areas. Match the reference's polished industrial game world while giving Fortune its own clover identity.
