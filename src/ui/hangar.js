@@ -10,7 +10,7 @@ import { sfx } from '../core/audio.js';
 import { S, previewShipSprite } from '../render/sprites.js';
 import { menuArtwork } from './menu-art.js';
 import { initServiceArt, showFabricatorArt, playFabricatorRoll } from './service-art.js';
-import { SHIPS, WEAPONS, weaponStreams, ownsShip, paintsFor, activePaint, shipById } from '../game/ships.js';
+import { SHIPS, WEAPONS, volleyWeight, ownsShip, paintsFor, activePaint, shipById } from '../game/ships.js';
 import { SLOTS, SLOT_INFO, SLOT_CAP, TAGS, gearDef, gearByUid, gearInSlot, equippedParts, equippedOn, itemName, itemLines, itemTags, sellValue, itemScore } from '../game/parts.js';
 import { RARITY, rarityOdds } from '../game/rarity.js';
 import { recomputeStats } from '../game/upgrades.js';
@@ -42,10 +42,11 @@ function statsFor(ship, parts) {
 }
 
 // Gun output at weapon level 1 against Vector's twin pulse (= 100): damage x volley size x rate, piercing counted once.
+// Angled barrels count at their reduced side damage (volleyWeight).
 function gunRating(ship) {
   const dps = (s) => {
     const w = WEAPONS[s.weapon];
-    return (w.dmg * (w.burst || 1) * weaponStreams(s.weapon, 1).length * (1 + 0.4 * Math.min(1, w.pierce || 0))) / w.interval;
+    return (w.dmg * (w.burst || 1) * volleyWeight(s.weapon, 1) * (1 + 0.4 * Math.min(1, w.pierce || 0))) / w.interval;
   };
   return dps(ship) / dps(SHIPS[0]);
 }

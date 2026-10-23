@@ -6,7 +6,7 @@ import { SHIP_ENGINES } from '../render/shipArt.js';
 import { shipSpriteForView, drawPosedHull } from '../render/shipImages.js';
 import { cannonMount, worldShipMount, shipPoseLocal, SIDE_TILT } from '../render/shipMounts.js';
 import { clamp, damp, rand, TAU, wrapAngle } from '../core/math.js';
-import { WEAPONS, weaponStreams, weaponDamageScale, activePaint } from './ships.js';
+import { WEAPONS, weaponStreams, weaponDamageScale, streamWeight, activePaint } from './ships.js';
 import { equippedParts, itemTags } from './parts.js';
 import { profile } from '../core/storage.js';
 import { recomputeStats, familyLocked, upgradeById } from './upgrades.js';
@@ -431,7 +431,7 @@ function firePrimary(p, w) {
   const wn = field.ow ? [c, sn] : null;
   for (const [index, [ox, a, ph]] of streams.entries()) {
     const muzzle = primaryMuzzle(p, ox, index, c, sn);
-    playerBullet(muzzle.x, muzzle.y, p.aim + a, w.speed, dmg, spr, {
+    playerBullet(muzzle.x, muzzle.y, p.aim + a, w.speed, dmg * streamWeight(a), spr, {
       wn,
       wave: w.wave ? w.wave * (1 + (lv - 1) * 0.06) : 0,
       wphase: ph || 0,
