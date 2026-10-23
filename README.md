@@ -286,7 +286,7 @@ Use the imagegen skill for individual transparent assets, following `art/icons/b
 
 The web build stays the source of truth; the desktop app wraps it unchanged.
 
-- **Web:** every push to `main` publishes to GitHub Pages (`.github/workflows/pages.yml`). On https the site registers `sw.js`, so phones can "Add to Home Screen" and play fullscreen, offline for whatever they've already loaded.
+- **Web:** GitHub Pages already serves `main` (branch deploy), so every merge is live. On https the site registers `sw.js`, so phones can "Add to Home Screen" and play fullscreen, offline for whatever they've already loaded.
 - **Desktop:** `desktop/` is a thin Electron shell (bundled Chromium, so WebGL and the Gamepad API behave the same on Windows, macOS, Linux and Steam Deck). It serves `index.html` + `src/` from a private `app://neon-overdrive` origin, so saves persist in the app's own storage (separate from the browser's). It starts fullscreen (F11 or Settings → Fullscreen toggles) and adds QUIT to the title menu.
 - **Release:** `git tag v0.2.0 && git push origin v0.2.0`. `.github/workflows/release.yml` builds the Windows installer, macOS dmg/zip (universal) and Linux AppImage, uploads them to a draft release and publishes it once all three finish. Running the workflow by hand builds test artifacts without publishing.
 - **Updates:** installed apps check GitHub Releases on launch, download in the background, toast "UPDATE READY" and install on quit. Builds are unsigned: Windows shows a SmartScreen prompt on first install and macOS needs right-click → Open; macOS auto-update needs an Apple Developer ID to work.
