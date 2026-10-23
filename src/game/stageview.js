@@ -42,30 +42,28 @@ const CHASE_HOME = 150; // the jet's resting distance from the near edge (virtua
 const FOG = 160; // chase: virtual depth over which things fade in from the far edge
 const GROW = 110; // chase: ...and over which cutouts grow from GROW_MIN to full size as they arrive (enemies hover just past it)
 const GROW_MIN = 0.55;
-// Chase camera. A long lens: the camera sits CHASE_DP virtual units behind the jet's home row and the jet is drawn at
-// CHASE_SP there, so the far half of the field (where most enemies hover) reads at ~0.5-0.65 scale instead of ~0.35.
-const CHASE_SP = 1.15;
-const CHASE_DP = 700;
+// Chase camera: it sits CHASE_DP virtual units behind the jet's home row and the jet is drawn at CHASE_SP there. Close
+// in and zoomed: the jet is big, the enemy band reads at ~0.6-0.75 scale, and depth falls off steeply past it.
+const CHASE_SP = 1.8;
+const CHASE_DP = 550;
 // The camera slides sideways after the jet (this share of its offset from the lane centre), like a chase cam: the
 // lane shifts under you, near things shift more than far ones, and the larger near lane never pushes the jet off screen.
 const PAN = 0.42;
 // Drops are tiny next to ships; in the chase view they stand up this much bigger (pickup reach is unchanged and larger).
 const DROP_SCALE = 1.4;
-// Far zone: past the depth row FAR_KNEE the chase camera stretches depth (up to FAR_S x as deep, easing in over FAR_L),
-// so arrivals swoop in from near the horizon instead of popping in half way there, and shots fly on into the distance.
-// Visual only: positions and hits are untouched, and things at the same row stay at the same depth, so shots still
-// meet what they hit. FAR_S is the "enemies come from further away" knob.
-const FAR_KNEE = 60;
-const FAR_S = 9;
-const FAR_L = 40;
-// Player shots fly on this far past the far edge before they die (virtual units; bullets.js via view.farReach). The
-// "shots go further into the distance" knob: only arriving enemies are out there, so it barely touches balance.
-const SHOT_REACH = 340;
-// Enemies that arrive from beyond the far edge start this much further out in the chase view (virtual units, sv.entry;
-// enemies.js spawnEnemy), on top of the stretch. Most arrivals ease to their row, so it costs them only a beat.
-const ENTRY = 200;
+// How far things live past the far edge. Depth is plain distance all the way out (a stretched far zone made shots
+// lurch toward the horizon and arrivals stop dead at its edge), so shots slow and shrink into the haze naturally.
+// Player shots fly on SHOT_REACH past the far edge before they die (virtual units; bullets.js via view.farReach): the
+// "shots go further into the distance" knob. Only arriving enemies are out there, so it barely touches balance.
+const SHOT_REACH = 900;
+// Arrivals from beyond the far edge start ENTRY further out (sv.entry; enemies.js spawnEnemy) and close that gap
+// on a braking curve (time constant APPROACH, enemy seconds): they streak in out of the distance and settle into
+// their usual entry. The "enemies come from further away" knob.
+const ENTRY = 1500;
+export const APPROACH = 0.42;
+export const APPROACH_HOLD = 45; // ...and they start their usual behaviour (and fire) once within this of it
 // The warped frame (particles, beams, telegraphs) reaches this far past the far edge too, for kills out there.
-const FAR_M = 160;
+const FAR_M = 320;
 // Chase pace. The field is deeper than the top-down one (1100 vs ~800) and the far half reads at ~0.5-0.65 scale, so
 // at normal enemy time threats crawled on screen; enemy time (movement, fire, shots, wave timer, gates) runs this much
 // faster to make it urgent.
@@ -110,29 +108,15 @@ function panStep() {
   PANS.t = t;
   PANS.x += (want - PANS.x) * (1 - Math.exp(-dt * 5));
 }
-// Camera depth of virtual depth row v (chaseProj() current): straight distance, plus the far-zone stretch.
-function farX(v) {
-  const u = FAR_KNEE - v;
-  return u > 0 ? FAR_S * (u - FAR_L * (1 - Math.exp(-u / FAR_L))) : 0;
-}
+// Camera depth of virtual depth row v (chaseProj() current).
 function depthOf(v) {
-  return Math.max(30, P.Yc - v + farX(v));
+  return Math.max(30, P.Yc - v);
 }
-// Inverse of depthOf (Newton steps in the far zone).
-function rowOf(d) {
-  let v = P.Yc - d;
-  if (v >= FAR_KNEE) return v;
-  v = FAR_KNEE - (FAR_KNEE - v) / (1 + FAR_S);
-  for (let i = 0; i < 8; i++) {
-    const u = FAR_KNEE - v;
-    const g = P.Yc - v + farX(v) - d;
-    v -= g / (-1 - FAR_S * (1 - Math.exp(-u / FAR_L)));
-    if (v > FAR_KNEE) v = FAR_KNEE;
-  }
-  return v;
-}
-// Fade for things far out in the stretch (shots running out of reach, far shadows): 1 near, 0 at the reach limit.
-const farFade = (v) => clamp((v + SHOT_REACH) / (SHOT_REACH * 0.55), 0, 1);
+// Fade for shots running out of reach: 1 near, 0 at the reach limit, easing out over its far half like haze.
+const farFade = (v) => {
+  const f = clamp((v + SHOT_REACH) / (SHOT_REACH * 0.6), 0, 1);
+  return f * f * (3 - 2 * f);
+};
 // Cutout size factor as a thing arrives from the far edge (virtual depth row vy).
 const grow = (vy) => GROW_MIN + (1 - GROW_MIN) * clamp((vy + 20) / GROW, 0, 1);
 
@@ -187,9 +171,9 @@ function airY(v) {
 }
 // Inverse of airY.
 function airV(y) {
-  return Math.max(-900, rowOf(P.B / Math.max(1e-3, y - P.hyA)));
+  return Math.max(-ENTRY - 400, P.Yc - P.B / Math.max(1e-3, y - P.hyA));
 }
-// A virtual point on the chase floor under the action (shadows, gates) → screen.
+// A virtual point on the chase floor (shadows, gates, lane furniture) → screen.
 function floorPt(x, y, out = {}) {
   const Pp = chaseProj();
   const d = depthOf(y);
@@ -199,17 +183,6 @@ function floorPt(x, y, out = {}) {
   out.s = s;
   return out;
 }
-// The same for the scenery (grid, track, pylons): plain distance, no far-zone stretch, so it streams evenly.
-function deckPt(x, y, out = {}) {
-  const Pp = chaseProj();
-  const d = Math.max(30, Pp.Yc - y);
-  const s = Pp.f / d;
-  out.x = real().W / 2 + (x - PANS.x) * s;
-  out.y = Pp.hy + Pp.A / d;
-  out.s = s;
-  return out;
-}
-
 const off = typeof document !== 'undefined' ? document.createElement('canvas') : null;
 const octx = off ? off.getContext('2d') : null;
 
@@ -538,8 +511,8 @@ export const sv = {
     const shakeY = view.oy || 0;
     this.push();
     const cam = getCam();
-    // Chase: the warped frame is drawn up to ~1.3x near the bottom of the screen, so render it that sharp.
-    const kk = k * (this.mode === 'side' ? SZ : 1.35);
+    // Chase: the warped frame is drawn up to ~2x near the bottom of the screen; render it at 1.5x (particles, beams).
+    const kk = k * (this.mode === 'side' ? SZ : 1.5);
     const m = chase ? FAR_M : 0; // the chase frame also holds a band past the far edge
     const w = Math.round(this.W * kk);
     const h = Math.round((this.H + m) * kk);
@@ -1087,7 +1060,7 @@ function drawChaseBack(ctx, r) {
   ctx.strokeStyle = rayFade;
   ctx.beginPath();
   for (let vx = -CW * 2; vx <= CW * 3; vx += 56) {
-    const near = deckPt(vx, CH + 200);
+    const near = floorPt(vx, CH + 200);
     ctx.moveTo(W / 2, hy);
     ctx.lineTo(near.x, near.y);
   }
@@ -1147,10 +1120,10 @@ function drawTrack(ctx, r, h, travel) {
   const span = Math.max(40, (H - Pp.hy) * 0.22);
   // Everything on the track fades out toward the horizon over the same screen band, so it melts into the haze.
   const fadeY = (y) => clamp((y - Pp.hy) / span, 0, 1);
-  const L0 = deckPt(0, vFar);
-  const L1 = deckPt(0, vNear);
-  const R0 = deckPt(CW, vFar);
-  const R1 = deckPt(CW, vNear);
+  const L0 = floorPt(0, vFar);
+  const L1 = floorPt(0, vNear);
+  const R0 = floorPt(CW, vFar);
+  const R1 = floorPt(CW, vNear);
   // Dim the floor outside the lane (the lane edges run off the bottom or the sides of the screen).
   const dim = ctx.createLinearGradient(0, Pp.hy, 0, Pp.hy + span);
   dim.addColorStop(0, `hsla(${h},60%,3%,0)`);
@@ -1200,8 +1173,8 @@ function drawTrack(ctx, r, h, travel) {
       ctx.globalAlpha = al * fadeY((ya + yb) / 2) * (0.8 + beat.pulse * 0.2);
       ctx.beginPath();
       for (const vx of [0, CW]) {
-        const ea = deckPt(vx, va);
-        const eb = deckPt(vx, vb);
+        const ea = floorPt(vx, va);
+        const eb = floorPt(vx, vb);
         ctx.moveTo(ea.x, ea.y);
         ctx.lineTo(eb.x, eb.y);
       }
@@ -1219,8 +1192,8 @@ function drawTrack(ctx, r, h, travel) {
       const v0 = v + ph;
       const v1 = v0 + 46;
       if (Yc - v1 < 40) continue;
-      deckPt(vx, v0, a);
-      deckPt(vx, v1, b);
+      floorPt(vx, v0, a);
+      floorPt(vx, v1, b);
       if (a.y > H + 10) continue;
       ctx.globalAlpha = al * fadeY(a.y);
       ctx.lineWidth = Math.max(0.6, wd * b.s);
@@ -1408,8 +1381,8 @@ function drawTrench(ctx, r) {
   const b = {};
   for (const vx of [-TRENCH_X, CW + TRENCH_X]) {
     // Face: dark, lit a little from the floor.
-    deckPt(vx, vFar, a);
-    deckPt(vx, vNear, b);
+    floorPt(vx, vFar, a);
+    floorPt(vx, vNear, b);
     const face = ctx.createLinearGradient(0, P0.hy - 40, 0, r.H);
     face.addColorStop(0, `hsl(${h},40%,4%)`);
     face.addColorStop(0.4, `hsl(${h},45%,7%)`);
@@ -1431,7 +1404,7 @@ function drawTrench(ctx, r) {
     for (let v = vFar - RIB_GAP; v < vNear; v += RIB_GAP) {
       const y = v + ph;
       if (P0.Yc - y < 40) continue;
-      deckPt(vx, y, a);
+      floorPt(vx, y, a);
       if (a.y > r.H + 60) break;
       const al = fade(a.y) * clamp((y + 2600) / 1400, 0, 1);
       if (al > 0.02) {
@@ -1470,8 +1443,8 @@ function drawTrench(ctx, r) {
         const yb = P0.hy + 1 + ((r.H - P0.hy) * (i + 1)) / seg;
         const va = P0.Yc - P0.A / (ya - P0.hy);
         const vb = Math.min(vNear, P0.Yc - P0.A / (yb - P0.hy));
-        deckPt(vx, va, a);
-        deckPt(vx, vb, b);
+        floorPt(vx, va, a);
+        floorPt(vx, vb, b);
         ctx.globalAlpha = al * fade((ya + yb) / 2) * (0.8 + beat.pulse * 0.2);
         ctx.beginPath();
         ctx.moveTo(a.x, a.y - TRENCH_H * hk * a.s);
@@ -1499,7 +1472,7 @@ function drawPylons(ctx, r) {
     const a = clamp((y + 720) / 520, 0, 1) * (0.55 + beat.pulse * 0.2);
     if (a < 0.02) continue;
     for (const vx of [-34, CW + 34]) {
-      deckPt(vx, y, q);
+      floorPt(vx, y, q);
       if (q.y > r.H + 40) continue;
       const s = q.s;
       const top = q.y - 118 * s;

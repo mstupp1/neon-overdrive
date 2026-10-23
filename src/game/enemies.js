@@ -16,7 +16,7 @@ import { onEliteKilled } from './pilot.js';
 import { bossDamaged, updateBoss, every } from './bosses.js';
 import { armorOf, onPlayerHit, slowOf, updateStatus, applyStatus } from './status.js';
 import { topdownCombatTop } from './topdownGeometry.js';
-import { sv } from './stageview.js';
+import { sv, APPROACH, APPROACH_HOLD } from './stageview.js';
 
 export const TYPES = {
   dart: { hp: 3, r: 12, xp: 1, score: 100, spr: 'dart' },
@@ -38,7 +38,6 @@ export const TYPES = {
 };
 
 export function spawnEnemy(type, x, y, opts = {}) {
-  if (y < 0 && !field.ow) y -= sv.entry; // the chase view's arrivals start further out in the distance
   const def = TYPES[type];
   const d = G.director.diff;
   const e = {};
@@ -63,6 +62,9 @@ export function spawnEnemy(type, x, y, opts = {}) {
   e.shots = opts.shots ?? 1;
   e.x0 = x;
   e.y0 = y;
+  // Chase view: arrivals from the far edge start further out and brake in to here (updateEnemies, stageview.js).
+  e.approach = y < 0 && !field.ow ? sv.entry : 0;
+  e.y -= e.approach;
   e.tx = opts.tx ?? x;
   e.ty = opts.ty ?? view.H * 0.3;
   e.stay = opts.stay ?? 6;
@@ -101,7 +103,7 @@ export function spawnEnemy(type, x, y, opts = {}) {
   if (type === 'snake') {
     e.trail = [];
     e.parts = [];
-    for (let i = 0; i < 9; i++) e.parts.push({ x, y, r: i === 0 ? e.r : 9 });
+    for (let i = 0; i < 9; i++) e.parts.push({ x, y: e.y, r: i === 0 ? e.r : 9 });
   }
   if (field.ow) {
     // Overworld enemy: overworld.js drives it (owAI) instead of the fight behaviours.
@@ -664,8 +666,19 @@ export function updateEnemies(dt) {
     }
     const real = dt;
     if (e.fx || e.frozenT > 0) dt = real * slowOf(e); // Freeze: slowed (or locked) behaviour clock
-    e.t += dt;
     if (e.flash > 0) e.flash -= real;
+    if (e.approach > APPROACH_HOLD) {
+      // Chase arrival, still streaking in out of the distance: it only closes the gap (braking) and holds its fire;
+      // its own behaviour starts once it is nearly at the far edge.
+      const left = e.approach * Math.exp(-dt / APPROACH);
+      e.y += e.approach - left;
+      if (e.parts) for (const pt of e.parts) pt.y += e.approach - left;
+      e.approach = left;
+      dt = real;
+      continue;
+    }
+    e.t += dt;
+    if (e.approach) e.y += e.approach; // the behaviour runs in its usual frame, as if already at the far edge
     if (e.boss) updateBoss(e, dt);
     else if (e.ow) {
       owAI(e, dt); // sets e.entered (on camera) and handles its own despawning
@@ -674,6 +687,13 @@ export function updateEnemies(dt) {
     } else if (e.retreat) retreat(e, dt);
     else BEHAVIOR[e.type](e, dt);
     dt = real;
+    if (e.approach) {
+      // Closing in from the distance: the remaining gap shrinks on a braking curve, on top of the usual movement.
+      const left = e.approach > 0.5 ? e.approach * Math.exp(-dt / (APPROACH * 0.6)) : 0;
+      e.y -= left;
+      if (e.parts) for (const pt of e.parts) pt.y -= left;
+      e.approach = left;
+    }
     if (!e.entered && inBounds(e, -e.r * 0.5)) e.entered = true;
     // Despawn once they leave the play area (after having entered), or if stuck off-screen.
     if (!e.boss && !e.keep && ((e.entered && !inBounds(e, 70)) || e.t > 30 || (!e.entered && e.t > 9))) e.dead = true;
